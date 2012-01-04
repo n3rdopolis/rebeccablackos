@@ -62,15 +62,18 @@ yes Yes | aptitude install remastersys -y
 #For some reason, it installs out of date packages sometimes, as I see unupgraded packages
 yes Y | apt-get dist-upgrade
 
-#Do this as some packages fail to install completly unless if the attempt to start them as deamons succeeds. This will report success during those attemps
+#Do this as some packages fail to install completly unless if the attempt to start them as deamons succeeds. This will report success during those attempts to start the services to dpkg
 mv /sbin/initctl /sbin/initctl.bak
 ln -s /bin/true /sbin/initctl
 yes Y | apt-get dist-upgrade
 rm /sbin/initctl
 mv  /sbin/initctl.bak /sbin/initctl
 
-#configure plymouth, enable it, set the default theme, and replace the Ubuntu logo
-cp /usr/importt/RebeccaBlackLinux.png /lib/plymouth/ubuntu-logo.png
+#copy all the post install files
+rsync /usr/import/* -a /
+
+
+# /lib/plymouth/ubuntu-logo.png
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 echo 2 | update-alternatives --config default.plymouth
 
