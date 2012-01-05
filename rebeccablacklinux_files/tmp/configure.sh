@@ -88,7 +88,6 @@ do
 "$BUILDSCRIPT"
 done
 cd ..
-rm -rf /srcbuild
 
 #install more Wayland clients into the PATH
 find /srcbuild/wayland-demos/clients -executable | while read CLIENT
@@ -96,9 +95,20 @@ do
 cp "$CLIENT" /usr/bin
 done
 
+#remove the build packages
+rm -rf /srcbuild
+
+
+
 
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
+
+#get the installed kernel version in /lib/modules, there is only one installed in this CD, but take the first one by default.
+KERNELVERSION=$(ls /lib/modules/ | head -1 )
+
+#replace all of remastersys's unames with the installed kernel version.
+sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 
 #start the remastersys job
 remastersys dist
