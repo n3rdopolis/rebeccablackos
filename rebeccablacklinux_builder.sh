@@ -207,7 +207,6 @@ rm -rf /media/LiveDiskCreAtionChrootFolDer/temp/
 
 
 
-
 #change text to red to not scare user
 echo -en \\033[31m\\033[8] > $(tty)
 #Configure the Live system########################################
@@ -219,7 +218,7 @@ echo -en \\033[00m\\033[8] > $(tty)
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
-cp /media/LiveDiskCreAtionChrootFolDer/home/remastersys/remastersys/custombackup.iso ~/RebeccaBlackLinux.iso
+cp /media/LiveDiskCreAtionChrootFolDer/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
 
 #allow the user to actually read the iso   
 chown $LOGNAME ~/RebeccaBlackLinux.iso
@@ -229,6 +228,10 @@ chmod 777 ~/RebeccaBlackLinux.iso
 
 #go back to the users home folder
 cd ~
+
+# TODO remove this test pause
+echo press enter
+read a
 
 #unmount the chrooted procfs from the outside 
 umount -lf /media/LiveDiskCreAtionChrootFolDer/proc

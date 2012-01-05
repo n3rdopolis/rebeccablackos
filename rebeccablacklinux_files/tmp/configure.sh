@@ -49,8 +49,6 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 #install Kubuntu Desktop
 yes Yes |apt-get install kubuntu-desktop -y
 
-#install a plymouth theme 
-yes Yes | aptitude install plymouth-theme-spinfinity  --without-recommends -y
 
 #install remastersys
 yes Yes | aptitude install remastersys -y
@@ -75,18 +73,6 @@ rsync /usr/import/* -a /
 
 # /lib/plymouth/ubuntu-logo.png
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
-echo 2 | update-alternatives --config default.plymouth
-
-
-
-
-
-###BEGIN REMASTERSYS EDITS####
-#edit the remastersys script file so that it updates the initramfs instead of making a new one with uname -r as it doesnt work in chroot
-sed -i -e ' /# Step 6 - Make filesystem.squashfs/ a update-initramfs -u  ' /usr/bin/remastersys 
-#copy the initramfs to the correct location
-sed -i -e ' /update-initramfs/ a cp /initrd.img \$WORKDIR/ISOTMP/casper/initrd.gz ' /usr/bin/remastersys 
-###END REMASTERSYS EDITS
 
 
 
@@ -95,7 +81,7 @@ sed -i -e ' /update-initramfs/ a cp /initrd.img \$WORKDIR/ISOTMP/casper/initrd.g
 #Compile software
 mkdir /srcbuild
 cd /srcbuild
-ls "/usr/bin/compile/B*" | while read BUILDSCRIPT
+ls /usr/bin/compile/B* | while read BUILDSCRIPT
 do
 "$BUILDSCRIPT"
 done
@@ -111,7 +97,7 @@ done
 
 
 #start the remastersys job
-remastersys backup
+remastersys dist
 
 
 
