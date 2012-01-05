@@ -29,6 +29,8 @@ mount -t sysfs none /sys
 #mount /dev/pts
 mount -t devpts none /dev/pts
 
+#attempt to prevent packages from prompting for debconf
+export DEBIAN_FRONTEND=noninteractive
 
 #update the apt cache
 apt-get update
@@ -44,7 +46,7 @@ aptitude install language-pack-en --without-recommends -y
 aptitude install linux-generic  --without-recommends -y
 
 #Install Wayland depends 
-yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev libjpeg-turbo62     libjpeg-turbo-progs    -y
+yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev  -y
 
 #install Kubuntu Desktop
 yes Yes |apt-get install kubuntu-desktop -y
@@ -95,6 +97,8 @@ cp "$CLIENT" /usr/bin
 done
 
 
+#Edit remastersys to not detect the filesystem. df fails in chroot
+sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
 
 #start the remastersys job
 remastersys dist
