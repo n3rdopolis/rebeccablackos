@@ -220,9 +220,6 @@ chmod 777 ~/RebeccaBlackLinux.iso
 #go back to the users home folder
 cd ~
 
-# TODO remove this test pause
-echo press enter
-read a
 
 #unmount the chrooted procfs from the outside 
 umount -lf /media/LiveDiskCreAtionChrootFolDer/proc
