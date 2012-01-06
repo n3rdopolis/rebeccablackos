@@ -87,7 +87,7 @@ cd /srcbuild
 ls /usr/bin/compile/B* | while read BUILDSCRIPT
 do
 BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/...$//' |  rev)
-"$BUILDSCRIPT" > /usr/share/buildlog/ > /usr/share/buildlog/$BUILDNAME
+"$BUILDSCRIPT" >  /usr/share/buildlog/$BUILDNAME
 done
 cd ..
 
