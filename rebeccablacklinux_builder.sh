@@ -15,10 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#set terminal color to default to keep consistancy
-echo -en \\033[00m\\033[8] > $(tty)
-CPU_ARCHITECTURE=DEFAULT     
-
+  
 
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
@@ -152,13 +149,11 @@ cd ~/LiveDiskCreAtionCacheFolDer
 dd if=/dev/zero of=livecdfs bs=1 count=0 seek=8G 
 
 
-#change text to red to not scare user
-echo -en \\033[31m\\033[8] > $(tty)
+
 echo "creating a file system on the virtual image. Not on your real file system."
 #create a file system on the image 
 yes y | mkfs.ext4 ./livecdfs
-#change back to default
-echo -en \\033[00m\\033[8] > $(tty)
+
 
 
 #create a media mountpoint in the media folder
@@ -168,12 +163,10 @@ mkdir /media/LiveDiskCreAtionChrootFolDer
 mount ./livecdfs /media/LiveDiskCreAtionChrootFolDer -o loop
 
 
-#change text to red to not scare user
-echo -en \\033[31m\\033[8] > $(tty)
+
 #install a really basic Ubuntu installation in the new fs  
 debootstrap precise /media/LiveDiskCreAtionChrootFolDer http://archive.ubuntu.com/ubuntu/
-#change back to default
-echo -en \\033[00m\\033[8] > $(tty)
+
 
 
 #mounting devfs on chrooted fs with bind 
@@ -207,13 +200,11 @@ rm -rf /media/LiveDiskCreAtionChrootFolDer/temp/
 
 
 
-#change text to red to not scare user
-echo -en \\033[31m\\033[8] > $(tty)
+
 #Configure the Live system########################################
 chroot /media/LiveDiskCreAtionChrootFolDer /tmp/configure.sh
 
-#change back to default
-echo -en \\033[00m\\033[8] > $(tty)
+
 
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso
