@@ -149,7 +149,7 @@ cd ~/LiveDiskCreAtionCacheFolDer
 
 
 #create the file that will be the filesystem image
-dd if=/dev/zero of=livecdfs bs=1 count=0 seek=4G 
+dd if=/dev/zero of=livecdfs bs=1 count=0 seek=8G 
 
 
 #change text to red to not scare user
