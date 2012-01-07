@@ -78,7 +78,8 @@ echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
 
 
-
+#set LD_LIBRARY_PATH
+export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 
 #Compile software
 mkdir /usr/share/buildlog
@@ -86,15 +87,16 @@ mkdir /srcbuild
 cd /srcbuild
 ls /usr/bin/compile/B* | while read BUILDSCRIPT
 do
-BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/...$//' |  rev)
-"$BUILDSCRIPT" >  /usr/share/buildlog/$BUILDNAME
+BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/....$//' |  rev)
+echo "building $BUILDNAME"
+"$BUILDSCRIPT" 2>&1 | tee  /usr/share/buildlog/$BUILDNAME
 done
 cd ..
 
 #install more Wayland clients into the PATH
-find /srcbuild/wayland-demos/clients -executable | while read CLIENT
+find /srcbuild/weston/clients -executable | while read CLIENT
 do
-cp "$CLIENT" /usr/bin
+cp "$CLIENT" /usr/local/bin
 done
 
 #remove the build packages
