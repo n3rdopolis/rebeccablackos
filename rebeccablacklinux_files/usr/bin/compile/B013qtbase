@@ -1,4 +1,4 @@
-[Desktop Entry]
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -15,7 +15,19 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+export WLD=/usr/local
+PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
+ACLOCAL="aclocal -I $WLD/share/aclocal"
+C_INCLUDE_PATH=$WLD/include
+LIBRARY_PATH=$WLD/lib
+PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+mkdir -p $WLD/share/aclocal
+export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
+       LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
+git clone git://gitorious.org/qt/qtbase.git
+cd qtbase
+./configure -confirm-license -opensource  -no-multimedia -no-webkit -no-phonon -no-v8 -debug -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+make 
+make install
+cd ..
 
-Exec=konsole --hold -e weston
-Name=Wayland
-Type=Application
