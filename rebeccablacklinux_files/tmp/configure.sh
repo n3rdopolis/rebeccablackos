@@ -86,6 +86,10 @@ echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 #set LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 
+#set to the ld
+echo "LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib" >> /etc/ld.so.conf
+ldconfig
+
 #Compile software
 mkdir /usr/share/buildlog
 mkdir /srcbuild
