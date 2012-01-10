@@ -58,6 +58,9 @@ yes Yes | aptitude install remastersys -y
 #install depends for building QT
 yes Yes | aptitude install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync0 libxcb-sync0-dev libxcb-xfixes0-dev -y
 
+#Install depends for building xwayland (nested X under Wayland)
+yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-fonts-dev  x11proto-video-dev x11proto-record-dev x11proto-resource-dev libxkbfile-dev libxfont-dev -y
+yes Y | apt-get build-dep tinc
 
 ##################################################################################################################
 
@@ -87,7 +90,11 @@ echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 
 #set to the ld
-echo "LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib" >> /etc/ld.so.conf
+echo "/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+/usr/local/lib
+/usr/lib
+" > /etc/ld.so.conf.d/libc.conf
 ldconfig
 
 #Compile software
