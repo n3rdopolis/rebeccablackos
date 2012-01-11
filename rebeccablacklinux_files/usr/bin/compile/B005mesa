@@ -26,7 +26,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://anongit.freedesktop.org/mesa/mesa
 cd mesa
-./autogen.sh --prefix=$WLD --enable-gles2 --disable-gallium-egl --with-gallium-drivers=  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$WLD --enable-gles2 --disable-gallium-egl --with-gallium-drivers=nouveau,svga,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install
 cd ..

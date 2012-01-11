@@ -105,6 +105,13 @@ export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):
 #set XDG_RUNTIME_DIR
 export XDG_RUNTIME_DIR=~
 
+#increse the verbosity level of Wayland running.
+MESA_DEBUG=1
+EGL_LOG_LEVEL=debug
+LIBGL_DEBUG=verbose
+WAYLAND_DEBUG=1
+
+
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo ' '
  

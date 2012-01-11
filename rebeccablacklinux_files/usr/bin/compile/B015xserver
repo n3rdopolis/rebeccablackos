@@ -28,7 +28,7 @@ git clone http://cgit.freedesktop.org/~iksaif/xserver
 cd xserver
 git checkout -b xwayland origin/xwayland
 CFLAGS="-O0 -ggdb3"
-./autogen.sh --disable-strict-compilation --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport--enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace 
+./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport--enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace  
 make
 make install
 cd ..
