@@ -1,0 +1,5 @@
+#! /bin/bash
+/usr/local/bin/X :1 -rootless
+sleep 10
+export DISPLAY=:1
+xterm 
