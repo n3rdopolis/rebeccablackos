@@ -109,10 +109,26 @@ echo "building $BUILDNAME"
 done
 cd ..
 
+#configure the xwayland server
+mkdir /usr/local/etc/X11
+cat > /usr/local/etc/X11/xorg.conf <<EOF
+Section "Device"
+        Identifier "Device"
+        Driver "wlshm" # or intel
+EndSection
+EOF
+
 #install more Wayland clients into the PATH
 find /srcbuild/weston/clients -executable | while read CLIENT
 do
 cp "$CLIENT" /usr/local/bin
+done
+
+#install the clients into libexec as well
+mkdir /usr/local/libexec
+find /srcbuild/weston/clients -executable | while read CLIENT
+do
+cp "$CLIENT" /usr/local/libexec
 done
 
 #remove the build packages
