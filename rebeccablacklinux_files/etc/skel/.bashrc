@@ -99,8 +99,6 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 
-#set LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 
 #set XDG_RUNTIME_DIR
 export XDG_RUNTIME_DIR=~
