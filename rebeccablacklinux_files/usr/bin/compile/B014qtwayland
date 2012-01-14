@@ -22,7 +22,7 @@ C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 export QTVER=qt5
-export QTDIR=$WLD/$QTVER
+export QTDIR=$WLD
 export PATH=$QTDIR/bin/:$PATH
 export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
@@ -30,7 +30,7 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://gitorious.org/qt/qtwayland.git
+git clone git://gitorious.org/qt/qtwayland
 cd qtwayland/
 qmake
 make 

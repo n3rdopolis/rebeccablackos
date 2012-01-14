@@ -52,16 +52,20 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 yes Yes |apt-get install kubuntu-desktop -y
 
 
-#install remastersys
-yes Yes | aptitude install remastersys -y
-
 #install depends for building QT
 yes Yes | aptitude install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync0 libxcb-sync0-dev libxcb-xfixes0-dev -y
+
+#install depends for building gtk
+yes Y | apt-get build-dep libgtk-3-0 libgtk2.0-0 
+yes Yes | aptitude install libgtk-3-dev -y
+
 
 #Install depends for building xwayland (nested X under Wayland)
 yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-fonts-dev  x11proto-video-dev x11proto-record-dev x11proto-resource-dev libxkbfile-dev libxfont-dev -y
 yes Y | apt-get build-dep tinc
 
+#install clutter depends
+yes Y | apt-get build-de libclutter-1.0-0
 ##################################################################################################################
 
 
@@ -117,18 +121,21 @@ Section "Device"
         Driver "wlshm" # or intel
 EndSection
 EOF
+mkdir /usr/local/X11
+cp -R /usr/share/X11 /usr/local/share/X11
+cp /usr/bin/xkbcomp /usr/local/bin
 
-#install more Wayland clients into the PATH
+#install Wayland clients into the PATH
 find /srcbuild/weston/clients -executable | while read CLIENT
 do
 cp "$CLIENT" /usr/local/bin
 done
 
-#install the clients into libexec as well
-mkdir /usr/local/libexec
-find /srcbuild/weston/clients -executable | while read CLIENT
+
+#install clutter tests
+find /srcbuild/clutter/tests -executable | while read TEST
 do
-cp "$CLIENT" /usr/local/libexec
+cp "$TEST" /usr/local/bin
 done
 
 #remove the build packages
@@ -145,6 +152,10 @@ KERNELVERSION=$(ls /lib/modules/ | head -1 )
 
 #replace all of remastersys's unames with the installed kernel version.
 sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
+
+
+#install remastersys
+yes Yes | aptitude install remastersys -y
 
 #start the remastersys job
 remastersys dist
