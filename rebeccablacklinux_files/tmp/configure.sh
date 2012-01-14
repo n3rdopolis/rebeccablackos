@@ -144,6 +144,10 @@ rm -rf /srcbuild
 
 
 
+
+#install remastersys
+yes Yes | aptitude install remastersys -y
+
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
 
@@ -154,8 +158,6 @@ KERNELVERSION=$(ls /lib/modules/ | head -1 )
 sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 
 
-#install remastersys
-yes Yes | aptitude install remastersys -y
 
 #start the remastersys job
 remastersys dist
