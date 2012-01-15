@@ -81,8 +81,7 @@ yes Y | apt-get dist-upgrade
 rm /sbin/initctl
 mv  /sbin/initctl.bak /sbin/initctl
 
-#copy all the post install files
-rsync /usr/import/* -a /
+
 
 
 # /lib/plymouth/ubuntu-logo.png
@@ -147,6 +146,9 @@ rm -rf /srcbuild
 
 #install remastersys
 yes Yes | aptitude install remastersys -y
+
+#copy all the post install files
+rsync /usr/import/* -a /
 
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
