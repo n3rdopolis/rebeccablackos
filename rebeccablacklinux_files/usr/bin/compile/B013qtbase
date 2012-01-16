@@ -31,6 +31,7 @@ mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://gitorious.org/qt/qtbase
+git clone git://gitorious.org/qt/qtbase
 cd qtbase
 ./configure -confirm-license -opensource  -no-multimedia -no-webkit -no-phonon -no-v8 -debug -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD
 make 
