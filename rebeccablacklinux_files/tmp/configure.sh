@@ -50,7 +50,11 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 
 #install Desktops
 yes Yes |apt-get install kubuntu-desktop -y
-yes Yes |apt-get install ubuntu-desktop -y
+yes Yes |apt-get install gnome -y
+
+
+#install for testing clutter
+yes Yes |apt-get install  clutter-1.0-tests -y
 
 #install depends for building QT
 yes Yes | aptitude install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb-keysyms1 libxcb-keysyms1-dev libxcb-image0 libxcb-image0-dev libxcb-shm0 libxcb-shm0-dev libxcb-icccm4 libxcb-icccm4-dev libxcb-sync0 libxcb-sync0-dev libxcb-xfixes0-dev -y
@@ -59,6 +63,8 @@ yes Yes | aptitude install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb
 yes Y | apt-get build-dep libgtk-3-0 libgtk2.0-0 
 yes Yes | aptitude install libgtk-3-dev -y
 
+#install depends for building clutter
+yes Yes | aptitude install libjson-glib-dev
 
 #Install depends for building xwayland (nested X under Wayland)
 yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-fonts-dev  x11proto-video-dev x11proto-record-dev x11proto-resource-dev libxkbfile-dev libxfont-dev -y
