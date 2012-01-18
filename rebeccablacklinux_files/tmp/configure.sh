@@ -49,9 +49,9 @@ aptitude install linux-generic  --without-recommends -y
 yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev libxcb-glx0-dev  -y
 
 #install Desktops
-yes Yes |apt-get install kubuntu-desktop -y
+yes Yes |apt-get install kubuntu-desktop ubuntu-standard -y
 yes Yes |apt-get install gnome -y
-
+yes Yes |apt-get remove gdm -y
 
 #install for testing clutter
 yes Yes |apt-get install  clutter-1.0-tests -y
@@ -67,7 +67,7 @@ yes Yes | aptitude install libgtk-3-dev -y
 yes Yes | aptitude install libjson-glib-dev
 
 #Install depends for building xwayland (nested X under Wayland)
-yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-fonts-dev  x11proto-video-dev x11proto-record-dev x11proto-resource-dev libxkbfile-dev libxfont-dev -y
+yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-fonts-dev  x11proto-video-dev x11proto-record-dev x11proto-resource-dev libxkbfile-dev libxfont-dev xserver-xorg-dev x11proto-xf86dri-dev -y
 yes Y | apt-get build-dep tinc
 
 #install clutter depends

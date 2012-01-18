@@ -26,7 +26,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://git.gnome.org/gtk+
 cd gtk+
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-x11-backend --enable-wayland-backend --enable-debug=yes
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-x11-backend --enable-wayland-backend --enable-debug=yes   
 make 
 make install
 cd ..
