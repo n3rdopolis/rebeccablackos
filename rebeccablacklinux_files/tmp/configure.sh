@@ -51,7 +51,7 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 #install Desktops
 yes Yes |apt-get install kubuntu-desktop ubuntu-standard -y
 yes Yes |apt-get install gnome -y
-yes Yes |apt-get remove gdm -y
+yes Yes |apt-get remove gdm gnome-session -y
 
 #install for testing clutter
 yes Yes |apt-get install  clutter-1.0-tests -y
@@ -71,7 +71,7 @@ yes Yes | aptitude install x11proto-xcmisc-dev   x11proto-bigreqs-dev x11proto-f
 yes Y | apt-get build-dep tinc
 
 #install clutter depends
-yes Y | apt-get build-de libclutter-1.0-0
+yes Y | apt-get build-dep libclutter-1.0-0
 ##################################################################################################################
 
 
