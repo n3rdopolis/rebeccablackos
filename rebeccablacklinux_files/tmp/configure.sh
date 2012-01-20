@@ -51,7 +51,7 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 #install Desktops
 yes Yes |apt-get install kubuntu-desktop ubuntu-standard firefox -y
 yes Yes |apt-get install gnome -y
-yes Yes |apt-get remove gdm gnome-session -y
+
 
 #install for testing clutter
 yes Yes |apt-get install  clutter-1.0-tests -y
@@ -152,6 +152,9 @@ rm -rf /srcbuild
 
 #install remastersys
 yes Yes | aptitude install remastersys -y
+
+#remove packages that cause conflict
+yes Yes |apt-get remove gdm gnome-session -y
 
 #copy all the post install files
 rsync /usr/import/* -a /
