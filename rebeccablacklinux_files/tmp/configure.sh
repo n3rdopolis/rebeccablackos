@@ -49,7 +49,7 @@ aptitude install linux-generic  --without-recommends -y
 yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev libxcb-glx0-dev  -y
 
 #install Desktops
-yes Yes |apt-get install kubuntu-desktop ubuntu-standard -y
+yes Yes |apt-get install kubuntu-desktop ubuntu-standard firefox -y
 yes Yes |apt-get install gnome -y
 yes Yes |apt-get remove gdm gnome-session -y
 
