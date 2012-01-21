@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 stty intr undef
-
+chvt 8
 while [ 1 ]
 do
 server=$(dialog --no-cancel --no-ok --menu "Do you want an X server, or Wayland server?" 10 50 2 X "" Wayland "" --stdout )
@@ -30,5 +30,4 @@ then
 westoncaller
 fi
 sleep 5
-chvt $(fgconsole)
 done

@@ -127,7 +127,7 @@ Section "Device"
 EndSection
 EOF
 mkdir /usr/local/X11
-cp -R /usr/share/X11 /usr/local/share/X11
+cp -R /usr/share/X11/* /usr/local/share/X11
 cp /usr/bin/xkbcomp /usr/local/bin
 
 #install Wayland clients into the PATH
@@ -137,11 +137,14 @@ cp "$CLIENT" /usr/local/bin
 done
 
 
-#install clutter tests
-find /srcbuild/clutter/tests -executable | while read TEST
+#install qt tests
+find /srcbuild/qtbase -executable | while read TEST
 do
 cp "$TEST" /usr/local/bin
 done
+
+#put clutter tests in the path
+cp /usr/lib/clutter-1.0/tests/* /usr/local/bin
 
 #remove the build packages
 rm -rf /srcbuild
