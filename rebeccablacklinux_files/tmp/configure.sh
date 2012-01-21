@@ -138,7 +138,7 @@ done
 
 
 #install qt tests
-find /srcbuild/qtbase -executable | while read TEST
+find /srcbuild/qtbase/examples -executable | while read TEST
 do
 cp "$TEST" /usr/local/bin
 done
