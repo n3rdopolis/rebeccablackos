@@ -24,7 +24,6 @@ while [ 1 ]
 do
 Xorg :1 &
 export DISPLAY=:1
-kwin &
 server=$(kdialog  --menu "Do you want an X server, or Wayland server?" "X" X "Wayland" Wayland )
 killall Xorg
 if [ $server == "X" ]
