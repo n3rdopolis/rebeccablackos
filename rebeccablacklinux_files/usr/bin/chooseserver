@@ -18,12 +18,13 @@
 stty intr undef
 unset LD_LIBRARY_PATH
 export PATH="/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-Xorg :1 &
-export DISPLAY=:1
-kwin &
+
 
 while [ 1 ]
 do
+Xorg :1 &
+export DISPLAY=:1
+kwin &
 server=$(kdialog  --menu "Do you want an X server, or Wayland server?" "X" X "Wayland" Wayland )
 killall Xorg
 if [ $server == "X" ]
