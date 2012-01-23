@@ -33,6 +33,7 @@ fi
 
 if [ $server == "Wayland" ]
 then
+export PATH="/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 westoncaller
 fi
 sleep 5
