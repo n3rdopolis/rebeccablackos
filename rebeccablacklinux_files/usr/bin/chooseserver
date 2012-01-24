@@ -15,27 +15,15 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-stty intr undef
-unset LD_LIBRARY_PATH
-
-
-
-while [ 1 ]
-do
-export PATH="/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-Xorg :1 &
-export DISPLAY=:1
-server=$(kdialog  --menu "Do you want an X server, or Wayland server?" "X" X "Wayland" Wayland )
-killall Xorg
-if [ $server == "X" ]
+if [ $(cat /proc/cmdline) | grep -c Xorg ) == "1" ]
 then
 kdm -nodaemon
 fi
 
-if [ $server == "Wayland" ]
+if [ $(cat /proc/cmdline) | grep -c Wayland ) == "1" ]
 then
-export PATH="/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 westoncaller
+#fallback
+kdm -nodaemon
 fi
-sleep 5
 done
