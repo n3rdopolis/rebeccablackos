@@ -15,8 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-/usr/local/bin/X :2 -wayland -rootless
-export $(dbus-launch)
+/usr/local/bin/X :2 -wayland -rootless &
 sleep 10
 export DISPLAY=:2
 kwin &
