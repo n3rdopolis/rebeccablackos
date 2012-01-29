@@ -18,5 +18,10 @@
 /usr/local/bin/X :2 -wayland -rootless &
 sleep 10
 export DISPLAY=:2
+#bring these to the defaults for this X11 
+unset QT_QPA_PLATFORM
+unset COGL_RENDERER
+unset CLUTTER_BACKEND
+unset GDK_BACKEND
 kwin &
 xterm 
