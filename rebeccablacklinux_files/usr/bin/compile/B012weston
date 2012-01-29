@@ -28,5 +28,5 @@ git clone git://anongit.freedesktop.org/wayland/weston
 cd weston
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
-make install
+make install -i
 cd ..
