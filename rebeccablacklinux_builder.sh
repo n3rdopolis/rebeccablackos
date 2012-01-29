@@ -165,7 +165,7 @@ mount ./livecdfs /media/LiveDiskCreAtionChrootFolDer -o loop
 
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap precise /media/LiveDiskCreAtionChrootFolDer http://ubuntu.osuosl.org/ubuntu/
+debootstrap precise /media/LiveDiskCreAtionChrootFolDer http://archive.ubuntu.com/ubuntu/
 
 
 
