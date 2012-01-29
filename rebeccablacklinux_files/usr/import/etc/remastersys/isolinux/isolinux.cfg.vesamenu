@@ -6,10 +6,16 @@ menu title __LIVECDLABEL__
 menu background splash.png
 menu color title 1;37;44 #c0ffffff #00000000 std
 
-label live
-  menu label live - boot the Live System
+label livex
+  menu label live - boot the Live System with X
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash Xorg --
+
+label livewayland
+  menu label live - boot the Live System with Wayland (And X fallback)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash Wayland --
+
 
 label xforcevesa
   menu label xforcevesa - boot Live in safe graphics mode
