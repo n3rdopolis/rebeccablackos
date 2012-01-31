@@ -28,4 +28,6 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 export QT_QPA_PLATFORM=wayland
 export ELM_ENGINE="wayland_shm"
 export $(dbus-launch)
-weston > ~/weston
+weston | tee ~/weston &
+sleep 5
+zenity --warning --text="This is a third party fan made distrobution"
