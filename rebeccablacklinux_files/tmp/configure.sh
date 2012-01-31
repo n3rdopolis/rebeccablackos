@@ -144,8 +144,9 @@ do
 cp "$CLIENT" /usr/local/bin
 done
 
-#turn OFF setuid on weston
+#turn OFF setuid on weston and Xorg
 chmod -s /usr/local/bin/weston
+chmod -s /usr/local/bin/Xorg
 
 #install qt tests
 find /srcbuild/qtbase/examples -executable | while read TEST
