@@ -77,7 +77,7 @@ yes Y | apt-get build-dep tinc
 yes Y | apt-get build-dep libclutter-1.0-0
 
 #install efl depends
-yes Y | apt-get install subversion 
+yes Y | apt-get install subversion e17
 yes Y | apt-get build-dep e17  
 
 ##################################################################################################################
