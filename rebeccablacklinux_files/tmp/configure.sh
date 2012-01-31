@@ -45,6 +45,9 @@ aptitude install language-pack-en --without-recommends -y
 #install a kernel for the Live disk
 aptitude install linux-generic  --without-recommends -y
 
+#install more mesa depends
+yes Y | apt-get build-dep mesa
+
 #Install Wayland depends 
 yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev libxcb-glx0-dev libgl1-mesa-dri-dbg -y
 
@@ -72,6 +75,10 @@ yes Y | apt-get build-dep tinc
 
 #install clutter depends
 yes Y | apt-get build-dep libclutter-1.0-0
+
+#install efl depends
+yes Y | apt-get build-dep e17 subversion -y
+
 ##################################################################################################################
 
 
@@ -145,8 +152,16 @@ do
 cp "$TEST" /usr/local/bin
 done
 
+
 #put clutter tests in the path
 cp /usr/lib/clutter-1.0/tests/* /usr/local/bin
+
+#install efl tests
+find /srcbuild/elementary/src/bin -executable -maxdepth 1 | while read TEST
+do 
+cp "$TEST" /usr/local/bin
+done
+
 
 #remove the build packages
 rm -rf /srcbuild
