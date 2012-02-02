@@ -26,7 +26,6 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone http://git.gnome.org/browse/cogl
 cd cogl
-git checkout 1.9.4
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -enable-wayland-egl-platform=yes --enable-gl
 make
 make install
