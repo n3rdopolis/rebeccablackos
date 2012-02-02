@@ -164,6 +164,9 @@ do
 cp "$TEST" /usr/local/bin
 done
 
+#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
+ln -s /usr/bin/gedit /usr/local/bin/gedit
+ln -s /usr/bin/epiphany-browser /usr/local/bin/epiphany-browser
 
 #remove the build packages
 rm -rf /srcbuild
