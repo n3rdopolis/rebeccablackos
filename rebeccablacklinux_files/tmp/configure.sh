@@ -53,7 +53,7 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 
 #install Desktops
 yes Yes |apt-get install kubuntu-desktop ubuntu-standard firefox -y
-yes Yes |apt-get install epiphany-browser evolution gedit -y
+yes Yes |apt-get install epiphany-browser evolution gedit gnibbles unity nautilus file-roller gnobots cheese -y
 
 
 #install for testing clutter
@@ -165,9 +165,14 @@ cp "$TEST" /usr/local/bin
 done
 
 #put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
-ln -s /usr/bin/gedit /usr/local/bin/gedit
-ln -s /usr/bin/epiphany-browser /usr/local/bin/epiphany-browser
-
+ln -s /usr/bin/gedit             /usr/local/bin/gedit
+ln -s /usr/bin/epiphany-browser  /usr/local/bin/epiphany-browser
+ln -s /usr/bin/gnibbles          /usr/local/bin/gnibbles 
+ln -s /usr/bin/unity             /usr/local/bin/unity 
+ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
+ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
+ln -s /usr/bin/gnobots           /usr/local/bin/gnobots 
+ln -s /usr/bin/cheese            /usr/local/bin/cheese
 #remove the build packages
 rm -rf /srcbuild
 
