@@ -173,9 +173,11 @@ ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
 ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
 ln -s /usr/bin/gnobots           /usr/local/bin/gnobots 
 ln -s /usr/bin/cheese            /usr/local/bin/cheese
-#remove the build packages
-rm -rf /srcbuild
-
+#remove the build packages except elementary
+find /srcbuild/ | grep -v elementary | while read BUILDDIR
+do
+rm -rf $BUILDDIR
+done
 
 
 
