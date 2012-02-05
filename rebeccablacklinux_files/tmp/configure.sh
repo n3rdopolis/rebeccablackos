@@ -53,7 +53,7 @@ yes Yes | apt-get install build-essential libtool libxi-dev libxmu-dev libxt-dev
 
 #install Desktops
 yes Yes |apt-get install kubuntu-desktop ubuntu-standard firefox -y
-yes Yes |apt-get install epiphany-browser evolution gedit gnibbles unity nautilus file-roller gnobots cheese -y
+yes Yes |apt-get install epiphany-browser evolution gedit gnibbles unity nautilus file-roller cheese -y
 
 
 #install for testing clutter
