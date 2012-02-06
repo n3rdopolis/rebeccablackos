@@ -107,7 +107,7 @@ EGL_LOG_LEVEL=debug
 LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
 
-
+echo 'Run sudo westoncaller in a tty to try Wayland running native.'
 echo ' '
 echo 'Wayland programs are in /usr/local/bin or any GTK program when you are running a GTK program from a Wayland terminal'
 echo ' '
