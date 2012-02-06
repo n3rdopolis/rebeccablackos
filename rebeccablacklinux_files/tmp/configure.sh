@@ -159,7 +159,7 @@ done
 cp /usr/lib/clutter-1.0/tests/* /usr/local/bin
 
 #install efl tests
-find /srcbuild/elementary/src/bin -executable -maxdepth 1 | while read TEST
+find /usr/local/share/elementary/elementary -executable | while read TEST
 do 
 cp "$TEST" /usr/local/bin
 done
@@ -173,13 +173,11 @@ ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
 ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
 ln -s /usr/bin/gnobots           /usr/local/bin/gnobots 
 ln -s /usr/bin/cheese            /usr/local/bin/cheese
-#remove the build packages except elementary
-find /srcbuild/ | grep -v elementary | while read BUILDDIR
-do
-rm -rf $BUILDDIR
-done
+#remove the build packages
+rm -rf /srcbuild
 
- 
+
+
 
 
 #install remastersys
