@@ -159,7 +159,7 @@ done
 cp /usr/lib/clutter-1.0/tests/* /usr/local/bin
 
 #install efl tests
-find /usr/local/share/elementary/elementary -executable | while read TEST
+find /usr/local/share/elementary -executable | while read TEST
 do 
 cp "$TEST" /usr/local/bin
 done
