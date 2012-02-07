@@ -11,6 +11,11 @@ label livex
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash Xorg --
 
+label livewayland
+  menu label live - boot the Live System with Wayland, and X fallback. EXPERIMENTAL
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash Wayland --
+
 label xforcevesa
   menu label xforcevesa - boot Live in safe graphics mode
   kernel /casper/vmlinuz
