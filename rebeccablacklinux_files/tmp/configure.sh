@@ -102,36 +102,8 @@ mv  /sbin/initctl.bak /sbin/initctl
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
 
-
-#set LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
-
-#set to the ld
-echo "/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-/usr/local/lib
-/usr/lib
-" > /etc/ld.so.conf.d/libc.conf
-ldconfig
-
-#Compile software
-mkdir /usr/share/Buildlog
-mkdir /srcbuild
-
-ls /usr/bin/compile/B* | while read BUILDSCRIPT
-do
-BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/....$//' |  rev)
-echo "building $BUILDNAME"
-"$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
-done
-cd ..
-
-
-#remove the build packages
-rm -rf /srcbuild
-
-
-
+#run the script that calls all compile scripts in a specified order
+compile_all
 
 
 #install remastersys
