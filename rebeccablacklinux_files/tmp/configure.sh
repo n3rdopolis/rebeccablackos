@@ -138,6 +138,10 @@ mkdir /usr/local/X11
 cp -R /usr/share/X11/* /usr/local/share/X11
 cp /usr/bin/xkbcomp /usr/local/bin
 
+#set the log folder to allow nested X to create log files, and not fataly exit
+mkdir -p /usr/local/var/log
+chmod 777 /usr/local/var/log
+
 #install Wayland clients into the PATH
 find /srcbuild/weston/clients -executable | while read CLIENT
 do
