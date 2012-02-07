@@ -15,6 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+mkdir /srcbuild
+cd /srcbuild
 export WLD=/usr/local
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
@@ -30,3 +32,12 @@ cd weston
 make
 make install -i
 cd ..
+
+#install Wayland clients into the PATH
+find /srcbuild/weston/clients -executable | while read CLIENT
+do
+cp "$CLIENT" /usr/local/bin
+done
+
+#turn OFF setuid on weston
+chmod -s /usr/local/bin/weston

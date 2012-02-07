@@ -15,6 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+mkdir /srcbuild
+cd /srcbuild
 export WLD=/usr/local
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
@@ -31,3 +33,22 @@ git checkout remotes/origin/xwayland-1.10
 make
 make install
 cd ..
+
+#configure the xwayland server
+mkdir /usr/local/etc/X11
+cat > /usr/local/etc/X11/xorg.conf <<EOF
+Section "Device"
+        Identifier "Device"
+        Driver "wlshm" # or intel
+EndSection
+EOF
+mkdir /usr/local/X11
+cp -R /usr/share/X11/* /usr/local/share/X11
+cp /usr/bin/xkbcomp /usr/local/bin
+
+#set the log folder to allow nested X to create log files, and not fataly exit
+mkdir -p /usr/local/var/log
+chmod 777 /usr/local/var/log
+
+#disable setuid on xserver
+chmod -s /usr/local/bin/Xorg

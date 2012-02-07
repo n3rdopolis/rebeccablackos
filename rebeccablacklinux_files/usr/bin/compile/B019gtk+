@@ -15,6 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+mkdir /srcbuild
+cd /srcbuild
 export WLD=/usr/local
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
@@ -31,3 +33,12 @@ git checkout 3.3.10
 make 
 make install
 cd ..
+
+#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
+ln -s /usr/bin/gedit             /usr/local/bin/gedit
+ln -s /usr/bin/epiphany-browser  /usr/local/bin/epiphany-browser
+ln -s /usr/bin/gnibbles          /usr/local/bin/gnibbles 
+ln -s /usr/bin/unity             /usr/local/bin/unity 
+ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
+ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
+ln -s /usr/bin/cheese            /usr/local/bin/cheese

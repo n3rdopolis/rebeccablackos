@@ -115,68 +115,18 @@ echo "/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 ldconfig
 
 #Compile software
-mkdir /usr/share/buildlog
+mkdir /usr/share/Buildlog
 mkdir /srcbuild
-cd /srcbuild
+
 ls /usr/bin/compile/B* | while read BUILDSCRIPT
 do
 BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/....$//' |  rev)
 echo "building $BUILDNAME"
-"$BUILDSCRIPT" 2>&1 | tee  /usr/share/buildlog/$BUILDNAME
+"$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
 done
 cd ..
 
-#configure the xwayland server
-mkdir /usr/local/etc/X11
-cat > /usr/local/etc/X11/xorg.conf <<EOF
-Section "Device"
-        Identifier "Device"
-        Driver "wlshm" # or intel
-EndSection
-EOF
-mkdir /usr/local/X11
-cp -R /usr/share/X11/* /usr/local/share/X11
-cp /usr/bin/xkbcomp /usr/local/bin
 
-#set the log folder to allow nested X to create log files, and not fataly exit
-mkdir -p /usr/local/var/log
-chmod 777 /usr/local/var/log
-
-#install Wayland clients into the PATH
-find /srcbuild/weston/clients -executable | while read CLIENT
-do
-cp "$CLIENT" /usr/local/bin
-done
-
-#turn OFF setuid on weston and Xorg
-chmod -s /usr/local/bin/weston
-chmod -s /usr/local/bin/Xorg
-
-#install qt tests
-find /srcbuild/qtbase/examples -executable | while read TEST
-do
-cp "$TEST" /usr/local/bin
-done
-
-
-#put clutter tests in the path
-cp /usr/lib/clutter-1.0/tests/* /usr/local/bin
-
-#install efl tests
-find /usr/local/share/elementary -executable | while read TEST
-do 
-cp "$TEST" /usr/local/bin
-done
-
-#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
-ln -s /usr/bin/gedit             /usr/local/bin/gedit
-ln -s /usr/bin/epiphany-browser  /usr/local/bin/epiphany-browser
-ln -s /usr/bin/gnibbles          /usr/local/bin/gnibbles 
-ln -s /usr/bin/unity             /usr/local/bin/unity 
-ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
-ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
-ln -s /usr/bin/gnobots           /usr/local/bin/gnobots 
-ln -s /usr/bin/cheese            /usr/local/bin/cheese
 #remove the build packages
 rm -rf /srcbuild
 
