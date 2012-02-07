@@ -26,7 +26,6 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://anongit.freedesktop.org/wayland/weston
 cd weston
-patch < /tmp/tmp-weston-patch
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-cairo-gles2 
 make
 make install -i
