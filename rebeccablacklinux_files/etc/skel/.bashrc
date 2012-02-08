@@ -98,9 +98,6 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-#set XDG_RUNTIME_DIR
-export XDG_RUNTIME_DIR=~
-
 #increse the verbosity level of Wayland running.
 MESA_DEBUG=1
 EGL_LOG_LEVEL=debug
