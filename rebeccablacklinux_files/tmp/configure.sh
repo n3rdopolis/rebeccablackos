@@ -64,7 +64,7 @@ yes Yes | aptitude install libxcb1 libxcb1-dev libx11-xcb1 libx11-xcb-dev libxcb
 
 #install depends for building gtk
 yes Y | apt-get build-dep libgtk-3-0 libgtk2.0-0 
-yes Yes | aptitude install libgtk-3-dev -y
+yes Yes | aptitude install libgtk-3-dev libgio2.0-cil-dev  -y
 
 #install depends for building clutter
 yes Yes | aptitude install libjson-glib-dev
