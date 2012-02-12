@@ -1,8 +1,10 @@
-To build, just run the included script. This script only works on Ubuntu/Debain (I think it would work on Debian) based systems. 
+To build, just run the included script. The build script only works on Ubuntu/Debain (I think it would work on Debian) based systems. 
+
+Otherwise use the ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
 This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is Rebecca Black Linux. 
 
-Oh yeah, it's also meant to be the first Wayland Live CD, instead of using X. (soon. hopefuly.) Some Wayland clients work, but it's not a productive system yet (when in Wayland).
+This has both Wayland and X. Even though QT, GTK, EFL, has been compiled on this CD to support Wayland, many apps don't work.
 
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
@@ -20,7 +22,7 @@ How to use the ISO:
   boot from the CD. Once it boots you can use the live system. 
  
 How to use Wayland:
-    Either select the boot option to start Wayland native on hardware, or boot into X, and open Wayland nested
+    Either select the boot option to start Wayland native on hardware, or boot into X, and open Wayland nested, or open it on a tty
 
     Wayland programs are in /usr/local/bin or the panel at the top.
 
