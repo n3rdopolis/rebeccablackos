@@ -47,6 +47,7 @@ aptitude install linux-generic  --without-recommends -y
 
 #install more mesa depends
 yes Y | apt-get build-dep mesa
+yes Yes | apt-get install llvm -y
 
 #Install Wayland depends 
 yes Yes | apt-get install libxkbcommon-dev build-essential libtool libxi-dev libxmu-dev libxt-dev bison flex libgl1-mesa-dev xutils-dev libtalloc-dev libdrm-dev autoconf x11proto-kb-dev libegl1-mesa-dev libgles2-mesa-dev libgdk-pixbuf2.0-dev libudev-dev libxcb-dri2-0-dev libxcb-xfixes0-dev shtool libffi-dev libpoppler-glib-dev libgtk2.0-dev git diffstat libx11-xcb-dev quilt autopoint dh-autoreconf xkb-data gtk-doc-tools gobject-introspection gperf librsvg2-bin libpciaccess-dev  python-libxml2 libjpeg-dev   libgbm-dev libxcb-glx0-dev libgl1-mesa-dri-dbg -y
