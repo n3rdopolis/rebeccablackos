@@ -24,7 +24,7 @@ ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
-export QTVER=qt5
+export QTVER=4.8.0
 export QTDIR=$WLD
 export PATH=$QTDIR/bin/:$PATH
 export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
@@ -33,10 +33,21 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://gitorious.org/qt/qtwayland
-git clone git://gitorious.org/qt/qtwayland
-cd qtwayland/
-qmake
-make 
+#git clone twice from QT, because sometimes the repos randomly 'hang up'
+git clone git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
+git clone git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
+cd thiago-intels-qt
+git checkout 4.8-qpa-wayland
+patch -p1 < /tmp/thiago-intels-qt.diff
+./configure -confirm-license -opensource -debug -qpa  -egl -opengl es2 -prefix $WLD -no-webkit
+make
 make install
 cd ..
+
+
+
+#install qt tests
+find /srcbuild/qt/examples -executable | while read TEST
+do
+cp "$TEST" /usr/local/bin
+done
