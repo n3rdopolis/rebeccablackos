@@ -81,6 +81,8 @@ yes Y | apt-get build-dep libclutter-1.0-0
 yes Y | apt-get install subversion e17
 yes Y | apt-get build-dep e17  
 
+#get depends for kdelibs
+yes Y | apt-get build-dep kde4libs
 ##################################################################################################################
 
 

@@ -24,22 +24,22 @@ ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+export QTVER=4.8.0
+export QTDIR=$WLD
+export PATH=$QTDIR/bin/:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
+export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://git.gnome.org/gtk+
-cd gtk+
-git checkout 3.3.12
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-x11-backend --enable-wayland-backend --enable-debug=yes   
-make 
+git clone git://anongit.kde.org/kdelibs
+cd kdelibs
+git checkout KDE/4.8
+rm CMakeCache.txt
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$WLD -DLIB_INSTALL_DIR:PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+make
 make install
 cd ..
-
-#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
-ln -s /usr/bin/gedit             /usr/local/bin/gedit
-ln -s /usr/bin/epiphany-browser  /usr/local/bin/epiphany-browser
-ln -s /usr/bin/gnibbles          /usr/local/bin/gnibbles 
-ln -s /usr/bin/unity             /usr/local/bin/unity 
-ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
-ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
-ln -s /usr/bin/cheese            /usr/local/bin/cheese
