@@ -21,4 +21,5 @@ export WAYLAND_DISPLAY=wayland-0
 weston --socket $ServerID &
 export WAYLAND_DISPLAY=$ServerID
 sleep 3
-weston-terminal
+weston-terminal &
+testchooser

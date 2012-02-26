@@ -9,9 +9,11 @@ This has both Wayland and X. Even though QT, GTK, EFL, has been compiled on this
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
 Problems:
-      Wayland is still new
+      Wayland is still new, things are still unstable
 
       Won't fit on a normal CD.
+
+      The spell checker doesn't recongise "Rebecca"... 
 
 TODO:
 
