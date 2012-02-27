@@ -83,6 +83,7 @@ yes Y | apt-get build-dep e17
 
 #get depends for kdelibs
 yes Y | apt-get build-dep kde4libs
+yes Y | apt-get install libraptor-dev
 ##################################################################################################################
 
 
