@@ -33,9 +33,8 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://anongit.kde.org/kdelibs
-cd kdelibs
-git checkout KDE/4.8
+git clone git://anongit.kde.org/extra-cmake-modules
+cd extra-cmake-modules
 rm CMakeCache.txt
 mkdir build
 cd build
