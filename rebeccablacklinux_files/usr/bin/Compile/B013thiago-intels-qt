@@ -47,7 +47,7 @@ cd ..
 
 
 #install qt tests
-find /srcbuild/qt/examples -executable | while read TEST
+find /srcbuild/thiago-intels-qt/examples -executable | while read TEST
 do
 cp "$TEST" /usr/local/bin
 done
