@@ -39,7 +39,7 @@ git checkout frameworks
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$WLD -DLIB_INSTALL_DIR:PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make -i
-make install -i
+cmake .. -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+make
+make install
 cd ..
