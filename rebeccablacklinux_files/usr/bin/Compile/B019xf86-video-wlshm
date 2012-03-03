@@ -29,6 +29,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone http://cgit.freedesktop.org/~iksaif/xf86-video-wlshm/
 cd xf86-video-wlshm
+echo "REVISION $(git rev-parse HEAD)"
 sed -i 's/hosted/xwayland/g' src/wlshm.h
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 

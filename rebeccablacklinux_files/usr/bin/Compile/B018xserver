@@ -30,6 +30,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 git clone http://cgit.freedesktop.org/~krh/xserver
 cd xserver
 git checkout remotes/origin/xwayland-1.10
+echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport --enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace  
 make
 make install

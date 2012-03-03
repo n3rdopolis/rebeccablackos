@@ -35,6 +35,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://anongit.kde.org/extra-cmake-modules
 cd extra-cmake-modules
+echo "REVISION $(git rev-parse HEAD)"
 rm CMakeCache.txt
 mkdir build
 cd build

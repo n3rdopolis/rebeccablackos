@@ -36,6 +36,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 git clone git://anongit.kde.org/kdelibs
 cd kdelibs
 git checkout frameworks
+echo "REVISION $(git rev-parse HEAD)"
 rm CMakeCache.txt
 mkdir build
 cd build

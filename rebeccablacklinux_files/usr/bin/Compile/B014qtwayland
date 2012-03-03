@@ -36,6 +36,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 git clone git://gitorious.org/qt/qtwayland
 git clone git://gitorious.org/qt/qtwayland
 cd qtwayland/
+echo "REVISION $(git rev-parse HEAD)"
 qmake
 make 
 make install

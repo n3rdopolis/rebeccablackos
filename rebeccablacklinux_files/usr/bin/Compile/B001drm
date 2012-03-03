@@ -29,6 +29,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://anongit.freedesktop.org/git/mesa/drm
 cd drm
+echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --prefix=$WLD --enable-nouveau-experimental-api --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install

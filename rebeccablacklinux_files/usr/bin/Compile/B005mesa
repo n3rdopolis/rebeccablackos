@@ -30,6 +30,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 git clone git://anongit.freedesktop.org/mesa/mesa
 cd mesa
 git checkout 	e0897009f8fe8100204038e37f5555966300383a
+echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --prefix=$WLD --enable-openvg --enable-gles1 --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install
