@@ -43,7 +43,7 @@ kdelibs
 xserver
 xf86-video-wlshm
 glib
-gtk
+gtk+
 cogl
 clutter
 eina
@@ -63,4 +63,4 @@ echo "building $BUILDSCRIPT"
 done
 
 #remove the build packages
-rm -rf /srcbuild
+#rm -rf /srcbuild
