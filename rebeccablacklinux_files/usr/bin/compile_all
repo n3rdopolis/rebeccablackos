@@ -22,11 +22,45 @@ export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):
 mkdir /usr/share/Buildlog
 mkdir /srcbuild
 
-ls /usr/bin/Compile/B* | while read BUILDSCRIPT
+echo "
+wayland
+drm
+macros
+glproto
+dri2proto
+mesa
+xproto
+kbproto
+libX11
+libxkbcommon
+pixman
+cairo
+weston
+qtbase
+qtwayland
+extra-cmake-modules
+kdelibs
+macros.2
+xserver
+xf86-video-wlshm
+glib
+gtk
+cogl
+clutter
+eina
+eet
+evas
+ecore
+embryo
+edje
+efreet
+e_dbus
+eeze
+elementary
+" | while read BUILDSCRIPT
 do
-BUILDNAME=$(echo "$BUILDSCRIPT" |rev | awk -F / '{print $1}' | sed 's/....$//' |  rev)
-echo "building $BUILDNAME"
-"$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
+echo "building $BUILDSCRIPT"
+"$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
 done
 
 #remove the build packages

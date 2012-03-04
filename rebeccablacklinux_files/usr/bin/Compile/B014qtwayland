@@ -18,27 +18,26 @@
 export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 mkdir /srcbuild
 cd /srcbuild
-export WLD=/usr
+export WLD=/usr/local
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+export QTVER=qt5
+export QTDIR=$WLD
+export PATH=$QTDIR/bin/:$PATH
+export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
+export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
+export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://anongit.freedesktop.org/git/xorg/util/macros
-cd macros
+git clone git://gitorious.org/qt/qtwayland
+git clone git://gitorious.org/qt/qtwayland
+cd qtwayland/
 echo "REVISION $(git rev-parse HEAD)"
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-make
-make install
-
-git clean -f -x -d
-git reset --hard
-
-export WLD=/usr/local
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-make
+qmake
+make 
 make install
 cd ..
