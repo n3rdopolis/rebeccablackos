@@ -40,7 +40,6 @@ qtbase
 qtwayland
 extra-cmake-modules
 kdelibs
-macros.2
 xserver
 xf86-video-wlshm
 glib
@@ -60,7 +59,7 @@ elementary
 " | while read BUILDSCRIPT
 do
 echo "building $BUILDSCRIPT"
-"$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
+"/usr/bin/Compile/$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
 done
 
 #remove the build packages
