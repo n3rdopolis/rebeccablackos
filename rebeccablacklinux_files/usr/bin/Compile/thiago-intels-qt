@@ -40,7 +40,7 @@ cd thiago-intels-qt
 git checkout 4.8-qpa-wayland
 echo "REVISION $(git rev-parse HEAD)"
 patch -p1 < /tmp/thiago-intels-qt.diff
-./configure -confirm-license -opensource -debug -qpa  -egl -opengl es2 -prefix $WLD -no-webkit
+./configure -confirm-license -opensource -release -qpa  -egl -opengl es2 -prefix $WLD -no-webkit -reduce-exports -reduce-relocations
 make
 make install
 cd ..
