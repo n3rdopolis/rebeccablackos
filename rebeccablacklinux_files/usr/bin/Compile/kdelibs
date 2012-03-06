@@ -42,6 +42,6 @@ patch -p1 < /tmp/kdelibs.diff
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make
-make install
+make -i
+make install -i
 cd ..
