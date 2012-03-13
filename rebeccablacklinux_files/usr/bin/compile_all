@@ -15,9 +15,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-#set LD_LIBRARY_PATH
-export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
 
+export LD_LIBRARY_PATH=/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib:/usr/lib
+export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 
 mkdir /usr/share/Buildlog
 mkdir /srcbuild
@@ -60,6 +60,7 @@ do
 echo "building $BUILDSCRIPT"
 "/usr/bin/Compile/$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
 done
+
 
 #remove the build packages
 rm -rf /srcbuild
