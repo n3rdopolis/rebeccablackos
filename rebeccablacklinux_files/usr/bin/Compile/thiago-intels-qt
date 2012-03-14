@@ -52,3 +52,9 @@ find /srcbuild/thiago-intels-qt/examples -executable | while read TEST
 do
 cp "$TEST" /usr/local/bin
 done
+
+#install qmae
+find /srcbuild/thiago-intels-qt/qmake -executable | while read QMAKE
+do
+cp "$QMAKE" $WLD/bin
+done
