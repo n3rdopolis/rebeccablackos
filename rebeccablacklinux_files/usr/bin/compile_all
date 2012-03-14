@@ -62,7 +62,5 @@ echo "building $BUILDSCRIPT"
 "/usr/bin/Compile/$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
 done
 
-read a
-
 #remove the build packages
 rm -rf /srcbuild
