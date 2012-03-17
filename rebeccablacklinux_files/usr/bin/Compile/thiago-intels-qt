@@ -53,8 +53,8 @@ do
 cp "$TEST" /usr/local/bin
 done
 
-#install qmae
-find /srcbuild/thiago-intels-qt/qmake -executable | while read QMAKE
+#install QT binaries
+find /srcbuild/thiago-intels-qt/bin -executable | while read QTAPP
 do
-cp "$QMAKE" $WLD/bin
+cp "$QTAPP" $WLD/bin
 done
