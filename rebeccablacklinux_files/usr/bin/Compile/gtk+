@@ -32,7 +32,7 @@ git clone git://git.gnome.org/gtk+
 cd gtk+
 git checkout 3.3.16
 echo "REVISION $(git rev-parse HEAD)"
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-x11-backend --enable-wayland-backend --enable-debug=yes   
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-backend --enable-debug=yes   
 make 
 make install
 cd ..
