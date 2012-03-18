@@ -116,6 +116,9 @@ yes Yes | aptitude install remastersys -y
 #remove packages that cause conflict
 yes Yes |apt-get remove gdm gnome-session -y
 
+#change session manager
+echo 2 | update-alternatives --config x-session-manager  
+
 #copy all the post install files
 rsync /usr/import/* -a /
 
