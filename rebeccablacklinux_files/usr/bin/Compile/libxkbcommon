@@ -30,7 +30,6 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 git clone git://people.freedesktop.org/xorg/lib/libxkbcommon.git
 cd libxkbcommon/
-git checkout for-weston-0.85
 echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --prefix=$WLD --with-xkb-config-root=/usr/share/X11/xkb --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make

@@ -37,7 +37,6 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 git clone git://gitorious.org/qt/qtbase
 git clone git://gitorious.org/qt/qtbase
 cd qtbase
-git checkout 96232be1466e8c059c270b611ce7c32997ff60a9
 echo "REVISION $(git rev-parse HEAD)"
 ./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations
 make 
