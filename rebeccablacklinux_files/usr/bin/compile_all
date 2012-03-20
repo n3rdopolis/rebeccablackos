@@ -64,21 +64,41 @@ do
 if [[ $1 == download-only]]
 then
 mkdir -p /srcbuild/$BUILDNAME
-cd $BUILDNAME
+
+
+
+
 
 cat "/usr/bin/Compile/$BUILDNAME" | grep GITURLPATH= | while read GITLINE
 do
-git clone $(echo $GITLINE | awk -F 'GITURLPATH=' '{print $2}')
+GITURL=$(echo $GITLINE | awk -F 'GITURLPATH=' '{print $2}')
+GITREVISION=$(cat /usr/bin/Compile/$BUILDNAME | grep GITREVISION= | awk -F 'GITURLPATH=' '{print $2}' | head -n1)
+git clone $GITURL
+cd $BUILDNAME
+git checkout $GITREVISION
+git pull
+cd /srcbuild
 done
 
 cat "/usr/bin/Compile/$BUILDNAME" | grep SVNURLPATH= | while read SVNLINE
 do
-svn co $(echo $GITLINE | awk -F 'SVNURLPATH=' '{print $2}')
+SVNURL=$(echo $SVNLINE | awk -F 'SVNURLPATH=' '{print $2}')
+svn co $SVNURL
+cd $BUILDNAME
+svn merge -r HEAD:$SVNREVISION $SVNURL
+svn update 
+cd /srcbuild
 done
 
+
+
+
+
+#srcbuild is not running as a downloader
 else
 echo "building $BUILDNAME"
 "/usr/bin/Compile/$BUILDNAME" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
+/srcbuild
 fi
 
 done

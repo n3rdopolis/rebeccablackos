@@ -37,7 +37,8 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 GITURLPATH=git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
 git clone "$GITURLPATH"
 cd thiago-intels-qt
-git checkout 4.8-qpa-wayland
+GITREVISION=4.8-qpa-wayland
+git checkout $GITREVISION
 git pull
 echo "REVISION $(git rev-parse HEAD)"
 patch -p1 < /tmp/thiago-intels-qt.diff
