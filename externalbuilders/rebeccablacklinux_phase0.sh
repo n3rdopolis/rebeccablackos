@@ -50,22 +50,38 @@ rm -rf ~/RBOS_Build_Files
 #END PAST RUN CLEANUP##################
 
 
+#make a folder containing the live cd tools in the users local folder
+mkdir ~/RBOS_Build_Files
+
+#switch to that folder
+cd ~/RBOS_Build_Files
+
+
+#create the file that will be the filesystem image
+dd if=/dev/zero of=~/RBOS_Build_Files/RBOS_FS.img bs=1 count=0 seek=16G 
 
 
 
-#mount the image as a loop device
+echo "creating a file system on the virtual image. Not on your real file system."
+#create a file system on the image 
+yes y | mkfs.btrfs ~/RBOS_Build_Files/RBOS_FS.img
+
+
+
+#create a media mountpoint in the media folder
+mkdir ~/RBOS_Build_Files/build_mountpoint
+
+#mount the image created above at the mountpoint as a loop device
 mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
 
-#mounting devfs on chrooted fs with bind 
-mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
+#make a folder for the phase 1 system
+mkdir ~/RBOS_Build_Files/build_mountpoint/phase_1
 
-#Configure the Live system########################################
-chroot ~/RBOS_Build_Files/build_mountpoint/phase_1 /tmp/configure_phase1.sh
+#install a really basic Ubuntu installation in the new fs  
+debootstrap precise ~/RBOS_Build_Files/build_mountpoint/phase_1 http://ubuntu.osuosl.org/ubuntu/
 
-
-#create the subvolume that phase 2 will work with
-btrfs subvolume snapshot ~/RBOS_Build_Files/build_mountpoint/phase_1 ~/RBOS_Build_Files/build_mountpoint/phase_2
-
+#tell future calls of the first builder script that phase 1 is done
+touch ~/RBOS_Build_Files/DontStartFromScratch
 
 #go back to the users home folder
 cd ~
