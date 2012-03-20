@@ -34,10 +34,11 @@ mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 #git clone twice from QT, because sometimes the repos randomly 'hang up'
-git clone git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
-git clone git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
+GITURLPATH=git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
+git clone "$GITURLPATH"
 cd thiago-intels-qt
 git checkout 4.8-qpa-wayland
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 patch -p1 < /tmp/thiago-intels-qt.diff
 ./configure -confirm-license -opensource -release -qpa  -egl -opengl es2 -prefix $WLD -no-webkit -reduce-exports -reduce-relocations

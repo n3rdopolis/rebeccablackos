@@ -28,9 +28,11 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone http://cgit.freedesktop.org/~krh/xserver
+GITURLPATH=http://cgit.freedesktop.org/~krh/xserver
+git clone "$GITURLPATH"
 cd xserver
 git checkout remotes/origin/xwayland-1.10
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport --enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace  
 make

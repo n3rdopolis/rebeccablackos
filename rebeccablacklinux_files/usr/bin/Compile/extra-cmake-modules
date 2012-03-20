@@ -34,8 +34,10 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://anongit.kde.org/extra-cmake-modules
+GITURLPATH=git://anongit.kde.org/extra-cmake-modules
+git clone "$GITURLPATH"
 cd extra-cmake-modules
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 rm CMakeCache.txt
 mkdir build

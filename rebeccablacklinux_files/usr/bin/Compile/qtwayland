@@ -34,9 +34,10 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://gitorious.org/qt/qtwayland
-git clone git://gitorious.org/qt/qtwayland
+GITURLPATH=git://gitorious.org/qt/qtwayland
+git clone "$GITURLPATH"
 cd qtwayland/
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 qmake
 make 

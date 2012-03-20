@@ -28,7 +28,8 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-svn co http://svn.enlightenment.org/svn/e/trunk/embryo
+SVNURLPATH=http://svn.enlightenment.org/svn/e/trunk/embryo
+svn co "$SVNURLPATH"
 cd embryo
 echo "REVISION $(svnversion .)"
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 

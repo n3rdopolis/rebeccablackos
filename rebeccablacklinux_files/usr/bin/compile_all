@@ -58,10 +58,29 @@ efreet
 e_dbus
 eeze
 elementary
-" | awk -F "#" '{print $1}' | while read BUILDSCRIPT
+" | awk -F "#" '{print $1}' | while read BUILDNAME
 do
-echo "building $BUILDSCRIPT"
-"/usr/bin/Compile/$BUILDSCRIPT" 2>&1 | tee  /usr/share/Buildlog/$BUILDSCRIPT
+#if it's download only, parse the files for the git and svn repos, and download them.
+if [[ $1 == download-only]]
+then
+mkdir -p /srcbuild/$BUILDNAME
+cd $BUILDNAME
+
+cat "/usr/bin/Compile/$BUILDNAME" | grep GITURLPATH= | while read GITLINE
+do
+git clone $(echo $GITLINE | awk -F 'GITURLPATH=' '{print $2}')
+done
+
+cat "/usr/bin/Compile/$BUILDNAME" | grep SVNURLPATH= | while read SVNLINE
+do
+svn co $(echo $GITLINE | awk -F 'SVNURLPATH=' '{print $2}')
+done
+
+else
+echo "building $BUILDNAME"
+"/usr/bin/Compile/$BUILDNAME" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
+fi
+
 done
 
 #remove the build packages

@@ -22,16 +22,13 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 #####Tell User what script does
 echo "
+THIS SCRIPT INSTALLS debootstrap AND btfs-tools
+
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
-
-!! VOLUME MOUNTPOINT: /media/LiveDiskCreAtionChrootFolDer/   !!!!          
-   Folder:            ${HOME}/LiveDiskCreAtionCacheFolDer/
-   File:              ${HOME}/LiveDiskCreAtionWasDeBootStrapNotInStalled
+    
+   Folder:            ${HOME}/RBOS_Build_Files/
    File:              ${HOME}/RebeccaBlackLinux.iso
-   
-NOTE THAT SOME GUI FILE BROWSERS MAY CALL THE FOLDER  ${HOME}/ just plain old 'home' so be careful 
-
-As you can tell its unlikley you have any files named like this, but just check to be sure, because if they exist they will be erased."
+"
 
 
 
@@ -45,43 +42,6 @@ echo "press enter again to start the operation. If you started the script in an 
 
 read a
 
-####CLEAN UP IF THIS BASH SCRIPT WAS INTURUPTED
-#enter users home directory
-cd ~
-
-#unmount the chrooted procfs from the outside 
-umount -lf /media/LiveDiskCreAtionChrootFolDer/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf /media/LiveDiskCreAtionChrootFolDer/sys
-
-#unmount the chrooted sysfs from the outside
-umount -lf /media/LiveDiskCreAtionChrootFolDer/dev/pts
-
-#unmount the chrooted devfs from the outside 
-umount -lf /media/LiveDiskCreAtionChrootFolDer/dev
-
-#kill any process accessing the livedisk mountpoint 
-fuser /media/LiveDiskCreAtionChrootFolDer/ -k
-
-#unmount the chroot fs
-umount -lf /media/LiveDiskCreAtionChrootFolDer
-
-#delete the mountpoint
-rm -rf /media/LiveDiskCreAtionChrootFolDer
-
-#remove the LiveDiskCreAtionCacheFolDer folder 
-rm -rf ~/LiveDiskCreAtionCacheFolDer
-
-#was debootstrap installed before the script was first run? if not uninstall it to keep everything clean.
-WasDeBootStrapNotInstalledBefore=$(cat LiveDiskCreAtionWasDeBootStrapNotInStalled)
-if (( 1==WasDeBootStrapNotInstalledBefore ));
-then
-apt-get purge debootstrap -y
-fi
-
-
-#END PAST RUN CLEANUP##################
 
 #ping google to test total network connectivity. Google is usally pingable
 ping -c1 google.com > /dev/null
@@ -111,9 +71,12 @@ then
   exit 1                       
 fi
 
+#install needed tools to get the build system to work
+apt-get install debootstrap btrfs-tools
+
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
-#if there is 8gb or less tell the user and quit. If not continue.
+#if there is 16gb or less tell the user and quit. If not continue.
 if [[ $HomeFileSysTemFSFrEESpaCe -le 16000000 ]]; then               
   echo "You have less then 16gb of free space on the partition that contains your home folder. Please free up some space." 
   echo "The script will now abort."
@@ -122,154 +85,11 @@ if [[ $HomeFileSysTemFSFrEESpaCe -le 16000000 ]]; then
   exit 1                       
 fi
 
-
-#detect if debootstrap is installed
-DebootstrapStatus=$(dpkg-query -s debootstrap | grep "install ok installed" -c)
-
-#Cache DeBootstraps Status to a file in case if this batch file gets intrupted
-if (( 0==DebootstrapStatus ));
+#only initilize the FS if the FS isn't there.
+if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
 then
-echo 1 > ~/LiveDiskCreAtionWasDeBootStrapNotInStalled
+ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase0.sh
 fi
-
-#install bootstrap if not installed
-if (( 0==DebootstrapStatus ));
-then
-apt-get install debootstrap
-fi
-
-#make a folder containing the live cd tools in the users local folder
-mkdir ~/LiveDiskCreAtionCacheFolDer
-
-#switch to that folder
-cd ~/LiveDiskCreAtionCacheFolDer
-
-
-#create the file that will be the filesystem image
-dd if=/dev/zero of=livecdfs bs=1 count=0 seek=16G 
-
-
-
-echo "creating a file system on the virtual image. Not on your real file system."
-#create a file system on the image 
-yes y | mkfs.ext4 ./livecdfs
-
-
-
-#create a media mountpoint in the media folder
-mkdir /media/LiveDiskCreAtionChrootFolDer
-
-#mount the image created above at the mountpoint as a loop deivce
-mount ./livecdfs /media/LiveDiskCreAtionChrootFolDer -o loop
-
-
-
-#install a really basic Ubuntu installation in the new fs  
-debootstrap precise /media/LiveDiskCreAtionChrootFolDer http://ubuntu.osuosl.org/ubuntu/
-
-
-
-#mounting devfs on chrooted fs with bind 
-mount --bind /dev /media/LiveDiskCreAtionChrootFolDer/dev/
-
-
-
-
-
-#######################################################END RECOVERY CALLER SCRIPT########################################
-
-
-#copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/rebeccablacklinux_files/* -Cr /media/LiveDiskCreAtionChrootFolDer/temp/
-
-
-
-
-#make the imported files executable 
-chmod +x -R /media/LiveDiskCreAtionChrootFolDer/temp/
-chown  root  -R /media/LiveDiskCreAtionChrootFolDer/temp/
-chgrp  root  -R /media/LiveDiskCreAtionChrootFolDer/temp/
-
-
-#copy the new translated executable files to where they belong
-rsync /media/LiveDiskCreAtionChrootFolDer/temp/* -a /media/LiveDiskCreAtionChrootFolDer/
-
-#delete the temp folder
-rm -rf /media/LiveDiskCreAtionChrootFolDer/temp/
-
-
-
-
-
-#Configure the Live system########################################
-chroot /media/LiveDiskCreAtionChrootFolDer /tmp/configure.sh
-
-
-
-#delete the old copy of the ISO 
-rm ~/RebeccaBlackLinux.iso
-#move the iso out of the chroot fs    
-cp /media/LiveDiskCreAtionChrootFolDer/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
-
-#allow the user to actually read the iso   
-chown $LOGNAME ~/RebeccaBlackLinux.iso
-chgrp $LOGNAME ~/RebeccaBlackLinux.iso
-chmod 777 ~/RebeccaBlackLinux.iso
-
-
-#go back to the users home folder
-cd ~
-
-
-#unmount the chrooted procfs from the outside 
-umount -lf /media/LiveDiskCreAtionChrootFolDer/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf /media/LiveDiskCreAtionChrootFolDer/sys
-
-#unmount the chrooted dev/pts from the outside 
-umount -lf /media/LiveDiskCreAtionChrootFolDer/dev/pts
-
-#unmount the chrooted dev/shm from the outside
-umount -lf /media/LiveDiskCreAtionChrootFolDer/dev/shm
-
-#unmount the chrooted devfs from the outside 
-umount -lf /media/LiveDiskCreAtionChrootFolDer/dev
-
-#kill any process accessing the livedisk mountpoint 
-fuser -k /media/LiveDiskCreAtionChrootFolDer/ 
-
-#unmount the chroot fs
-umount -lfd /media/LiveDiskCreAtionChrootFolDer
-
-#delete the mountpoint
-rm -rf /media/LiveDiskCreAtionChrootFolDer
-
-#remove the LiveDiskCreAtionCacheFolDer folder 
-rm -rf ~/LiveDiskCreAtionCacheFolDer
-
-
-
-#uninstall debootstrap if it was uninstalled before
-if (( 0==DebootstrapStatus ));
-then
-apt-get purge debootstrap -y
-fi
-rm ~/LiveDiskCreAtionWasDeBootStrapNotInStalled
-
-
-
-
-#If the live cd did not build then tell user  
-if [ ! -f ~/RebeccaBlackLinux.iso ];
-then  
-echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
-exit 1
-fi 
-
-#If the live cd did  build then tell user   
-if [  -f ~/RebeccaBlackLinux.iso ];
-then  
-echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
-exit 1
-fi
+#run the build scripts
+ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase1.sh
+ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase2.sh

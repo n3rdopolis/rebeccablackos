@@ -28,9 +28,11 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://git.gnome.org/glib
+GITURLPATH=git://git.gnome.org/glib
+git clone "$GITURLPATH"
 cd glib
 git checkout 2.31.18
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)   
 make 

@@ -33,9 +33,11 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://anongit.kde.org/kdelibs
+GITURLPATH=git://anongit.kde.org/kdelibs
+git clone "$GITURLPATH"
 cd kdelibs
 git checkout frameworks
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 rm CMakeCache.txt
 patch -p1 < /tmp/kdelibs.diff

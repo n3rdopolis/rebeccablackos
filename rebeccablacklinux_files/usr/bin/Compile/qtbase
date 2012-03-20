@@ -34,9 +34,10 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-git clone git://gitorious.org/qt/qtbase
-git clone git://gitorious.org/qt/qtbase
+GITURLPATH=git://gitorious.org/qt/qtbase
+git clone "$GITURLPATH"
 cd qtbase
+git pull
 echo "REVISION $(git rev-parse HEAD)"
 ./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations
 make 
