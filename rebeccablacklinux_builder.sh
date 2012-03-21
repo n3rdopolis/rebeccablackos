@@ -85,11 +85,14 @@ if [[ $HomeFileSysTemFSFrEESpaCe -le 16000000 ]]; then
   exit 1                       
 fi
 
+
+chmod +x $ThIsScriPtSFolDerLoCaTion/externalbuilders/*
+
 #only initilize the FS if the FS isn't there.
 if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
 then
-ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase0.sh
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh
 fi
 #run the build scripts
-ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase1.sh
-ThIsScriPtSFolDerLoCaTion\rebeccablacklinux_phase2.sh
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh
