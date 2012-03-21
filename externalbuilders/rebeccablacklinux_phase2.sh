@@ -30,7 +30,7 @@ mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop
 
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 
 
 #make the imported files executable 
@@ -87,13 +87,13 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/shm
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
 
 #kill any process accessing the livedisk mountpoint 
-fuser -k ~/RBOS_Build_Files/build_mountpoint/phase_2/ 
+fuser -k ~/RBOS_Build_Files/build_mountpoint 
 
 #Delete Phase 2 snapshot
 btrfs subvolume delete ~/RBOS_Build_Files/build_mountpoint/phase_2
 
 #unmount the chroot fs
-umount -lfd ~/RBOS_Build_Files/build_mountpoint/phase_2
+umount -lfd ~/RBOS_Build_Files/build_mountpoint
 
 
 

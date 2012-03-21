@@ -36,14 +36,10 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/pts
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
 
 #kill any process accessing the livedisk mountpoint 
-fuser ~/RBOS_Build_Files/build_mountpoint/phase_1/ -k
+fuser ~/RBOS_Build_Files/build_mountpoint -k
 
 #unmount the chroot fs
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1
-
-#remove the RBOS_Build_Files folder 
-rm -rf ~/RBOS_Build_Files
-
+umount -lfd ~/RBOS_Build_Files/build_mountpoint
 
 
 
@@ -58,6 +54,24 @@ mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop
 
 #mounting devfs on chrooted fs with bind 
 mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
+
+
+#copy in the files needed
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+
+
+#make the imported files executable 
+chmod +x -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+
+#copy the ONLY the build scripts in
+rsync ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/tmp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_1/tmp
+
+#delete the temp folder
+rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+
+
 
 #Configure the Live system########################################
 chroot ~/RBOS_Build_Files/build_mountpoint/phase_1 /tmp/configure_phase1.sh
