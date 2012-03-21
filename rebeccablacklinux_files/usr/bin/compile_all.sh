@@ -74,6 +74,7 @@ do
 GITURL=$(echo $GITLINE | awk -F 'GITURLPATH=' '{print $2}')
 git clone $GITURL
 cd $BUILDNAME
+GITREVISION=$(cat "/usr/bin/Compile/$BUILDNAME" | grep GITREVISION= | awk -F '=' '{print $2}' | head -1)
 git checkout $GITREVISION
 git pull
 cd /srcbuild
@@ -84,6 +85,7 @@ do
 SVNURL=$(echo $SVNLINE | awk -F 'SVNURLPATH=' '{print $2}')
 svn co $SVNURL
 cd $BUILDNAME
+SVNREVISION=$(cat "/usr/bin/Compile/$BUILDNAME" | grep SVNREVISION= | awk -F '=' '{print $2}' | head -1)
 svn merge -r HEAD:$SVNREVISION $SVNURL
 svn update 
 cd /srcbuild
