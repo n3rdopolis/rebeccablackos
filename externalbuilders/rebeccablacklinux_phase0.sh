@@ -74,8 +74,8 @@ mkdir ~/RBOS_Build_Files/build_mountpoint
 #mount the image created above at the mountpoint as a loop device
 mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
 
-#make a folder for the phase 1 system
-mkdir ~/RBOS_Build_Files/build_mountpoint/phase_1
+#make a subvolume for the phase 1 system
+btrfs subvolume create ~/RBOS_Build_Files/build_mountpoint/phase_1/
 
 #install a really basic Ubuntu installation in the new fs  
 debootstrap precise ~/RBOS_Build_Files/build_mountpoint/phase_1 http://ubuntu.osuosl.org/ubuntu/

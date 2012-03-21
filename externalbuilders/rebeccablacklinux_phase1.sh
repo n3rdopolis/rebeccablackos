@@ -67,6 +67,7 @@ chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 
 #copy the ONLY the build scripts in
 rsync ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/tmp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_1/tmp
+cp ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/usr/bin/compile_all ~/RBOS_Build_Files/build_mountpoint/phase_1/usr/bin/compile_all 
 
 #delete the temp folder
 rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/

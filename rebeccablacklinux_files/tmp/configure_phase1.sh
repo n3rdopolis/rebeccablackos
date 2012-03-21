@@ -35,6 +35,9 @@ export DEBIAN_FRONTEND=noninteractive
 #update the apt cache
 apt-get update
 
+#Set all packages to automatically installed
+apt-mark auto $(dpkg --get-selections | awk '{print $1}')
+
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
 language-pack-en 
@@ -136,13 +139,23 @@ kde4libs"
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
+
+
 echo Y | apt-get install $PACKAGE -y
+
+apt-mark manual $PACKAGE
+
 done
+
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
 do
+
 echo Y | apt-get build-dep $PACKAGE -y
+apt-mark manual $PACKAGE
+
+
 done
 
 ##################################################################################################################
@@ -160,35 +173,11 @@ yes Y | apt-get dist-upgrade
 rm /sbin/initctl
 mv  /sbin/initctl.bak /sbin/initctl
 
-#get current list of packages
-dpkg --get-selections > /tmp/oldpackages
+#Delete the old depends of the packages no longer needed.
+apt-get --purge autoremove
 
-#backup the state of the packages
-cp /var/lib/dpkg/status  /var/lib/dpkg/status.backup
-
-#trick dpkg to think everytiing is uninstalled
-sed -i 's/install ok installed/deinstall ok config-files' /var/lib/dpkg/status
-
-#FAKE INSTALL THE PACKAGES SPECIFIED TO GET LIST OF DEPENDS
-echo "$BINARYINSTALLS" | while read PACKAGE
-do
-echo Y | apt-get install $PACKAGE -y -s >> /tmp/newpackages
-done
-
-#FAKE BUILDDEPS FOR THE PACKAGES SPECIFIED TO GET LIST OF DEPENDS
-echo "$BUILDINSTALLS" | while read PACKAGE
-do
-echo Y | apt-get build-dep $PACKAGE -y -s >> /tmp/newpackages
-done
-
-#Place the state of the packages back
-cp /var/lib/dpkg/status.backup  /var/lib/dpkg/status
-
-#find packages that WHERE installed previously, but are no longer specified to BE installed
-diff /tmp/oldpackages /tmp/newpackages | grep \< | awk '{print $2}' | while read PACKAGE
-do
-apt-get purge $PACKAGE
-done
+#Set all packages to manually installed
+apt-mark manual $(dpkg --get-selections | awk '{print $1}')
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-compile_all download-only
+#compile_all download-only
