@@ -125,7 +125,8 @@ x11proto-xf86dri-dev
 subversion 
 e17
 libraptor-dev
-remastersys"
+remastersys
+ubuntu-minimal"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
@@ -174,7 +175,7 @@ rm /sbin/initctl
 mv  /sbin/initctl.bak /sbin/initctl
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove
+echo Y | apt-get --purge autoremove -y 
 
 #Set all packages to manually installed
 apt-mark manual $(dpkg --get-selections | awk '{print $1}')

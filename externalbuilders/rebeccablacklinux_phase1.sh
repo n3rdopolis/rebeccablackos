@@ -65,9 +65,10 @@ chmod +x -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 
-#copy the ONLY the build scripts in
+#copy the ONLY minimal build files in, not any data files like wallpapers.
 rsync ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/tmp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_1/tmp
 cp ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/usr/bin/compile_all ~/RBOS_Build_Files/build_mountpoint/phase_1/usr/bin/compile_all 
+cp ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/etc/apt/sources.list ~/RBOS_Build_Files/build_mountpoint/phase_1/etc/apt/sources.list 
 
 #delete the temp folder
 rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
