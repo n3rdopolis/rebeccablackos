@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+argument=$1
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 
@@ -60,8 +61,9 @@ eeze
 elementary
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
+
 #if it's download only, parse the files for the git and svn repos, and download them.
-if [[ $1 == download-only]]
+if [[ $argument == download-only ]]
 then
 mkdir -p /srcbuild/$BUILDNAME
 
