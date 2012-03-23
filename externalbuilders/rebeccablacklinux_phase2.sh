@@ -30,20 +30,20 @@ mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop
 
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 
 
 #make the imported files executable 
-chmod +x -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
-chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
-chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+chmod +x -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
+chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
+chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 
 
 #copy the new translated executable files to where they belong
-rsync ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_1/
+rsync ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_2/
 
 #delete the temp folder
-rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
+rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 
 
 
@@ -53,6 +53,8 @@ mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/
 
 #Configure the Live system########################################
 chroot ~/RBOS_Build_Files/build_mountpoint/phase_2 /tmp/configure_phase2.sh
+
+
 
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso

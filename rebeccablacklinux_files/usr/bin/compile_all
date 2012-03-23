@@ -99,7 +99,6 @@ done
 else
 echo "building $BUILDNAME"
 "/usr/bin/Compile/$BUILDNAME" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
-/srcbuild
 fi
 
 done
