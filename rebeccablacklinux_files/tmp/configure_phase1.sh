@@ -35,9 +35,6 @@ export DEBIAN_FRONTEND=noninteractive
 #update the apt cache
 apt-get update
 
-#Set all packages to automatically installed
-apt-mark auto $(dpkg --get-selections | awk '{print $1}')
-
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
 language-pack-en 
@@ -137,26 +134,20 @@ tinc
 e17  
 kde4libs"
 
+#LIST OF PACKAGES TO REMOVE
+UNINSTALLS="" 
+
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
-
-
 echo Y | apt-get install $PACKAGE -y
-
-apt-mark manual $PACKAGE
-
 done
 
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
 do
-
 echo Y | apt-get build-dep $PACKAGE -y
-apt-mark manual $PACKAGE
-
-
 done
 
 ##################################################################################################################
@@ -174,11 +165,16 @@ yes Y | apt-get dist-upgrade
 rm /sbin/initctl
 mv  /sbin/initctl.bak /sbin/initctl
 
+#remove uneeded packages
+echo "$UNINSTALLS" | while read PACKAGE
+do
+echo Y | apt-get --purge remove $PACKAGE -y
+done
+
+
 #Delete the old depends of the packages no longer needed.
 echo Y | apt-get --purge autoremove -y 
 
-#Set all packages to manually installed
-apt-mark manual $(dpkg --get-selections | awk '{print $1}')
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-#compile_all download-only
+compile_all download-only

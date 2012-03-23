@@ -53,7 +53,7 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoint
 mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
 
 #mounting devfs on chrooted fs with bind 
-mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
+mount --rbind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
 
 
 #copy in the files needed
@@ -80,8 +80,8 @@ chroot ~/RBOS_Build_Files/build_mountpoint/phase_1 /tmp/configure_phase1.sh
 
 
 #create the subvolume that phase 2 will work with
+btrfs subvolume delete ~/RBOS_Build_Files/build_mountpoint/phase_2
 btrfs subvolume snapshot ~/RBOS_Build_Files/build_mountpoint/phase_1 ~/RBOS_Build_Files/build_mountpoint/phase_2
-
 
 #go back to the users home folder
 cd ~
