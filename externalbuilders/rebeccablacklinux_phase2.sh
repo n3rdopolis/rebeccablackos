@@ -54,8 +54,6 @@ mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/
 #Configure the Live system########################################
 chroot ~/RBOS_Build_Files/build_mountpoint/phase_2 /tmp/configure_phase2.sh
 
-
-
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
