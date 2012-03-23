@@ -27,6 +27,10 @@ mkdir ~/RBOS_Build_Files/build_mountpoint
 #mount the image created above at the mountpoint as a loop device
 mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
 
+#mounting critical fses on chrooted fs with bind 
+mount --rbind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
+mount --rbind /proc ~/RBOS_Build_Files/build_mountpoint/phase_1/proc/
+mount --rbind /sys ~/RBOS_Build_Files/build_mountpoint/phase_1/sys/
 
 
 #copy in the files needed
@@ -76,12 +80,6 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
-
-#unmount the chrooted dev/pts from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/pts
-
-#unmount the chrooted dev/shm from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/shm
 
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev

@@ -52,9 +52,10 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoint
 #mount the image as a loop device
 mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
 
-#mounting devfs on chrooted fs with bind 
+#mounting critical fses on chrooted fs with bind 
 mount --rbind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
-
+mount --rbind /proc ~/RBOS_Build_Files/build_mountpoint/phase_1/proc/
+mount --rbind /sys ~/RBOS_Build_Files/build_mountpoint/phase_1/sys/
 
 #copy in the files needed
 rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
@@ -92,12 +93,6 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
-
-#unmount the chrooted dev/pts from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/pts
-
-#unmount the chrooted dev/shm from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/shm
 
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev

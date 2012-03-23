@@ -16,21 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#mount the procfs
-mount -t proc none /proc
-
-
-#mount sysfs
-mount -t sysfs none /sys
-
-
-
-#mount /dev/pts
-mount -t devpts none /dev/pts
-
-
-
 # /lib/plymouth/ubuntu-logo.png
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 

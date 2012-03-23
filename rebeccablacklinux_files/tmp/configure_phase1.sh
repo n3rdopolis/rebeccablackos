@@ -17,18 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#mount the procfs
-mount -t proc none /proc
-
-
-#mount sysfs
-mount -t sysfs none /sys
-
-
-
-#mount /dev/pts
-mount -t devpts none /dev/pts
-
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
