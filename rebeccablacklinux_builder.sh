@@ -91,8 +91,8 @@ chmod +x $ThIsScriPtSFolDerLoCaTion/externalbuilders/*
 #only initilize the FS if the FS isn't there.
 if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
 then
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh | tee -a ~/RBOS_Build_Files/Phase_0.log
 fi
 #run the build scripts
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh | tee -a ~/RBOS_Build_Files/Phase_1.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh | tee -a ~/RBOS_Build_Files/Phase_2.log
