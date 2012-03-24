@@ -79,6 +79,7 @@ nautilus
 file-roller 
 cheese
 clutter-1.0-tests
+libmtdev-dev
 libxcb1 
 libxcb1-dev 
 libx11-xcb1 
