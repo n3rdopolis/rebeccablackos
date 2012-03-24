@@ -129,14 +129,14 @@ UNINSTALLS=""
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
-echo Y | apt-get install $PACKAGE -y
+yes Y | apt-get install $PACKAGE -y
 done
 
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
 do
-echo Y | apt-get build-dep $PACKAGE -y
+yes Y | apt-get build-dep $PACKAGE -y
 done
 
 ##################################################################################################################
@@ -157,12 +157,12 @@ mv  /sbin/initctl.bak /sbin/initctl
 #remove uneeded packages
 echo "$UNINSTALLS" | while read PACKAGE
 do
-echo Y | apt-get --purge remove $PACKAGE -y
+yes Y | apt-get --purge remove $PACKAGE -y
 done
 
 
 #Delete the old depends of the packages no longer needed.
-echo Y | apt-get --purge autoremove -y 
+yes Y | apt-get --purge autoremove -y 
 
 
 #run the script that calls all compile scripts in a specified order, in download only mode

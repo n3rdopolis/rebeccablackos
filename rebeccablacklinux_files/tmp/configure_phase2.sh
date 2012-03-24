@@ -23,10 +23,6 @@ echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 #run the script that calls all compile scripts in a specified order
 compile_all
 
-
-#install remastersys
-yes Yes | aptitude install remastersys -y
-
 #remove packages that cause conflict
 yes Yes |apt-get remove gdm gnome-session -y
 
