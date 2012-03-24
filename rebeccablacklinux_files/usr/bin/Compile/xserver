@@ -15,10 +15,27 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+
+if [[ "$1" != build-only ]]
+then
 mkdir /srcbuild
 cd /srcbuild
+git clone http://cgit.freedesktop.org/~krh/xserver
+cd xserver
+git checkout remotes/origin/xwayland-1.10
+git pull
+
+fi
+
+
+
+if [[ "$1" != download-only ]]
+then
+cd /srcbuild
+cd xserver
+echo "REVISION $(git rev-parse HEAD)"
+export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
+export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export WLD=/usr/local
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
@@ -28,17 +45,10 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-GITURLPATH=http://cgit.freedesktop.org/~krh/xserver
-git clone "$GITURLPATH"
-cd xserver
-GITREVISION=remotes/origin/xwayland-1.10
-git checkout $GITREVISION
-git pull
-echo "REVISION $(git rev-parse HEAD)"
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport --enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace  
 make
 make install
-cd ..
+
 
 #configure the xwayland server
 mkdir /usr/local/etc/X11
@@ -58,3 +68,7 @@ chmod 777 /usr/local/var/log
 
 #disable setuid on xserver
 chmod -s /usr/local/bin/Xorg
+
+cd ..
+
+fi

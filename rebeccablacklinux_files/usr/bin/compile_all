@@ -63,43 +63,16 @@ elementary
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
-#if it's download only, parse the files for the git and svn repos, and download them.
-if [[ $argument == download-only ]]
+if [[ "$argument" == download-only ]]
 then
-mkdir /srcbuild
 
-#change into the source build directory
-cd /srcbuild
-
-
-cat "/usr/bin/Compile/$BUILDNAME" | grep GITURLPATH= | while read GITLINE
-do
-GITURL=$(echo $GITLINE | awk -F 'GITURLPATH=' '{print $2}')
-git clone $GITURL
-cd $BUILDNAME
-GITREVISION=$(cat "/usr/bin/Compile/$BUILDNAME" | grep GITREVISION= | awk -F '=' '{print $2}' | head -1)
-git checkout $GITREVISION
-git pull
-done
-
-cat "/usr/bin/Compile/$BUILDNAME" | grep SVNURLPATH= | while read SVNLINE
-do
-SVNURL=$(echo $SVNLINE | awk -F 'SVNURLPATH=' '{print $2}')
-svn co $SVNURL
-cd $BUILDNAME
-SVNREVISION=$(cat "/usr/bin/Compile/$BUILDNAME" | grep SVNREVISION= | awk -F '=' '{print $2}' | head -1)
-svn merge -r HEAD:$SVNREVISION $SVNURL
-svn update 
-done
-
-
-
+"/usr/bin/Compile/$BUILDNAME" download-only
 
 
 #srcbuild is not running as a downloader
 else
 echo "building $BUILDNAME"
-"/usr/bin/Compile/$BUILDNAME" 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
+"/usr/bin/Compile/$BUILDNAME" build-only 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
 fi
 
 done
