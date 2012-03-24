@@ -19,7 +19,7 @@ echo "PHASE 1"
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
-####CLEAN UP OLD SCRIPT FILES
+
 #enter users home directory
 cd ~
 
@@ -28,9 +28,6 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
-
-#unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/pts
 
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
@@ -44,8 +41,6 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoint
 
 
 #END PAST RUN CLEANUP##################
-
-
 
 
 
