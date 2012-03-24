@@ -44,7 +44,7 @@ chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 
 
 #copy the new translated executable files to where they belong
-rsync ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/* -a ~/RBOS_Build_Files/build_mountpoint/phase_2/
+cp -a ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/* ~/RBOS_Build_Files/build_mountpoint/phase_2/
 
 #delete the temp folder
 rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
