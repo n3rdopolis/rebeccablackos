@@ -49,6 +49,9 @@ sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
+#delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
+rm -rf /srcbuild
+
 #start the remastersys job
 remastersys dist
 
