@@ -23,6 +23,9 @@ export DEBIAN_FRONTEND=noninteractive
 #update the apt cache
 apt-get update
 
+#install remastersys key
+wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
+
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
 language-pack-en 
