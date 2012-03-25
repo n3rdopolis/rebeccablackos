@@ -4,7 +4,7 @@ Otherwise use the ISO here: http://sourceforge.net/projects/rebeccablackos/files
 
 This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is Rebecca Black Linux. 
 
-This has both Wayland and X. Even though QT, GTK, EFL, has been compiled on this CD to support Wayland, many apps don't work.
+This has both Wayland and X. Even though QT, GTK, EFL, and Xwayland has been compiled on this CD to support Wayland, many apps don't work.
 
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
