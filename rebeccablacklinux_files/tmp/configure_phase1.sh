@@ -113,6 +113,7 @@ xserver-xorg-dev
 x11proto-xf86dri-dev 
 subversion 
 e17
+libicu-dev 
 libraptor-dev
 remastersys
 ubuntu-minimal"
