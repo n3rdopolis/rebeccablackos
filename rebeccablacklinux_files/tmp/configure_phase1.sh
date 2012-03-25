@@ -132,14 +132,14 @@ UNINSTALLS=""
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
-yes Y | apt-get install $PACKAGE -y
+yes Y | apt-get install $PACKAGE -y --force-yes
 done
 
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
 do
-yes Y | apt-get build-dep $PACKAGE -y
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
 done
 
 ##################################################################################################################
@@ -148,7 +148,7 @@ done
 
 
 #For some reason, it installs out of date packages sometimes, as I see unupgraded packages
-yes Y | apt-get dist-upgrade
+yes Y | apt-get dist-upgrade 
 
 #Do this as some packages fail to install completly unless if the attempt to start them as deamons succeeds. This will report success during those attempts to start the services to dpkg
 mv /sbin/initctl /sbin/initctl.bak
