@@ -28,6 +28,7 @@ wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
+libsqlite3-dev
 language-pack-en 
 linux-generic
 llvm

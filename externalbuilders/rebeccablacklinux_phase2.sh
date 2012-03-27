@@ -59,11 +59,25 @@ mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/
 chroot ~/RBOS_Build_Files/build_mountpoint/phase_2 /tmp/configure_phase2.sh
 
 
+#If the live cd did not build then tell user  
+if [ ! -f ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ];
+then  
+echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
+exit 1
+fi 
 
+#If the live cd did  build then tell user   
+if [  -f ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ];
+then  
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
 cp ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
+
+echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
+exit 0
+fi
+
 
 #allow the user to actually read the iso   
 chown $USER ~/RebeccaBlackLinux.iso
@@ -98,16 +112,3 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoint
 
 
 
-#If the live cd did not build then tell user  
-if [ ! -f ~/RebeccaBlackLinux.iso ];
-then  
-echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
-exit 1
-fi 
-
-#If the live cd did  build then tell user   
-if [  -f ~/RebeccaBlackLinux.iso ];
-then  
-echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
-exit 1
-fi
