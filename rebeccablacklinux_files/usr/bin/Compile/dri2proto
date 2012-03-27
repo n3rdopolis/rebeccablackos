@@ -22,6 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/xorg/proto/dri2proto
 cd dri2proto
+git checkout master
 git pull
 
 fi

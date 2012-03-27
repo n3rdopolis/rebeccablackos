@@ -22,6 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.kde.org/extra-cmake-modules
 cd extra-cmake-modules
+git checkout master
 git pull
 
 fi

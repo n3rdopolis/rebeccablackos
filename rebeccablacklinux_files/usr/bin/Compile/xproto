@@ -23,6 +23,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/xorg/proto/xproto
 cd xproto
+git checkout master
 git pull
 
 fi

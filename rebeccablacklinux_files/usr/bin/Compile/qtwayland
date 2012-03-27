@@ -21,7 +21,8 @@ then
 mkdir /srcbuild
 cd /srcbuild
 git clone git://gitorious.org/qt/qtwayland
-cd qtwayland/
+cd qtwayland
+git checkout master
 git pull
 
 fi

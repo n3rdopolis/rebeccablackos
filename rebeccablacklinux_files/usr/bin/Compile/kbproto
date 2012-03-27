@@ -22,6 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/xorg/proto/kbproto
 cd kbproto
+git checkout master
 git pull
 
 fi
