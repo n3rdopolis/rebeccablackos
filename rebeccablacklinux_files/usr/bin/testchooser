@@ -19,5 +19,6 @@ while [ 1 ]
 do
 TEST=$(zenity --list --text="More tests can be run as commands in /usr/local/bin from a terminal" --column=Name --column=Description "wiggly" "Animated text" "gedit" "Gnome Text Editor" "weston-terminal" "Wayland Terminal" "dnd" "Drag and Drop Test" "calculator" "QT Calculator" "scribble" "QT Drawing app" "mainwindow" "Example QT Main Window" "file-roller" "GTK archive manager" "fileselector_example" "EFL file browser") 
 $TEST &
+sleep 10
 done
 
