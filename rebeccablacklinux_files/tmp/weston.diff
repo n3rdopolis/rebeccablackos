@@ -1,0 +1,29 @@
+From 61997cdae66be016866e1e7be505ba2eab6cce48 Mon Sep 17 00:00:00 2001
+From: Darxus <darxus@chaosreigns.com>
+Date: Wed, 28 Mar 2012 23:12:02 -0400
+Subject: [PATCH] do assign output for surface of type none
+
+---
+ src/shell.c |    4 ++--
+ 1 files changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/shell.c b/src/shell.c
+index 5c94cf9..6687c22 100644
+--- a/src/shell.c
++++ b/src/shell.c
+@@ -1645,11 +1645,11 @@ map(struct weston_shell *base, struct weston_surface *surface,
+ 		break;
+ 	}
+ 
+-	if (surface_type != SHELL_SURFACE_NONE) {
++//	if (surface_type != SHELL_SURFACE_NONE) {
+ 		weston_surface_assign_output(surface);
+ 		if (surface_type == SHELL_SURFACE_MAXIMIZED)
+ 			surface->output = shsurf->output;
+-	}
++//	}
+ 
+ 	switch (surface_type) {
+ 	case SHELL_SURFACE_TOPLEVEL:
+-- 
+1.7.5.4
