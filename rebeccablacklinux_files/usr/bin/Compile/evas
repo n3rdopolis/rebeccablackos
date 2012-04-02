@@ -22,8 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 svn co http://svn.enlightenment.org/svn/e/trunk/evas
 cd evas
-svn update
-svn merge -r HEAD:67820 http://svn.enlightenment.org/svn/e/trunk/evas
+svn update -r 67820 
 
 fi
 

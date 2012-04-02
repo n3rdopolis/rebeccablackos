@@ -22,8 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 svn co http://svn.enlightenment.org/svn/e/trunk/ecore
 cd ecore
-svn update
-svn merge -r HEAD:67820 http://svn.enlightenment.org/svn/e/trunk/ecore
+svn update -r 67820 
 
 fi
 
