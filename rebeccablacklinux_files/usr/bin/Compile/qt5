@@ -55,7 +55,10 @@ perl init-repository
 ./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations
 
 make 
-make module-qtwayland
+cd qtwebkit
+export WEBKITOUTPUTDIR=/opt/webkit
+perl Tools/Scripts/build-webkit --qt --qmake=../qtbase/bin/qmake --install-libs=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --release --makeargs=$MAKEFLAGS
+
 make install
 
 

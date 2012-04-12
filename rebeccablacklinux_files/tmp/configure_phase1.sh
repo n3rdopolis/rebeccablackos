@@ -26,6 +26,9 @@ apt-get update
 #install remastersys key
 wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 
+#try to prevent the kernel from  updating during the live cd build. The update process causes dpkg to freak out
+aptitude hold linux-headers-generic linux-image-generic
+
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
 libsqlite3-dev
@@ -170,6 +173,8 @@ done
 #Delete the old depends of the packages no longer needed.
 yes Y | apt-get --purge autoremove -y 
 
+#allow the kernel to be updated now the dpkg part is done
+aptitude unhold linux-headers-generic linux-image-generic
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
