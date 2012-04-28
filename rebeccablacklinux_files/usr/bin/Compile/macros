@@ -35,7 +35,7 @@ cd macros
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export WLD=/usr
+export WLD=/opt
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
@@ -51,7 +51,7 @@ make install
 git clean -f -x -d
 git reset --hard
 
-export WLD=/usr/local
+export WLD=/opt
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install

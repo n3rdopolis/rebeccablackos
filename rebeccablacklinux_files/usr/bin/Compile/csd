@@ -37,7 +37,7 @@ cd csd
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export WLD=/usr/local
+export WLD=/opt
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
@@ -51,14 +51,14 @@ make
 make install
 
 
-#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
-ln -s /usr/bin/gedit             /usr/local/bin/gedit
-ln -s /usr/bin/epiphany-browser  /usr/local/bin/epiphany-browser
-ln -s /usr/bin/gnibbles          /usr/local/bin/gnibbles 
-ln -s /usr/bin/unity             /usr/local/bin/unity 
-ln -s /usr/bin/nautilus          /usr/local/bin/nautilus
-ln -s /usr/bin/file-roller       /usr/local/bin/file-roller
-ln -s /usr/bin/cheese            /usr/local/bin/cheese
+#put some GTK apps in $WLDbin, as the instructions say Wayland runnable apps are there.
+ln -s /usr/bin/gedit             $WLD/bin/gedit
+ln -s /usr/bin/epiphany-browser  $WLD/bin/epiphany-browser
+ln -s /usr/bin/gnibbles          $WLD/bin/gnibbles 
+ln -s /usr/bin/unity             $WLD/bin/unity 
+ln -s /usr/bin/nautilus          $WLD/bin/nautilus
+ln -s /usr/bin/file-roller       $WLD/bin/file-roller
+ln -s /usr/bin/cheese            $WLD/bin/cheese
 cd ..
 
 

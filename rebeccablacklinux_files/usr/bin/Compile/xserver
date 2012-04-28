@@ -36,7 +36,7 @@ cd xserver
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export WLD=/usr/local
+export WLD=/opt
 PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
@@ -51,23 +51,23 @@ make install
 
 
 #configure the xwayland server
-mkdir /usr/local/etc/X11
-cat > /usr/local/etc/X11/xorg.conf <<EOF
+mkdir $WLD/etc/X11
+cat > $WLD/etc/X11/xorg.conf <<EOF
 Section "Device"
         Identifier "Device"
         Driver "wlshm" # or intel
 EndSection
 EOF
-mkdir /usr/local/X11
-cp -R /usr/share/X11/* /usr/local/share/X11
-cp /usr/bin/xkbcomp /usr/local/bin
+mkdir $WLD/X11
+cp -R /usr/share/X11/* $WLD/share/X11
+cp /usr/bin/xkbcomp $WLD/bin
 
 #set the log folder to allow nested X to create log files, and not fataly exit
-mkdir -p /usr/local/var/log
-chmod 777 /usr/local/var/log
+mkdir -p $WLD/var/log
+chmod 777 $WLD/var/log
 
 #disable setuid on xserver
-chmod -s /usr/local/bin/Xorg
+chmod -s $WLD/bin/Xorg
 
 cd ..
 
