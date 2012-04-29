@@ -29,17 +29,23 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 #unmount the chrooted sysfs from the outside
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
 
-#unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/pts
-
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
 
+#unmount the chrooted procfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
+
+#unmount the chrooted sysfs from the outside
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
+
+#unmount the chrooted devfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
+
 #kill any process accessing the livedisk mountpoint 
-fuser ~/RBOS_Build_Files/build_mountpoint/phase_1/ -k
+fuser ~/RBOS_Build_Files/build_mountpoint/ -k
 
 #unmount the chroot fs
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1
+umount -lf ~/RBOS_Build_Files/build_mountpoint
 
 #remove the RBOS_Build_Files folder 
 rm -rf ~/RBOS_Build_Files
