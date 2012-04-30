@@ -63,7 +63,7 @@ make install
 
 
 #install qt tests
-find $WLD/examples  -executable | while read TEST
+find /srcbuild/qt5/examples  -executable | while read TEST
 do
 cp "$TEST" $WLD/bin
 done
