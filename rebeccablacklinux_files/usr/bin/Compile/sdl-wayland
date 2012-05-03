@@ -49,6 +49,17 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 ./configure
 make 
 make install
+cd test
+./configure
+make
+cd ..
+cd ..
+
+#install sdl tests
+find /srcbuild/sdl-wayland/test -executable | while read TEST
+do
+cp "$TEST" $WLD/bin
+done
 cd ..
 
 fi

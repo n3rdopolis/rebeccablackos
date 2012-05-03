@@ -39,11 +39,13 @@ export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bi
 export WLD=/opt
 PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
-C_INCLUDE_PATH=$WLD/include
+C_INCLUDE_PATH=$WLD/include:/usr/include
+CPLUS_INCLUDE_PATH=$WLD/include:/usr/include
+OBJC_INCLUDE_PATH=$WLD/include:/usr/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
-export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
+export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH\
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-dri --disable-dri2 --disable-config-hal --enable-unix-transport --enable-tcp-transport --disable-config-udev --disable-config-dbus --disable-xaa --enable-libdrm --disable-xnest --disable-xvfb --disable-dmx --disable-xvmc --disable-dga --disable-screensaver --disable-xdmcp --disable-xdm-auth-1 --disable-glx --disable-xinerama --disable-xace  
 make

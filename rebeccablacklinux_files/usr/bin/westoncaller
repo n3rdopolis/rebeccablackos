@@ -29,6 +29,7 @@ export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
 export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 export QT_QPA_PLATFORM=wayland
 export ELM_ENGINE="wayland_shm"
+export SDL_VIDEODRIVER=wayland
 export $(dbus-launch)
 (sleep 10; zenity --warning --text="This is a third party fan made distrobution") &
 (sleep 10; testchooser ) &
