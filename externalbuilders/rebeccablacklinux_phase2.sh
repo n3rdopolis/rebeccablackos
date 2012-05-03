@@ -99,7 +99,7 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
 
 #kill any process accessing the livedisk mountpoint 
-fuser -k ~/RBOS_Build_Files/build_mountpoint 
+fuser -km ~/RBOS_Build_Files/build_mountpoint 
 
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoint
