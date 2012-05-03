@@ -80,8 +80,8 @@ fi
 
 
 #allow the user to actually read the iso   
-chown $USER ~/RebeccaBlackLinux.iso
-chgrp $USER ~/RebeccaBlackLinux.iso
+chown $SUDO_USER ~/RebeccaBlackLinux.iso
+chgrp $SUDO_USER ~/RebeccaBlackLinux.iso
 chmod 777 ~/RebeccaBlackLinux.iso
 
 
@@ -100,7 +100,7 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
 
 #kill any process accessing the livedisk mountpoint 
 fuser -km ~/RBOS_Build_Files/build_mountpoint 
-
+ 
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoint
 

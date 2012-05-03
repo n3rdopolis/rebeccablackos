@@ -107,7 +107,7 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/shm
 
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
-
+ 
 #kill any process accessing the livedisk mountpoint 
 fuser -km ~/RBOS_Build_Files/build_mountpoint
 
