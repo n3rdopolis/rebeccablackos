@@ -18,7 +18,7 @@
 ServerID=$RANDOM
 unset DISPLAY
 export WAYLAND_DISPLAY=wayland-0
-weston --socket=$ServerID &
+weston --xserver --socket=$ServerID &
 export WAYLAND_DISPLAY=$ServerID
 sleep 3
 weston-terminal &

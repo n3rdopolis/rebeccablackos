@@ -33,4 +33,4 @@ export SDL_VIDEODRIVER=wayland
 export $(dbus-launch)
 (sleep 10; zenity --warning --text="This is a third party fan made distrobution") &
 (sleep 10; testchooser ) &
-weston 2>&1 | tee ~/weston
+weston --xserver 2>&1 | tee ~/weston
