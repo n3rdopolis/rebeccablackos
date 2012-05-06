@@ -22,7 +22,7 @@ then
 mkdir /srcbuild
 cd /srcbuild
 git clone https://github.com/krh/gtk 
-cd csd
+cd gtk
 git checkout csd
 git pull
 
@@ -33,7 +33,7 @@ fi
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
-cd csd
+cd gtk
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
