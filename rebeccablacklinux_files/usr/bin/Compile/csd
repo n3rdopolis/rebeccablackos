@@ -21,7 +21,7 @@ if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone https://github.com/krh/gtk/tree/csd 
+git clone https://github.com/krh/gtk 
 cd csd
 git checkout csd
 git pull
