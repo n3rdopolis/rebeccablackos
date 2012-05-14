@@ -106,7 +106,7 @@ WAYLAND_DEBUG=1
 
 echo 'Run sudo westoncaller in a tty to try Wayland running native. To exit from Wayland running native, run sudo killall weston'
 echo ' '
-echo 'Wayland programs are in /usr/local/bin or any GTK program when you are running a GTK program from a Wayland terminal'
+echo 'Wayland programs are in /opt/bin or any GTK program when you are running a GTK program from a Wayland terminal'
 echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo ' '
