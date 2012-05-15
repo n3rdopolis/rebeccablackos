@@ -77,14 +77,6 @@ rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_1/temp/
 chroot ~/RBOS_Build_Files/build_mountpoint/phase_1 /tmp/configure_phase1.sh
 
 
-#create the subvolume that phase 2 will work with
-btrfs subvolume delete ~/RBOS_Build_Files/build_mountpoint/phase_2
-btrfs subvolume snapshot ~/RBOS_Build_Files/build_mountpoint/phase_1 ~/RBOS_Build_Files/build_mountpoint/phase_2
-
-#go back to the users home folder
-cd ~
-
-
 #unmount the chrooted procfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 
@@ -96,6 +88,13 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
  
 #kill any process accessing the livedisk mountpoint 
 fuser -km ~/RBOS_Build_Files/build_mountpoint/phase_1/ 
+
+#create the subvolume that phase 2 will work with
+btrfs subvolume delete ~/RBOS_Build_Files/build_mountpoint/phase_2
+btrfs subvolume snapshot ~/RBOS_Build_Files/build_mountpoint/phase_1 ~/RBOS_Build_Files/build_mountpoint/phase_2
+
+#go back to the users home folder
+cd ~
 
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoint
