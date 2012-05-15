@@ -74,6 +74,14 @@ rm ~/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
 cp ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
 
+#dump out the logged revision numbers to a file
+ls ~/RBOS_Build_Files/build_mountpoint/phase_2/usr/share/Buildlog/ | while read FILE 
+do  
+REV=$(cat ~/RBOS_Build_Files/build_mountpoint/phase_2/usr/share/Buildlog/$FILE | grep REVISION | awk '{print $2}')
+echo $FILE=$REV
+done > ~/RBOS_Build_Files/BuiltRevisions-$(date +%s)
+
+
 echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
 exit 0
 fi
