@@ -23,7 +23,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone http://git.gnome.org/browse/cogl
 cd cogl
-git checkout master
+git checkout 6a2bd783740c9bc799befa2aeaa09985741c6083
 git pull
 
 fi
@@ -53,6 +53,7 @@ make
 make install
 
 cp $WLD/share/gir-1.0/* /usr/share/gir-1.0
+cp -r $WLD/include/* /usr/include/
 cd ..
 
 
