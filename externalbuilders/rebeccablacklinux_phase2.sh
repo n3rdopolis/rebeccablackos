@@ -43,7 +43,7 @@ chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
 
 
-#copy the new translated executable files to where they belong
+#copy the files to where they belong
 cp -a ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/* ~/RBOS_Build_Files/build_mountpoint/phase_2/
 
 #delete the temp folder
