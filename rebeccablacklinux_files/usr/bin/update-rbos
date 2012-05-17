@@ -17,9 +17,17 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "This needs to be run as root"
 cd /usr/share
+#download off the SVN
 svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
-cp -a /usr/share/rebeccablackos/* ~/RBOS_Build_Files/build_mountpoint/phase_2/
+#make the files owned by root, and executable
+chmod +x -R /usr/share/rebeccablackos/
+chown  root  /usr/share/rebeccablackos/
+chgrp  root  -R /usr/share/rebeccablackos/
+#copy the files where they belong
+cp -a /usr/share/rebeccablackos/rebeccablacklinux_files/* /
+#copy /usr/import files where they belong too
 rsync /usr/import/* -a /
 echo "Will start downloading and building sourcecode in 15 seconds. You can cancel at any time with CTRL-c"
 sleep 15
-compile_all
+compile_all download-only
+compile_all build-only
