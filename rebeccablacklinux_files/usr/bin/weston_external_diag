@@ -32,5 +32,14 @@ export QT_QPA_PLATFORM=wayland
 export ELM_ENGINE="wayland_shm"
 export SDL_VIDEODRIVER=wayland
 export $(dbus-launch)
-export WESTONDIAG="This is a External Diagnosis Terminal for Wayland to run Wayland programs"
+export WESTONDIAG="This is a External Diagnosis Terminal for Wayland to run Wayland programs
+You also can launch weston (the command for the Wayland compositor) from here with custom parameters.
+This only works when running under X11
+
+To the weston command you can add 
+--height=(number of pixels) 
+--width=(number of pixels)
+--output-count=(number of simulated screens)
+
+You will have to close any other instance running as your user account first."
 xterm
