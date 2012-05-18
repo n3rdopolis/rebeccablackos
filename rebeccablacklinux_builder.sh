@@ -96,3 +96,23 @@ fi
 #run the build scripts
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_1.log
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_2.log
+
+
+
+
+
+
+#unmount the chrooted procfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
+
+#unmount the chrooted sysfs from the outside
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
+
+#unmount the chrooted devfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
+
+#kill any process accessing the livedisk mountpoint 
+fuser -km ~/RBOS_Build_Files/build_mountpoint 
+ 
+#unmount the chroot fs
+umount -lfd ~/RBOS_Build_Files/build_mountpoint
