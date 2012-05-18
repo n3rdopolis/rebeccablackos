@@ -13,11 +13,9 @@ Problems:
 
       Won't fit on a normal CD.
 
-      The spell checker doesn't recongise "Rebecca"... 
-
 TODO:
 
-      Need Creative Commons compatible images!
+      Need Creative Commons compatible images that can actually be put into a Open Source CD.
 
 How to use the ISO:
   burn it, (or put it in a VM), reboot, set the BIOS to boot from the CD if it does not already, 
@@ -26,6 +24,6 @@ How to use the ISO:
 How to use Wayland:
     Either select the boot option to start Wayland native on hardware, or boot into X, and open Wayland nested, or open it on a tty
 
-    Wayland programs are in /usr/local/bin or the panel at the top.
+    Wayland programs are in /opt/bin or the panel at the top, or in the application selector popup that appears in Wayland.
 
  
