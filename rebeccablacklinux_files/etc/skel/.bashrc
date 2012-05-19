@@ -108,6 +108,8 @@ echo 'Run sudo westoncaller in a tty to try Wayland running native. To exit from
 echo ' '
 echo 'Wayland programs are in /opt/bin or any GTK program when you are running a GTK program from a Wayland terminal'
 echo ' '
+echo 'You also can use the testchooser command/wrench icon in Wayland which pops up a dialog of some wayland tests from various toolkits for easy selection'
+echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo ' '
-echo $WESTONDIAG 
+echo "$WESTONDIAG"

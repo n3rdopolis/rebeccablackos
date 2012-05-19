@@ -22,4 +22,3 @@ weston --xserver --socket=$ServerID &
 export WAYLAND_DISPLAY=$ServerID
 sleep 3
 weston-terminal &
-testchooser
