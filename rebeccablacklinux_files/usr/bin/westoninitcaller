@@ -15,17 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-
-if [ $(cat /proc/cmdline | grep -c Xorg ) == "1" ]
-then
-kdm -nodaemon
-fi
-
-if [ $(cat /proc/cmdline | grep -c Wayland ) == "1" ]
-then
-westoninitcaller
-
-#fallback
-kdm -nodaemon
-fi
+Xorg &
+sleep 5
+killall Xorg
+westoncaller
