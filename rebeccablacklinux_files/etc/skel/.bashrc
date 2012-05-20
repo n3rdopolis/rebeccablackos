@@ -103,6 +103,7 @@ MESA_DEBUG=1
 EGL_LOG_LEVEL=debug
 LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
+unset WINDOWID
 
 echo 'Run sudo westoncaller in a tty to try Wayland running native. To exit from Wayland running native, run sudo killall weston'
 echo ' '
