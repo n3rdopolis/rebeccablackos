@@ -15,6 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+unset WINDOWID
 unset HOME
 export HOME=~
 export XDG_RUNTIME_DIR=~
@@ -24,7 +25,7 @@ export GDK_BACKEND=wayland
 export CLUTTER_BACKEND=wayland
 export COGL_RENDERER=egl_wayland 
 export QTVER=qt5
-export QTDIR=/usr/local
+export QTDIR=/opt
 export PATH=$QTDIR/bin/:$PATH
 export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
@@ -43,5 +44,7 @@ To the weston command you can add
 --output-count=(number of simulated screens)
 --xserver to start an xwayland server
 
-You will have to close any other instance running as your user account first."
+You will have to close any other instance running as your user account first.
+
+You can have multiple weston diagnostic terminals open at the same time to open various clients, as well as the server"
 xterm
