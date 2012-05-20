@@ -15,7 +15,11 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#call up Xorg to set up hardware for weston. Sometimes weston hangs with a error when starting from init
 Xorg &
+#wait five seconds
 sleep 5
+#kill Xorg
 killall Xorg
+#call weston
 westoncaller
