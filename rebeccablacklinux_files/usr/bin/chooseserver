@@ -26,6 +26,7 @@ if [ $(cat /proc/cmdline | grep -c Wayland ) == "1" ]
 then
 westoninitcaller
 
+fi
+
 #fallback
 kdm -nodaemon
-fi
