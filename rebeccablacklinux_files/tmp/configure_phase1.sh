@@ -16,6 +16,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+dpkg-divert --local --rename --add /usr/sbin/grub-probe
+dpkg-divert --local --rename --add /sbin/initctl
+ln -s /bin/true /sbin/initctl
+ln -s /bin/true /usr/sbin/grub-probe
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
@@ -25,9 +30,6 @@ apt-get update
 
 #install remastersys key
 wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
-
-#try to prevent the kernel from  updating during the live cd build. The update process causes dpkg to freak out
-aptitude hold linux-headers-generic linux-image-generic
 
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="aptitude
@@ -156,13 +158,6 @@ done
 #For some reason, it installs out of date packages sometimes, as I see unupgraded packages
 yes Y | apt-get dist-upgrade 
 
-#Do this as some packages fail to install completly unless if the attempt to start them as deamons succeeds. This will report success during those attempts to start the services to dpkg
-mv /sbin/initctl /sbin/initctl.bak
-ln -s /bin/true /sbin/initctl
-yes Y | apt-get dist-upgrade
-rm /sbin/initctl
-mv  /sbin/initctl.bak /sbin/initctl
-
 #remove uneeded packages
 echo "$UNINSTALLS" | while read PACKAGE
 do
@@ -173,8 +168,12 @@ done
 #Delete the old depends of the packages no longer needed.
 yes Y | apt-get --purge autoremove -y 
 
-#allow the kernel to be updated now the dpkg part is done
-aptitude unhold linux-headers-generic linux-image-generic
+#Reset the utilites back to the way they are supposed to be.
+rm /sbin/initctl
+rm /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /sbin/initctl
+
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
