@@ -59,7 +59,7 @@ make install
 #install qt tests
 find /srcbuild/qtbase/examples  -executable | while read TEST
 do
-cp "$TEST" /usr/local/bin
+cp "$TEST" $WLD/bin
 done
 cd ..
 
