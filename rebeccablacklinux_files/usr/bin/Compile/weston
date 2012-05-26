@@ -22,7 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/wayland/weston
 cd weston
-git checkout a64b15d1608fe10464381148b775e132544c3921
+git checkout master
 git pull
 
 fi
@@ -46,7 +46,6 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-patch -p1 < /tmp/weston.diff
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-cairo-glesv2 
 make
 make install -i

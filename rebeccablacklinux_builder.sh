@@ -99,8 +99,14 @@ $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | t
 
 
 
+#unmount the chrooted procfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 
+#unmount the chrooted sysfs from the outside
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
 
+#unmount the chrooted devfs from the outside 
+umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
 
 #unmount the chrooted procfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
