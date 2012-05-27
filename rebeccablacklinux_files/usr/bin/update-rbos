@@ -30,5 +30,10 @@ rsync /usr/import/* -a /
 chmod 777 /tmp
 echo "Will start downloading and building sourcecode in 15 seconds. You can cancel at any time with CTRL-c"
 sleep 15
-compile_all download-only
+#run the config script to install depends in case they changed
+/tmp/configure_phase1.sh
+#remove packages that cause conflict
+yes Yes |apt-get remove gdm gnome-session -y
+#change session manager
+echo 2 | update-alternatives --config x-session-manager 
 compile_all build-only
