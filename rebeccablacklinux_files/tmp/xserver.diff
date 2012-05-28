@@ -47,17 +47,19 @@ index fea5210..e5037fd 100644
 1.7.7.6
 
 
-
 diff --git a/hw/xfree86/common/xf86AutoConfig.c b/hw/xfree86/common/xf86AutoConfig.c
-index d0eb0af..48e9887 100644
+index d0eb0af..f0b75e1 100644
 --- a/hw/xfree86/common/xf86AutoConfig.c
 +++ b/hw/xfree86/common/xf86AutoConfig.c
-@@ -264,7 +264,7 @@ listPossibleVideoDrivers(char *matches[], int nmatches)
+@@ -264,7 +264,10 @@ listPossibleVideoDrivers(char *matches[], int nmatches)
      /* Fallback to platform default hardware */
      if (i < (nmatches - 1)) {
  #if defined(__i386__) || defined(__amd64__) || defined(__hurd__)
 -        matches[i++] = xnfstrdup("vesa");
-+        matches[i++] = xnfstrdup("wlshm");
++        if (xorgWayland)
++               matches[i++] = xnfstrdup("wlshm");
++       else
++               matches[i++] = xnfstrdup("vesa");
  #elif defined(__sparc__) && !defined(sun)
          matches[i++] = xnfstrdup("sunffb");
  #endif
