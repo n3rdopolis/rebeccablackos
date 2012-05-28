@@ -16,54 +16,41 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone http://cgit.freedesktop.org/xorg/xserver
-cd xserver
-git checkout xwayland-1.12
+git clone https://github.com/timon37/xf86-video-ati
+cd xf86-video-ati
+git checkout master
 git pull
 
 fi
 
 
 
+
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
-cd xserver
+cd xf86-video-ati
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export WLD=/opt
 PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
-C_INCLUDE_PATH=$WLD/include:/usr/include
-CPLUS_INCLUDE_PATH=$WLD/include:/usr/include
-OBJC_INCLUDE_PATH=$WLD/include:/usr/include
+C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
 PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
-export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH\
+export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-patch -p1 < /tmp/xserver.diff
-./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make
+patch -p1 < /tmp/xf86-video-ati.diff
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+make 
 make install
-
-
-mkdir $WLD/X11
-cp -R /usr/share/X11/* $WLD/share/X11
-cp /usr/bin/xkbcomp $WLD/bin
-
-#set the log folder to allow nested X to create log files, and not fataly exit
-mkdir -p $WLD/var/log
-chmod 777 $WLD/var/log
-
-#disable setuid on xserver
-chmod -s $WLD/bin/Xorg
-
 cd ..
 
 fi
