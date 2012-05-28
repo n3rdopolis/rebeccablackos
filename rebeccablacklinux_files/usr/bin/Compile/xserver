@@ -47,6 +47,7 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH\
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
+patch -p1 < /tmp/xserver.diff
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
 make install
