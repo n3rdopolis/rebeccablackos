@@ -31,7 +31,8 @@ export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
 export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 export QT_QPA_PLATFORM=wayland
-export ELM_ENGINE="wayland_shm"
+export ELM_ENGINE=wayland_shm
+export ECORE_EVAS_ENGINE=wayland_shm
 export SDL_VIDEODRIVER=wayland
 export $(dbus-launch)
 export WESTONDIAG="This is a External Diagnosis Terminal for Wayland to run Wayland programs
