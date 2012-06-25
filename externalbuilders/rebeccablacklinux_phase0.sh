@@ -84,7 +84,7 @@ mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop
 btrfs subvolume create ~/RBOS_Build_Files/build_mountpoint/phase_1/
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap precise ~/RBOS_Build_Files/build_mountpoint/phase_1 http://ubuntu.osuosl.org/ubuntu/
+debootstrap quantal ~/RBOS_Build_Files/build_mountpoint/phase_1 http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
 touch ~/RBOS_Build_Files/DontStartFromScratch
