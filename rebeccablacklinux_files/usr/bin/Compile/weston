@@ -57,6 +57,12 @@ do
 cp "$CLIENT" $WLD/bin
 done
 
+#Install the screen capture utils
+find /srcbuild/weston/wcap -executable | while read CLIENT
+do
+cp "$CLIENT" $WLD/bin
+done
+
 #turn OFF setuid on weston
 chmod -s $WLD/bin/weston
 
