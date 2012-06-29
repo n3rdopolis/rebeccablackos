@@ -57,6 +57,16 @@ mkdir $WLD/X11
 cp -R /usr/share/X11/* $WLD/share/X11
 cp /usr/bin/xkbcomp $WLD/bin
 
+
+#configure the xwayland server
+mkdir $WLD/etc/X11
+cat > $WLD/etc/X11/xorg.conf <<EOF
+Section "Device"
+        Identifier "Device"
+        Driver "wlshm" # or intel
+EndSection
+EOF
+
 #set the log folder to allow nested X to create log files, and not fataly exit
 mkdir -p $WLD/var/log
 chmod 777 $WLD/var/log
