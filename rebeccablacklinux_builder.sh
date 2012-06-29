@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-
+STARTTIME=$(date +%s)
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
@@ -122,3 +122,5 @@ fuser -km ~/RBOS_Build_Files/build_mountpoint
  
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoint
+ENDTIME=$(date +%s)
+echo "build finished in $((ENDTIME-STARTTIME)) seconds"
