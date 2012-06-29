@@ -88,10 +88,12 @@ fi
 
 chmod +x $ThIsScriPtSFolDerLoCaTion/externalbuilders/*
 
+REBUILT="to update"
 #only initilize the FS if the FS isn't there.
 if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
 then
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_0.log
+REBUILT="to rebuild from scratch"
 fi
 #run the build scripts
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_1.log
@@ -123,4 +125,4 @@ fuser -km ~/RBOS_Build_Files/build_mountpoint
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoint
 ENDTIME=$(date +%s)
-echo "build finished in $((ENDTIME-STARTTIME)) seconds"
+echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
