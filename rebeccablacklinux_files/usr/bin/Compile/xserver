@@ -47,7 +47,7 @@ PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH CPLUS_INCLUDE_PATH OBJC_INCLUDE_PATH\
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-patch -p1 < /tmp/xserver.diff
+sed -i 's/vesa/wlshm/g' xserver/hw/xfree86/common/xf86AutoConfig.c 
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
 make install
@@ -58,14 +58,6 @@ cp -R /usr/share/X11/* $WLD/share/X11
 cp /usr/bin/xkbcomp $WLD/bin
 
 
-#configure the xwayland server
-mkdir $WLD/etc/X11
-cat > $WLD/etc/X11/xorg.conf <<EOF
-Section "Device"
-        Identifier "Device"
-        Driver "wlshm" # or intel
-EndSection
-EOF
 
 #set the log folder to allow nested X to create log files, and not fataly exit
 mkdir -p $WLD/var/log
