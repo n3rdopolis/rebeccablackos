@@ -124,7 +124,8 @@ e17
 libicu-dev 
 libraptor-dev
 remastersys
-ubuntu-minimal"
+ubuntu-minimal
+xterm"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
