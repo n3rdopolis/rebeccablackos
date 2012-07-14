@@ -16,17 +16,22 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#call up Xorg to set up display for chooser
+Xorg &
+#set the display
+export DISPLAY=:0
+#wait for 10 seconds. X may take ages to load on an actual CD
+sleep 10
+#launch the chooser
+SERVER=$(kdialog --menu "Choose the display server." Xorg Xorg Wayland Wayland)
+#kill Xorg
+killall Xorg
 
-if [ $(cat /proc/cmdline | grep -c Xorg ) == "1" ]
+
+
+if [ $SERVER == "Wayland" ]
 then
+westoncaller
+else
 kdm -nodaemon
 fi
-
-if [ $(cat /proc/cmdline | grep -c Wayland ) == "1" ]
-then
-westoninitcaller
-
-fi
-
-#fallback
-kdm -nodaemon
