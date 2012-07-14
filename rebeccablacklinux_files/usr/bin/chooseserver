@@ -26,6 +26,8 @@ sleep 10
 SERVER=$(kdialog --menu "Choose the display server." Xorg Xorg Wayland Wayland)
 #kill Xorg
 killall Xorg
+#remove the display variable so that Weston doesn't try to run nested under the display
+unset DISPLAY
 
 
 
