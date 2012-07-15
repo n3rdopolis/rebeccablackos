@@ -20,9 +20,9 @@ if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone git://gitorious.org/qt/qtbase
-cd qtbase
-git checkout buildsystem
+git clone git://gitorious.org/qt/qtsvg
+cd qtsvg
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
@@ -34,12 +34,12 @@ fi
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
-cd qtbase
+cd qtsvg/
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export WLD=/opt
-PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
+PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 ACLOCAL="aclocal -I $WLD/share/aclocal"
 C_INCLUDE_PATH=$WLD/include
 LIBRARY_PATH=$WLD/lib
@@ -53,18 +53,9 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations -qconfig large
-make all -i
-make install -i
-
-
-
-
-#install qt tests
-find /srcbuild/qtbase/examples  -executable | while read TEST
-do
-cp "$TEST" $WLD/bin
-done
+qmake
+make 
+make install
 cd ..
 
 fi
