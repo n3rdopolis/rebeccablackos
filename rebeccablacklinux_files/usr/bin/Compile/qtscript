@@ -20,9 +20,9 @@ if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone git://gitorious.org/+qtwebkit-developers/webkit/qtwebkit.git
-cd qtwebkit
-git checkout qtwebkit-2.2
+git clone git://gitorious.org/qt/qtscript
+cd qtscript
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
@@ -34,7 +34,7 @@ fi
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
-cd qtwebkit/
+cd qtscript/
 echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
@@ -53,10 +53,9 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-export WEBKITOUTPUTDIR="$WLD/bil"
-perl Tools/Scripts/build-webkit --qt --qmake="$PWD/../qtbase/bin/qmake" --install-libs=$WLD/lib --debug --makeargs="$MAKEFLAGS"
-
-
+qmake
+make 
+make install
 cd ..
 
 fi
