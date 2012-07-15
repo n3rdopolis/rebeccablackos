@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://anongit.kde.org/extra-cmake-modules
 cd extra-cmake-modules
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

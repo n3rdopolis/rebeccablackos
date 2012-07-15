@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://people.freedesktop.org/xorg/lib/libxkbcommon.git
 cd libxkbcommon
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

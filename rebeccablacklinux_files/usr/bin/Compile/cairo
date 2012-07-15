@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://anongit.freedesktop.org/cairo
 cd cairo
 git checkout 1.10
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

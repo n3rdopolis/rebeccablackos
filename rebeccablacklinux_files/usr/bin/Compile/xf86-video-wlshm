@@ -24,6 +24,8 @@ cd /srcbuild
 git clone https://github.com/soreau/xf86-video-wlshm
 cd xf86-video-wlshm
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

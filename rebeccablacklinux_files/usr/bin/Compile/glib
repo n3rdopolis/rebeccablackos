@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://git.gnome.org/glib
 cd glib
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

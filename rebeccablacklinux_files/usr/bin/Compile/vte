@@ -24,6 +24,8 @@ cd /srcbuild
 git clone git://git.gnome.org/vte
 cd vte
 git checkout vte-0-32
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

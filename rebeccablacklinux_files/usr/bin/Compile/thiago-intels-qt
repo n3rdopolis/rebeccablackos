@@ -23,7 +23,8 @@ cd /srcbuild
 git clone git://gitorious.org/~thiago-intel/qt/thiago-intels-qt/
 cd thiago-intels-qt
 git checkout 4.8-qpa-wayland
-git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

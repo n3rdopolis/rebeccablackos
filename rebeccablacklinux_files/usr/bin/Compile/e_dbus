@@ -23,6 +23,8 @@ mkdir /srcbuild
 cd /srcbuild
 svn co http://svn.enlightenment.org/svn/e/trunk/e_dbus
 cd e_dbus
+svn revert --recursive .
+svn-clean
 svn update
 
 fi

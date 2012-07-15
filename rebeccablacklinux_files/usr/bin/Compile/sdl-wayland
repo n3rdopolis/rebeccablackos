@@ -23,6 +23,8 @@ cd /srcbuild
 git clone http://cgit.freedesktop.org/~bnf/sdl-wayland/
 cd sdl-wayland
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

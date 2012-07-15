@@ -120,6 +120,7 @@ libxfont-dev
 xserver-xorg-dev 
 x11proto-xf86dri-dev 
 subversion 
+subversion-tools
 e17
 libicu-dev 
 libraptor-dev

@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://anongit.freedesktop.org/pixman
 cd pixman
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

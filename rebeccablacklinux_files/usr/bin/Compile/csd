@@ -24,6 +24,8 @@ cd /srcbuild
 git clone https://github.com/krh/gtk 
 cd gtk
 git checkout csd
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

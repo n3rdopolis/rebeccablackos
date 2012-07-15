@@ -24,6 +24,8 @@ cd /srcbuild
 git clone http://git.gnome.org/browse/cogl
 cd cogl
 git checkout cogl-1.10
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

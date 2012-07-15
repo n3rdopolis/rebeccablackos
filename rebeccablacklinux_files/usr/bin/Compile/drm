@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://anongit.freedesktop.org/git/mesa/drm
 cd drm
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

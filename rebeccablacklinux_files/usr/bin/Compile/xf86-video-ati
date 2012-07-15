@@ -24,6 +24,8 @@ cd /srcbuild
 git clone https://github.com/timon37/xf86-video-ati
 cd xf86-video-ati
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

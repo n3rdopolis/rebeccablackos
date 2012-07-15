@@ -22,6 +22,8 @@ mkdir /srcbuild
 cd /srcbuild
 svn co http://svn.enlightenment.org/svn/e/trunk/ecore
 cd ecore
+svn revert --recursive .
+svn-clean
 svn update
 
 fi

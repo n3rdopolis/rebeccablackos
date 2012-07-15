@@ -24,6 +24,8 @@ cd /srcbuild
 git clone git://git.gnome.org/atk
 cd atk
 git checkout master
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

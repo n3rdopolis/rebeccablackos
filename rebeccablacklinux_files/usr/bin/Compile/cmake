@@ -23,6 +23,8 @@ cd /srcbuild
 git clone http://cmake.org/cmake.git
 cd cmake
 git checkout v2.8.8
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

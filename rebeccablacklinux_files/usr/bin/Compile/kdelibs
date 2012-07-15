@@ -23,6 +23,8 @@ cd /srcbuild
 git clone git://anongit.kde.org/kdelibs
 cd kdelibs
 git checkout frameworks
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi

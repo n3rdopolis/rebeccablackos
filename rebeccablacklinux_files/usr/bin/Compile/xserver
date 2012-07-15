@@ -23,6 +23,8 @@ cd /srcbuild
 git clone http://cgit.freedesktop.org/xorg/xserver
 cd xserver
 git checkout xwayland-1.12
+git reset --hard 
+git clean -fdx 
 git pull
 
 fi
