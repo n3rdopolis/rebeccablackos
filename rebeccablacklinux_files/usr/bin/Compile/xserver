@@ -69,6 +69,7 @@ chmod 777 $WLD/var/log
 chmod -s $WLD/bin/Xorg
 
 #weston now crashes when it can't find /usr/share/pixmaps/oxy-white, but the oxy-white folder is in /usr/share/icons...
+cp -r /usr/share/themes/Crux/metacity-1/* /usr/share/icons/oxy-white/
 cp -r /usr/share/icons/oxy-white/ /usr/share/pixmaps/
 
 cd ..

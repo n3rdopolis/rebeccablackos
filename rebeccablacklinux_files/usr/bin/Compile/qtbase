@@ -56,7 +56,7 @@ export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
 ./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations -qconfig large
 make all -i
 make install -i
-
+bin/syncqt
 
 
 
