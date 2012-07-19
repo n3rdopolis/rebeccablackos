@@ -81,7 +81,7 @@ do
 
 if [[ "$argument" == download-only ]]
 then
-
+echo "Downloading/updating $BUILDNAME source"
 "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 | tee  /usr/share/Downloadlog/$BUILDNAME
 
 
