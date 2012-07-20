@@ -88,7 +88,10 @@ fi
 
 chmod +x $ThIsScriPtSFolDerLoCaTion/externalbuilders/*
 
+echo "Setting up live system..."
+
 REBUILT="to update"
+
 #only initilize the FS if the FS isn't there.
 if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
 then
