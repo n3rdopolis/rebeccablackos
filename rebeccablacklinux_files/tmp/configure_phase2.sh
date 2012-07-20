@@ -19,10 +19,6 @@
 # /lib/plymouth/ubuntu-logo.png
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
-
-#run the script that calls all compile scripts in a specified order
-compile_all
-
 #remove packages that cause conflict
 yes Yes |apt-get remove gdm gnome-session -y
 
@@ -31,6 +27,9 @@ echo 2 | update-alternatives --config x-session-manager
 
 #copy all the post install files
 rsync /usr/import/* -a /
+
+#run the script that calls all compile scripts in a specified order
+compile_all
 
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
