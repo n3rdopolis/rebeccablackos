@@ -1,67 +1,14 @@
-diff --git a/src/compositor.c b/src/compositor.c
-index 235b4a2..ae03b4c 100644
---- a/src/compositor.c
-+++ b/src/compositor.c
-@@ -228,6 +228,7 @@ weston_surface_create(struct weston_compositor *compositor)
- 	surface->alpha = 255;
- 	surface->brightness = 255;
- 	surface->saturation = 255;
-+	surface->blend = 1;
- 	surface->pitch = 1;
+diff --git a/clients/dnd.c b/clients/dnd.c
+index c38b94f..bdd2b4a 100644
+--- a/clients/dnd.c
++++ b/clients/dnd.c
+@@ -325,6 +325,9 @@ create_drag_cursor(struct dnd_drag *dnd_drag,
  
- 	surface->buffer = NULL;
-@@ -724,6 +725,10 @@ weston_surface_attach(struct wl_surface *surface, struct wl_buffer *buffer)
- 		glTexImage2D(GL_TEXTURE_2D, 0, GL_BGRA_EXT,
- 			     es->pitch, es->buffer->height, 0,
- 			     GL_BGRA_EXT, GL_UNSIGNED_BYTE, NULL);
-+		if (wl_shm_buffer_get_format(buffer) == WL_SHM_FORMAT_XRGB8888)
-+			es->blend = 0;
-+		else
-+			es->blend = 1;
- 	} else {
- 		if (es->image != EGL_NO_IMAGE_KHR)
- 			ec->destroy_image(ec->display, es->image);
-@@ -812,7 +817,10 @@ weston_surface_draw(struct weston_surface *es, struct weston_output *output,
- 		goto out;
+        pointer = display_get_pointer_image(dnd->display, CURSOR_DRAGGING);
  
- 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
--	glEnable(GL_BLEND);
-+	if (es->blend)
-+		glEnable(GL_BLEND);
-+	else
-+		glDisable(GL_BLEND);
- 
- 	if (ec->current_shader != es->shader) {
- 		glUseProgram(es->shader->program);
-diff --git a/src/compositor.h b/src/compositor.h
-index 3722d32..947211a 100644
---- a/src/compositor.h
-+++ b/src/compositor.h
-@@ -321,7 +321,8 @@ struct weston_surface {
- 	uint32_t alpha;
- 	uint32_t brightness;
- 	uint32_t saturation;
--
-+	int blend;
-+	
- 	/* Surface geometry state, mutable.
- 	 * If you change anything, set dirty = 1.
- 	 * That includes the transformations referenced from the list.
-diff --git a/src/shell.c b/src/shell.c
-index 8c35ae8..ec3647a 100644
---- a/src/shell.c
-+++ b/src/shell.c
-@@ -2061,11 +2061,11 @@ map(struct desktop_shell *shell, struct weston_surface *surface,
- 		break;
- 	}
- 
--	if (surface_type != SHELL_SURFACE_NONE) {
-+	//if (surface_type != SHELL_SURFACE_NONE) {
- 		weston_surface_assign_output(surface);
- 		if (surface_type == SHELL_SURFACE_MAXIMIZED)
- 			surface->output = shsurf->output;
--	}
-+	//}
- 
- 	switch (surface_type) {
- 	case SHELL_SURFACE_TOPLEVEL:
++       if (!pointer)
++               return;
++
+        rectangle.width = item_width + 2 * pointer->width;
+        rectangle.height = item_height + 2 * pointer->height;
+        surface = display_create_surface(dnd->display, NULL, &rectangle,
