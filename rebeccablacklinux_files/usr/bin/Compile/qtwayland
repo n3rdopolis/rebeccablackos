@@ -22,7 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://gitorious.org/qt/qtwayland
 cd qtwayland
-git checkout master
+git checkout 61d9acc0df8dec6cda5f563eef326b951e6ec4f8
 git reset --hard 
 git clean -fdx 
 git pull
