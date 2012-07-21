@@ -3,9 +3,9 @@ index c38b94f..bdd2b4a 100644
 --- a/clients/dnd.c
 +++ b/clients/dnd.c
 @@ -325,6 +325,9 @@ create_drag_cursor(struct dnd_drag *dnd_drag,
- 
+
         pointer = display_get_pointer_image(dnd->display, CURSOR_DRAGGING);
- 
+
 +       if (!pointer)
 +               return;
 +
