@@ -49,6 +49,12 @@ echo "$(date)" > /etc/builddate
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
+#set weston-launch binary as setuid
+sudo chmod +s /opt/bin/weston-launch
+
+#create the weston-launch group 
+sudo groupadd weston-launch
+
 #start the remastersys job
 remastersys dist
 
