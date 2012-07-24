@@ -68,9 +68,6 @@ chmod 777 $WLD/var/log
 #disable setuid on xserver
 chmod -s $WLD/bin/Xorg
 
-#weston now crashes when it can't find /usr/share/pixmaps/oxy-white, but the oxy-white folder is in /usr/share/icons...
-cp -rn /usr/share/icons/whiteglass/cursors/* /usr/share/icons/oxy-white/cursors
-
 
 cd ..
 

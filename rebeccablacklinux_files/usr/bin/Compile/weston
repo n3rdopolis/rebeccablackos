@@ -69,6 +69,10 @@ done
 #turn OFF setuid on weston
 chmod -s $WLD/bin/weston
 
+#Apps and weston crash when they can't find the appropriate cursors
+cp -rn /usr/share/icons/whiteglass/cursors/* /usr/share/icons/oxy-white/cursors
+cp /usr/share/icons/oxy-white/cursors/dnd-copy /usr/share/icons/oxy-white/cursors/dragging
+ 
 cd ..
 
 fi
