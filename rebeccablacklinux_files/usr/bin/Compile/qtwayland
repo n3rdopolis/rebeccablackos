@@ -53,9 +53,14 @@ export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
 mkdir -p $WLD/share/aclocal
 export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
        LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
+patch -p1 < /tmp/qtwayland.diff
 qmake
+cd src
+cd plugins
 make 
 make install
+cd ..
+cd ..
 cd ..
 
 fi
