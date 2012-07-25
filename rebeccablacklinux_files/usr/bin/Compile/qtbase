@@ -61,7 +61,7 @@ bin/syncqt
 
 
 #install qt tests
-find /srcbuild/qtbase/examples  -executable  | while read TEST
+find /srcbuild/qtbase/examples  -executable -type f   | while read TEST
 do
 cp "$TEST" $WLD/bin
 done
