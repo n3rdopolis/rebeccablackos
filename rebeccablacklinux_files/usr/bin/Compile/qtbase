@@ -22,7 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://gitorious.org/qt/qtbase
 cd qtbase
-git checkout master
+git checkout a31ac11
 git reset --hard 
 git clean -fdx 
 git pull
