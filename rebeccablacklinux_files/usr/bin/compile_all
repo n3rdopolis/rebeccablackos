@@ -75,7 +75,7 @@ efreet
 e_dbus
 eeze
 elementary
-sdl-wayland
+libsdl
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
