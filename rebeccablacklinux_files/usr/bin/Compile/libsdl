@@ -58,7 +58,7 @@ cd ..
 cd ..
 
 #install sdl tests
-find /srcbuild/sdl-wayland/test -executable | while read TEST
+find /srcbuild/libsdl/test -executable | while read TEST
 do
 cp "$TEST" $WLD/bin
 done
