@@ -152,3 +152,11 @@ then
 fuser -km   ~/RBOS_Build_Files/isotest/isomount
 umount -lfd ~/RBOS_Build_Files/isotest/isomount
 fi
+
+mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/isotest/testmountpoint
+umount -lfd ~/RBOS_Build_Files/isotest/testmountpoint
+fi
