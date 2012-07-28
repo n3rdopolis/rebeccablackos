@@ -75,13 +75,12 @@ if [ ! -f ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
 then
 echo "Invalid CDROM image. Not an Ubuntu/RebeccaBlackLinux based image" 
 #unmount and exit
-read a
 umount ~/RBOS_Build_Files/isotest/isomount
 exit
 fi
 
 #mount the squashfs image
-mount -o loop ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs2 ~/RBOS_Build_Files/isotest/squashfsmount
+mount -o loop ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs ~/RBOS_Build_Files/isotest/squashfsmount
 
 #create a 4gb image for the writable overlay
 dd if=/dev/zero of=~/RBOS_Build_Files/isotest/iso_overlay.img bs=1 count=0 seek=16G 
