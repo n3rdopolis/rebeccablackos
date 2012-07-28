@@ -82,12 +82,16 @@ fi
 #mount the squashfs image
 mount -o loop ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs ~/RBOS_Build_Files/isotest/squashfsmount
 
-#create a 4gb image for the writable overlay
-dd if=/dev/zero of=~/RBOS_Build_Files/isotest/iso_overlay.img bs=1 count=0 seek=16G 
+#if the ISO overlay FS image does not exist create it
+if [ ! -f ~/RBOS_Build_Files/isotest/iso_overlay.img  ]
+then
+#create a 1gb image for the writable overlay
+dd if=/dev/zero of=~/RBOS_Build_Files/isotest/iso_overlay.img bs=1 count=0 seek=1G 
 
 echo "creating a file system on the virtual image. Not on your real file system."
 #create a file system on the image 
 yes y | mkfs.ext4 ~/RBOS_Build_Files/isotest/iso_overlay.img
+fi
 
 #mount the overlay filesystem
 mount -o loop ~/RBOS_Build_Files/isotest/iso_overlay.img ~/RBOS_Build_Files/isotest/testmountpoint
