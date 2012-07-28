@@ -77,8 +77,6 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
 #kill any process accessing the livedisk mountpoint 
 fuser -km ~/RBOS_Build_Files/build_mountpoint/phase_2/ 
 
-#create the subvolume that phase 2 will work with
-
 #go back to the users home folder
 cd ~
 
