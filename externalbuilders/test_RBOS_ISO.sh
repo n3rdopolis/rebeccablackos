@@ -21,7 +21,9 @@ ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
-The ISO needs to be the root of your home folder, as that's where it searches for ISOs"
+The ISO needs to be the root of your home folder, as that's where it searches for ISOs
+
+Press enter"
 
 read a
 #enter users home directory
@@ -69,10 +71,11 @@ mount -o loop ~/$ISO ~/RBOS_Build_Files/isotest/isomount
 
 
 #if the iso doesn't have a squashfs image
-if [ ! -f ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs2  ]
+if [ ! -f ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
 then
 echo "Invalid CDROM image. Not an Ubuntu/RebeccaBlackLinux based image" 
 #unmount and exit
+read a
 umount ~/RBOS_Build_Files/isotest/isomount
 exit
 fi
