@@ -26,4 +26,5 @@ How to use Wayland:
 
     Wayland programs are in /opt/bin or the panel at the top, or in the application selector popup that appears in Wayland.
 
- 
+
+You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script executable, and run the script from a terminal. It will ask you for the ISO you want to mount, (out of the ones in your home folder), and then it will give you a shell running AS ROOT, where you can run the command westoncaller
