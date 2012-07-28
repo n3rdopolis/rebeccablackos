@@ -28,7 +28,7 @@ read a
 cd ~
 
 
-mountpoint /var/backups/NerdopolisBackup/
+mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
@@ -36,6 +36,7 @@ echo "A script is running that is already testing an ISO. will now chroot into i
 echo "Type exit to go back to your system."
 chroot ~/RBOS_Build_Files/isotest/testmountpoint
 exit
+fi
 
 #install needed tools to allow testing on a read only iso
 apt-get install aufs-tools squashfs-tools
@@ -117,11 +118,35 @@ cd ~
 umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/dev
 umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/sys
 umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/proc
+
+mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
+ismount=$?
+if [ $ismount -eq 0 ]
+then
 fuser -km   ~/RBOS_Build_Files/isotest/testmountpoint
 umount -lfd ~/RBOS_Build_Files/isotest/testmountpoint
+fi
+
+mountpoint ~/RBOS_Build_Files/isotest/overlaymount
+ismount=$?
+if [ $ismount -eq 0 ]
+then
 fuser -km   ~/RBOS_Build_Files/isotest/overlaymount
 umount -lfd ~/RBOS_Build_Files/isotest/overlaymount
+fi
+
+mountpoint ~/RBOS_Build_Files/isotest/squashfsmount
+ismount=$?
+if [ $ismount -eq 0 ]
+then
 fuser -km   ~/RBOS_Build_Files/isotest/squashfsmount
 umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
+fi
+
+mountpoint ~/RBOS_Build_Files/isotest/isomount
+ismount=$?
+if [ $ismount -eq 0 ]
+then
 fuser -km   ~/RBOS_Build_Files/isotest/isomount
 umount -lfd ~/RBOS_Build_Files/isotest/isomount
+fi

@@ -32,12 +32,13 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
 #unmount the chrooted devfs from the outside 
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
 
-#kill any process accessing the livedisk mountpoint 
-fuser ~/RBOS_Build_Files/build_mountpoint -km
-
-#unmount the chroot fs
-umount -lfd ~/RBOS_Build_Files/build_mountpoint
-
+mountpoint ~/RBOS_Build_Files/build_mountpoint/ 
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/build_mountpoint/ 
+umount -lfd ~/RBOS_Build_Files/build_mountpoint/ 
+fi
 
 
 #END PAST RUN CLEANUP##################
@@ -83,11 +84,13 @@ umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/proc
 #unmount the chrooted sysfs from the outside
 umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/sys
 
-#unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_1/dev
- 
-#kill any process accessing the livedisk mountpoint 
-fuser -km ~/RBOS_Build_Files/build_mountpoint/phase_1/ 
+mountpoint ~/RBOS_Build_Files/build_mountpoint/ 
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/build_mountpoint/ 
+umount -lfd ~/RBOS_Build_Files/build_mountpoint/ 
+fi
 
 #create the subvolume that phase 2 will work with
 btrfs subvolume delete ~/RBOS_Build_Files/build_mountpoint/phase_2
