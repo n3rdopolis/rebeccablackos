@@ -109,7 +109,8 @@ xhost +LOCAL:
 
 
 #tell the user how to exit chroot
-echo "Type exit to go back to your system."
+echo "
+Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
 
 #Chroot into the live system
 chroot ~/RBOS_Build_Files/isotest/testmountpoint
