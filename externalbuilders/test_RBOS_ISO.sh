@@ -56,12 +56,12 @@ ISOS="$(ls ~ | grep .iso$ | nl -ba -w 3)"
 #if there are no iso files found in the home directory exit
 if [ -z $ISOS ]
 then 
-echo "No ISOs Found"
+echo "No ISOs Found in your home folder"
 exit
 fi
 
 #list the isos found, and get the number of the selected iso
-ISONUMBER=$(dialog --stdout --menu "menu" 30 30 30 $ISOS )
+ISONUMBER=$(dialog --stdout --menu "Select an ISO in your home folder" 30 30 30 $ISOS )
 
 #get the name of the selected iso from the number
 ISO=$(echo "$ISOS" | grep "^  $ISONUMBER" | awk '{print $2}')
