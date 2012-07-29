@@ -41,7 +41,7 @@ exit
 fi
 
 #install needed tools to allow testing on a read only iso
-apt-get install aufs-tools squashfs-tools
+apt-get install aufs-tools squashfs-tools dialog
 
 
 #make a folders for mounting the ISO
