@@ -15,24 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-unset HOME
-export HOME=$(echo ~)
-export XDG_RUNTIME_DIR=~
-export PATH=/opt/bin:$PATH
-export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export GDK_BACKEND=wayland
-export CLUTTER_BACKEND=wayland
-export COGL_RENDERER=egl_wayland 
-export QTVER=qt5
-export QTDIR=/opt
-export PATH=$QTDIR/bin/:$PATH
-export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
-export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
-export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
-export QT_QPA_PLATFORM=wayland
-export ELM_ENGINE=wayland_shm
-export ECORE_EVAS_ENGINE=wayland_shm
-export SDL_VIDEODRIVER=wayland
-export $(dbus-launch)
+
+. /usr/bin/weston_vars
+
 (sleep 10; zenity --warning --text="This is a third party fan made distrobution") &
 weston --xserver 2>&1 | tee ~/weston
