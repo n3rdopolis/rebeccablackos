@@ -30,13 +30,13 @@ read a
 cd ~
 
 
-mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
+mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
 echo "A script is running that is already testing an ISO. will now chroot into it"
 echo "Type exit to go back to your system."
-chroot ~/RBOS_Build_Files/isotest/testmountpoint
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint
 exit
 fi
 
@@ -47,8 +47,8 @@ apt-get install aufs-tools squashfs-tools
 #make a folders for mounting the ISO
 mkdir -p ~/RBOS_Build_Files/isotest/isomount
 mkdir -p ~/RBOS_Build_Files/isotest/squashfsmount
-mkdir -p ~/RBOS_Build_Files/isotest/overlaymount
-mkdir -p ~/RBOS_Build_Files/isotest/testmountpoint
+mkdir -p ~/RBOS_Build_Files/isotest/overlay
+mkdir -p ~/RBOS_Build_Files/isotest/unionmountpoint
 
 #Get a list of isos in the home directory
 ISOS="$(ls ~ | grep .iso$ | nl -ba -w 3)"
@@ -82,27 +82,13 @@ fi
 #mount the squashfs image
 mount -o loop ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs ~/RBOS_Build_Files/isotest/squashfsmount
 
-#if the ISO overlay FS image does not exist create it
-if [ ! -f ~/RBOS_Build_Files/isotest/iso_overlay.img  ]
-then
-#create a 1gb image for the writable overlay
-dd if=/dev/zero of=~/RBOS_Build_Files/isotest/iso_overlay.img bs=1 count=0 seek=1G 
-
-echo "creating a file system on the virtual image. Not on your real file system."
-#create a file system on the image 
-yes y | mkfs.ext4 ~/RBOS_Build_Files/isotest/iso_overlay.img
-fi
-
-#mount the overlay filesystem
-mount -o loop ~/RBOS_Build_Files/isotest/iso_overlay.img ~/RBOS_Build_Files/isotest/testmountpoint
-
 #Create the union between squashfs and the overlay
-mount -t aufs -o dirs=~/RBOS_Build_Files/isotest/overlaymount:~/RBOS_Build_Files/isotest/squashfsmount none ~/RBOS_Build_Files/isotest/testmountpoint
+mount -t aufs -o dirs=~/RBOS_Build_Files/isotest/overlay:~/RBOS_Build_Files/isotest/squashfsmount none ~/RBOS_Build_Files/isotest/unionmountpoint
 
 #bind mount in the critical filesystems
-mount --rbind /dev ~/RBOS_Build_Files/isotest/testmountpoint/dev
-mount --rbind /proc ~/RBOS_Build_Files/isotest/testmountpoint/proc
-mount --rbind /sys ~/RBOS_Build_Files/isotest/testmountpoint/sys
+mount --rbind /dev ~/RBOS_Build_Files/isotest/unionmountpoint/dev
+mount --rbind /proc ~/RBOS_Build_Files/isotest/unionmountpoint/proc
+mount --rbind /sys ~/RBOS_Build_Files/isotest/unionmountpoint/sys
 
 #allow all local connections to the xserver
 xhost +LOCAL:
@@ -113,7 +99,7 @@ echo "
 Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
 
 #Chroot into the live system
-chroot ~/RBOS_Build_Files/isotest/testmountpoint
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint
 
 #set the xserver security back to what it should be
 xhost -LOCAL:
@@ -122,24 +108,16 @@ xhost -LOCAL:
 cd ~
 
 #unmount the filesystems used by the CD
-umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/dev
-umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/sys
-umount -lf  ~/RBOS_Build_Files/isotest/testmountpoint/proc
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/dev
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
 
-mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
+mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
-fuser -km   ~/RBOS_Build_Files/isotest/testmountpoint
-umount -lfd ~/RBOS_Build_Files/isotest/testmountpoint
-fi
-
-mountpoint ~/RBOS_Build_Files/isotest/overlaymount
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/overlaymount
-umount -lfd ~/RBOS_Build_Files/isotest/overlaymount
+fuser -km   ~/RBOS_Build_Files/isotest/unionmountpoint
+umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
 fi
 
 mountpoint ~/RBOS_Build_Files/isotest/squashfsmount
@@ -156,12 +134,4 @@ if [ $ismount -eq 0 ]
 then
 fuser -km   ~/RBOS_Build_Files/isotest/isomount
 umount -lfd ~/RBOS_Build_Files/isotest/isomount
-fi
-
-mountpoint ~/RBOS_Build_Files/isotest/testmountpoint
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/testmountpoint
-umount -lfd ~/RBOS_Build_Files/isotest/testmountpoint
 fi
