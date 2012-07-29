@@ -89,7 +89,6 @@ ismount=$?
 if [ $ismount -eq 0 ]
 then
 fuser -km   ~/RBOS_Build_Files/build_mountpoint/ 
-umount -lfd ~/RBOS_Build_Files/build_mountpoint/ 
 fi
 
 #create the subvolume that phase 2 will work with
