@@ -50,10 +50,7 @@ echo "$(date)" > /etc/builddate
 rm -rf /srcbuild
 
 #set weston-launch binary as setuid
-sudo chmod +s /opt/bin/weston-launch
-
-#create the weston-launch group 
-sudo groupadd weston-launch
+chmod +s /opt/bin/weston-launch
 
 #start the remastersys job
 remastersys dist
