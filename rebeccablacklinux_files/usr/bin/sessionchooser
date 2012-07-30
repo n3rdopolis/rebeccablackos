@@ -16,25 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#call up Xorg to set up display for chooser
-Xorg & 		> /var/log/chooseserverlog
-#set the display
-export DISPLAY=:0
-#wait for 10 seconds. X may take ages to load on an actual CD
-sleep 10
-#launch the chooser
-SERVER=$(kdialog --menu "Choose the display server." Xorg Xorg Wayland Wayland) 	>> /var/log/chooseserverlog
-#kill Xorg
-killall Xorg 	>> /var/log/chooseserverlog
-#remove the display variable so that Weston doesn't try to run nested under the display
-unset DISPLAY
-
-
+SERVER=$(kdialog --menu "Choose the display server." Xorg Xorg Wayland Wayland)
 
 if [ $SERVER == "Wayland" ]
 then
-westoncaller 	>> /var/log/chooseserverlog
-lightdm 	>> /var/log/chooseserverlog
+weston-launch
+startkde
 else
-lightdm 	>> /var/log/chooseserverlog
+startkde
 fi

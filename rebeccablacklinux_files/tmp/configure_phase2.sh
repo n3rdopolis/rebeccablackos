@@ -23,7 +23,8 @@ echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 yes Yes |apt-get remove gdm gnome-session -y
 
 #change session manager
-echo 2 | update-alternatives --config x-session-manager  
+update-alternatives --install /usr/bin/x-session-manager x-session-manager /opt/bin/weston 100
+update-alternatives --set x-session-manager /usr/bin/sessionchooser
 
 #copy all the post install files
 rsync /usr/import/* -a /
