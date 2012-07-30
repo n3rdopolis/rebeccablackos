@@ -24,7 +24,7 @@ yes Yes |apt-get remove gdm gnome-session -y
 
 #change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
 mv /opt/bin/weston /opt/bin/weston-display-server
-mv /usr/bin/westonlaunchcaller /opt/bin/weston
+mv /usr/bin/westoncaller /opt/bin/weston
 
 #change session manager
 update-alternatives --install /usr/bin/x-session-manager x-session-manager /usr/bin/sessionchooser 100
