@@ -89,6 +89,7 @@ mount -t aufs -o dirs=~/RBOS_Build_Files/isotest/overlay:~/RBOS_Build_Files/isot
 mount --rbind /dev ~/RBOS_Build_Files/isotest/unionmountpoint/dev
 mount --rbind /proc ~/RBOS_Build_Files/isotest/unionmountpoint/proc
 mount --rbind /sys ~/RBOS_Build_Files/isotest/unionmountpoint/sys
+mount --rbind /tmp ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
 #allow all local connections to the xserver
 xhost +LOCAL:
@@ -111,6 +112,7 @@ cd ~
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/dev
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
 mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
