@@ -19,4 +19,4 @@
 . /usr/bin/weston_vars
 
 (sleep 10; zenity --warning --text="This is a third party fan made distrobution") 
-LD_PRELOAD=/usr/lib/i386-linux-gnu/libjpeg.so weston-display-server --xserver 2>&1 | tee ~/weston
+weston-display-server --xserver 2>&1 | tee ~/weston

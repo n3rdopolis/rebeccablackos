@@ -1,14 +1,37 @@
-diff --git a/clients/dnd.c b/clients/dnd.c
-index c38b94f..bdd2b4a 100644
---- a/clients/dnd.c
-+++ b/clients/dnd.c
-@@ -325,6 +325,9 @@ create_drag_cursor(struct dnd_drag *dnd_drag,
+Signed-off-by: Tiago Vignatti <tiago.vignatti at intel.com>
+---
+ configure.ac |   12 ++++++------
+ 1 file changed, 6 insertions(+), 6 deletions(-)
 
-        pointer = display_get_pointer_image(dnd->display, CURSOR_DRAGGING);
-
-+       if (!pointer)
-+               return;
+diff --git a/configure.ac b/configure.ac
+index a8fc7f2..4e44eb6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -141,12 +141,6 @@ PKG_CHECK_MODULES(WEBP, [libwebp], [have_webp=yes], [have_webp=no])
+ AS_IF([test "x$have_webp" = "xyes"],
+       [AC_DEFINE([HAVE_WEBP], [1], [Have webp])])
+ 
+-PKG_CHECK_MODULES(CAIRO, [cairo])
+-SHARED_LIBS="$CAIRO_LIBS $PIXMAN_LIBS $PNG_LIBS $WEBP_LIBS"
+-SHARED_CFLAGS="$CAIRO_CFLAGS $PIXMAN_CFLAGS $PNG_CFLAGS $WEBP_CFLAGS"
+-AC_SUBST(SHARED_LIBS)
+-AC_SUBST(SHARED_CFLAGS)
+-
+ AC_CHECK_LIB([jpeg], [jpeg_CreateDecompress], have_jpeglib=yes)
+ if test x$have_jpeglib = xyes; then
+   IMAGE_LIBS="$IMAGE_LIBS -ljpeg"
+@@ -154,6 +148,12 @@ else
+   AC_ERROR([libjpeg not found])
+ fi
+ 
++PKG_CHECK_MODULES(CAIRO, [cairo])
++SHARED_LIBS="$CAIRO_LIBS $PIXMAN_LIBS $PNG_LIBS $WEBP_LIBS $IMAGE_LIBS"
++SHARED_CFLAGS="$CAIRO_CFLAGS $PIXMAN_CFLAGS $PNG_CFLAGS $WEBP_CFLAGS"
++AC_SUBST(SHARED_LIBS)
++AC_SUBST(SHARED_CFLAGS)
 +
-        rectangle.width = item_width + 2 * pointer->width;
-        rectangle.height = item_height + 2 * pointer->height;
-        surface = display_create_surface(dnd->display, NULL, &rectangle,
+ COMPOSITOR_LIBS="$COMPOSITOR_LIBS $IMAGE_LIBS"
+ COMPOSITOR_CFLAGS="$COMPOSITOR_CFLAGS $IMAGE_CFLAGS"
+ 
+-- 
+1.7.9.5
