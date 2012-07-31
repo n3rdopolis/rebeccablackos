@@ -17,9 +17,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 . /usr/bin/weston_vars
-
+export LD_PRELOAD=/usr/lib/i386-linux-gnu/libjpeg.so
 export WESTONDIAG="This is a External Diagnosis Terminal for Wayland to run Wayland programs
-You also can launch weston (the command for the Wayland compositor) from here with custom parameters.
+You also can launch weston-display-server (the command for the Wayland compositor) from here with custom parameters.
 This only works when running under X11
 
 To the weston command you can add 
