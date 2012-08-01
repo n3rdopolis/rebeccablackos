@@ -15,6 +15,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#make the folder for the script to create the mounting folders, and the lockfile
+mkdir -p ~/RBOS_Build_Files/isotest/
+
 #Connect to socket file so that it can be counted how many times this script is running
 exec 3<>~/RBOS_Build_Files/isotest/lockfile
 
@@ -95,7 +99,7 @@ fi
 apt-get install aufs-tools squashfs-tools dialog
 
 
-#make a folders for mounting the ISO
+#make the folders for mounting the ISO
 mkdir -p ~/RBOS_Build_Files/isotest/isomount
 mkdir -p ~/RBOS_Build_Files/isotest/squashfsmount
 mkdir -p ~/RBOS_Build_Files/isotest/overlay
