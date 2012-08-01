@@ -46,13 +46,6 @@ echo "$(date)" > /etc/builddate
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
-#set weston-launch binary as setuid
-chmod +s /opt/bin/weston-launch
-
-#change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
-mv /opt/bin/weston /opt/bin/weston-display-server
-cp /usr/bin/westoncaller /opt/bin/weston
-
 #change session manager
 update-alternatives --install /usr/bin/x-session-manager x-session-manager /usr/bin/sessionchooser 100
 update-alternatives --set x-session-manager /usr/bin/sessionchooser
