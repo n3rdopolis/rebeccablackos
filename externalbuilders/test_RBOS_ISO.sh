@@ -15,10 +15,62 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+#Connect to socket file so that it can be counted how many times this script is running
+exec 3<>~/RBOS_Build_Files/isotest/lockfile
 
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
+
+
+function mountisoexit() 
+{
+opencount=$(fuser -v ~/RBOS_Build_Files/isotest/lockfile | wc -w)
+if [ $opencount  -le 3 ]
+then
+echo "This is the last instance of the script that is open. Cleaning up..."
+#unmount the filesystems used by the CD
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/dev
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
+umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
+
+mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/isotest/unionmountpoint
+umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
+fi
+
+mountpoint ~/RBOS_Build_Files/isotest/squashfsmount
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/isotest/squashfsmount
+umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
+fi
+
+mountpoint ~/RBOS_Build_Files/isotest/isomount
+ismount=$?
+if [ $ismount -eq 0 ]
+then
+fuser -km   ~/RBOS_Build_Files/isotest/isomount
+umount -lfd ~/RBOS_Build_Files/isotest/isomount
+fi
+
+#if the user wants to delete the files created on the overlay due to aufs
+dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
+answer=$?
+if [ $answer -eq 1 ]
+then 
+rm -rf ~/RBOS_Build_Files/isotest/overlay
+fi
+fi
+exit
+
+}
+
+
 
 echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 The ISO needs to be the root of your home folder, as that's where it searches for ISOs
@@ -29,7 +81,6 @@ read a
 #enter users home directory
 cd ~
 
-
 mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
@@ -37,7 +88,7 @@ then
 echo "A script is running that is already testing an ISO. will now chroot into it"
 echo "Type exit to go back to your system."
 chroot ~/RBOS_Build_Files/isotest/unionmountpoint
-exit
+mountisoexit
 fi
 
 #install needed tools to allow testing on a read only iso
@@ -57,7 +108,6 @@ ISOS="$(ls ~ | grep .iso$ | nl -ba -w 3)"
 if [ -z $ISOS ]
 then 
 echo "No ISOs Found in your home folder"
-exit
 fi
 
 #list the isos found, and get the number of the selected iso
@@ -76,7 +126,7 @@ then
 echo "Invalid CDROM image. Not an Ubuntu/RebeccaBlackLinux based image" 
 #unmount and exit
 umount ~/RBOS_Build_Files/isotest/isomount
-exit
+mountisoexit
 fi
 
 #mount the squashfs image
@@ -108,32 +158,5 @@ xhost -LOCAL:
 #go back to the users home folder
 cd ~
 
-#unmount the filesystems used by the CD
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/dev
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
-mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/unionmountpoint
-umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
-fi
-
-mountpoint ~/RBOS_Build_Files/isotest/squashfsmount
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/squashfsmount
-umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
-fi
-
-mountpoint ~/RBOS_Build_Files/isotest/isomount
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/isomount
-umount -lfd ~/RBOS_Build_Files/isotest/isomount
-fi
+mountisoexit
