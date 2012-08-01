@@ -16,20 +16,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#make the folder for the script to create the mounting folders, and the lockfile
-mkdir -p ~/RBOS_Build_Files/isotest/
-
-#Connect to socket file so that it can be counted how many times this script is running
-exec 3<>~/RBOS_Build_Files/isotest/lockfile
-
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 
 function mountisoexit() 
 {
-opencount=$(fuser -v ~/RBOS_Build_Files/isotest/lockfile | wc -w)
-if [ $opencount  -le 3 ]
+
+dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
+unmountanswer=$?
+if [ $unmountanswer -eq 1 ]
 then
 echo "This is the last instance of the script that is open. Cleaning up..."
 #unmount the filesystems used by the CD
@@ -64,8 +60,8 @@ fi
 
 #if the user wants to delete the files created on the overlay due to aufs
 dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
-answer=$?
-if [ $answer -eq 1 ]
+deleteanswer=$?
+if [ $deleteanswer -eq 1 ]
 then 
 rm -rf ~/RBOS_Build_Files/isotest/overlay
 fi
