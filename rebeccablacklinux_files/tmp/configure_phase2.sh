@@ -46,10 +46,6 @@ echo "$(date)" > /etc/builddate
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
-#change session manager
-update-alternatives --install /usr/bin/x-session-manager x-session-manager /usr/bin/sessionchooser 100
-update-alternatives --set x-session-manager /usr/bin/sessionchooser
-
 #start the remastersys job
 remastersys dist
 
