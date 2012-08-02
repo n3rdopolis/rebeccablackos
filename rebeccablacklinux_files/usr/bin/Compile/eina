@@ -34,17 +34,9 @@ then
 cd /srcbuild
 cd eina
 echo "REVISION $(svnversion .)"
-export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export WLD=/opt
-PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
-ACLOCAL="aclocal -I $WLD/share/aclocal"
-C_INCLUDE_PATH=$WLD/include
-LIBRARY_PATH=$WLD/lib
-PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+. /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
-export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
-       LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
+
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 
 make install

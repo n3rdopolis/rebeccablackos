@@ -16,59 +16,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-if [[ "$1" != build-only ]]
-then
-mkdir /srcbuild
-cd /srcbuild
-git clone git://gitorious.org/qt/qt5
-cd qt5
-git checkout master
-git reset --hard 
-git clean -fdx 
-git pull
-perl init-repository
-fi
-
-
-
-if [[ "$1" != download-only ]]
-then
-cd /srcbuild
-cd qt5
-set +e
-echo "REVISION $(git rev-parse HEAD)"
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export WLD=/opt
-PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
-ACLOCAL="aclocal -I $WLD/share/aclocal"
-C_INCLUDE_PATH=$WLD/include
-LIBRARY_PATH=$WLD/lib
-PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+export PKG_CONFIG_PATH=$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
+export ACLOCAL="aclocal -I $WLD/share/aclocal"
+export C_INCLUDE_PATH=$WLD/include
+export LIBRARY_PATH=$WLD/lib
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 export QTVER=qt5
+export QTDIR=$WLD
 export PATH=$QTDIR/bin/:$PATH
 export LD_LIBRARY_PATH=$QTDIR/lib/:$LD_LIBRARY_PATH
 export PKG_CONFIG_PATH=$QTDIR/lib/pkgconfig/:$PKG_CONFIG_PATH
 export QT_PLUGIN_PATH=$QTDIR/lib/plugins/
-mkdir -p $WLD/share/aclocal
-export WLD LD_LIBRARY_PATH PKG_CONFIG_PATH ACLOCAL C_INCLUDE_PATH \
-       LIBRARY_PATH PKG_CONFIG_ALLOW_SYSTEM_CFLAGS
-perl init-repository 
-./configure -confirm-license  -opensource -xcb -wayland -egl -opengl es2 -prefix $WLD -release -reduce-exports -reduce-relocations
-
-make 
-cd qtwebkit
-export WEBKITOUTPUTDIR=/opt/webkit
-perl Tools/Scripts/build-webkit --qt --qmake=../qtbase/bin/qmake --install-libs=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --release --makeargs=$MAKEFLAGS
-
-make install
-
-
-#install qt tests
-find /srcbuild/qt5/examples  -executable | while read TEST
-do
-cp "$TEST" $WLD/bin
-done
-cd ..
-
-fi
