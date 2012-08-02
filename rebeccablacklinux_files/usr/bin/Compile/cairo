@@ -22,7 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/cairo
 cd cairo
-git checkout 1.10
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
