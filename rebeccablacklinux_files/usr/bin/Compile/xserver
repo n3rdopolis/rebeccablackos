@@ -39,6 +39,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
+sed -i 's/vesa/wlshm/g' hw/xfree86/common/xf86AutoConfig.c
 ./autogen.sh --disable-selective-werror --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
 make install
