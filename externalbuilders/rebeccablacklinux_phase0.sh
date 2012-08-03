@@ -78,7 +78,7 @@ mkdir ~/RBOS_Build_Files/build_mountpoints/workdir
 mount ~/RBOS_Build_Files/RBOS_FS_PHASE_1.img ~/RBOS_Build_Files/build_mountpoints/phase_1 -o loop
 
 #bind mount the FS to the workdir
-mount --bind mkdir ~/RBOS_Build_Files/build_mountpoints/phase_1 ~/RBOS_Build_Files/build_mountpoints/workdir
+mount --bind ~/RBOS_Build_Files/build_mountpoints/phase_1 ~/RBOS_Build_Files/build_mountpoints/workdir
 
 #install a really basic Ubuntu installation in the new fs  
 debootstrap quantal ~/RBOS_Build_Files/build_mountpoints/workdir http://ubuntu.osuosl.org/ubuntu/
