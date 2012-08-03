@@ -34,29 +34,15 @@ umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
-mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/unionmountpoint
+fuser -kmM   ~/RBOS_Build_Files/isotest/unionmountpoint
 umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
-fi
 
-mountpoint ~/RBOS_Build_Files/isotest/squashfsmount
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/squashfsmount
+fuser -kmM   ~/RBOS_Build_Files/isotest/squashfsmount
 umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
-fi
 
-mountpoint ~/RBOS_Build_Files/isotest/isomount
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/isotest/isomount
+fuser -kmM  ~/RBOS_Build_Files/isotest/isomount
 umount -lfd ~/RBOS_Build_Files/isotest/isomount
-fi
+
 
 #if the user wants to delete the files created on the overlay due to aufs
 dialog --stdout --yesno "Keep Temporary overlay files?" 30 30

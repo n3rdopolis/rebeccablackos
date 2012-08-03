@@ -24,19 +24,19 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 cd ~
 
 #unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
 
-#kill any process accessing the livedisk mountpoint 
-fuser ~/RBOS_Build_Files/build_mountpoint -km
+#Kill processess accessing the workdir mountpoint
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
 
-#unmount the chroot fs
-umount -lfd ~/RBOS_Build_Files/build_mountpoint
+#unmount the FS at the workdir
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
 
 
 
@@ -45,12 +45,12 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoint
 
 
 #mount the image as a loop device
-mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
+mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoints -o loop,compress-force=lzo
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/
-mount --rbind /proc ~/RBOS_Build_Files/build_mountpoint/phase_2/proc/
-mount --rbind /sys ~/RBOS_Build_Files/build_mountpoint/phase_2/sys/
+mount --rbind /dev ~/RBOS_Build_Files/build_mountpoints/workdir/dev/
+mount --rbind /proc ~/RBOS_Build_Files/build_mountpoints/workdir/proc/
+mount --rbind /sys ~/RBOS_Build_Files/build_mountpoints/workdir/sys/
 
 #allow all local connections to the xserver
 xhost +LOCAL:
@@ -60,25 +60,25 @@ xhost +LOCAL:
 echo "Type exit to go back to your system."
 
 #Configure the Live system########################################
-chroot ~/RBOS_Build_Files/build_mountpoint/phase_2
+chroot ~/RBOS_Build_Files/build_mountpoints/workdir
 
 #set the xserver security back to what it should be
 xhost -LOCAL:
 
 #unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
  
-#kill any process accessing the livedisk mountpoint 
-fuser -km ~/RBOS_Build_Files/build_mountpoint/phase_2/ 
+#Kill processess accessing the workdir mountpoint
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
 
-#go back to the users home folder
+#unmount the FS at the workdir
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
+
+
 cd ~
-
-#unmount the chroot fs
-umount -lfd ~/RBOS_Build_Files/build_mountpoint

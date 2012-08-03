@@ -22,62 +22,76 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 
 #create a media mountpoint in the media folder
-mkdir ~/RBOS_Build_Files/build_mountpoint
+mkdir ~/RBOS_Build_Files/build_mountpoints
 
-#mount the image created above at the mountpoint as a loop device
-mount ~/RBOS_Build_Files/RBOS_FS.img ~/RBOS_Build_Files/build_mountpoint -o loop,compress-force=lzo
+#create the file that will be the filesystem image for the second phase
+dd if=/dev/zero of=~/RBOS_Build_Files/RBOS_FS_PHASE_2.img bs=1 count=0 seek=8G 
+
+
+echo "creating a file system on the virtual image. Not on your real file system."
+#create a file system on the image 
+yes y | mkfs.ext4 ~/RBOS_Build_Files/RBOS_FS_PHASE_2.img
+
+
+
+#mount the images for the two FSes
+mount ~/RBOS_Build_Files/RBOS_FS_PHASE_1.img ~/RBOS_Build_Files/build_mountpoints/phase_1 -o loop
+mount ~/RBOS_Build_Files/RBOS_FS_PHASE_2.img ~/RBOS_Build_Files/build_mountpoints/phase_2 -o loop
+
+#create the union of the two overlay FSes at the workdir
+mount -t aufs -o dirs=~/RBOS_Build_Files/build_mountpoints/phase_2:~/RBOS_Build_Files/build_mountpoints/phase_1 none ~/RBOS_Build_Files/build_mountpoints/workdir
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev ~/RBOS_Build_Files/build_mountpoint/phase_1/dev/
-mount --rbind /proc ~/RBOS_Build_Files/build_mountpoint/phase_1/proc/
-mount --rbind /sys ~/RBOS_Build_Files/build_mountpoint/phase_1/sys/
+mount --rbind /dev ~/RBOS_Build_Files/build_mountpoints/workdir/dev/
+mount --rbind /proc ~/RBOS_Build_Files/build_mountpoints/workdir/proc/
+mount --rbind /sys ~/RBOS_Build_Files/build_mountpoints/workdir/sys/
 
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
 
 
 #make the imported files executable 
-chmod +x -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
-chown  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
-chgrp  root  -R ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
+chmod +x -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
+chown  root  -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
+chgrp  root  -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
 
 
 #copy the files to where they belong
-cp -a ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/* ~/RBOS_Build_Files/build_mountpoint/phase_2/
+cp -a ~/RBOS_Build_Files/build_mountpoints/workdir/temp/* ~/RBOS_Build_Files/build_mountpoints/workdir/
 
 #delete the temp folder
-rm -rf ~/RBOS_Build_Files/build_mountpoint/phase_2/temp/
+rm -rf ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
 
 
 
 #mounting devfs on chrooted fs with bind 
-mount --bind /dev ~/RBOS_Build_Files/build_mountpoint/phase_2/dev/
+mount --bind /dev ~/RBOS_Build_Files/build_mountpoints/workdir/dev/
 
 
 #Configure the Live system########################################
-chroot ~/RBOS_Build_Files/build_mountpoint/phase_2 /tmp/configure_phase2.sh
+chroot ~/RBOS_Build_Files/build_mountpoints/workdir /tmp/configure_phase2.sh
 
 
 #If the live cd did not build then tell user  
-if [ ! -f ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ];
+if [ ! -f ~/RBOS_Build_Files/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
 exit 1
 fi 
 
 #If the live cd did  build then tell user   
-if [  -f ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ];
+if [  -f ~/RBOS_Build_Files/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 #delete the old copy of the ISO 
 rm ~/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
-cp ~/RBOS_Build_Files/build_mountpoint/phase_2/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
+cp ~/RBOS_Build_Files/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
 
 #dump out the logged revision numbers to a file
-ls ~/RBOS_Build_Files/build_mountpoint/phase_2/usr/share/Buildlog/ | while read FILE 
+ls ~/RBOS_Build_Files/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 
 do  
-REV=$(cat ~/RBOS_Build_Files/build_mountpoint/phase_2/usr/share/Buildlog/$FILE | grep REVISION | awk '{print $2}')
+REV=$(cat ~/RBOS_Build_Files/build_mountpoints/workdir/usr/share/Buildlog/$FILE | grep REVISION | awk '{print $2}')
 echo $FILE=$REV
 done > ~/RBOS_Build_Files/BuiltRevisions-$(date +%s)
 
@@ -98,24 +112,23 @@ cd ~
 
 
 #unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/proc
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/sys
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoint/phase_2/dev
+umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
 
-mountpoint ~/RBOS_Build_Files/build_mountpoint/ 
-ismount=$?
-if [ $ismount -eq 0 ]
-then
-fuser -km   ~/RBOS_Build_Files/build_mountpoint/ 
-umount -lfd ~/RBOS_Build_Files/build_mountpoint/ 
-fi
+#Kill processess accessing the workdir mountpoint
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
 
+#unmount the FS at the workdir
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
 
+#unmount the underlay filesystems
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_1
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_2
 
-
-
-
+#Delete the FS image for phase 2.
+rm ~/RBOS_Build_Files/RBOS_FS_PHASE_2.img
