@@ -50,8 +50,8 @@ fuser -km   ~/RBOS_Build_Files/build_mountpoint/
 umount -lfd ~/RBOS_Build_Files/build_mountpoint/ 
 fi
 
-#remove the RBOS_Build_Files folder 
-rm -rf ~/RBOS_Build_Files
+#remove the RBOS_FS images
+rm  ~/RBOS_Build_Files/*.img
 
 
 
