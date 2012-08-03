@@ -33,7 +33,7 @@ umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
 
 #Kill processess accessing the workdir mountpoint
-fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
 umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
@@ -75,7 +75,7 @@ umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
  
 #Kill processess accessing the workdir mountpoint
-fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
 umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir

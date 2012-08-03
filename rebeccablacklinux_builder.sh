@@ -117,13 +117,13 @@ umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
 
 #kill any process accessing the livedisk mountpoint 
-fuser -kmM ~/RBOS_Build_Files/build_mountpoints/workdir
+fuser -kmM ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
  
 #unmount the chroot fs
 umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
 
 #unmount the underlay filesystems
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_1
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_2
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_1
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_2
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"

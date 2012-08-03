@@ -34,13 +34,13 @@ umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
 umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
-fuser -kmM   ~/RBOS_Build_Files/isotest/unionmountpoint
+fuser -kmM   ~/RBOS_Build_Files/isotest/unionmountpoint 2> /dev/null
 umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
 
-fuser -kmM   ~/RBOS_Build_Files/isotest/squashfsmount
+fuser -kmM   ~/RBOS_Build_Files/isotest/squashfsmount 2> /dev/null
 umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
 
-fuser -kmM  ~/RBOS_Build_Files/isotest/isomount
+fuser -kmM  ~/RBOS_Build_Files/isotest/isomount 2> /dev/null
 umount -lfd ~/RBOS_Build_Files/isotest/isomount
 
 

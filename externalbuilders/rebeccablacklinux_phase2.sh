@@ -121,14 +121,14 @@ umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
 umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
 
 #Kill processess accessing the workdir mountpoint
-fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir
+fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
 umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
 
 #unmount the underlay filesystems
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_1
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir/phase_2
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_1
+umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_2
 
 #Delete the FS image for phase 2.
 rm ~/RBOS_Build_Files/RBOS_FS_PHASE_2.img
