@@ -19,24 +19,25 @@ echo "PHASE 1"
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
+RBOSLOCATION=~/RBOS_Build_Files
 
 #enter users home directory
 cd ~
 
 #unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
 #Kill processess accessing the workdir mountpoint
-fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
+fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
 
 
@@ -45,58 +46,58 @@ umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
 
 
 #mount the image as a loop device
-mount ~/RBOS_Build_Files/RBOS_FS_PHASE_1.img ~/RBOS_Build_Files/build_mountpoints/phase_1 -o loop
+mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
 
 #call the manager script for resizing the disk image 
-$ThIsScriPtSFolDerLoCaTion/fsresizer "~/RBOS_Build_Files/RBOS_FS_PHASE_1.img" & >> ~/RBOS_Build_Files/fsresizer.log
+$ThIsScriPtSFolDerLoCaTion/fsresizer "$RBOSLOCATION/RBOS_FS_PHASE_1.img"  >> $RBOSLOCATION/fsresizer.log &
 
 #bind mount the FS to the workdir
-mount --bind ~/RBOS_Build_Files/build_mountpoints/phase_1 ~/RBOS_Build_Files/build_mountpoints/workdir
+mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev ~/RBOS_Build_Files/build_mountpoints/workdir/dev/
-mount --rbind /proc ~/RBOS_Build_Files/build_mountpoints/workdir/proc/
-mount --rbind /sys ~/RBOS_Build_Files/build_mountpoints/workdir/sys/
+mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
+mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
+mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 
 #make the imported files executable 
-chmod +x -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
-chown  root  -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
-chgrp  root  -R ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
+chmod +x -R $RBOSLOCATION/build_mountpoints/workdir/temp/
+chown  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
+chgrp  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 #copy the ONLY minimal build files in, not any data files like wallpapers.
-mkdir -p ~/RBOS_Build_Files/build_mountpoints/workdir/usr/bin/Compile/
-cp -a ~/RBOS_Build_Files/build_mountpoints/workdir/temp/tmp/* ~/RBOS_Build_Files/build_mountpoints/workdir/tmp
-cp -a ~/RBOS_Build_Files/build_mountpoints/workdir/temp/usr/bin/Compile/* ~/RBOS_Build_Files/build_mountpoints/workdir/usr/bin/Compile/
-cp ~/RBOS_Build_Files/build_mountpoints/workdir/temp/usr/bin/compile_all ~/RBOS_Build_Files/build_mountpoints/workdir/usr/bin/compile_all 
-cp ~/RBOS_Build_Files/build_mountpoints/workdir/temp/etc/apt/sources.list ~/RBOS_Build_Files/build_mountpoints/workdir/etc/apt/sources.list 
+mkdir -p $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
+cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/tmp/* $RBOSLOCATION/build_mountpoints/workdir/tmp
+cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
+cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build_mountpoints/workdir/usr/bin/compile_all 
+cp $RBOSLOCATION/build_mountpoints/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build_mountpoints/workdir/etc/apt/sources.list 
 
 #delete the temp folder
-rm -rf ~/RBOS_Build_Files/build_mountpoints/workdir/temp/
+rm -rf $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 
 
 #Configure the Live system########################################
-chroot ~/RBOS_Build_Files/build_mountpoints/workdir /tmp/configure_phase1.sh
+chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase1.sh
 
 
 #unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 
 #Kill processess accessing the workdir mountpoint
-fuser -kmM   ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
+fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
 #unmount the underlay filesystem
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_1
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
 
 #go back to the users home folder
 cd ~

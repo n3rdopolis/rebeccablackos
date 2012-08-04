@@ -1,4 +1,4 @@
-#! /bin/bash
+#! /usr/bin/sudo /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -16,14 +16,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+IMAGEARGUMENT=$1
+echo $IMAGEARGUMENT
 #get the image file from the argument
-IMAGEFILE=$1
+IMAGEFILE=`readlink -f $IMAGEARGUMENT`
 
 #get the loop device the file is associated with
-LOOPDEVICE=$(losetup -j "$IMAGEFILE" | awk -F : '{print $1}' | head -1)
+LOOPDEVICE=`losetup -j "$IMAGEFILE" | awk -F : '{print $1}' | head -1`
 
 #get where the file system image is mounted
-MOUNTPOINT=$(df "$LOOPDEVICE" | awk '{print $6}' | grep -v M)
+MOUNTPOINT=`df "$LOOPDEVICE" | awk '{print $6}' | grep -v M`
+
+echo "Monitoring the usage of  file system mounted at $MOUNTPOINT, which is backed by $IMAGEFILE, and is using the loop device $LOOPDEVICE"
 
 #verify that the virtual fs is still mounted
 mountpoint -q "$MOUNTPOINT"
@@ -37,13 +41,15 @@ sleep 10
 
 #get the number of free bytes on the disk image
 FREESPACE=$(( 1024 * $(df "$LOOPDEVICE" |awk '{print $4}' | grep -v A)))
-echo $FREESPACE
+
+echo "There are $FREESPACE bytes free at this check"
+
 #if there is less then 500 megabytes free 
 if [[ $FREESPACE -lt 500000000 ]]
 then
 echo "Size of disk is below threshold. Resizing image..."
 #get the current size of the file system image
-SIZE=$(ls -l "$IMAGEFILE"  | awk '{print $5}')
+SIZE=`ls -l "$IMAGEFILE"  | awk '{print $5}'`
 
 #Add 250 megabytes
 NEWSIZE=$(( $SIZE + 250000000))

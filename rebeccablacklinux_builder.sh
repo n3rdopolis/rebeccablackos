@@ -20,6 +20,8 @@ STARTTIME=$(date +%s)
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
+RBOSLOCATION=~/RBOS_Build_Files
+
 #####Tell User what script does
 echo "
 THIS SCRIPT INSTALLS debootstrap AND btfs-tools
@@ -94,15 +96,15 @@ echo "Setting up live system..."
 REBUILT="to update"
 
 #only initilize the FS if the FS isn't there.
-if [ ! -f ~/RBOS_Build_Files/DontStartFromScratch ]
+if [ ! -f $RBOSLOCATION/DontStartFromScratch ]
 then
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_0.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh 2>&1 | tee -a $RBOSLOCATION/Phase_0.log
 REBUILT="to rebuild from scratch"
 fi
 
 #run the build scripts
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_1.log
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_2.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a $RBOSLOCATION/Phase_1.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | tee -a $RBOSLOCATION/Phase_2.log
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
