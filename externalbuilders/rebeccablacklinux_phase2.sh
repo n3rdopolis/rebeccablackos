@@ -39,7 +39,7 @@ mount ~/RBOS_Build_Files/RBOS_FS_PHASE_1.img ~/RBOS_Build_Files/build_mountpoint
 mount ~/RBOS_Build_Files/RBOS_FS_PHASE_2.img ~/RBOS_Build_Files/build_mountpoints/phase_2 -o loop
 
 #call the manager script for resizing the disk image. Phase 2 is the only image that gets written to in this script, so only call it for phase 2
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/fsresizer "~/RBOS_Build_Files/RBOS_FS_PHASE_2.img" & >> ~/RBOS_Build_Files/fsresizer.log
+$ThIsScriPtSFolDerLoCaTion/fsresizer "~/RBOS_Build_Files/RBOS_FS_PHASE_2.img" & >> ~/RBOS_Build_Files/fsresizer.log
 
 #create the union of the two overlay FSes at the workdir
 mount -t aufs -o dirs=~/RBOS_Build_Files/build_mountpoints/phase_2:~/RBOS_Build_Files/build_mountpoints/phase_1 none ~/RBOS_Build_Files/build_mountpoints/workdir
