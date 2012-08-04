@@ -20,27 +20,30 @@
 IMAGEFILE=$1
 
 #get the loop device the file is associated with
-LOOPDEVICE=$(losetup -j "$IMAGEFILE")
+LOOPDEVICE=$(losetup -j "$IMAGEFILE" | awk -F : '{print $1}' | head -1)
 
 #get where the file system image is mounted
-MOUNTPOINT=$(df $LOOPDEVICE | awk '{print $6}' | grep -v M)
+MOUNTPOINT=$(df "$LOOPDEVICE" | awk '{print $6}' | grep -v M)
 
+#verify that the virtual fs is still mounted
+mountpoint -q "$MOUNTPOINT"
+ismount=$?
 #run until the device is unmounted
-while [ $(mountpoint -q $MOUNTPOINT; echo $?) ]
+while [ $ismount -eq 0 ]
 do
 
 #wait for 1 second to not overuse the CPU 
 sleep 1
 
 #get the number of free bytes on the disk image
-FREESPACE=$(( 1024 * $(df $LOOPDEVICE |awk '{print $4}' | grep -v A)))
-
-#if there is less then 50 megabytes free
-if [[ FREESPACE -lt 50000000 ]]
+FREESPACE=$(( 1024 * $(df "$LOOPDEVICE" |awk '{print $4}' | grep -v A)))
+echo $FREESPACE
+#if there is less then 50 megabytes free 
+if [[ $FREESPACE -lt 50000000 ]]
 then
 
 #get the current size of the file system image
-SIZE=$(ls -l $IMAGEFILE  | awk '{print $5}')
+SIZE=$(ls -l "$IMAGEFILE"  | awk '{print $5}')
 
 #Add 100 megabytes
 NEWSIZE=$(( $SIZE + 100000000))
@@ -49,9 +52,13 @@ NEWSIZE=$(( $SIZE + 100000000))
 sudo dd if=/dev/zero of="$IMAGEFILE" bs=1 count=0 seek=$NEWSIZE oflag=append 
 
 #update the size of the loop device to the size of the grown image
-sudo losetup -c $LOOPDEVICE
+sudo losetup -c "$LOOPDEVICE"
 
 #resize the ext4 FS on the loop device to become the new size of the image
-sudo resize2fs  $LOOPDEVICE
+sudo resize2fs  "$LOOPDEVICE"
 fi
+
+#verify that the virtual fs is still mounted
+mountpoint -q "$MOUNTPOINT"
+ismount=$?
 done
