@@ -77,7 +77,7 @@ chroot ~/RBOS_Build_Files/build_mountpoints/workdir /tmp/configure_phase2.sh
 if [ ! -f ~/RBOS_Build_Files/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
-exit 1
+
 fi 
 
 #If the live cd did  build then tell user   
@@ -97,14 +97,13 @@ done > ~/RBOS_Build_Files/BuiltRevisions-$(date +%s)
 
 
 echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
-exit 0
-fi
-
 
 #allow the user to actually read the iso   
 chown $SUDO_USER ~/RebeccaBlackLinux.iso
 chgrp $SUDO_USER ~/RebeccaBlackLinux.iso
 chmod 777 ~/RebeccaBlackLinux.iso
+
+fi
 
 
 #go back to the users home folder

@@ -104,26 +104,5 @@ fi
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_1.log
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | tee -a ~/RBOS_Build_Files/Phase_2.log
 
-
-
-
-#unmount the chrooted procfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf ~/RBOS_Build_Files/build_mountpoints/workdir/dev
-
-#kill any process accessing the livedisk mountpoint 
-fuser -kmM ~/RBOS_Build_Files/build_mountpoints/workdir 2> /dev/null
- 
-#unmount the chroot fs
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/workdir
-
-#unmount the underlay filesystems
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_1
-umount -lfd ~/RBOS_Build_Files/build_mountpoints/phase_2
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
