@@ -32,8 +32,8 @@ ismount=$?
 while [ $ismount -eq 0 ]
 do
 
-#wait for 1 second to not overuse the CPU 
-sleep 1
+#wait for 10 seconds to not overuse the CPU 
+sleep 10
 
 #get the number of free bytes on the disk image
 FREESPACE=$(( 1024 * $(df "$LOOPDEVICE" |awk '{print $4}' | grep -v A)))
