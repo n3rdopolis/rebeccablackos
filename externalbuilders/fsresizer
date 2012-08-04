@@ -41,12 +41,12 @@ echo $FREESPACE
 #if there is less then 500 megabytes free 
 if [[ $FREESPACE -lt 500000000 ]]
 then
-
+echo "Size of disk is below threshold. Resizing image..."
 #get the current size of the file system image
 SIZE=$(ls -l "$IMAGEFILE"  | awk '{print $5}')
 
-#Add 100 megabytes
-NEWSIZE=$(( $SIZE + 100000000))
+#Add 250 megabytes
+NEWSIZE=$(( $SIZE + 250000000))
 
 #sparsely append $NEWSIZE-$SIZE worth of data to the specified image file
 sudo dd if=/dev/zero of="$IMAGEFILE" bs=1 count=0 seek=$NEWSIZE oflag=append 
@@ -62,3 +62,4 @@ fi
 mountpoint -q "$MOUNTPOINT"
 ismount=$?
 done
+echo "Image is no longer mounted. Resizer script is exiting."
