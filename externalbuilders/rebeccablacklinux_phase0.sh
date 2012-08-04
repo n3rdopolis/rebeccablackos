@@ -79,6 +79,9 @@ mkdir $RBOSLOCATION/build_mountpoints/workdir
 #mount the image created above at the mountpoint as a loop device
 mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
 
+#Kill the fsresizer script, so it doesn't run twice
+killall $ThIsScriPtSFolDerLoCaTion/fsresizer
+
 #call the manager script for resizing the disk image 
 $ThIsScriPtSFolDerLoCaTion/fsresizer "$RBOSLOCATION/RBOS_FS_PHASE_1.img"  >> $RBOSLOCATION/fsresizer.log &
 
@@ -112,3 +115,6 @@ umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
 #unmount the underlay filesystem
 umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
+
+#Kill the fsresizer script, so it doesn't run twice
+killall $ThIsScriPtSFolDerLoCaTion/fsresizer

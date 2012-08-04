@@ -38,6 +38,9 @@ yes y | mkfs.ext4 $RBOSLOCATION/RBOS_FS_PHASE_2.img
 mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
 mount $RBOSLOCATION/RBOS_FS_PHASE_2.img $RBOSLOCATION/build_mountpoints/phase_2 -o loop
 
+#Kill the fsresizer script, so it doesn't run twice
+killall $ThIsScriPtSFolDerLoCaTion/fsresizer
+
 #call the manager script for resizing the disk image. Phase 2 is the only image that gets written to in this script, so only call it for phase 2
 $ThIsScriPtSFolDerLoCaTion/fsresizer "$RBOSLOCATION/RBOS_FS_PHASE_2.img" >> $RBOSLOCATION/fsresizer.log &
 
@@ -134,3 +137,7 @@ umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
 #Delete the FS image for phase 2.
 rm $RBOSLOCATION/RBOS_FS_PHASE_2.img
+
+
+#Kill the fsresizer script, so it doesn't run twice
+killall $ThIsScriPtSFolDerLoCaTion/fsresizer
