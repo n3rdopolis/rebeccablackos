@@ -77,6 +77,9 @@ mkdir ~/RBOS_Build_Files/build_mountpoints/workdir
 #mount the image created above at the mountpoint as a loop device
 mount ~/RBOS_Build_Files/RBOS_FS_PHASE_1.img ~/RBOS_Build_Files/build_mountpoints/phase_1 -o loop
 
+#call the manager script for resizing the disk image 
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/fsresizer "~/RBOS_Build_Files/RBOS_FS_PHASE_1.img" &
+
 #bind mount the FS to the workdir
 mount --bind ~/RBOS_Build_Files/build_mountpoints/phase_1 ~/RBOS_Build_Files/build_mountpoints/workdir
 
