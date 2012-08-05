@@ -86,7 +86,7 @@ echo "building $BUILDNAME"
 fi
 
 #compile_all is running to download and build
-if [[ ! -x "$argument" ]]
+if [[ ! -n "$argument" ]]
 then
 "/usr/bin/Compile/$BUILDNAME"
 fi
