@@ -25,8 +25,8 @@ yes Yes |apt-get remove gdm gnome-session -y
 #copy all the post install files
 rsync /usr/import/* -a /
 
-#run the script that calls all compile scripts in a specified order
-compile_all
+#run the script that calls all compile scripts in a specified order, in build only mode
+compile_all build-only
 
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys

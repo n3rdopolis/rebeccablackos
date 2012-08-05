@@ -40,7 +40,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /tmp/weston.diff
+patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
 make install -i
