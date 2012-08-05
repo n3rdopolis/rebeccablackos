@@ -18,6 +18,9 @@
 
 SERVER=$(kdialog --menu "Choose the display server." Xorg Xorg Wayland Wayland)
 
+#inherit variables for Wayland, so this script can actually find weston-launch with $PATH. 
+. /usr/bin/weston_vars
+
 if [ $SERVER == "Wayland" ]
 then
 weston-launch
