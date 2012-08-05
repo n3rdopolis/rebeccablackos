@@ -42,8 +42,6 @@ sleep 10
 #get the number of free bytes on the disk image
 FREESPACE=$(( 1024 * $(df "$LOOPDEVICE" |awk '{print $4}' | grep -v A)))
 
-echo "There are $FREESPACE bytes free at this check"
-
 #if there is less then 500 megabytes free 
 if [[ $FREESPACE -lt 500000000 ]]
 then
