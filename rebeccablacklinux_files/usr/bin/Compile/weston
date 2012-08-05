@@ -43,7 +43,7 @@ mkdir -p $WLD/share/aclocal
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
-make install -i
+make install 
 
 
 #install Wayland clients into the PATH
@@ -67,11 +67,11 @@ cp /usr/share/icons/oxy-white/cursors/dnd-none /usr/share/icons/oxy-white/cursor
  
 
 #set weston-launch binary as setuid
-chmod +s /opt/bin/weston-launch
+chmod +s $WLD/bin/weston-launch
 
 #change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
-mv /opt/bin/weston /opt/bin/weston-display-server
-cp /usr/bin/westoncaller /opt/bin/weston
+mv $WLD/bin/weston $WLD/bin/weston-display-server
+cp /usr/bin/westoncaller $WLD/bin/weston
 
 cd ..
 
