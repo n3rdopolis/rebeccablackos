@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 IMAGEARGUMENT=$1
-echo $IMAGEARGUMENT
 #get the image file from the argument
 IMAGEFILE=`readlink -f $IMAGEARGUMENT`
 
