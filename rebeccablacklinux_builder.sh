@@ -98,13 +98,13 @@ REBUILT="to update"
 #only initilize the FS if the FS isn't there.
 if [ ! -f $RBOSLOCATION/DontStartFromScratch ]
 then
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh 2>&1 | tee -a $RBOSLOCATION/Phase_0.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh
 REBUILT="to rebuild from scratch"
 fi
 
 #run the build scripts
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 2>&1 | tee -a $RBOSLOCATION/Phase_1.log
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh 2>&1 | tee -a $RBOSLOCATION/Phase_2.log
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh  
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
