@@ -39,6 +39,12 @@ fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
+#unmount the two virtual file systems backed by image files
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
+
+#Delete the FS image for phase 2.
+rm $RBOSLOCATION/RBOS_FS_PHASE_2.img
 
 
 #END PAST RUN CLEANUP##################
