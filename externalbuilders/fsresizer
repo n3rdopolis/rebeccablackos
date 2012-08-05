@@ -58,7 +58,7 @@ sudo dd if=/dev/zero of="$IMAGEFILE" bs=1 count=0 seek=$NEWSIZE oflag=append
 sudo losetup -c "$LOOPDEVICE"
 
 #resize the ext4 FS on the loop device to become the new size of the image
-sudo resize2fs  "$LOOPDEVICE"
+sudo resize2fs -f -p "$LOOPDEVICE"
 fi
 
 #verify that the virtual fs is still mounted
