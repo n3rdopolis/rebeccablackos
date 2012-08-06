@@ -1,15 +1,17 @@
-To build, just run the included script. The build script only works on Ubuntu/Debain (I think it would work on Debian) based systems. 
+/To build, just run the included script. The build script only works on Ubuntu/Debain (I think it would work on Debian) based systems. 
 
 Otherwise use the ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
 This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is Rebecca Black Linux. 
 
-This has both Wayland and X. Even though QT, GTK, EFL, and Xwayland has been compiled on this CD to support Wayland, many apps don't work.
+This has both Wayland and X. Even though QT, GTK, EFL, and SDL has been compiled on this CD to support Wayland, many apps don't work.
+
+However Xwayland is also built into the CD which provides a way for X apps to run in Wayland, where many DO work, with a few quirks.
 
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
 Problems:
-      Wayland is still new, things are still unstable
+      Wayland is still new, things are still a bit unstable, but somewhat useable
 
       Won't fit on a normal CD.
 
