@@ -54,12 +54,6 @@ rm $RBOSLOCATION/RBOS_FS_PHASE_2.img
 #mount the image as a loop device
 mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
 
-#Kill the fsresizer script, so it doesn't run twice
-killall $ThIsScriPtSFolDerLoCaTion/fsresizer
-
-#call the manager script for resizing the disk image 
-$ThIsScriPtSFolDerLoCaTion/fsresizer "$RBOSLOCATION/RBOS_FS_PHASE_1.img"  >> $RBOSLOCATION/fsresizer.log &
-
 #bind mount the FS to the workdir
 mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
 
@@ -110,6 +104,3 @@ umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
 
 #go back to the users home folder
 cd ~
-
-#Kill the fsresizer script, so it doesn't run twice
-killall $ThIsScriPtSFolDerLoCaTion/fsresizer
