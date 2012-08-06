@@ -1,0 +1,40 @@
+#! /bin/bash
+#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+zenity --info --text 'Weston Key Bindings:
+============================================================================================================================================
+Note: The super key on most keyboards is the Windows logo key.
+Note: The middle mouse button is usually pressing the scroll button on most mice.
+============================================================================================================================================
+
+Zoom the display in and out: Super key + scroll wheel
+
+Move Window: Super key + left mouse button                    Resize Window: Super key + middle mouse button
+Switch Windows: Super key + tab                              Change Window opacity: Super key + alt key + scroll wheel
+Rotate Window: Super key: right mouse button
+
+Save a screenshot: Super key + s
+Start and stop video recording: Super key + r (after recording run weston-video-convert in the panel to convert the capture file to a .webm video file)
+
+Dim the display (under native Weston): Super key + F9
+Brighten the display (under native Weston): Super key + F10
+
+Exit Weston: ctrl key + alt key + backspace'
+
+

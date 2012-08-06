@@ -126,7 +126,8 @@ libicu-dev
 libraptor-dev
 remastersys
 ubuntu-minimal
-xterm"
+xterm
+vpx-tools"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
@@ -177,6 +178,8 @@ rm /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /sbin/initctl
 
+#delete the downloaded file cache
+apt-get clean
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
