@@ -31,8 +31,8 @@ elif [ $SERVER == "Xwayland" ]
 then
 . /usr/bin/weston_vars
 DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
-HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $1}')
-WIDTH=$(echo $DIMENSIONS | awk -F x '{print $2}')
+WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
+HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
 weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT
 startkde
 
