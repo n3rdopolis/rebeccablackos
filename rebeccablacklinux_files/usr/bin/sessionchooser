@@ -28,6 +28,7 @@ weston-launch
 startkde
 
 elif [ $SERVER == "Xwayland" ]
+then
 . /usr/bin/weston_vars
 DIMENSIONS=$(xdpyinfo | grep dimensions | awk '{print $2}')
 HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $1}')
