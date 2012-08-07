@@ -33,7 +33,7 @@ then
 DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
 HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $1}')
 WIDTH=$(echo $DIMENSIONS | awk -F x '{print $2}')
-weston --fullscreen --width=$WIDTH --height=$HEIGHT
+weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT
 startkde
 
 else
