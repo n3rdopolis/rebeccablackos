@@ -105,7 +105,7 @@ LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
 unset WINDOWID
 
-echo 'Run sudo westoncaller in a tty to try Wayland running native. To exit from Wayland running native, hit CTRL-ALT-BACKSPACE'
+echo 'To exit from Wayland running native, hit CTRL-ALT-BACKSPACE'
 echo ' '
 echo 'Wayland programs are in /opt/bin or any GTK program when you are running a GTK program from a Wayland terminal'
 echo ' '
