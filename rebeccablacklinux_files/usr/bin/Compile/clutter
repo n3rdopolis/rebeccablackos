@@ -20,9 +20,9 @@ if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone http://git.gnome.org/browse/clutter
+git clone https://github.com/rbradford/clutter
 cd clutter
-git checkout master
+git checkout clutter-1.10-wayland
 git reset --hard 
 git clean -fdx 
 git pull
