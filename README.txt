@@ -42,7 +42,7 @@ TODO:
 PROBLEMS:
       Wayland is still new, things are still a bit unstable, but somewhat useable
 
-      Won't fit on a normal CD.
+      Won't fit on a normal CD, the ISO requires a DVD, or to be created on a flash drive with the startup disk creator in Ubuntu.
 
 
 
