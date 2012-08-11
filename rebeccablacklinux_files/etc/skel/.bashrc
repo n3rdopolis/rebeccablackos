@@ -113,7 +113,7 @@ echo 'Under Wayland to run a program under xwayland instead, run'
 echo 'xwaylandapp programname --args --args2...'
 echo 'If its a program that supports both Wayland and X'
 echo ' '
-echo 'You also can use the testchooser command/dropper icon in Wayland which pops up a dialog of some wayland tests from various toolkits for easy selection'
+echo 'You also find Wayland programs under the application launcher in the Wayland Examples section'
 echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo ' '
