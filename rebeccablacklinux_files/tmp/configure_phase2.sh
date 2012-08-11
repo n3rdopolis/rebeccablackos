@@ -46,6 +46,9 @@ echo "$(date)" > /etc/builddate
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
+#install the menu items for the wayland tests
+install_menu_items
+
 #start the remastersys job
 remastersys dist
 

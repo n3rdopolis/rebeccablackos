@@ -1,0 +1,52 @@
+#! /bin/bash
+#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+MENUPATH=/usr/share/RBOS_MENU
+#for each desktop file
+while read DESKTOPFILE
+do
+
+#Reset variables as it's cumulative for each file
+unset DIRECTORYFILELIST
+unset FOLDERPATH
+
+#Get the folder the desktop file is in
+FOLDERPATH=$(dirname $DESKTOPFILE)
+#Until empty
+while [[ $FOLDERPATH != . ]]
+do
+FOLDERNAME=$(basename $FOLDERPATH)
+DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/RBOS-/g' | sed 's/$/.directory/g')
+#list the chain of .directory files
+DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
+
+FOLDERPATH=$(dirname $FOLDERPATH)
+
+done
+
+#Install the menu items with the structure
+xdg-desktop-menu install $DIRECTORYFILELIST $MENUPATH/$DESKTOPFILE
+
+#echo DesktopFile: $MENUPATH$DESKTOPFILE
+#echo FolderPath:  $FOLDERPATH
+#echo FolderName:  $FOLDERNAME
+#echo DirFileName: $DIRECTORYFILENAME
+#echo DirFilePath: $DIRECTORYFILELIST
+
+#find desktop files in the menupath
+done < <(find $MENUPATH | grep "\.desktop$" | awk -F "$MENUPATH" '{print $2}')
