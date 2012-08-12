@@ -16,7 +16,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-SERVER=$(kdialog --menu "Choose the display server." "Wayland" "Native Weston Display Server" "Xwayland" "Weston Fullscreen Under Xorg Display Server" "KDE" "KDE Under Xorg Display Server" )
+SERVER=$(kdialog --menu "- Choose weston to attempt to run the weston display server
+
+- Choose Weston Fullscreen Under Xorg for running a fullscreen weston under an xserver 
+for hardware that doen't have the approriate drivers for running weston as a display server
+
+- Chose KDE to start a KDE session
+
+
+Choose the display server:" "Wayland" "Native Weston Display Server" "Xwayland" "Weston Fullscreen Under Xorg Display Server" "KDE" "KDE Under Xorg Display Server" )
 
 #inherit variables for Wayland, so this script can actually find weston-launch with $PATH. 
 
