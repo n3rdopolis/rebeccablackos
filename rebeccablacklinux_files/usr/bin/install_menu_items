@@ -31,7 +31,7 @@ FOLDERPATH=$(dirname $DESKTOPFILE)
 while [[ $FOLDERPATH != . ]]
 do
 FOLDERNAME=$(basename $FOLDERPATH)
-DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/RBOS-/g' | sed 's/$/.directory/g')
+DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/rbos-/g' | sed 's/$/.directory/g')
 #list the chain of .directory files
 DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
 
