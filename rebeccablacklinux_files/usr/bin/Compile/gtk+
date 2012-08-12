@@ -44,15 +44,6 @@ mkdir -p $WLD/share/aclocal
 make 
 make install
 
-
-#put some GTK apps in /usr/local/bin, as the instructions say Wayland runnable apps are there.
-ln -s /usr/bin/gedit             $WLD/bin/gedit
-ln -s /usr/bin/epiphany-browser  $WLD/bin/epiphany-browser
-ln -s /usr/bin/gnibbles          $WLD/bin/gnibbles 
-ln -s /usr/bin/unity             $WLD/bin/unity 
-ln -s /usr/bin/nautilus          $WLD/bin/nautilus
-ln -s /usr/bin/file-roller       $WLD/bin/file-roller
-ln -s /usr/bin/cheese            $WLD/bin/cheese
 cd ..
 
 
