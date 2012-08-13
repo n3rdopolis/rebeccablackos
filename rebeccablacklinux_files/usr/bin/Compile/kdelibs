@@ -43,8 +43,8 @@ rm CMakeCache.txt
 mkdir build
 cd build
 cmake .. -DQT5_BUILD=TRUE -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make 
-make install 
+make -i
+make install -i
 cd ..
 
 fi
