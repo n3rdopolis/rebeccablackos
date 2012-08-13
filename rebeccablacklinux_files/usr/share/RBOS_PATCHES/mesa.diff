@@ -1,0 +1,246 @@
+Signed-off-by: Jakob Bornecrantz <jakob at vmware.com>
+---
+ src/egl/drivers/dri2/egl_dri2.c |   22 ++++++++++++++++------
+ 1 file changed, 16 insertions(+), 6 deletions(-)
+
+diff --git a/src/egl/drivers/dri2/egl_dri2.c b/src/egl/drivers/dri2/egl_dri2.c
+index a78ee8b..7648e68 100644
+--- a/src/egl/drivers/dri2/egl_dri2.c
++++ b/src/egl/drivers/dri2/egl_dri2.c
+@@ -1142,9 +1142,13 @@ dri2_create_image_wayland_wl_buffer(_EGLDisplay *disp, _EGLContext *ctx,
+    offset = buffer->offset[index];
+    stride = buffer->stride[index];
+ 
+-   dri_image = dri2_dpy->image->createSubImage(buffer->driver_buffer,
+-                                               width, height, format,
+-                                               offset, stride / cpp, NULL);
++   if (f->nplanes == 1) {
++      dri_image = dri2_dpy->image->dupImage(buffer->driver_buffer, NULL);
++   } else {
++      dri_image = dri2_dpy->image->createSubImage(buffer->driver_buffer,
++                                                  width, height, format,
++                                                  offset, stride / cpp, NULL);
++   }
+ 
+    return dri2_create_image(disp, dri_image);
+ }
+@@ -1305,11 +1309,17 @@ dri2_wl_reference_buffer(void *user_data, uint32_t name,
+ {
+    _EGLDisplay *disp = user_data;
+    struct dri2_egl_display *dri2_dpy = dri2_egl_display(disp);
+-   int i;
++   const struct wl_drm_format_descriptor *f;
++   int i, format = 0;
+ 
+    for (i = 0; i < ARRAY_SIZE(wl_drm_formats); i++)
+       if (wl_drm_formats[i].wl_format == buffer->format) {
+-         buffer->driver_format = &wl_drm_formats[i];
++         f = &wl_drm_formats[i];
++         buffer->driver_format = f;
++         if (f->nplanes == 1)
++            format = f->planes[0].dri_format;
++         else
++            format = __DRI_IMAGE_FORMAT_NONE;
+          break;
+       }
+ 
+@@ -1320,7 +1330,7 @@ dri2_wl_reference_buffer(void *user_data, uint32_t name,
+       dri2_dpy->image->createImageFromName(dri2_dpy->dri_screen,
+                                            buffer->buffer.width,
+                                            buffer->buffer.height, 
+-                                           __DRI_IMAGE_FORMAT_NONE, name,
++                                           format, name,
+                                            buffer->stride[0] / 4,
+                                            NULL);
+ }
+-- 
+1.7.9.5
+
+Signed-off-by: Jakob Bornecrantz <jakob at vmware.com>
+---
+ configure.ac                      |    2 ++
+ src/egl/drivers/dri2/Makefile.am  |    1 +
+ src/gbm/Makefile.am               |    3 +-
+ src/gbm/backends/dri/gbm_dri.c    |   56 +++++++++++++++++++++++++++++++++----
+ src/gbm/backends/dri/gbm_driint.h |    8 ++++++
+ 5 files changed, 63 insertions(+), 7 deletions(-)
+
+diff --git a/configure.ac b/configure.ac
+index 2ecedaf..f5836d6 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -1355,6 +1355,8 @@ if test "x$enable_gbm" = xyes; then
+         if test "$SHARED_GLAPI" -eq 0; then
+             AC_MSG_ERROR([gbm_dri requires --enable-shared-glapi])
+         fi
++        PKG_CHECK_MODULES([LIBKMS], [libkms], [],
++                          AC_MSG_ERROR([gbm needs libkms]))
+     fi
+ fi
+ GBM_PC_REQ_PRIV="libudev"
+diff --git a/src/egl/drivers/dri2/Makefile.am b/src/egl/drivers/dri2/Makefile.am
+index 49ec06b..45f7dfa 100644
+--- a/src/egl/drivers/dri2/Makefile.am
++++ b/src/egl/drivers/dri2/Makefile.am
+@@ -30,6 +30,7 @@ AM_CFLAGS = \
+ 	$(DEFINES) \
+ 	$(LIBDRM_CFLAGS) \
+ 	$(LIBUDEV_CFLAGS) \
++	$(LIBKMS_CFLAGS) \
+ 	-DDEFAULT_DRIVER_DIR=\"$(DRI_DRIVER_SEARCH_DIR)\"
+ 
+ noinst_LTLIBRARIES = libegl_dri2.la
+diff --git a/src/gbm/Makefile.am b/src/gbm/Makefile.am
+index f079da1..e22c55c 100644
+--- a/src/gbm/Makefile.am
++++ b/src/gbm/Makefile.am
+@@ -7,6 +7,7 @@ AM_CFLAGS = \
+ 	-I$(top_srcdir)/include \
+ 	-I$(top_srcdir)/src/gbm/main \
+ 	$(LIBUDEV_CFLAGS) \
++	$(LIBKMS_CFLAGS) \
+ 	$(DLOPEN_CFLAGS) \
+ 	$(DEFINES)
+ 
+@@ -18,7 +19,7 @@ libgbm_la_SOURCES = \
+ 	main/backend.c \
+ 	main/common.c
+ libgbm_la_LDFLAGS = -version-info 1:0
+-libgbm_la_LIBADD = $(LIBUDEV_LIBS) $(DLOPEN_LIBS)
++libgbm_la_LIBADD = $(LIBUDEV_LIBS) $(LIBKMS_LIBS) $(DLOPEN_LIBS)
+ 
+ if HAVE_EGL_PLATFORM_WAYLAND
+ AM_CPPFLAGS = -DHAVE_WAYLAND_PLATFORM
+diff --git a/src/gbm/backends/dri/gbm_dri.c b/src/gbm/backends/dri/gbm_dri.c
+index f09f6ef..784bb93 100644
+--- a/src/gbm/backends/dri/gbm_dri.c
++++ b/src/gbm/backends/dri/gbm_dri.c
+@@ -301,11 +301,24 @@ gbm_dri_bo_write(struct gbm_bo *_bo, const void *buf, size_t count)
+ {
+    struct gbm_dri_device *dri = gbm_dri_device(_bo->gbm);
+    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
++   void *ptr;
++   int ret;
++
++   /* This should be safe as write is guarded in create. */
++   if (bo->image != NULL)
++      return dri->image->write(bo->image, buf, count);
++
++   if (bo->bo == NULL)
++      return -1;
+ 
+-   if (dri->image->base.version < 4)
++   ret = kms_bo_map(bo->bo, &ptr);
++   if (ret < 0)
+       return -1;
+ 
+-   return dri->image->write(bo->image, buf, count);
++   memcpy(ptr, buf, count);
++
++   kms_bo_unmap(bo->bo);
++   return 0;
+ }
+ 
+ static void
+@@ -314,7 +327,10 @@ gbm_dri_bo_destroy(struct gbm_bo *_bo)
+    struct gbm_dri_device *dri = gbm_dri_device(_bo->gbm);
+    struct gbm_dri_bo *bo = gbm_dri_bo(_bo);
+ 
+-   dri->image->destroyImage(bo->image);
++   if (bo->image != NULL)
++      dri->image->destroyImage(bo->image);
++   if (bo->bo != NULL)
++      kms_bo_destroy(&bo->bo);
+    free(bo);
+ }
+ 
+@@ -446,9 +462,6 @@ gbm_dri_bo_create(struct gbm_device *gbm,
+    int dri_format;
+    unsigned dri_use = 0;
+ 
+-   if (dri->image->base.version < 4 && (usage & GBM_BO_USE_WRITE))
+-      return NULL;
+-
+    bo = calloc(1, sizeof *bo);
+    if (bo == NULL)
+       return NULL;
+@@ -457,6 +470,33 @@ gbm_dri_bo_create(struct gbm_device *gbm,
+    bo->base.base.width = width;
+    bo->base.base.height = height;
+ 
++   if (dri->image->base.version < 4 && (usage & GBM_BO_USE_WRITE)) {
++      int ret;
++      unsigned attrs[7] = {
++         KMS_WIDTH, 64,
++         KMS_HEIGHT, 64,
++         KMS_BO_TYPE, KMS_BO_TYPE_SCANOUT_X8R8G8B8,
++         KMS_TERMINATE_PROP_LIST,
++      };
++
++      if (!(usage & GBM_BO_USE_CURSOR_64X64))
++         return NULL;
++
++      if (dri->kms == NULL)
++         return NULL;
++
++      ret = kms_bo_create(dri->kms, attrs, &bo->bo);
++      if (ret < 0) {
++         free(bo);
++         return NULL;
++      }
++
++      kms_bo_get_prop(bo->bo, KMS_PITCH, &bo->base.base.stride);
++      kms_bo_get_prop(bo->bo, KMS_HANDLE, (unsigned*)&bo->base.base.handle);
++
++      return &bo->base.base;
++   }
++
+    switch (format) {
+    case GBM_FORMAT_RGB565:
+       dri_format =__DRI_IMAGE_FORMAT_RGB565;
+@@ -567,6 +607,10 @@ dri_device_create(int fd)
+       return NULL;
+    }
+ 
++   if (dri->image->base.version < 4) {
++      kms_create(fd, &dri->kms);
++   }
++
+    return &dri->base.base;
+ }
+ 
+diff --git a/src/gbm/backends/dri/gbm_driint.h b/src/gbm/backends/dri/gbm_driint.h
+index f404368..4b619a0 100644
+--- a/src/gbm/backends/dri/gbm_driint.h
++++ b/src/gbm/backends/dri/gbm_driint.h
+@@ -30,6 +30,8 @@
+ 
+ #include "gbmint.h"
+ 
++#include "libkms.h"
++
+ #include "common.h"
+ #include "common_drm.h"
+ 
+@@ -41,6 +43,9 @@ struct gbm_dri_surface;
+ struct gbm_dri_device {
+    struct gbm_drm_device base;
+ 
++   /* Only used for cursors */
++   struct kms_driver *kms;
++
+    void *driver;
+ 
+    __DRIscreen *screen;
+@@ -72,6 +77,9 @@ struct gbm_dri_bo {
+    struct gbm_drm_bo base;
+ 
+    __DRIimage *image;
++
++   /* Only used for cursors */
++   struct kms_bo *bo;
+ };
+ 
+ struct gbm_dri_surface {
+-- 
+1.7.9.5 

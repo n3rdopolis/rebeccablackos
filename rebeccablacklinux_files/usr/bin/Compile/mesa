@@ -39,6 +39,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
+patch -p1 < /usr/share/RBOS_PATCHES/mesa.diff
 ./autogen.sh --prefix=$WLD --enable-openvg --enable-gles1 --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install
