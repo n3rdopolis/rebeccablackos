@@ -17,7 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 ServerID=$RANDOM
 unset DISPLAY
-export WAYLAND_DISPLAY=wayland-0
 weston-display-server --backend=wayland-backend.so --xserver --socket=$ServerID &
 export WAYLAND_DISPLAY=$ServerID
 sleep 3
