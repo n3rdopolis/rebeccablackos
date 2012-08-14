@@ -34,6 +34,6 @@ sleep 15
 /tmp/configure_phase1.sh
 #remove packages that cause conflict
 yes Yes |apt-get remove gdm gnome-session -y
-#change session manager
-echo 2 | update-alternatives --config x-session-manager 
+#Install menu items
+install_menu_items 
 compile_all build-only
