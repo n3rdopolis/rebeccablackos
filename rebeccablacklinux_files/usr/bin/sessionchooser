@@ -34,6 +34,7 @@ then
 . /usr/bin/weston_vars
 weston-launch
 . /usr/bin/xwaylandapp
+unset LD_LIBRARY_PATH
 kdialog --msgbox "Weston either crashed, or been exited, or current drivers for your hardware do not support the functionality needed for it to run as a display server. A KDE session will be launched as fallback"
 
 startkde
@@ -46,6 +47,7 @@ HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
 . /usr/bin/weston_vars
 weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT --xserver
 . /usr/bin/xwaylandapp
+unset LD_LIBRARY_PATH
 kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
 startkde
 
