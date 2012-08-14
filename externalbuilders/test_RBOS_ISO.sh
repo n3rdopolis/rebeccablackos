@@ -78,7 +78,7 @@ mountisoexit
 fi
 
 #install needed tools to allow testing on a read only iso
-apt-get install aufs-tools squashfs-tools dialog
+apt-get install aufs-tools squashfs-tools
 
 
 #make the folders for mounting the ISO
@@ -87,23 +87,15 @@ mkdir -p ~/RBOS_Build_Files/isotest/squashfsmount
 mkdir -p ~/RBOS_Build_Files/isotest/overlay
 mkdir -p ~/RBOS_Build_Files/isotest/unionmountpoint
 
-#Get a list of isos in the home directory
-ISOS="$(ls ~ | grep .iso$ | nl -ba -w 3)"
 
 #if there are no iso files found in the home directory exit
-if [ -z $ISOS ]
+if [ -z ~/RebeccaBlackLinux.iso ]
 then 
-echo "No ISOs Found in your home folder"
+echo "No RebeccaBlackLinux.iso Found in your home folder"
 fi
 
-#list the isos found, and get the number of the selected iso
-ISONUMBER=$(dialog --stdout --menu "Select an ISO in your home folder" 30 30 30 $ISOS )
-
-#get the name of the selected iso from the number
-ISO=$(echo "$ISOS" | grep "^  $ISONUMBER" | awk '{print $2}')
-
 #mount the ISO
-mount -o loop ~/$ISO ~/RBOS_Build_Files/isotest/isomount
+mount -o loop ~/RebeccaBlackLinux.iso ~/RBOS_Build_Files/isotest/isomount
 
 
 #if the iso doesn't have a squashfs image
