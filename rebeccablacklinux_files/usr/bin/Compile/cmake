@@ -39,7 +39,9 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-(setenv CXX CC; setenv CC cc; ./bootstrap --prefix=$WLD) 
+setenv CXX CC 
+setenv CC cc
+./bootstrap --prefix=$WLD 
 make
 make install
 cd ..
