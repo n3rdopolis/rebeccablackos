@@ -31,25 +31,26 @@ Choose the display server:" "Wayland" "Native Weston Display Server" "Xwayland" 
 
 if [ $SERVER == "Wayland" ]
 then
-. /usr/bin/weston_vars
-weston-launch
+
+waylandapp weston-launch
 
 
-kdialog --msgbox "Weston either crashed, or been exited, or current drivers for your hardware do not support the functionality needed for it to run as a display server. A KDE session will be launched as fallback"
+xwaylandapp kdialog --msgbox "Weston either crashed, or been exited, or current drivers for your hardware do not support the functionality needed for it to run as a display server. A KDE session will be launched as fallback"
 
-/usr/bin/xwaylandapp startkde
+xwaylandapp startkde
 
 elif [ $SERVER == "Xwayland" ]
 then
+
 DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
 WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
 HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
-. /usr/bin/weston_vars
-weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT --xserver
 
+waylandapp weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT --xserver
 
-kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
-/usr/bin/xwaylandapp startkde
+xwaylandapp kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
+
+xwaylandapp startkde
 
 else
 startkde
