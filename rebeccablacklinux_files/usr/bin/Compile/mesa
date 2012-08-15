@@ -22,7 +22,7 @@ mkdir /srcbuild
 cd /srcbuild
 git clone git://anongit.freedesktop.org/mesa/mesa
 cd mesa
-git checkout master
+git checkout cd4a61100da889afec96dc79b33a88b7b8049cec
 git reset --hard 
 git clean -fdx 
 git pull
