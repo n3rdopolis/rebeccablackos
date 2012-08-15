@@ -35,7 +35,7 @@ then
 waylandapp weston-launch
 
 
-xwaylandapp kdialog --msgbox "Weston either crashed, or been exited, or current drivers for your hardware do not support the functionality needed for it to run as a display server. A KDE session will be launched as fallback"
+kdialog --msgbox "Weston either crashed, or been exited, or current drivers for your hardware do not support the functionality needed for it to run as a display server. A KDE session will be launched as fallback"
 
 xwaylandapp startkde
 
@@ -48,7 +48,7 @@ HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
 
 waylandapp weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT --xserver
 
-xwaylandapp kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
+kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
 
 xwaylandapp startkde
 
