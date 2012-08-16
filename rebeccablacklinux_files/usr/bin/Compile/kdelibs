@@ -48,6 +48,14 @@ cd build
 cmake .. -DQT5_BUILD=TRUE -DKDE4_BUILD_TESTS=TRUE -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make 
 make install 
+
+#install the kdelibs tests
+find /srcbuild/kdelibs  -executable -type f   | while read TEST
+do
+cp "$TEST" $WLD/bin
+done
+cd ..
+
 cd ..
 
 fi
