@@ -18,7 +18,12 @@
 
 . /usr/bin/weston_vars
 
-(sleep 10; zenity --warning --text="This is a third party fan made distrobution
+(sleep 10; zenity --warning --text="This is a third party fan made distribution!
 
-Built: $(cat /etc/builddate)") &
+===========================================
+Built: $(cat /etc/builddate)
+===========================================
+
+Click on the I icon in the panel for information 
+about key bindings, and Programs") &
 weston-display-server --xserver 2>&1 | tee ~/weston
