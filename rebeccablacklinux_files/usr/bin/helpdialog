@@ -45,14 +45,21 @@ By default there are 2 workspaces
 
 Exit Weston: ctrl key + alt key + backspace' 
 
+zenity --info --text 'The Application menu stays open, even after calling programs, and does not work with multiple instances of the Application Launcher 
+
+To launch another Application, currently, you have to find the already open instance of the Application Launcher
+
+Some applications (mostly xwayland applications) might need to be resized to refresh the contents of the window.'
+
+
 zenity --info --text 'To launch programs:
 =================================================================================
 =================================================================================
-Click on the "RBOS" Icon on the top for the Application menu. 
+Click on the "RBOS" Icon on the top for the Application menu. Be sure to check for the Wayland programs under "Applications"!
 
-Be sure to check for the Wayland programs under "Applications"!
+Click on the Terminal icon for a Wayland Terminal with Wayland variables
 
-Click on the Terminal icon for a Terminal
+Click on the Xorg logo for a Xterm with X variables
 
 Click the Speaker icon to adjust the volume
 
@@ -60,12 +67,10 @@ Click on the Antenna icon to launch the Network Manager
 
 The movie icon converts the Weston screenshot file to .WEBM files as mentioned in the previous dialog
 
+Click on the lightbulb icon for battery info
+
 The I icon launches these help dialogs 
 
-The Application menu stays open, even after calling programs, and does not work with multiple instances of the Application Launcher
-
-To launch another Application, currently, you have to find the already open instance of the Application Launcher
-
-Some applications (mostly xwayland applications) might need to be resized to refresh the contents of the window.' 
+'
 
 
