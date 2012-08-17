@@ -28,12 +28,18 @@ cp -a /usr/share/rebeccablackos/rebeccablacklinux_files/* /
 #copy /usr/import files where they belong too
 rsync /usr/import/* -a /
 chmod 777 /tmp
-echo "Will start downloading and building sourcecode in 15 seconds. You can cancel at any time with CTRL-c"
-sleep 15
+
+#Install menu items
+install_menu_items 
+
+if [ $1 == build]
+then 
 #run the config script to install depends in case they changed
 /tmp/configure_phase1.sh
 #remove packages that cause conflict
 yes Yes |apt-get remove gdm gnome-session -y
-#Install menu items
-install_menu_items 
+
 compile_all build-only
+else
+echo "not building source because this script wasn't called with the option 'build'"
+fi
