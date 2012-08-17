@@ -19,6 +19,7 @@
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
+MOUNTISO=$1
 
 function mountisoexit() 
 {
@@ -88,20 +89,25 @@ mkdir -p ~/RBOS_Build_Files/isotest/overlay
 mkdir -p ~/RBOS_Build_Files/isotest/unionmountpoint
 
 
-#if there are no iso files found in the home directory exit
-if [ -z ~/RebeccaBlackLinux.iso ]
+#if there is no iso specified 
+if [ -z $MOUNTISO ]
 then 
-echo "No RebeccaBlackLinux.iso Found in your home folder"
+echo "
+
+
+Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)"
+exit
 fi
 
 #mount the ISO
-mount -o loop ~/RebeccaBlackLinux.iso ~/RBOS_Build_Files/isotest/isomount
+mount -o loop ~/"$MOUNTISO" ~/RBOS_Build_Files/isotest/isomount
 
 
 #if the iso doesn't have a squashfs image
 if [ ! -f ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
 then
-echo "Invalid CDROM image. Not an Ubuntu/RebeccaBlackLinux based image" 
+echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
+read a 
 #unmount and exit
 umount ~/RBOS_Build_Files/isotest/isomount
 mountisoexit
