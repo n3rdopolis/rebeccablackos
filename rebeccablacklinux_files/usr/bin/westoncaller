@@ -17,8 +17,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 . /usr/bin/weston_vars
+ServerID=wayland-$RANDOM
 
-(sleep 10; zenity --warning --text="This is a third party fan made distribution!
+(WAYLAND_DISPLAY=$ServerID sleep 10; zenity --warning --text="This is a third party fan made distribution!
 
 ===========================================
 Built: $(cat /etc/builddate)
@@ -26,4 +27,4 @@ Built: $(cat /etc/builddate)
 
 Click on the I icon in the panel for information 
 about key bindings, and Programs") &
-weston-display-server --xserver 2>&1 | tee ~/weston
+weston-display-server --socket=$ServerID --xserver $*  2>&1 | tee ~/weston

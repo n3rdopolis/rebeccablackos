@@ -46,7 +46,7 @@ DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{pr
 WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
 HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
 
-waylandapp weston-display-server --fullscreen --width=$WIDTH --height=$HEIGHT --xserver
+waylandapp westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT 
 
 kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
 
