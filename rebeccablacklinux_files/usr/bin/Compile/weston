@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SOURCENAME=weston
-SOURCEURL=git://anongit.freedesktop.org/wayland/weston
+SOURCEURL=git://people.freedesktop.org/~vignatti/weston
 
 if [[ "$1" != build-only ]]
 then
@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout master
+git checkout xwm-client
 git reset --hard 
 git clean -fdx 
 git pull
