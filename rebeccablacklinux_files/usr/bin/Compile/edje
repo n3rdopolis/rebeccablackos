@@ -29,7 +29,7 @@ then
 rm -rf "$SOURCENAME"
 fi
 
-svn co "$SOURCENAME"
+svn co "$SOURCEURL"
 cd "$SOURCENAME"
 svn revert --recursive .
 svn-clean
