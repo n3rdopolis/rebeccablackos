@@ -15,13 +15,22 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+SOURCENAME=pixman
+SOURCEURL=git://anongit.freedesktop.org/pixman
 
 if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
-git clone git://anongit.freedesktop.org/pixman
-cd pixman
+
+OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | awk '{print $2}')
+if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+then
+rm -rf "$SOURCENAME"
+fi
+
+git clone "$SOURCEURL"
+cd "$SOURCENAME"
 git checkout master
 git reset --hard 
 git clean -fdx 
@@ -34,7 +43,7 @@ fi
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
-cd pixman
+cd "$SOURCENAME"
 echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
