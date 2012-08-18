@@ -32,7 +32,7 @@ chmod 777 /tmp
 #Install menu items
 install_menu_items 
 
-if [ $1 == build ]
+if [[ $1 == build ]]
 then 
 #run the config script to install depends in case they changed
 /tmp/configure_phase1.sh
