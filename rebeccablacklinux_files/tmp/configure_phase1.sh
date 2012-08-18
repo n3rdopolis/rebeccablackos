@@ -136,7 +136,10 @@ libclutter-1.0-0
 mesa
 tinc
 e17  
-kde4libs"
+kde4libs
+libkactivities-dev
+libqimageblitz-dev
+kde-workspace-dev"
 
 #LIST OF PACKAGES TO REMOVE
 UNINSTALLS="" 
