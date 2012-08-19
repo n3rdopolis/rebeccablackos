@@ -69,9 +69,9 @@ rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/cache/debconf/*
 
 #Make the executables smaller
-find / | while read FILE
+find /bin /lib /sbin /usr/bin /usr/lib /usr/sbin /opt/bin /opt/lib /opt/sbin | while read FILE
 do
-strip $FILE
+strip $FILE 2>/dev/null
 done
 
 #start the remastersys job
