@@ -50,31 +50,12 @@ rm -rf /srcbuild
 install_menu_items
 
 
-#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-dpkg-divert --local --rename --add /usr/sbin/grub-probe
-dpkg-divert --local --rename --add /sbin/initctl
-ln -s /bin/true /sbin/initctl
-ln -s /bin/true /usr/sbin/grub-probe
-
-
-#remove old kernels!
-CURRENTKERNELPACKAGES=$(apt-rdepends linux-image-generic | grep linux-image | sed 's/  Depends: //g' | sort | uniq)
-dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELPACKAGES" | grep linux-image | while read PACKAGE
-do
-yes Y | apt-get purge $PACKAGE
-done
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 yes Y | apt-get purge $REMOVEDEVPGKS
 yes Y | apt-get autoremove
-
-#Reset the utilites back to the way they are supposed to be.
-rm /sbin/initctl
-rm /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-
+echo $REMOVEDEVPGKS > /usr/share/RemovedPackages.txt
 
 #remove duplicated samples
 rm -rf /opt/examples

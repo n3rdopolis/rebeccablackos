@@ -168,6 +168,13 @@ done
 #For some reason, it installs out of date packages sometimes, as I see unupgraded packages
 yes Y | apt-get dist-upgrade 
 
+#remove old kernels!
+CURRENTKERNELPACKAGES=$(apt-rdepends linux-image-generic | grep linux-image | sed 's/  Depends: //g' | sort | uniq)
+dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELPACKAGES" | grep linux-image | while read PACKAGE
+do
+yes Y | apt-get purge $PACKAGE
+done
+
 #remove uneeded packages
 echo "$UNINSTALLS" | while read PACKAGE
 do
