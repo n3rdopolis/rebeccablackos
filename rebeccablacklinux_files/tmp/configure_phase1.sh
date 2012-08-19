@@ -130,7 +130,10 @@ libraptor-dev
 remastersys
 ubuntu-minimal
 xterm
-vpx-tools"
+vpx-tools
+libkactivities-dev
+libqimageblitz-dev
+kde-workspace-dev"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
@@ -140,9 +143,8 @@ mesa
 tinc
 e17  
 kde4libs
-libkactivities-dev
-libqimageblitz-dev
-kde-workspace-dev"
+kde-baseapps
+kde-workspace"
 
 #LIST OF PACKAGES TO REMOVE
 UNINSTALLS="" 
