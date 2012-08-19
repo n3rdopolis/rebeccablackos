@@ -51,8 +51,8 @@ install_menu_items
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS
-apt-get autoremove
+yes Y | apt-get purge $REMOVEDEVPGKS
+yes Y | apt-get autoremove
 
 #remove duplicated samples
 rm -rf /opt/examples
