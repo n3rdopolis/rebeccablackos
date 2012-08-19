@@ -37,7 +37,7 @@ git clean -fdx
 git pull
 
 fi
-
+c
 
 
 if [[ "$1" != download-only ]]
@@ -51,6 +51,12 @@ mkdir -p $WLD/share/aclocal
 
 cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
 cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
+
+find /opt/share/ECM-0.0.5/ | while read FILE
+do 
+cp $FILE /opt/share/cmake-2.8/Modules/
+done
+
 rm CMakeCache.txt
 mkdir build
 cd build
