@@ -40,9 +40,6 @@ KERNELVERSION=$(ls /lib/modules/ | head -1 )
 #replace all of remastersys's unames with the installed kernel version.
 sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 
-#This is a kde distro. Force the remastersys script to install kde frontend, as Remastersys detects running process from kde to determine it is a kde distro, but since this is chroot, it's not running
-sed -i "s/\"\`ps axf | grep startkde | grep -v grep\`\" != \"\" -o \"\`ps axf | grep kwin | grep -v grep\`\" != \"\"/ 1 /g" /usr/bin/remastersys
-
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
