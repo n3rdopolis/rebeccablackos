@@ -54,6 +54,8 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep
 apt-get purge $REMOVEDEVPGKS
 apt-get autoremove
 
+#remove duplicated samples
+rm -rf /opt/examples
 
 #start the remastersys job
 remastersys dist

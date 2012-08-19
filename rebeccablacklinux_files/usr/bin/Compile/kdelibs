@@ -59,7 +59,7 @@ make
 make install 
 
 #install the kdelibs tests
-find /srcbuild/"$SOURCENAME"  -executable -type f   | while read TEST
+find /srcbuild/"$SOURCENAME"/build/kdeui/tests  -executable -type f   | while read TEST
 do
 cp "$TEST" $WLD/bin
 done

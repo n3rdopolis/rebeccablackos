@@ -52,11 +52,6 @@ mkdir -p $WLD/share/aclocal
 
 make
 make install
-#put clutter tests in the path
-find /srcbuild/clutter/tests  -executable -type f   | while read TEST
-do
-cp "$TEST" $WLD/bin
-done
 
 cd ..
 fi
