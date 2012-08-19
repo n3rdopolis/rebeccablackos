@@ -25,6 +25,9 @@ yes Yes |apt-get remove gdm gnome-session -y
 #copy all the post install files
 rsync /usr/import/* -a /
 
+#delete the import folder
+rm -r /usr/import
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -64,6 +67,12 @@ rm -rf /opt/examples
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/cache/debconf/*
+
+#Make the executables smaller
+find / | while read FILE
+do
+strip $FILE
+done
 
 #start the remastersys job
 remastersys dist
