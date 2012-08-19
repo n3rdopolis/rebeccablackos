@@ -64,9 +64,11 @@ rm -rf /opt/examples
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/cache/debconf/*
+rm -rf /var/lib/apt/lists/*
 
 #Make the executables smaller
-find /bin /lib /sbin /usr/bin /usr/lib /usr/sbin /opt/bin /opt/lib /opt/sbin | while read FILE
+echo "Reducing binary file sizes"
+find /opt/bin /opt/lib /opt/sbin | while read FILE
 do
 strip $FILE 2>/dev/null
 done

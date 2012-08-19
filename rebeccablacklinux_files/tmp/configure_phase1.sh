@@ -80,17 +80,15 @@ libvpx-dev
 libgbm-dev 
 libxcb-glx0-dev 
 libgl1-mesa-dri-dbg
-kubuntu-desktop 
-ubuntu-standard 
+ubuntu-standard
+lightdm
+kde-plasma-desktop
+plasma-widget-networkmanagement
+xcursor-themes
+nouveau-firmware
 firefox 
-epiphany-browser 
-evolution 
 gedit 
-gnibbles 
-unity 
-nautilus 
 file-roller 
-cheese
 clutter-1.0-tests
 ncurses-dev
 libmtdev-dev
@@ -133,7 +131,8 @@ xterm
 vpx-tools
 libkactivities-dev
 libqimageblitz-dev
-kde-workspace-dev"
+kde-workspace-dev
+ubiquity-frontend-kde"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
