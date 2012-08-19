@@ -54,7 +54,8 @@ libegl1-mesa-dev
 libgles2-mesa-dev 
 libgdk-pixbuf2.0-dev 
 libudev-dev 
-libxcb-dri2-0-dev 
+libxcb-dri2-0-dev
+libxcb-xfixes0 
 libxcb-xfixes0-dev 
 shtool 
 libffi-dev 

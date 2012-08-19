@@ -49,6 +49,12 @@ rm -rf /srcbuild
 #install the menu items for the wayland tests
 install_menu_items
 
+#This will remove my abilities to build packages from the ISO, but should make it a bit smaller
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+apt-get purge $REMOVEDEVPGKS
+apt-get autoremove
+
+
 #start the remastersys job
 remastersys dist
 
