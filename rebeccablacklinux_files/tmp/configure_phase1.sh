@@ -84,6 +84,8 @@ ubuntu-standard
 lightdm
 kde-plasma-desktop
 plasma-widget-networkmanagement
+plymouth-theme-kubuntu-logo
+plymouth-theme-kubuntu-text
 xcursor-themes
 nouveau-firmware
 firefox 

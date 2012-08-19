@@ -54,8 +54,21 @@ install_menu_items
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 yes Y | apt-get purge $REMOVEDEVPGKS
-yes Y | apt-get autoremove
 echo $REMOVEDEVPGKS > /usr/share/RemovedPackages.txt
+
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:i386$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+yes Y | apt-get purge $REMOVEDEVPGKS
+echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
+
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+yes Y | apt-get purge $REMOVEDEVPGKS
+echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
+
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libllvm3.0 samba-common-bin libglib2.0-doc"
+apt-get purge $REMOVEDEVPGKS
+echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
+
+yes Y | apt-get autoremove
 
 #remove duplicated samples
 rm -rf /opt/examples
