@@ -531,7 +531,7 @@ FOO
 
     # make a new initial ramdisk including the casper scripts
     log_msg "Creating a new initial ramdisk for the live system"
-    mkinitramfs -o `uname -r` `uname -r`
+    mkinitramfs -o /boot/initrd.img-`uname -r` `uname -r`
 
     log_msg "Copying your kernel and initrd for the livecd"
     cp /boot/vmlinuz-`uname -r` $WORKDIR/ISOTMP/casper/vmlinuz
