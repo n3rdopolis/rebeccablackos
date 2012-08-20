@@ -56,7 +56,7 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS > /usr/share/RemovedPackages.txt
 
-REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:i386$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
