@@ -35,7 +35,7 @@ chmod 777 /tmp
 install_menu_items 
 
 #Install the dev packages that got removed
-INSTALLPACKAGES=/usr/share/RemovedPackages.txt
+INSTALLPACKAGES="$(cat /usr/share/RemovedPackages.txt)"
 yes Y | apt-get install $INSTALLPACKAGES
 
 if [[ $1 == build ]]
