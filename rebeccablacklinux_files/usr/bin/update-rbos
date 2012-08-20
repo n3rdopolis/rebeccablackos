@@ -17,6 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "This needs to be run as root"
 cd /usr/share
+
+apt-get install subversion
 #download off the SVN
 svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
 #make the files owned by root, and executable
