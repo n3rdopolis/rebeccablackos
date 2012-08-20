@@ -137,7 +137,7 @@ if [ "$LIVECDURL" = "" ]; then
 fi
 
 if [ "$SQUASHFSOPTS" = "" ]; then
-    SQUASHFSOPTS="-comp xz -no-recovery -always-use-fragments -b 1M -no-duplicates"
+    SQUASHFSOPTS="-comp xz -no-recovery -always-use-fragments -b 1M -no-duplicates -Xbcj x86 -Xdict-size 100%"
 fi
 
 if [ "$BACKUPSHOWINSTALL" = "0" -o "$BACKUPSHOWINSTALL" = "1" ]; then
