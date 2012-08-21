@@ -90,6 +90,7 @@ plasma-widget-networkmanagement
 plymouth-theme-kubuntu-logo
 plymouth-theme-kubuntu-text
 xcursor-themes
+xfonts-utils
 nouveau-firmware
 firefox 
 gedit 
@@ -102,7 +103,7 @@ libxcb1-dev
 libx11-xcb1 
 libx11-xcb-dev
 libxcb-dri2-0
-libxcb-xfixes0 
+libxcb-xfixes 
 libxcb-keysyms1 
 libxcb-keysyms1-dev 
 libxcb-image0 
@@ -125,8 +126,10 @@ x11proto-record-dev
 x11proto-resource-dev 
 libxkbfile-dev 
 libxfont-dev 
+libxext-dev
 xserver-xorg-dev 
-x11proto-xf86dri-dev 
+x11proto-xf86dri-dev
+x11proto-xext-dev
 subversion 
 subversion-tools
 e17

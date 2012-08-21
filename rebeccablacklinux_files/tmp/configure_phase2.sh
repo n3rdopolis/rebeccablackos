@@ -68,7 +68,8 @@ REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libllvm3
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
-apt-get autoremove -s | grep "(" | awk '{print $2}' >> /usr/share/RemovedPackages.txt
+REMOVEDEVPGKS=$(apt-get autoremove -s | awk '{print $2}') 
+echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
 
 #remove duplicated samples
