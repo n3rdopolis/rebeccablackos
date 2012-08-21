@@ -137,7 +137,9 @@ nano
 libicu-dev 
 libraptor-dev
 remastersys
+libegl1-mesa
 ubuntu-minimal
+xserver-xorg
 xterm
 vpx-tools
 libkactivities-dev

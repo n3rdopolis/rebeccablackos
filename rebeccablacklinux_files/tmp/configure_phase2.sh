@@ -64,7 +64,7 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libllvm3.0 libglib2.0-doc"
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libglib2.0-doc"
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
