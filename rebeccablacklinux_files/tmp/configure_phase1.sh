@@ -168,7 +168,7 @@ UNINSTALLS=""
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
 echo "installing $PACKAGE"
-yes Yes | aptitude install $PACKAGE -y --without-recommends
+yes Yes | apt-get --no-install-recommends $PACKAGE -y --without-recommends
 done
 
 
