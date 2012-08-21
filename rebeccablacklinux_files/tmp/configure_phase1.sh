@@ -36,6 +36,7 @@ yes Y| apt-get install aptitude
 
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="apt-rdepends
+bash-completion
 libsqlite3-dev
 language-pack-en 
 linux-generic
@@ -86,6 +87,7 @@ ubuntu-standard
 lightdm
 kde-plasma-desktop
 kmix
+lightdm-kde-greeter  
 plasma-widget-networkmanagement
 plymouth-theme-kubuntu-logo
 plymouth-theme-kubuntu-text
@@ -168,7 +170,7 @@ UNINSTALLS=""
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
 echo "installing $PACKAGE"
-yes Yes | apt-get --no-install-recommends $PACKAGE -y --without-recommends
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y 
 done
 
 
@@ -214,4 +216,4 @@ dpkg-divert --local --rename --remove /sbin/initctl
 apt-get clean
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-compile_all download-only
+#compile_all download-only
