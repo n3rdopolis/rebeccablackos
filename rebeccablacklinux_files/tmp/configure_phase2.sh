@@ -43,6 +43,9 @@ sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
+#uninstall cmake
+make -C /srcbuild/cmake uninstall
+
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
@@ -67,6 +70,9 @@ echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libglib2.0-doc"
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
+
+#Mark this package as manual. it keeps getting removed no matter what I do
+apt-mark manual libxcb-xfixes0
 
 REMOVEDEVPGKS=$(apt-get autoremove -s | grep Remv | awk '{print $2}') 
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
