@@ -98,15 +98,9 @@ file-roller
 clutter-1.0-tests
 ncurses-dev
 libmtdev-dev
-libxcb1 
-libxcb1-dev 
-libx11-xcb1 
 libx11-xcb-dev
-libxcb-dri2-0
-libxcb-xfixes 
-libxcb-keysyms1 
+libxcb1-dev 
 libxcb-keysyms1-dev 
-libxcb-image0 
 libxcb-image0-dev 
 libxcb-shm0 
 libxcb-shm0-dev 
@@ -130,9 +124,16 @@ libxext-dev
 xserver-xorg-dev 
 x11proto-xf86dri-dev
 x11proto-xext-dev
+libxcb1 
+libx11-xcb1 
+libxcb-dri2-0
+libxcb-xfixes0 
+libxcb-keysyms1 
+libxcb-image0 
 subversion 
 subversion-tools
 e17
+nano
 libicu-dev 
 libraptor-dev
 remastersys
@@ -144,6 +145,7 @@ libqimageblitz-dev
 kde-workspace-dev
 ubiquity-frontend-kde
 ubuntu-standard
+zenity
 lsb-desktop"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
