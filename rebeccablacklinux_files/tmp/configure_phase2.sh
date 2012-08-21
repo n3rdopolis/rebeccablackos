@@ -68,7 +68,7 @@ REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libglib2
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
-REMOVEDEVPGKS=$(apt-get autoremove -s | awk '{print $2}') 
+REMOVEDEVPGKS=$(apt-get autoremove -s | grep Remv | awk '{print $2}') 
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
 
