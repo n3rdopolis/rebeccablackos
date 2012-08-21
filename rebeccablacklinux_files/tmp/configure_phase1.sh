@@ -31,9 +31,11 @@ apt-get update
 #install remastersys key
 wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 
+#install aptitude
+yes Y| apt-get install aptitude
+
 #LIST OF PACKAGES TO GET INSTALLED
-BINARYINSTALLS="aptitude
-apt-rdepends
+BINARYINSTALLS="apt-rdepends
 libsqlite3-dev
 language-pack-en 
 linux-generic
@@ -83,6 +85,7 @@ libgl1-mesa-dri-dbg
 ubuntu-standard
 lightdm
 kde-plasma-desktop
+kmix
 plasma-widget-networkmanagement
 plymouth-theme-kubuntu-logo
 plymouth-theme-kubuntu-text
@@ -97,7 +100,9 @@ libmtdev-dev
 libxcb1 
 libxcb1-dev 
 libx11-xcb1 
-libx11-xcb-dev 
+libx11-xcb-dev
+libxcb-dri2-0
+libxcb-xfixes0 
 libxcb-keysyms1 
 libxcb-keysyms1-dev 
 libxcb-image0 
@@ -134,7 +139,9 @@ vpx-tools
 libkactivities-dev
 libqimageblitz-dev
 kde-workspace-dev
-ubiquity-frontend-kde"
+ubiquity-frontend-kde
+ubuntu-standard
+lsb-desktop"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
 BUILDINSTALLS="libgtk-3-0 
@@ -153,13 +160,15 @@ UNINSTALLS=""
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
-yes Y | apt-get install $PACKAGE -y --force-yes
+echo "installing $PACKAGE"
+yes Yes | aptitude install $PACKAGE -y --without-recommends
 done
 
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
 do
+echo "installing $PACKAGE"
 yes Y | apt-get build-dep $PACKAGE -y --force-yes
 done
 
