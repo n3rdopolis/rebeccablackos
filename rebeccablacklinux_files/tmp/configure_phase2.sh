@@ -37,6 +37,10 @@ sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
 #get the installed kernel version in /lib/modules, there is only one installed in this CD, but take the first one by default.
 KERNELVERSION=$(ls /lib/modules/ | head -1 )
 
+#This is a kde distro. Force the remastersys script to install kde frontend, as Remastersys detects running process from kde to determine it is a kde distro, but since this is chroot, it's not running
+sed -i "s/\"\`ps axf | grep startkde | grep -v grep\`\" != \"\" -o \"\`ps axf | grep kwin | grep -v grep\`\" != \"\"/ 1 /g" /usr/bin/remastersys
+
+
 #replace all of remastersys's unames with the installed kernel version.
 sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 
@@ -71,9 +75,6 @@ REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git libglib2
 yes Y | apt-get purge $REMOVEDEVPGKS
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 
-#Mark this package as manual. it keeps getting removed no matter what I do
-apt-mark manual libxcb-xfixes0
-
 REMOVEDEVPGKS=$(apt-get autoremove -s | grep Remv | awk '{print $2}') 
 echo $REMOVEDEVPGKS >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
@@ -84,7 +85,6 @@ rm -rf /opt/examples
 #clean more apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
-rm -rf /var/cache/debconf/*
 rm -rf /var/lib/apt/lists/*
 
 #Make the executables smaller
