@@ -28,7 +28,7 @@ Choose the display server:" "Wayland" "Native Weston Display Server" "Xwayland" 
 
 #inherit variables for Wayland, so this script can actually find weston-launch with $PATH. 
 
-
+WAYLAND_DISPLAY=1
 if [ $SERVER == "Wayland" ]
 then
 
