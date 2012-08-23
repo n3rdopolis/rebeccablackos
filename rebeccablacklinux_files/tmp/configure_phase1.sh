@@ -217,4 +217,4 @@ dpkg-divert --local --rename --remove /sbin/initctl
 apt-get clean
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-#compile_all download-only
+compile_all download-only
