@@ -37,6 +37,7 @@ yes Y| apt-get install aptitude
 #LIST OF PACKAGES TO GET INSTALLED
 BINARYINSTALLS="apt-rdepends
 bash-completion
+lupin-casper
 libsqlite3-dev
 language-pack-en 
 linux-generic
