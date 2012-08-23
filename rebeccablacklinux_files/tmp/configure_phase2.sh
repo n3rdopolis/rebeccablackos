@@ -44,6 +44,9 @@ sed -i "s/\"\`ps axf | grep startkde | grep -v grep\`\" != \"\" -o \"\`ps axf | 
 #replace all of remastersys's unames with the installed kernel version.
 sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 
+#make remastersys use xz compression
+sed -i 's/SQUASHFSOPTS="/SQUASHFSOPTS="-comp xz/g' /usr/bin/remastersys
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
