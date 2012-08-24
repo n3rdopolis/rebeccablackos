@@ -1,13 +1,12 @@
 OVERVIEW:
-To build, just run the included script. The build script only works on Ubuntu/Debain (I think it would work on Debian) based systems. 
 
-Otherwise use the ISO here: http://sourceforge.net/projects/rebeccablackos/files/
+Use the latest ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
 This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is Rebecca Black Linux. 
 
 This has both Wayland and X. Even though QT, GTK, EFL, Clutter, and SDL has been compiled on this CD to support Wayland, under these toolkits, many apps don't work.This CD also has a minimal kdelibs frameworks built around QT 5 on Wayland. Unfortunantly only the test apps work on Frameworks.
 
-However Xwayland is also built into the CD which provides a way for X apps to run in Wayland, where many DO work, with a few quirks.
+However Xwayland is also built into the CD which provides a way for X apps to run in Wayland, where many DO work, with a many more quirks then the native toolkit applications.
 
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
@@ -41,9 +40,7 @@ TODO:
       Need Creative Commons compatible images that can actually be put into a Open Source CD.
 
 PROBLEMS:
-      Wayland is still new, things are still a bit unstable, but somewhat useable
-
-      Won't fit on a normal CD, the ISO requires a DVD, or to be created on a flash drive with the startup disk creator in Ubuntu.
+      Wayland is still new, things are still a bit unstable, but "somewhat" useable.
 
 
 
