@@ -15,7 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-if [[ ! -z $UNDER_WAYLAND ]]
+if [[ ! -z $UNDER_WAYLAND || ! -z $WAYLAND_DISPLAY ]]
 then
 . /usr/bin/weston_vars
 $*
