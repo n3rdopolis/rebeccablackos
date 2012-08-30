@@ -127,6 +127,7 @@ libxext-dev
 xserver-xorg-dev 
 x11proto-xf86dri-dev
 x11proto-xext-dev
+libqjson-dev
 libxcb1 
 libx11-xcb1 
 libxcb-dri2-0
