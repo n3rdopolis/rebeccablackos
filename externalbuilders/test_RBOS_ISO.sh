@@ -60,7 +60,6 @@ exit
 
 
 echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
-The ISO needs to be the root of your home folder, as that's where it searches for ISOs
 
 The password for the test user is no password. Just hit enter if you actually need it.
 
