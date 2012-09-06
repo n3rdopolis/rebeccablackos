@@ -16,7 +16,7 @@ How to use the ISO:
   boot from the CD. Once it boots you can use the live system. 
 
 You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script executable, and run the script from a terminal, and pass the path to the ISO file as an argument. You can usually do this by dragging the iso onto the terminal window after the path to the script, and a space. (and selecting paste text if needed)
-it will give you a shell running AS ROOT, where you can run the command westoncaller
+it will give you a shell running as a test user account, where you can run the command westoncaller. The password for this user account is no password
 
  
 How to use Wayland:
