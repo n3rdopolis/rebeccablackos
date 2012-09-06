@@ -62,6 +62,8 @@ exit
 echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 The ISO needs to be the root of your home folder, as that's where it searches for ISOs
 
+The password for the test user is no password. Just hit enter if you actually need it.
+
 Press enter"
 
 read a
@@ -133,8 +135,11 @@ xhost +LOCAL:
 echo "
 Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
 
-#Chroot into the live system
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint
+
+#Configure test system
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint groupadd -r admin
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin -u 999999999 livetest
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint su livetest
 
 #set the xserver security back to what it should be
 xhost -LOCAL:
