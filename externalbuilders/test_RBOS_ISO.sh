@@ -75,7 +75,7 @@ if [ $ismount -eq 0 ]
 then
 echo "A script is running that is already testing an ISO. will now chroot into it"
 echo "Type exit to go back to your system."
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint
+chroot ~/RBOS_Build_Files/isotest/unionmountpoint su livetest
 mountisoexit
 fi
 
