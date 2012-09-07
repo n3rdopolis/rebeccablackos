@@ -43,7 +43,7 @@ sudo $0
 fi
 exit
 fi
-fi
+
 
 
 function mountisoexit() 
