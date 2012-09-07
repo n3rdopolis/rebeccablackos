@@ -39,7 +39,7 @@ mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 
 mount $RBOSLOCATION/RBOS_FS_PHASE_2.img $RBOSLOCATION/build_mountpoints/phase_2 -o loop
 
 #create the union of the two overlay FSes at the workdir
-mount -t aufs -o dirs=$RBOSLOCATION/build_mountpoints/phase_2:$RBOSLOCATION/build_mountpoints/phase_1 none $RBOSLOCATION/build_mountpoints/workdir
+unionfs-fuse -o cow,default_permissions,allow_other,nonempty,max_files=131068 $RBOSLOCATION/build_mountpoints/phase_2=RW:$RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/

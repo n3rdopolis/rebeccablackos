@@ -20,6 +20,7 @@ ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 MOUNTISO=$1
+MOUNTHOME=~
 
 function mountisoexit() 
 {
@@ -30,27 +31,27 @@ if [ $unmountanswer -eq 1 ]
 then
 echo "This is the last instance of the script that is open. Cleaning up..."
 #unmount the filesystems used by the CD
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/dev
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/sys
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/proc
-umount -lf  ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
+umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/dev
+umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/sys
+umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/proc
+umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
-fuser -kmM   ~/RBOS_Build_Files/isotest/unionmountpoint 2> /dev/null
-umount -lfd ~/RBOS_Build_Files/isotest/unionmountpoint
+fuser -kmM   $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint 2> /dev/null
+umount -lfd $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 
-fuser -kmM   ~/RBOS_Build_Files/isotest/squashfsmount 2> /dev/null
-umount -lfd ~/RBOS_Build_Files/isotest/squashfsmount
+fuser -kmM   $MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount 2> /dev/null
+umount -lfd $MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount
 
-fuser -kmM  ~/RBOS_Build_Files/isotest/isomount 2> /dev/null
-umount -lfd ~/RBOS_Build_Files/isotest/isomount
+fuser -kmM  $MOUNTHOME/RBOS_Build_Files/isotest/isomount 2> /dev/null
+umount -lfd $MOUNTHOME/RBOS_Build_Files/isotest/isomount
 
 
-#if the user wants to delete the files created on the overlay due to aufs
+#if the user wants to delete the files created on the overlay due to the union mount
 dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
 deleteanswer=$?
 if [ $deleteanswer -eq 1 ]
 then 
-rm -rf ~/RBOS_Build_Files/isotest/overlay
+rm -rf $MOUNTHOME/RBOS_Build_Files/isotest/overlay
 fi
 fi
 exit
@@ -67,27 +68,27 @@ Press enter"
 
 read a
 #enter users home directory
-cd ~
+cd $MOUNTHOME
 
-mountpoint ~/RBOS_Build_Files/isotest/unionmountpoint
+mountpoint $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
 echo "A script is running that is already testing an ISO. will now chroot into it"
 echo "Type exit to go back to your system."
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint su livetest
+chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
 mountisoexit
 fi
 
 #install needed tools to allow testing on a read only iso
-apt-get install aufs-tools squashfs-tools dialog
+apt-get install unionfs-fuse squashfs-tools dialog
 
 
 #make the folders for mounting the ISO
-mkdir -p ~/RBOS_Build_Files/isotest/isomount
-mkdir -p ~/RBOS_Build_Files/isotest/squashfsmount
-mkdir -p ~/RBOS_Build_Files/isotest/overlay
-mkdir -p ~/RBOS_Build_Files/isotest/unionmountpoint
+mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/isomount
+mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount
+mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/overlay
+mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 
 
 #if there is no iso specified 
@@ -101,30 +102,30 @@ exit
 fi
 
 #mount the ISO
-mount -o loop ~/"$MOUNTISO" ~/RBOS_Build_Files/isotest/isomount
+mount -o loop $MOUNTHOME/"$MOUNTISO" $MOUNTHOME/RBOS_Build_Files/isotest/isomount
 
 
 #if the iso doesn't have a squashfs image
-if [ ! -f ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
+if [ ! -f $MOUNTHOME/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
 then
 echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
 read a 
 #unmount and exit
-umount ~/RBOS_Build_Files/isotest/isomount
+umount $MOUNTHOME/RBOS_Build_Files/isotest/isomount
 mountisoexit
 fi
 
 #mount the squashfs image
-mount -o loop ~/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs ~/RBOS_Build_Files/isotest/squashfsmount
+mount -o loop $MOUNTHOME/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs $MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount
 
 #Create the union between squashfs and the overlay
-mount -t aufs -o dirs=~/RBOS_Build_Files/isotest/overlay:~/RBOS_Build_Files/isotest/squashfsmount none ~/RBOS_Build_Files/isotest/unionmountpoint
+unionfs-fuse -o cow,default_permissions,allow_other,nonempty,max_files=131068 $MOUNTHOME/RBOS_Build_Files/isotest/overlay=RW:$MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 
 #bind mount in the critical filesystems
-mount --rbind /dev ~/RBOS_Build_Files/isotest/unionmountpoint/dev
-mount --rbind /proc ~/RBOS_Build_Files/isotest/unionmountpoint/proc
-mount --rbind /sys ~/RBOS_Build_Files/isotest/unionmountpoint/sys
-mount --rbind /tmp ~/RBOS_Build_Files/isotest/unionmountpoint/tmp
+mount --rbind /dev $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/dev
+mount --rbind /proc $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/proc
+mount --rbind /sys $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/sys
+mount --rbind /tmp $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/tmp
 
 #allow all local connections to the xserver
 xhost +LOCAL:
@@ -136,15 +137,15 @@ Type exit to go back to your system. If you want to test wayland, run the comman
 
 
 #Configure test system
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint groupadd -r admin
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin -u 999999999 livetest
-chroot ~/RBOS_Build_Files/isotest/unionmountpoint su livetest
+chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint groupadd -r admin
+chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin -u 999999999 livetest
+chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
 
 #set the xserver security back to what it should be
 xhost -LOCAL:
 
 #go back to the users home folder
-cd ~
+cd $MOUNTHOME
 
 
 mountisoexit

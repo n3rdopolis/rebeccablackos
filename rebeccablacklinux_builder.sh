@@ -74,7 +74,7 @@ then
 fi
 
 #install needed tools to get the build system to work
-apt-get install debootstrap aufs-tools
+apt-get install debootstrap unionfs-fuse
 
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
