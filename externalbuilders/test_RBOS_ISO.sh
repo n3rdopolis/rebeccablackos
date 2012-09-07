@@ -168,7 +168,7 @@ fi
 mount -o loop $MOUNTHOME/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs $MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount
 
 #Create the union between squashfs and the overlay
-unionfs-fuse -o cow,default_permissions,allow_other,nonempty,max_files=131068 $MOUNTHOME/RBOS_Build_Files/isotest/overlay=RW:$MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
+unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 $MOUNTHOME/RBOS_Build_Files/isotest/overlay=RW:$MOUNTHOME/RBOS_Build_Files/isotest/squashfsmount $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 
 #bind mount in the critical filesystems
 mount --rbind /dev $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/dev
