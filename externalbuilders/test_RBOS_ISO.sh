@@ -114,8 +114,12 @@ fi
 fi
 
 #install needed tools to allow testing on a read only iso
+if [[ $XALIVE == 0 ]]
+then
+xterm -e apt-get install --no-install-recommends unionfs-fuse squashfs-tools dialog zenity xterm
+else
 apt-get install --no-install-recommends unionfs-fuse squashfs-tools dialog zenity xterm
-
+fi
 
 #make the folders for mounting the ISO
 mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/isomount
