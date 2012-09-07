@@ -21,15 +21,25 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 MOUNTISO=$1
 MOUNTHOME=~
+XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 
 function mountisoexit() 
 {
 
+if [[ $XALIVE == 0 ]]
+then
+zenity --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated"
+unmountanswer=$?
+else
 dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
 unmountanswer=$?
+fi
+
+
+
 if [ $unmountanswer -eq 1 ]
 then
-echo "This is the last instance of the script that is open. Cleaning up..."
+echo "Cleaning up..."
 #unmount the filesystems used by the CD
 umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/dev
 umount -lf  $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/sys
@@ -46,9 +56,14 @@ fuser -kmM  $MOUNTHOME/RBOS_Build_Files/isotest/isomount 2> /dev/null
 umount -lfd $MOUNTHOME/RBOS_Build_Files/isotest/isomount
 
 
-#if the user wants to delete the files created on the overlay due to the union mount
+if [[ $XALIVE == 0 ]]
+then
+zenity --question --text "Keep Temporary overlay files?"
+deleteanswer=$?
+else
 dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
 deleteanswer=$?
+fi
 if [ $deleteanswer -eq 1 ]
 then 
 rm -rf $MOUNTHOME/RBOS_Build_Files/isotest/overlay
@@ -59,14 +74,24 @@ exit
 }
 
 
+if [[ $XALIVE == 0 ]]
+then
+zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 
+The password for the test user is no password. Just hit enter if you actually need it."
+else
 echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 
 The password for the test user is no password. Just hit enter if you actually need it.
 
 Press enter"
+fi
 
+if [[ $XALIVE == 1 ]]
+then
 read a
+fi
+
 #enter users home directory
 cd $MOUNTHOME
 
@@ -74,14 +99,22 @@ mountpoint $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
+
+
+if [[ $XALIVE == 0 ]]
+then
+zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
+xterm -e chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
+else
 echo "A script is running that is already testing an ISO. will now chroot into it"
 echo "Type exit to go back to your system."
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
-mountisoexit
+fi
+
 fi
 
 #install needed tools to allow testing on a read only iso
-apt-get install unionfs-fuse squashfs-tools dialog
+apt-get install --no-install-recommends unionfs-fuse squashfs-tools dialog zenity xterm
 
 
 #make the folders for mounting the ISO
@@ -94,25 +127,37 @@ mkdir -p $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint
 #if there is no iso specified 
 if [ -z $MOUNTISO ]
 then 
+
+if [[ $XALIVE == 0 ]]
+then
+zenity --info --text "No ISO specified as an argument. Please select one in the next dialog."
+MOUNTISO=$(zenity --file-selection)
+else
 echo "
 
 
 Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)"
 exit
 fi
+fi
 
 #mount the ISO
-mount -o loop $MOUNTHOME/"$MOUNTISO" $MOUNTHOME/RBOS_Build_Files/isotest/isomount
+mount -o loop "$MOUNTISO" $MOUNTHOME/RBOS_Build_Files/isotest/isomount
 
 
 #if the iso doesn't have a squashfs image
 if [ ! -f $MOUNTHOME/RBOS_Build_Files/isotest/isomount/casper/filesystem.squashfs  ]
 then
+if [[ $XALIVE == 0 ]]
+then
+zenity --info --text "Invalid CDROM image. Not an Ubuntu based image. Exiting and unmounting the image."
+else
 echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
 read a 
+fi
 #unmount and exit
 umount $MOUNTHOME/RBOS_Build_Files/isotest/isomount
-mountisoexit
+exit
 fi
 
 #mount the squashfs image
@@ -132,14 +177,24 @@ xhost +LOCAL:
 
 
 #tell the user how to exit chroot
+if [[ $XALIVE == 0 ]]
+then
+zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image"
+else
 echo "
 Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
-
+fi
 
 #Configure test system
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint groupadd -r admin
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin -u 999999999 livetest
+
+if [[ $XALIVE == 0 ]]
+then
+xterm -e chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
+else
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
+fi
 
 #set the xserver security back to what it should be
 xhost -LOCAL:
