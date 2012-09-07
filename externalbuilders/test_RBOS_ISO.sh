@@ -29,10 +29,10 @@ then
 if [[ $XALIVE == 0 ]]
 then
 
-if [[ -f /usr/bin/kdesudo1 ]]
+if [[ -f /usr/bin/kdesudo ]]
 then
 kdesudo $0
-elif [[ -f /usr/bin/gksudo1 ]]
+elif [[ -f /usr/bin/gksudo ]]
 then
 gksudo $0
 else
