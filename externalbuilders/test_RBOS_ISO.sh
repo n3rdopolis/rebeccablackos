@@ -29,15 +29,15 @@ then
 if [[ $XALIVE == 0 ]]
 then
 
-if [[ -f /usr/bin/kdesud3o ]]
+if [[ -f /usr/bin/kdesudo ]]
 then
 kdesudo $0
-elif [[ -f /usr/bin/gksudo ]]
-then
+else [[ -f /usr/bin/gksudo ]]
 gksudo $0
+fi
+
 else
 zenity --info --text "This Needs to be run as root"
-fi
 else
 sudo $0 
 fi
