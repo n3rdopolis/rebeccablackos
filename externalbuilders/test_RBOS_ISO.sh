@@ -1,4 +1,4 @@
-#! /usr/bin/sudo /bin/bash
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -22,6 +22,28 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 MOUNTISO=$1
 MOUNTHOME=~
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+
+if [[ $UID != 0 ]]
+then
+
+if [[ $XALIVE == 0 ]]
+then
+
+if [[ -f /usr/bin/kdesud3o ]]
+then
+kdesudo $0
+elif [[ -f /usr/bin/gksudo ]]
+then
+gksudo $0
+else
+zenity --info --text "This Needs to be run as root"
+fi
+else
+sudo $0 
+fi
+exit
+fi
+
 
 function mountisoexit() 
 {
@@ -85,12 +107,11 @@ echo "This will call a chroot shell from an iso. If you use an iso from RebeccaB
 The password for the test user is no password. Just hit enter if you actually need it.
 
 Press enter"
-fi
-
-if [[ $XALIVE == 1 ]]
-then
 read a
 fi
+
+
+
 
 #enter users home directory
 cd $MOUNTHOME
@@ -110,7 +131,7 @@ echo "A script is running that is already testing an ISO. will now chroot into i
 echo "Type exit to go back to your system."
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
 fi
-
+mountisoexit
 fi
 
 #install needed tools to allow testing on a read only iso
