@@ -47,6 +47,8 @@ fi
 
 function mountisoexit() 
 {
+if [[ -f $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/online ]]
+then
 
 if [[ $XALIVE == 0 ]]
 then
@@ -92,7 +94,7 @@ rm -rf $MOUNTHOME/RBOS_Build_Files/isotest/overlay
 fi
 fi
 exit
-
+fi
 }
 
 
@@ -214,6 +216,7 @@ fi
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint groupadd -r admin
 chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin -u 999999999 livetest
 
+touch $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
 then
 xterm -e chroot $MOUNTHOME/RBOS_Build_Files/isotest/unionmountpoint su livetest
