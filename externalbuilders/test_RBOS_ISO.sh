@@ -19,7 +19,7 @@
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
-MOUNTISO=$1
+MOUNTISO=$(readlink -f $1)
 MOUNTHOME=~
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 
@@ -31,15 +31,15 @@ then
 
 if [[ -f /usr/bin/kdesudo ]]
 then
-kdesudo $0
+kdesudo $0 $MOUNTISO
 elif [[ -f /usr/bin/gksudo ]]
 then
-gksudo $0
+gksudo $0 $MOUNTISO
 else
 zenity --info --text "This Needs to be run as root"
 fi
 else
-sudo $0 
+sudo $0 $MOUNTISO
 fi
 exit
 fi
