@@ -118,4 +118,4 @@ echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo ' '
 echo 'To be able to call Weston from a standard terminal run:'
-echo 'source /usr/bin/weston_vars'
+echo 'westoncaller (--westonargs)'
