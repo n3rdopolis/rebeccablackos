@@ -140,9 +140,28 @@ fi
 #install needed tools to allow testing on a read only iso
 if [[ $XALIVE == 0 ]]
 then
-xterm -e apt-get install --no-install-recommends unionfs-fuse squashfs-tools dialog zenity xterm
+if [[ ! -f $(which xterm) ]]
+then
+zenity --question --text "xterm is needed for this script. Install xterm?"  
+xterminstall=$?
+if [[ $xterminstall -eq 0 ]]
+then 
+pkcon install xterm -y
 else
-apt-get install --no-install-recommends unionfs-fuse squashfs-tools dialog zenity xterm
+zenity --info --text "Can not continue without xterm. Exiting the script."
+exit
+fi
+fi
+xterm -e pkcon install unionfs-fuse
+xterm -e pkcon install squashfs-tools
+xterm -e pkcon install dialog
+xterm -e pkcon install zenity
+else
+pkcon install unionfs-fuse
+pkcon install squashfs-tools
+pkcon install dialog
+pkcon install zenity
+pkcon install xterm
 fi
 
 #make the folders for mounting the ISO
