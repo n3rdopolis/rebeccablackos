@@ -65,6 +65,9 @@ fi
 if [ $unmountanswer -eq 1 ]
 then
 echo "Cleaning up..."
+#set the xserver security back to what it should be
+xhost -LOCAL:
+
 #unmount the filesystems used by the CD
 umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/dev
 umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/sys
@@ -243,9 +246,6 @@ xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 else
 chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 fi
-
-#set the xserver security back to what it should be
-xhost -LOCAL:
 
 #go back to the users home folder
 cd $MOUNTHOME
