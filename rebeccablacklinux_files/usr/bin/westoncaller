@@ -27,4 +27,4 @@ Built: $(cat /etc/builddate)
 
 Click on the I icon in the panel for information 
 about key bindings, and Programs") &
-weston-display-server --socket=$ServerID --xserver $*  2>&1 | tee ~/weston
+weston-display-server --socket=$ServerID --modules=xwayland.so $*  2>&1 | tee ~/weston
