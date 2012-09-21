@@ -50,8 +50,6 @@ sed -i 's/SQUASHFSOPTS="/SQUASHFSOPTS="-comp xz/g' /usr/bin/remastersys
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
-#uninstall cmake
-make -C /srcbuild/cmake uninstall
 
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
@@ -63,6 +61,9 @@ install_menu_items
 remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
+
+#uninstall cmake
+make -C /srcbuild/cmake uninstall
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
