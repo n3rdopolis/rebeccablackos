@@ -87,6 +87,7 @@ libgl1-mesa-dri-dbg
 ubuntu-standard
 lightdm
 kde-plasma-desktop
+libpam-xdg-support
 kmix
 lightdm-kde-greeter  
 plasma-widget-networkmanagement
