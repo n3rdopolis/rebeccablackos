@@ -24,7 +24,9 @@ RBOSLOCATION=~/RBOS_Build_Files
 
 #####Tell User what script does
 echo "
-THIS SCRIPT INSTALLS debootstrap AND btfs-tools
+THIS SCRIPT INSTALLS debootstrap AND overlayroot
+
+This requires Ubuntu Quantal or later due to the use of overlayfs
 
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
@@ -74,7 +76,7 @@ then
 fi
 
 #install needed tools to get the build system to work
-apt-get install debootstrap aufs-tools
+apt-get install debootstrap overlayroot
 
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
