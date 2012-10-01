@@ -173,7 +173,7 @@ UNINSTALLS=""
 echo "$BINARYINSTALLS" | while read PACKAGE
 do
 echo "installing $PACKAGE"
-yes Yes | apt-get --no-install-recommends install $PACKAGE -y 
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
 done
 
 
