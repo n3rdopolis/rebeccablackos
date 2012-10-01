@@ -63,6 +63,7 @@ mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
 
 #copy in the files needed
+cp /etc/resolv.conf $RBOSLOCATION/build_mountpoints/workdir/etc
 rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 
