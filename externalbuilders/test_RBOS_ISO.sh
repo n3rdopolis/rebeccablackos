@@ -236,9 +236,14 @@ Type exit to go back to your system. If you want to test wayland, run the comman
 fi
 
 #Configure test system
+mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
+chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
+chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
 cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
+chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
 chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
-chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
+chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
+
 
 touch $MOUNTHOME/liveisotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
