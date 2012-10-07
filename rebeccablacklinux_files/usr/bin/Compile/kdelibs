@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout master
+git checkout frameworks
 git reset --hard 
 git clean -fdx 
 git pull
