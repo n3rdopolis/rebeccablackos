@@ -45,6 +45,7 @@ llvm
 libxkbcommon-dev
 manpages
 build-essential 
+doxygen
 libtool 
 libxi-dev 
 libxmu-dev 
