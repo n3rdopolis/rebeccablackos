@@ -89,6 +89,10 @@ yes Y | apt-get purge $REMOVEDEVPGKS
 apt-get autoremove -s | grep Remv | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
 
+#delete build logs
+rm -rf /usr/share/Buildlog
+rm -rf /usr/share/Downloadlog
+
 #remove duplicated samples
 rm -rf /opt/examples
 
