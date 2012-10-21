@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout cogl-1.10
+git checkout rbradford/cogl-1.12/wayland-0.99
 git reset --hard 
 git clean -fdx 
 git pull
