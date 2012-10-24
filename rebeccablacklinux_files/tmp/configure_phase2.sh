@@ -93,6 +93,9 @@ yes Y | apt-get autoremove
 rm -rf /usr/share/Buildlog
 rm -rf /usr/share/Downloadlog
 
+#delete header
+rm -rf /opt/include
+
 #remove duplicated samples
 rm -rf /opt/examples
 

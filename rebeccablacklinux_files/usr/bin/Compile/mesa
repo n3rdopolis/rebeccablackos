@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SOURCENAME=mesa
-SOURCEURL=http://cgit.freedesktop.org/~krh/mesa
+SOURCEURL=git://anongit.freedesktop.org/mesa/mesa
 
 if [[ "$1" != build-only ]]
 then
@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout wayland-9.0
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
@@ -48,8 +48,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /usr/share/RBOS_PATCHES/mesa.diff
-./autogen.sh --prefix=$WLD --enable-shared-dricore --enable-openvg --enable-gles1 --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$WLD --enable-shared-dricore --enable-gles1 --enable-gles2  --with-gallium-drivers=nouveau,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install
 cd ..
