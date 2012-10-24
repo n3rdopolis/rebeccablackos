@@ -48,7 +48,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-./autogen.sh --prefix=$WLD --enable-shared-dricore --enable-gles1 --enable-gles2    --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --with-gallium-drivers=nouveau,r300,r600,swrast --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$WLD --enable-shared-dricore --enable-gles1 --enable-gles2    --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --enable-gallium-llvm --with-gallium-drivers=nouveau,r300,r600,swrast,softpipe --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make
 make install
 cd ..
