@@ -33,8 +33,7 @@ svn co "$SOURCEURL"
 cd "$SOURCENAME"
 svn revert --recursive .
 svn-clean
-svn update
-
+svn update -r 78315  
 fi
 
 
