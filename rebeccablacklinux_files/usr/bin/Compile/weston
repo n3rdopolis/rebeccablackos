@@ -50,7 +50,7 @@ echo "REVISION $(git rev-parse HEAD)"
 mkdir -p $WLD/share/aclocal
 
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+./autogen.sh --with-cairo-glesv2 --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make
 make install 
 
