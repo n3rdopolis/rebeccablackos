@@ -66,7 +66,6 @@ remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
-bash
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
