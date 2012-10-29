@@ -47,12 +47,16 @@ sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 #make remastersys use xz compression
 sed -i 's/SQUASHFSOPTS="/SQUASHFSOPTS="-comp xz/g' /usr/bin/remastersys
 
+#exclude srcbuild
+sed -i 's/media mnt proc /media mnt proc srcbuild /g' /usr/bin/remastersys
+
+#Don't allow remastersys to remove ubiquity!!!
+grep -iv "remove ubiquity" /usr/bin/remastersys
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
 
-#delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
-rm -rf /srcbuild
 
 #install the menu items for the wayland tests
 install_menu_items
@@ -61,6 +65,10 @@ install_menu_items
 remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
+
+#delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
+rm -rf /srcbuild
+
 
 #uninstall cmake
 make -C /srcbuild/cmake uninstall
