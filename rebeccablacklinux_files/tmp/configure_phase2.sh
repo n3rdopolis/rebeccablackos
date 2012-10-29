@@ -47,11 +47,11 @@ sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
 #make remastersys use xz compression
 sed -i 's/SQUASHFSOPTS="/SQUASHFSOPTS="-comp xz/g' /usr/bin/remastersys
 
-#exclude srcbuild
-sed -i 's/media mnt proc /media mnt proc srcbuild /g' /usr/bin/remastersys
-
 #Don't allow remastersys to remove ubiquity!!!
-grep -iv "remove ubiquity" /usr/bin/remastersys
+grep -v "remove ubiquity" /usr/bin/remastersys > /usr/bin/remastersys.bak
+cat /usr/bin/remastersys.bak > /usr/bin/remastersys
+rm /usr/bin/remastersys.bak
+
 
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
@@ -66,6 +66,7 @@ remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
+bash
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
 
