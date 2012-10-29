@@ -16,4 +16,4 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-wcap-decode  --yuv4mpeg2 /run/user/$USER/capture.wcap | vpxenc --target-bitrate=1024 --best -t 4 -o ~/weston-capture-$RANDOM.webm -
+wcap-decode  --yuv4mpeg2 ~/capture.wcap | vpxenc --target-bitrate=1024 --best -t 4 -o ~/weston-capture-$RANDOM.webm -
