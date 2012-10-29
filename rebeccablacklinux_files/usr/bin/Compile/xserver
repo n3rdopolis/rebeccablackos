@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SOURCENAME=xserver
-SOURCEURL=http://cgit.freedesktop.org/xorg/xserver
+SOURCEURL=http://cgit.collabora.com/git/user/daniels/xserver.git
 
 if [[ "$1" != build-only ]]
 then
@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout xwayland-1.12
+git checkout xwayland-1.13
 git reset --hard 
 git clean -fdx 
 git pull
