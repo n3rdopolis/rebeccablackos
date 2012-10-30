@@ -28,6 +28,10 @@ rsync /usr/import/* -a /
 #delete the import folder
 rm -r /usr/import
 
+#remastersys doesn't put in tmp into the live cds. symlink srcbuild into tmp, so that it can be unlinked from root, and the cmake uninstaller will still exist for the second image
+mkdir /tmp/srcbuild
+ln -s /tmp/srcbuild /srcbuild 
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -61,17 +65,19 @@ echo "$(date)" > /etc/builddate
 #install the menu items for the wayland tests
 install_menu_items
 
+#unlink srcbuild symlink
+rm /srcbuild
+
 #start the remastersys job
 remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
+#uninstall cmake
+make -C /tmp/srcbuild/cmake uninstall
+
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
-
-
-#uninstall cmake
-make -C /srcbuild/cmake uninstall
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
