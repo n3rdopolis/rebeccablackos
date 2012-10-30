@@ -219,5 +219,9 @@ dpkg-divert --local --rename --remove /sbin/initctl
 #delete the downloaded file cache
 apt-get clean
 
+#remastersys doesn't put in tmp into the live cds. symlink srcbuild into tmp, so that it can be unlinked from root, and the cmake uninstaller will still exist for the second image
+mkdir /tmp/srcbuild
+ln -s /tmp/srcbuild /srcbuild 
+
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
