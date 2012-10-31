@@ -61,6 +61,8 @@ done
 
 cp -r /opt/share/cmake /opt/include
 
+sed '/KDE4_NO_ENABLE_FINAL/d'
+
 rm CMakeCache.txt
 mkdir build
 cd build
