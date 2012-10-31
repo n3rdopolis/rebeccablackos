@@ -61,7 +61,7 @@ done
 
 cp -r /opt/share/cmake /opt/include
 
-sed '/KDE4_NO_ENABLE_FINAL/d'
+sed -i '/KDE4_NO_ENABLE_FINAL/d' konqueror/settings/CMakeLists.txt
 
 rm CMakeCache.txt
 mkdir build
