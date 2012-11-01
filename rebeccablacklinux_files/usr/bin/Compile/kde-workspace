@@ -49,11 +49,23 @@ echo "REVISION $(git rev-parse HEAD)"
 mkdir -p $WLD/share/aclocal
 
 
-cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
-cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
 
-sed -i '/kde4_no_enable_final/d' libs/solid/control/CMakeLists.txt
-sed -i '/kde4_no_enable_final/d' libs/ksysguard/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' libs/solid/control/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' libs/ksysguard/CMakeLists.txt
+#sed -i '/KDE4_MOC_HEADERS/d' libs/ksysguard/signalplotter/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' kwin/kcmkwin/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' kwin/effects/CMakeLists.txt
+#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/input/CMakeLists.txt
+#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/colors/CMakeLists.txt
+#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/style/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' kcontrol/keys/CMakeLists.txt
+#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/fonts/CMakeLists.txt
+#sed -i '/kde4_no_enable_final/d' klipper/CMakeLists.txt
+#sed -i '/check_symbol_exists/d' kdm/ConfigureChecks.cmake
+#sed -i '/kde4_no_enable_final/d' plasma/generic/applets/systemtray/CMakeLists.txt
+#sed -i '/AUTOMOC4_MOC_HEADERS/d' plasma/generic/dataengines/places/CMakeLists.txt
 
 rm CMakeCache.txt
 mkdir build

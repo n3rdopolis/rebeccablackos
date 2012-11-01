@@ -48,20 +48,20 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
-cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
 
-mkdir /opt/share/cmake-2.8/modules
+#mkdir /opt/share/cmake-2.8/modules
 
-find /opt/share/ECM-0.0.5/ | while read FILE
-do 
-cp $FILE /opt/share/cmake-2.8/Modules/
-cp $FILE /opt/share/cmake-2.8/modules/
-done
+#find /opt/share/ECM-0.0.5/ | while read FILE
+#do 
+#cp $FILE /opt/share/cmake-2.8/Modules/
+#cp $FILE /opt/share/cmake-2.8/modules/
+#done
 
-cp -r /opt/share/cmake /opt/include
+#cp -r /opt/share/cmake /opt/include
 
-sed -i '/KDE4_NO_ENABLE_FINAL/d' konqueror/settings/CMakeLists.txt
+#sed -i '/KDE4_NO_ENABLE_FINAL/d' konqueror/settings/CMakeLists.txt
 
 rm CMakeCache.txt
 mkdir build

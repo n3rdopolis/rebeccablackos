@@ -52,8 +52,9 @@ mkdir -p $WLD/share/aclocal
 sed -i 's/-Werror-implicit-function-declaration//g' /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake
 sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake 
 
-cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
-cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
+#cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
+
 rm CMakeCache.txt
 mkdir build
 cd build
