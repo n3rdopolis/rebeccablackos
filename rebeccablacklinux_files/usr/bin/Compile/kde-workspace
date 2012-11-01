@@ -53,6 +53,7 @@ cp /opt/include/QtWidgets/QApplication /opt/include/QtGui/
 cp /opt/include/QtWidgets/QWidget /opt/include/QtGui/
 
 sed -i '/kde4_no_enable_final/d' libs/solid/control/CMakeLists.txt
+sed -i '/kde4_no_enable_final/d' libs/ksysguard/CMakeLists.txt
 
 rm CMakeCache.txt
 mkdir build
