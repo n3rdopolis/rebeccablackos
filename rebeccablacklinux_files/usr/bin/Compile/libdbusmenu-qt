@@ -15,8 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SOURCENAME=libsdl
-SOURCEURL=https://github.com/dhewg/libsdl
+SOURCENAME=libdbusmenu-qt
+SOURCEURL=git://git.debian.org/pkg-kde/krap/libdbusmenu-qt.git
 
 if [[ "$1" != build-only ]]
 then
@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout wl
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
@@ -48,22 +48,11 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /usr/share/RBOS_PATCHES/libsdl.diff
+patch -p1 < /usr/share/RBOS_PATCHES/libdbusmenu-qt.diff
+
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-./configure
 make 
 make install
-cd test
-./configure
-make
-cd ..
-cd ..
-
-#install sdl tests
-find /srcbuild/"$SOURCENAME"/test -executable | while read TEST
-do
-cp "$TEST" $WLD/bin
-done
 cd ..
 
 fi
