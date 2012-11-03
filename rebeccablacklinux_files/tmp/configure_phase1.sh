@@ -69,6 +69,7 @@ libffi-dev
 libpoppler-glib-dev 
 libgtk2.0-dev 
 git diffstat 
+bzr
 libx11-xcb-dev 
 quilt 
 autopoint 

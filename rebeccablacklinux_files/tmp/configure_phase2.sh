@@ -91,7 +91,7 @@ apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/Rem
 yes Y | apt-get purge $REMOVEDEVPGKS
 
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git cmake libgl1-mesa-dri-dbg libglib2.0-doc"
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git bzr cmake libgl1-mesa-dri-dbg libglib2.0-doc"
 apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get purge $REMOVEDEVPGKS
 
