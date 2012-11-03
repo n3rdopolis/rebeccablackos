@@ -48,7 +48,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
+sed -i 's/waylandDispaly/waylandDisplay/g' src/plugins/gl_integration/xcomposite_egl/qwaylandxcompositeeglintegration.cpp 
 qmake
 make
 cd src
