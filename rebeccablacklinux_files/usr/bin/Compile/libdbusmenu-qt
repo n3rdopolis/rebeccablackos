@@ -50,9 +50,12 @@ mkdir -p $WLD/share/aclocal
 
 patch -p1 < /usr/share/RBOS_PATCHES/libdbusmenu-qt.diff
 
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make 
 make install
+cd ..
 cd ..
 
 fi
