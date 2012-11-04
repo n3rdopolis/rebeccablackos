@@ -15,27 +15,26 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SOURCENAME=libdbusmenu-qt
-SOURCEURL=http://bazaar.launchpad.net/~dbusmenu-team/libdbusmenu-qt/trunk
+SOURCENAME=SDL
+SOURCEURL=https://github.com/soreau/SDL
 
 if [[ "$1" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
 
-
-OLDSOURCEURL=$(bzr info | grep "parent branch" | awk -F "branch: " '{print $2}')
+OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | awk '{print $2}')
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
 fi
 
-bzr branch "$SOURCEURL" "$SOURCENAME"
+git clone "$SOURCEURL"
 cd "$SOURCENAME"
-bzr update
-bzr revert
-bzr clean-tree --force --detritus
-bzr pull
+git checkout wl
+git reset --hard 
+git clean -fdx 
+git pull
 
 fi
 
@@ -49,14 +48,21 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /usr/share/RBOS_PATCHES/libdbusmenu-qt.diff
-
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./configure
 make 
 make install
+cd test
+./configure
+make
 cd ..
+cd ..
+
+#install sdl tests
+find /srcbuild/"$SOURCENAME"/test -executable | while read TEST
+do
+cp "$TEST" $WLD/bin
+done
 cd ..
 
 fi
