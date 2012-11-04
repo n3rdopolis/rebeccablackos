@@ -99,9 +99,9 @@ yes Y | apt-get purge $REMOVEDEVPGKS
 apt-get autoremove -s | grep Remv | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
 
-#delete build logs
-rm -rf /usr/share/Buildlog
-rm -rf /usr/share/Downloadlog
+#hide buildlogs in tmp from remastersys
+mv -r /usr/share/Buildlog     /tmp
+mv -r  /usr/share/Downloadlog /tmp
 
 #delete header
 rm -rf /opt/include
@@ -124,6 +124,8 @@ done
 #start the remastersys job
 remastersys dist
 
-
+#move logs back
+mv -r /tmp/Buildlog /usr/share
+mv -r /tmp/Downloadlog /usr/share
 
 
