@@ -72,8 +72,7 @@ edje
 efreet
 e_dbus
 eeze
-elementary
-libsdl
+SDL
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
