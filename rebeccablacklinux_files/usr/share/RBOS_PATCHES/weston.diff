@@ -26,101 +26,37 @@ index 36f9c6b..7238128 100644
 
 
 
+The --fullscreen option effectively does nothing if --width and --height aren't
+manually set to the size of the screen. This handles the size setting and limits
+the output count to one, for fullscreen.
+---
+ src/compositor-x11.c | 6 +++++-
+ 1 file changed, 5 insertions(+), 1 deletion(-)
 
-
-
-
-
-
-
-
-
-
-
-
-diff --git a/protocol/xserver.xml b/protocol/xserver.xml
-index 9e25f5c..2900fef 100644
---- a/protocol/xserver.xml
-+++ b/protocol/xserver.xml
-@@ -1,6 +1,6 @@
- <protocol name="xserver">
+diff --git a/src/compositor-x11.c b/src/compositor-x11.c
+index c575f25..75de857 100644
+--- a/src/compositor-x11.c
++++ b/src/compositor-x11.c
+@@ -1206,6 +1206,10 @@ x11_compositor_create(struct wl_display *display,
+ 	count = option_count ? option_count : 1;
  
--  <interface name="xserver" version="1">
-+  <interface name="xserver" version="2">
-     <request name="set_window_id">
-       <arg name="surface" type="object" interface="wl_surface"/>
-       <arg name="id" type="uint"/>
-@@ -13,6 +13,8 @@
-     <event name="listen_socket">
-       <arg name="fd" type="fd"/>
-     </event>
-+
-+    <request name="init_complete"/>
-   </interface>
+ 	wl_list_for_each(o, &configured_output_list, link) {
++		if (fullscreen) {
++			o->width = c->screen->width_in_pixels;
++			o->height = c->screen->height_in_pixels;
++		}
+ 		output = x11_compositor_create_output(c, x, 0,
+ 						      option_width ? width :
+ 						      o->width,
+@@ -1219,7 +1223,7 @@ x11_compositor_create(struct wl_display *display,
+ 		x = pixman_region32_extents(&output->base.region)->x2;
  
- </protocol>
-diff --git a/src/xwayland/launcher.c b/src/xwayland/launcher.c
-index 00f064e..63986b0 100644
---- a/src/xwayland/launcher.c
-+++ b/src/xwayland/launcher.c
-@@ -162,10 +162,11 @@ bind_xserver(struct wl_client *client,
- 		wl_client_add_object(client, &xserver_interface,
- 				     &xserver_implementation, id, wxs);
+ 		output_count++;
+-		if (option_count && output_count >= option_count)
++		if (fullscreen || (option_count && output_count >= option_count))
+ 			break;
+ 	}
  
--	wxs->wm = weston_wm_create(wxs);
--	if (wxs->wm == NULL) {
--		weston_log("failed to create wm\n");
--	}
-+	/* init_complete() wasn't added until version 2.  Try to do
-+	 * our best with v1, even if it does usually mean a
-+	 * deadlock. */
-+	if (version == 1)
-+		wxs->wm = weston_wm_create(wxs);
- 
- 	xserver_send_listen_socket(wxs->resource, wxs->abstract_fd);
- 	xserver_send_listen_socket(wxs->resource, wxs->unix_fd);
-diff --git a/src/xwayland/window-manager.c b/src/xwayland/window-manager.c
-index 6d4ce1b..25b2fb0 100644
---- a/src/xwayland/window-manager.c
-+++ b/src/xwayland/window-manager.c
-@@ -808,8 +808,9 @@ weston_wm_handle_property_notify(struct weston_wm *wm, xcb_generic_event_t *even
- 		read_and_dump_property(wm, property_notify->window,
- 				       property_notify->atom);
- 
--	if (property_notify->atom == wm->atom.net_wm_name ||
--	    property_notify->atom == XCB_ATOM_WM_NAME)
-+	if (window &&
-+	    (property_notify->atom == wm->atom.net_wm_name ||
-+	     property_notify->atom == XCB_ATOM_WM_NAME))
- 		weston_wm_window_schedule_repaint(window);
- }
- 
-@@ -883,6 +884,8 @@ weston_wm_handle_destroy_notify(struct weston_wm *wm, xcb_generic_event_t *event
- 		return;
- 
- 	window = hash_table_lookup(wm->window_hash, destroy_notify->window);
-+	if (!window)
-+		return;
- 	weston_wm_window_destroy(window);
- }
- 
-@@ -1683,6 +1686,18 @@ xserver_set_window_id(struct wl_client *client, struct wl_resource *resource,
- 	xserver_map_shell_surface(wm, window);
- }
- 
-+static void xserver_init_complete(struct wl_client *client,
-+				  struct wl_resource *resource)
-+{
-+	struct weston_xserver *wxs = resource->data;
-+
-+	wxs->wm = weston_wm_create(wxs);
-+	if (!wxs->wm)
-+		wl_resource_post_error(resource, WL_DISPLAY_ERROR_NO_MEMORY,
-+				       "failed to start window manager\n");
-+}
-+
- const struct xserver_interface xserver_implementation = {
--	xserver_set_window_id
-+	xserver_set_window_id,
-+	xserver_init_complete
- };
+-- 
+1.7.11.7
+
