@@ -42,9 +42,11 @@ xwaylandapp startkde
 elif [ $SERVER == "Xwayland" ]
 then
 
-kwin &
-waylandapp westoncaller --fullscreen
-killall kwin
+DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
+WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
+HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
+
+waylandapp westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT 
 
 kdialog --msgbox "Weston either crashed, or been exited. A KDE session will be launched as fallback"
 
