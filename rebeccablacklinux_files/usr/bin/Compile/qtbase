@@ -48,12 +48,36 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release  -no-reduce-relocations -reduce-exports
+./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release  -no-reduce-relocations -reduce-exports -nomake examples
 make
 make install 
 bin/syncqt
 
+echo "
 
+
+Building Examples:
+
+
+"
+
+#make specific widgets
+cd examples/widgets/itemviews/dirview
+qmake
+make
+cd ../../../..
+cd examples/widgets/widgets/calculator
+qmake
+make
+cd ../../../..
+cd examples/widgets/mainwindows/mainwindow
+qmake
+make
+cd ../../../..
+cd examples/widgets/widgets/tetrix
+qmake
+make
+cd ../../../..
 
 #install qt tests
 find /srcbuild/"$SOURCENAME"/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
