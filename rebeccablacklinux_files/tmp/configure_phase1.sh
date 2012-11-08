@@ -195,8 +195,8 @@ done
 yes Y | apt-get dist-upgrade 
 
 #remove old kernels!
-CURRENTKERNELPACKAGES=$(apt-rdepends linux-image-generic | grep linux-image | sed 's/  Depends: //g' | sort | uniq)
-dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELPACKAGES" | grep linux-image | while read PACKAGE
+CURRENTKERNELVERSION=$(apt-rdepends linux-image-generic | grep linux-image | grep -v linux-image-generic | grep -v extra | sed 's/  Depends: //g' | sort | uniq |awk -F "-" '{print $3"-"$4}')
+dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep linux-image | grep -v linux-image-generic | while read PACKAGE
 do
 yes Y | apt-get purge $PACKAGE
 done
