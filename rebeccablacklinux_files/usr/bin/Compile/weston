@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout master
+git checkout d32233b11035a22f8b9c14df736b645759034a29
 git reset --hard 
 git clean -fdx 
 git pull
@@ -49,7 +49,6 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-git revert 0c061e7e5f47e24fbc8cac55276412b6663f5c67
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
 ./autogen.sh --with-cairo-glesv2 --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
 make

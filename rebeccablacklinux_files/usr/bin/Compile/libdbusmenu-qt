@@ -45,7 +45,7 @@ if [[ "$1" != download-only ]]
 then
 cd /srcbuild
 cd "$SOURCENAME"
-echo "REVISION $(git rev-parse HEAD)"
+echo "REVISION $(bzr revno)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
