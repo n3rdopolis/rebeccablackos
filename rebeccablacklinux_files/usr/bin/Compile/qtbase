@@ -78,6 +78,10 @@ cd examples/widgets/widgets/tetrix
 qmake
 make
 cd ../../../..
+cd examples/widgets/widgets/wiggly
+qmake
+make
+cd ../../../..
 
 #install qt tests
 find /srcbuild/"$SOURCENAME"/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
