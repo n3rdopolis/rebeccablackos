@@ -31,7 +31,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout d32233b11035a22f8b9c14df736b645759034a29
+git checkout xwayland
 git reset --hard 
 git clean -fdx 
 git pull
