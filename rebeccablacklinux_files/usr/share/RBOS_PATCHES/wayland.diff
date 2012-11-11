@@ -1,0 +1,53 @@
+diff --git a/protocol/wayland.xml b/protocol/wayland.xml
+index 6171670..4205dae 100644
+--- a/protocol/wayland.xml
++++ b/protocol/wayland.xml
+@@ -675,6 +675,13 @@
+       <arg name="output" type="object" interface="wl_output" allow-null="true"/>
+     </request>
+ 
++    <request name="set_minimized">
++      <description summary="request minimize">
++	A request from the client to notify the compositor that it wants to be
++	minimized.
++      </description>
++    </request>
++
+     <request name="set_title">
+       <description summary="set surface title">
+       </description>
+@@ -721,6 +728,33 @@
+ 	to the client owning the popup surface.
+       </description>
+     </event>
++
++    <event name="maximize">
++      <description summary="suggest maximize">
++	The maximize event is to signal to the client that it should become
++	maximized.
++      </description>
++    </event>
++
++    <event name="unmaximize">
++      <description summary="suggest unmaximize">
++	The unmaximize event is to signal to the client that it should become
++	unmaximized.
++      </description>
++    </event>
++
++    <event name="minimize">
++      <description summary="minimize notification">
++	The minimize event is to notify the client that it has been minimized.
++      </description>
++    </event>
++
++    <event name="unminimize">
++      <description summary="unminimize notification">
++	The unminimize event is to notify the client that it has been
++	unminimized.
++      </description>
++    </event>
+   </interface>
+ 
+   <interface name="wl_surface" version="1">
+ 
