@@ -70,7 +70,7 @@ remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
 #uninstall cmake
-make -C /tmp/srcbuild/cmake uninstall
+make -C /srcbuild/cmake uninstall
 
 #delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
 rm -rf /srcbuild
@@ -103,8 +103,23 @@ yes Y | apt-get autoremove
 mv -r /usr/share/Buildlog     /tmp
 mv -r  /usr/share/Downloadlog /tmp
 
-#delete header
+#delete headers (some software leaks headers to /usr/include)
 rm -rf /opt/include
+rm -rf /usr/include
+
+#delete bloated binary files that are for development, and are not needed on the smaller iso
+rm /opt/bin/Xnest
+rm /opt/bin/Xvfb
+rm /opt/bin/rcc
+rm /opt/bin/moc
+rm /opt/bin/qdbusxml2cpp
+rm /opt/bin/qmake
+rm /opt/bin/ctest
+rm /opt/bin/cpack
+rm /opt/bin/ccmake
+rm /opt/bin/cmake
+
+
 
 #remove duplicated samples
 rm -rf /opt/examples
