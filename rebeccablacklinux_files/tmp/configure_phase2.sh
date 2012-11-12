@@ -118,7 +118,9 @@ rm /opt/bin/ctest
 rm /opt/bin/cpack
 rm /opt/bin/ccmake
 rm /opt/bin/cmake
-
+rm /opt/bin/qdoc
+rm /opt/bin/uic
+rm /opt/bin/qdbuscpp2xml
 
 
 #remove duplicated samples
