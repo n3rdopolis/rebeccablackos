@@ -68,6 +68,9 @@ echo "Cleaning up..."
 #set the xserver security back to what it should be
 xhost -LOCAL:
 
+#don't allow access to the card for the testuser
+setfacl -x u:999999999 /dev/dri/card*
+
 #unmount the filesystems used by the CD
 umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/dev
 umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/sys
@@ -225,6 +228,8 @@ mount --rbind /tmp $MOUNTHOME/liveisotest/unionmountpoint/tmp
 #allow all local connections to the xserver
 xhost +LOCAL:
 
+#allow testuser to access the system
+setfacl -m u:999999999:rwx /dev/dri/card*
 
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
