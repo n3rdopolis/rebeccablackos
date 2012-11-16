@@ -49,7 +49,12 @@ rm $RBOSLOCATION/RBOS_FS_PHASE_2.img
 
 #END PAST RUN CLEANUP##################
 
-
+if [[ ! -f "$RBOSLOCATION/RBOS_FS_PHASE_1.img" ]]
+then 
+echo "Image for phase 1 not found. Please run the builder again to start from scratch"
+rm  $RBOSLOCATION/DontStartFromScratch
+exit
+fi
 
 #mount the image as a loop device
 mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
