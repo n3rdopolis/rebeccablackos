@@ -103,8 +103,8 @@ apt-get autoremove -s | grep Remv | awk '{print $2}' >> /usr/share/RemovedPackag
 yes Y | apt-get autoremove
 
 #hide buildlogs in tmp from remastersys
-mv -r /usr/share/Buildlog     /tmp
-mv -r  /usr/share/Downloadlog /tmp
+mv /usr/share/Buildlog     /tmp
+mv /usr/share/Downloadlog /tmp
 
 #delete headers (some software leaks headers to /usr/include)
 rm -rf /opt/include
@@ -145,7 +145,7 @@ done
 remastersys dist
 
 #move logs back
-mv -r /tmp/Buildlog /usr/share
-mv -r /tmp/Downloadlog /usr/share
+mv /tmp/Buildlog /usr/share
+mv /tmp/Downloadlog /usr/share
 
 
