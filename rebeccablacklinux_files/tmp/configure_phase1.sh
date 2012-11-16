@@ -35,7 +35,7 @@ wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 yes Y| apt-get install aptitude
 
 #LIST OF PACKAGES TO GET INSTALLED
-BINARYINSTALLS="apt-rdepends
+PARTBINARYINSTALLS="apt-rdepends
 bash-completion
 lupin-casper
 libsqlite3-dev
@@ -143,7 +143,6 @@ e17
 nano
 libicu-dev 
 libraptor-dev
-remastersys
 libegl1-mesa
 ubuntu-minimal
 xserver-xorg
@@ -152,8 +151,6 @@ vpx-tools
 libkactivities-dev
 libqimageblitz-dev
 kde-workspace-dev
-ubiquity-frontend-kde
-ubuntu-standard
 zenity
 lsb-desktop"
 
@@ -168,16 +165,28 @@ kde4libs
 kde-baseapps
 kde-workspace"
 
+FULLBINARYINSTALLS="ubiquity-frontend-kde
+ubuntu-standard
+remastersys
+"
+
 #LIST OF PACKAGES TO REMOVE
 UNINSTALLS="" 
 
+
 #INSTALL THE PACKAGES SPECIFIED
-echo "$BINARYINSTALLS" | while read PACKAGE
+echo "$PARTBINARYINSTALLS" | while read PACKAGE
 do
 echo "installing $PACKAGE"
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
 done
 
+#INSTALL THE PACKAGES SPECIFIED
+echo "$FULLBINARYINSTALLS" | while read PACKAGE
+do
+echo "installing $PACKAGE"
+yes Yes | apt-get install $PACKAGE -y --force-yes
+done
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
 echo "$BUILDINSTALLS" | while read PACKAGE
