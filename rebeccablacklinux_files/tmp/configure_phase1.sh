@@ -91,7 +91,8 @@ lightdm
 kde-plasma-desktop
 libpam-xdg-support
 kmix
-lightdm-kde-greeter  
+lightdm-kde-greeter
+kubuntu-default-settings   
 plasma-widget-networkmanagement
 plymouth-theme-kubuntu-logo
 plymouth-theme-kubuntu-text
