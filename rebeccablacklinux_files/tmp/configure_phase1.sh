@@ -64,6 +64,10 @@ libudev-dev
 libxcb-dri2-0-dev
 libxcb-xfixes0 
 libxcb-xfixes0-dev 
+libxcb-randr0
+libxcb-randr0-dev
+libxcb-render-util0
+libxcb-render-util0-dev
 shtool 
 libffi-dev 
 libpoppler-glib-dev 
