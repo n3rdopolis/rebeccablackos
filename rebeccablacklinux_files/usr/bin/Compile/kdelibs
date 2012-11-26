@@ -49,8 +49,8 @@ echo "REVISION $(git rev-parse HEAD)"
 mkdir -p $WLD/share/aclocal
 
 
-#sed -i 's/-Werror-implicit-function-declaration//g' /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake
-#sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake 
+sed -i 's/-Werror-implicit-function-declaration//g' /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake
+sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake 
 
 rm CMakeCache.txt
 mkdir build
