@@ -183,8 +183,8 @@ UNINSTALLS=""
 #INSTALL THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
 do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F '{print $2}' )
+PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $1}' )
+METHOD=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
