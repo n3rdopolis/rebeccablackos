@@ -46,7 +46,7 @@ echo "REVISION $(svnversion .)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-build-examples
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-ecore-wayland --enable-build-examples
 make 
 make install
 

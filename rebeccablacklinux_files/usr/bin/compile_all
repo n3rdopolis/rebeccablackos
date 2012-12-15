@@ -62,16 +62,8 @@ gtk+
 vte
 cogl
 clutter
-eina
-eet
 efl
-evas
-ecore
-embryo
-edje
-efreet
-e_dbus
-eeze
+emotion
 elementary
 SDL
 " | awk -F "#" '{print $1}' | while read BUILDNAME

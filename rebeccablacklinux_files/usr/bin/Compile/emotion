@@ -15,8 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SOURCENAME=embryo
-SOURCEURL=http://svn.enlightenment.org/svn/e/trunk/embryo
+SOURCENAME=emotion
+SOURCEURL=http://svn.enlightenment.org/svn/e/trunk/emotion
 
 if [[ "$1" != build-only ]]
 then
@@ -38,8 +38,6 @@ svn update
 fi
 
 
-
-
 if [[ "$1" != download-only ]]
 then
 cd /srcbuild
@@ -48,10 +46,9 @@ echo "REVISION $(svnversion .)"
 . /usr/bin/build_vars
 mkdir -p $WLD/share/aclocal
 
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 
 make install
 cd ..
-
 
 fi

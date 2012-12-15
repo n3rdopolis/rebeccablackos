@@ -85,7 +85,8 @@ gperf
 librsvg2-bin 
 libpciaccess-dev  
 python-libxml2 
-libjpeg-dev   
+libjpeg-dev
+libtiff-dev   
 libvpx-dev
 libgbm-dev 
 libxcb-glx0-dev 
