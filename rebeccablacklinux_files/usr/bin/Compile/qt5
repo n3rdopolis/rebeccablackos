@@ -15,8 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SOURCENAME=qtbase
-SOURCEURL=git://gitorious.org/qt/qtbase
+SOURCENAME=qt5
+SOURCEURL=git://gitorious.org/qt/qt5
 
 if [[ "$1" != build-only ]]
 then
@@ -31,11 +31,38 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout 7c21fdd
+./init-repository -f
+
+git checkout master
 git reset --hard 
 git clean -fdx 
 git pull
 
+#Get current path of QT source
+QTPATH=$PWD
+
+#set revisions for seperate modules
+qtbase_REVISION=stable
+
+#go through each module path and handle it
+find -maxdepth 1 -type d | while read MODULE
+do
+
+#get the current module folder name, and add '_REVISION' to the end of the name
+REVISIONNAME=`basename $PWD`_REVISION
+#use REVISIONNAME (foldername_REVISION as variable variable 
+MODULEREVISION=${!REVISIONNAME}
+
+cd $MODULE
+
+git checkout $MODULEREVISION
+git reset --hard 
+git clean -fdx 
+git pull
+
+#change back to qt source
+cd $QTPATH
+done
 fi
 
 
@@ -62,26 +89,23 @@ Building Examples:
 "
 
 #make specific widgets
-cd examples/widgets/itemviews/dirview
+cd /srcbuild/qt5/qtbase/examples/widgets/itemviews/dirview
 qmake
 make
-cd ../../../..
-cd examples/widgets/widgets/calculator
+cd /srcbuild/qt5/qtbase/examples/widgets/widgets/calculator
 qmake
 make
-cd ../../../..
-cd examples/widgets/mainwindows/mainwindow
+cd /srcbuild/qt5/qtbase/examples/widgets/mainwindows/mainwindow
 qmake
 make
-cd ../../../..
-cd examples/widgets/widgets/tetrix
+cd /srcbuild/qt5/qtbase/examples/widgets/widgets/tetrix
 qmake
 make
-cd ../../../..
-cd examples/widgets/widgets/wiggly
+cd /srcbuild/qt5/qtbase/examples/widgets/widgets/wiggly
 qmake
 make
-cd ../../../..
+
+cd ..
 
 #install qt tests
 find /srcbuild/"$SOURCENAME"/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
