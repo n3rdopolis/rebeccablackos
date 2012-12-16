@@ -108,7 +108,7 @@ make
 cd ..
 
 #install qt tests
-find /srcbuild/"$SOURCENAME"/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
+find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
 do
 cp "$TEST" $WLD/bin
 done

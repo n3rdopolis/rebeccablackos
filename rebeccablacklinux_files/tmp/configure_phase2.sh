@@ -19,8 +19,66 @@
 # /lib/plymouth/ubuntu-logo.png
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
-#remove packages that cause conflict
-yes Yes |apt-get remove gdm gnome-session -y
+#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+dpkg-divert --local --rename --add /usr/sbin/grub-probe
+dpkg-divert --local --rename --add /sbin/initctl
+ln -s /bin/true /sbin/initctl
+ln -s /bin/true /usr/sbin/grub-probe
+
+#attempt to prevent packages from prompting for debconf
+export DEBIAN_FRONTEND=noninteractive
+
+#install aptitude
+yes Y| apt-get install aptitude
+
+#LIST OF PACKAGES TO GET INSTALLED
+BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt)"
+
+#LIST OF PACKAGES THAT NEED BUILD DEPS
+BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt)"
+
+
+#INSTALL THE PACKAGES SPECIFIED
+echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
+do
+PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $1}' )
+METHOD=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $2}' )
+
+if [[ $METHOD == "PART" ]]
+then
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
+else
+yes Yes | apt-get install $PACKAGE -y --force-yes
+fi
+
+done
+
+
+#GET BUILDDEPS FOR THE PACKAGES SPECIFIED
+echo "$BUILDINSTALLS" | while read PACKAGE
+do
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
+done
+
+
+#remove old kernels!
+CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
+dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep linux-image | grep -v linux-image-generic | while read PACKAGE
+do
+yes Y | apt-get purge $PACKAGE
+done
+
+#Delete the old depends of the packages no longer needed.
+yes Y | apt-get --purge autoremove -y 
+
+#Reset the utilites back to the way they are supposed to be.
+rm /sbin/initctl
+rm /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /sbin/initctl
+
+#delete the downloaded file cache
+apt-get clean
 
 #copy all the post install files
 rsync /usr/import/* -a /
