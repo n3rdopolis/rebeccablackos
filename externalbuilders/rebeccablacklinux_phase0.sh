@@ -60,7 +60,7 @@ cd $RBOSLOCATION
 
 
 #create the file that will be the filesystem image for the first phase
-dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_1.img bs=1 count=0 seek=11G 
+dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_1.img bs=1 count=0 seek=7G 
 
 
 
