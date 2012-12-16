@@ -25,7 +25,7 @@ RBOSLOCATION=~/RBOS_Build_Files
 mkdir $RBOSLOCATION/build_mountpoints
 
 #create the file that will be the filesystem image for the second phase
-dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_2.img bs=1 count=0 seek=11G 
+dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_2.img bs=1 count=0 seek=14G 
 
 
 echo "creating a file system on the virtual image. Not on your real file system."
