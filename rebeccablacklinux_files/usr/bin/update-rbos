@@ -19,7 +19,7 @@ echo "This needs to be run as root"
 cd /usr/share
 
 apt-get update
-yes Y |apt-get install subversion
+yes Y |apt-get install subversion git bzr
 #download off the SVN
 svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
 #make the files owned by root, and executable
@@ -35,16 +35,61 @@ chmod 777 /tmp
 #Install menu items
 install_menu_items 
 
-#Install the dev packages that got removed
-INSTALLPACKAGES="$(cat /usr/share/RemovedPackages.txt)"
-yes Y | apt-get install $INSTALLPACKAGES
+
+
+#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+dpkg-divert --local --rename --add /usr/sbin/grub-probe
+dpkg-divert --local --rename --add /sbin/initctl
+ln -s /bin/true /sbin/initctl
+ln -s /bin/true /usr/sbin/grub-probe
+
+
+#LIST OF PACKAGES TO GET INSTALLED
+BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt)"
+
+#LIST OF PACKAGES THAT NEED BUILD DEPS
+BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt)"
+
+
+#INSTALL THE PACKAGES SPECIFIED
+echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
+do
+PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $1}' )
+METHOD=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $2}' )
+
+if [[ $METHOD == "PART" ]]
+then
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
+else
+yes Yes | apt-get install $PACKAGE -y --force-yes
+fi
+
+done
+
+
+#GET BUILDDEPS FOR THE PACKAGES SPECIFIED
+echo "$BUILDINSTALLS" | while read PACKAGE
+do
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
+done
+
+
+#Reset the utilites back to the way they are supposed to be.
+rm /sbin/initctl
+rm /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /sbin/initctl
+
+#delete the downloaded file cache
+apt-get clean
+
+
 
 if [[ $1 == build ]]
 then 
 #run the config script to install depends in case they changed
 /tmp/configure_phase1.sh
-#remove packages that cause conflict
-yes Yes |apt-get remove gdm gnome-session -y
+
 
 compile_all build-only
 else

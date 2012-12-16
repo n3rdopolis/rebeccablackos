@@ -16,8 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-# /lib/plymouth/ubuntu-logo.png
-echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
 dpkg-divert --local --rename --add /usr/sbin/grub-probe
@@ -80,6 +78,11 @@ dpkg-divert --local --rename --remove /sbin/initctl
 #delete the downloaded file cache
 apt-get clean
 
+
+# /lib/plymouth/ubuntu-logo.png
+echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
+
+
 #copy all the post install files
 rsync /usr/import/* -a /
 
@@ -138,26 +141,22 @@ unlink /srcbuild
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/RemovedPackages.txt
+
 yes Y | apt-get purge $REMOVEDEVPGKS
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get purge $REMOVEDEVPGKS
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get purge $REMOVEDEVPGKS
 
 
 REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git bzr cmake libgl1-mesa-dri-dbg libglib2.0-doc"
-apt-get purge $REMOVEDEVPGKS -s | grep Purg | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get purge $REMOVEDEVPGKS
 
 
-apt-get autoremove -s | grep Remv | awk '{print $2}' >> /usr/share/RemovedPackages.txt
 yes Y | apt-get autoremove
 
 #hide buildlogs in tmp from remastersys
