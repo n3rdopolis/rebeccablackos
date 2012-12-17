@@ -58,8 +58,8 @@ do
 yes Y | apt-get build-dep $PACKAGE -d -y --force-yes
 done
 
-
-
+#Download updates
+yes Y | apt-get dist-upgrade -d -y --force-yes
 
 #remastersys doesn't put in tmp into the live cds. symlink srcbuild into tmp, so that it can be unlinked from root, and the cmake uninstaller will still exist for the second image
 mkdir /tmp/srcbuild
