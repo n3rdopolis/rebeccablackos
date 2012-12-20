@@ -23,7 +23,7 @@ then
 mkdir /srcbuild
 cd /srcbuild
 
-OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | awk '{print $2}')
+OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
