@@ -56,8 +56,8 @@ rm CMakeCache.txt
 mkdir build
 cd build
 cmake .. -DQT5_BUILD=TRUE -DKDE4_BUILD_TESTS=TRUE -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make 
-make install 
+make -i
+make install -i
 
 #install the kdelibs tests
 cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest $WLD/bin
