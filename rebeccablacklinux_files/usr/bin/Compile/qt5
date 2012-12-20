@@ -33,7 +33,7 @@ git clone "$SOURCEURL"
 cd "$SOURCENAME"
 ./init-repository -f
 
-git checkout master
+git checkout release
 git reset --hard 
 git clean -fdx 
 git pull
@@ -42,7 +42,7 @@ git pull
 QTPATH=$PWD
 
 #set revisions for seperate modules
-qtbase_REVISION=stable
+#qtbase_REVISION=stable
 
 #go through each module path and handle it
 find -maxdepth 1 -type d | while read MODULE
