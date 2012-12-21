@@ -17,12 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 
-if [[ -z $1 ]]
-then
-export WLD=/opt
-else
 export $WLD=$1
-fi
 
 export LD_LIBRARY_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$WLD/lib:/usr/local/lib:/usr/lib
 export PATH="$WLD/sbin:$WLD/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"

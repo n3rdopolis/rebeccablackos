@@ -18,7 +18,11 @@
 SOURCENAME=libxtrans
 SOURCEURL=git://anongit.freedesktop.org/xorg/lib/libxtrans
 
-if [[ "$1" != build-only ]]
+ACTION=$1
+shift 1
+
+
+if [[ "$ACTION" != build-only ]]
 then
 mkdir /srcbuild
 cd /srcbuild
@@ -41,12 +45,12 @@ fi
 
 
 
-if [[ "$1" != download-only ]]
+if [[ "$ACTION" != download-only ]]
 then
 cd /srcbuild
 cd "$SOURCENAME"
 echo "REVISION $(git rev-parse HEAD)"
-. /usr/bin/build_vars
+. /usr/bin/build_vars /opt
 mkdir -p $WLD/share/aclocal
 
 ./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
