@@ -15,14 +15,21 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) + 1 ))"
-export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export PATH="/opt/sbin:/opt/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
+
+if [[ -z $1 ]]
+then
 export WLD=/opt
+else
+export $WLD=$1
+fi
+
+export LD_LIBRARY_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$WLD/lib:/usr/local/lib:/usr/lib
+export PATH="$WLD/sbin:$WLD/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export PKG_CONFIG_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$WLD/lib/pkgconfig/:$WLD/share/pkgconfig/
 export ACLOCAL="aclocal -I $WLD/share/aclocal"
 export C_INCLUDE_PATH=$WLD/include
 export LIBRARY_PATH=$WLD/lib
 export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
 export QT_PLUGIN_PATH=$WLD/lib/plugins/
-export CMAKE_PREFIX_PATH=/opt
+export CMAKE_PREFIX_PATH=$WLD
