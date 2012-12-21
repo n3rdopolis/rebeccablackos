@@ -66,6 +66,9 @@ do
 yes Y | apt-get purge $PACKAGE
 done
 
+#install updates
+yes Y | apt-get dist-upgrade -y --force-yes
+
 #Delete the old depends of the packages no longer needed.
 yes Y | apt-get --purge autoremove -y 
 
