@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SOURCENAME=xserver
-SOURCEURL=git://people.freedesktop.org/~vignatti/xserver 
+SOURCEURL=git://anongit.freedesktop.org/xorg/xserver 
 
 ACTION=$1
 shift 1
@@ -35,7 +35,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout xwm-client
+git checkout xwayland-1.12
 git reset --hard 
 git clean -fdx 
 git pull
