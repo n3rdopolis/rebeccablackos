@@ -37,7 +37,7 @@ git clone "$SOURCEURL"
 cd "$SOURCENAME"
 ./init-repository -f
 
-git checkout release
+git checkout stable
 git reset --hard 
 git clean -fdx 
 git pull
@@ -46,7 +46,7 @@ git pull
 QTPATH=$PWD
 
 #set revisions for seperate modules
-#qtbase_REVISION=stable
+qtbase_REVISION=stable
 
 #go through each module path and handle it
 find -maxdepth 1 -type d | while read MODULE
@@ -79,7 +79,7 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars /opt
 mkdir -p $WLD/share/aclocal
 
-./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release  -no-reduce-relocations -reduce-exports -nomake examples
+./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release  -no-reduce-relocations -reduce-exports -no-glib -nomake examples
 make
 make install 
 bin/syncqt

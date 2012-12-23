@@ -28,7 +28,7 @@ mkdir /srcbuild
 cd /srcbuild
 
 
-OLDSOURCEURL=$(bzr info | grep "parent branch" | awk -F "branch: " '{print $2}')
+OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
@@ -53,7 +53,7 @@ echo "REVISION $(bzr revno)"
 . /usr/bin/build_vars /opt
 mkdir -p $WLD/share/aclocal
 
-patch -p1 < /usr/share/RBOS_PATCHES/libdbusmenu-qt.diff
+patch -p0 -i /usr/share/RBOS_PATCHES/libdbusmenu-qt.diff
 
 mkdir build
 cd build
