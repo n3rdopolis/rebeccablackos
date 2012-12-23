@@ -30,10 +30,10 @@ export DEBIAN_FRONTEND=noninteractive
 yes Y| apt-get install aptitude
 
 #LIST OF PACKAGES TO GET INSTALLED
-BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt)"
+BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt | awk -F "#" '{print $1}')"
 
 #LIST OF PACKAGES THAT NEED BUILD DEPS
-BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt)"
+BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt | awk -F "#" '{print $1}')"
 
 
 #INSTALL THE PACKAGES SPECIFIED
