@@ -15,8 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-SOURCENAME=kdelibs
-SOURCEURL=git://anongit.kde.org/kdelibs
+SOURCENAME=phonon
+SOURCEURL=git://anongit.kde.org/phonon
 
 ACTION=$1
 shift 1
@@ -35,7 +35,7 @@ fi
 
 git clone "$SOURCEURL"
 cd "$SOURCENAME"
-git checkout frameworks
+git checkout five
 git reset --hard 
 git clean -fdx 
 git pull
@@ -52,21 +52,12 @@ echo "REVISION $(git rev-parse HEAD)"
 . /usr/bin/build_vars /opt
 mkdir -p $WLD/share/aclocal
 
-
-sed -i 's/-Werror-implicit-function-declaration//g' /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake
-sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake 
-
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_SYSTEM_PREFIX_PATH=/usr:/usr/local:$WLD -DQT5_BUILD=TRUE -DKDE4_BUILD_TESTS=TRUE -DCMAKE_INSTALL_PREFIX=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make -i
-make install -i
-
-#install the kdelibs tests
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest $WLD/bin
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcolorutilsdemo $WLD/bin
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/krulertest $WLD/bin
+cmake .. -DCMAKE_INSTALL_PREFIX=$WLD -DCMAKE_PREFIX_PATH=$WLD -DLIB_INSTALL_DIR=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+make 
+make install 
 
 cd ..
 
