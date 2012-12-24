@@ -116,6 +116,8 @@ find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "c
 do
 cp "$TEST" $WLD/bin
 done
+cp /$WLD/examples/webkitwidgets/browser/browser $WLD/bin
+
 cd ..
 
 fi
