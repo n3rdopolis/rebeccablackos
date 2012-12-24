@@ -54,6 +54,7 @@ mkdir -p $WLD/share/aclocal
 
 
 sed -i 's/waylandDispaly/waylandDisplay/g' src/plugins/platforms/wayland/gl_integration/xcomposite_egl/qwaylandxcompositeeglintegration.cpp 
+patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
 qmake
 make
 cd src
