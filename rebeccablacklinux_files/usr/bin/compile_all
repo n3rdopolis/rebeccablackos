@@ -67,20 +67,20 @@ do
 if [[ "$argument" == download-only ]]
 then
 echo "Downloading/updating $BUILDNAME source"
-time "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 | tee  /usr/share/Downloadlog/$BUILDNAME
+"/usr/bin/Compile/$BUILDNAME" download-only 2>&1 | tee  /usr/share/Downloadlog/$BUILDNAME
 fi
 
 #compile_all is running to build the source
 if [[ "$argument" == build-only ]]
 then
 echo "building $BUILDNAME"
-time "/usr/bin/Compile/$BUILDNAME" build-only 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
+"/usr/bin/Compile/$BUILDNAME" build-only 2>&1 | tee  /usr/share/Buildlog/$BUILDNAME
 fi
 
 #compile_all is running to download and build
 if [[ ! -n "$argument" ]]
 then
-time "/usr/bin/Compile/$BUILDNAME"
+"/usr/bin/Compile/$BUILDNAME"
 fi
 
 done
