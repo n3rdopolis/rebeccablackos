@@ -15,7 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
+export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) )) -O2"
 
 export WLD=$1
 
