@@ -116,6 +116,8 @@ grep -v "remove ubiquity" /usr/bin/remastersys > /usr/bin/remastersys.bak
 cat /usr/bin/remastersys.bak > /usr/bin/remastersys
 rm /usr/bin/remastersys.bak
 
+#remove the resolv.conf from the list of files in /etc that remastersys deletes, as it's a symlink to a dynamic file. 
+sed -i 's/resolv.conf,//g'  /usr/bin/remastersys
 
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate

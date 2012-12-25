@@ -19,6 +19,9 @@
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
+#Create the correct /etc/resolv.conf symlink
+ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
+
 #update the apt cache
 apt-get update
 
