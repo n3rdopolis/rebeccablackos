@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
   
-STARTTIME=$(date +%s)
+
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
@@ -47,7 +47,7 @@ echo "press enter again to start the operation. If you started the script in an 
 
 read a
 
-
+STARTTIME=$(date +%s)
 #ping google to test total network connectivity. Google is usally pingable
 ping -c1 google.com > /dev/null
 IsGoOgLeAcceSsaBle=$?
