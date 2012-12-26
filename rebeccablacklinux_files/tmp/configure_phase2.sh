@@ -196,13 +196,6 @@ apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/lib/apt/lists/*
 
-#Make the executables smaller
-echo "Reducing binary file sizes"
-find /opt/bin /opt/lib /opt/sbin | while read FILE
-do
-strip $FILE 2>/dev/null
-done
-
 #start the remastersys job
 remastersys dist
 
