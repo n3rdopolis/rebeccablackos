@@ -74,6 +74,9 @@ mount --bind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 #Configure the Live system########################################
 chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase2.sh
 
+#update ccache on Phase 1
+rm -rf $RBOSLOCATION/build_mountpoints/phase_1/tmp/srcbuild/.ccache
+cp -a $RBOSLOCATION/build_mountpoints/workdir/tmp/srcbuild/.ccache $RBOSLOCATION/build_mountpoints/phase_1/tmp/srcbuild/.ccache
 
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
