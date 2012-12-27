@@ -127,22 +127,16 @@ echo "$(date)" > /etc/builddate
 #install the menu items for the wayland tests
 install_menu_items
 
-#unlink srcbuild symlink
-unlink /srcbuild
+#set a variable for remastersys to exclude srcbuild
+export EXCLUDES=/srcbuild
 
 #start the remastersys job
 remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
-#create srcbuild folder for cmake uninstaller
-ln -s /tmp/srcbuild /srcbuild 
-
 #uninstall cmake
 make -C /srcbuild/cmake uninstall
-
-#delete the build source (from the phase 2 snapshot) so it doesn't bloat the live cd
-unlink /srcbuild
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)

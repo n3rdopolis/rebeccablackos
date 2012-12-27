@@ -33,18 +33,8 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
-#Kill processess accessing the workdir mountpoint
-fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
-
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
-
-#unmount the underlay filesystem
-umount -lfd $RBOSLOCATION/build_mountpoints/workdir/phase_1
-
-#remove the RBOS_FS images
-rm  $RBOSLOCATION/*.img
-
 
 
 
@@ -58,25 +48,11 @@ mkdir $RBOSLOCATION
 cd $RBOSLOCATION
 
 
-#create the file that will be the filesystem image for the first phase
-dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_1.img bs=1 count=0 seek=7G 
-
-
-
-echo "creating a file system on the virtual image. Not on your real file system."
-#create a file system on the image 
-yes y | mkfs.ext4 $RBOSLOCATION/RBOS_FS_PHASE_1.img
-
-
-
 #create a folder for the media mountpoints in the media folder
 mkdir $RBOSLOCATION/build_mountpoints
 mkdir $RBOSLOCATION/build_mountpoints/phase_1
 mkdir $RBOSLOCATION/build_mountpoints/phase_2
 mkdir $RBOSLOCATION/build_mountpoints/workdir
-
-#mount the image created above at the mountpoint as a loop device
-mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
 
 #bind mount the FS to the workdir
 mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
@@ -88,19 +64,13 @@ debootstrap quantal $RBOSLOCATION/build_mountpoints/workdir http://ubuntu.osuosl
 touch $RBOSLOCATION/DontStartFromScratch
 
 #unmount the chrooted procfs from the outside 
-umount -l\f $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
- 
-#Kill processess accessing the workdir mountpoint
-fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
 
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
-
-#unmount the underlay filesystem
-umount -lfd $RBOSLOCATION/build_mountpoints/phase_1

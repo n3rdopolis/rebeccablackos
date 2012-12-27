@@ -99,13 +99,6 @@ echo "Setting up live system..."
 REBUILT="to update"
 
 
-if [[ ! -f "$RBOSLOCATION/RBOS_FS_PHASE_1.img" ]]
-then 
-echo "Image for phase 1 not found. Starting from scratch"
-rm  $RBOSLOCATION/DontStartFromScratch
-exit
-fi
-
 #only initilize the FS if the FS isn't there.
 if [ ! -f $RBOSLOCATION/DontStartFromScratch ]
 then

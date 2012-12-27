@@ -26,20 +26,6 @@ unset HOME
 #create a media mountpoint in the media folder
 mkdir $RBOSLOCATION/build_mountpoints
 
-#create the file that will be the filesystem image for the second phase
-dd if=/dev/zero of=$RBOSLOCATION/RBOS_FS_PHASE_2.img bs=1 count=0 seek=14G 
-
-
-echo "creating a file system on the virtual image. Not on your real file system."
-#create a file system on the image 
-yes y | mkfs.ext4 $RBOSLOCATION/RBOS_FS_PHASE_2.img
-
-
-
-#mount the images for the two FSes
-mount $RBOSLOCATION/RBOS_FS_PHASE_1.img $RBOSLOCATION/build_mountpoints/phase_1 -o loop
-mount $RBOSLOCATION/RBOS_FS_PHASE_2.img $RBOSLOCATION/build_mountpoints/phase_2 -o loop
-
 #create the union of the two overlay FSes at the workdir
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/workdir
 
@@ -75,8 +61,8 @@ mount --bind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase2.sh
 
 #update ccache on Phase 1
-rm -rf $RBOSLOCATION/build_mountpoints/phase_1/tmp/srcbuild/.ccache
-cp -a $RBOSLOCATION/build_mountpoints/workdir/tmp/srcbuild/.ccache $RBOSLOCATION/build_mountpoints/phase_1/tmp/srcbuild/.ccache
+rm -rf $RBOSLOCATION/build_mountpoints/phase_1/srcbuild/.ccache
+cp -a $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache $RBOSLOCATION/build_mountpoints/phase_1/srcbuild/.ccache
 
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
@@ -102,7 +88,7 @@ echo $FILE=$REV
 done > $RBOSLOCATION/BuiltRevisions-$(date +%s)
 
 
-echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
+echo "Live CD image build was successful. It was created at $HOMELOCATION/RebeccaBlackLinux.iso"
 
 #allow the user to actually read the iso   
 chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
@@ -121,15 +107,8 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
-#Kill processess accessing the workdir mountpoint
-fuser -kmM   $RBOSLOCATION/build_mountpoints/workdir 2> /dev/null
-
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
-#unmount the underlay filesystems
-umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
-umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
-
-#Delete the FS image for phase 2.
-rm $RBOSLOCATION/RBOS_FS_PHASE_2.img
+#Delete the phase 2 folder contents
+rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
