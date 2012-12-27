@@ -127,9 +127,6 @@ echo "$(date)" > /etc/builddate
 #install the menu items for the wayland tests
 install_menu_items
 
-#set a variable for remastersys to exclude srcbuild
-export EXCLUDES=/srcbuild
-
 #start the remastersys job
 remastersys dist
 
