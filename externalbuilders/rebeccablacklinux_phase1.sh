@@ -20,9 +20,7 @@ ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 RBOSLOCATION=~/RBOS_Build_Files
-
-#enter users home directory
-cd ~
+unset HOME
 
 #unmount the chrooted procfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
@@ -102,6 +100,3 @@ umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
 #unmount the underlay filesystem
 umount -lfd $RBOSLOCATION/build_mountpoints/phase_1
-
-#go back to the users home folder
-cd ~

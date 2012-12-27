@@ -20,10 +20,9 @@ ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
 RBOSLOCATION=~/RBOS_Build_Files
+unset HOME
 
 ####CLEAN UP OLD SCRIPT FILES
-#enter users home directory
-cd ~
 
 #unmount the chrooted procfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
@@ -88,12 +87,8 @@ debootstrap quantal $RBOSLOCATION/build_mountpoints/workdir http://ubuntu.osuosl
 #tell future calls of the first builder script that phase 1 is done
 touch $RBOSLOCATION/DontStartFromScratch
 
-#go back to the users home folder
-cd ~
-
-
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -l\f $RBOSLOCATION/build_mountpoints/workdir/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys

@@ -19,7 +19,9 @@ echo "PHASE 2"
 ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
 ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 
+HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
+unset HOME
 
 #create a media mountpoint in the media folder
 mkdir $RBOSLOCATION/build_mountpoints
@@ -84,10 +86,10 @@ fi
 if [  -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 #delete the old copy of the ISO 
-rm ~/RebeccaBlackLinux.iso
+rm $HOMELOCATION/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
-cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ~/RebeccaBlackLinux.iso
-cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom-full.iso ~/RebeccaBlackLinux_Development.iso
+cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux.iso
+cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_Development.iso
 
 #dump out the logged revision numbers to a file
 ls $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 
@@ -100,15 +102,11 @@ done > $RBOSLOCATION/BuiltRevisions-$(date +%s)
 echo "Live CD image build was successful. It was created at ${HOME}/RebeccaBlackLinux.iso"
 
 #allow the user to actually read the iso   
-chown $SUDO_USER ~/RebeccaBlackLinux*.iso
-chgrp $SUDO_USER ~/RebeccaBlackLinux*.iso
-chmod 777 ~/RebeccaBlackLinux*.iso
+chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
 
 fi
-
-
-#go back to the users home folder
-cd ~
 
 
 #unmount the chrooted procfs from the outside 
