@@ -33,7 +33,7 @@ mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=
 mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
-
+mount --rbind $RBOSLOCATION/build_mountpoints/ccachedata $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache
 
 #copy in the files needed
 rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
@@ -59,12 +59,6 @@ mount --bind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 
 #Configure the Live system########################################
 chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase2.sh
-
-#update ccache on Phase 1 to a temporary location outside, and then into phase 1
-rm -rf $RBOSLOCATION/build_mountpoints/phase_1/srcbuild/.ccache
-mv $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache $RBOSLOCATION/ccachetmp
-mv $RBOSLOCATION/ccachetmp $RBOSLOCATION/build_mountpoints/phase_1/srcbuild/.ccache
-
 
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];

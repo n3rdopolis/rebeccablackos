@@ -52,6 +52,7 @@ cd $RBOSLOCATION
 mkdir $RBOSLOCATION/build_mountpoints
 mkdir $RBOSLOCATION/build_mountpoints/phase_1
 mkdir $RBOSLOCATION/build_mountpoints/phase_2
+mkdir $RBOSLOCATION/build_mountpoints/ccachedata
 mkdir $RBOSLOCATION/build_mountpoints/workdir
 
 #bind mount the FS to the workdir

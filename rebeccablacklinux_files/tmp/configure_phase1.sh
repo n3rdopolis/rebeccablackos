@@ -28,7 +28,7 @@ apt-get update
 #install remastersys key
 wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 
-#install aptitude
+#install basic applications that the system needs to get repositories
 yes Y| apt-get install aptitude git bzr subversion
 
 
@@ -63,6 +63,9 @@ done
 
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
+
+#create the folder for ccache
+mkdir -p /srcbuild/.ccache
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only

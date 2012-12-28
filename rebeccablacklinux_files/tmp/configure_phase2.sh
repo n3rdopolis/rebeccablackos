@@ -23,6 +23,9 @@ dpkg-divert --local --rename --add /sbin/initctl
 ln -s /bin/true /sbin/initctl
 ln -s /bin/true /usr/sbin/grub-probe
 
+#Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
+echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
+
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
@@ -77,6 +80,9 @@ rm /sbin/initctl
 rm /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /sbin/initctl
+
+#delete the dpkg config file that speeds up the installs, so the user doesn't get it.
+rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
 #delete the downloaded file cache
 apt-get clean
