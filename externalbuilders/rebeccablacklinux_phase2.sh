@@ -106,5 +106,8 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
+#unmount the ccache data
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache
+
 #Delete the phase 2 folder contents
 rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
