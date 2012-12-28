@@ -49,7 +49,7 @@ QTPATH=$PWD
 qtbase_REVISION=stable
 
 #go through each module path and handle it
-find -maxdepth 1 -type d | while read MODULE
+git submodule  | awk '{print $2}' | while read MODULE
 do
 
 #get the current module folder name, and add '_REVISION' to the end of the name

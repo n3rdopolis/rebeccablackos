@@ -15,13 +15,13 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) )) -O2"
+export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 
 export WLD=$1
 
 mkdir /srcbuild/.ccache
 export CCACHE_DIR=/srcbuild/.ccache
-export CCACHE_HARDLINK=1
+export CCACHE_NLEVELS=8
 export QMAKE_CXX="ccache g++"
 export LD_LIBRARY_PATH=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$WLD/lib:/usr/local/lib:/usr/lib
 export PATH="/usr/lib/ccache:$WLD/sbin:$WLD/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
