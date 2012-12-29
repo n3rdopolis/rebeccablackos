@@ -33,7 +33,9 @@ mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=
 mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
-mount --rbind $RBOSLOCATION/build_mountpoints/ccachedata $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache
+
+#Mount in the folder with previously built debs
+mount --rbind $RBOSLOCATION/build_mountpoints/builtdebs $RBOSLOCATION/build_mountpoints/workdir/srcbuild/builtdebs
 
 #copy in the files needed
 rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
@@ -103,8 +105,8 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
-#unmount the ccache data
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/.ccache
+#unmount the debs data
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/builtdebs
 
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
