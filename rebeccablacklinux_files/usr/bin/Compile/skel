@@ -34,8 +34,8 @@ SOURCEREVERSION=master
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
 
-#This variable is not manditory, /usr/bin/build_core sets it by default as 1. If it is set to anything else, then the build gets saved as a deb and not rebuilt on the next run unless the deb is deleted, if /usr/bin/build_core is set to create deb files.
-ALWAYSREBUILD=0
+#This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
+ALWAYSREBUILD=1
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
@@ -50,7 +50,7 @@ function PackageCompileSource()
 make 
 }
 
-#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLROOT, along with mkdir -p $INSTALLROOT/path/to/file.
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLROOT, along with mkdir -p $INSTALLROOT/path/to/file, so that it can be saved for deb installs.
 function PackagePostInstall()
 {
 :

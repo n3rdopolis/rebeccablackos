@@ -18,7 +18,7 @@
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 
 export SOURCEDIR=/srcbuild
-export ALWAYSREBUILD=1
+export ALWAYSREBUILD=0
 
 export LD_LIBRARY_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$INSTALLDIR/lib:/usr/local/lib:/usr/lib
 export PATH="/usr/lib/ccache:$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
@@ -107,7 +107,7 @@ function PrepareBuild()
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
 echo "REVISION $CURRENTREVISION"
-mkdir -p $INSTALLDIR/share/aclocal
+mkdir -p "$INSTALLDIR/share/aclocal"
 PackagePrepareBuild
 }
 
@@ -116,41 +116,45 @@ function MakeAndInstall()
 {
 
 #If the script is set to always rebuild, then delete the lock file.
-if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS==1 ]]
+if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS == 1 ]]
 then
-rm /$SOURCEDIR/buildoutput/control/$SOURCENAME
+rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 fi
 
 #If the deb file is gone, there is no control file, or the scripts not configured to make deb files, then build the source
-if [[ ! -f /srcbuild/buildoutput/$SOURCENAME.deb || ! -f /srcbuild/buildoutput/control/$SOURCENAME || $MAKEDEBS != 1 ]]
+if [[ ! -f "/$SOURCEDIR/buildoutput/$SOURCENAME.deb" || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
 then
 #Complile the source
 PackageCompileSource
 
-#if the script is configured to create debs then create the debs, and save the copied files outside of the debs to /srcbuild/buildoutput/externalfiles. If not, run the install routine as normal.
+#if the script is configured to create debs then create the debs, and save the copied files outside of the debs to $SOURCEDIR/buildoutput/externalfiles. If not, run the install routine as normal.
 if [[ $MAKEDEBS == 1 ]]
 then
-
+export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
+mkdir "/$SOURCEDIR/buildoutput/"
+mkdir "/$SOURCEDIR/buildoutput/control"
 checkinstall
-PackagePostInstall
-
 
 else
+export INSTALLROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
 make install
-PackagePostInstall
 fi
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
-dpkg -i /srcbuild/buildoutput/$SOURCENAME.deb
+export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
+dpkg -i "/$SOURCEDIR/buildoutput/$SOURCENAME.deb"
+fi
 
+#Run the Package install routine, and copy the files out of INSTALLROOT into the actual root.
+mkdir -p "/$INSTALLROOT"
+PackagePostInstall
+cp -a "/$INSTALLROOT"/* /
 
 #If the build script is set to not always rebuild, create the lock file
 if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]
 then
-touch /$SOURCEDIR/buildoutput/control/$SOURCENAME
-fi
-
+touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 fi
 
 }
