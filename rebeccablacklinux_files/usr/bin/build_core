@@ -1,0 +1,156 @@
+#! /bin/bash
+#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
+
+export SOURCEDIR=/srcbuild
+export ALWAYSREBUILD=1
+
+export LD_LIBRARY_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$INSTALLDIR/lib:/usr/local/lib:/usr/lib
+export PATH="/usr/lib/ccache:$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+export PKG_CONFIG_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
+export ACLOCAL="aclocal -I $INSTALLDIR/share/aclocal"
+export C_INCLUDE_PATH=$INSTALLDIR/include
+export LIBRARY_PATH=$INSTALLDIR/lib
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
+export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
+
+
+
+
+#Function to download git repos
+function DownloadGIT()
+{
+OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
+if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+then
+rm -rf "$SOURCENAME"
+fi
+
+git clone "$SOURCEURL"
+cd "$SOURCENAME"
+git checkout $SOURCEREVERSION
+git reset --hard 
+git clean -fdx 
+git pull
+CURRENTREVISION=$(git rev-parse HEAD)
+}
+
+
+#Function to download svn repos
+function DownloadSVN()
+{
+OLDSOURCEURL=$(svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
+if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+then
+rm -rf "$SOURCENAME"
+fi
+
+svn co "$SOURCEURL"
+cd "$SOURCENAME"
+svn revert --recursive .
+svn-clean
+svn update -r $SOURCEREVERSION
+CURRENTREVISION=$(svnversion .)
+}
+
+
+#Function to download bzr repos
+function DownloadBZR()
+{
+OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
+if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+then
+rm -rf "$SOURCENAME"
+fi
+
+bzr branch "$SOURCEURL" "$SOURCENAME"
+cd "$SOURCENAME"
+bzr revert
+bzr clean-tree --force --detritus
+bzr pull
+bzr update -r $SOURCEREVERSION
+CURRENTREVISION=$(bzr revno)
+}
+
+
+#Function that calls download functions for GIT repos based on the repository type set by the main script
+function DownloadSource()
+{
+mkdir "$SOURCEDIR"
+cd "$SOURCEDIR"
+REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
+Download$REPOSITORYTYPE
+}
+
+
+
+
+#Function that calls common build preperations, and then calls upon the main builder scripts prepare function
+function PrepareBuild()
+{
+cd "$SOURCEDIR"
+cd "$SOURCENAME"
+echo "REVISION $CURRENTREVISION"
+mkdir -p $INSTALLDIR/share/aclocal
+PackagePrepareBuild
+}
+
+#Function that handles the build of the source, creation of the deb file, or installation of the source
+function MakeAndInstall()
+{
+
+#If the script is set to always rebuild, then delete the lock file.
+if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS==1 ]]
+then
+rm /$SOURCEDIR/buildoutput/control/$SOURCENAME
+fi
+
+#If the deb file is gone, there is no control file, or the scripts not configured to make deb files, then build the source
+if [[ ! -f /srcbuild/buildoutput/$SOURCENAME.deb || ! -f /srcbuild/buildoutput/control/$SOURCENAME || $MAKEDEBS != 1 ]]
+then
+#Complile the source
+PackageCompileSource
+
+#if the script is configured to create debs then create the debs, and save the copied files outside of the debs to /srcbuild/buildoutput/externalfiles. If not, run the install routine as normal.
+if [[ $MAKEDEBS == 1 ]]
+then
+
+checkinstall
+PackagePostInstall
+
+
+else
+make install
+PackagePostInstall
+fi
+
+#If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
+else
+dpkg -i /srcbuild/buildoutput/$SOURCENAME.deb
+
+
+#If the build script is set to not always rebuild, create the lock file
+if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]
+then
+touch /$SOURCEDIR/buildoutput/control/$SOURCENAME
+fi
+
+fi
+
+}

@@ -20,7 +20,7 @@ argument=$1
 
 mkdir /usr/share/Downloadlog
 mkdir /usr/share/Buildlog
-mkdir /srcbuild
+export MAKEDEBS=1
 
 #build these packages in this order. # symbol is a comment
 echo "

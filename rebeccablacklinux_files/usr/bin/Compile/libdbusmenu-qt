@@ -36,7 +36,7 @@ fi
 
 bzr branch "$SOURCEURL" "$SOURCENAME"
 cd "$SOURCENAME"
-bzr update
+bzr update -r last:1
 bzr revert
 bzr clean-tree --force --detritus
 bzr pull
