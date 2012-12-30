@@ -143,7 +143,7 @@ rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 fi
 
 #If the deb file is gone, there is no control file, or the scripts not configured to make deb files, then build the source
-if [[ ! -f "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb" || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
+if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$SOURCENAME"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
 then
 #Complile the source
 PackageCompileSource
@@ -165,7 +165,7 @@ rm "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
 checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1
 
 #copy the resulting deb file into the buildoutput tree.
-cp "*.deb" "/$SOURCEDIR/buildoutput/"
+cp *.deb "/$SOURCEDIR/buildoutput/"
 
 else
 export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
