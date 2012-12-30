@@ -48,7 +48,6 @@ git checkout $SOURCEREVERSION
 git reset --hard 
 git clean -fdx 
 git pull
-CURRENTREVISION=$(git rev-parse HEAD)
 }
 
 
@@ -66,7 +65,6 @@ cd "$SOURCENAME"
 svn revert --recursive .
 svn-clean
 svn update -r $SOURCEREVERSION
-CURRENTREVISION=$(svnversion .)
 }
 
 
@@ -85,7 +83,6 @@ bzr revert
 bzr clean-tree --force --detritus
 bzr pull
 bzr update -r $SOURCEREVERSION
-CURRENTREVISION=$(bzr revno)
 }
 
 
@@ -98,6 +95,30 @@ REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 Download$REPOSITORYTYPE
 }
 
+#function to get the revison of GIT repos
+function GetVersionGIT()
+{
+CURRENTREVISION=$(git rev-parse HEAD)
+}
+
+#function to get the revison of SVN repos
+function GetVersionSVN()
+{
+CURRENTREVISION=$(svnversion .)
+}
+
+#function to get the version of BZR repos
+function GetVersionBZR()
+{
+CURRENTREVISION=$(bzr revno)
+}
+
+
+#function that calls functions to get version based on repository type
+function GetSourceVersion()
+{
+GetVersion$REPOSITORYTYPE
+}
 
 
 
@@ -106,6 +127,7 @@ function PrepareBuild()
 {
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
+GetSourceVersion
 echo "REVISION $CURRENTREVISION"
 mkdir -p "$INSTALLDIR/share/aclocal"
 PackagePrepareBuild
@@ -122,7 +144,7 @@ rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 fi
 
 #If the deb file is gone, there is no control file, or the scripts not configured to make deb files, then build the source
-if [[ ! -f "/$SOURCEDIR/buildoutput/$SOURCENAME.deb" || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
+if [[ ! -f "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb" || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
 then
 #Complile the source
 PackageCompileSource
@@ -131,9 +153,20 @@ PackageCompileSource
 if [[ $MAKEDEBS == 1 ]]
 then
 export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
+#create directories for output
 mkdir "/$SOURCEDIR/buildoutput/"
 mkdir "/$SOURCEDIR/buildoutput/control"
-checkinstall
+#checkinstall wants a debian/control file, otherwise it exits out.
+mkdir debian
+touch debian/control
+#remove any old deb files
+rm "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
+
+#create the new deb
+checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1
+
+#copy the resulting deb file into the buildoutput tree.
+cp "*.deb" "/$SOURCEDIR/buildoutput/"
 
 else
 export INSTALLROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
@@ -143,7 +176,7 @@ fi
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
 export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
-dpkg -i "/$SOURCEDIR/buildoutput/$SOURCENAME.deb"
+dpkg -i "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
 fi
 
 #Run the Package install routine, and copy the files out of INSTALLROOT into the actual root.

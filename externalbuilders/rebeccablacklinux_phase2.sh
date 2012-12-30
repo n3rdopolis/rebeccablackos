@@ -35,7 +35,7 @@ mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
 
 #Mount in the folder with previously built debs
-mount --rbind $RBOSLOCATION/build_mountpoints/builtdebs $RBOSLOCATION/build_mountpoints/workdir/srcbuild/builtdebs
+mount --rbind $RBOSLOCATION/build_mountpoints/buildoutput $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
 
 #copy in the files needed
 rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
@@ -106,7 +106,7 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/builtdebs
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
