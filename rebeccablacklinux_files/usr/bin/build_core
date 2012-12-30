@@ -159,7 +159,7 @@ mkdir "/$SOURCEDIR/buildoutput/control"
 mkdir debian
 touch debian/control
 #remove any old deb files
-rm "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
+rm "/$SOURCEDIR/buildoutput/""$SOURCENAME"_*.deb
 
 #create the new deb
 checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1
@@ -175,7 +175,7 @@ fi
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
 export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
-dpkg -i "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
+dpkg -i "/$SOURCEDIR/buildoutput/""$SOURCENAME"_*.deb
 fi
 
 #Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
