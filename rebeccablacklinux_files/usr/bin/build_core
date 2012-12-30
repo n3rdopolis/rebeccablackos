@@ -15,22 +15,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 
 export SOURCEDIR=/srcbuild
 export ALWAYSREBUILD=0
-
-export LD_LIBRARY_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$INSTALLDIR/lib:/usr/local/lib:/usr/lib
-export PATH="/usr/lib/ccache:$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export PKG_CONFIG_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
-export ACLOCAL="aclocal -I $INSTALLDIR/share/aclocal"
-export C_INCLUDE_PATH=$INSTALLDIR/include
-export LIBRARY_PATH=$INSTALLDIR/lib
-export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
-export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
-export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
-
-
 
 
 #Function to download git repos
@@ -125,6 +112,18 @@ GetVersion$REPOSITORYTYPE
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function
 function PrepareBuild()
 {
+#Create build variables
+export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
+export LD_LIBRARY_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$INSTALLDIR/lib:/usr/local/lib:/usr/lib
+export PATH="/usr/lib/ccache:$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+export PKG_CONFIG_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
+export ACLOCAL="aclocal -I $INSTALLDIR/share/aclocal"
+export C_INCLUDE_PATH=$INSTALLDIR/include
+export LIBRARY_PATH=$INSTALLDIR/lib
+export PKG_CONFIG_ALLOW_SYSTEM_CFLAGS=1
+export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
+export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
+
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
 GetSourceVersion
