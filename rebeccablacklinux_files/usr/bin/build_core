@@ -152,7 +152,7 @@ PackageCompileSource
 #if the script is configured to create debs then create the debs, and save the copied files outside of the debs to $SOURCEDIR/buildoutput/externalfiles. If not, run the install routine as normal.
 if [[ $MAKEDEBS == 1 ]]
 then
-export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
+export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 #create directories for output
 mkdir "/$SOURCEDIR/buildoutput/"
 mkdir "/$SOURCEDIR/buildoutput/control"
@@ -169,20 +169,20 @@ checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1
 cp "*.deb" "/$SOURCEDIR/buildoutput/"
 
 else
-export INSTALLROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
+export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
 make install
 fi
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
-export INSTALLROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
+export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 dpkg -i "/$SOURCEDIR/buildoutput/"$SOURCENAME"_*.deb"
 fi
 
-#Run the Package install routine, and copy the files out of INSTALLROOT into the actual root.
-mkdir -p "/$INSTALLROOT"
+#Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
+mkdir -p "/$INSTALLCACHEROOT"
 PackagePostInstall
-cp -a "/$INSTALLROOT"/* /
+cp -a "/$INSTALLCACHEROOTROOT"/* /
 
 #If the build script is set to not always rebuild, create the lock file
 if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]
