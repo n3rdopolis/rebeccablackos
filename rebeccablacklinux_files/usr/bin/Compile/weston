@@ -53,12 +53,6 @@ make
 #This gets called after the build, only when the script is compiling source. This is usualy for compiling or setting up the files inside the source tree before they actually get copied by PackagePostBuild to INSTALLCACHEROOT
 function PackagePostBuild()
 {
-:
-}
-
-#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
-function PackagePostInstall()
-{
 mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install Wayland clients into the PATH
 find /srcbuild/"$SOURCENAME"/clients -executable | while read CLIENT
@@ -71,7 +65,11 @@ find /srcbuild/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
 cp "$CLIENT" /$INSTALLCACHEROOT/$INSTALLDIR/bin
 done
+}
 
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+function PackagePostInstall()
+{
 #turn OFF setuid on weston
 chmod -s $INSTALLDIR/bin/weston
 
