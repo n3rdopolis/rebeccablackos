@@ -206,7 +206,7 @@ fi
 #Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
 mkdir -p "/$INSTALLCACHEROOT"
 PackagePostInstall
-cp -a "/$INSTALLCACHEROOTROOT"/* /
+cp -a "/$INSTALLCACHEROOT"/* /
 
 #If the build script is set to not always rebuild, create the lock file
 if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]
