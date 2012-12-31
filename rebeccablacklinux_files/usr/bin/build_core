@@ -56,6 +56,8 @@ git reset --hard
 git clean -fdx 
 git pull
 
+cd /$SOURCEDIR/$SOURCENAME
+done
 }
 
 
@@ -183,14 +185,14 @@ touch debian/control
 rm "/$SOURCEDIR/buildoutput/""$SOURCENAME"_*.deb
 
 #create the new deb
-checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1
+checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1 make install -i
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
 
 else
 export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
-make install
+make install -i
 fi
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
