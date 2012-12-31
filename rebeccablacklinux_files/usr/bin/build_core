@@ -199,8 +199,15 @@ export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
 make install -i
 fi
 
+#Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
+mkdir -p "/$INSTALLCACHEROOT"
+
+#Clean up files from a potentially older build
+rm -rf "/$INSTALLCACHEROOT"/*
+
 #Call package source post build commands. This is usually for building examples that don't get built by the make 
 PackagePostBuild
+
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
@@ -208,9 +215,10 @@ export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 dpkg -i "/$SOURCEDIR/buildoutput/""$SOURCENAME"-RBOS_*.deb
 fi
 
-#Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
-mkdir -p "/$INSTALLCACHEROOT"
+#run the package post install routine
 PackagePostInstall
+
+#copy the files out of the install cache root, and into the system.
 cp -a "/$INSTALLCACHEROOT"/* /
 
 #If the build script is set to not always rebuild, create the lock file

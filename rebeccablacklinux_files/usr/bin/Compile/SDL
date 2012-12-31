@@ -57,17 +57,18 @@ function PackagePostBuild()
 cd test
 ./configure
 make
-}
-
-#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
-function PackagePostInstall()
-{
 mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install sdl tests
 find /srcbuild/"$SOURCENAME"/test -executable | while read TEST
 do
 cp "$TEST" /$INSTALLCACHEROOT/$INSTALLDIR/bin
 done
+}
+
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+function PackagePostInstall()
+{
+:
 }
 
 #Download source, unless the argument passed to the build script is 'build-only'
