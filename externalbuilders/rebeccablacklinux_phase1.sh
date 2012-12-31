@@ -62,7 +62,7 @@ mkdir -p $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
 cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/tmp/* $RBOSLOCATION/build_mountpoints/workdir/tmp
 cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build_mountpoints/workdir/usr/bin/compile_all 
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_core
+cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/build_core $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_core
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/weston_vars $RBOSLOCATION/build_mountpoints/workdir/usr/bin/weston_vars
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build_mountpoints/workdir/etc/apt/sources.list 
 
