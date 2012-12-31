@@ -193,14 +193,14 @@ touch debian/control
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
-checkinstall -y -D --install=yes --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1 make install -i
+checkinstall -y -D --install=yes --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1 make install "$MAKEINSTALLARGS"
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
 
 else
 export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
-make install -i
+make install "$MAKEINSTALLARGS"
 fi
 
 #Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
