@@ -19,6 +19,8 @@
 export SOURCEDIR=/srcbuild
 export ALWAYSREBUILD=0
 
+#Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
+export ACTION=$1
 
 #Function to download git repos
 function DownloadGIT()
