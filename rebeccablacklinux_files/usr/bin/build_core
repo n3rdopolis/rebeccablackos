@@ -160,6 +160,8 @@ PackagePrepareBuild
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
+#create a variable for the package name that is the source name converted to all lower case.
+PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 
 #If the script is set to always rebuild, then delete the lock file.
 if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS == 1 ]]
@@ -178,8 +180,6 @@ PackageCompileSource
 #if the script is configured to create debs then create the debs, and save the copied files outside of the debs to $SOURCEDIR/buildoutput/externalfiles. If not, run the install routine as normal.
 if [[ $MAKEDEBS == 1 ]]
 then
-#create a variable for the package name that is the source name converted to all lower case.
-PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 
 export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 
