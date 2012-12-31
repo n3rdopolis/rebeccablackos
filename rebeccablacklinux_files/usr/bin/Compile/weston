@@ -79,11 +79,11 @@ cp /usr/share/icons/oxy-white/cursors/dnd-none /usr/share/icons/oxy-white/cursor
  
 
 #set weston-launch binary as setuid
-chmod +s $WLD/bin/weston-launch
+chmod +s $INSTALLDIR/bin/weston-launch
 
 #change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
-mv $WLD/bin/weston $WLD/bin/weston-display-server
-cp /usr/bin/westoncaller $WLD/bin/weston
+mv $INSTALLDIR/bin/weston $INSTALLDIR/bin/weston-display-server
+cp /usr/bin/westoncaller $INSTALLDIR/bin/weston
 }
 
 #Download source, unless the argument passed to the build script is 'build-only'
