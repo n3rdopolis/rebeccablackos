@@ -187,7 +187,7 @@ touch debian/control
 rm "/$SOURCEDIR/buildoutput/""$SOURCENAME"_*.deb
 
 #create the new deb
-checkinstall -y -D --install=yes --pkgversion=1 --pkgrelease=1 make install -i
+checkinstall -y -D --install=yes --pkgname=$SOURCENAME --pkgversion=1 --pkgrelease=1 make install -i
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
