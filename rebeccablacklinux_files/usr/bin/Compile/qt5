@@ -48,6 +48,11 @@ function PackageCompileSource()
 {
 ./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -nomake examples
 make 
+}
+
+#This gets called after the build, only when the script is compiling source. This is usualy for compiling or setting up the files inside the source tree before they actually get copied by PackagePostBuild to INSTALLCACHEROOT
+function PackagePostBuild()
+{
 echo "
 
 

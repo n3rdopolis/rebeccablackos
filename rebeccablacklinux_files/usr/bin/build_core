@@ -173,6 +173,8 @@ then
 #Complile the source
 PackageCompileSource
 
+
+
 #if the script is configured to create debs then create the debs, and save the copied files outside of the debs to $SOURCEDIR/buildoutput/externalfiles. If not, run the install routine as normal.
 if [[ $MAKEDEBS == 1 ]]
 then
@@ -196,6 +198,9 @@ else
 export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
 make install -i
 fi
+
+#Call package source post build commands. This is usually for building examples that don't get built by the make 
+PackagePostBuild
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else

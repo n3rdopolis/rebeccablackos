@@ -49,6 +49,11 @@ function PackageCompileSource()
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 ./configure
 make 
+}
+
+#This gets called after the build, only when the script is compiling source. This is usualy for compiling or setting up the files inside the source tree before they actually get copied by PackagePostBuild to INSTALLCACHEROOT
+function PackagePostBuild()
+{
 cd test
 ./configure
 make
