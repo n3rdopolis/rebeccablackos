@@ -75,8 +75,8 @@ then
 #delete the old copy of the ISO 
 rm $HOMELOCATION/RebeccaBlackLinux.iso
 #move the iso out of the chroot fs    
-cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux.iso
-cp $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_Development.iso
+mv $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux.iso
+mv $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_Development.iso
 
 #dump out the logged revision numbers to a file
 ls $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 

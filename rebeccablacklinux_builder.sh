@@ -82,9 +82,9 @@ apt-get install debootstrap overlayroot
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 16gb or less tell the user and quit. If not continue.
-if [[ $HomeFileSysTemFSFrEESpaCe -le 22000000 ]] 
+if [[ $HomeFileSysTemFSFrEESpaCe -le 12000000 ]] 
   then               
-  echo "You have less then 22gb of free space on the partition that contains your home folder. Please free up some space." 
+  echo "You have less then 12gb of free space on the partition that contains your home folder. Please free up some space." 
   echo "The script will now abort."
   echo "free space:"
   df ~ -h | awk '{print $4}' |  grep -v Av
