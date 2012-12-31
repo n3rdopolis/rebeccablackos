@@ -15,44 +15,62 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Inherit functions and variables from the script in /usr/bin/build_core
+. /usr/bin/build_core
+
+#The name of the source code folder that gets created
 SOURCENAME=vte
+
+#The URL of the Source code repo
 SOURCEURL=git://git.gnome.org/vte
 
-ACTION=$1
-shift 1
+#The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
+REPOSITORYTYPE=GIT
 
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
+SOURCEREVERSION=vte-0-32
 
+#The prefix to compile and install the source code to
+INSTALLDIR=/opt
+
+#This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
+ALWAYSREBUILD=0
+
+#This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
+function PackagePrepareBuild()
+{
+:
+}
+
+#This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
+function PackageCompileSource()
+{
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-gtk=3.0   
+make 
+}
+
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+function PackagePostInstall()
+{
+:
+}
+
+#Download source, unless the argument passed to the build script is 'build-only'
 if [[ "$ACTION" != build-only ]]
 then
-mkdir /srcbuild
-cd /srcbuild
-
-OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
-fi
-
-git clone "$SOURCEURL"
-cd "$SOURCENAME"
-git checkout vte-0-32
-git reset --hard 
-git clean -fdx 
-git pull
-
+#Download the source specified variables, using the DownloadSource function in /usr/bin/build_core
+DownloadSource
 fi
 
 
-
+#Build the source and install it, unless the argument passed to the build script is 'download-only'
 if [[ "$ACTION" != download-only ]]
 then
-cd /srcbuild
-cd "$SOURCENAME"
-echo "REVISION $(git rev-parse HEAD)"
-. /usr/bin/build_vars /opt
-mkdir -p $WLD/share/aclocal
+#Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
+PrepareBuild
 
-./autogen.sh --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-gtk=3.0   
-make 
-make install
+#Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
+MakeAndInstall
+
 fi

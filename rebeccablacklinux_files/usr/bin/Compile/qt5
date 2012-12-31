@@ -15,75 +15,39 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Inherit functions and variables from the script in /usr/bin/build_core
+. /usr/bin/build_core
+
+#The name of the source code folder that gets created
 SOURCENAME=qt5
+
+#The URL of the Source code repo
 SOURCEURL=git://gitorious.org/qt/qt5
 
-ACTION=$1
-shift 1
+#The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
+REPOSITORYTYPE=GIT
 
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
+SOURCEREVERSION=master
 
-if [[ "$ACTION" != build-only ]]
-then
-mkdir /srcbuild
-cd /srcbuild
+#The prefix to compile and install the source code to
+INSTALLDIR=/opt
 
-OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
-fi
+#This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
+ALWAYSREBUILD=0
 
-git clone "$SOURCEURL"
-cd "$SOURCENAME"
-./init-repository -f
+#This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
+function PackagePrepareBuild()
+{
+:
+}
 
-git checkout stable
-git reset --hard 
-git clean -fdx 
-git pull
-
-#Get current path of QT source
-QTPATH=$PWD
-
-#set revisions for seperate modules
-qtbase_REVISION=stable
-
-#go through each module path and handle it
-git submodule  | awk '{print $2}' | while read MODULE
-do
-
-#get the current module folder name, and add '_REVISION' to the end of the name
-REVISIONNAME=`basename $PWD`_REVISION
-#use REVISIONNAME (foldername_REVISION as variable variable 
-MODULEREVISION=${!REVISIONNAME}
-
-cd $MODULE
-
-git checkout $MODULEREVISION
-git reset --hard 
-git clean -fdx 
-git pull
-
-#change back to qt source
-cd $QTPATH
-done
-fi
-
-
-
-if [[ "$ACTION" != download-only ]]
-then
-cd /srcbuild
-cd "$SOURCENAME"
-echo "REVISION $(git rev-parse HEAD)"
-. /usr/bin/build_vars /opt
-mkdir -p $WLD/share/aclocal
-
-./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $WLD -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -nomake examples
-make
-make install 
-bin/syncqt
-
+#This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
+function PackageCompileSource()
+{
+./configure -confirm-license  -opensource -qpa -xcb -wayland -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -nomake examples
+make 
 echo "
 
 
@@ -108,18 +72,37 @@ make
 cd /srcbuild/qt5/qtbase/examples/widgets/widgets/wiggly
 qmake
 make
+}
 
-cd ..
-
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+function PackagePostInstall()
+{
+mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install qt tests
 find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
 do
-cp "$TEST" $WLD/bin
+cp "$TEST" /$INSTALLCACHEROOT/$INSTALLDIR/bin
 done
-cp /$WLD/examples/webkitwidgets/browser/browser $WLD/bin
-cp /$WLD/examples/webkitwidgets/fancybrowser/fancybrowser $WLD/bin
-cp /$WLD/examples/webkitwidgets/embedded/anomaly/anomaly $WLD/bin 
+cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
+cp /$INSTALLDIR/examples/webkitwidgets/fancybrowser/fancybrowser $INSTALLDIR/bin
+cp /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
+}
 
-cd ..
+#Download source, unless the argument passed to the build script is 'build-only'
+if [[ "$ACTION" != build-only ]]
+then
+#Download the source specified variables, using the DownloadSource function in /usr/bin/build_core
+DownloadSource
+fi
+
+
+#Build the source and install it, unless the argument passed to the build script is 'download-only'
+if [[ "$ACTION" != download-only ]]
+then
+#Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
+PrepareBuild
+
+#Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
+MakeAndInstall
 
 fi

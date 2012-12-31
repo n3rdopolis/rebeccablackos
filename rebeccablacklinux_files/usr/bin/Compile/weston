@@ -15,64 +15,59 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Inherit functions and variables from the script in /usr/bin/build_core
+. /usr/bin/build_core
+
+#The name of the source code folder that gets created
 SOURCENAME=weston
+
+#The URL of the Source code repo
 SOURCEURL=git://anongit.freedesktop.org/wayland/weston
 
-ACTION=$1
-shift 1
+#The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
+REPOSITORYTYPE=GIT
 
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
+SOURCEREVERSION=master
 
-if [[ "$ACTION" != build-only ]]
-then
-mkdir /srcbuild
-cd /srcbuild
+#The prefix to compile and install the source code to
+INSTALLDIR=/opt
 
-OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
-fi
+#This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
+ALWAYSREBUILD=0
 
-git clone "$SOURCEURL"
-cd "$SOURCENAME"
-git checkout master
-git reset --hard 
-git clean -fdx 
-git pull
-
-fi
-
-
-
-
-if [[ "$ACTION" != download-only ]]
-then
-cd /srcbuild
-cd "$SOURCENAME"
-echo "REVISION $(git rev-parse HEAD)"
-. /usr/bin/build_vars /opt
-mkdir -p $WLD/share/aclocal
-
+#This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
+function PackagePrepareBuild()
+{
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
-./autogen.sh --with-cairo-glesv2 --prefix=$WLD --libdir=$WLD/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
-make
-make install 
+}
 
+#This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
+function PackageCompileSource()
+{
+./autogen.sh --with-cairo-glesv2 --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+make 
+}
 
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+function PackagePostInstall()
+{
+mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install Wayland clients into the PATH
 find /srcbuild/"$SOURCENAME"/clients -executable | while read CLIENT
 do
-cp "$CLIENT" $WLD/bin
+cp "$CLIENT" /$INSTALLCACHEROOT/$INSTALLDIR/bin
 done
 
 #Install the screen capture utils
 find /srcbuild/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
-cp "$CLIENT" $WLD/bin
+cp "$CLIENT" /$INSTALLCACHEROOT/$INSTALLDIR/bin
 done
 
 #turn OFF setuid on weston
-chmod -s $WLD/bin/weston
+chmod -s $INSTALLDIR/bin/weston
 
 #Apps and weston crash when they can't find the appropriate cursors
 cp -rn /usr/share/icons/whiteglass/cursors/* /usr/share/icons/oxy-white/cursors
@@ -85,7 +80,23 @@ chmod +s $WLD/bin/weston-launch
 #change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
 mv $WLD/bin/weston $WLD/bin/weston-display-server
 cp /usr/bin/westoncaller $WLD/bin/weston
+}
 
-cd ..
+#Download source, unless the argument passed to the build script is 'build-only'
+if [[ "$ACTION" != build-only ]]
+then
+#Download the source specified variables, using the DownloadSource function in /usr/bin/build_core
+DownloadSource
+fi
+
+
+#Build the source and install it, unless the argument passed to the build script is 'download-only'
+if [[ "$ACTION" != download-only ]]
+then
+#Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
+PrepareBuild
+
+#Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
+MakeAndInstall
 
 fi
