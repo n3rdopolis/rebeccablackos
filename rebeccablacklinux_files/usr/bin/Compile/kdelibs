@@ -60,7 +60,11 @@ make -i
 #This gets called after the build, only when the script is compiling source. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
 function PackagePostBuild()
 {
-:
+mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
+#install the kdelibs tests
+cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcolorutilsdemo /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/krulertest /$INSTALLCACHEROOT/$INSTALLDIR/bin
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
