@@ -62,7 +62,7 @@ function PackagePostBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+cp /usr/lib/clutter-1.0/tests/* /$INSTALLDIR/bin
 }
 
 #Download source, unless the argument passed to the build script is 'build-only'
