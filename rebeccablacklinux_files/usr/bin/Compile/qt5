@@ -29,7 +29,7 @@ SOURCEURL=git://gitorious.org/qt/qt5
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
-SOURCEREVERSION=master
+SOURCEREVERSION=stable
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -39,6 +39,26 @@ ALWAYSREBUILD=0
 
 #Argume.ake install. If there are none, there must be a space between the quotes
 MAKEINSTALLARGS=" "
+
+#set the revisions for the submodules.
+qtactiveqt_REVISION=stable
+qtbase_REVISION=stable
+qtdeclarative_REVISION=stable
+qtdoc_REVISION=stable
+qtgraphicaleffects_REVISION=stable
+qtimageformats_REVISION=stable
+qtjsbackend_REVISION=stable
+qtmultimedia_REVISION=stable
+qtqa_REVISION=stable
+qtquick1_REVISION=stable
+qtrepotools_REVISION=stable
+qtscript_REVISION=stable
+qtsvg_REVISION=stable
+qttools_REVISION=stable
+qttranslations_REVISION=stable
+qtwebkit_REVISION=stable
+qtwebkit-examples-and-demos_REVISION=stable
+qtxmlpatterns_REVISION=stable
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
