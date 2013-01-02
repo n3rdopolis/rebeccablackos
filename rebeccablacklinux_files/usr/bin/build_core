@@ -140,7 +140,7 @@ function PrepareBuild()
 #Create build variables
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 export LD_LIBRARY_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):$INSTALLDIR/lib:/usr/local/lib:/usr/lib
-export PATH="/usr/lib/ccache:$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+export PATH="$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
 export PKG_CONFIG_PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
 export ACLOCAL="aclocal -I $INSTALLDIR/share/aclocal"
 export C_INCLUDE_PATH=$INSTALLDIR/include
