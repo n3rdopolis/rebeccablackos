@@ -35,7 +35,7 @@ SOURCEREVERSION=HEAD
 INSTALLDIR=/opt
 
 #Argume.ake install. If there are none, there must be a space between the quotes
-MAKEINSTALLARGS=" "
+MAKEINSTALLARGS="-i"
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
 ALWAYSREBUILD=1
