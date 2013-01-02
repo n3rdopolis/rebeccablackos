@@ -189,6 +189,10 @@ mkdir "/$SOURCEDIR/buildoutput/control"
 #checkinstall wants a debian/control file, otherwise it exits out.
 mkdir debian
 touch debian/control
+
+#.spec file seem to cause problems with checkinstall
+rm *.spec
+
 #remove any old deb files
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
