@@ -188,7 +188,7 @@ rm *.spec
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
-checkinstall -y -D --install=yes --strip=no --stripso=no --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos make install $MAKEINSTALLARGS
+checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos make install $MAKEINSTALLARGS
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
