@@ -49,6 +49,8 @@ chgrp  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 #copy the files to where they belong
 cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/* $RBOSLOCATION/build_mountpoints/workdir/
+cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/* $RBOSLOCATION/build_mountpoints/workdir/usr/import
+rm $RBOSLOCATION/build_mountpoints/workdir/temp/* $RBOSLOCATION/build_mountpoints/workdir/usr/import/tmp/*
 
 #delete the temp folder
 rm -rf $RBOSLOCATION/build_mountpoints/workdir/temp/
