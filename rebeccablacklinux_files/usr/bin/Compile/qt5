@@ -40,7 +40,7 @@ ALWAYSREBUILD=0
 #Argume.ake install. If there are none, there must be a space between the quotes
 MAKEINSTALLARGS=" "
 
-#set the revisions for the submodules.
+#set the revisions for the submodules. Replace all / and - with _
 qtactiveqt_REVISION=stable
 qtbase_REVISION=stable
 qtdeclarative_REVISION=stable
@@ -57,7 +57,7 @@ qtsvg_REVISION=stable
 qttools_REVISION=stable
 qttranslations_REVISION=stable
 qtwebkit_REVISION=stable
-qtwebkit-examples-and-demos_REVISION=stable
+qtwebkit_examples_and_demos_REVISION=stable
 qtxmlpatterns_REVISION=stable
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source

@@ -47,7 +47,7 @@ git submodule update --init --recursive
 git submodule  | awk '{print $2}' | while read MODULE
 do
 #get the current module folder name, and add '_REVISION' to the end of the name
-REVISIONNAME="$(echo $MODULE | sed 's/\//_/g')"_REVISION
+REVISIONNAME="$(echo $MODULE | sed 's/\//_/g' | sed 's/-/_/g')"_REVISION
 #use REVISIONNAME (foldername_REVISION as variable variable 
 MODULEREVISION=${!REVISIONNAME}
 
