@@ -29,13 +29,13 @@ SOURCEURL=http://svn.enlightenment.org/svn/e/trunk/emotion
 REPOSITORYTYPE=SVN
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
-SOURCEREVERSION=HEAD
+SOURCEREVERSION=81558
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-ALWAYSREBUILD=0
+ALWAYSREBUILD=1
 
 #Argume.ake install. If there are none, there must be a space between the quotes
 MAKEINSTALLARGS=" "

@@ -75,7 +75,7 @@ fi
 svn co "$SOURCEURL"
 cd "$SOURCENAME"
 svn revert --recursive .
-svn-clean
+svn cleanup
 svn update -r $SOURCEREVERSION
 }
 
