@@ -146,19 +146,19 @@ ENDTIME=$(date +%s) | tee -a  /usr/share/logs/build_core/$SOURCENAME/PackageDown
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-CURRENTREVISION=$(git rev-parse HEAD)
+echo "REVISION $(git rev-parse HEAD)"
 }
 
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-CURRENTREVISION=$(svnversion .)
+echo "REVISION $(svnversion .)"
 }
 
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-CURRENTREVISION=$(bzr revno)
+echo "REVISION $(bzr revno)"
 }
 
 
@@ -179,7 +179,6 @@ function PrepareBuild()
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
 GetSourceVersion | tee /usr/share/logs/build_core/$SOURCENAME/GetSourceVersion
-echo "REVISION $CURRENTREVISION"
 mkdir -p "$INSTALLDIR/share/aclocal"
 
 STARTTIME=$(date +%s)
