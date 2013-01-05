@@ -171,6 +171,9 @@ echo "#! /bin/bash
 make install $MAKEINSTALLARGS
 $(declare -f PackagePostBuild)
 $(declare -f PackagePostInstall)
+export SOURCEDIR=$SOURCEDIR
+export SOURCENAME=$SOURCENAME
+export INSTALLDIR=$INSTALLDIR
 PackagePostBuild
 PackagePostInstall" > packageinstallscript
 
