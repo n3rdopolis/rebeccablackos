@@ -69,7 +69,7 @@ rm -rf $RBOSLOCATION/build_mountpoints/workdir/temp/
 
 
 #Configure the Live system########################################
-chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase2.sh
+chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase3.sh
 
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
