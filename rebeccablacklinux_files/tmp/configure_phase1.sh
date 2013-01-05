@@ -36,20 +36,25 @@ yes Y| apt-get install aptitude git bzr subversion
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
-echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
+echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
 PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
 METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
+echo "Downloading with partial dependancies for $PACKAGE"
 yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes
 elif [[ $METHOD == "FULL" ]]
+then
+echo "Downloading with all dependancies for $PACKAGE"
 yes Yes | apt-get install $PACKAGE -d -y --force-yes
 elif [[ $METHOD == "BUILDDEP" ]]
+then
+echo "Downloading build dependancies for $PACKAGE"
 yes Y | apt-get build-dep $PACKAGE -d -y --force-yes
 else
-echo "Invalid Install Operation"
+echo "Invalid Install Operation: $METHOD"
 fi
 
 done

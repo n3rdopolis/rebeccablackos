@@ -64,8 +64,10 @@ if [[ $METHOD == "PART" ]]
 then
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
 elif [[ $METHOD == "FULL" ]]
+then
 yes Yes | apt-get install $PACKAGE -y --force-yes
 elif [[ $METHOD == "BUILDDEP" ]]
+then
 yes Y | apt-get build-dep $PACKAGE -y --force-yes
 else
 echo "Invalid Install Operation"

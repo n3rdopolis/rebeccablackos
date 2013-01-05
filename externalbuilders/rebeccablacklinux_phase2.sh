@@ -24,13 +24,15 @@ RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
 #Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
-INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_2/tmp/INSTALLS.txt $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | nc -l | wc -l)"
+INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_2/tmp/INSTALLS.txt $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
 if [[ $INSTALLREMOVECOUNT -gt 0 ]]
 then
 #Delete the phase 2 folder contents
 rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
 fi
 
+#Clean up Phase 3 data.
+rm -rf $RBOSLOCATION/build_mountpoints/phase_3/*
 
 #create the union of phases 1 and 2 at the workdir
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/workdir
