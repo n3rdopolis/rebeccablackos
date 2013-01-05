@@ -218,14 +218,14 @@ export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
 
 STARTTIME=\$(date +%s)
-PackagePostBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostBuild
+PackagePostBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
 ENDTIME=\$(date +%s)
-echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostBuild
+echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
 
 STARTTIME=\$(date +%s)
-PackagePostInstall | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostInstall
+PackagePostInstall | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
 ENDTIME=\$(date +%s)
-echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostInstall
+echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
 " > packageinstallscript
 
 #Make the script executable
