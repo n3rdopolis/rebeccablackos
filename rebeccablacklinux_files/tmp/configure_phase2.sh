@@ -32,33 +32,27 @@ export DEBIAN_FRONTEND=noninteractive
 #install aptitude
 yes Y| apt-get install aptitude
 
+
 #LIST OF PACKAGES TO GET INSTALLED
-BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt | awk -F "#" '{print $1}')"
+INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
-#LIST OF PACKAGES THAT NEED BUILD DEPS
-BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt | awk -F "#" '{print $1}')"
-
-
-#INSTALL THE PACKAGES SPECIFIED
+#DOWNLOAD THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
 do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $2}' )
+PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
-else
+elif [[ $METHOD == "FULL" ]]
 yes Yes | apt-get install $PACKAGE -y --force-yes
+elif [[ $METHOD == "BUILDDEP" ]]
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
+else
+echo "Invalid Install Operation"
 fi
 
-done
-
-
-#GET BUILDDEPS FOR THE PACKAGES SPECIFIED
-echo "$BUILDINSTALLS" | while read PACKAGE
-do
-yes Y | apt-get build-dep $PACKAGE -y --force-yes
 done
 
 
