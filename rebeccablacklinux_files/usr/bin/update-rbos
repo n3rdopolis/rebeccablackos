@@ -43,28 +43,28 @@ dpkg-divert --local --rename --add /sbin/initctl
 ln -s /bin/true /sbin/initctl
 ln -s /bin/true /usr/sbin/grub-probe
 
-
 #LIST OF PACKAGES TO GET INSTALLED
-BINARYINSTALLS="$(cat /tmp/BINARYINSTALLS.txt)"
+INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
-#LIST OF PACKAGES THAT NEED BUILD DEPS
-BUILDINSTALLS="$(cat /tmp/BUILDINSTALLS.txt)"
-
-
-#INSTALL THE PACKAGES SPECIFIED
+#DOWNLOAD THE PACKAGES SPECIFIED
 echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
 do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F ":" '{print $2}' )
+PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
-else
+elif [[ $METHOD == "FULL" ]]
 yes Yes | apt-get install $PACKAGE -y --force-yes
+elif [[ $METHOD == "BUILDDEP" ]]
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
+else
+echo "Invalid Install Operation"
 fi
 
 done
+
 
 
 #GET BUILDDEPS FOR THE PACKAGES SPECIFIED
