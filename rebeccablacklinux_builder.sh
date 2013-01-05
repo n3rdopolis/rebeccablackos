@@ -109,6 +109,7 @@ fi
 #run the build scripts
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh  
+$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase3.sh 
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"

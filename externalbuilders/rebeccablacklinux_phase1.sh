@@ -31,11 +31,10 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 
-#unmount the FS at the workdir
+#unmount the FS at the workdir and phase 2
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
-#Delete the phase 2 folder contents
-rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
 
 #END PAST RUN CLEANUP##################
 
@@ -63,6 +62,7 @@ cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/tmp/* $RBOSLOCATION/build_mou
 cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build_mountpoints/workdir/usr/bin/compile_all 
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/build_core $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_core
+cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/build_vars $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_vars
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/weston_vars $RBOSLOCATION/build_mountpoints/workdir/usr/bin/weston_vars
 cp $RBOSLOCATION/build_mountpoints/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build_mountpoints/workdir/etc/apt/sources.list 
 

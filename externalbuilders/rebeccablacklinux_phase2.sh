@@ -23,10 +23,16 @@ HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
-#create a media mountpoint in the media folder
-mkdir $RBOSLOCATION/build_mountpoints
+#Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
+INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_2/tmp/INSTALLS.txt $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | nc -l | wc -l)"
+if [[ $INSTALLREMOVECOUNT -gt 0 ]]
+then
+#Delete the phase 2 folder contents
+rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
+fi
 
-#create the union of the two overlay FSes at the workdir
+
+#create the union of phases 1 and 2 at the workdir
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/workdir
 
 #mounting critical fses on chrooted fs with bind 
@@ -34,69 +40,10 @@ mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
 mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
 
-#Mount in the folder with previously built debs
-mount --rbind $RBOSLOCATION/build_mountpoints/buildoutput $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
-
-#copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
-
-
-#make the imported files executable 
-chmod +x -R $RBOSLOCATION/build_mountpoints/workdir/temp/
-chown  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
-chgrp  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
-
-
-#copy the files to where they belong
-cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/* $RBOSLOCATION/build_mountpoints/workdir/
-cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/* $RBOSLOCATION/build_mountpoints/workdir/usr/import
-rm -rf $RBOSLOCATION/build_mountpoints/workdir/usr/import/tmp
-rm -rf $RBOSLOCATION/build_mountpoints/workdir/usr/import/usr/import
-
-#delete the temp folder
-rm -rf $RBOSLOCATION/build_mountpoints/workdir/temp/
-
-
-
-#mounting devfs on chrooted fs with bind 
-mount --bind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
-
 
 #Configure the Live system########################################
 chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase2.sh
 
-#If the live cd did not build then tell user  
-if [ ! -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
-then  
-echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
-
-fi 
-
-#If the live cd did  build then tell user   
-if [  -f $RBOSLOCATION/build_mountpoints/workdir/home/remastersys/remastersys/custom.iso ];
-then  
-#delete the old copy of the ISO 
-rm $HOMELOCATION/RebeccaBlackLinux.iso
-#move the iso out of the chroot fs    
-mv $RBOSLOCATION/build_mountpoints/phase_2/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux.iso
-mv $RBOSLOCATION/build_mountpoints/phase_2/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_Development.iso
-
-#dump out the logged revision numbers to a file
-ls $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 
-do  
-REV=$(cat $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/$FILE | grep REVISION | awk '{print $2}')
-echo $FILE=$REV
-done > $RBOSLOCATION/BuiltRevisions-$(date +%s)
-
-
-echo "Live CD image build was successful. It was created at $HOMELOCATION/RebeccaBlackLinux.iso"
-
-#allow the user to actually read the iso   
-chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
-
-fi
 
 
 #unmount the chrooted procfs from the outside 
@@ -114,5 +61,3 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
-#Delete the phase 2 folder contents
-rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
