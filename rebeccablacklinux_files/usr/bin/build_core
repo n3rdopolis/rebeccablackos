@@ -38,10 +38,8 @@ fi
 if [[ "$ACTION" != download-only ]]
 then
 #Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
-STARTTIME=$(date +%s)
-PrepareBuild | tee /usr/share/logs/build_core/$SOURCENAME/PrepareBuild
-ENDTIME=$(date +%s)
-echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PrepareBuild
+
+PrepareBuild 
 
 #Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
 MakeAndInstall
@@ -180,10 +178,14 @@ function PrepareBuild()
 
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
-GetSourceVersion
+GetSourceVersion | tee /usr/share/logs/build_core/$SOURCENAME/GetSourceVersion
 echo "REVISION $CURRENTREVISION"
 mkdir -p "$INSTALLDIR/share/aclocal"
-PackagePrepareBuild
+
+STARTTIME=$(date +%s)
+PackagePrepareBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
+ENDTIME=$(date +%s)
+echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
