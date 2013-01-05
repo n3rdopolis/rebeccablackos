@@ -45,15 +45,15 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 if [[ $METHOD == "PART" ]]
 then
 echo "Installing with partial dependancies for $PACKAGE"
-yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
 elif [[ $METHOD == "FULL" ]]
 then
 echo "Installing with all dependancies for $PACKAGE"
-yes Yes | apt-get install $PACKAGE -d -y --force-yes
+yes Yes | apt-get install $PACKAGE -y --force-yes
 elif [[ $METHOD == "BUILDDEP" ]]
 then
 echo "Installing build dependancies for $PACKAGE"
-yes Y | apt-get build-dep $PACKAGE -d -y --force-yes
+yes Y | apt-get build-dep $PACKAGE -y --force-yes
 else
 echo "Invalid Install Operation: $METHOD"
 fi

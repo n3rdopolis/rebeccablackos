@@ -23,8 +23,18 @@ HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
-#create a media mountpoint in the media folder
-mkdir $RBOSLOCATION/build_mountpoints
+#unmount the chrooted procfs from the outside 
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+
+#unmount the chrooted sysfs from the outside
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+
+#unmount the chrooted devfs from the outside 
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
+
+#unmount the FS at the workdir and phase 2
+umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
 #create the union of phases 1, 2, and 3 at workdir
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/phase_2

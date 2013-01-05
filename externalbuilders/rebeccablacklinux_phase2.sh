@@ -23,12 +23,26 @@ HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
+#unmount the chrooted procfs from the outside 
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+
+#unmount the chrooted sysfs from the outside
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+
+#unmount the chrooted devfs from the outside 
+umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
+
+#unmount the FS at the workdir and phase 2
+umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
+
 #Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
 INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_2/tmp/INSTALLS.txt $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
-if [[ $INSTALLREMOVECOUNT -gt 0 ]]
+if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $RBOSLOCATION/DontRestartPhase2 ]]
 then
 #Delete the phase 2 folder contents
 rm -rf $RBOSLOCATION/build_mountpoints/phase_2/*
+touch $RBOSLOCATION/DontRestartPhase2
 fi
 
 #Clean up Phase 3 data.
