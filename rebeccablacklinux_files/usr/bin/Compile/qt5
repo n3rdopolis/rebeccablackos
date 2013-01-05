@@ -73,7 +73,7 @@ function PackageCompileSource()
 make 
 }
 
-#This gets called after the build, only when the script is compiling source. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+#This gets called after the build, only when the script is compiling source. 
 function PackagePostBuild()
 {
 echo "
@@ -100,11 +100,10 @@ make
 cd /srcbuild/qt5/qtbase/examples/widgets/widgets/wiggly
 qmake
 make
-mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install qt tests
 find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
 do
-cp "$TEST" /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp "$TEST" /$INSTALLDIR/bin
 done
 cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
 cp /$INSTALLDIR/examples/webkitwidgets/fancybrowser/fancybrowser $INSTALLDIR/bin

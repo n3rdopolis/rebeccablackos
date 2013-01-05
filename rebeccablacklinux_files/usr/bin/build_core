@@ -168,11 +168,9 @@ PackageCompileSource
 
 
 
-#if the script is configured to create debs then create the debs, and save the copied files outside of the debs to $SOURCEDIR/buildoutput/externalfiles. If not, run the install routine as normal.
+#if the script is configured to create debs then create the debs. If not, run the install routine as normal.
 if [[ $MAKEDEBS == 1 ]]
 then
-
-export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 
 #create directories for output
 mkdir "/$SOURCEDIR/buildoutput/"
@@ -187,38 +185,33 @@ rm *.spec
 #remove any old deb files
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
+#Create a script file that will be called by checkinstall. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script, and then calls the script with checkinstall.
+echo "#! /bin/bash
+make install $MAKEINSTALLARGS
+$(declare -f PackagePostBuild)
+$(declare -f PackagePostInstall)
+PackagePostBuild
+PackagePostInstall" > packageinstallscript
+
+#Make the script executable
+chmod +x packageinstallscript
+
 #create the new deb
-checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos make install $MAKEINSTALLARGS
+checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
 
 else
-export INSTALLCACHEROOT="/tmp/buildoutput/externalfiles/$SOURCENAME"
 make install $MAKEINSTALLARGS
 fi
 
-#Run the Package install routine, and copy the files out of INSTALLCACHEROOT into the actual root.
-mkdir -p "/$INSTALLCACHEROOT"
-
-#Clean up files from a potentially older build
-rm -rf "/$INSTALLCACHEROOT"/*
-
-#Call package source post build commands. This is usually for building examples that don't get built by the make 
-PackagePostBuild
 
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
-export INSTALLCACHEROOT="/$SOURCEDIR/buildoutput/externalfiles/$SOURCENAME"
 dpkg -i "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 fi
-
-#run the package post install routine
-PackagePostInstall
-
-#copy the files out of the install cache root, and into the system.
-cp -a "/$INSTALLCACHEROOT"/* /
 
 #If the build script is set to not always rebuild, create the lock file
 if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]

@@ -54,17 +54,16 @@ function PackageCompileSource()
 make 
 }
 
-#This gets called after the build, only when the script is compiling source. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+#This gets called after the build, only when the script is compiling source. 
 function PackagePostBuild()
 {
 cd test
 ./configure
 make
-mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install sdl tests
 find /srcbuild/"$SOURCENAME"/test -executable | while read TEST
 do
-cp "$TEST" /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp "$TEST" /$INSTALLDIR/bin
 done
 }
 

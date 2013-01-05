@@ -53,20 +53,19 @@ function PackageCompileSource()
 make 
 }
 
-#This gets called after the build, only when the script is compiling source. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+#This gets called after the build, only when the script is compiling source. 
 function PackagePostBuild()
 {
-mkdir -p /$INSTALLCACHEROOT/$INSTALLDIR/bin
 #install Wayland clients into the PATH
 find /srcbuild/"$SOURCENAME"/clients -executable | while read CLIENT
 do
-cp "$CLIENT" /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp "$CLIENT" /$INSTALLDIR/bin
 done
 
 #Install the screen capture utils
 find /srcbuild/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
-cp "$CLIENT" /$INSTALLCACHEROOT/$INSTALLDIR/bin
+cp "$CLIENT" /$INSTALLDIR/bin
 done
 }
 

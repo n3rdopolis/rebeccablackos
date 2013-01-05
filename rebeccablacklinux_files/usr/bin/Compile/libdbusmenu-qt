@@ -55,7 +55,7 @@ cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(
 make 
 }
 
-#This gets called after the build, only when the script is compiling source. For commands that copy files out of the source tree into the system, the destination path should start with $INSTALLCACHEROOT, along with mkdir -p $INSTALLCACHEROOT/path/to/file, so that it can be saved for deb installs.
+#This gets called after the build, only when the script is compiling source. 
 function PackagePostBuild()
 {
 :
