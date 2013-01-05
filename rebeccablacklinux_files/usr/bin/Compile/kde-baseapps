@@ -40,6 +40,12 @@ ALWAYSREBUILD=0
 #Arguments for make install
 MAKEINSTALLARGS=""
 
+#This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
+function PackageDownloadSource
+{
+:
+}
+
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
@@ -81,21 +87,5 @@ function PackagePostInstall()
 :
 }
 
-#Download source, unless the argument passed to the build script is 'build-only'
-if [[ "$ACTION" != build-only ]]
-then
-#Download the source specified variables, using the DownloadSource function in /usr/bin/build_core
-DownloadSource
-fi
-
-
-#Build the source and install it, unless the argument passed to the build script is 'download-only'
-if [[ "$ACTION" != download-only ]]
-then
-#Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
-PrepareBuild
-
-#Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
-MakeAndInstall
-
-fi
+#Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
+RunDownloadAndOrBuild
