@@ -24,11 +24,13 @@ export ACTION=$1
 
 function RunDownloadAndOrBuild 
 {
+mkdir -p /usr/share/logs/build_core/$SOURCENAME
+
 #Download source, unless the argument passed to the build script is 'build-only'
 if [[ "$ACTION" != build-only ]]
 then
 #Download the source specified variables, using the DownloadSource function in /usr/bin/build_core
-DownloadSource
+DownloadSource 
 fi
 
 
@@ -36,7 +38,10 @@ fi
 if [[ "$ACTION" != download-only ]]
 then
 #Prepare the build using the PrepareBuild function in /usr/bin/build_core, which then calls this scripts PackagePrepareBuild function.
-PrepareBuild
+STARTTIME=$(date +%s)
+PrepareBuild | tee /usr/share/logs/build_core/$SOURCENAME/PrepareBuild
+ENDTIME=$(date +%s)
+echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PrepareBuild
 
 #Compile the source using the MakeAndInstall function in /usr/bin/build_core, which calls PackageCompileSource from this script, then MakeAndInstall's install methods, and then PackagePostInstall from this script.
 MakeAndInstall
@@ -128,8 +133,16 @@ function DownloadSource()
 mkdir "$SOURCEDIR"
 cd "$SOURCEDIR"
 REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
-Download$REPOSITORYTYPE
-PackageDownloadSource
+
+STARTTIME=$(date +%s)
+Download$REPOSITORYTYPE | tee /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
+ENDTIME=$(date +%s)
+echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
+
+STARTTIME=$(date +%s)
+PackageDownloadSource   | tee /usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource
+ENDTIME=$(date +%s) | tee -a  /usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource
+
 }
 
 #function to get the revison of GIT repos
@@ -189,7 +202,11 @@ fi
 if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
 then
 #Complile the source
-PackageCompileSource
+STARTTIME=$(date +%s)
+PackageCompileSource | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
+ENDTIME=$(date +%s)
+echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
+
 
 #Create a script file that will be called by checkinstall, or just called. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script.
 echo "#! /bin/bash
@@ -199,8 +216,17 @@ $(declare -f PackagePostInstall)
 export SOURCEDIR=$SOURCEDIR
 export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
-PackagePostBuild
-PackagePostInstall" > packageinstallscript
+
+STARTTIME=\$(date +%s)
+PackagePostBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostBuild
+ENDTIME=\$(date +%s)
+echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostBuild
+
+STARTTIME=\$(date +%s)
+PackagePostInstall | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostInstall
+ENDTIME=\$(date +%s)
+echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource/PackagePostInstall
+" > packageinstallscript
 
 #Make the script executable
 chmod +x packageinstallscript
