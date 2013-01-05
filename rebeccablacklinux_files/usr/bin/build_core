@@ -166,6 +166,16 @@ then
 #Complile the source
 PackageCompileSource
 
+#Create a script file that will be called by checkinstall, or just called. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script.
+echo "#! /bin/bash
+make install $MAKEINSTALLARGS
+$(declare -f PackagePostBuild)
+$(declare -f PackagePostInstall)
+PackagePostBuild
+PackagePostInstall" > packageinstallscript
+
+#Make the script executable
+chmod +x packageinstallscript
 
 
 #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
@@ -185,17 +195,6 @@ rm *.spec
 #remove any old deb files
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
-#Create a script file that will be called by checkinstall. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script, and then calls the script with checkinstall.
-echo "#! /bin/bash
-make install $MAKEINSTALLARGS
-$(declare -f PackagePostBuild)
-$(declare -f PackagePostInstall)
-PackagePostBuild
-PackagePostInstall" > packageinstallscript
-
-#Make the script executable
-chmod +x packageinstallscript
-
 #create the new deb
 checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript
 
@@ -203,7 +202,7 @@ checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos
 cp *.deb "/$SOURCEDIR/buildoutput/"
 
 else
-make install $MAKEINSTALLARGS
+./packageinstallscript
 fi
 
 
