@@ -28,8 +28,16 @@ chown  root  /usr/share/rebeccablackos/
 chgrp  root  -R /usr/share/rebeccablackos/
 #copy the files where they belong
 cp -a /usr/share/rebeccablackos/rebeccablacklinux_files/* /
-#copy /usr/import files where they belong too
-rsync /usr/import/* -a /
+rm -rf /usr/import/tmp
+rm -rf /usr/import/usr/import
+
+#Make package off of, and install files off of SVN package
+cd /tmp
+mkdir debian
+touch debian/control
+checkinstall -y -D --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos rsync /usr/import/* -a /
+cp *.deb "/srcbuild/buildoutput/"
+cd /
 chmod 777 /tmp
 
 #Install menu items

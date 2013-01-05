@@ -86,8 +86,13 @@ apt-get clean
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
 
-#copy all the post install files
-rsync /usr/import/* -a /
+#Make package off of, and install files off of SVN package, merged with the post install files
+cd /tmp
+mkdir debian
+touch debian/control
+checkinstall -y -D --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos rsync /usr/import/* -a /
+cp *.deb "/srcbuild/buildoutput/"
+cd /
 
 #delete the import folder
 rm -r /usr/import
