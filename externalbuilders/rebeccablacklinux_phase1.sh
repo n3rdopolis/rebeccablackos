@@ -40,7 +40,8 @@ umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
 
 #bind mount the FS to the workdir if there is no phase 2. If there is a phase 2, create a union of the phases.
-if [[ !  -f $RBOSLOCATION/DontRestartPhase2 ]]
+INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/build_mountpoints/phase_2/tmp/INSTALLS.txt.bak $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
+if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $RBOSLOCATION/DontRestartPhase2 ]]
 then
 mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
 else 
