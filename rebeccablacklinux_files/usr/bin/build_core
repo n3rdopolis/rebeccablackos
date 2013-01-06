@@ -227,19 +227,18 @@ ENDTIME=$(date +%s)
 echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
 
 
-#Create a script file that will be called by checkinstall, or just called. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script.
+#Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
 echo "#! /bin/bash
-make install $MAKEINSTALLARGS 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/MakeInstall
-$(declare -f PackagePostBuild)
+$(declare -f PackageInstallSource)
 $(declare -f PackagePostInstall)
 export SOURCEDIR=$SOURCEDIR
 export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
 
 STARTTIME=\$(date +%s)
-PackagePostBuild 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
+PackageInstallSource 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackageInstallSource
 ENDTIME=\$(date +%s)
-echo \"PackagePostBuild finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
+echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageInstallSource
 
 STARTTIME=\$(date +%s)
 PackagePostInstall 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall

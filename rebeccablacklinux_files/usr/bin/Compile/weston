@@ -37,8 +37,8 @@ INSTALLDIR=/opt
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
 ALWAYSREBUILD=1
 
-#Arguments for make install
-MAKEINSTALLARGS=""
+
+
 
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
@@ -59,8 +59,14 @@ function PackageCompileSource()
 make 
 }
 
-#This gets called after the build, only when the script is compiling source. 
-function PackagePostBuild()
+#This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
+function PackageInstallSource()
+{
+make install
+}
+
+#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
+function PackagePostInstall()
 {
 #install Wayland clients into the PATH
 find /srcbuild/"$SOURCENAME"/clients -executable | while read CLIENT
@@ -73,11 +79,7 @@ find /srcbuild/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
 cp "$CLIENT" /$INSTALLDIR/bin
 done
-}
 
-#This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
-function PackagePostInstall()
-{
 #turn OFF setuid on weston
 chmod -s $INSTALLDIR/bin/weston
 
