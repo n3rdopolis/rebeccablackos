@@ -44,18 +44,18 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-echo "Installing with partial dependancies for $PACKAGE"
-yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
+echo "Installing with partial dependancies for $PACKAGE"                        |tee -a /usr/share/logs/package_operations/Installs
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       |tee -a /usr/share/logs/package_operations/Installs 
 elif [[ $METHOD == "FULL" ]]
 then
-echo "Installing with all dependancies for $PACKAGE"
-yes Yes | apt-get install $PACKAGE -y --force-yes
+echo "Installing with all dependancies for $PACKAGE"                            |tee -a /usr/share/logs/package_operations/Installs
+yes Yes | apt-get install $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs
 elif [[ $METHOD == "BUILDDEP" ]]
 then
-echo "Installing build dependancies for $PACKAGE"
-yes Y | apt-get build-dep $PACKAGE -y --force-yes
+echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs
+yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs
 else
-echo "Invalid Install Operation: $METHOD"
+echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs
 fi
 
 done

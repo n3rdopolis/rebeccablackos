@@ -31,6 +31,11 @@ wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
 #install basic applications that the system needs to get repositories
 yes Y| apt-get install aptitude git bzr subversion
 
+#create folder for install logs
+mkdir -p /usr/share/logs/package_operations
+
+#clean up possible older logs
+rm /usr/share/logs/package_operations/*
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
@@ -43,18 +48,18 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-echo "Downloading with partial dependancies for $PACKAGE"
-yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes
+echo "Downloading with partial dependancies for $PACKAGE"                       |tee -a /usr/share/logs/package_operations/Downloads
+yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    |tee -a /usr/share/logs/package_operations/Downloads
 elif [[ $METHOD == "FULL" ]]
 then
-echo "Downloading with all dependancies for $PACKAGE"
-yes Yes | apt-get install $PACKAGE -d -y --force-yes
+echo "Downloading with all dependancies for $PACKAGE"                           |tee -a /usr/share/logs/package_operations/Downloads
+yes Yes | apt-get install $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads
 elif [[ $METHOD == "BUILDDEP" ]]
 then
-echo "Downloading build dependancies for $PACKAGE"
-yes Y | apt-get build-dep $PACKAGE -d -y --force-yes
+echo "Downloading build dependancies for $PACKAGE"                              |tee -a /usr/share/logs/package_operations/Downloads
+yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads 
 else
-echo "Invalid Install Operation: $METHOD"
+echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Downloads
 fi
 
 done
