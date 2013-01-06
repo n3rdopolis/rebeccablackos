@@ -56,6 +56,12 @@ OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | gre
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
+
+if [[ $MAKEDEBS == 1 ]]
+then
+rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+fi
+
 fi
 
 git clone "$SOURCEURL"
@@ -97,6 +103,12 @@ OLDSOURCEURL=$(svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
+
+if [[ $MAKEDEBS == 1 ]]
+then
+rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+fi
+
 fi
 
 svn co "$SOURCEURL"
@@ -114,6 +126,12 @@ OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
 then
 rm -rf "$SOURCENAME"
+
+if [[ $MAKEDEBS == 1 ]]
+then
+rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+fi
+
 fi
 
 bzr branch "$SOURCEURL" "$SOURCENAME"
