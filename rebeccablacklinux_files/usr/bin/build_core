@@ -60,6 +60,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
 fi
 
 fi
@@ -107,6 +109,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
 fi
 
 fi
@@ -130,6 +134,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
+rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
 fi
 
 fi
@@ -164,19 +170,19 @@ ENDTIME=$(date +%s) 2>&1 | tee -a  /usr/share/logs/build_core/$SOURCENAME/Packag
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-echo "REVISION $(git rev-parse HEAD)"
+REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
 }
 
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-echo "REVISION $(svnversion .)"
+REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
 }
 
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-echo "REVISION $(bzr revno)"
+REVISIONSTRING="$SOURCENAME REVISION $(bzr revno)"
 }
 
 
@@ -184,6 +190,15 @@ echo "REVISION $(bzr revno)"
 function GetSourceVersion()
 {
 GetVersion$REPOSITORYTYPE
+echo "$REVISIONSTRING"
+
+if [[ $MAKEDEBS == 1 ]]
+then
+mkdir -p /$SOURCEDIR/buildoutput/versioninfo
+echo "$REVISIONSTRING" > /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
+echo 
+fi
+
 }
 
 
@@ -211,14 +226,17 @@ function MakeAndInstall()
 #create a variable for the package name that is the source name converted to all lower case.
 PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 
-#If the script is set to always rebuild, then delete the lock file.
+#If the script is set to always rebuild, then detect if the revision info changed.
 if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS == 1 ]]
 then
-rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+DIFFERENTREVISION="$(diff -q /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old &>/dev/null ; echo $?)"
+cat /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt > /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
+else 
+DIFFERENTREVISION=0
 fi
 
-#If the deb file is gone, there is no control file, or the scripts not configured to make deb files, then build the source
-if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 ]]
+#If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
+if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 ]]
 then
 #Complile the source
 STARTTIME=$(date +%s)

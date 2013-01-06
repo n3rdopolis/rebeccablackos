@@ -90,8 +90,7 @@ mv $RBOSLOCATION/build_mountpoints/phase_3/home/remastersys/remastersys/custom-f
 #dump out the logged revision numbers to a file
 ls $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 
 do  
-REV=$(cat $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/$FILE | grep REVISION | awk '{print $2}')
-echo $FILE=$REV
+cat $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/$FILE | grep REVISION 
 done > $RBOSLOCATION/BuiltRevisions-$(date +%s)
 
 
