@@ -32,6 +32,9 @@ export DEBIAN_FRONTEND=noninteractive
 #install aptitude
 yes Y| apt-get install aptitude
 
+#clean up possible older logs
+rm /usr/share/logs/package_operations/Installs
+
 #Archive this current list of installs.
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
 

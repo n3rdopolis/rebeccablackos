@@ -35,7 +35,7 @@ yes Y| apt-get install aptitude git bzr subversion
 mkdir -p /usr/share/logs/package_operations
 
 #clean up possible older logs
-rm /usr/share/logs/package_operations/*
+rm /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
