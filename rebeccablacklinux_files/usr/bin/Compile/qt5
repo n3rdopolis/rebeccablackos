@@ -41,25 +41,25 @@ ALWAYSREBUILD=0
 MAKEINSTALLARGS=""
 
 
-#set the revisions for the submodules. Replace all / and - with _
-qtactiveqt_REVISION=stable
-qtbase_REVISION=stable
-qtdeclarative_REVISION=stable
-qtdoc_REVISION=stable
-qtgraphicaleffects_REVISION=stable
-qtimageformats_REVISION=stable
-qtjsbackend_REVISION=stable
-qtmultimedia_REVISION=stable
-qtqa_REVISION=stable
-qtquick1_REVISION=stable
-qtrepotools_REVISION=stable
-qtscript_REVISION=stable
-qtsvg_REVISION=stable
-qttools_REVISION=stable
-qttranslations_REVISION=stable
-qtwebkit_REVISION=stable
-qtwebkit_examples_and_demos_REVISION=stable
-qtxmlpatterns_REVISION=stable
+#set the revisions for the submodules. Replace all symbols (including /)  and spaces  with underscores, and add REVISION_ before the name
+REVISION_qtactiveqt=stable
+REVISION_qtbase=stable
+REVISION_qtdeclarative=stable
+REVISION_qtdoc=stable
+REVISION_qtgraphicaleffects=stable
+REVISION_qtimageformats=stable
+REVISION_qtjsbackend=stable
+REVISION_qtmultimedia=stable
+REVISION_qtqa=stable
+REVISION_qtquick1=stable
+REVISION_qtrepotools=stable
+REVISION_qtscript=stable
+REVISION_qtsvg=stable
+REVISION_qttools=stable
+REVISION_qttranslations=stable
+REVISION_qtwebkit=stable
+REVISION_qtwebkit_examples_and_demos=stable
+REVISION_qtxmlpatterns=stable
 
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource

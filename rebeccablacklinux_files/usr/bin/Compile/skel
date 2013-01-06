@@ -40,6 +40,13 @@ ALWAYSREBUILD=0
 #Arguments for make install
 MAKEINSTALLARGS=""
 
+#set the revisions for the submodules. Replace all symbols (including /)  and spaces  with underscores, and add REVISION_ before the name
+#Example set for submodule 'submodulename'
+#REVISION_submodulename=stable
+
+#example set for submodule submodule/subsubmodule
+#REVISION_submodule_subsubmodule=stable
+
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
