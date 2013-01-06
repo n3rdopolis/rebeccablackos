@@ -37,7 +37,7 @@ umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
 #Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
-INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_1/tmp/INSTALLS.txt $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
+INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/phase_2/tmp/INSTALLS.txt.bak $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
 if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $RBOSLOCATION/DontRestartPhase2 ]]
 then
 #Delete the phase 2 folder contents

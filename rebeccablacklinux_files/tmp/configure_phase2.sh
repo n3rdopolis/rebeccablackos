@@ -32,6 +32,8 @@ export DEBIAN_FRONTEND=noninteractive
 #install aptitude
 yes Y| apt-get install aptitude
 
+#Archive this current list of installs.
+cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
