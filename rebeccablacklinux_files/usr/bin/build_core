@@ -135,7 +135,7 @@ REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 STARTTIME=$(date +%s)
 Download$REPOSITORYTYPE | tee /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
 ENDTIME=$(date +%s)
-echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
+echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
 
 STARTTIME=$(date +%s)
 PackageDownloadSource   | tee /usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource
@@ -184,7 +184,7 @@ mkdir -p "$INSTALLDIR/share/aclocal"
 STARTTIME=$(date +%s)
 PackagePrepareBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
 ENDTIME=$(date +%s)
-echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
+echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
@@ -206,7 +206,7 @@ then
 STARTTIME=$(date +%s)
 PackageCompileSource | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
 ENDTIME=$(date +%s)
-echo "Finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
+echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
 
 
 #Create a script file that will be called by checkinstall, or just called. It calls make with the specified variable, and exports the current build scripts PackagePostBuild and PackagePostInstall functions to the script.
@@ -221,12 +221,12 @@ export INSTALLDIR=$INSTALLDIR
 STARTTIME=\$(date +%s)
 PackagePostBuild | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
 ENDTIME=\$(date +%s)
-echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
+echo \"PackagePostBuild finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostBuild
 
 STARTTIME=\$(date +%s)
 PackagePostInstall | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
 ENDTIME=\$(date +%s)
-echo \"Finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
+echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
 " > packageinstallscript
 
 #Make the script executable
@@ -251,7 +251,10 @@ rm *.spec
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
-checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript
+STARTTIME=\$(date +%s)
+checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript | tee /usr/share/logs/build_core/$SOURCENAME/checkinstall
+ENDTIME=$(date +%s)
+echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" | tee -a /usr/share/logs/build_core/$SOURCENAME/checkinstall
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
