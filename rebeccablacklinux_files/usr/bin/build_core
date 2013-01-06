@@ -60,8 +60,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
 fi
 
 fi
@@ -93,7 +93,7 @@ git reset --hard
 git clean -fdx 
 git pull
 
-cd /$SOURCEDIR/$SOURCENAME
+cd "/$SOURCEDIR/$SOURCENAME"
 done
 }
 
@@ -109,8 +109,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
 fi
 
 fi
@@ -134,8 +134,8 @@ rm -rf "$SOURCENAME"
 if [[ $MAKEDEBS == 1 ]]
 then
 rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
-rm /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
 fi
 
 fi
@@ -157,13 +157,13 @@ cd "$SOURCEDIR"
 REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
 STARTTIME=$(date +%s)
-Download$REPOSITORYTYPE 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
+Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 ENDTIME=$(date +%s)
-echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE
+echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 
 STARTTIME=$(date +%s)
-PackageDownloadSource   2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource
-ENDTIME=$(date +%s) 2>&1 | tee -a  /usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource
+PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
 
 }
 
@@ -194,8 +194,8 @@ echo "$REVISIONSTRING"
 
 if [[ $MAKEDEBS == 1 ]]
 then
-mkdir -p /$SOURCEDIR/buildoutput/versioninfo
-echo "$REVISIONSTRING" > /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt
+mkdir -p "/$SOURCEDIR/buildoutput/versioninfo"
+echo "$REVISIONSTRING" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
 echo 
 fi
 
@@ -211,13 +211,13 @@ function PrepareBuild()
 
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
-GetSourceVersion 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/GetSourceVersion
+GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 mkdir -p "$INSTALLDIR/share/aclocal"
 
 STARTTIME=$(date +%s)
-PackagePrepareBuild 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
+PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
 ENDTIME=$(date +%s)
-echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild
+echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
@@ -229,8 +229,8 @@ PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 #If the script is set to always rebuild, then detect if the revision info changed.
 if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
 then
-DIFFERENTREVISION="$(diff -q /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old &>/dev/null ; echo $?)"
-cat /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt > /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
+DIFFERENTREVISION="$(diff -q "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old" &>/dev/null ; echo $?)"
+cat "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
 else 
 DIFFERENTREVISION=0
 fi
@@ -240,9 +240,9 @@ if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f
 then
 #Complile the source
 STARTTIME=$(date +%s)
-PackageCompileSource 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
+PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
 ENDTIME=$(date +%s)
-echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageCompileSource
+echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
 
 
 #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
@@ -254,14 +254,14 @@ export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
 
 STARTTIME=\$(date +%s)
-PackageInstallSource 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackageInstallSource
+PackageInstallSource 2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackageInstallSource\"
 ENDTIME=\$(date +%s)
-echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackageInstallSource
+echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackageInstallSource\"
 
 STARTTIME=\$(date +%s)
-PackagePostInstall 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
+PackagePostInstall 2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackagePostInstall\"
 ENDTIME=\$(date +%s)
-echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/PackagePostInstall
+echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackagePostInstall\"
 " > packageinstallscript
 
 #Make the script executable
@@ -287,9 +287,9 @@ rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
 STARTTIME=$(date +%s)
-checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript 2>&1 | tee /usr/share/logs/build_core/$SOURCENAME/checkinstall
+checkinstall -y -D --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 ENDTIME=$(date +%s)
-echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/Checkinstall
+echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
@@ -303,15 +303,13 @@ fi
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
 STARTTIME=$(date +%s)
-dpkg -i "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb | tee /usr/share/logs/build_core/$SOURCENAME/DebInstall
+dpkg -i "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
 ENDTIME=$(date +%s)
-echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/share/logs/build_core/$SOURCENAME/DebInstall
+echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
 fi
 
-#If the build script is set to not always rebuild, create the lock file
-if [[ $REBUILDNEWREVISION == 0 && $MAKEDEBS == 1 ]]
-then
+#Create lock file that when removed forces the package to be rebuilt
 touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-fi
+
 
 }
