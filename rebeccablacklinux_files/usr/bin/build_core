@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 export SOURCEDIR=/srcbuild
-export ALWAYSREBUILD=0
+export REBUILDNEWREVISION=0
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
@@ -227,7 +227,7 @@ function MakeAndInstall()
 PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 
 #If the script is set to always rebuild, then detect if the revision info changed.
-if [[ $ALWAYSREBUILD == 1 && $MAKEDEBS == 1 ]]
+if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
 then
 DIFFERENTREVISION="$(diff -q /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old &>/dev/null ; echo $?)"
 cat /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt > /$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old
@@ -309,7 +309,7 @@ echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a /usr/
 fi
 
 #If the build script is set to not always rebuild, create the lock file
-if [[ $ALWAYSREBUILD == 0 && $MAKEDEBS == 1 ]]
+if [[ $REBUILDNEWREVISION == 0 && $MAKEDEBS == 1 ]]
 then
 touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 fi
