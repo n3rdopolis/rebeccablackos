@@ -39,8 +39,13 @@ umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 #END PAST RUN CLEANUP##################
 
 
-#bind mount the FS to the workdir
+#bind mount the FS to the workdir if there is no phase 2. If there is a phase 2, create a union of the phases.
+if [[ !  -f $RBOSLOCATION/DontRestartPhase2 ]]
+then
 mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
+else 
+mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/workdir
+fi
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
