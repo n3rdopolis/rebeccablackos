@@ -296,6 +296,9 @@ echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/u
 #copy the resulting deb file into the buildoutput tree.
 cp *.deb "/$SOURCEDIR/buildoutput/"
 
+#Create lock file that when removed forces the package to be rebuilt
+touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+
 else
 ./packageinstallscript
 fi
@@ -309,9 +312,6 @@ dpkg -i "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb | tee "/usr/sh
 ENDTIME=$(date +%s)
 echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
 fi
-
-#Create lock file that when removed forces the package to be rebuilt
-touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 
 
 }
