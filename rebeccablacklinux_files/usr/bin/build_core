@@ -310,7 +310,7 @@ fi
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
 STARTTIME=$(date +%s)
-dpkg -i "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
+dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
 ENDTIME=$(date +%s)
 echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
 fi
