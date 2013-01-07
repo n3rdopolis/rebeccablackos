@@ -26,6 +26,9 @@ function RunDownloadAndOrBuild
 {
 mkdir -p /usr/share/logs/build_core/$SOURCENAME
 
+
+
+
 #Download source, unless the argument passed to the build script is 'build-only'
 if [[ "$ACTION" != build-only ]]
 then
@@ -218,6 +221,8 @@ echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
+cd "$SOURCEDIR"
+cd "$SOURCENAME"
 GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 mkdir -p "$INSTALLDIR/share/aclocal"
 
