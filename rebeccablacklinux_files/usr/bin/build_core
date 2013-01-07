@@ -38,8 +38,6 @@ fi
 if [[ "$ACTION" != download-only ]]
 then
 
-PrepareBuild 
-
 #Start the compile or install Process
 MakeAndInstall
 
@@ -210,8 +208,6 @@ function PrepareBuild()
 
 cd "$SOURCEDIR"
 cd "$SOURCENAME"
-GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
-mkdir -p "$INSTALLDIR/share/aclocal"
 
 STARTTIME=$(date +%s)
 PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
@@ -222,6 +218,9 @@ echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
+GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
+mkdir -p "$INSTALLDIR/share/aclocal"
+
 #create a variable for the package name that is the source name converted to all lower case.
 PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
 
@@ -237,6 +236,10 @@ fi
 #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
 if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 ]]
 then
+
+#Call PrepareBuild functions
+PrepareBuild 
+
 #Complile the source
 STARTTIME=$(date +%s)
 PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
