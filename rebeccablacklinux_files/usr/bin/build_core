@@ -256,9 +256,12 @@ PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageC
 ENDTIME=$(date +%s)
 echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
 
+#Empty any possible logs inside the source folder
+rm "/$SOURCEDIR/$SOURCENAME/Logs/"* 
 
 #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
 echo "#! /bin/bash
+mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
 $(declare -f PackageInstallSource)
 $(declare -f PackagePostInstall)
 export SOURCEDIR=$SOURCEDIR
@@ -266,15 +269,17 @@ export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
 
 STARTTIME=\$(date +%s)
-PackageInstallSource 2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackageInstallSource\"
+PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs\"
 ENDTIME=\$(date +%s)
-echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackageInstallSource\"
+echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs\"
 
 STARTTIME=\$(date +%s)
-PackagePostInstall 2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackagePostInstall\"
+PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs\"
 ENDTIME=\$(date +%s)
-echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackagePostInstall\"
+echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs\"
 " > packageinstallscript
+
+cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
 
 #Make the script executable
 chmod +x packageinstallscript
