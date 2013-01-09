@@ -59,6 +59,7 @@ edje
 emotion
 elementary
 SDL
+mplayer2-wayland
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
