@@ -105,17 +105,18 @@ LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
 unset WINDOWID
 
-echo 'To exit from Wayland running native, hit CTRL-ALT-BACKSPACE'
+echo 'To exit Weston, hit CTRL-ALT-BACKSPACE'
 echo ' '
-echo 'Wayland programs are in /opt/bin or any GTK program when you are running a GTK program from a Wayland terminal'
-echo ' '
-echo 'Under Wayland to run a program under xwayland instead, run'
+echo 'When using Wayland, to run a program under xwayland, run'
 echo 'xwaylandapp programname --args --args2...'
 echo 'If its a program that supports both Wayland and X'
 echo ' '
 echo 'You also find Wayland programs under the application launcher in the Wayland Examples section'
 echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
-echo ' '
-echo 'To be able to call Weston from a standard terminal run:'
-echo 'westoncaller (--westonargs)'
+echo '------------------------------------------------------'
+echo '------------------------------------------------------'
+echo 'In order to be able to run Wayland apps as root, run:'
+echo 'sudo waylandapp programname --args --args2'
+echo '------------------------------------------------------'
+echo '------------------------------------------------------'

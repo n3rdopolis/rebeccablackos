@@ -19,13 +19,20 @@
 unset HOME
 export HOME=$(echo ~)
 
+#If there is the SUDO_USER variable, then set XDG_RUNTIME_DIR based off of the SUDO_USER variable
+if [[ -z $SUDO_USER ]]
+then
+export XDG_RUNTIME_DIR=/run/user/$USER
+else
+export XDG_RUNTIME_DIR=/run/user/$SUDO_USER
+fi
+
+
+#export XDG_DATA_HOME=$HOME/.local
+#export XDG_CONFIG_HOME=$HOME/.config
+#export XDG_CACHE_HOME=$HOME/.cache
 export XDG_DATA_DIRS=/opt/share:$XDG_DATA_DIRS
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
-
-export XDG_DATA_HOME=$HOME/.local
-export XDG_CONFIG_HOME=$HOME/.config
-export XDG_CACHE_HOME=$HOME/.cache
-export XDG_RUNTIME_DIR=/run/user/$USER
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export GDK_BACKEND=wayland
