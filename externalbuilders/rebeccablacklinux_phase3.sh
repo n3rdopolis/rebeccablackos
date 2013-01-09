@@ -95,7 +95,7 @@ ENDDATE=$(date +"%Y\%m\%d %H:%M:%S")
 mkdir -p "$RBOSLOCATION/logs/$ENDDATE"
 
 #Export the log files to the location
-cp -a "$RBOSLOCATION/build_mountpoints/workdir/usr/share/logs/*" "$RBOSLOCATION/logs/$ENDDATE"
+cp -a "$RBOSLOCATION/build_mountpoints/workdir/usr/share/logs/"* "$RBOSLOCATION/logs/$ENDDATE"
 
 #dump out the logged revision numbers to a file
 ls "$RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/" | while read FILE 
