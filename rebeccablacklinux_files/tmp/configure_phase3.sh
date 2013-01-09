@@ -53,6 +53,14 @@ rm /usr/bin/remastersys.bak
 #remove the resolv.conf from the list of files in /etc that remastersys deletes, as it's a symlink to a dynamic file. 
 sed -i 's/resolv.conf,//g'  /usr/bin/remastersys
 
+#Remastersys deletes the tty startup files, and disables the ttys. Don't allow it to do so
+sed -i 's/rm -f \$WORKDIR\/dummysys\/etc\/init\/tty?.conf//g'  /usr/bin/remastersys
+
+#Remastersys now formats the ISO so it can be 'dd'ed onto a flash drive. However it creates a warning that not all BIOSes might like it, and might be what makes the ISO creation phase slower. This feature can be replaced with unetbootin or the USB startup creator, as it is easier for the user as well
+grep -v "hybrid" /usr/bin/remastersys > /usr/bin/remastersys.bak
+cat /usr/bin/remastersys.bak > /usr/bin/remastersys
+rm /usr/bin/remastersys.bak
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
