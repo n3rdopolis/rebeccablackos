@@ -36,7 +36,8 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 
-
+#unmount phase 2
+umount -lf $RBOSLOCATION/build_mountpoints/phase_2
 
 #END PAST RUN CLEANUP##################
 
@@ -47,6 +48,8 @@ mkdir $RBOSLOCATION
 #switch to that folder
 cd $RBOSLOCATION
 
+#clean up old files
+rm -rf $RBOSLOCATION/build_mountpoints/
 
 #create a folder for the media mountpoints in the media folder
 mkdir $RBOSLOCATION/build_mountpoints
