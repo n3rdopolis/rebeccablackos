@@ -35,7 +35,10 @@ yes Y| apt-get install aptitude git bzr subversion
 mkdir -p /usr/share/logs/package_operations
 
 #clean up possible older logs
-rm /usr/share/logs/package_operations/Downloads
+rm -r /usr/share/logs/package_operations/Downloads
+
+#Create folder to hold the install logs
+mkdir /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
@@ -48,18 +51,18 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-echo "Downloading with partial dependancies for $PACKAGE"                       |tee -a /usr/share/logs/package_operations/Downloads
-yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    |tee -a /usr/share/logs/package_operations/Downloads
+echo "Downloading with partial dependancies for $PACKAGE"                       |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 elif [[ $METHOD == "FULL" ]]
 then
-echo "Downloading with all dependancies for $PACKAGE"                           |tee -a /usr/share/logs/package_operations/Downloads
-yes Yes | apt-get install $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads
+echo "Downloading with all dependancies for $PACKAGE"                           |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Yes | apt-get install $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 elif [[ $METHOD == "BUILDDEP" ]]
 then
-echo "Downloading build dependancies for $PACKAGE"                              |tee -a /usr/share/logs/package_operations/Downloads
-yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads 
+echo "Downloading build dependancies for $PACKAGE"                              |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
 else
-echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Downloads
+echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 fi
 
 done

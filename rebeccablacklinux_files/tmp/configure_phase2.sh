@@ -33,7 +33,10 @@ export DEBIAN_FRONTEND=noninteractive
 yes Y| apt-get install aptitude
 
 #clean up possible older logs
-rm /usr/share/logs/package_operations/Installs
+rm -r /usr/share/logs/package_operations/Installs
+
+#Create folder to hold the install logs
+mkdir /usr/share/logs/package_operations/Installs
 
 #Archive this current list of installs.
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
@@ -49,18 +52,18 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-echo "Installing with partial dependancies for $PACKAGE"                        |tee -a /usr/share/logs/package_operations/Installs
-yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       |tee -a /usr/share/logs/package_operations/Installs 
+echo "Installing with partial dependancies for $PACKAGE"                        |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 elif [[ $METHOD == "FULL" ]]
 then
-echo "Installing with all dependancies for $PACKAGE"                            |tee -a /usr/share/logs/package_operations/Installs
-yes Yes | apt-get install $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs
+echo "Installing with all dependancies for $PACKAGE"                            |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+yes Yes | apt-get install $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 elif [[ $METHOD == "BUILDDEP" ]]
 then
-echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs
-yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs
+echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 else
-echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs
+echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 fi
 
 done
