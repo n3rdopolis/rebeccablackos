@@ -117,6 +117,6 @@ echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -
 echo '------------------------------------------------------'
 echo '------------------------------------------------------'
 echo 'In order to be able to run Wayland apps as root, run:'
-echo 'sudo waylandapp programname --args --args2'
+echo 'wlsudo programname --args --args2'
 echo '------------------------------------------------------'
 echo '------------------------------------------------------'
