@@ -87,11 +87,21 @@ rm $HOMELOCATION/RebeccaBlackLinux.iso
 mv $RBOSLOCATION/build_mountpoints/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux.iso
 mv $RBOSLOCATION/build_mountpoints/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_Development.iso
 
+
+#Create a date string for unique log folder names
+ENDDATE=$(date +"%Y/%m/%d %H:%M:%S")
+
+#Create a folder for the log files with the date string
+mkdir -p "$RBOSLOCATION/logs/$ENDDATE"
+
+#Export the log files to the location
+cp -a "$RBOSLOCATION/build_mountpoints/workdir/usr/share/logs/*" "$RBOSLOCATION/logs/$ENDDATE"
+
 #dump out the logged revision numbers to a file
-ls $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/ | while read FILE 
+ls "$RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/" | while read FILE 
 do  
-cat $RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/$FILE | grep REVISION 
-done > $RBOSLOCATION/BuiltRevisions-$(date +%s)
+cat "$RBOSLOCATION/build_mountpoints/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
+done > "$RBOSLOCATION/logs/$ENDDATE/BuiltRevisions.log"
 
 
 echo "Live CD image build was successful. It was created at $HOMELOCATION/RebeccaBlackLinux.iso"
