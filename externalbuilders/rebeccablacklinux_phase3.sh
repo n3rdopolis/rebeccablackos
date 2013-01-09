@@ -89,7 +89,7 @@ mv $RBOSLOCATION/build_mountpoints/phase_3/home/remastersys/remastersys/custom-f
 
 
 #Create a date string for unique log folder names
-ENDDATE=$(date +"%Y/%m/%d %H:%M:%S")
+ENDDATE=$(date +"%Y\%m\%d %H:%M:%S")
 
 #Create a folder for the log files with the date string
 mkdir -p "$RBOSLOCATION/logs/$ENDDATE"
