@@ -24,6 +24,7 @@ cd /tmp
 mkdir debian
 touch debian/control
 checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos rsync /usr/import/* -a /
+cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
 #delete the import folder
