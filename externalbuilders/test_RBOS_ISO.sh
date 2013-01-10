@@ -22,6 +22,7 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 MOUNTISO=$(readlink -f $1)
 MOUNTHOME=~
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+unset SUDO_USER
 
 if [[ $UID != 0 ]]
 then
