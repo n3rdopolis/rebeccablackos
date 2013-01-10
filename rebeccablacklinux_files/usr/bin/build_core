@@ -269,14 +269,14 @@ export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
 
 STARTTIME=\$(date +%s)
-PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs\"
+PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
 ENDTIME=\$(date +%s)
-echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs\"
+echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
 
 STARTTIME=\$(date +%s)
-PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs\"
+PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
 ENDTIME=\$(date +%s)
-echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs\"
+echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
 " > packageinstallscript
 
 cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
