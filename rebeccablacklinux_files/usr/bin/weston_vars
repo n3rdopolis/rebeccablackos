@@ -48,5 +48,6 @@ export QT_QPA_PLATFORM=wayland
 export ELM_ENGINE=wayland_shm
 export ECORE_EVAS_ENGINE=wayland_shm
 export SDL_VIDEODRIVER=wayland
+export GST_GL_WINDOW=wayland
 export $(dbus-launch)
 
