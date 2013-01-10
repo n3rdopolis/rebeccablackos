@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=gstreamer-vaapi
+SOURCENAME=sree-gstreamer-vaapi
 
 #The URL of the Source code repo
-SOURCEURL=git://gitorious.org/vaapi/gstreamer-vaapi.git
+SOURCEURL=git://gitorious.org/~sreerenj/vaapi/sree-gstreamer-vaapi.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
-SOURCEREVERSION=master
+SOURCEREVERSION=1.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -63,7 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-glx
 make 
 }
 
