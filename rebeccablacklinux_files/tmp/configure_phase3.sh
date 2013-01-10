@@ -19,9 +19,12 @@
 # configure plymouth to use framebuffer
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
-#Copy the import files into the system.
-rsync /usr/import/* -a /
-
+#Copy the import files into the system, while creating a deb with checkinstall.
+cd /tmp
+mkdir debian
+touch debian/control
+checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos rsync /usr/import/* -a /
+cd $OLDPWD
 
 #delete the import folder
 rm -r /usr/import
