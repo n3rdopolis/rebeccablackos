@@ -66,7 +66,6 @@ gstreamer
 gst-plugins-base
 gst-plugins-bad
 gst-plugins-good
-sree-gstreamer-vaapi
 gst-plugins-gl
 kmscon
 " | awk -F "#" '{print $1}' | while read BUILDNAME
