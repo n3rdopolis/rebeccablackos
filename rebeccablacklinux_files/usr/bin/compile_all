@@ -60,13 +60,12 @@ emotion
 elementary
 SDL
 mplayer2-wayland
-libva
-intel-driver
 gstreamer
 gst-plugins-base
 gst-plugins-bad
 gst-plugins-good
 gst-plugins-gl
+gst-libav
 kmscon
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
