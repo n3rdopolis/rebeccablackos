@@ -16,10 +16,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 export FILENAMEID=$RANDOM
+
+if [[ ! -f ~/capture.wcap ]]
+then
+zenity --warning --text="No capture file to convert. To create a capture recording of your Desktop, press super key + r to start the recording, and super key + r to end the recording."
+exit
+fi
+
+zenity --warning --text="This will convert the captured video data from your recorded desktop session into a playable movie file. Press OK to continue."
+
 wlterm -l /usr/libexec/wayland_helpers/weston-video-convert-helper
 if [[ -f ~/weston-capture-$FILENAMEID.webm ]]
 then
-zenity --warning --text="Created movie file ~/weston-capture-$FILENAMEID.webm"
+zenity --warning --text="Created movie file ~/weston-capture-$FILENAMEID.webm out of the captured desktop file."
 rm ~/capture.wcap
 else
 zenity --warning --text="Failed to convert file"
