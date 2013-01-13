@@ -19,7 +19,7 @@
 ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Logoff" FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Logoff" ]]
 then
-kill $SESSIONMANAGERPID
+kill $SESSIONCALLERPID
 RESULT=$?
 elif [[ $ACTION == "Shutdown" ]]
 then
