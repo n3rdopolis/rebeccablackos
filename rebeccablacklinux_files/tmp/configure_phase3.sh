@@ -19,13 +19,16 @@
 # configure plymouth to use framebuffer
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
 
-#Copy the import files into the system, while creating a deb with checkinstall.
+#Copy the import files into the system, and create menu items while creating a deb with checkinstall.
 cd /tmp
 mkdir debian
 touch debian/control
-checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos rsync /usr/import/* -a /
+checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="subversion,git,bzr,dlocate,vinagre,shotwell,seahorse,alacarte,checkinstall,zenity,transmission-gtk,gnome-games,gucharmap,gnome-font-viewer,pcmanfm,xterm,plasma-widget-networkmanagement,plasma-widget-veromix,kde-baseapps-bin,gedit,file-roller,vpx-tools,plasma-widget-folderview,plasma-widgets-workspace" /tmp/configure_phase3_helper.sh
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
+
+#Copy files into place, this time overwriting.
+rsync /usr/import/* -a /
 
 #delete the import folder
 rm -r /usr/import
@@ -68,11 +71,6 @@ rm /usr/bin/remastersys.bak
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
-
-
-#install the menu items for the wayland tests
-install_menu_items
-
 #start the remastersys job
 remastersys dist
 
@@ -81,22 +79,22 @@ mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-yes Y | apt-get purge $REMOVEDEVPGKS
+yes Y | apt-get purge $REMOVEDEVPGKS > /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS
+yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS
+yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
 
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide subversion git bzr cmake libgl1-mesa-dri-dbg libglib2.0-doc"
-yes Y | apt-get purge $REMOVEDEVPGKS
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc"
+yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
 
 
-yes Y | apt-get autoremove
+yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
 
 #hide buildlogs in tmp from remastersys
 mv /usr/share/Buildlog     /tmp
