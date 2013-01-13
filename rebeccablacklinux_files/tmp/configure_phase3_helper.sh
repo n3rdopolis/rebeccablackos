@@ -16,8 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Copy files into place, but don't overwrite existing files.
-rsync --ignore-existing /usr/import/* -a /
+#Copy files into place.
+rsync /usr/import/* -a /
 
 #install the menu items for the wayland tests
 install_menu_items
