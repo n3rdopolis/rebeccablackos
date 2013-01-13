@@ -40,6 +40,10 @@ install_menu_items
 
 
 
+if [[ $1 == build ]]
+then 
+
+
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
 dpkg-divert --local --rename --add /usr/sbin/grub-probe
 dpkg-divert --local --rename --add /sbin/initctl
@@ -50,7 +54,7 @@ ln -s /bin/true /usr/sbin/grub-probe
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
-echo "$BINARYINSTALLS" | while read PACKAGEINSTRUCTION
+echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
 PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
 METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
@@ -72,13 +76,6 @@ done
 
 
 
-#GET BUILDDEPS FOR THE PACKAGES SPECIFIED
-echo "$BUILDINSTALLS" | while read PACKAGE
-do
-yes Y | apt-get build-dep $PACKAGE -y --force-yes
-done
-
-
 #Reset the utilites back to the way they are supposed to be.
 rm /sbin/initctl
 rm /usr/sbin/grub-probe
@@ -89,11 +86,6 @@ dpkg-divert --local --rename --remove /sbin/initctl
 apt-get clean
 
 
-
-if [[ $1 == build ]]
-then 
-#run the config script to install depends in case they changed
-/tmp/configure_phase1.sh
 
 
 compile_all build-only
