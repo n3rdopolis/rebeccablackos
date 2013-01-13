@@ -20,18 +20,27 @@ ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?
 if [[ $ACTION == "Logoff" ]]
 then
 kill $SESSIONMANAGERPID
+RESULT=$?
 elif [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+RESULT=$?
 elif [[ $ACTION == "Restart" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+RESULT=$?
 elif [[ $ACTION == "Standby" ]]
 then
 dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
+RESULT=$?
 elif [[ $ACTION == "Hibernate" ]]
 then
 dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
+RESULT=$?
 else
 exit
+fi
+if [[ $RESULT != 0 ]]
+then
+zenity --warning --text="Failed to $ACTION"
 fi
