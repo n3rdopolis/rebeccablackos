@@ -306,7 +306,7 @@ do
 dlocate -S --package-only "$LIBRARY"
 done | sort | uniq)
 
-DEPENDS=$(echo $DEPENDS | sed 's/ /, /g') 
+DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
 
 #.spec file seem to cause problems with checkinstall
 rm *.spec
@@ -316,7 +316,7 @@ rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
 STARTTIME=$(date +%s)
-checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=1  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 ENDTIME=$(date +%s)
 echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 
