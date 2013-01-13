@@ -297,17 +297,16 @@ mkdir debian
 touch debian/control
 
 
-#Find all Executable files compiled in the source tree
-find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
+#Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
+DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
 do
-#Get the libraries the executable file uses.
-ldd /usr/bin/zenity | awk '{print $3}'
-#Make sure the libraries are only listed once. Go through each library.
-done | sort | uniq | while read LIBRARY
+ldd "$FILE" | awk '{print $3}'
+done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
 do
-#Find what package the library belongs to
-dpkg -S $LIBRARY
-done | sort | uniq > /$SOURCEDIR/$SOURCENAME/ExecuteDependancies
+dlocate -S --package-only "$LIBRARY"
+done | sort | uniq)
+
+DEPENDS=$(echo $DEPENDS | sed 's/ /, /g') 
 
 #.spec file seem to cause problems with checkinstall
 rm *.spec
