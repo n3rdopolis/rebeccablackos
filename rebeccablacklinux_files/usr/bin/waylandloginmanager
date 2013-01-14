@@ -1,0 +1,126 @@
+#! /bin/bash
+#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+echo "Must be run as root."
+exit
+fi
+
+export loginmanagerpid=$$
+export SUDO_USER=loginmanager
+. /usr/bin/weston_vars
+LastTTY=0
+
+#Create communication fifos.
+mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid
+mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid
+chown loginmanager /run/loginmanager_data.$loginmanagerpid
+
+
+#Get the next TTY that is open for use
+function GetNextTTY()
+{
+TTYInUse=1
+while [[ $TTYInUse != 0 ]]
+do
+((LastTTY++))
+TTYInUse=$(openvt --console $LastTTY /bin/true)
+done
+AvailibleTTY=$LastTTY
+}
+
+# TODO session changing function
+
+function NewLoginSession()
+{
+export SessionNumber=$(date +%s)
+#Create communication fifos for the session.
+mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid.$SessionNumber
+mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid.$SessionNumber
+chown loginmanager /run/loginmanager_data.$loginmanagerpid.$SessionNumber
+
+export SessionTTY=$(GetNextTTY)
+
+#Get the list of nonsystem users
+UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
+UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
+USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
+
+#present the list of the users to the system
+export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
+
+if [[ -z $LOGINUSER ]]
+then
+zenity --warning --text="No User selected" 
+return 
+fi
+
+
+#Ask for the Users password in a terminal running as the loginmanager user. This way su asks for a password
+su --preserve-environment loginmanager -c wlterm -l /usr/libexec/login-test-helper
+
+#If the su password test result reports success, then su into the user
+LoginResult=$(cat /run/loginmanager_data.$loginmanagerpid.$SessionNumber)
+if [[ $LoginResult == 0 ]]
+then
+su $LOGINUSER -c /usr/bin/sessionchooser &
+SESSIONPID=$!
+
+# TODO METHOD TO FOWARD THIS TO MAIN SCRIPT
+echo "$SessionNumber:$SessionTTY:$LOGINUSER:$SESSIONPID" 
+else
+zenity --warning --text="Incorrect Password." 
+fi
+
+}
+
+
+
+#If the user for the loginmanager does not exist, then create it.
+loginmanagerexists=$(id -u loginmanager)
+if [[ $loginmanagerexists != 0 ]]
+then
+adduser loginmanager --disabled-password --system --group --home=/var/lib/loginmanager
+usermod -a -G plugdev loginmanager
+chown -R loginmanager:loginmanager /var/lib/loginmanager
+chmod -R 700 /var/lib/loginmanager
+fi
+
+
+#Get the TTY that will hold the Wayland server that displays the login screen.
+HostVT=$(GetNextTTY)
+
+# TODO Start Frame buffer Weston server as loginmanager once the backend is commited in Background
+
+while [ 1 ]
+do
+COMMAND=$(/run/loginmanager_control.$loginmanagerpid)
+if [[ $COMMAND == "Switch" ]]
+then
+chvt $HostVT
+# TODO Session checker
+ListCurrentSessions &
+elif [[ $COMMAND == "Login" ]]
+NewLoginSession &
+else
+echo "Invalid command"
+fi
+
+done
