@@ -313,7 +313,7 @@ DEPENDS=$(echo $DEPENDS | sed 's/ /,/g')
 #.spec file seem to cause problems with checkinstall
 rm *.spec
 
-#remove any old deb files
+#remove any old deb files for this package
 rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
 #create the new deb
