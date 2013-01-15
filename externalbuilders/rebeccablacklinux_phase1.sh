@@ -22,6 +22,14 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
+#create a folder for the media mountpoints in the media folder
+mkdir $RBOSLOCATION/build_mountpoints
+mkdir $RBOSLOCATION/build_mountpoints/phase_1
+mkdir $RBOSLOCATION/build_mountpoints/phase_2
+mkdir $RBOSLOCATION/build_mountpoints/phase_3
+mkdir $RBOSLOCATION/build_mountpoints/buildoutput
+mkdir $RBOSLOCATION/build_mountpoints/workdir
+
 #unmount the chrooted procfs from the outside 
 umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
 
