@@ -80,6 +80,8 @@ su --preserve-environment loginmanager -c wlterm -l /usr/libexec/login-test-help
 LoginResult=$(cat /run/loginmanager_data.$loginmanagerpid.$SessionNumber)
 if [[ $LoginResult == 0 ]]
 then
+chvt $SessionTTY
+# TODO sessionchooser will need to be changed to not be X
 su $LOGINUSER -c /usr/bin/sessionchooser &
 SESSIONPID=$!
 
@@ -111,6 +113,8 @@ HostVT=$(GetNextTTY)
 
 while [ 1 ]
 do
+# TODO detect lightdm/casper autologin
+
 COMMAND=$(/run/loginmanager_control.$loginmanagerpid)
 if [[ $COMMAND == "Switch" ]]
 then
