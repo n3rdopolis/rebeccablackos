@@ -44,6 +44,9 @@ umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
 umount -lfd $RBOSLOCATION/build_mountpoints/workdir
 umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
 
+#Clean up Phase 3 data.
+rm -rf $RBOSLOCATION/build_mountpoints/phase_3/*
+
 #create the union of phases 1, 2, and 3 at workdir
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_1,upperdir=$RBOSLOCATION/build_mountpoints/phase_2 overlayfs $RBOSLOCATION/build_mountpoints/phase_2
 mount -t overlayfs -o lowerdir=$RBOSLOCATION/build_mountpoints/phase_2,upperdir=$RBOSLOCATION/build_mountpoints/phase_3 overlayfs $RBOSLOCATION/build_mountpoints/workdir
