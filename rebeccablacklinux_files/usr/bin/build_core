@@ -277,8 +277,6 @@ STARTTIME=\$(date +%s)
 PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
 ENDTIME=\$(date +%s)
 echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
-
-touch /usr/share/logs/build_core/$SOURCENAME/GetSourceVersion
 " > packageinstallscript
 
 cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/

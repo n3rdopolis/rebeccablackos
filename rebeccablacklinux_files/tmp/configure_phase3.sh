@@ -24,7 +24,7 @@ cd /tmp
 mkdir debian
 touch debian/control
 #remove any old deb files for this package
-rm "/$SOURCEDIR/buildoutput/"rbos-rbos_*.deb
+rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
 checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="subversion,git,bzr,dlocate,vinagre,shotwell,seahorse,alacarte,checkinstall,zenity,transmission-gtk,gnome-games,gucharmap,gnome-font-viewer,pcmanfm,xterm,plasma-widget-networkmanagement,plasma-widget-veromix,kde-baseapps-bin,gedit,file-roller,vpx-tools,plasma-widget-folderview,plasma-widgets-workspace" /tmp/configure_phase3_helper.sh
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
