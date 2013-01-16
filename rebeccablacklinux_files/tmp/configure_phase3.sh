@@ -78,19 +78,19 @@ mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-yes Y | apt-get purge $REMOVEDEVPGKS > /usr/share/logs/package_operations/removes.txt
+yes Y | apt-get purge $REMOVEDEVPGKS | tee /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
+yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
+yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc"
-yes Y | apt-get purge $REMOVEDEVPGKS >> /usr/share/logs/package_operations/removes.txt
+yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
 yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
