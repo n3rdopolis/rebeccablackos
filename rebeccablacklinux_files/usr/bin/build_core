@@ -303,6 +303,7 @@ do
 ldd "$FILE" | awk '{print $3}'
 done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
 do
+update-dlocatedb
 dlocate -S --package-only "$LIBRARY"
 done | sort | uniq)
 
