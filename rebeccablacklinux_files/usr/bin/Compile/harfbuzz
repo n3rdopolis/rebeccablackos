@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=cairo
+SOURCENAME=harfbuzz
 
 #The URL of the Source code repo
-SOURCEURL=git://anongit.freedesktop.org/cairo
+SOURCEURL=git://anongit.freedesktop.org/harfbuzz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
 REPOSITORYTYPE=GIT
@@ -40,11 +40,19 @@ REBUILDNEWREVISION=0
 
 
 
+#set the revisions for the submodules. Replace all symbols (including /)  and spaces  with underscores, and add REVISION_ before the name
+#Example set for submodule 'submodulename'
+#REVISION_submodulename=stable
+
+#example set for submodule submodule/subsubmodule
+#REVISION_submodule_subsubmodule=stable
+
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
 :
 }
+
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
@@ -55,7 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --enable-gl --enable-ft --enable-fc --enable-xcb --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make 
 }
 
