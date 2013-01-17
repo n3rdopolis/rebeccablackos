@@ -63,7 +63,7 @@ mkdir $RBOSLOCATION/build_mountpoints/workdir
 mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap quantal $RBOSLOCATION/build_mountpoints/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap raring $RBOSLOCATION/build_mountpoints/workdir http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
 touch $RBOSLOCATION/DontStartFromScratch

@@ -57,6 +57,7 @@ mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
 
 #Mount in the folder with previously built debs
+mkdir -p $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
 mount --rbind $RBOSLOCATION/build_mountpoints/buildoutput $RBOSLOCATION/build_mountpoints/workdir/srcbuild/buildoutput
 
 #copy in the files needed
