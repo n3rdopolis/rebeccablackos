@@ -72,6 +72,7 @@ fi
 fi
 
 git clone "$SOURCEURL" "$SOURCENAME"
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 git checkout $SOURCEREVERSION 
 git reset --hard 
@@ -91,6 +92,7 @@ REVISIONNAME=REVISION_"$(echo -n $MODULE | tr '[:punct:]' '_' | tr '[:space:]' '
 #use REVISIONNAME (foldername_REVISION as variable variable 
 MODULEREVISION=${!REVISIONNAME}
 
+mkdir -p $MODULE
 cd $MODULE
 
 git checkout $MODULEREVISION
@@ -98,6 +100,7 @@ git reset --hard
 git clean -fdx 
 git pull
 
+mkdir -p "/$SOURCEDIR/$SOURCENAME"
 cd "/$SOURCEDIR/$SOURCENAME"
 done
 }
@@ -121,6 +124,7 @@ fi
 fi
 
 svn co "$SOURCEURL" "$SOURCENAME"
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 svn revert --recursive .
 svn cleanup
@@ -146,6 +150,7 @@ fi
 fi
 
 bzr branch "$SOURCEURL" "$SOURCENAME"
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 bzr revert
 bzr clean-tree --force --detritus
@@ -157,7 +162,7 @@ bzr update -r $SOURCEREVERSION
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
-mkdir "$SOURCEDIR"
+mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
 REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
@@ -214,7 +219,9 @@ function PrepareBuild()
 #Create build variables
 . /usr/bin/build_vars
 
+mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
+mkidr -p "$SOURCENAME"
 cd "$SOURCENAME"
 
 STARTTIME=$(date +%s)
@@ -226,7 +233,9 @@ echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
+mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 mkdir -p "$INSTALLDIR/share/aclocal"
