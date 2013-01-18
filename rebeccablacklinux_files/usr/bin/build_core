@@ -71,9 +71,9 @@ fi
 
 fi
 
-git clone "$SOURCEURL"
+git clone "$SOURCEURL" "$SOURCENAME"
 cd "$SOURCENAME"
-git checkout $SOURCEREVERSION
+git checkout $SOURCEREVERSION 
 git reset --hard 
 git clean -fdx 
 git pull
@@ -120,7 +120,7 @@ fi
 
 fi
 
-svn co "$SOURCEURL"
+svn co "$SOURCEURL" "$SOURCENAME"
 cd "$SOURCENAME"
 svn revert --recursive .
 svn cleanup
