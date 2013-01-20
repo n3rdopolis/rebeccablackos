@@ -78,7 +78,7 @@ cp /usr/bin/xkbcomp $INSTALLDIR/bin
 #set the log folder to allow nested X to create log files, and not fataly exit
 mkdir -p $INSTALLDIR/var/log
 chmod 777 $INSTALLDIR/var/log
-
+touch $INSTALLDIR/var/log/logs
 #disable setuid on xserver
 chmod -s $INSTALLDIR/bin/Xorg
 }

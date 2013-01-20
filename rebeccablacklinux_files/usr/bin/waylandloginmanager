@@ -82,7 +82,7 @@ if [[ $LoginResult == 0 ]]
 then
 chvt $SessionTTY
 # TODO sessionchooser will need to be changed to not be X
-su $LOGINUSER -c /usr/bin/sessionchooser &
+su $LOGINUSER -c /usr/bin/wlsessionchooser &
 SESSIONPID=$!
 
 # TODO METHOD TO FOWARD THIS TO MAIN SCRIPT
@@ -109,10 +109,14 @@ fi
 #Get the TTY that will hold the Wayland server that displays the login screen.
 HostVT=$(GetNextTTY)
 
-# TODO Start Frame buffer Weston server as loginmanager once the backend is commited in Background
+#Call the host server for the login gui, running as a seperate user
+su loginmanager /opt/bin/weston-launch -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
+export WAYLAND_DISPLAY=loginmanagerdisplay
+chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 
 while [ 1 ]
 do
+AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 # TODO detect lightdm/casper autologin
 
 COMMAND=$(/run/loginmanager_control.$loginmanagerpid)

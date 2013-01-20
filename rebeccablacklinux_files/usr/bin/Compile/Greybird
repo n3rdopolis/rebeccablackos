@@ -68,8 +68,10 @@ function PackageInstallSource()
 function PackagePostInstall()
 {
 mkdir -p /etc/skel/.config/gtk-3.0
+mkdir -p /root/.config/gtk-3.0
 cd gtk-3.0
 cp -a * /etc/skel/.config/gtk-3.0
+cp -a * /root/.config/gtk-3.0
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
