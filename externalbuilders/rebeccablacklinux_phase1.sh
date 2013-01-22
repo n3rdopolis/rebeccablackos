@@ -1,4 +1,4 @@
-#! /usr/bin/sudo /bin/bash
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -23,71 +23,71 @@ RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
 #create a folder for the media mountpoints in the media folder
-mkdir $RBOSLOCATION/build_mountpoints
-mkdir $RBOSLOCATION/build_mountpoints/phase_1
-mkdir $RBOSLOCATION/build_mountpoints/phase_2
-mkdir $RBOSLOCATION/build_mountpoints/phase_3
-mkdir $RBOSLOCATION/build_mountpoints/buildoutput
-mkdir $RBOSLOCATION/build_mountpoints/workdir
+mkdir $RBOSLOCATION/build/$BUILDARCH
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_2
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_3
+mkdir $RBOSLOCATION/build/$BUILDARCH/buildoutput
+mkdir $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the FS at the workdir and phase 2
-umount -lfd $RBOSLOCATION/build_mountpoints/workdir
-umount -lfd $RBOSLOCATION/build_mountpoints/phase_2
+umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
+umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 
 #END PAST RUN CLEANUP##################
 
 
 #bind mount the FS to the workdir. 
-mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
+mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev $RBOSLOCATION/build_mountpoints/workdir/dev/
-mount --rbind /proc $RBOSLOCATION/build_mountpoints/workdir/proc/
-mount --rbind /sys $RBOSLOCATION/build_mountpoints/workdir/sys/
+mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
+mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
+mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build_mountpoints/workdir/temp/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 #make the imported files executable 
-chmod +x -R $RBOSLOCATION/build_mountpoints/workdir/temp/
-chown  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
-chgrp  root  -R $RBOSLOCATION/build_mountpoints/workdir/temp/
+chmod +x -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
+chown  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
+chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 #copy the ONLY minimal build files in, not any data files like wallpapers.
-mkdir -p $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
-cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/tmp/* $RBOSLOCATION/build_mountpoints/workdir/tmp
-cp -a $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build_mountpoints/workdir/usr/bin/Compile/
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build_mountpoints/workdir/usr/bin/compile_all 
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/build_core $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_core
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/build_vars $RBOSLOCATION/build_mountpoints/workdir/usr/bin/build_vars
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/usr/bin/weston_vars $RBOSLOCATION/build_mountpoints/workdir/usr/bin/weston_vars
-cp $RBOSLOCATION/build_mountpoints/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build_mountpoints/workdir/etc/apt/sources.list 
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/Compile/
+cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/tmp/* $RBOSLOCATION/build/$BUILDARCH/workdir/tmp
+cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/Compile/
+cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/compile_all 
+cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/build_core $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/build_core
+cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/build_vars $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/build_vars
+cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/weston_vars $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/weston_vars
+cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
 
 #delete the temp folder
-rm -rf $RBOSLOCATION/build_mountpoints/workdir/temp/
+rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 
 #Configure the Live system########################################
-chroot $RBOSLOCATION/build_mountpoints/workdir /tmp/configure_phase1.sh
+chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir

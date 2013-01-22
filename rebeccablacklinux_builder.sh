@@ -31,8 +31,8 @@ This requires Ubuntu Quantal or later due to the use of overlayfs
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            ${HOME}/RBOS_Build_Files/
-   File:              ${HOME}/RebeccaBlackLinux.iso
-   File:              ${HOME}/RebeccaBlackLinux_Development.iso
+   File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
+   File:              ${HOME}/RebeccaBlackLinux_Development_i386.iso or ${HOME}/RebeccaBlackLinux_Development_amd64.iso
 "
 
 
@@ -43,9 +43,14 @@ echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PG
 
 read a
 
-echo "press enter again to start the operation. If you started the script in an xterm or equivilent, and you already hit enter once, and you dont want to continue, DO NOT close out the window, if you do it may start to run in the background. If you wish to close it, press control-c FIRST."
-
-read a
+echo "Select Arch. Enter 1 for i386, 2 for amd64. Default=i386."
+read archselect
+if [[ $archselect == 2 ]]
+then
+export BUILDARCH=amd64
+else
+export BUILDARCH=i386
+fi
 
 STARTTIME=$(date +%s)
 #ping google to test total network connectivity. Google is usally pingable
@@ -100,7 +105,7 @@ REBUILT="to update"
 
 
 #only initilize the FS if the FS isn't there.
-if [ ! -f $RBOSLOCATION/DontStartFromScratch ]
+if [ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH ]
 then
 $ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh
 REBUILT="to rebuild from scratch"

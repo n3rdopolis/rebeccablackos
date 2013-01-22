@@ -1,4 +1,4 @@
-#! /usr/bin/sudo /bin/bash
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -25,19 +25,19 @@ unset HOME
 ####CLEAN UP OLD SCRIPT FILES
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #unmount phase 2
-umount -lf $RBOSLOCATION/build_mountpoints/phase_2
+umount -lf $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 #END PAST RUN CLEANUP##################
 
@@ -49,33 +49,33 @@ mkdir $RBOSLOCATION
 cd $RBOSLOCATION
 
 #clean up old files
-rm -rf $RBOSLOCATION/build_mountpoints/
+rm -rf $RBOSLOCATION/build/$BUILDARCH/
 
 #create a folder for the media mountpoints in the media folder
-mkdir $RBOSLOCATION/build_mountpoints
-mkdir $RBOSLOCATION/build_mountpoints/phase_1
-mkdir $RBOSLOCATION/build_mountpoints/phase_2
-mkdir $RBOSLOCATION/build_mountpoints/phase_3
-mkdir $RBOSLOCATION/build_mountpoints/buildoutput
-mkdir $RBOSLOCATION/build_mountpoints/workdir
+mkdir $RBOSLOCATION/build/$BUILDARCH
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_2
+mkdir $RBOSLOCATION/build/$BUILDARCH/phase_3
+mkdir $RBOSLOCATION/build/$BUILDARCH/buildoutput
+mkdir $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #bind mount the FS to the workdir
-mount --bind $RBOSLOCATION/build_mountpoints/phase_1 $RBOSLOCATION/build_mountpoints/workdir
+mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap quantal $RBOSLOCATION/build_mountpoints/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap --arch $BUILDARCH quantal $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
-touch $RBOSLOCATION/DontStartFromScratch
+touch $RBOSLOCATION/DontStartFromScratch$BUILDARCH
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/proc
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/sys
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build_mountpoints/workdir/dev
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build_mountpoints/workdir
+umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
