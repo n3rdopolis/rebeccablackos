@@ -70,8 +70,5 @@ done
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
 
-#create the folder for ccache
-mkdir -p /srcbuild/.ccache
-
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
