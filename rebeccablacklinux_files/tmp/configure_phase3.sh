@@ -16,8 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
 # configure plymouth to use framebuffer
 echo FRAMEBUFFER=y > /etc/initramfs-tools/conf.d/splash
+
+#Try to add Framebuffer for the live cd
+cp /usr/share/initramfs-tools/scripts/init-top/framebuffer /usr/share/initramfs-tools/scripts/casper-bottom/51framebuffer
+
 
 #Copy the import files into the system, and create menu items while creating a deb with checkinstall.
 cd /tmp

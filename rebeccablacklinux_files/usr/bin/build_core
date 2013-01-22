@@ -221,7 +221,7 @@ function PrepareBuild()
 
 mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
-mkidr -p "$SOURCENAME"
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 
 STARTTIME=$(date +%s)

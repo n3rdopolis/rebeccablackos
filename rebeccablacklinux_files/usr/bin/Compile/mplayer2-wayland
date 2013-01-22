@@ -63,7 +63,12 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+if [[ $(dpkg-architecture -qDEB_HOST_MULTIARCH) == i386-linux-gnu ]]
+then
 ./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland --disable-x11 --enable-runtime-cpudetection --target=i586-linux
+else
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland --disable-x11 --enable-runtime-cpudetection
+fi
 make 
 }
 
