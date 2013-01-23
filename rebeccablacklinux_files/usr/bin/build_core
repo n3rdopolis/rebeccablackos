@@ -305,6 +305,8 @@ mkdir "/$SOURCEDIR/buildoutput/control"
 mkdir debian
 touch debian/control
 
+#Update database containing the list of files that belong to packages
+update-dlocatedb
 
 #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
 DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
@@ -312,7 +314,6 @@ do
 ldd "$FILE" | awk '{print $3}'
 done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
 do
-update-dlocatedb
 dlocate -S --package-only "$LIBRARY"
 done | sort | uniq)
 
