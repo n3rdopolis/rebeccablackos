@@ -95,7 +95,12 @@ rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 #Configure the Live system########################################
+if [[ $BUILDARCH == i386 ]]
+then
+linux32 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+else
 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+fi
 
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];

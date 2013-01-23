@@ -69,8 +69,12 @@ mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 
 
 #Configure the Live system########################################
+if [[ $BUILDARCH == i386 ]]
+then
+linux32 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+else
 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
-
+fi
 
 
 #unmount the chrooted procfs from the outside 

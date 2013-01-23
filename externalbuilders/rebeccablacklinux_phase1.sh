@@ -86,8 +86,12 @@ rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 #Configure the Live system########################################
+if [[ $BUILDARCH == i386 ]]
+then
+linux32 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
+else
 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
-
+fi
 
 #unmount the chrooted procfs from the outside 
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
