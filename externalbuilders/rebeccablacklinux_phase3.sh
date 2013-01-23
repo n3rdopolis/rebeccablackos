@@ -23,6 +23,12 @@ HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
+if [[ -z $BUILDARCH ]]
+then
+echo "BUILDARCH variable not set"
+exit
+fi
+
 #create a folder for the media mountpoints in the media folder
 mkdir $RBOSLOCATION/build/$BUILDARCH
 mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1

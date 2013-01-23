@@ -22,6 +22,12 @@ ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
 
+if [[ -z $BUILDARCH ]]
+then
+echo "BUILDARCH variable not set"
+exit
+fi
+
 ####CLEAN UP OLD SCRIPT FILES
 
 #unmount the chrooted procfs from the outside 
