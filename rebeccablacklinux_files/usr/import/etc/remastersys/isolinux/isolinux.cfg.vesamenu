@@ -12,6 +12,11 @@ label live
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash --
 
+label livefb
+  menu label live - boot the Live System with a 1024x768 framebuffer
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash vga=792 --
+
 label xforcevesa
   menu label xforcevesa - boot Live in safe graphics mode
   kernel /casper/vmlinuz

@@ -29,6 +29,14 @@ echo "BUILDARCH variable not set"
 exit
 fi
 
+#If the lockfile for the build output does not exist, delete it so all debs get deleted, and the build restarts from scratch.
+if [[  ! -f $RBOSLOCATION/DontRestartBuildoutput$BUILDARCH ]]
+then
+rm -rf $RBOSLOCATION/build/$BUILDARCH/buildoutput
+touch $RBOSLOCATION/DontRestartBuildoutput$BUILDARCH 
+fi
+
+
 #create a folder for the media mountpoints in the media folder
 mkdir $RBOSLOCATION/build/$BUILDARCH
 mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
