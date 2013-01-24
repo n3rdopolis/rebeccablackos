@@ -30,6 +30,9 @@ checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
+#copy all files
+rsync /usr/import/* -a /
+
 #delete the import folder
 rm -r /usr/import
 
