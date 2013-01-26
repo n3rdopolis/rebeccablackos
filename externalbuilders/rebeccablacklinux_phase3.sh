@@ -87,7 +87,6 @@ chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 #copy the files to where they belong
 cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/* $RBOSLOCATION/build/$BUILDARCH/workdir/
 cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/* $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
-rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import/tmp
 rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import/usr/import
 
 #delete the temp folder
