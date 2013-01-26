@@ -118,9 +118,9 @@ find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "c
 do
 cp "$TEST" /$INSTALLDIR/bin
 done
-cp /$INSTALLDIR/examples/qtwebkitwidgets/browser/browser $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/qtwebkitwidgets/webkit/fancybrowser/fancybrowser $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/qtwebkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
+cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
+cp /$INSTALLDIR/examples/webkitwidgets/webkit/fancybrowser/fancybrowser $INSTALLDIR/bin
+cp /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
