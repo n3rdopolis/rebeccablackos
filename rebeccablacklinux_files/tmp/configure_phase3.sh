@@ -122,10 +122,6 @@ rm /opt/bin/qdoc
 rm /opt/bin/uic
 rm /opt/bin/qdbuscpp2xml
 
-
-#remove duplicated samples
-rm -rf /opt/examples
-
 #clean more apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
