@@ -16,6 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Dont store command history.
+unset HISTFILE
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -48,7 +51,17 @@ AvailibleTTY=$LastTTY
 
 # TODO session changing function
 
-function NewLoginSession()
+fuction NewUserSession()
+{
+export SessionTTY=$(GetNextTTY)
+chvt $SessionTTY
+# TODO sessionchooser will need to be changed to not be X
+su $LOGINUSER -c /usr/bin/wlsessionchooser &
+SESSIONPID=$!
+}
+
+#Attempt to get the users authentication
+function AuthenticateUser()
 {
 export SessionNumber=$(date +%s)
 #Create communication fifos for the session.
@@ -56,41 +69,57 @@ mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid.$SessionNumber
 mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid.$SessionNumber
 chown loginmanager /run/loginmanager_data.$loginmanagerpid.$SessionNumber
 
-export SessionTTY=$(GetNextTTY)
-
 #Get the list of nonsystem users
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
 UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
 USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
 
 #present the list of the users to the system
-export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
+export LOGINUSER=$(su loginmanager --preserve-environment  -c zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
 
+#if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
 then
-zenity --warning --text="No User selected" 
-return 
-fi
-
-
-#Ask for the Users password in a terminal running as the loginmanager user. This way su asks for a password
-su --preserve-environment loginmanager -c wlterm -l /usr/libexec/login-test-helper
-
-#If the su password test result reports success, then su into the user
-LoginResult=$(cat /run/loginmanager_data.$loginmanagerpid.$SessionNumber)
-if [[ $LoginResult == 0 ]]
-then
-chvt $SessionTTY
-# TODO sessionchooser will need to be changed to not be X
-su $LOGINUSER -c /usr/bin/wlsessionchooser &
-SESSIONPID=$!
-
-# TODO METHOD TO FOWARD THIS TO MAIN SCRIPT
-echo "$SessionNumber:$SessionTTY:$LOGINUSER:$SESSIONPID" 
+su loginmanager --preserve-environment  -c zenity --warning --text="No User selected" 
 else
-zenity --warning --text="Incorrect Password." 
+su loginmanager --preserve-environment  -c /usr/libexec/login-test-helper $(zenity --password | grep -v 'startup message: remove:')
+passwordresult=$?
+if [[ $passwordresult != 0 ]]
+then
+su loginmanager --preserve-environment  -c zenity --warning --text="Invalid Password" 
+fi
 fi
 
+}
+
+
+#Funtion for prompting for leave options
+function LeavePrompt()
+{
+ACTION=$(su loginmanager --preserve-environment  -c zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
+if [[ $ACTION == "Shutdown" ]]
+then
+dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+RESULT=$?
+elif [[ $ACTION == "Restart" ]]
+then
+dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+RESULT=$?
+elif [[ $ACTION == "Standby" ]]
+then
+dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
+RESULT=$?
+elif [[ $ACTION == "Hibernate" ]]
+then
+dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
+RESULT=$?
+else
+exit
+fi
+if [[ $RESULT != 0 ]]
+then
+su loginmanager --preserve-environment  -c zenity --warning --text="Failed to $ACTION"
+fi
 }
 
 
@@ -117,7 +146,10 @@ chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 while [ 1 ]
 do
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
-# TODO detect lightdm/casper autologin
+if [[ ! -z $AUTOLOGONUSER ]]
+then
+su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager
+fi 
 
 COMMAND=$(/run/loginmanager_control.$loginmanagerpid)
 if [[ $COMMAND == "Switch" ]]
@@ -126,7 +158,11 @@ chvt $HostVT
 # TODO Session checker
 ListCurrentSessions &
 elif [[ $COMMAND == "Login" ]]
-NewLoginSession &
+then
+AuthenticateUser &
+elif [[ $COMMAND == "Leave" ]] 
+then
+LeavePrompt &
 else
 echo "Invalid command"
 fi
