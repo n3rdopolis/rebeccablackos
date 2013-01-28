@@ -55,9 +55,7 @@ fuction NewUserSession()
 {
 export SessionTTY=$(GetNextTTY)
 chvt $SessionTTY
-# TODO sessionchooser will need to be changed to not be X
 su $LOGINUSER -c /usr/bin/wlsessionchooser &
-SESSIONPID=$!
 }
 
 #Attempt to get the users authentication
@@ -82,11 +80,14 @@ if [[ -z $LOGINUSER ]]
 then
 su loginmanager --preserve-environment  -c zenity --warning --text="No User selected" 
 else
-su loginmanager --preserve-environment  -c /usr/libexec/login-test-helper $(zenity --password | grep -v 'startup message: remove:')
+export SessionTTY=$(GetNextTTY)
+su loginmanager --preserve-environment  -c /usr/libexec/login-helper $(zenity --password | grep -v 'startup message: remove:')
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
 su loginmanager --preserve-environment  -c zenity --warning --text="Invalid Password" 
+else
+chvt $SessionTTY
 fi
 fi
 
@@ -150,6 +151,7 @@ if [[ ! -z $AUTOLOGONUSER ]]
 then
 su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager
 fi 
+# TODO Session return data
 
 COMMAND=$(/run/loginmanager_control.$loginmanagerpid)
 if [[ $COMMAND == "Switch" ]]

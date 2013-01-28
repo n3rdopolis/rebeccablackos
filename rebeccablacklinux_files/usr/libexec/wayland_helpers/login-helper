@@ -30,10 +30,11 @@ catch wait result
 set status [lindex $result 3]
 
 if { $status == 0 } {
-spawn su $LOGINUSER -c /usr/bin/wlsessionmanager
+set PID [spawn su $LOGINUSER -c /usr/bin/wlsessionmanager]
 expect "Password:"
 
 send "$password\r";
 
+# TODO foward $PID the result somewhere
 interact
 } else {exit 1}
