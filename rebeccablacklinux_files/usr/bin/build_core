@@ -74,9 +74,9 @@ fi
 git clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-git checkout $SOURCEREVERSION 
 git reset --hard 
 git clean -fdx 
+git checkout -f $SOURCEREVERSION 
 git pull
 
 #Download submodules. set the revision name in the builder script, take the submodule name and add _REVISION to the end, for example SUBMODULENAME_REVISION=revisionno.
@@ -97,7 +97,7 @@ cd $MODULE
 
 git reset --hard 
 git clean -fdx 
-git checkout $MODULEREVISION
+git checkout -f $MODULEREVISION
 git pull
 
 mkdir -p "/$SOURCEDIR/$SOURCENAME"
