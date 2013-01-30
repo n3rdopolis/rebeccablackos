@@ -95,9 +95,9 @@ MODULEREVISION=${!REVISIONNAME}
 mkdir -p $MODULE
 cd $MODULE
 
-git checkout $MODULEREVISION
 git reset --hard 
 git clean -fdx 
+git checkout $MODULEREVISION
 git pull
 
 mkdir -p "/$SOURCEDIR/$SOURCENAME"
