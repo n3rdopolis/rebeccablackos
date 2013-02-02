@@ -288,8 +288,6 @@ ENDTIME=\$(date +%s)
 echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
 " > packageinstallscript
 
-cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
-
 #Make the script executable
 chmod +x packageinstallscript
 
@@ -341,7 +339,8 @@ else
 ./packageinstallscript
 fi
 
-
+#Copy the source logs correctly
+cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
 
 #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
 else
