@@ -31,7 +31,7 @@ fi
 export XDG_DATA_HOME=$HOME/.local
 export XDG_CONFIG_HOME=$HOME/.config
 export XDG_CACHE_HOME=$HOME/.cache
-export XDG_DATA_DIRS=/opt/share:$XDG_DATA_DIRS
+export XDG_DATA_DIRS=/opt/share:/usr/share:$XDG_DATA_DIRS
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
