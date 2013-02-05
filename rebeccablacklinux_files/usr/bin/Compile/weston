@@ -69,13 +69,13 @@ make install
 function PackagePostInstall()
 {
 #install Wayland clients into the PATH
-find /srcbuild/"$SOURCENAME"/clients -executable | while read CLIENT
+find /"$SOURCEDIR"/"$SOURCENAME"/clients -executable | while read CLIENT
 do
 cp "$CLIENT" /$INSTALLDIR/bin
 done
 
 #Install the screen capture utils
-find /srcbuild/"$SOURCENAME"/wcap -executable | while read CLIENT
+find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
 cp "$CLIENT" /$INSTALLDIR/bin
 done

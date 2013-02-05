@@ -74,7 +74,7 @@ cd test
 ./configure
 make
 #install sdl tests
-find /srcbuild/"$SOURCENAME"/test -executable | while read TEST
+find /"$SOURCEDIR"/"$SOURCENAME"/test -executable | while read TEST
 do
 cp "$TEST" /$INSTALLDIR/bin
 done

@@ -98,23 +98,23 @@ Building Examples:
 "
 
 #make specific widgets
-cd /srcbuild/qt5/qtbase/examples/widgets/itemviews/dirview
+cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/itemviews/dirview"
 qmake
 make
-cd /srcbuild/qt5/qtbase/examples/widgets/widgets/calculator
+cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/calculator"
 qmake
 make
-cd /srcbuild/qt5/qtbase/examples/widgets/mainwindows/mainwindow
+cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/mainwindows/mainwindow"
 qmake
 make
-cd /srcbuild/qt5/qtbase/examples/widgets/widgets/tetrix
+cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/tetrix"
 qmake
 make
-cd /srcbuild/qt5/qtbase/examples/widgets/widgets/wiggly
+cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/wiggly"
 qmake
 make
 #install qt tests
-find /srcbuild/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
+find /"$SOURCEDIR"/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
 do
 cp "$TEST" /$INSTALLDIR/bin
 done

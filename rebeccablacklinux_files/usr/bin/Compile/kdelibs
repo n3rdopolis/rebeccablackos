@@ -74,9 +74,9 @@ make install -i
 function PackagePostInstall()
 {
 #install the kdelibs tests
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest /$INSTALLDIR/bin
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/kcolorutilsdemo /$INSTALLDIR/bin
-cp /srcbuild/"$SOURCENAME"/build/kdeui/tests/krulertest /$INSTALLDIR/bin
+cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest /$INSTALLDIR/bin
+cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/kcolorutilsdemo /$INSTALLDIR/bin
+cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/krulertest /$INSTALLDIR/bin
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
