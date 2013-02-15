@@ -74,7 +74,10 @@ fi
 git clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-git reset --hard 
+git branch -r | awk '{print $1}' | while read BRANCH
+do
+git reset $BRANCH --hard 
+done
 git clean -fdx 
 git checkout -f $SOURCEREVERSION 
 git pull -s recursive -X theirs --no-edit
@@ -95,7 +98,10 @@ MODULEREVISION=${!REVISIONNAME}
 mkdir -p $MODULE
 cd $MODULE
 
-git reset --hard 
+git branch -r | awk '{print $1}' | while read BRANCH
+do
+git reset $BRANCH --hard 
+done 
 git clean -fdx 
 git checkout -f $MODULEREVISION
 git pull -s recursive -X theirs --no-edit
