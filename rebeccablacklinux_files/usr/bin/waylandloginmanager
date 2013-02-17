@@ -38,20 +38,20 @@ chown loginmanager /run/loginmanager_data.$loginmanagerpid
 
 
 #Get the next TTY that is open for use
-function GetNextTTY()
+function GetNextTTY
 {
 TTYInUse=1
-while [[ $TTYInUse != 0 ]]
+while [[ $TTYInUse != 0 || $TTYInUse <= "64" ]]
 do
 ((LastTTY++))
-TTYInUse=$(openvt --console $LastTTY /bin/true)
+TTYInUse=$(openvt --console $LastTTY /bin/true; echo $?)
 done
 AvailibleTTY=$LastTTY
 }
 
 # TODO session changing function
 
-fuction NewUserSession()
+function NewUserSession
 {
 export SessionTTY=$(GetNextTTY)
 chvt $SessionTTY
@@ -59,7 +59,7 @@ su $LOGINUSER -c /usr/bin/wlsessionchooser &
 }
 
 #Attempt to get the users authentication
-function AuthenticateUser()
+function AuthenticateUser
 {
 export SessionNumber=$(date +%s)
 #Create communication fifos for the session.
@@ -95,7 +95,7 @@ fi
 
 
 #Funtion for prompting for leave options
-function LeavePrompt()
+function LeavePrompt
 {
 ACTION=$(su loginmanager --preserve-environment  -c zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
@@ -129,8 +129,7 @@ fi
 loginmanagerexists=$(id -u loginmanager)
 if [[ $loginmanagerexists != 0 ]]
 then
-adduser loginmanager --disabled-password --system --group --home=/var/lib/loginmanager
-usermod -a -G plugdev loginmanager
+useradd -b /var/lib/ -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G admin,plugdev -U livetest 
 chown -R loginmanager:loginmanager /var/lib/loginmanager
 chmod -R 700 /var/lib/loginmanager
 fi
