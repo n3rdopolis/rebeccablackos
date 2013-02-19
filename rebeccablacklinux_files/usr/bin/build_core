@@ -77,7 +77,8 @@ cd "$SOURCENAME"
 git checkout -f $SOURCEREVERSION 
 git pull -s recursive -X theirs --no-edit
 git fetch origin
-git reset --hard origin/master
+git reset --hard $SOURCEREVERSION
+git reset --hard "origin/$SOURCEREVISION"
 git clean -fdx 
 
 #Download submodules. set the revision name in the builder script, take the submodule name and add _REVISION to the end, for example SUBMODULENAME_REVISION=revisionno.
@@ -99,7 +100,8 @@ cd $MODULE
 git checkout -f $MODULEREVISION
 git pull -s recursive -X theirs --no-edit
 git fetch origin
-git reset --hard origin/master
+git reset --hard $MODULEREVISION
+git reset --hard "origin/$SOURCEREVISION"
 git clean -fdx 
 
 mkdir -p "/$SOURCEDIR/$SOURCENAME"
