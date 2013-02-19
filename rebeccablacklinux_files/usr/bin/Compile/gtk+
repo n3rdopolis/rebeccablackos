@@ -71,8 +71,8 @@ function PackagePostInstall()
 {
 mkdir -p /etc/skel/.config/gtk-3.0
 mkdir -p /root/.config/gtk-3.0
-cp "/$SOURCEDIR/$SOURCENAME/gtk.css" "/etc/skel/.config/gtk-3.0"
-cp "/$SOURCEDIR/$SOURCENAME/gtk.css" "/root/.config/gtk-3.0"
+cat "/$SOURCEDIR/$SOURCENAME/gtk.css" >> "/etc/skel/.config/gtk-3.0/gtk.css"
+cat "/$SOURCEDIR/$SOURCENAME/gtk.css" >> "/root/.config/gtk-3.0/gtk.css"
 cp "/$SOURCEDIR/$SOURCENAME/theme.png" "/etc/skel/.config/gtk-3.0"
 cp "/$SOURCEDIR/$SOURCENAME/theme.png" "/root/.config/gtk-3.0" 
 }
