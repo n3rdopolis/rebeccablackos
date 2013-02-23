@@ -32,7 +32,6 @@ NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CON
     
    Folder:            ${HOME}/RBOS_Build_Files/
    File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
-   File:              ${HOME}/RebeccaBlackLinux_Development_i386.iso or ${HOME}/RebeccaBlackLinux_Development_amd64.iso
 "
 
 
