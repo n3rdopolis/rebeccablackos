@@ -76,7 +76,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -nomake examples
+./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked
 make 
 }
 
@@ -89,30 +89,6 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-echo "
-
-
-Building Examples:
-
-
-"
-
-#make specific widgets
-cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/itemviews/dirview"
-qmake
-make
-cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/calculator"
-qmake
-make
-cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/mainwindows/mainwindow"
-qmake
-make
-cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/tetrix"
-qmake
-make
-cd "/$SOURCEDIR/$SOURCENAME/qtbase/examples/widgets/widgets/wiggly"
-qmake
-make
 #install qt tests
 find /"$SOURCEDIR"/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
 do
