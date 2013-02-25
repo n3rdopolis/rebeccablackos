@@ -90,13 +90,54 @@ make install
 function PackagePostInstall()
 {
 #install qt tests
-find /"$SOURCEDIR"/"$SOURCENAME"/qtbase/examples  -executable -type f   | grep -E "calculator|dirview|mainwindow|tetrix|wiggly" | while read TEST
-do
-cp "$TEST" /$INSTALLDIR/bin
-done
+echo "
+
+Building Examples
+"
+cd /$INSTALLDIR/examples/widgets/widgets/wiggly
+qmake
+make
+cp /$INSTALLDIR/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/widgets/itemviews/dirview
+qmake
+make
+
+cd /$INSTALLDIR/examples/widgets/itemviews/dirview
+qmake
+make
+cp /$INSTALLDIR/examples/widgets/itemviews/dirview/dirview $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/widgets/mainwindows/mainwindow
+qmake
+make
+cp /$INSTALLDIR/examples/widgets/mainwindows/mainwindow/mainwindow $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/widgets/widgets/tetrix
+qmake
+make
+cp /$INSTALLDIR/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/widgets/widgets/calculator
+qmake
+make
+cp /$INSTALLDIR/examples/widgets/widgets/calculator/calculator $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/webkitwidgets/browser
+qmake
+make
 cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/webkitwidgets/fancybrowser
+qmake
+make
 cp /$INSTALLDIR/examples/webkitwidgets/fancybrowser/fancybrowser $INSTALLDIR/bin
+
+cd /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly
+qmake
+make
 cp /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
+
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
