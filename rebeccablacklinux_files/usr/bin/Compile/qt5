@@ -76,7 +76,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked
+./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked -make examples
 make 
 }
 
