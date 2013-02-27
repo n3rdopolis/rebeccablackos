@@ -53,6 +53,7 @@ elif [ $SERVER == "Xwayland" ]
 then
 USEWESTON=1
 kwin &
+sleep 10
 westoncaller --fullscreen 
 WESTONRETURNSTRING="Weston either crashed, or been exited." 
 kdialog --msgbox "$WESTONRETURNSTRING"
@@ -62,6 +63,7 @@ elif [ $SERVER == "MinimalXwayland" ]
 then
 USEWESTON=1
 kwin &
+sleep 10
 westoncaller --fullscreen  --use-pixman
 WESTONRETURNSTRING="Weston either crashed, or been exited." 
 kdialog --msgbox "$WESTONRETURNSTRING"
