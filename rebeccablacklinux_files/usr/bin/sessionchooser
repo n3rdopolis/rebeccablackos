@@ -53,8 +53,8 @@ elif [ $SERVER == "Xwayland" ]
 then
 USEWESTON=1
 kwin &
-sleep 10
-westoncaller --fullscreen 
+sleep 5
+westoncaller --fullscreen
 WESTONRETURNSTRING="Weston either crashed, or been exited." 
 kdialog --msgbox "$WESTONRETURNSTRING"
 
@@ -62,9 +62,13 @@ kdialog --msgbox "$WESTONRETURNSTRING"
 elif [ $SERVER == "MinimalXwayland" ]
 then
 USEWESTON=1
-kwin &
-sleep 10
-westoncaller --fullscreen  --use-pixman
+
+
+DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
+WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
+HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
+
+westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT --use-pixman
 WESTONRETURNSTRING="Weston either crashed, or been exited." 
 kdialog --msgbox "$WESTONRETURNSTRING"
 
