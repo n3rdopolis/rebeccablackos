@@ -49,7 +49,7 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 
 #make a folder containing the live cd tools in the users local folder
-mkdir $RBOSLOCATION
+mkdir -p $RBOSLOCATION
 
 #switch to that folder
 cd $RBOSLOCATION
@@ -58,18 +58,18 @@ cd $RBOSLOCATION
 rm -rf $RBOSLOCATION/build/$BUILDARCH/
 
 #create a folder for the media mountpoints in the media folder
-mkdir $RBOSLOCATION/build/$BUILDARCH
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_2
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_3
-mkdir $RBOSLOCATION/build/$BUILDARCH/buildoutput
-mkdir $RBOSLOCATION/build/$BUILDARCH/workdir
+mkdir -p $RBOSLOCATION/build/$BUILDARCH
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_1
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_2
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_3
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/buildoutput
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #bind mount the FS to the workdir
 mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap --arch $BUILDARCH raring $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap --arch $BUILDARCH quantal $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
 touch $RBOSLOCATION/DontStartFromScratch$BUILDARCH
