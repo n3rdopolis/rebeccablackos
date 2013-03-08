@@ -1,3 +1,24 @@
+Fixes https://bugs.freedesktop.org/show_bug.cgi?id=61930
+---
+ src/pixman-renderer.c | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/pixman-renderer.c b/src/pixman-renderer.c
+index 9571f6f..9dbe9f0 100644
+--- a/src/pixman-renderer.c
++++ b/src/pixman-renderer.c
+@@ -485,6 +485,8 @@ pixman_renderer_init(struct weston_compositor *ec)
+        if (renderer == NULL)
+                return -1;
+ 
++       renderer->repaint_debug = 0;
++       renderer->debug_color = NULL;
+        renderer->base.read_pixels = pixman_renderer_read_pixels;
+        renderer->base.repaint_output = pixman_renderer_repaint_output;
+        renderer->base.flush_damage = pixman_renderer_flush_damage;
+-- 
+1.8.1.5
+
 Signed-off-by: Joe Konno <joe.konno at intel.com>
 ---
  configure.ac | 2 +-
