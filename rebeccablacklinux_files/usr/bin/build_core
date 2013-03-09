@@ -241,7 +241,6 @@ mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 mkdir -p "$INSTALLDIR/share/aclocal"
 
 #create a variable for the package name that is the source name converted to all lower case.
@@ -280,6 +279,8 @@ $(declare -f PackagePostInstall)
 export SOURCEDIR=$SOURCEDIR
 export SOURCENAME=$SOURCENAME
 export INSTALLDIR=$INSTALLDIR
+
+GetSourceVersion 2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion\"
 
 STARTTIME=\$(date +%s)
 PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
