@@ -15,7 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+kwin &
 export SESSIONCALLERPID=$$
 
 #start by allowing user to select weston by default
@@ -52,8 +52,7 @@ kdialog --msgbox "$WESTONRETURNSTRING"
 elif [ $SERVER == "Xwayland" ]
 then
 USEWESTON=1
-kwin &
-sleep 5
+
 westoncaller --fullscreen
 WESTONRETURNSTRING="Weston either crashed, or been exited." 
 kdialog --msgbox "$WESTONRETURNSTRING"
