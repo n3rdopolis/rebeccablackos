@@ -50,6 +50,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+git revert e4566c049c7b385e2307fef3c72ef61762729f42
 sed -i 's/vesa/wlshm/g' hw/xfree86/common/xf86AutoConfig.c
 }
 
