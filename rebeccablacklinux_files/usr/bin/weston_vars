@@ -35,7 +35,6 @@ export XDG_DATA_DIRS=/opt/share:/usr/share:$XDG_DATA_DIRS
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export EGL_DRIVER=egl_dri2
 export GDK_BACKEND=wayland
 export CLUTTER_BACKEND=wayland
 export COGL_RENDERER=egl_wayland 
