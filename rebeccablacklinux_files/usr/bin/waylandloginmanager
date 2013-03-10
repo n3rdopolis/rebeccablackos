@@ -41,10 +41,10 @@ chown loginmanager /run/loginmanager_data.$loginmanagerpid
 function GetNextTTY
 {
 TTYInUse=1
-while [[ $TTYInUse != 0 || $TTYInUse <= "64" ]]
+while [[ $TTYInUse != 0 && $LastTTY -le 63 ]]
 do
 ((LastTTY++))
-TTYInUse=$(openvt --console $LastTTY /bin/true; echo $?)
+TTYInUse=$(openvt --console $LastTTY /bin/true ; echo $?)
 done
 AvailibleTTY=$LastTTY
 }
@@ -129,7 +129,7 @@ fi
 loginmanagerexists=$(id -u loginmanager)
 if [[ $loginmanagerexists != 0 ]]
 then
-useradd -b /var/lib/ -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G admin,plugdev -U livetest 
+useradd -b /var/lib/ -g loginmanager -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G admin,plugdev -U loginmanager 
 chown -R loginmanager:loginmanager /var/lib/loginmanager
 chmod -R 700 /var/lib/loginmanager
 fi
