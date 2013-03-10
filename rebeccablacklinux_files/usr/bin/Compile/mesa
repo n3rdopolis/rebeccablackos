@@ -56,7 +56,7 @@ patch -p1 < /usr/share/RBOS_PATCHES/mesa.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --enable-shared-dricore --enable-gles2  --with-gallium-drivers=nouveau,svga,nv30,nv50,nvc0,radeon,radeonsi,llvmpipe,softpipe,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$INSTALLDIR --enable-shared-dricore --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 
 }
 
