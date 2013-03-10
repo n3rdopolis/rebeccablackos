@@ -129,7 +129,7 @@ fi
 loginmanagerexists=$(id -u loginmanager)
 if [[ $loginmanagerexists != 0 ]]
 then
-useradd -b /var/lib/ -g loginmanager -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G admin,plugdev -U loginmanager 
+useradd -b /var/lib/ -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G plugdev -U loginmanager 
 chown -R loginmanager:loginmanager /var/lib/loginmanager
 chmod -R 700 /var/lib/loginmanager
 fi
