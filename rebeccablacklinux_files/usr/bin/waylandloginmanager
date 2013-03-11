@@ -139,7 +139,7 @@ fi
 HostVT=$(GetNextTTY)
 
 #Call the host server for the login gui, running as a seperate user
-su loginmanager /opt/bin/weston-launch -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
+/opt/bin/weston-launch --user=loginmanager -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 
