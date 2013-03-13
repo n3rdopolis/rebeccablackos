@@ -52,40 +52,13 @@ export BUILDARCH=i386
 fi
 
 STARTTIME=$(date +%s)
-#ping google to test total network connectivity. Google is usally pingable
-ping -c1 google.com > /dev/null
-IsGoOgLeAcceSsaBle=$?
-if [[ $IsGoOgLeAcceSsaBle -ne 0 ]]
-then               
-  echo "Unable to access Google. There is a high proberbility that your connection to the Internet is disconnected. (or in an extreemly rare case Google may be down) 
-"
-                     
-fi
-
-#detect if the Ubuntu Archive Site is reachable
-ping -c1 archive.ubuntu.com > /dev/null
-IsUbuNtUArcHiveSiTeAcceSsaBle=$?
-if [[ $IsUbuNtUArcHiveSiTeAcceSsaBle -ne 0 ]]
-then               
-  echo "Unable to access the Ubuntu Archive site. Please test your connectivity to the Internet If you belive you are connected, the Ubuntu Archive Site may be down. The script needs Ubuntu's Archive website in order to succede. Exiting."
-  exit 1                       
-fi
-
-#detect if the Remastersys Archive site is reachable
-ping -c1 www.remastersys.com > /dev/null
-IsReMastersYsArcHiveSiTeAcceSsaBle=$?
-if [[ $IsReMastersYsArcHiveSiTeAcceSsaBle -ne 0 ]]
-then               
-  echo "Unable to access the Remastersys Archive site. Please test your connectivity to the Internet If you belive you are connected, the Remastersys Archive Site may be down. The script needs Remastersys' Archive Site in order to succede. Exiting." 
-  exit 1                       
-fi
 
 #install needed tools to get the build system to work
 apt-get install debootstrap overlayroot
 
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
-#if there is 16gb or less tell the user and quit. If not continue.
+#if there is 12gb or less tell the user and quit. If not continue.
 if [[ $HomeFileSysTemFSFrEESpaCe -le 12000000 ]] 
   then               
   echo "You have less then 12gb of free space on the partition that contains your home folder. Please free up some space." 
