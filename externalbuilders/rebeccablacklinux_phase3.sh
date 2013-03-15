@@ -119,7 +119,7 @@ mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.is
 ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
 
 #Create a folder for the log files with the date string
-mkdir -p "$RBOSLOCATION/logs/$ENDDATE_$BUILDARCH"
+mkdir -p "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH"
 
 #Export the log files to the location
 cp -a "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH"
