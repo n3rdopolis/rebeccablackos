@@ -23,7 +23,7 @@
 SOURCENAME=mpv
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/giselher/mpv.git
+SOURCEURL=git://github.com/mpv-player/mpv.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
 REPOSITORYTYPE=GIT
@@ -63,7 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./configure --prefix=$INSTALLDIR  --enable-wayland --disable-x11 --disable-sdl2
+./configure --prefix=$INSTALLDIR  --enable-wayland --disable-x11 --disable-sdl2 --disable-libass
 make 
 }
 
