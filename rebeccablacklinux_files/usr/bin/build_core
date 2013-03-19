@@ -228,6 +228,12 @@ cd "$SOURCEDIR"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 
+#Delete all .la files as they cause problems
+find | grep "\.la$" | while read LAFILE
+do rm $LAFILE
+done
+
+
 STARTTIME=$(date +%s)
 PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
 ENDTIME=$(date +%s)
