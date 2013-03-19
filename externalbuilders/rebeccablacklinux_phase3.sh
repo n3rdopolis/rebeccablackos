@@ -128,7 +128,7 @@ cp -a "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$RBOSLOCATION/l
 ls "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/" | while read FILE 
 do  
 cat "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
-done > "$RBOSLOCATION/logs/$ENDDATE/BuiltRevisions.log"
+done > "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH/BuiltRevisions.log"
 
 
 echo "Live CD image build was successful."
