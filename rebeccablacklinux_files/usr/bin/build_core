@@ -229,7 +229,7 @@ mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 
 #Delete all .la files as they cause problems
-find | grep "\.la$" | while read LAFILE
+find / | grep "\.la$" | while read LAFILE
 do rm $LAFILE
 done
 
