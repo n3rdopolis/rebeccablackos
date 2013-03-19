@@ -49,7 +49,15 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-:
+echo "* {
+  color: @fg_color;
+  border-color: shade (@bg_color, 0.6);
+  padding: 2px;
+  -GtkWindow-resize-grip-width: 0;
+  -GtkWindow-resize-grip-height: 0;
+  -GtkWindow-decoration-button-layout: 'icon:minimize,maximize,close';
+}
+" >> /"$SOURCEDIR"/"$SOURCENAME"/gtk-3.0/gtk.css
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
