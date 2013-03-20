@@ -104,7 +104,7 @@ fi
 #If the live cd did not build then tell user  
 if [ ! -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
-echo "The Live CD did not succesfuly build. if you did not edit this script please make sure you are conneced to 'the Internet', and be able to reach the Ubuntu archives, and Remastersys's archives and try agian. if you did edit it, check your syntax"
+echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 
 fi 
 
