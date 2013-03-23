@@ -27,8 +27,8 @@ exit
 fi
 
 export loginmanagerpid=$$
-export SUDO_USER=loginmanager
 . /usr/bin/weston_vars
+export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 LastTTY=0
 
 #Create communication fifos.
@@ -65,7 +65,6 @@ export SessionNumber=$(date +%s)
 #Create communication fifos for the session.
 mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid.$SessionNumber
 mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid.$SessionNumber
-chown loginmanager /run/loginmanager_data.$loginmanagerpid.$SessionNumber
 
 #Get the list of nonsystem users
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
@@ -73,19 +72,19 @@ UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
 USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
 
 #present the list of the users to the system
-export LOGINUSER=$(su loginmanager --preserve-environment  -c zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
+export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
 then
-su loginmanager --preserve-environment  -c zenity --warning --text="No User selected" 
+zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-su loginmanager --preserve-environment  -c /usr/libexec/login-helper $(zenity --password | grep -v 'startup message: remove:')
+/usr/libexec/login-helper $(zenity --password | grep -v 'startup message: remove:')
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
-su loginmanager --preserve-environment  -c zenity --warning --text="Invalid Password" 
+zenity --warning --text="Invalid Password" 
 else
 chvt $SessionTTY
 fi
@@ -97,7 +96,7 @@ fi
 #Funtion for prompting for leave options
 function LeavePrompt
 {
-ACTION=$(su loginmanager --preserve-environment  -c zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
+ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
@@ -119,27 +118,17 @@ exit
 fi
 if [[ $RESULT != 0 ]]
 then
-su loginmanager --preserve-environment  -c zenity --warning --text="Failed to $ACTION"
+zenity --warning --text="Failed to $ACTION"
 fi
 }
 
-
-
-#If the user for the loginmanager does not exist, then create it.
-loginmanagerexists=$(id -u loginmanager)
-if [[ $loginmanagerexists != 0 ]]
-then
-useradd -b /var/lib/ -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -r -s /bin/bash -G plugdev -U loginmanager 
-chown -R loginmanager:loginmanager /var/lib/loginmanager
-chmod -R 700 /var/lib/loginmanager
-fi
 
 
 #Get the TTY that will hold the Wayland server that displays the login screen.
 HostVT=$(GetNextTTY)
 
 #Call the host server for the login gui, running as a seperate user
-/opt/bin/weston-launch --user=loginmanager -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
+/opt/bin/weston-launch -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 
