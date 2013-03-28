@@ -23,13 +23,13 @@
 SOURCENAME=weston
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/soreau/weston.git
+SOURCEURL=git://anongit.freedesktop.org/wayland/weston
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
-SOURCEREVERSION=next
+SOURCEREVERSION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
