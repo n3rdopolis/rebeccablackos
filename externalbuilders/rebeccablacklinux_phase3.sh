@@ -101,19 +101,6 @@ else
 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
 fi
 
-#If the live cd did not build then tell user  
-if [ ! -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
-then  
-echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
-
-fi 
-
-#If the live cd did  build then tell user   
-if [  -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
-then  
-#move the iso out of the chroot fs    
-mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
-
 
 #Create a date string for unique log folder names
 ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
@@ -130,6 +117,20 @@ do
 cat "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
 done > "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH/BuiltRevisions.log"
 
+
+
+#If the live cd did not build then tell user  
+if [ ! -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+then  
+echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
+
+fi 
+
+#If the live cd did  build then tell user   
+if [  -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+then  
+#move the iso out of the chroot fs    
+mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
 
 echo "Live CD image build was successful."
 
