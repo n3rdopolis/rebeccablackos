@@ -43,7 +43,7 @@ compile_all build-only
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
 
 #get the installed kernel version in /lib/modules, there is only one installed in this CD, but take the first one by default.
-KERNELVERSION=$(ls /lib/modules/ | head -1 )
+KERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
 
 #This is a kde distro. Force the remastersys script to install kde frontend, as Remastersys detects running process from kde to determine it is a kde distro, but since this is chroot, it's not running
 sed -i "s/\"\`ps axf | grep startkde | grep -v grep\`\" != \"\" -o \"\`ps axf | grep kwin | grep -v grep\`\" != \"\"/ 1 /g" /usr/bin/remastersys
