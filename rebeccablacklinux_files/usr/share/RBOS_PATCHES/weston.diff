@@ -425,38 +425,29 @@ index 36f9c6b..7238128 100644
 
 
 
-diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 1cae789..2737d82 100644
---- a/clients/desktop-shell.c
-+++ b/clients/desktop-shell.c
-@@ -638,6 +638,7 @@ background_draw(struct widget *widget, void *data)
- 	int type = -1;
- 	struct display *display;
- 	struct wl_region *opaque;
-+	const char *path;
+diff --git a/configure.ac b/configure.ac
+index 682e7a3..3ed9f45 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -142,6 +142,12 @@ AM_CONDITIONAL(ENABLE_HEADLESS_COMPOSITOR,
+ 	       test x$enable_headless_compositor = xyes)
  
- 	surface = window_get_surface(background->window);
  
-@@ -648,8 +649,11 @@ background_draw(struct widget *widget, void *data)
- 
- 	widget_get_allocation(widget, &allocation);
- 	image = NULL;
--	if (key_background_image)
--		image = load_cairo_surface(key_background_image);
-+	path = getenv("WESTON_BACKGROUND");
-+	if (!path)
-+		path = key_background_image;
-+	if (path)
-+		image = load_cairo_surface(path);
- 
- 	if (strcmp(key_background_type, "scale") == 0)
- 		type = BACKGROUND_SCALE;
++AC_ARG_ENABLE(remote-display, [  --enable-remote-display],,
++	      enable_remote_display=yes)
++AM_CONDITIONAL(ENABLE_REMOTE_DISPLAY,
++	       test x$enable_remote_display = xyes)
++
++
+ AC_ARG_ENABLE(rpi-compositor,
+ 	      AS_HELP_STRING([--disable-rpi-compositor],
+ 	                     [do not build the Raspberry Pi backend]),,
 diff --git a/protocol/remote.xml b/protocol/remote.xml
 new file mode 100644
-index 0000000..430a7f3
+index 0000000..0facd23
 --- /dev/null
 +++ b/protocol/remote.xml
-@@ -0,0 +1,44 @@
+@@ -0,0 +1,37 @@
 +<protocol name="remote">
 +
 +  <interface name="remote" version="1">
@@ -467,16 +458,9 @@ index 0000000..430a7f3
 +
 +    <request name="create_buffer">
 +      <description summary="create wl_buffer from pool">
-+	Create a wl_buffer from the pool.  The buffer is created a
-+	offset bytes into the pool and has width and height as
-+	specified.  The stride arguments specifies the number of bytes
-+	from beginning of one row to the beginning of the next.  The
-+	format is the pixel format of the buffer and must be one of
-+	those advertised through the wl_shm.format event.
-+
-+	A buffer will keep a reference to the pool it was created from
-+	so it is valid to destroy the pool immediatedly after creating
-+	a buffer from it.
++	Create a wl_buffer remote buffer.  Content for the buffer is
++	provided using the update_buffer request, which uploads data
++	to the buffer from the out-of-band block with the given tag.
 +      </description>
 +
 +      <arg name="id" type="new_id" interface="wl_buffer"/>
@@ -502,24 +486,25 @@ index 0000000..430a7f3
 +  </interface>
 +</protocol>
 diff --git a/src/Makefile.am b/src/Makefile.am
-index cbfa911..8c039f9 100644
+index d56daa0..0a42f8b 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -84,7 +84,9 @@ module_LTLIBRARIES =				\
- 	$(x11_backend)				\
+@@ -98,7 +98,8 @@ module_LTLIBRARIES =				\
  	$(drm_backend)				\
  	$(wayland_backend)			\
--	$(headless_backend)
-+	$(headless_backend)			\
-+	remote-proxy.la				\
-+	remote-server.la
+ 	$(headless_backend)			\
+-	$(fbdev_backend)
++	$(fbdev_backend)			\
++	$(remote_display)
  
- # Do not install, since the binary produced via autotools is unusable.
- # The real backend is built by the Android build system.
-@@ -218,6 +220,31 @@ tablet_shell_la_SOURCES =			\
+ noinst_LTLIBRARIES =
+ 
+@@ -237,6 +238,33 @@ tablet_shell_la_SOURCES =			\
  	tablet-shell-server-protocol.h
  endif
  
++if ENABLE_REMOTE_DISPLAY
++remote_display = remote-proxy.la remote-server.la
 +remote_proxy_la_LDFLAGS = -module -avoid-version
 +remote_proxy_la_LIBADD = $(COMPOSITOR_LIBS) -lz
 +remote_proxy_la_CFLAGS = $(GCC_CFLAGS) $(COMPOSITOR_CFLAGS)
@@ -543,12 +528,12 @@ index cbfa911..8c039f9 100644
 +	remote-server-protocol.h		\
 +	../shared/os-compatibility.c		\
 +	../shared/os-compatibility.h
-+
++endif
 +
  BUILT_SOURCES =					\
  	screenshooter-server-protocol.h		\
  	screenshooter-protocol.c		\
-@@ -233,6 +260,9 @@ BUILT_SOURCES =					\
+@@ -252,6 +280,9 @@ BUILT_SOURCES =					\
  	input-method-server-protocol.h		\
  	workspaces-server-protocol.h		\
  	workspaces-protocol.c			\
@@ -558,145 +543,12 @@ index cbfa911..8c039f9 100644
  	git-version.h
  
  CLEANFILES = $(BUILT_SOURCES)
-diff --git a/src/compositor.c b/src/compositor.c
-index cd11f6b..8d696bd 100644
---- a/src/compositor.c
-+++ b/src/compositor.c
-@@ -2280,6 +2280,7 @@ seat_get_keyboard(struct wl_client *client, struct wl_resource *resource,
- 		  uint32_t id)
- {
- 	struct weston_seat *seat = resource->data;
-+	struct weston_compositor *ec = seat->compositor;
- 	struct wl_resource *cr;
- 
- 	if (!seat->seat.keyboard)
-@@ -2290,9 +2291,11 @@ seat_get_keyboard(struct wl_client *client, struct wl_resource *resource,
- 	wl_list_insert(&seat->seat.keyboard->resource_list, &cr->link);
- 	cr->destroy = unbind_resource;
- 
--	wl_keyboard_send_keymap(cr, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
--				seat->xkb_info.keymap_fd,
--				seat->xkb_info.keymap_size);
-+	if (!ec->try_send_keymap ||
-+	    ec->try_send_keymap(client, seat, cr) < 0)
-+		wl_keyboard_send_keymap(cr, WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
-+					seat->xkb_info.keymap_fd,
-+					seat->xkb_info.keymap_size);
- 
- 	if (seat->seat.keyboard->focus &&
- 	    seat->seat.keyboard->focus->resource.client == client) {
-diff --git a/src/compositor.h b/src/compositor.h
-index 544cf33..0fa2da3 100644
---- a/src/compositor.h
-+++ b/src/compositor.h
-@@ -264,6 +264,9 @@ struct weston_renderer {
- 			       pixman_format_code_t format, void *pixels,
- 			       uint32_t x, uint32_t y,
- 			       uint32_t width, uint32_t height);
-+	int (*read_surface_pixels)(struct weston_surface *es,
-+				   pixman_format_code_t format, void *pixels,
-+				   int x, int y, int width, int height);
- 	void (*repaint_output)(struct weston_output *output,
- 			       pixman_region32_t *output_damage);
- 	void (*flush_damage)(struct weston_surface *surface);
-@@ -344,6 +347,10 @@ struct weston_compositor {
- 	struct xkb_rule_names xkb_names;
- 	struct xkb_context *xkb_context;
- 	struct weston_xkb_info xkb_info;
-+
-+	int (*try_send_keymap)(struct wl_client *client,
-+			       struct weston_seat *seat,
-+			       struct wl_resource *cr);
- };
- 
- struct weston_buffer_reference {
-diff --git a/src/gl-renderer.c b/src/gl-renderer.c
-index a5dc2f3..cca0b47 100644
---- a/src/gl-renderer.c
-+++ b/src/gl-renderer.c
-@@ -82,6 +82,8 @@ struct gl_renderer {
- 		int32_t width, height;
- 	} border;
- 
-+	GLuint fbo;
-+
- 	PFNGLEGLIMAGETARGETTEXTURE2DOESPROC image_target_texture_2d;
- 	PFNEGLCREATEIMAGEKHRPROC create_image;
- 	PFNEGLDESTROYIMAGEKHRPROC destroy_image;
-@@ -831,6 +833,49 @@ repaint_surfaces(struct weston_output *output, pixman_region32_t *damage)
- 			draw_surface(surface, output, damage);
- }
- 
-+static int
-+gl_renderer_read_surface_pixels(struct weston_surface *es,
-+				pixman_format_code_t format, void *pixels,
-+				int x, int y, int width, int height)
-+{
-+	struct wl_buffer *buffer = es->buffer_ref.buffer;
-+	struct weston_compositor *ec = es->compositor;
-+	struct gl_renderer *gr = get_renderer(ec);
-+	struct gl_surface_state *gs = get_surface_state(es);
-+	GLenum gl_format;
-+	int size;
-+
-+	switch (format) {
-+	case PIXMAN_a8r8g8b8:
-+		gl_format = GL_BGRA_EXT;
-+		break;
-+	case PIXMAN_a8b8g8r8:
-+		gl_format = GL_RGBA;
-+		break;
-+	default:
-+		return -1;
-+	}
-+
-+	if (buffer && wl_buffer_is_shm(buffer)) {
-+		size = buffer->width * 4 * buffer->height;
-+		memcpy(pixels, wl_shm_buffer_get_data(buffer), size);
-+	} else {
-+		if (gr->fbo == 0)
-+			glGenFramebuffers(1, &gr->fbo);
-+		glBindFramebuffer(GL_FRAMEBUFFER, gr->fbo);
-+		glFramebufferTexture2D(GL_FRAMEBUFFER,
-+				       GL_COLOR_ATTACHMENT0,
-+				       GL_TEXTURE_2D,
-+				       gs->textures[0], 0);
-+
-+		glReadPixels(x, y, width, height,
-+			     gl_format, GL_UNSIGNED_BYTE, pixels);
-+
-+		glBindFramebuffer(GL_FRAMEBUFFER, 0);
-+	}
-+
-+	return 0;
-+}
- 
- static int
- texture_border(struct weston_output *output)
-@@ -1653,6 +1698,9 @@ gl_renderer_destroy(struct weston_compositor *ec)
- {
- 	struct gl_renderer *gr = get_renderer(ec);
- 
-+	if (gr->fbo)
-+		glDeleteFramebuffers(1, &gr->fbo);
-+
- 	if (gr->has_bind_display)
- 		gr->unbind_display(gr->egl_display, ec->wl_display);
- 
-@@ -1742,6 +1790,7 @@ gl_renderer_create(struct weston_compositor *ec, EGLNativeDisplayType display,
- 		return -1;
- 
- 	gr->base.read_pixels = gl_renderer_read_pixels;
-+	gr->base.read_surface_pixels = gl_renderer_read_surface_pixels;
- 	gr->base.repaint_output = gl_renderer_repaint_output;
- 	gr->base.flush_damage = gl_renderer_flush_damage;
- 	gr->base.attach = gl_renderer_attach;
 diff --git a/src/remote-proxy.c b/src/remote-proxy.c
 new file mode 100644
-index 0000000..ca486c0
+index 0000000..78cf216
 --- /dev/null
 +++ b/src/remote-proxy.c
-@@ -0,0 +1,1760 @@
+@@ -0,0 +1,1761 @@
 +/*
 + * Copyright © 2012 Intel Corporation
 + *
@@ -2389,7 +2241,8 @@ index 0000000..ca486c0
 +}
 +
 +WL_EXPORT int
-+module_init(struct weston_compositor *compositor)
++module_init(struct weston_compositor *compositor,
++	    int *argc, char *argv[], const char *config_file)
 +{
 +	struct remote *remote;
 +	struct wl_event_loop *loop =
@@ -2459,10 +2312,10 @@ index 0000000..ca486c0
 +}
 diff --git a/src/remote-server.c b/src/remote-server.c
 new file mode 100644
-index 0000000..8b76a93
+index 0000000..bacba7e
 --- /dev/null
 +++ b/src/remote-server.c
-@@ -0,0 +1,568 @@
+@@ -0,0 +1,580 @@
 +/*
 + * Copyright © 2012 Intel Corporation
 + *
@@ -2510,6 +2363,7 @@ index 0000000..8b76a93
 +	int sock;
 +	struct wl_event_source *sock_source;
 +	struct wl_global *global;
++	struct wl_listener seat_created_listener;
 +};
 +
 +struct remote_client {
@@ -2832,29 +2686,40 @@ index 0000000..8b76a93
 +	return 1;
 +}
 +
-+static int
-+remote_try_send_keymap(struct wl_client *client,
-+		       struct weston_seat *seat, struct wl_resource *cr)
++static void
++try_send_keymap(struct weston_seat *seat, struct wl_resource *resource)
 +{
 +	struct wl_listener *listener;
++	struct wl_client *client = resource->client;
 +	struct remote_client *rc;
 +
 +	listener = wl_client_get_destroy_listener(client,
 +						  remote_client_destroy);
-+	if (listener == NULL)
-+		return -1;
++	if (listener == NULL) {
++		wl_keyboard_send_keymap(resource,
++					WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
++					seat->xkb_info.keymap_fd,
++					seat->xkb_info.keymap_size);
++		return;		
++	}
 +
 +	rc = container_of(listener, struct remote_client, destroy_listener);
 +
 +	remote_stream_queue_block(rc->stream, &rc->keymap_stream_block,
 +				  seat->xkb_info.keymap_area,
 +				  seat->xkb_info.keymap_size);
-+	remote_send_keymap(rc->remote_resource, cr, 
++	remote_send_keymap(rc->remote_resource, resource, 
 +			   WL_KEYBOARD_KEYMAP_FORMAT_XKB_V1,
 +			   rc->keymap_stream_block.tag,
 +			   seat->xkb_info.keymap_size);
++}
 +
-+	return 0;
++static void
++seat_created(struct wl_listener *listener, void *data)
++{
++	struct weston_seat *seat = data;
++
++	seat->send_keymap = try_send_keymap;	
 +}
 +
 +static int
@@ -2989,11 +2854,9 @@ index 0000000..8b76a93
 +				     &remote_implementation, id, server);
 +}
 +
-+int
-+module_init(struct weston_compositor *compositor);
-+
 +WL_EXPORT int
-+module_init(struct weston_compositor *compositor)
++module_init(struct weston_compositor *compositor,
++	    int *argc, char *argv[], const char *config_file)
 +{
 +	struct remote_server *server;
 +	struct wl_event_loop *loop =
@@ -3025,7 +2888,9 @@ index 0000000..8b76a93
 +					       server, bind_remote);
 +
 +
-+	compositor->try_send_keymap = remote_try_send_keymap;
++	server->seat_created_listener.notify = seat_created;
++	wl_signal_add(&compositor->seat_created_signal,
++		      &server->seat_created_listener);
 +
 +	weston_log("remote server listening on port %d\n", port);
 +
