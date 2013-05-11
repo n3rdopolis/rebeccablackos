@@ -141,7 +141,7 @@ su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager
 fi 
 # TODO Session return data
 
-COMMAND=$(/run/loginmanager_control.$loginmanagerpid)
+COMMAND=$(cat /run/loginmanager_control.$loginmanagerpid)
 if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
@@ -149,7 +149,7 @@ chvt $HostVT
 ListCurrentSessions &
 elif [[ $COMMAND == "Login" ]]
 then
-AuthenticateUser &
+AuthenticateUser &x
 elif [[ $COMMAND == "Leave" ]] 
 then
 LeavePrompt &
