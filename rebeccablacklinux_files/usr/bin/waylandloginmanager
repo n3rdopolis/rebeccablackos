@@ -149,7 +149,7 @@ chvt $HostVT
 ListCurrentSessions &
 elif [[ $COMMAND == "Login" ]]
 then
-AuthenticateUser &x
+AuthenticateUser &
 elif [[ $COMMAND == "Leave" ]] 
 then
 LeavePrompt &
