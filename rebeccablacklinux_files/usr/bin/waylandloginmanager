@@ -132,16 +132,19 @@ HostVT=$(GetNextTTY)
 export WAYLAND_DISPLAY=loginmanagerdisplay
 chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 
-while [ 1 ]
-do
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 if [[ ! -z $AUTOLOGONUSER ]]
 then
-su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager
+su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager &
 fi 
 # TODO Session return data
 
+
+while [ 1 ]
+do
+
 COMMAND=$(cat /run/loginmanager_control.$loginmanagerpid)
+echo "received command $COMMAND"
 if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
