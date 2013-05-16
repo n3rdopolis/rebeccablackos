@@ -29,6 +29,7 @@ fi
 export loginmanagerpid=$$
 . /usr/bin/weston_vars
 export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
+export XDG_RUNTIME_DIR=/run/user/root
 LastTTY=0
 
 #Create communication fifos.
