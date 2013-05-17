@@ -33,9 +33,9 @@ export XDG_RUNTIME_DIR=/run/user/root
 LastTTY=0
 
 #Create communication fifos.
-mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid
-mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid
-chown loginmanager /run/loginmanager_data.$loginmanagerpid
+mkfifo -m 777 /run/loginmanager_control
+mkfifo -m 700 /run/loginmanager_data
+chown loginmanager /run/loginmanager_data
 
 
 #Get the next TTY that is open for use
@@ -144,7 +144,7 @@ fi
 while [ 1 ]
 do
 
-COMMAND=$(cat /run/loginmanager_control.$loginmanagerpid)
+COMMAND=$(cat /run/loginmanager_control)
 echo "received command $COMMAND"
 if [[ $COMMAND == "Switch" ]]
 then
