@@ -16,10 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#kill all jobs when this script dies
+trap 'kill $(jobs -p)' EXIT
+
 #Dont store command history.
 unset HISTFILE
 
-
+#Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
 WESTONBACKEND=drm-backend.so
@@ -113,7 +116,7 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-/usr/libexec/login-helper $(zenity --password | grep -v 'startup message: remove:')
+/usr/libexec/wayland_login_helpers/login-helper $(zenity --password | grep -v 'startup message: remove:')
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
