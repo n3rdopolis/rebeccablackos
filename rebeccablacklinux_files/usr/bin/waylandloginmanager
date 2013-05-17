@@ -24,10 +24,11 @@ if [[ $(ls  /dev/dri/card* ) ]]
 then 
 WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
+then
 WESTONBACKEND=fbdev-backend.so
 else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE == /cow ]]
+if [[ $FSTYPE == overlayfs ]]
 then
 openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
 
@@ -35,7 +36,7 @@ This means your video card does not support KMS, and doesn't create a framebuffe
 
 You can select the Framebuffer boot option when you start the Live CD, to force create a framebuffer
 
-Will now restart" 10 50 --no-cancel
+Will now restart" 20 50 --no-cancel
 else 
 openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
 
@@ -45,7 +46,7 @@ You can force the system to create a Framebuffer device, by restating into recov
 rbos-add-framebuffer
 command/utility to assist
 
-Will now restart" 10 50 --no-cancel
+Will now restart" 20 50 --no-cancel
 fi
 reboot
 
