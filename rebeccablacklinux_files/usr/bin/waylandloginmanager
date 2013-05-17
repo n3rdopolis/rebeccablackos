@@ -30,7 +30,7 @@ else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
-openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default
 
@@ -38,7 +38,7 @@ You can select the Framebuffer boot option when you start the Live CD, to force 
 
 Will now restart" 20 50 --no-cancel
 else 
-openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default
 
@@ -49,7 +49,7 @@ command/utility to assist
 Will now restart" 20 50 --no-cancel
 fi
 reboot
-
+exit
 fi
 
 
