@@ -76,11 +76,12 @@ mkfifo -m 700 /run/loginmanager_data
 #Get the next TTY that is open for use
 function GetNextTTY
 {
+LastTTY=0
 TTYInUse=1
-while [[ $TTYInUse != 0 && $LastTTY -le 63 ]]
+while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
 do
 ((LastTTY++))
-TTYInUse=$(openvt --console $LastTTY /bin/true ; echo $?)
+TTYInUse=$(openvt -c $LastTTY -- /bin/true 2>&1 | grep -c "is in use")
 done
 AvailibleTTY=$LastTTY
 }
