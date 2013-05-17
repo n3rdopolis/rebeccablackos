@@ -16,7 +16,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-dialog  --msgbox "This will set up the Grub configuration, so that a framebuffer is force created upon the next reboot" 7 60
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+echo "Must be run as root."
+exit
+fi
+
+
+dialog  --msgbox "This will assis you in configuring your system, so that a framebuffer is force created upon the next reboot, with the specified resolution." 7 60
 
 RESOLUTION=$(dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default" 20 60 20 785 640x480 off 788 800x600 off 791 1024x768 on 794 1280x1024 off 834 1400x1050 off 884 1600x1200 off 0 "Disable Framebuffer Boot" off --stdout)
 OKSelected=$?

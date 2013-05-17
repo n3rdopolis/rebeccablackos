@@ -30,23 +30,23 @@ else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
-openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
-This means your video card does not support KMS, and doesn't create a framebuffer by default
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
-You can select the Framebuffer boot option when you start the Live CD, to force create a framebuffer
+You can select the Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device.
 
-Will now restart" 20 50 --no-cancel
+Will now restart." 20 50 --no-cancel
 else 
-openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
-This means your video card does not support KMS, and doesn't create a framebuffer by default
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
-You can force the system to create a Framebuffer device, by restating into recovery mode and running the 
+You can force the system to create a framebuffer device, by restating into recovery mode and running the 
 rbos-add-framebuffer
-command/utility to assist
+command/utility to assist you in configuring framebuffer options.
 
-Will now restart" 20 50 --no-cancel
+Will now restart." 20 50 --no-cancel
 fi
 reboot
 exit
@@ -69,8 +69,6 @@ LastTTY=0
 #Create communication fifos.
 mkfifo -m 777 /run/loginmanager_control
 mkfifo -m 700 /run/loginmanager_data
-chown loginmanager /run/loginmanager_data
-
 
 #Get the next TTY that is open for use
 function GetNextTTY
