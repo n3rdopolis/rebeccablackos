@@ -19,6 +19,39 @@
 #Dont store command history.
 unset HISTFILE
 
+
+if [[ $(ls  /dev/dri/card* ) ]]
+then 
+WESTONBACKEND=drm-backend.so
+elif [[ $(ls  /dev/fb* ) ]]
+WESTONBACKEND=fbdev-backend.so
+else
+FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $FSTYPE == /cow ]]
+then
+openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+
+This means your video card does not support KMS, and doesn't create a framebuffer by default
+
+You can select the Framebuffer boot option when you start the Live CD, to force create a framebuffer
+
+Will now restart" 10 50 --no-cancel
+else 
+openvt -c 13 -s -f -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found
+
+This means your video card does not support KMS, and doesn't create a framebuffer by default
+
+You can force the system to create a Framebuffer device, by restating into recovery mode and running the 
+rbos-add-framebuffer
+command/utility to assist
+
+Will now restart" 10 50 --no-cancel
+fi
+reboot
+
+fi
+
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -129,7 +162,7 @@ fi
 HostVT=$(GetNextTTY)
 
 #Call the host server for the login gui, running as a seperate user
-/opt/bin/weston-launch -- --backend=fbdev-backend.so --tty=$HostVT --socket=loginmanagerdisplay &
+/opt/bin/weston-launch -- --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 chmod 777 /var/lib/loginmanager/loginmanagerdisplay
 
