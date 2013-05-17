@@ -1,0 +1,44 @@
+#! /bin/bash
+#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+dialog  --msgbox "This will set up the Grub configuration, so that a framebuffer is force created upon the next reboot" 7 60
+
+RESOLUTION=$(dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default" 20 60 20 785 640x480 off 788 800x600 off 791 1024x768 on 794 1280x1024 off 834 1400x1050 off 884 1600x1200 off 0 "Disable Framebuffer Boot" off --stdout)
+OKSelected=$?
+if [[ $OKSelected == 0 ]]
+then
+if [[ $RESOLUTION == 0 ]]
+then
+sed -ri 's/\bvga=\S*//gI' /etc/default/grub
+else
+sed -ri 's/\bvga=\S*//gI' /etc/default/grub
+sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"vga=$RESOLUTION /g" /etc/default/grub
+fi
+update-grub
+dialog  --yesno "You will need to restart in order for the changes to apply" 7 60
+OKSelected=$?
+if [[ $OKSelected == 0 ]]
+then
+reboot
+fi
+fi
+
+
+
+
+
