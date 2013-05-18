@@ -28,6 +28,7 @@ then
 WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
 then
+setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
