@@ -21,19 +21,15 @@ set LOGINUSER $::env(LOGINUSER)
 set password [lindex $argv 0]
 
 #test with /bin/true, before trying the real login so that the password fail result can be returned to the main script
-spwan su $LOGINUSER -c /bin/true
-expect "Password:"
-
-send "$password\r";
+spawn su $LOGINUSER -c /bin/true
+expect "Password:" {send "$password\r";}
 
 catch wait result
 set status [lindex $result 3]
 
 if { $status == 0 } {
 set PID [spawn su $LOGINUSER -c /usr/bin/wlsessionmanager]
-expect "Password:"
-
-send "$password\r";
+expect "Password:" {send "$password\r";}
 
 # TODO foward $PID the result somewhere
 interact
