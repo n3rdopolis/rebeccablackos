@@ -16,15 +16,23 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Logoff" FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
-if [[ $ACTION == "Logoff" ]]
+ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Switch User" FALSE "Logoff" FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
+
+if [[ $ACTION == "Switch User" ]]
+then
+echo "Switch > /run/loginmanager_control"
+RESULT=$?
+
+elif [[ $ACTION == "Logoff" ]]
 then
 kill $SESSIONCALLERPID
 RESULT=$?
+
 elif [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
 RESULT=$?
+
 elif [[ $ACTION == "Restart" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart
@@ -33,13 +41,16 @@ elif [[ $ACTION == "Standby" ]]
 then
 dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
 RESULT=$?
+
 elif [[ $ACTION == "Hibernate" ]]
 then
 dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
 RESULT=$?
+
 else
 exit
 fi
+
 if [[ $RESULT != 0 ]]
 then
 zenity --warning --text="Failed to $ACTION"

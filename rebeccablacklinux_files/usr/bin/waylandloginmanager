@@ -116,7 +116,7 @@ USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UI
 fi
 
 #present the list of the users to the system
-export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
+export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST --hide-header | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
