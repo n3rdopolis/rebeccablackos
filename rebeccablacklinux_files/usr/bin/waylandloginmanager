@@ -44,18 +44,15 @@ This means your video card does not support KMS, and doesn't create a framebuffe
 You can select the Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device.
 
 Will now restart." 20 50 --no-cancel
+reboot
 else 
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
-You can force the system to create a framebuffer device, by restating into recovery mode and running the 
-rbos-add-framebuffer
-command/utility to assist you in configuring framebuffer options.
-
-Will now restart." 20 50 --no-cancel
+Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
+openvt -c 13 -s -f -w -- rbos-add-framebuffer
 fi
-reboot
 exit
 fi
 
@@ -180,7 +177,7 @@ chmod 777 /run/loginmanagerdisplay
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 if [[ ! -z $AUTOLOGONUSER ]]
 then
-su $AUTOLOGINUSER -c /usr/bin/wlsessionmanager &
+su $AUTOLOGINUSER -c /usr/bin/wlsessionchooser &
 fi 
 # TODO Session return data
 
