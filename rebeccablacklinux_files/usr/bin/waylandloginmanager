@@ -22,6 +22,12 @@ trap 'kill $(jobs -p)' EXIT
 #Dont store command history.
 unset HISTFILE
 
+FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $FSTYPE == overlayfs ]]
+then
+ISLIVE=1
+fi
+
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
@@ -32,7 +38,7 @@ setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE == overlayfs ]]
+if [[ $ISLIVE == 1 ]]
 then
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
@@ -108,6 +114,10 @@ mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid.$SessionNumber
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
 UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
 USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
+if [[ $ISLIVE == 1 ]]
+then
+USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
+fi
 
 #present the list of the users to the system
 export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST | grep -v 'startup message: remove:')
