@@ -73,7 +73,6 @@ LastTTY=0
 
 #Create communication fifos.
 mkfifo -m 777 /run/loginmanager_control
-mkfifo -m 700 /run/loginmanager_data
 
 #Get the next TTY that is open for use
 function GetNextTTY
@@ -101,11 +100,6 @@ su $LOGINUSER -c /usr/bin/wlsessionchooser &
 #Attempt to get the users authentication
 function AuthenticateUser
 {
-export SessionNumber=$(date +%s)
-#Create communication fifos for the session.
-mkfifo -m 777 /run/loginmanager_control.$loginmanagerpid.$SessionNumber
-mkfifo -m 700 /run/loginmanager_data.$loginmanagerpid.$SessionNumber
-
 #Get the list of nonsystem users
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
 UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
@@ -116,7 +110,7 @@ USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UI
 fi
 
 #present the list of the users to the system
-export LOGINUSER=$(zenity --list --radiolist --column select --column users $USERLIST --hide-header | grep -v 'startup message: remove:')
+export LOGINUSER=$(zenity --list --radiolist --text "Select a user from the list to log into." --column select --column users $USERLIST --hide-header | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
@@ -124,13 +118,11 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:')"
+su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:') $SessionTTY"
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
-zenity --warning --text="Invalid Password" 
-else
-chvt $SessionTTY
+zenity --warning --text="Invalid password for $LOGINUSER" 
 fi
 fi
 
@@ -179,7 +171,8 @@ chmod 777 /run/loginmanagerdisplay
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 if [[ ! -z $AUTOLOGONUSER ]]
 then
-su $AUTOLOGINUSER -c /usr/bin/wlsessionchooser &
+export AutoSessionTTY=$(GetNextTTY)
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionchooser $AutoSessionTTY" &
 fi 
 # TODO Session return data
 

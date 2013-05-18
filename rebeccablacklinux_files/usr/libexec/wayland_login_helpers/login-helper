@@ -19,6 +19,7 @@
 #using the password argument sent, put it into a variable
 set LOGINUSER [lindex $argv 0]
 set password [lindex $argv 1]
+set usertty [lindex $argv 2]
 
 #test with /bin/true, before trying the real login so that the password fail result can be returned to the main script
 spawn su $LOGINUSER -c /bin/true
@@ -28,7 +29,7 @@ catch wait result
 set status [lindex $result 3]
 
 if { $status == 0 } {
-set PID [spawn su $LOGINUSER -c /usr/bin/wlsessionchooser]
+set PID [spawn su $LOGINUSER -c "/usr/bin/wlsessionchooser $tty" ]
 expect "Password:" {send "$password\r";}
 
 # TODO foward $PID the result somewhere
