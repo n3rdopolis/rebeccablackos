@@ -41,10 +41,7 @@ openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
-You can select the Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device.
-
-Will now restart." 20 50 --no-cancel
-reboot
+You can select the Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
 else 
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
@@ -53,6 +50,10 @@ This means your video card does not support KMS, and doesn't create a framebuffe
 Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
 openvt -c 13 -s -f -w -- rbos-add-framebuffer
 fi
+openvt -c 13 -s -f -w -- dialog --msgbox "Can not start Weston.
+
+Will now reboot." 20 50 --no-cancel
+reboot
 exit
 fi
 
@@ -170,7 +171,7 @@ fi
 HostVT=$(GetNextTTY)
 
 #Call the host server for the login gui, running as a seperate user
-/opt/bin/weston-launch -- --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
+westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 chmod 777 /run/loginmanagerdisplay
 

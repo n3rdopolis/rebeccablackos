@@ -20,6 +20,9 @@ unset HOME
 export HOME=$(echo ~)
 
 #If there is the SUDO_USER variable, then set XDG_RUNTIME_DIR based off of the SUDO_USER variable
+if [[ -z $XDG_RUNTIME_DIR ]]
+then
+
 if [[ -z $SUDO_USER ]]
 then
 export XDG_RUNTIME_DIR=/run/user/$USER
@@ -27,6 +30,7 @@ else
 export XDG_RUNTIME_DIR=/run/user/$SUDO_USER
 fi
 
+fi
 
 export XDG_DATA_DIRS=/opt/share:/usr/share:$XDG_DATA_DIRS
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
