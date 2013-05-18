@@ -109,6 +109,13 @@ then
 USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
 fi
 
+#Parse the list of sessions specified, so that zenity can use it as a list of sessions
+WSESSIONLIST=$(cat /usr/share/wsessions | awk '{print "FALSE " $0}' | sed 's/^FALSE desktop-shell.so/TRUE desktop-shell.so/g' |sed 's/,/ /g')
+
+#select the session
+WSESSION=$(zenity --list --radiolist --text "Select a Weston Desktop Environment to use" --column select --column session --column name --hide-column=2 --print-column=2 $WSESSIONLIST)
+
+
 #present the list of the users to the system
 export LOGINUSER=$(zenity --list --radiolist --text "Select a user from the list to log into." --column select --column users $USERLIST --hide-header | grep -v 'startup message: remove:')
 
@@ -118,7 +125,7 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:') $SessionTTY"
+su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:') $SessionTTY $WSESSION"
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then

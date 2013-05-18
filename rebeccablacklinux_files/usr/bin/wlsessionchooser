@@ -20,6 +20,7 @@
 . /usr/bin/weston_vars
 
 westontty=$1
+$westonbackend=$2
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
@@ -29,19 +30,5 @@ else
 WESTONBACKEND=fbdev-backend.so
 fi
 
-#Parse the list of sessions specified, so that zenity can use it as a list of sessions
-#WSESSIONLIST=$(cat /usr/share/wsessions | awk '{print "FALSE " $0}' | sed 's/^FALSE desktop-shell.so/TRUE desktop-shell.so/g' |sed 's/,/ /g')
-
-#Allow the selection chooser to run in the login manager display
-export XDG_RUNTIME_DIR=/run/
-export WAYLAND_DISPLAY=loginmanagerdisplay
-
-#select the session
-#WSESSION=$(zenity --list --radiolist --text "Select a session for $USERNAME" --column select --column session --column name --hide-column=2 --print-column=2 $WSESSIONLIST)
-
-#remove the varibles for the login display
-unset XDG_RUNTIME_DIR
-unset WAYLAND_DISPLAY
-
 #Call weston
-weston-launch -t=/dev/tty$westontty -- --backend=$WESTONBACKEND  --modules=$WSESSION &
+weston-launch -t=/dev/tty$westontty -- --backend=$westonbackend  --modules=$WSESSION &
