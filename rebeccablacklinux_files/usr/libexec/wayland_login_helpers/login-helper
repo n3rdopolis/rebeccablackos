@@ -29,7 +29,7 @@ catch wait result
 set status [lindex $result 3]
 
 if { $status == 0 } {
-set PID [spawn su $LOGINUSER -c "/usr/bin/wlsessionchooser $tty" ]
+set PID [spawn su $LOGINUSER -c "/usr/bin/wlsessionchooser $usertty" ]
 expect "Password:" {send "$password\r";}
 
 # TODO foward $PID the result somewhere
