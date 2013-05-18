@@ -124,7 +124,7 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-su daemon -c /usr/libexec/wayland_login_helpers/login-helper $(zenity --password | grep -v 'startup message: remove:')
+su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:')"
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
