@@ -16,5 +16,11 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Detect hardware abilities
+if [[ $(ls  /dev/dri/card* ) ]]
+then 
+WESTONBACKEND=drm-backend.so
+else
+WESTONBACKEND=fbdev-backend.so
+fi
 
-# TODO ZENITY DIALOGS FOR THE USER SELECTING Framebuffer or KMS wayland backend
