@@ -39,6 +39,9 @@ rm -r /usr/import
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Disable X11 startup
+echo "/usr/bin/waylandloginmanger" > /etc/X11/default-display-manager
+
 #Edit remastersys to not detect the filesystem. df fails in chroot
 sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
 
