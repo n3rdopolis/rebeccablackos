@@ -17,10 +17,10 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #using the password argument sent, put it into a variable
-set LOGINUSER [lindex $argv 0]
-set password [lindex $argv 1]
-set usertty [lindex $argv 2]
-set usersession [lindex $argv 3]
+set LOGINUSER $::env(LOGINUSER)
+set password $::env(LOGINPASSWORD)
+set usertty [lindex $argv 0]
+set usersession [lindex $argv 1]
 
 #test with /bin/true, before trying the real login so that the password fail result can be returned to the main script
 spawn su $LOGINUSER -c /bin/true
