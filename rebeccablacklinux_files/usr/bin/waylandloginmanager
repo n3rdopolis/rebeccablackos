@@ -123,7 +123,7 @@ zenity --warning --text="No User selected"
 else
 export SessionTTY=$(GetNextTTY)
 export LOGINPASSWORD=$(zenity --title="Password" --password | grep -v 'startup message: remove:')
-su daemon --preserve-environment -c "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION"
+script -c "su daemon --preserve-environment -c \"/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION\""
 unset LOGINPASSWORD
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
@@ -195,7 +195,7 @@ AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = 
 if [[ ! -z $AUTOLOGONUSER ]]
 then
 export AutoSessionTTY=$(GetNextTTY)
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY" "desktop-shell.so" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 # TODO Session return data
 
