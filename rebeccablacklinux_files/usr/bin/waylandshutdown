@@ -30,7 +30,7 @@ RESULT=$?
 
 elif [[ $ACTION == "Logoff" ]]
 then
-kill $SESSIONCALLERPID
+fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
 RESULT=$?
 
 elif [[ $ACTION == "Shutdown" ]]

@@ -50,7 +50,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
-sed -i 's/clearenv();//g' src/weston-launch.c
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
