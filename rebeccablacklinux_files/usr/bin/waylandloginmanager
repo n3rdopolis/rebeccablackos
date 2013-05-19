@@ -103,21 +103,24 @@ function AuthenticateUser
 #Get the list of nonsystem users
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
 UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
-USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
+USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}')
 if [[ $ISLIVE == 1 ]]
 then
-USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' | sed 's/^/FALSE /g')
+USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(cat /usr/share/wsessions | awk '{print "FALSE " $0}' | sed 's/^FALSE desktop-shell.so/TRUE desktop-shell.so/g' |sed 's/,/ /g')
-
+WSESSIONLIST=$(cat /usr/share/wsessions  |sed 's/,/ \n/g')
 #select the session
-WSESSION=$(zenity --list --radiolist --text "Select a Weston Desktop Environment to use" --column select --column session --column name --hide-column=2 --print-column=2 $WSESSIONLIST)
-
+WSESSION=$(echo "$WSESSIONLIST" | zenity --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header )
+if [[ -z $WSESSION ]]
+then 
+zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell."
+WSESSION=desktop-shell.so
+fi
 
 #present the list of the users to the system
-export LOGINUSER=$(zenity --list --radiolist --text "Select a user from the list to log into." --column select --column users $USERLIST --hide-header | grep -v 'startup message: remove:')
+export LOGINUSER=$(echo "$USERLIST" | zenity --list --text "Select a user from the list to log into."  --column users  --hide-header | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
