@@ -31,4 +31,4 @@ WESTONBACKEND=fbdev-backend.so
 fi
 
 #Call weston
-weston-launch -t=/dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &
+weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &

@@ -122,7 +122,7 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --password | grep -v 'startup message: remove:') $SessionTTY $WSESSION"
+su daemon -c "/usr/libexec/wayland_login_helpers/login-helper $LOGINUSER $(zenity --title="Password" --password | grep -v 'startup message: remove:') $SessionTTY $WSESSION"
 passwordresult=$?
 if [[ $passwordresult != 0 ]]
 then
@@ -136,8 +136,7 @@ fi
 #Funtion for prompting for leave options
 function LeavePrompt
 {
-ACTION=$(echo "Logoff
-Shutdown
+ACTION=$(echo "Shutdown
 Restart
 Standby
 Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' | grep -v 'startup message: remove:' )
