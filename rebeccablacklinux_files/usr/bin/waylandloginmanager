@@ -176,7 +176,7 @@ function LogonWestonLauncher
 while [ 1 ]
 do
 
-if [[ ! -f /run/loginmanagerdisplay ]]
+if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
 #chmod 777 /run/loginmanagerdisplay

@@ -19,8 +19,8 @@
 #Import Wayland variable
 . /usr/bin/weston_vars
 
-westontty=$1
-$westonbackend=$2
+WESTONTTY=$1
+WSESSION=$2
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
@@ -31,4 +31,4 @@ WESTONBACKEND=fbdev-backend.so
 fi
 
 #Call weston
-weston-launch -t=/dev/tty$westontty -- --backend=$westonbackend  --modules=$WSESSION &
+weston-launch -t=/dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &
