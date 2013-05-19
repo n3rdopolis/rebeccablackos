@@ -91,13 +91,6 @@ echo $AvailibleTTY
 
 # TODO session changing function
 
-function NewUserSession
-{
-export SessionTTY=$(GetNextTTY)
-chvt $SessionTTY
-su $LOGINUSER -c /usr/bin/wlsessionchooser &
-}
-
 #Attempt to get the users authentication
 function AuthenticateUser
 {
@@ -113,7 +106,7 @@ fi
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
 WSESSIONLIST=$(cat /usr/share/wsessions  |sed 's/,/ \n/g')
 #select the session
-WSESSION=$(echo "$WSESSIONLIST" | zenity --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header )
+WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header )
 if [[ -z $WSESSION ]]
 then 
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell."
@@ -121,7 +114,7 @@ WSESSION=desktop-shell.so
 fi
 
 #present the list of the users to the system
-export LOGINUSER=$(echo "$USERLIST" | zenity --list --text "Select a user from the list to log into."  --column users  --hide-header | grep -v 'startup message: remove:')
+export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
@@ -143,7 +136,11 @@ fi
 #Funtion for prompting for leave options
 function LeavePrompt
 {
-ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
+ACTION=$(echo "Logoff
+Shutdown
+Restart
+Standby
+Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
@@ -165,7 +162,7 @@ exit
 fi
 if [[ $RESULT != 0 ]]
 then
-zenity --warning --text="Failed to $ACTION"
+zenity --title="Failure" --warning --text="Failed to $ACTION"
 fi
 }
 
@@ -197,7 +194,7 @@ AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = 
 if [[ ! -z $AUTOLOGONUSER ]]
 then
 export AutoSessionTTY=$(GetNextTTY)
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionchooser $AutoSessionTTY" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY" "desktop-shell.so" &
 fi 
 # TODO Session return data
 

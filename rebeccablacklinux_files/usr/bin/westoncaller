@@ -19,7 +19,7 @@
 . /usr/bin/weston_vars
 ServerID=wayland-$RANDOM
 
-(sleep 10; WAYLAND_DISPLAY=$ServerID zenity --warning --text="This is a third party fan made distribution!
+(sleep 10; WAYLAND_DISPLAY=$ServerID zenity --title="Welcome" --warning --text="This is a third party fan made distribution!
 
 ===========================================
 Built: $(cat /etc/builddate)

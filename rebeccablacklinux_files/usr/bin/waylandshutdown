@@ -16,11 +16,16 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ACTION=$(zenity --list --radiolist --hide-header --text="What do you want to do?" --column select --column 'action' FALSE "Switch User" FALSE "Logoff" FALSE "Shutdown" FALSE "Restart" FALSE "Standby" FALSE "Hibernate" TRUE "Nothing" | grep -v 'startup message: remove:' )
+ACTION=$(echo "Switch User
+Logoff
+Shutdown
+Restart
+Standby
+Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' | grep -v 'startup message: remove:' )
 
 if [[ $ACTION == "Switch User" ]]
 then
-echo "Switch > /run/loginmanager_control"
+echo "Switch" > /run/loginmanager_control
 RESULT=$?
 
 elif [[ $ACTION == "Logoff" ]]
@@ -53,5 +58,5 @@ fi
 
 if [[ $RESULT != 0 ]]
 then
-zenity --warning --text="Failed to $ACTION"
+zenity --title="Failure" --warning --text="Failed to $ACTION"
 fi
