@@ -71,7 +71,8 @@ export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
 LastTTY=0
 
-#Create communication fifos.
+#Create communication fifo.
+rm /run/loginmanager_control
 mkfifo -m 777 /run/loginmanager_control
 
 #Get the next TTY that is open for use
