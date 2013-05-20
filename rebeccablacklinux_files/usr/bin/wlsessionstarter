@@ -30,5 +30,7 @@ else
 WESTONBACKEND=fbdev-backend.so
 fi
 
+# TODO return data
+
 #Call weston
 weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION

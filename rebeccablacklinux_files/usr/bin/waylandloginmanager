@@ -78,6 +78,7 @@ mkfifo -m 777 /run/loginmanager_control
 #Get the next TTY that is open for use
 function GetNextTTY
 {
+sleep 5
 LastTTY=0
 TTYInUse=1
 while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
@@ -181,7 +182,6 @@ do
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
-#chmod 777 /run/loginmanagerdisplay
 fi
 
 sleep 3
@@ -197,7 +197,7 @@ then
 export AutoSessionTTY=$(GetNextTTY)
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
-# TODO Session return data
+
 
 
 while [ 1 ]
