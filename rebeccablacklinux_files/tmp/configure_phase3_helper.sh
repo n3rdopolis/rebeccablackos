@@ -38,8 +38,14 @@ cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/Re
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/.config/* /etc/skel/.config
 
+mkdir -p /etc/init
+cp -a /usr/import/etc/init /etc/init
+
 mkdir -p /var
 cp -a /usr/import/var/* /var
+
+#Disable X11 startup
+echo "/usr/bin/waylandloginmanger" > /etc/X11/default-display-manager
 
 #install the menu items for the wayland tests
 install_menu_items

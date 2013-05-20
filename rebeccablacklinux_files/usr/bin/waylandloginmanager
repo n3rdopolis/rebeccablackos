@@ -190,6 +190,9 @@ done
 LogonWestonLauncher &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 
+
+function StartAutoLogin
+{
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 if [[ ! -z $AUTOLOGONUSER ]]
 then
@@ -197,7 +200,8 @@ zenity --info --title="Autologin" --text="Press OK to start the autologin for $A
 export AutoSessionTTY=$(GetNextTTY)
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
-
+}
+StartAutoLogin &
 
 
 while [ 1 ]
