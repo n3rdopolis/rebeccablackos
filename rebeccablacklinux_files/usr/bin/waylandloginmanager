@@ -121,7 +121,7 @@ then
 zenity --title="Switch User" --warning --text="No users logged in to switch to."
 else
 ChangeVT=$(echo $SessionList | zenity --title="Switch User" --list --text "Select a running session to change into" --column tty --column pid --column username --print-column=1 --hide-column=2 --hide-header)
-if -e [[ /proc/$ChangeVT/environ ]]
+if [[ -e /proc/$ChangeVT/environ ]]
 then
 chvt $ChangeVT
 else
