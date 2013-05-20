@@ -70,6 +70,7 @@ export loginmanagerpid=$$
 export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
 LastTTY=0
+AllSessions=0
 
 #Create communication fifo.
 rm /run/loginmanager_control
@@ -88,6 +89,16 @@ done
 AvailibleTTY=$LastTTY
 echo $AvailibleTTY
 }
+
+function RegisterSession
+{
+((AllSessions++))
+COMMANDSTRING=$1
+AllSessionTTYs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 2p ^C)
+AllSessionPIDs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 3p ^C)
+AllSessionUsers[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 4p ^C)
+}
+
 
 # TODO session changing function
 
@@ -220,6 +231,9 @@ AuthenticateUser &
 elif [[ $COMMAND == "Leave" ]] 
 then
 LeavePrompt &
+elif [[ $COMMAND = RegisterSession* ]]
+then
+RegisterSession $COMMAND &
 else
 echo "Invalid command"
 fi
