@@ -92,15 +92,42 @@ echo $AvailibleTTY
 
 function RegisterSession
 {
-((AllSessions++))
 COMMANDSTRING=$1
 AllSessionTTYs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 2p ^C)
 AllSessionPIDs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 3p ^C)
 AllSessionUsers[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 4p ^C)
+((AllSessions++))
 }
 
+function SwitchUserDialog 
+{
+unset SessionList
+NumberOfSessions=${#AllSessionPIDs[@]}
 
-# TODO session changing function
+while [[ $NumberOfSessions -ge 0 ]]
+do
+if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
+then
+SessionList+="${AllSessionTTYs[$NumberOfSessions]}
+${AllSessionPIDs[$NumberOfSessions]}
+${AllSessionUsers[$NumberOfSessions]}
+"
+fi
+((NumberOfSessions--))
+done
+
+if [[ -z $SessionList ]]
+then
+zenity --title="Switch User" --warning --text="No users logged in to switch to."
+else
+ChangeVT=$(echo $SessionList | zenity --title="Switch User" --list --text "Select a running session to change into" --column tty --column pid --column username --print-column=1 --hide-column=2 --hide-header)
+if -e [[ /proc/$ChangeVT/environ ]]
+then
+chvt $ChangeVT
+else
+zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit."
+fi
+}
 
 #Attempt to get the users authentication
 function AuthenticateUser
@@ -223,8 +250,7 @@ echo "received command $COMMAND"
 if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
-# TODO Session checker
-ListCurrentSessions &
+SwitchUserDialog &
 elif [[ $COMMAND == "Login" ]]
 then
 AuthenticateUser &
@@ -233,7 +259,7 @@ then
 LeavePrompt &
 elif [[ $COMMAND = RegisterSession* ]]
 then
-RegisterSession $COMMAND &
+RegisterSession $COMMAND
 else
 echo "Invalid command"
 fi
