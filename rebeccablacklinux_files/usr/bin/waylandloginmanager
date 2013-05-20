@@ -78,7 +78,6 @@ mkfifo -m 777 /run/loginmanager_control
 #Get the next TTY that is open for use
 function GetNextTTY
 {
-sleep 5
 LastTTY=0
 TTYInUse=1
 while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
@@ -194,6 +193,7 @@ export WAYLAND_DISPLAY=loginmanagerdisplay
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 if [[ ! -z $AUTOLOGONUSER ]]
 then
+sleep 5
 export AutoSessionTTY=$(GetNextTTY)
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
