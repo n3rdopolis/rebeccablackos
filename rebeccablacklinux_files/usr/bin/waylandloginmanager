@@ -41,7 +41,7 @@ openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
-You can select the Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
+You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
 else 
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
@@ -164,7 +164,7 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-export LOGINPASSWORD=$(zenity --title="Password" --password | grep -v 'startup message: remove:')
+export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
 script -c "su daemon --preserve-environment -c \"/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION\""
 unset LOGINPASSWORD
 passwordresult=$?
@@ -235,7 +235,13 @@ export WAYLAND_DISPLAY=loginmanagerdisplay
 
 function StartAutoLogin
 {
+if [[ $ISLIVE == 1 ]]
+then
+AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep USERNAME= | awk -F = '{print $2}' )
+else
 AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
+fi
+
 if [[ ! -z $AUTOLOGONUSER ]]
 then
 zenity --info --title="Autologin" --text="Press OK to start the autologin for $AUTOLOGONUSER"
@@ -263,7 +269,7 @@ then
 LeavePrompt &
 elif [[ $COMMAND = RegisterSession* ]]
 then
-RegisterSession $COMMAND
+RegisterSession "$COMMAND"
 else
 echo "Invalid command"
 fi
