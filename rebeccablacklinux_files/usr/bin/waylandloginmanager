@@ -93,9 +93,9 @@ echo $AvailibleTTY
 function RegisterSession
 {
 COMMANDSTRING=$1
-AllSessionTTYs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 2p ^C)
-AllSessionPIDs[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 3p ^C)
-AllSessionUsers[$AllSessions]=$(echo $COMMANDSTRING | sed -ne 4p ^C)
+AllSessionTTYs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 2p ^C)
+AllSessionPIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 3p ^C)
+AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p ^C)
 ((AllSessions++))
 }
 
