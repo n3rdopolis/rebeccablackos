@@ -235,7 +235,15 @@ if [[ $ISLIVE == 1 ]]
 then
 AUTOLOGINUSER=$(cat /etc/casper.conf | grep USERNAME= | awk -F = '{print $2}' | sed 's/\"//g' )
 else
+
+if [[ -e /etc/waylandloginmanager.conf ]]
+then
+AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' )
+else
 AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
+echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
+fi
+
 fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
