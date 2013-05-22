@@ -219,17 +219,20 @@ do
 
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
+
+
+weston-launch -t /dev/tty$HostVT -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay &
+
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
 then
-fi
-weston-launch -t /dev/tty$HostVT -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay &
 sleep 10
 zenity --title="Framebuffer Support" --warning --text="Your video card is not supported by any installed kernel mode setting drivers. 
 
 Weston will fallback on using the system framebuffer instead, which might be a bit more unstable." 
 fi
 
-sleep 3
+fi
+
 done
 }
 
@@ -270,6 +273,9 @@ if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
 SwitchUserDialog &
+elif [[ $COMMAND == "Change" ]]
+then
+chvt $HostVT
 elif [[ $COMMAND == "Login" ]]
 then
 AuthenticateUser &
