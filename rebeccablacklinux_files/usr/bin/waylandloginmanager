@@ -16,14 +16,27 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Dont store command history.
-unset HISTFILE
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+echo "Must be run as root."
+exit
+fi
 
+
+export loginmanagerpid=$$
+. /usr/bin/weston_vars
+export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
+export XDG_RUNTIME_DIR=/run/
+export WAYLAND_DISPLAY=loginmanagerdisplay
+LastTTY=0
+AllSessions=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
 ISLIVE=1
 fi
+
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
@@ -57,24 +70,6 @@ reboot
 exit
 fi
 
-
-#Require root privlages
-if [[ $UID != 0 ]]
-then
-echo "Must be run as root."
-exit
-fi
-
-export loginmanagerpid=$$
-. /usr/bin/weston_vars
-export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
-export XDG_RUNTIME_DIR=/run/
-LastTTY=0
-AllSessions=0
-
-#Create communication fifo.
-rm /run/loginmanager_control
-mkfifo -m 777 /run/loginmanager_control
 
 #Get the next TTY that is open for use
 function GetNextTTY
@@ -211,12 +206,14 @@ fi
 
 
 
-#Get the TTY that will hold the Wayland server that displays the login screen.
-HostVT=$(GetNextTTY)
+
 
 #Call the host server for the login gui, running as a seperate user
 function LoginWestonLauncher
 {
+#Get the TTY that will hold the Wayland server that displays the login screen.
+HostVT=$(GetNextTTY)
+
 while [ 1 ]
 do
 
@@ -235,8 +232,7 @@ sleep 3
 done
 }
 
-LoginWestonLauncher &
-export WAYLAND_DISPLAY=loginmanagerdisplay
+
 
 
 function StartAutoLogin
@@ -255,11 +251,15 @@ export AutoSessionTTY=$(GetNextTTY)
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 }
-StartAutoLogin &
 
-
+#The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
 function ReadCommandFIFO
 {
+#Create communication fifo.
+rm -r /run/loginmanager_control
+mkfifo -m 777 /run/loginmanager_control
+
+
 while [ 1 ]
 do
 
@@ -285,4 +285,13 @@ fi
 done
 }
 
+
+
+#Start the main login Weston server
+LoginWestonLauncher &
+
+#Start the autologin launcher
+StartAutoLogin &
+
+#Start the login managers IPC
 ReadCommandFIFO
