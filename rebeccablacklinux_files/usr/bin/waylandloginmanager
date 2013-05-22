@@ -297,7 +297,7 @@ LeavePrompt &
 elif [[ $COMMAND = RegisterSession* ]]
 then
 RegisterSession "$COMMAND"
-elif [[ $COMMAND == "Change" ]]
+elif [[ $COMMAND == "Info" ]]
 then
 ShowInfo &
 else
