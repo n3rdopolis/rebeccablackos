@@ -242,11 +242,10 @@ do
 
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
-
-
-weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
-
+openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
 fi
+
+sleep 5
 
 done
 }
