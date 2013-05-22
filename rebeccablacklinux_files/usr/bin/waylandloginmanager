@@ -93,6 +93,21 @@ AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p )
 ((AllSessions++))
 }
 
+function ShowInfo
+{
+if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
+then
+zenity --title="Information" --info --text="Weston is using the framebuffer backend.
+
+This probably means the current video card drivers do not support the native kernel mode setting that is optimal for Weston."
+else
+zenity --title="Information" --info --text="Your system is using Weston with Kernel mode setting.
+
+This is the optimal way to run Weston."
+fi
+
+}
+
 function SwitchUserDialog 
 {
 unset SessionList
@@ -282,6 +297,9 @@ LeavePrompt &
 elif [[ $COMMAND = RegisterSession* ]]
 then
 RegisterSession "$COMMAND"
+elif [[ $COMMAND == "Change" ]]
+then
+ShowInfo &
 else
 echo "Invalid command"
 fi
