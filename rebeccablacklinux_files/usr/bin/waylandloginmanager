@@ -24,7 +24,6 @@ exit
 fi
 
 
-export loginmanagerpid=$$
 . /usr/bin/weston_vars
 export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
@@ -103,7 +102,8 @@ while [[ $NumberOfSessions -ge 0 ]]
 do
 if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
 then
-SessionList+="${AllSessionTTYs[$NumberOfSessions]}
+SessionList+="$NumberOfSessions
+${AllSessionTTYs[$NumberOfSessions]}
 ${AllSessionPIDs[$NumberOfSessions]}
 ${AllSessionUsers[$NumberOfSessions]}
 "
@@ -115,11 +115,11 @@ if [[ -z $SessionList ]]
 then
 zenity --title="Switch User" --warning --text="No users logged in to switch to."
 else
-ChangeVT=$(echo $SessionList | zenity --title="Switch User" --list --text "Select a running session to change into" --column tty --column pid --column username --print-column=1 --hide-column=2 --hide-header)
+ChangeSession=$(echo $SessionList | zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 )
 
-if [[ -e /proc/$ChangeVT/environ ]]
+if [[ -e /proc/${AllSessionPIDs[$ChangeSession]}/environ ]]
 then
-chvt $ChangeVT
+chvt ${AllSessionTTYs[$ChangeSession]}
 else
 zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit."
 fi
