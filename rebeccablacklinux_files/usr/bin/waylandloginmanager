@@ -219,7 +219,7 @@ if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 
 
-weston-launch -t /dev/tty$HostVT -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
+weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
 
 fi
 
