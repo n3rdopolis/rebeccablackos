@@ -175,6 +175,7 @@ zenity --warning --text="No User selected"
 else
 export SessionTTY=$(GetNextTTY)
 export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
+chvt $SessionTTY
 script -c "su daemon --preserve-environment -c \"/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION\""
 unset LOGINPASSWORD
 passwordresult=$?
@@ -264,6 +265,7 @@ fi
 if [[ ! -z $AUTOLOGINUSER ]]
 then
 export AutoSessionTTY=$(GetNextTTY)
+chvt $AutoSessionTTY
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 }
