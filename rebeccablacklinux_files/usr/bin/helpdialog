@@ -16,8 +16,17 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+zenity --title="Welcome" --warning --text="This is a third party fan made distribution!
 
-zenity --info --text 'Weston Key Bindings:
+===========================================
+Built: $(cat /etc/builddate)
+===========================================
+
+Click on the I icon in the panel for information 
+about key bindings, and Programs"
+
+
+zenity --title="Help" --info --text 'Weston Key Bindings:
 =================================================================================
 Note: The super key on most keyboards is the Windows logo key.
 Note: The middle mouse button is usually pressing the scroll button on most mice.
@@ -45,7 +54,7 @@ By default there are 2 workspaces
 
 Exit Weston: ctrl key + alt key + backspace' 
 
-zenity --info --text '
+zenity --title="Help" --info --text '
 =================================================================================
 =================================================================================
 The Application menu stays open, even after calling programs, and does not work with multiple instances of the Application Launcher 
@@ -55,7 +64,7 @@ To launch another Application, currently, you have to find the already open inst
 Some applications (mostly xwayland applications) might need to be resized to refresh the contents of the window.'
 
 
-zenity --info --text 'To launch programs:
+zenity --title="Help" --info --text 'To launch programs:
 =================================================================================
 =================================================================================
 Click on the "RBOS" Icon on the top for the Application menu. Be sure to check for the Wayland programs under "Applications"!

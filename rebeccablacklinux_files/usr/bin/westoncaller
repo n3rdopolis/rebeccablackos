@@ -18,13 +18,4 @@
 
 . /usr/bin/weston_vars
 ServerID=wayland-$RANDOM
-
-(sleep 10; WAYLAND_DISPLAY=$ServerID zenity --title="Welcome" --warning --text="This is a third party fan made distribution!
-
-===========================================
-Built: $(cat /etc/builddate)
-===========================================
-
-Click on the I icon in the panel for information 
-about key bindings, and Programs") &
 weston-display-server --socket=$ServerID --modules=xwayland.so $*  
