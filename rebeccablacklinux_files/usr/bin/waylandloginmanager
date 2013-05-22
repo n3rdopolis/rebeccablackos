@@ -221,11 +221,12 @@ if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
 then
-(sleep 10; WAYLAND_DISPLAY=$ServerID zenity --title="Framebuffer Support" --warning --text="Your video card is not supported by any installed kernel mode setting drivers. 
-
-Weston will fallback on using the system framebuffer instead." ) &
 fi
 westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
+sleep 10
+zenity --title="Framebuffer Support" --warning --text="Your video card is not supported by any installed kernel mode setting drivers. 
+
+Weston will fallback on using the system framebuffer instead, which might be a bit more unstable." 
 fi
 
 sleep 3
