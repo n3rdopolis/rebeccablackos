@@ -32,11 +32,17 @@ cp -a /usr/import/usr/share/RBOS_PATCHES/* /usr/share/RBOS_PATCHES
 mkdir -p /usr/share/icons
 cp -a /usr/import/usr/share/icons/* /usr/share/icons
 
+mkdir -p /usr/share/xsessions
+cp -a /usr/import/usr/share/xsessions/* /usr/share/xsessions
+
 mkdir -p /usr/share/wallpapers/RebeccaBlackOS/
 cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/RebeccaBlackOS/
 
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/.config/* /etc/skel/.config
+
+mkdir -p /etc/skel/lightdm
+cp -a /usr/import/etc/skel/lightdm/* /etc/skel/lightdm
 
 mkdir -p /etc/init
 cp -a /usr/import/etc/init /etc/init
