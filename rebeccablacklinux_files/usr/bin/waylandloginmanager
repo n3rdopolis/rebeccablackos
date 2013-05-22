@@ -211,8 +211,6 @@ fi
 #Call the host server for the login gui, running as a seperate user
 function LoginWestonLauncher
 {
-#Get the TTY that will hold the Wayland server that displays the login screen.
-HostVT=$(GetNextTTY)
 
 while [ 1 ]
 do
@@ -291,7 +289,8 @@ fi
 done
 }
 
-
+#Get the TTY that will hold the Wayland server that displays the login screen.
+HostVT=$(GetNextTTY)
 
 #Start the main login Weston server
 LoginWestonLauncher &
