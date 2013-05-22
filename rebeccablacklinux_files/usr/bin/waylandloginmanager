@@ -222,7 +222,7 @@ then
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
 then
 fi
-westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
+weston-launch -t /dev/tty$HostVT -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay &
 sleep 10
 zenity --title="Framebuffer Support" --warning --text="Your video card is not supported by any installed kernel mode setting drivers. 
 
