@@ -42,11 +42,8 @@ then
 if [[ $RESOLUTION == 0 ]]
 then
 sed -ri 's/\bvga=\S*//gI' /etc/default/grub
-sed -ri 's/splash//gI' /etc/default/grub
-sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"splash /g" /etc/default/grub
 else
 sed -ri 's/\bvga=\S*//gI' /etc/default/grub
-sed -ri 's/splash//gI' /etc/default/grub
 sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"vga=$RESOLUTION /g" /etc/default/grub
 fi
 update-grub
