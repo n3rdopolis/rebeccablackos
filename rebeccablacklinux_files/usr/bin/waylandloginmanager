@@ -97,14 +97,23 @@ function ShowInfo
 {
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
 then
-zenity --title="Information" --info --text="Weston is using the framebuffer backend.
+BACKENDSTRING="Weston is using the framebuffer backend.
 
-This probably means the current video card drivers do not support the native kernel mode setting that is optimal for Weston."
+This probably means the current video card drivers do not 
+support the native kernel mode setting that is optimal for Weston."
 else
-zenity --title="Information" --info --text="Your system is using Weston with Kernel mode setting.
+BACKENDSTRING="Your system is using Weston with Kernel mode setting.
 
 This is the optimal way to run Weston."
 fi
+zenity --title="Information" --forms --text="This is a third party fan made distribution!
+
+$BACKENDSTRING
+
+The key icon is for login
+The arrow icon is for switching user sessions
+The red X icon is for power options
+The i icon shows this help prompt"
 
 }
 
