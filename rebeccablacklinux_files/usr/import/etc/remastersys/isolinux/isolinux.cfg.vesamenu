@@ -42,16 +42,6 @@ label livefb884
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz quiet splash vga=884 --
 
-label xforcevesa
-  menu label xforcevesa - boot Live in safe graphics mode
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper xforcevesa initrd=/casper/initrd.gz quiet splash --
-
-label install
-  menu label install - start the installer directly
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper only-ubiquity initrd=/casper/initrd.gz quiet splash --
-
 label memtest
   menu label memtest - Run memtest
   kernel /install/memtest

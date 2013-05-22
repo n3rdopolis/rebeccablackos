@@ -93,9 +93,9 @@ echo $AvailibleTTY
 function RegisterSession
 {
 COMMANDSTRING=$1
-AllSessionTTYs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 2p ^C)
-AllSessionPIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 3p ^C)
-AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p ^C)
+AllSessionTTYs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 2p )
+AllSessionPIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 3p )
+AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p )
 ((AllSessions++))
 }
 
@@ -215,13 +215,19 @@ fi
 HostVT=$(GetNextTTY)
 
 #Call the host server for the login gui, running as a seperate user
-function LogonWestonLauncher
+function LoginWestonLauncher
 {
 while [ 1 ]
 do
 
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
+if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
+then
+(sleep 10; WAYLAND_DISPLAY=$ServerID zenity --title="Framebuffer Support" --warning --text="Your video card is not supported by any installed kernel mode setting drivers. 
+
+Weston will fallback on using the system framebuffer instead." &
+fi
 westoncaller --backend=$WESTONBACKEND --tty=$HostVT --socket=loginmanagerdisplay &
 fi
 
@@ -229,7 +235,7 @@ sleep 3
 done
 }
 
-LogonWestonLauncher &
+LoginWestonLauncher &
 export WAYLAND_DISPLAY=loginmanagerdisplay
 
 
@@ -237,14 +243,14 @@ function StartAutoLogin
 {
 if [[ $ISLIVE == 1 ]]
 then
-AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep USERNAME= | awk -F = '{print $2}' )
+AUTOLOGINUSER=$(cat /etc/casper.conf | grep USERNAME= | awk -F = '{print $2}' | sed 's/\"//g' )
 else
-AUTOLOGONUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
+AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' )
 fi
 
-if [[ ! -z $AUTOLOGONUSER ]]
+if [[ ! -z $AUTOLOGINUSER ]]
 then
-zenity --info --title="Autologin" --text="Press OK to start the autologin for $AUTOLOGONUSER"
+zenity --info --title="Autologin" --text="Press OK to start the autologin for $AUTOLOGINUSER"
 export AutoSessionTTY=$(GetNextTTY)
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
@@ -252,6 +258,8 @@ fi
 StartAutoLogin &
 
 
+function ReadCommandFIFO
+{
 while [ 1 ]
 do
 
@@ -275,3 +283,6 @@ echo "Invalid command"
 fi
 
 done
+}
+
+ReadCommandFIFO
