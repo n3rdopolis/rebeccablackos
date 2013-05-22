@@ -53,5 +53,9 @@ cp -a /usr/import/var/* /var
 #Disable X11 startup
 echo "/usr/bin/waylandloginmanger" > /etc/X11/default-display-manager
 
+# configure plymouth to not use the framebuffer
+echo FRAMEBUFFER=n > /etc/initramfs-tools/conf.d/splash
+
+
 #install the menu items for the wayland tests
 install_menu_items
