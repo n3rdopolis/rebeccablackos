@@ -140,7 +140,7 @@ then
 zenity --title="Switch User" --warning --text="No users logged in to switch to."
 else
 unset ChangeSession
-ChangeSession=$(echo "$SessionList" | zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 )
+ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 )
 
 if [[ $ChangeSession ]]
 then
