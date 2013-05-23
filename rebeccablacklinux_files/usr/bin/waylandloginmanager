@@ -93,6 +93,20 @@ AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p )
 ((AllSessions++))
 }
 
+function DialogWait
+{
+waitseconds=$1
+countseconds=0
+while [[ $countseconds -lt $waitseconds ]]
+do
+percent=$(( $countseconds * 100 / $waitseconds ))
+echo $percent
+((countseconds++))
+sleep 1
+done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..."
+}
+
+
 function ShowInfo
 {
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
@@ -278,6 +292,7 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
+DialogWait 10
 export AutoSessionTTY=$(GetNextTTY)
 chvt $AutoSessionTTY
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
