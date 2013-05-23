@@ -41,8 +41,8 @@ cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/Re
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/.config/* /etc/skel/.config
 
-mkdir -p /etc/skel/lightdm
-cp -a /usr/import/etc/skel/lightdm/* /etc/skel/lightdm
+mkdir -p /etc/lightdm
+cp -a /usr/import/etc/lightdm/* /etc/lightdm
 
 mkdir -p /etc/init
 cp -a /usr/import/etc/init /etc/init
