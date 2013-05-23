@@ -45,7 +45,7 @@ mkdir -p /etc/lightdm
 cp -a /usr/import/etc/lightdm/* /etc/lightdm
 
 mkdir -p /etc/init
-cp -a /usr/import/etc/init /etc/init
+cp -a /usr/import/etc/init/* /etc/init
 
 mkdir -p /var
 cp -a /usr/import/var/* /var
