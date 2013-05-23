@@ -135,7 +135,7 @@ function SwitchUserDialog
 {
 unset SessionList
 NumberOfSessions=${#AllSessionPIDs[@]}
-
+((NumberOfSessions--))
 while [[ $NumberOfSessions -ge 0 ]]
 do
 if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
