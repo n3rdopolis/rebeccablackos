@@ -292,7 +292,6 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
-DialogWait 10
 export AutoSessionTTY=$(GetNextTTY)
 chvt $AutoSessionTTY
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
