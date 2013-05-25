@@ -220,9 +220,9 @@ zenity --warning --text="No User selected"
 else
 export SessionTTY=$(GetNextTTY)
 export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
-script -c "su daemon --preserve-environment -c \"/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION\""
-unset LOGINPASSWORD
+script --return -c "su daemon --preserve-environment -c \"/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION\""
 passwordresult=$?
+unset LOGINPASSWORD
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER"
