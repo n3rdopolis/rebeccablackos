@@ -67,6 +67,13 @@ reboot
 exit
 fi
 
+#if the user booted with a hidden option forcefbdev
+if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
+then
+setfacl -m "g:plugdev:rwx" /dev/fb*
+WESTONBACKEND=fbdev-backend.so
+fi
+
 
 #Get the next TTY that is open for use
 function GetNextTTY
