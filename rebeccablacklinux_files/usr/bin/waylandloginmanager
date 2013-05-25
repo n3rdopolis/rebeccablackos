@@ -33,7 +33,6 @@ exit
 fi
 
 . /usr/bin/weston_vars
-export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
 LastTTY=0
@@ -131,9 +130,9 @@ zenity --title="Information" --forms --text="This is a third party fan made dist
 
 $BACKENDSTRING
 
-The key icon is for login
-The arrow icon is for switching user sessions
-The red X icon is for power options
+The key icon brings up a login prompt
+The arrow icon brings up a prompt to swich between running sessions
+The red X icon brings up a shutdown prompt
 The i icon shows this help prompt"
 
 }
