@@ -16,6 +16,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+exec 3<> /run/loginmanager_control.lock
+FIRSTPID=$(lsof  /run/loginmanager_control.lock | awk '{print $2}' | sed -n 2p)
+if [[ $FIRSTPID == $$ ]]
+then
+echo "Error: Detected another instance of the loginmanager running..."
+exit
+fi
+
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -23,12 +32,11 @@ echo "Must be run as root."
 exit
 fi
 
-
 . /usr/bin/weston_vars
 export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
-LastTTY=0
+LastTTY=7
 AllSessions=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
@@ -73,7 +81,7 @@ fi
 #Get the next TTY that is open for use
 function GetNextTTY
 {
-LastTTY=0
+LastTTY=7
 TTYInUse=1
 while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
 do
@@ -136,6 +144,7 @@ function SwitchUserDialog
 unset SessionList
 NumberOfSessions=${#AllSessionPIDs[@]}
 ((NumberOfSessions--))
+
 while [[ $NumberOfSessions -ge 0 ]]
 do
 if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
@@ -149,12 +158,20 @@ fi
 ((NumberOfSessions--))
 done
 
-if [[ -z $SessionList ]]
-then
-zenity --title="Switch User" --warning --text="No users logged in to switch to."
-else
+SessionList+="-1
+
+
+New Session...
+"
+
+
 unset ChangeSession
 ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 )
+
+if [[ $ChangeSession == "-1" ]]
+then
+AuthenticateUser
+else 
 
 if [[ $ChangeSession ]]
 then
@@ -169,6 +186,7 @@ fi
 fi
 
 fi
+
 
 }
 
