@@ -79,7 +79,7 @@ rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATIO
 
 
 #make the imported files executable 
-chmod +x -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
+chmod 0744 -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 chown  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
