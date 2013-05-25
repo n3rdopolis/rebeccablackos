@@ -18,7 +18,7 @@
 
 exec 3<> /run/loginmanager_control.lock
 FIRSTPID=$(lsof  /run/loginmanager_control.lock | awk '{print $2}' | sed -n 2p)
-if [[ $FIRSTPID == $$ ]]
+if [[ $FIRSTPID != $$ ]]
 then
 echo "Error: Detected another instance of the loginmanager running..."
 exit
@@ -36,7 +36,7 @@ fi
 export XDG_CONFIG_HOME=/var/lib/loginmanager/.config
 export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
-LastTTY=7
+LastTTY=0
 AllSessions=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
@@ -81,7 +81,6 @@ fi
 #Get the next TTY that is open for use
 function GetNextTTY
 {
-LastTTY=7
 TTYInUse=1
 while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
 do
@@ -358,6 +357,7 @@ done
 
 #Get the TTY that will hold the Wayland server that displays the login screen.
 HostVT=$(GetNextTTY)
+LastTTY=$HostVT
 
 #Start the main login Weston server
 LoginWestonLauncher &
