@@ -226,8 +226,6 @@ unset LOGINPASSWORD
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER"
-else
-chvt $SessionTTY 
 fi
 fi
 
@@ -311,7 +309,6 @@ if [[ ! -z $AUTOLOGINUSER ]]
 then
 DialogWait 15
 export AutoSessionTTY=$(GetNextTTY)
-chvt $AutoSessionTTY
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 }

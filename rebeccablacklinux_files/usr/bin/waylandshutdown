@@ -30,7 +30,7 @@ RESULT=$?
 
 elif [[ $ACTION == "Logoff" ]]
 then
-(sleep 5; echo "Change" > /run/loginmanager_control) &
+echo "Change" > /run/loginmanager_control
 disown
 fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
 RESULT=$?
