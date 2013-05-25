@@ -30,10 +30,11 @@ else
 WESTONBACKEND=fbdev-backend.so
 fi
 
-echo "RegisterSession
-$WESTONTTY
-$BASHPID
-$LOGNAME" > /run/loginmanager_control
 
 #Call weston
-weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION
+weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &
+
+echo "RegisterSession
+$WESTONTTY
+$!
+$LOGNAME" > /run/loginmanager_control
