@@ -38,18 +38,18 @@ fi
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
-logger "waylandloginmanager: Kernel mode setting found."
+logger -t waylandloginmanager "Kernel mode setting found."
 WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
 then
-logger "waylandloginmanager: No kernel mode setting found. Using the framebuffer"
+logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer"
 setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $ISLIVE == 1 ]]
 then
-logger "waylandloginmanager: No supportable hardware found"
+logger -t waylandloginmanager "No supportable hardware found"
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
@@ -73,7 +73,7 @@ fi
 #if the user booted with a hidden option forcefbdev
 if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
 then
-logger "waylandloginmanager: Manually override set to use to use the framebuffer"
+logger -t waylandloginmanager "Manually override set to use to use the framebuffer"
 setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 fi
@@ -224,8 +224,8 @@ zenity --warning --text="No User selected"
 else
 export SessionTTY=$(GetNextTTY)
 export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
-logger "waylandloginmanager: Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-openvt -w -f -c 63 -- su daemon --preserve-environment -c "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION"
+logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
+openvt -w -f -c 63 -- su daemon --preserve-environment -c "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
 passwordresult=$?
 unset LOGINPASSWORD
 if [[ $passwordresult != 0 ]]
@@ -282,8 +282,8 @@ do
 
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
-logger "waylandloginmanager: Starting the loginmanagerdisplay on tty $HostVT"
-openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
+logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT"
+openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay | logger -t weston/login
 fi
 
 sleep 5
@@ -315,7 +315,7 @@ if [[ ! -z $AUTOLOGINUSER ]]
 then
 DialogWait 15
 export AutoSessionTTY=$(GetNextTTY)
-logger "waylandloginmanager: Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
+logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 }
@@ -332,7 +332,7 @@ while [ 1 ]
 do
 
 COMMAND=$(cat /run/loginmanager_control)
-logger "waylandloginmanager: received command $COMMAND"
+logger -t waylandloginmanager "received command $COMMAND"
 if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
@@ -353,7 +353,7 @@ elif [[ $COMMAND == "Info" ]]
 then
 ShowInfo &
 else
-logger "waylandloginmanager: Invalid command"
+logger -t waylandloginmanager "Invalid command"
 fi
 
 done
