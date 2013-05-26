@@ -15,7 +15,7 @@ label live
 label livefb785
   menu label live - boot the Live System with a 640x480 framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet vga=785 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject splash noprompt quiet vga=785 --
 
 label livefb788
   menu label live - boot the Live System with a 800x600 framebuffer
