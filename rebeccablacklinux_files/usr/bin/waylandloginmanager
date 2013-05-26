@@ -311,9 +311,9 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
-logger "waylandloginmanager: Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
 DialogWait 15
 export AutoSessionTTY=$(GetNextTTY)
+logger "waylandloginmanager: Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 fi 
 }
