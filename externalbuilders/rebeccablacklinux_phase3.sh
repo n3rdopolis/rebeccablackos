@@ -130,7 +130,9 @@ fi
 if [  -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 #move the iso out of the chroot fs    
-mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
+
 
 echo "Live CD image build was successful."
 
