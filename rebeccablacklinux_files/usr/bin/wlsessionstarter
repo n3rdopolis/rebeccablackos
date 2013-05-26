@@ -16,6 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Change to the users homepath so weston starts in the right place
+cd ~
+
 #Import Wayland variable
 . /usr/bin/weston_vars
 
