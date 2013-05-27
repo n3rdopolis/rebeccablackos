@@ -22,7 +22,7 @@ mkdir debian
 touch debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="subversion,git,bzr,dlocate,checkinstall,zenity,xterm,vpx-tools" /tmp/configure_phase3_helper.sh
+checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="expect,dlocate,zenity,xterm,vpx-tools" /tmp/configure_phase3_helper.sh
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
@@ -84,7 +84,7 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep
 yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg"
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr checkinstall"
 yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
@@ -125,7 +125,7 @@ done
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/lib/apt/lists/*
-
+rm -rf /var/lib/dlocate/*
 #start the remastersys job
 remastersys dist
 
