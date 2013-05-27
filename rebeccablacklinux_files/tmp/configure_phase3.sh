@@ -114,6 +114,13 @@ rm /opt/bin/qdoc
 rm /opt/bin/uic
 rm /opt/bin/qdbuscpp2xml
 
+#Reduce binary sizes
+echo "Reducing binary file sizes"
+find /opt/bin /opt/lib /opt/sbin | while read FILE
+do
+strip $FILE 2>/dev/null
+done
+
 #clean more apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
