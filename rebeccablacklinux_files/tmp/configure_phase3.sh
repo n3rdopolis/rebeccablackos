@@ -93,7 +93,7 @@ yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
 #hide buildlogs in tmp from remastersys
 mv /usr/share/Buildlog     /tmp
 mv /usr/share/Downloadlog /tmp
-mv /usr/share/Logs	/tmp
+mv /usr/share/logs	/tmp
 
 #delete headers (some software leaks headers to /usr/include)
 rm -rf /opt/include
@@ -132,4 +132,4 @@ remastersys dist
 #move logs back
 mv /tmp/Buildlog /usr/share
 mv /tmp/Downloadlog /usr/share
-mv /tmp/Logs /usr/share
+mv /tmp/logs /usr/share
