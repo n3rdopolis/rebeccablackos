@@ -22,14 +22,7 @@ It requires xterm,unionfs-fuse,squashfs-tools, dialog and zenity to be installed
  
 How to use Wayland:
     
-    Upon login, you are prompted for wayland, Xorg Backed Wayland, or KDE.
-	-Wayland attempts to start a  Wayland server running "bare metal" as the display server. This is not supported on all machines, especially ones with closed source drivers that do not support Kernel Mode Setting.
-
-	-Xorg Backed Wayland runs a fullscreen wayland session with X as the display server. There isn't really a performance penalty, but Wayland won't manage the layout of the screens
-
-	-Both Wayland and Xorg Backed Wayland fall back to a KDE session if Wayland fails
-
-	-KDE will launch a KDE session under X.
+    Wayland now starts automatically as the default display server. The loginmanager display, and the users session are now both Wayland sessions
 
     Wayland programs are in /opt/bin or the panel at the top, or in the application selector popup that you can call up under Wayland with the dropper icon in the panel.
     Xwayland apps will be availible from the menu provided by hitting the KDE icon on the panel.
