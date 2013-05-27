@@ -71,6 +71,11 @@ done
 
 #remove old kernels!
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
+if [[ -z $CURRENTKERNELVERSION ]]
+then
+CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
+fi
+
 dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -v linux-image-generic | while read PACKAGE
 do
 yes Y | apt-get purge $PACKAGE
