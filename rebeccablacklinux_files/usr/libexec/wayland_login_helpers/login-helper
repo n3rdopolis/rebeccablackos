@@ -36,7 +36,8 @@ expect "Password:" {send "$password\r";}
 
 interact
 
-spawn ecryptfs-mount-private
+spawn su $LOGINUSER -c ecryptfs-mount-private
+expect "Password:" {send "$password\r";}
 expect "Enter your login passphrase:" {send "$password\r";}
 
 } else {exit 1}
