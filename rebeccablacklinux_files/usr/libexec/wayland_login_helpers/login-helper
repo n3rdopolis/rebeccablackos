@@ -30,6 +30,9 @@ catch wait result
 set status [lindex $result 3]
 
 if { $status == 0 } {
+spawn ecryptfs-mount-private
+expect "Enter your login passphrase:" {send "$password\r";}
+
 set PID [spawn su $LOGINUSER -c "/usr/bin/wlsessionstarter $usertty $usersession" ]
 expect "Password:" {send "$password\r";}
 
