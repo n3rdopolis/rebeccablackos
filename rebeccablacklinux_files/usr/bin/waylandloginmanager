@@ -16,6 +16,19 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Detect another instance
+SCRIPTPATH=$(readlink -f "$0")
+SCRIPTNAME=$(basename "$SCRIPTPATH")
+LOCKSCRIPT=$(readlink -f "$(cat "/tmp/$SCRIPTNAME.lock" | xargs -0 echo | awk '{print $2}')" )
+if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
+then
+rm -r "/tmp/$SCRIPTNAME.lock"
+ln -s /proc/"$$"/cmdline "/tmp/$SCRIPTNAME.lock"
+else
+echo "Error: Another instance is already running" 
+fi
+
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
