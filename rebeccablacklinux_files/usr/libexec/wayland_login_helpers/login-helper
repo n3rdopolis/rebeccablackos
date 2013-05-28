@@ -31,13 +31,14 @@ set status [lindex $result 3]
 
 if { $status == 0 } {
 
-set PID [spawn su $LOGINUSER -c "/usr/bin/wlsessionstarter $usertty $usersession" ]
+spawn su $LOGINUSER -c ecryptfs-mount-private
+expect "Password:" {send "$password\r";}
+expect "Enter your login passphrase:" {send "$password\r";}
+
+spawn su $LOGINUSER -c "/usr/bin/wlsessionstarter $usertty $usersession" 
 expect "Password:" {send "$password\r";}
 
 interact
 
-spawn su $LOGINUSER -c ecryptfs-mount-private
-expect "Password:" {send "$password\r";}
-expect "Enter your login passphrase:" {send "$password\r";}
 
 } else {exit 1}
