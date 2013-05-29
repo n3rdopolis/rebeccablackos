@@ -97,7 +97,7 @@ fi
 function GetNextTTY
 {
 TTYInUse=1
-while [[ $TTYInUse -ne 0 && $LastTTY -lt 62 ]]
+while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
 do
 ((LastTTY++))
 TTYInUse=$(openvt -c $LastTTY -- /bin/true 2>&1 | grep -c "is in use")
@@ -237,11 +237,9 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
-export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-openvt -w -f -c 63 -- su daemon --preserve-environment -c "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
-passwordresult=$?
-unset LOGINPASSWORD
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:') | sudo -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
+passwordresult=${PIPESTATUS[2]}
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER"
