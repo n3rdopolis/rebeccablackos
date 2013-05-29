@@ -95,10 +95,6 @@ mv /usr/share/Buildlog     /tmp
 mv /usr/share/Downloadlog /tmp
 mv /usr/share/logs	/tmp
 
-#delete headers (some software leaks headers to /usr/include)
-rm -rf /opt/include
-rm -rf /usr/include
-
 #delete bloated binary files that are for development, and are not needed on the smaller iso
 rm /opt/bin/Xnest
 rm /opt/bin/Xvfb

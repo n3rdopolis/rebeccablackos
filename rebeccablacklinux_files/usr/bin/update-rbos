@@ -1,4 +1,4 @@
-#! /usr/bin/sudo /bin/bash
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -15,7 +15,14 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-echo "This needs to be run as root"
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+echo "Must be run as root."
+exit
+fi
+
 cd /usr/share
 
 apt-get update
