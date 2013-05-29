@@ -35,12 +35,11 @@ if { $status == 0 } {
 
 spawn su $LOGINUSER -c ecryptfs-mount-private
 expect "Password:" {send "$password";}
-expect "Enter your login passphrase:" {send "$password\r";}
+expect "Enter your login passphrase:" {send "$password";}
+catch wait result
 
 spawn su $LOGINUSER -c "/usr/bin/wlsessionstarter $usertty $usersession" 
 expect "Password:" {send "$password";}
-
-interact
-
+catch wait result
 
 } else {exit 1}
