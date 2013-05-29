@@ -26,6 +26,7 @@ rm -r "/tmp/$SCRIPTNAME.lock"
 ln -s /proc/"$$"/cmdline "/tmp/$SCRIPTNAME.lock"
 else
 logger -t waylandloginmanager "Error: Another instance is already running" 
+exit
 fi
 
 
@@ -236,9 +237,11 @@ then
 zenity --warning --text="No User selected" 
 else
 export SessionTTY=$(GetNextTTY)
+export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-openvt -w -f -c 63 -- su daemon --preserve-environment -c zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:' | "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
+openvt -w -f -c 63 -- su daemon --preserve-environment -c "env -i /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
 passwordresult=$?
+unset LOGINPASSWORD
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER"
