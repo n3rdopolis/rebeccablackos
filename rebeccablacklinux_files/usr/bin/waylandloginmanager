@@ -239,7 +239,7 @@ else
 export SessionTTY=$(GetNextTTY)
 export LOGINPASSWORD=$(zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:')
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-openvt -w -f -c 63 -- su daemon --preserve-environment -c "env -i /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
+openvt -w -f -c 63 -- su daemon --preserve-environment -c "/usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION" 
 passwordresult=$?
 unset LOGINPASSWORD
 if [[ $passwordresult != 0 ]]

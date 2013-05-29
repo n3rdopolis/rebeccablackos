@@ -19,6 +19,11 @@
 #Change to the users homepath so weston starts in the right place
 cd ~
 
+while read var
+do 
+unset $var
+done < <(env | awk -F = '{print $1}' | grep -v ^PATH$) 
+
 #Import Wayland variable
 . /usr/bin/weston_vars
 

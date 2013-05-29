@@ -22,6 +22,9 @@ set password $::env(LOGINPASSWORD)
 set usertty [lindex $argv 0]
 set usersession [lindex $argv 1]
 
+set env(LOGINUSER) ""
+set env(LOGINPASSWORD) ""
+
 #test with /bin/true, before trying the real login so that the password fail result can be returned to the main script
 spawn su $LOGINUSER -c /bin/true
 expect "Password:" {send "$password\r";}
