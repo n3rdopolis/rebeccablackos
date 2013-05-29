@@ -238,7 +238,7 @@ zenity --warning --text="No User selected"
 else
 export SessionTTY=$(GetNextTTY)
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:') | sudo -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:' | sudo -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
 passwordresult=${PIPESTATUS[2]}
 if [[ $passwordresult != 0 ]]
 then
