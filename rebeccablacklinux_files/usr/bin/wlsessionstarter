@@ -37,10 +37,15 @@ WESTONBACKEND=drm-backend.so
 else
 WESTONBACKEND=fbdev-backend.so
 fi
+if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
+then
+WESTONBACKEND=fbdev-backend.so
+fi
+
 
 
 #Call weston
-weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION | logger -t weston &
+weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &
 
 echo "RegisterSession
 $WESTONTTY

@@ -295,7 +295,7 @@ do
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT"
-openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay | logger -t weston/login
+openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
 fi
 
 sleep 5
