@@ -48,6 +48,7 @@ then
 ISLIVE=1
 fi
 
+plymouth hide-splash
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
@@ -219,7 +220,7 @@ USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UI
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(cat /usr/share/wsessions  |sed 's/,/ \n/g')
+WSESSIONLIST=$(cat /usr/share/wsessions  | grep -v '#' |sed 's/,/ \n/g')
 #select the session
 WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
 if [[ -z $WSESSION ]]
