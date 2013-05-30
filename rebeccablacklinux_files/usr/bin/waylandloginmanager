@@ -125,7 +125,7 @@ percent=$(( $countseconds * 100 / $waitseconds ))
 echo $percent
 ((countseconds++))
 sleep 1
-done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..."
+done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..." 2>/dev/null
 }
 
 
@@ -151,7 +151,7 @@ Login manager is running on tty: $HostVT
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to swich between running sessions
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt"
+The i icon shows this help prompt" 2>/dev/null
 
 }
 
@@ -182,7 +182,7 @@ New Session...
 
 
 unset ChangeSession
-ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 )
+ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 2>/dev/null )
 
 if [[ $ChangeSession == "-1" ]]
 then
@@ -196,7 +196,7 @@ if [[ -e /proc/${AllSessionPIDs[$ChangeSession]}/environ ]]
 then
 chvt ${AllSessionTTYs[$ChangeSession]}
 else
-zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit."
+zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
 fi
 
 fi
@@ -221,28 +221,28 @@ fi
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
 WSESSIONLIST=$(cat /usr/share/wsessions  |sed 's/,/ \n/g')
 #select the session
-WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header )
+WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
 if [[ -z $WSESSION ]]
 then 
-zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell."
+zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
 WSESSION=desktop-shell.so
 fi
 
 #present the list of the users to the system
-export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header | grep -v 'startup message: remove:')
+export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header 2>/dev/null| grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
 then
-zenity --warning --text="No User selected" 
+zenity --warning --text="No User selected" 2>/dev/null
 else
 export SessionTTY=$(GetNextTTY)
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
-zenity --title="Password" --password --text "Type Password for $LOGINUSER" | grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
 passwordresult=${PIPESTATUS[2]}
 if [[ $passwordresult != 0 ]]
 then
-zenity --warning --text="Invalid password for $LOGINUSER"
+zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 fi
 fi
 
@@ -255,7 +255,7 @@ function LeavePrompt
 ACTION=$(echo "Shutdown
 Restart
 Standby
-Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' | grep -v 'startup message: remove:' )
+Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' 2>/dev/null | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
@@ -277,7 +277,7 @@ exit
 fi
 if [[ $RESULT != 0 ]]
 then
-zenity --title="Failure" --warning --text="Failed to $ACTION"
+zenity --title="Failure" --warning --text="Failed to $ACTION" 2>/dev/null
 fi
 }
 
