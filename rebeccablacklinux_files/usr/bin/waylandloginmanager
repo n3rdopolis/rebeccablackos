@@ -234,8 +234,13 @@ if [[ $ENABLED -ne 0 ]]
 then
 SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
 DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
+
+if [[ -f $WESTON_PLUGIN_PATH/$SONAME ]]
+then
 echo $DISPLAYNAME
 echo $SONAME
+fi
+
 fi
 done)
 
