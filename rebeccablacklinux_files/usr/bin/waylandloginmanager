@@ -257,6 +257,7 @@ zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
+logger -t waylandloginmanager "Not Enough TTYs for user login!"
 fi
 
 fi
@@ -348,6 +349,7 @@ logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on 
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
+logger -t waylandloginmanager "Not Enough TTYs for autologin!"
 fi
 
 fi 
@@ -397,7 +399,7 @@ HostVT=$(GetNextTTY)
 LastTTY=$HostVT
 if [[ $HostVT -eq -1 ]]
 then
-logger -t waylandloginmanager "Not Enough TTYs!"
+logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!"
 exit
 fi
 
