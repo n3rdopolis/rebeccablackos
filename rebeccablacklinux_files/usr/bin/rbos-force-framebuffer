@@ -36,7 +36,7 @@ dialog  --msgbox "This will assist you in configuring your system, so that Westo
 FORCEFB=$(dialog --radiolist "Would you like to force/unforce weston to use the framebuffer backend?
 Current Option: $CURRENTOPTION" 20 60 20 1 "Force framebuffer" off 0 "Unforce Framebuffer" off 2 "Leave Unchanged" on --stdout)
 OKSelected=$?
-if [[ $OKSelected == 0 ]]
+if [[ $OKSelected == 0 && $FORCEFB != 2 ]]
 then
 
 if [[ $FORCEFB == 1 ]]
@@ -49,12 +49,15 @@ sed -ri 's/forcefbdev//gI' /etc/default/grub
 fi
 
 update-grub
-dialog  --yesno "You will need to restart in order for the changes to apply" 7 60
+dialog  --yesno "You will need to restart in order for the changes to apply
+
+Restart now?" 7 60
 OKSelected=$?
 if [[ $OKSelected == 0 ]]
 then
 reboot
 fi
+
 fi
 
 
