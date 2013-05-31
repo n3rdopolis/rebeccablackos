@@ -232,8 +232,8 @@ do
 ENABLED=$(cat $SESSIONFILE | grep -c "ENABLED=1")
 if [[ $ENABLED -ne 0 ]]
 then
-DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
 SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
+DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
 echo $DISPLAYNAME
 echo $SONAME
 fi

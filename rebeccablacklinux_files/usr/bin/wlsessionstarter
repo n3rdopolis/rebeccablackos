@@ -22,7 +22,7 @@ cd ~
 while read var
 do 
 unset $var
-done < <(env | awk -F = '{print $1}' | grep -v ^PATH$) 
+done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ ) 
 
 #Import Wayland variable
 . /usr/bin/weston_vars
