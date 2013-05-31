@@ -64,7 +64,7 @@ else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $ISLIVE == 1 ]]
 then
-logger -t waylandloginmanager "No supportable hardware found"
+logger -t waylandloginmanager "ERROR: No supportable hardware found"
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
@@ -89,8 +89,17 @@ fi
 if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
 then
 logger -t waylandloginmanager "Manually override set to use to use the framebuffer"
+if [[ $(ls /dev/fb* ) ]]
+then
 setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
+else
+logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!"
+openvt -c 13 -s -f -w -- dialog --msgbox "The forcefbdev overide is set, but no framebuffer device is found!
+
+Will now reboot" 20 50 --no-cancel
+reboot
+fi
 fi
 
 
