@@ -103,7 +103,14 @@ do
 ((LastTTY++))
 TTYInUse=$(openvt -c $LastTTY -- /bin/true 2>&1 | grep -c "is in use")
 done
+
+if [[ $TTYInUse -ne 0 ]]
+then
+AvailibleTTY=-1
+else
 AvailibleTTY=$LastTTY
+fi
+
 echo $AvailibleTTY
 }
 
@@ -238,13 +245,20 @@ then
 zenity --warning --text="No User selected" 2>/dev/null
 else
 export SessionTTY=$(GetNextTTY)
+if [[ $SessionTTY -ne -1 ]]
+then
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION"
 zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
 passwordresult=${PIPESTATUS[2]}
+
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 fi
+else
+zenity --warning --text="Not Enough TTYs!"
+fi
+
 fi
 
 }
@@ -328,8 +342,14 @@ if [[ ! -z $AUTOLOGINUSER ]]
 then
 DialogWait 15
 export AutoSessionTTY=$(GetNextTTY)
+if [[ $AutoSessionTTY -ne -1 ]]
+then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
+else
+zenity --warning --text="Not Enough TTYs for autologin!"
+fi
+
 fi 
 }
 
@@ -375,6 +395,12 @@ done
 #Get the TTY that will hold the Wayland server that displays the login screen.
 HostVT=$(GetNextTTY)
 LastTTY=$HostVT
+if [[ $HostVT -eq -1 ]]
+then
+logger -t waylandloginmanager "Not Enough TTYs!"
+exit
+fi
+
 
 #Start the main login Weston server
 LoginWestonLauncher &
