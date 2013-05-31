@@ -227,7 +227,18 @@ USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UI
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(cat /usr/share/wsessions  | grep -v '#' |sed 's/,/ \n/g')
+WSESSIONLIST=$(find /usr/share/wsessions.d -type f  | while read SESSIONFILE
+do 
+ENABLED=$(cat $SESSIONFILE | grep -c "ENABLED=1")
+if [[ $ENABLED -ne 0 ]]
+then
+DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
+SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
+echo $DISPLAYNAME
+echo $SONAME
+fi
+done)
+
 #select the session
 WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
 if [[ -z $WSESSION ]]
