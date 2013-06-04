@@ -37,30 +37,6 @@ INSTALLDIR=/opt
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
 REBUILDNEWREVISION=0
 
-
-
-
-
-#set the revisions for the submodules. Replace all symbols (including /)  and spaces  with underscores, and add REVISION_ before the name
-REVISION_qtactiveqt=dev
-REVISION_qtbase=dev
-REVISION_qtdeclarative=dev
-REVISION_qtdoc=dev
-REVISION_qtgraphicaleffects=dev
-REVISION_qtimageformats=dev
-REVISION_qtjsbackend=dev
-REVISION_qtmultimedia=dev
-REVISION_qtqa=dev
-REVISION_qtquick1=dev
-REVISION_qtrepotools=dev
-REVISION_qtscript=dev
-REVISION_qtsvg=dev
-REVISION_qttools=dev
-REVISION_qttranslations=dev
-REVISION_qtwebkit=dev
-REVISION_qtwebkit_examples_and_demos=dev
-REVISION_qtxmlpatterns=dev
-
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
