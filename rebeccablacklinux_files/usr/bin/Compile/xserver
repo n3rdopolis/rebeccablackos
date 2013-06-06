@@ -51,7 +51,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's/vesa/wlshm/g' hw/xfree86/common/xf86AutoConfig.c
-patch -p1 < /usr/share/RBOS_PATCHES/xserver.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
