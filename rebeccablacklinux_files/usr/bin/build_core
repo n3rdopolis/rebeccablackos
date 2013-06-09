@@ -85,7 +85,7 @@ git clean -fdx
 #For sub-sub-modules, change the slashes for the path to underscores REVISION_SUBMODULE_RELATIVE_PATH=revisionno
 
 #go through each module and register and download them
-git submodule update --init --recursive
+git submodule update --init --recursive --force
 
 git submodule  | awk '{print $2}' | while read MODULE
 do
