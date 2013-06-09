@@ -81,8 +81,8 @@ git reset --hard $SOURCEREVERSION
 git reset --hard "origin/$SOURCEREVISION"
 git clean -fdx 
 
-#Download submodules. set the revision name in the builder script, take the submodule name and add _REVISION to the end, for example SUBMODULENAME_REVISION=revisionno.
-#For sub-sub-modules, change the slashes for the path to underscores SUBMODULE_RELATIVE_PATH_REVISION=revisionno
+#Download submodules. set the revision name in the builder script, take the submodule name and add _REVISION to the end, for example REVISION_SUBMODULENAME=revisionno.
+#For sub-sub-modules, change the slashes for the path to underscores REVISION_SUBMODULE_RELATIVE_PATH=revisionno
 
 #go through each module and register and download them
 git submodule update --init --recursive
