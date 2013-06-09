@@ -176,6 +176,7 @@ ENDTIME=$(date +%s)
 echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 
 STARTTIME=$(date +%s)
+cd "$SOURCENAME"
 PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
 ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
 
