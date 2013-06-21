@@ -78,7 +78,7 @@ index 36f9c6b..7238128 100644
 
 
 diff --git a/configure.ac b/configure.ac
-index 682e7a3..3ed9f45 100644
+index 93a6720..6378e77 100644
 --- a/configure.ac
 +++ b/configure.ac
 @@ -142,6 +142,12 @@ AM_CONDITIONAL(ENABLE_HEADLESS_COMPOSITOR,
@@ -138,23 +138,24 @@ index 0000000..0facd23
 +  </interface>
 +</protocol>
 diff --git a/src/Makefile.am b/src/Makefile.am
-index d56daa0..0a42f8b 100644
+index 859f583..612fc73 100644
 --- a/src/Makefile.am
 +++ b/src/Makefile.am
-@@ -98,7 +98,8 @@ module_LTLIBRARIES =				\
- 	$(drm_backend)				\
+@@ -105,7 +105,8 @@ module_LTLIBRARIES =				\
  	$(wayland_backend)			\
  	$(headless_backend)			\
--	$(fbdev_backend)
-+	$(fbdev_backend)			\
+ 	$(fbdev_backend)			\
+-	$(rdp_backend)
++	$(rdp_backend)				\
 +	$(remote_display)
  
  noinst_LTLIBRARIES =
  
-@@ -237,6 +238,33 @@ tablet_shell_la_SOURCES =			\
- 	tablet-shell-server-protocol.h
+@@ -276,6 +277,32 @@ cms_colord_la_SOURCES =				\
+ 	cms-helper.c				\
+ 	cms-helper.h
  endif
- 
++
 +if ENABLE_REMOTE_DISPLAY
 +remote_display = remote-proxy.la remote-server.la
 +remote_proxy_la_LDFLAGS = -module -avoid-version
@@ -180,15 +181,13 @@ index d56daa0..0a42f8b 100644
 +	remote-server-protocol.h		\
 +	../shared/os-compatibility.c		\
 +	../shared/os-compatibility.h
-+endif
-+
+ endif
+ 
  BUILT_SOURCES =					\
- 	screenshooter-server-protocol.h		\
- 	screenshooter-protocol.c		\
-@@ -252,6 +280,9 @@ BUILT_SOURCES =					\
- 	input-method-server-protocol.h		\
- 	workspaces-server-protocol.h		\
+@@ -295,6 +322,9 @@ BUILT_SOURCES =					\
  	workspaces-protocol.c			\
+ 	subsurface-server-protocol.h		\
+ 	subsurface-protocol.c			\
 +	remote-protocol.c			\
 +	remote-client-protocol.h		\
 +	remote-server-protocol.h		\
