@@ -93,6 +93,7 @@ gst-plugins-ugly
 gst-plugins-gl
 gst-libav
 kmscon
+glmark
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
