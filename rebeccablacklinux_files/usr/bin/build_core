@@ -74,11 +74,11 @@ fi
 git clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-git checkout -f $SOURCEREVERSION 
+git checkout -f $SOURCEREVISION 
 git pull -s recursive -X theirs --no-edit
 git fetch origin
-git reset --hard $SOURCEREVERSION
-git reset --hard "origin/$SOURCEREVERSION"
+git reset --hard $SOURCEREVISION
+git reset --hard "origin/$SOURCEREVISION"
 git clean -fdx 
 
 #Download submodules. set the revision name in the builder script, take the submodule name and add _REVISION to the end, for example REVISION_SUBMODULENAME=revisionno.
@@ -96,7 +96,7 @@ MODULEREVISION=${!REVISIONNAME}
 
 if [[ -z $MODULEREVISION ]]
 then 
-MODULEREVISION=$SOURCEREVERSION
+MODULEREVISION=$SOURCEREVISION
 fi
 
 mkdir -p $MODULE
@@ -137,7 +137,7 @@ mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 svn revert --recursive .
 svn cleanup
-svn update -r $SOURCEREVERSION
+svn update -r $SOURCEREVISION
 }
 
 
@@ -164,7 +164,7 @@ cd "$SOURCENAME"
 bzr revert
 bzr clean-tree --force --detritus
 bzr pull
-bzr update -r $SOURCEREVERSION
+bzr update -r $SOURCEREVISION
 }
 
 
