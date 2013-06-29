@@ -37,8 +37,13 @@ INSTALLDIR=/opt
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
 REBUILDNEWREVISION=0
 
-
-
+#Specify any custom revisions for git submodules in the format shown below
+# SUBMODULEREVSIONS=(examplesubmodule master 
+# nested/submodule 1.0
+# commitsubmodule 0123456789abcdef )
+#
+#This is an array where the first element specifies a submodule name, and the second element specifies the revision, the third specifies the name, the fourth specifies the revision and so on.
+#This is only applicable to git repositories
 
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource

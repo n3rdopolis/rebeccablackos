@@ -84,31 +84,27 @@ git pull -s recursive -X theirs --no-edit
 git submodule sync --recursive
 git submodule update --recursive --force
 
+#Get the number of revisions specified.
+SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVSIONS[@]} /2))
+for (( SUBMODULEREVISION=0; SUBMODULEREVISION <= SUBMODULEREVISIONCOUNT; SUBMODULEREVISION=SUBMODULEREVISION+2 ))
+do
+MODULENAME=${SUBMODULEREVSIONS[$SUBMODULEREVISION]}
+MODULEREVISION=${SUBMODULEREVSIONS[$SUBMODULEREVISION+1]}
+
+cd "$SOURCEDIR"
+cd "$SOURCENAME"
+
+mkdir -p $MODULENAME
+cd $MODULENAME
+git reset --hard origin
+git clean -fdx
+git checkout -f $MODULEREVISION
+git config user.email rbos@rbos
+git pull -s recursive -X theirs --no-edit
+
+done
 
 
-# git submodule  | awk '{print $2}' | while read MODULE
-# do
-# get the current module folder name, and add '_REVISION' to the end of the name
-# REVISIONNAME=REVISION_"$(echo -n $MODULE | tr '[:punct:]' '_' | tr '[:space:]' '_')"
-# use REVISIONNAME (foldername_REVISION as variable variable 
-# MODULEREVISION=${!REVISIONNAME}
-# 
-# if [[ -z $MODULEREVISION ]]
-# then 
-# MODULEREVISION=$SOURCEREVISION
-# fi
-# 
-# mkdir -p $MODULE
-# cd $MODULE
-# 
-# git checkout -f $MODULEREVISION
-# git pull -s recursive -X theirs --no-edit
-# git fetch origin
-# git reset --hard $MODULEREVISION
-# git reset --hard "origin/$MODULEREVISION"
-# git clean -fdx 
-# 
-# done
 }
 
 
