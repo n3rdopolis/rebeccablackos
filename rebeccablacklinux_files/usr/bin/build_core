@@ -82,6 +82,7 @@ git checkout -f $SOURCEREVISION
 git config user.email rbos@rbos
 git pull -s recursive -X theirs --no-edit
 git submodule sync --recursive
+git submodule init
 git submodule update --recursive --force
 
 #Get the number of revisions specified.
