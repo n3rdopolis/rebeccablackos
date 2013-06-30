@@ -80,10 +80,10 @@ git reset --hard origin
 git clean -fdx
 git checkout -f $SOURCEREVISION 
 git config user.email rbos@rbos
-git pull 
 git submodule sync --recursive
 git submodule init
 git submodule update --recursive --force
+git pull
 
 #Get the number of revisions specified.
 SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
