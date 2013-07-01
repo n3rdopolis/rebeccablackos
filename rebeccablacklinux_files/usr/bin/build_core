@@ -76,9 +76,10 @@ mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 git submodule foreach --recursive git reset --hard origin
 git submodule foreach --recursive git clean -fdx
-git reset --hard origin
-git clean -fdx
 git checkout -f $SOURCEREVISION 
+git reset --hard $SOURCEREVISION
+git reset --hard origin/$SOURCEREVISION
+git clean -fdx
 git config user.email rbos@rbos
 git submodule sync --recursive
 git submodule init
@@ -97,9 +98,10 @@ cd "$SOURCENAME"
 
 mkdir -p $MODULENAME
 cd $MODULENAME
-git reset --hard origin
-git clean -fdx
 git checkout -f $MODULEREVISION
+git reset --hard $MODULEREVISION
+git reset --hard origin/$MODULEREVISION
+git clean -fdx
 git config user.email rbos@rbos
 git pull -s recursive -X theirs --no-edit
 
