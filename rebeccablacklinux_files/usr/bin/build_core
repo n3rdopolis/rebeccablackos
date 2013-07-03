@@ -74,7 +74,7 @@ fi
 git clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-git submodule foreach --recursive git reset --hard origin
+git submodule foreach --recursive git reset --hard 
 git submodule foreach --recursive git clean -fdx
 git checkout -f $SOURCEREVISION 
 git reset --hard $SOURCEREVISION
