@@ -55,7 +55,7 @@ git submodule | grep ^- | awk '{print $2}' | while read SUBMODULE
 do
 ls -A $SUBMODULE | grep -v "^.git" |while read FILE
 do 
-rm -rf $FILE
+rm -rf $SUBMODULE/$FILE
 done
 done
 }
