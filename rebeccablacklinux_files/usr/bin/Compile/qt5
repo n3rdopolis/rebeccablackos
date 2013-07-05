@@ -51,6 +51,13 @@ REBUILDNEWREVISION=0
 function PackageDownloadSource
 {
 ./init-repository -f
+git submodule | grep ^- | awk '{print $2}' | while read SUBMODULE
+do
+ls -A $SUBMODULE | grep -v "^.git" |while read FILE
+do 
+rm -rf $FILE
+done
+done
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
