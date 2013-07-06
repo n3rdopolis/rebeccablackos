@@ -63,8 +63,8 @@ sed -i 's/-Werror//g' wscript
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export CPLUS_INCLUDE_PATH=$WLD/include 
-./waf configure --with-flavors=wayland-glesv2,wayland-gl --prefix=$WLD
+export CPLUS_INCLUDE_PATH=$INSTALLDIR/include 
+./waf configure --with-flavors=wayland-glesv2,wayland-gl --prefix=$INSTALLDIR
 ./waf
 }
 
