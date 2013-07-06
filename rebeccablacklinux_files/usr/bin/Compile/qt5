@@ -70,7 +70,7 @@ patch -p1 < /usr/share/RBOS_PATCHES/qt5_qtbase.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked -make examples -fully-process -no-warnings-are-errors
+./configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked -compile-examples -fully-process -no-warnings-are-errors
 make  
 make module-qtwebkit-examples
 }
@@ -85,55 +85,7 @@ make module-qtwebkit-examples install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-#install qt tests
-echo "
-
-Building Examples
-"
-cd /$INSTALLDIR/examples/widgets/widgets/wiggly
-qmake
-make
-cp /$INSTALLDIR/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/widgets/itemviews/dirview
-qmake
-make
-
-cd /$INSTALLDIR/examples/widgets/itemviews/dirview
-qmake
-make
-cp /$INSTALLDIR/examples/widgets/itemviews/dirview/dirview $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/widgets/mainwindows/mainwindow
-qmake
-make
-cp /$INSTALLDIR/examples/widgets/mainwindows/mainwindow/mainwindow $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/widgets/widgets/tetrix
-qmake
-make
-cp /$INSTALLDIR/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/widgets/widgets/calculator
-qmake
-make
-cp /$INSTALLDIR/examples/widgets/widgets/calculator/calculator $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/webkitwidgets/browser
-qmake
-make
-cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/webkitwidgets/fancybrowser
-qmake
-make
-cp /$INSTALLDIR/examples/webkitwidgets/fancybrowser/fancybrowser $INSTALLDIR/bin
-
-cd /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly
-qmake
-make
-cp /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
-
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
