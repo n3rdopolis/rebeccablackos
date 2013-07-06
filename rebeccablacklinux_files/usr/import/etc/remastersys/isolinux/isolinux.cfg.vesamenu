@@ -12,33 +12,33 @@ label live
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash --
 
-label livefb785
+label livefb786
   menu label live - boot the Live System with a 640x480 framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=785 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=786 --
 
-label livefb788
-  menu label live - boot the Live System with a 800x600 framebuffer
+label livefb789
+  menu label live - boot the Live System with a 800x600(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=788 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=789 --
 
-label livefb791
-  menu label live - boot the Live System with a 1024x768 framebuffer
+label livefb792
+  menu label live - boot the Live System with a 1024x768(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=791 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=792 --
 
-label livefb794
-  menu label live - boot the Live System with a 1280x1024 framebuffer
+label livefb795
+  menu label live - boot the Live System with a 1280x1024(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=794 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=795 --
 
 label livefb834
-  menu label live - boot the Live System with a 1400x1050 framebuffer
+  menu label live - boot the Live System with a 1400x1050(x16) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=834 --
 
 label livefb884
-  menu label live - boot the Live System with a 1600x1200 framebuffer
+  menu label live - boot the Live System with a 1600x1200(x16) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=884 --
 
