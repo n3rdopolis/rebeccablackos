@@ -32,15 +32,20 @@ label livefb795
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=795 --
 
-label livefb834
-  menu label live - boot the Live System with a 1400x1050(x16) framebuffer
+label livefb838
+  menu label live - boot the Live System with a 1400x1050(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=834 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=838 --
 
-label livefb884
-  menu label live - boot the Live System with a 1600x1200(x16) framebuffer
+label livefb867
+  menu label live - boot the Live System with a 1400x900(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=884 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=867 --
+
+label livefb799
+  menu label live - boot the Live System with a 1600x1200(x24) framebuffer
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject forcefbdev splash noprompt quiet vga=799 --
 
 label memtest
   menu label memtest - Run memtest
