@@ -246,8 +246,8 @@ DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
 
 if [[ -f $WESTON_PLUGIN_PATH/$SONAME ]]
 then
-echo $DISPLAYNAME
 echo $SONAME
+echo $DISPLAYNAME
 fi
 
 fi
