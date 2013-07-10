@@ -145,6 +145,35 @@ sleep 1
 done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..." 2>/dev/null
 }
 
+function ChooseSessionType
+{
+#Parse the list of sessions specified, so that zenity can use it as a list of sessions
+WSESSIONLIST=$(find /usr/share/wsessions.d -type f  | while read SESSIONFILE
+do 
+ENABLED=$(cat $SESSIONFILE | grep -c "ENABLED=1")
+if [[ $ENABLED -ne 0 ]]
+then
+SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
+DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
+
+if [[ -f $WESTON_PLUGIN_PATH/$SONAME ]]
+then
+echo $SONAME
+echo $DISPLAYNAME
+fi
+
+fi
+done)
+
+#select the session
+WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
+if [[ -z $WSESSION ]]
+then 
+zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
+WSESSION=desktop-shell.so,xwayland.so,cms-colord.so
+fi
+
+}
 
 function ShowInfo
 {
@@ -223,6 +252,7 @@ fi
 
 }
 
+
 #Attempt to get the users authentication
 function AuthenticateUser
 {
@@ -235,31 +265,7 @@ then
 USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
 fi
 
-#Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(find /usr/share/wsessions.d -type f  | while read SESSIONFILE
-do 
-ENABLED=$(cat $SESSIONFILE | grep -c "ENABLED=1")
-if [[ $ENABLED -ne 0 ]]
-then
-SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
-DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
-
-if [[ -f $WESTON_PLUGIN_PATH/$SONAME ]]
-then
-echo $SONAME
-echo $DISPLAYNAME
-fi
-
-fi
-done)
-
-#select the session
-WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
-if [[ -z $WSESSION ]]
-then 
-zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
-WSESSION=desktop-shell.so,xwayland.so,cms-colord.so
-fi
+ChooseSessionType
 
 #present the list of the users to the system
 export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header 2>/dev/null| grep -v 'startup message: remove:')
@@ -367,11 +373,12 @@ fi
 if [[ ! -z $AUTOLOGINUSER ]]
 then
 DialogWait 15
+ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so,xwayland.so,cms-colord.so" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY $WSESSION" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >/var/log/waylandloginmanager 2>&1
