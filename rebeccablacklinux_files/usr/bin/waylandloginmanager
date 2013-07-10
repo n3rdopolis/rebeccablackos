@@ -258,7 +258,7 @@ WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --te
 if [[ -z $WSESSION ]]
 then 
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
-WSESSION=desktop-shell.so
+WSESSION=desktop-shell.so,xwayland.so,cms-colord.so
 fi
 
 #present the list of the users to the system
@@ -371,7 +371,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY desktop-shell.so,xwayland.so,cms-colord.so" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >/var/log/waylandloginmanager 2>&1
