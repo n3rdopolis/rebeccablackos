@@ -25,7 +25,7 @@ then
 rm -r "/tmp/$SCRIPTNAME.lock"
 ln -s /proc/"$$"/cmdline "/tmp/$SCRIPTNAME.lock"
 else
-logger -t waylandloginmanager "Error: Another instance is already running" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
 exit
 fi
 
@@ -53,18 +53,18 @@ plymouth hide-splash
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
-logger -t waylandloginmanager "Kernel mode setting found." -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
 WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
 then
-logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
 setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 else
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $ISLIVE == 1 ]]
 then
-logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
 openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
@@ -88,13 +88,13 @@ fi
 #if the user booted with a hidden option forcefbdev
 if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
 then
-logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $(ls /dev/fb* ) ]]
 then
 setfacl -m "g:plugdev:rwx" /dev/fb*
 WESTONBACKEND=fbdev-backend.so
 else
-logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
 openvt -c 13 -s -f -w -- dialog --msgbox "The forcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
@@ -278,7 +278,7 @@ else
 export SessionTTY=$(GetNextTTY)
 if [[ $SessionTTY -ne -1 ]]
 then
-logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION" -s  >>/var/log/waylandloginmanager 2>&1
 zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
 passwordresult=${PIPESTATUS[2]}
 
@@ -288,7 +288,7 @@ zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
-logger -t waylandloginmanager "Not Enough TTYs for user login!"
+logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
 fi
@@ -341,7 +341,7 @@ do
 
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
-logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
 openvt -c $HostVT -- weston-display-server --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
 fi
 
@@ -377,11 +377,11 @@ ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
-logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
 su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY $WSESSION" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
-logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
 fi 
@@ -399,7 +399,7 @@ while [ 1 ]
 do
 
 COMMAND=$(cat /run/loginmanager_control)
-logger -t waylandloginmanager "received command $COMMAND" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $COMMAND == "Switch" ]]
 then
 chvt $HostVT
@@ -420,7 +420,7 @@ elif [[ $COMMAND == "Info" ]]
 then
 ShowInfo &
 else
-logger -t waylandloginmanager "Invalid command" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "Invalid command" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
 done
@@ -431,7 +431,7 @@ HostVT=$(GetNextTTY)
 LastTTY=$HostVT
 if [[ $HostVT -eq -1 ]]
 then
-logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >/var/log/waylandloginmanager 2>&1
+logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
 exit
 fi
 
