@@ -1,3 +1,6 @@
 ENABLED=1
 NAME=Orbital Shell
-SOFILE=orbital-shell.so,xwayland.so,cms-colord.so
+COMPOSITOR=weston
+COMPOSITOR_ARGUMENTS=
+SOFILE=orbital-shell.so
+ADDITIONAL_SOFILES=xwayland.so,cms-colord.so
