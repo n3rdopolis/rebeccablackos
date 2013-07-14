@@ -196,7 +196,13 @@ fi
 done)
 
 #select the session
-WSESSIONDATA=( $(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1,2,3,4 --print-column=1,2,3,4 --separator="\n" --hide-header 2>/dev/null ) )
+WSESSIONDATA=( $(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1,2,3,4 --print-column=1,2,3,4,5 --separator="\n" --hide-header 2>/dev/null ) )
+export SelectedCompositorExec=${WSESSIONDATA[0]}
+export SelectedBackendArguments=${WSESSIONDATA[1]}
+export SelectedSessionArguments=${WSESSIONDATA[2]}
+export SelectedAdditionalArguments=${WSESSIONDATA[3]}
+export SelectedName=${WSESSIONDATA[4]}
+
 if [[ -z $WSESSIONDATA ]]
 then 
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
