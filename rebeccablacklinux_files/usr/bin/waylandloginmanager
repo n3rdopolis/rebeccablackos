@@ -163,15 +163,15 @@ WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f  | while read SESS
 do 
 DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
 
-Enabled=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Enabled" {print $0}' | cut -d = -f2- )
-Name=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- )
-Type=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- )
-SupportsBackend=$(echo $DesktopFileData| awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- )
-BackendArguments=$(echo $DesktopFileData| awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- )
-SessionArgument=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- ))
-AdditionalArguments=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2- ))
-NeedsFile=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- ))
-CompositorExec=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- ))
+Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' | cut -d = -f2- )
+Name=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- )
+Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- )
+SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- )
+BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- )
+SessionArgument=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- )")
+AdditionalArguments=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2- )")
+NeedsFile=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- )")
+CompositorExec=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- )")
 
 NotFoundCount=0
 echo $NeedsFile | while read FILE
