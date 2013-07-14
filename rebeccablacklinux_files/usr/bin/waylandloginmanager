@@ -147,30 +147,60 @@ done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Wa
 
 function ChooseSessionType
 {
+WSESSIONSPATH="/usr/share/wsessions.d"
+
+if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
+then
+BackendType=FB
+elif [[ $WESTONBACKEND == "drm-backend.so" ]]
+BackendType=KMS
+fi
+
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(find /usr/share/wsessions.d -type f  | while read SESSIONFILE
+WSESSIONLIST=$(find $WSESSIONSPATH -name "*.\desktop$" -type f  | while read SESSIONFILE
 do 
-ENABLED=$(cat $SESSIONFILE | grep -c "ENABLED=1")
+DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
 if [[ $ENABLED -ne 0 ]]
 then
-SONAME=$(cat $SESSIONFILE | grep ^SOFILE= | awk -F = '{print $2}')
-DISPLAYNAME=$(cat $SESSIONFILE | grep ^NAME= | awk -F = '{print $2}')
+Enabled=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Enabled" {print $2}')
+Name=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Name" {print $2}')
+Type=$(echo $DesktopFileData| awk -F ' *= *' '$1 == "Type" {print $2}')
+SupportsBackend=$(echo $DesktopFileData| awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $2}')
+BackendArguments=$(echo $DesktopFileData| awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $2}')
+SessionArgument=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "SessionArgument" {print $2}'))
+AdditionalArguments=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "AdditionalArguments" {print $2}'))
+NeedsFile=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "NeedsFile" {print $2}'))
+CompositorExec=$(eval echo $(echo $DesktopFileData| awk -F ' *= *' '$1 == "CompositorExec" {print $2}'))
 
-if [[ -f $WESTON_PLUGIN_PATH/$SONAME ]]
+NotFoundCount=0
+echo $NeedsFile | while read FILE
+do
+if [[ ! -e $FILE ]]
 then
-echo $SONAME
-echo $DISPLAYNAME
+((NotFoundCount++))
+fi
+done
+
+if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" ]]
+then
+echo $CompositorExec
+echo $BackendArguments
+echo $SessionArguments
+echo $AdditionalArguments
+echo $Name
 fi
 
 fi
 done)
 
 #select the session
-WSESSION=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1 --print-column=1 --hide-header 2>/dev/null )
-if [[ -z $WSESSION ]]
+WSESSIONDATA=( $(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1,2,3,4 --print-column=1,2,3,4 --separator="\n" --hide-header 2>/dev/null ) )
+if [[ -z $WSESSIONDATA ]]
 then 
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
-WSESSION=desktop-shell.so,xwayland.so,cms-colord.so
+SessionName="Default Weston Desktop Shell"
+SessionSessionArguments=desktop-shell.so,xwayland.so,cms-colord.so
+SessionBackendArguments=
 fi
 
 }
