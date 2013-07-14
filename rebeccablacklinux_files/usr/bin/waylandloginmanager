@@ -154,6 +154,7 @@ if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
 then
 BackendType=FB
 elif [[ $WESTONBACKEND == "drm-backend.so" ]]
+then
 BackendType=KMS
 fi
 
@@ -199,9 +200,17 @@ WSESSIONDATA=( $(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --lis
 if [[ -z $WSESSIONDATA ]]
 then 
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
-SessionName="Default Weston Desktop Shell"
-SessionSessionArguments=desktop-shell.so,xwayland.so,cms-colord.so
-SessionBackendArguments=
+export SelectedCompositorExec=weston
+if [[ $BackendType == KMS ]]
+then
+export SelectedBackendArguments=--backend=drm-backend.so
+elif [[ $BackendType == FB ]]
+then 
+export SelectedBackendArguments=--backend=drm-backend.so
+fi
+export SelectedSessionArguments=--modules=desktop-shell.so,xwayland.so,cms-colord.so
+export SelectedAdditionalArguments=--log=$HOME/weston.log
+export SelectedName="Default Weston Desktop Shell"
 fi
 
 }
