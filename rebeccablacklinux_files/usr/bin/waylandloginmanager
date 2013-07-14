@@ -197,11 +197,6 @@ done)
 
 #select the session
 WSESSIONDATA=( $(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column session --column name --hide-column=1,2,3,4 --print-column=1,2,3,4,5 --separator="\n" --hide-header 2>/dev/null ) )
-export SelectedCompositorExec=${WSESSIONDATA[0]}
-export SelectedBackendArguments=${WSESSIONDATA[1]}
-export SelectedSessionArguments=${WSESSIONDATA[2]}
-export SelectedAdditionalArguments=${WSESSIONDATA[3]}
-export SelectedName=${WSESSIONDATA[4]}
 
 if [[ -z $WSESSIONDATA ]]
 then 
@@ -209,14 +204,22 @@ zenity --warning --text="No session selected. Defaulting to the Default Weston D
 export SelectedCompositorExec=weston
 if [[ $BackendType == KMS ]]
 then
-export SelectedBackendArguments=--backend=drm-backend.so
+WSESSIONDATA=( $(echo "weston
+--backend=drm-backend.so
+--modules=desktop-shell.so,xwayland.so,cms-colord.so
+--log=$HOME/weston.log
+Default Weston Desktop Shell
+" ) )
 elif [[ $BackendType == FB ]]
 then 
-export SelectedBackendArguments=--backend=drm-backend.so
+WSESSIONDATA=( $(echo "weston
+--backend=fbdev-backend.so
+--modules=desktop-shell.so,xwayland.so,cms-colord.so
+--log=$HOME/weston.log
+Default Weston Desktop Shell
+" ) )
 fi
-export SelectedSessionArguments=--modules=desktop-shell.so,xwayland.so,cms-colord.so
-export SelectedAdditionalArguments=--log=$HOME/weston.log
-export SelectedName="Default Weston Desktop Shell"
+
 fi
 
 }
@@ -325,7 +328,7 @@ export SessionTTY=$(GetNextTTY)
 if [[ $SessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION" -s  >>/var/log/waylandloginmanager 2>&1
-zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSION
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSIONDATA
 passwordresult=${PIPESTATUS[2]}
 
 if [[ $passwordresult != 0 ]]
@@ -424,7 +427,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY $WSESSION" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY $WSESSIONDATA" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
