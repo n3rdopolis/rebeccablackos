@@ -327,8 +327,8 @@ else
 export SessionTTY=$(GetNextTTY)
 if [[ $SessionTTY -ne -1 ]]
 then
-logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY with session $WSESSION" -s  >>/var/log/waylandloginmanager 2>&1
-zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper $SessionTTY $WSESSIONDATA
+logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper "$SessionTTY" "$WSESSIONDATA"
 passwordresult=${PIPESTATUS[2]}
 
 if [[ $passwordresult != 0 ]]
@@ -427,7 +427,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter $AutoSessionTTY $WSESSIONDATA" &
+su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter \"$AutoSessionTTY\" \"$WSESSIONDATA\"" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
