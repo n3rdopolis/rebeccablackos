@@ -62,8 +62,9 @@ mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-
+rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata/
+rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/importdata/
+rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 #make the imported files executable 
 chmod 0755 -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/

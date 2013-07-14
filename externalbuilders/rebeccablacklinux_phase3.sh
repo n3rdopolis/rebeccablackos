@@ -75,7 +75,7 @@ mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #copy in the files needed
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
+rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 #make the imported files executable 
