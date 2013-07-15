@@ -168,10 +168,12 @@ Name=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut 
 Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- )
 SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- )
 BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- )
-SessionArgument=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- )")
-AdditionalArguments=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2- )")
-NeedsFile=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- )")
-CompositorExec=$(eval echo "$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- )")
+SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | sed -e "s/(/\\\(/g" -e "s/)/\\\)/g" -e "s/&/\\\&/g" -e "s/#/\\\#/g" -e "s/*/\\\*/g" -e "s/\\\/\\\\\\\/g" | while read LINE; do  eval echo $LINE; done)
+AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2- | sed -e "s/(/\\\(/g" -e "s/)/\\\)/g" -e "s/&/\\\&/g" -e "s/#/\\\#/g" -e "s/*/\\\*/g" -e "s/\\\/\\\\\\\/g" | while read LINE; do  eval echo $LINE; done)
+NeedsFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- | sed -e "s/(/\\\(/g" -e "s/)/\\\)/g" -e "s/&/\\\&/g" -e "s/#/\\\#/g" -e "s/*/\\\*/g" -e "s/\\\/\\\\\\\/g" | while read LINE; do  eval echo $LINE; done)
+CompositorExec=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- | sed -e "s/(/\\\(/g" -e "s/)/\\\)/g" -e "s/&/\\\&/g" -e "s/#/\\\#/g" -e "s/*/\\\*/g" -e "s/\\\/\\\\\\\/g" | while read LINE; do  eval echo $LINE; done)
+
+
 
 NotFoundCount=0
 echo $NeedsFile | while read FILE
