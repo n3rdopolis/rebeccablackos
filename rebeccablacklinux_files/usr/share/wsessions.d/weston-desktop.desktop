@@ -9,5 +9,3 @@ CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=drm-backend.so
 SessionArgument=--modules=desktop-shell.so,xwayland.so,cms-colord.so
 AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
-NeedsFile=/opt/bin/weston

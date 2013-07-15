@@ -9,5 +9,3 @@ CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=drm-backend.so
 SessionArgument=--modules=hawaii-desktop-shell.soxwayland.so,cms-colord.so
 AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=$WESTON_PLUGIN_PATH/hawaii-desktop-shell.so
-NeedsFile=/opt/bin/weston
