@@ -28,7 +28,13 @@ done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ )
 . /usr/bin/weston_vars
 
 WESTONTTY=$1
-WSESSION=$2
+WSESSIONDATA=($2)
+
+CompositorExec=${WSESSIONDATA[0]}
+BackendArguments=${WSESSIONDATA[1]}
+SessionArgument=${WSESSIONDATA[2]}
+AdditionalArguments=${WSESSIONDATA[3]}
+Name=${WSESSIONDATA[4]}
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
@@ -45,7 +51,7 @@ fi
 
 
 #Call weston
-weston-launch -t /dev/tty$WESTONTTY -- --backend=$WESTONBACKEND  --modules=$WSESSION &
+weston-launch -t /dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" &
 
 echo "RegisterSession
 $WESTONTTY
