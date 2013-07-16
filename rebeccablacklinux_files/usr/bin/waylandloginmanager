@@ -427,7 +427,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -c "/usr/bin/wlsessionstarter \"$AutoSessionTTY\" \"$WSESSIONDATA\"" &
+su $AUTOLOGINUSER -- /usr/bin/wlsessionstarter "$AutoSessionTTY" "$WSESSIONDATA" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
