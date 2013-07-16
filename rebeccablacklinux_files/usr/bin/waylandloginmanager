@@ -159,7 +159,7 @@ BackendType=KMS
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-while read SESSIONFILE
+WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f  | while read SESSIONFILE
 do 
 DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
 
@@ -186,14 +186,14 @@ done < <(echo "$NeedsFile")
 
 if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" ]]
 then
-WSESSIONLIST+="$CompositorExec
-$BackendArguments
-$SessionArgument
-$AdditionalArguments
-$Name"
+echo "$CompositorExec"
+echo "$BackendArguments"
+echo "$SessionArgument"
+echo "$AdditionalArguments"
+echo "$Name"
 fi
 
-done < <(find $WSESSIONSPATH -name "*\.desktop" -type f )
+done)
 
 #select the session
 WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column compositor --column backend --column session --column args --column name --hide-column=1,2,3,4 --print-column=1,2,3,4,5 --separator="\n" --hide-header 2>/dev/null )
