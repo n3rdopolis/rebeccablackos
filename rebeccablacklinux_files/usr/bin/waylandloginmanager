@@ -176,13 +176,13 @@ NeedsFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $
 
 
 NotFoundCount=0
-echo "$NeedsFile" | while read FILE
+while read FILE
 do
 if [[ ! -e $FILE ]]
 then
 ((NotFoundCount++))
 fi
-done
+done < <(echo "$NeedsFile")
 
 if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" ]]
 then
