@@ -167,16 +167,16 @@ Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' 
 Name=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- )
 Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- )
 SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- )
-BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
-SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
-AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
+BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- )
+SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- )
+AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2-)
+CompositorExec=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- )
 NeedsFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
-CompositorExec=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
 
 
 
 NotFoundCount=0
-echo $NeedsFile | while read FILE
+echo "$NeedsFile" | while read FILE
 do
 if [[ ! -e $FILE ]]
 then
