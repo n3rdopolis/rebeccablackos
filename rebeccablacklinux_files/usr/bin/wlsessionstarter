@@ -30,11 +30,11 @@ done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ )
 WESTONTTY=$1
 WSESSIONDATA=($2)
 
-CompositorExec=${WSESSIONDATA[0]}
-BackendArguments=${WSESSIONDATA[1]}
-SessionArgument=${WSESSIONDATA[2]}
-AdditionalArguments=${WSESSIONDATA[3]}
-Name=${WSESSIONDATA[4]}
+CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+Name="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
 #Detect hardware abilities
 if [[ $(ls  /dev/dri/card* ) ]]
