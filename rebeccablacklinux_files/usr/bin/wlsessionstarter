@@ -19,12 +19,16 @@
 #Change to the users homepath so weston starts in the right place
 cd ~
 
+#unset most varaibles
 while read var
 do 
 unset $var
 done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ ) 
 
-#Import Wayland variable
+#Get variables from users bashrc
+. ~/.bashrc
+
+#Import Wayland variables
 . /usr/bin/weston_vars
 
 WESTONTTY=$1
