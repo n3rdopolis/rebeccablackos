@@ -23,6 +23,14 @@ echo "Must be run as root."
 exit
 fi
 
+echo "Installing virtualbox additions with this distro is not recommended as they don't appear to support Wayland.
+This script is currently unsupported, as the kernel mode setting driver that the virtualbox additions install is NOT compatible with weston. egl fails to initilize, and weston hangs even using pixman.
+
+Virtualbox's framebuffer driver is much more reliable, and you are better off using that by configuring with rbos-add-framebuffer
+
+if you still want to install virtualbox addtions and possibly break weston, remove the exit line from $(readlink -f $0)"
+exit
+
 VBOXDISK=$(find /dev/disk/by-label/VBOXADDITIONS* | tail -1)
 VBOXMOUNT=$(findmnt -f -c -o TARGET -n $VBOXDISK)
 CPUARCH=$(uname -m)
