@@ -54,7 +54,7 @@ fi
 
 
 
-#Call weston
+#Call weston TODO weston-launch needs https://bugs.freedesktop.org/show_bug.cgi?id=66853 for the CompositorExec key to be used
 weston-launch -t /dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" &
 
 echo "RegisterSession
