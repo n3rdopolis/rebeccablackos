@@ -69,7 +69,7 @@ mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir
 mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap --arch $BUILDARCH quantal $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap --arch $BUILDARCH saucy $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
 touch $RBOSLOCATION/DontStartFromScratch$BUILDARCH
