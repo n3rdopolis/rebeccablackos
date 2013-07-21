@@ -23,7 +23,7 @@
 SOURCENAME=llvm
 
 #The URL of the Source code repo
-SOURCEURL=http://llvm.org/svn/llvm-project/test-suite/tags/RELEASE_33/final/
+SOURCEURL=http://llvm.org/svn/llvm-project/llvm/tags/RELEASE_33/final/
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
 REPOSITORYTYPE=SVN
@@ -64,13 +64,13 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
-gmake 
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-gmake install
+make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
