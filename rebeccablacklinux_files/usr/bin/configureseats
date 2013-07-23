@@ -21,7 +21,7 @@ while read Device
 do
 DeviceProperties=$(udevadm info --query=property  --name=$Device)
 DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -e '/looking at/d' -e 's/    //g' -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 )
-DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_PATH" {print $0}' | cut -d = -f2- | tail -1 )
+DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SERIAL" {print $0}' | cut -d = -f2- | tail -1 )
 DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_PATH" {print $0}' | cut -d = -f2- | tail -1 )
 DeviceSeatID=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
 IsDeviceMouse=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_MOUSE" {print $0}' | cut -d = -f2- | tail -1 )
@@ -36,6 +36,11 @@ DeviceDisplayName=$DeviceName
   then
   DeviceDisplayName="Generic"
   fi
+fi
+
+if [[ -z $DeviceSeatID ]]
+then
+DeviceSeatID=seat0
 fi
 
 unset DeviceType
