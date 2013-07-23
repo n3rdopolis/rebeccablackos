@@ -23,12 +23,12 @@ echo "Must be run as root."
 exit
 fi
 
-echo "Installing virtualbox additions with this distro is not recommended as they don't appear to support Wayland.
+echo "Installing virtualbox additions with this distro is not recommended as they don't appear to support Weston.
 This script is currently unsupported, as the kernel mode setting driver that the virtualbox additions install is NOT compatible with weston. egl fails to initilize, and weston hangs even using pixman.
 
-Virtualbox's framebuffer driver is much more reliable, and you are better off using that by configuring with rbos-add-framebuffer
+Virtualbox's framebuffer driver is much more reliable then the Virtualbox Kernel Mode setting drivers, and you are better off using that by configuring with rbos-add-framebuffer
 
-if you still want to install virtualbox addtions and possibly break weston, remove the exit line from $(readlink -f $0)"
+if you still want to install virtualbox addtions andpossibly break weston, remove the exit line from $(readlink -f $0)"
 exit
 
 VBOXDISK=$(find /dev/disk/by-label/VBOXADDITIONS* | tail -1)
@@ -46,16 +46,16 @@ fi
 mkdir /tmp/vboxinstall
 cd /tmp/vboxinstall
 $VBOXMOUNT/VBoxLinuxAdditions.run --keep --target .
-tar -axf
-if [[ $CPUARCH == i686 ]]
-then
-tar -axf VBoxGuestAdditions-x86.tar.bz2
-else 
-tar -axf VBoxGuestAdditions-amd64.tar.bz2
-fi
-cd src/vboxguest-*
-. /usr/bin/build_vars
-make
+#tar -axf
+#if [[ $CPUARCH == i686 ]]
+#then
+#tar -axf VBoxGuestAdditions-x86.tar.bz2
+#else 
+#tar -axf VBoxGuestAdditions-amd64.tar.bz2
+#fi
+#cd src/vboxguest-*
+#. /usr/bin/build_vars
+#make
 
 if [[ UNMOUNT == 1 ]]
 then 
