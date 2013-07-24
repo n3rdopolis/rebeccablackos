@@ -117,9 +117,17 @@ DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayName
 done
 
 #Show a guide for the users on what devices they have attached to their system, and what will be configured
-zenity --forms --text "This Dialog lists all the devices that will be configured by this wizard. 
+zenity --forms --text "The changes made here will effect all users, as well as the loginmanager.
+
+You will be able to select what seat devices belong to.
+
+Currently this script, can set up to 6 seats/pointers.
+
+This Dialog lists all the devices that will be configured by this wizard. 
 You can close this dialog at anytime, as closing with will not interfere with the wizard, 
 but serves as a guide to tell you how many devices are left.
+
+Please note that some devices have multiple internal components, and sometimes register themselves twice.
 
 Devices:
 $DeviceList " --title="Seat Configuration" &
