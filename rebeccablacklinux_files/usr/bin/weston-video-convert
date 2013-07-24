@@ -25,7 +25,7 @@ fi
 
 zenity --warning --text="This will convert the captured video data from your recorded desktop session into a playable movie file. Press OK to continue."
 
-wlterm -l /usr/libexec/wayland_helpers/weston-video-convert-helper
+vte2_90 -c /usr/libexec/wayland_helpers/weston-video-convert-helper
 if [[ -f ~/weston-capture-$FILENAMEID.webm ]]
 then
 zenity --warning --text="Created movie file ~/weston-capture-$FILENAMEID.webm out of the captured desktop file."
