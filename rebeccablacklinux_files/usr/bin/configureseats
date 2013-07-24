@@ -17,6 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 NumberOfDevices=0
+#Get all input devices from udev, and store attributes into an array
 while read Device
 do
 DeviceProperties=$(udevadm info --query=property  --name=$Device)
@@ -48,30 +49,47 @@ if [[ -z $IsDeviceMouse ]]
 then
 IsDeviceMouse=0
 else
-DeviceType+=M
+  if [[ ! -z $DeviceType ]]
+  then
+  DeviceType+=" / "
+  fi
+DeviceType+="Mouse"
 fi
 if [[ -z $IsDeviceTouchscreen ]]
 then
 IsDeviceTouchscreen=0
 else
-DeviceType+=S
+  if [[ ! -z $DeviceType ]]
+  then
+  DeviceType+=" / "
+  fi
+DeviceType+="Touchscreen"
 fi
 if [[ -z $IsDeviceTouchpad ]]
 then
 IsDeviceTouchpad=0
 else
-DeviceType+=T
+  if [[ ! -z $DeviceType ]]
+  then
+  DeviceType+=" / "
+  fi
+DeviceType+="Touchpad"
 fi
 if [[ -z $IsDeviceKeyboard ]]
 then
 IsDeviceKeyboard=0
 else
-DeviceType+=K
+  if [[ ! -z $DeviceType ]]
+  then
+  DeviceType+=" / "
+  fi
+DeviceType+="Keyboard"
 fi
 
 if [[ ! -z $DeviceType ]]
 then
 ((NumberOfDevices++))
+DevicePaths[$NumberOfDevices]=$Device
 DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
 DeviceNames[$NumberOfDevices]=$DeviceName
 DeviceConnections[$NumberOfDevices]=$DeviceConnection
@@ -80,3 +98,38 @@ DeviceTypes[$NumberOfDevices]=$DeviceType
 fi
 
 done < <(find /dev/input/event*)
+
+#Create the config file
+touch /lib/udev/rules.d/99-westonseats.rules
+
+#Go through each probed input device and prompt for a new seat
+for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+do
+
+NewSeatNumber=$(echo "seat0
+seat1
+seat2
+seat3
+seat4
+seat5" | zenity --list --column=seats --hide-header --text="Select a seat for the $DeviceDisplayNames[$CurrentDeviceNumber] $DeviceTypes[$CurrentDeviceNumber]
+
+Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}") --title "Choose a seat"
+
+if [[ -z $NewSeatNumber ]]
+then
+zenity --info --text "Seat for Device not Changed"
+else
+cat /lib/udev/rules.d/99-westonseats.rules /tmp/99-westonseats.rules.work
+awk '!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/' /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
+echo "ID_SERIAL==\"${DeviceNames[$CurrentDeviceNumber]}\" ID_PATH==\"${DeviceConnections[$CurrentDeviceNumber]}\" ENV{ID_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
+fi
+done
+
+#Reload the configuration into udev
+udevadm control --reload-rules
+
+#Notify each input device about the changes
+for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+do
+udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
+done
