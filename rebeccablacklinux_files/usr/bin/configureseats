@@ -144,7 +144,7 @@ seat5" | zenity --list --column=seats --hide-header --text="Seat Configuration (
 
 Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 
-Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" ) 
+Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
 
 if [[ -z $NewSeatNumber ]]
 then

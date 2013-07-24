@@ -277,7 +277,7 @@ New Session...
 
 
 unset ChangeSession
-ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 2>/dev/null )
+ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 --separator="\n" 2>/dev/null | head -1 )
 
 if [[ $ChangeSession == "-1" ]]
 then
@@ -317,7 +317,7 @@ fi
 ChooseSessionType
 
 #present the list of the users to the system
-export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header 2>/dev/null| grep -v 'startup message: remove:')
+export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
