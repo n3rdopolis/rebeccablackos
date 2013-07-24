@@ -159,7 +159,7 @@ BackendType=KMS
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f  | while read SESSIONFILE
+WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f  | sort | while read SESSIONFILE
 do 
 DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
 
