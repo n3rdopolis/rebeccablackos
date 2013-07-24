@@ -142,7 +142,7 @@ zenity --info --text "Seat for Device not Changed" --title="Seat Configuration"
 else
 cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
 awk '!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/' /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
-echo "ID_SERIAL==\"${DeviceNames[$CurrentDeviceNumber]}\" ID_PATH==\"${DeviceConnections[$CurrentDeviceNumber]}\" ENV{ID_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
+echo "ID_SERIAL==\"${DeviceNames[$CurrentDeviceNumber]}\", ID_PATH==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
 rm /tmp/99-westonseats.rules.work
 fi
 done
