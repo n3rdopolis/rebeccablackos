@@ -119,7 +119,9 @@ done
 #Show a guide for the users on what devices they have attached to their system, and what will be configured
 zenity --forms --text "The changes made here will effect all users, as well as the loginmanager.
 
-You will be able to select what seat devices belong to.
+You will be able to select what seat devices belong to. 
+The devices are remembered by the device's name (usually containing the make and model), 
+and the port it's plugged into.
 
 Currently this script, can set up to 6 seats/pointers.
 
@@ -127,7 +129,7 @@ This Dialog lists all the devices that will be configured by this wizard.
 You can close this dialog at anytime, as closing with will not interfere with the wizard, 
 but serves as a guide to tell you how many devices are left.
 
-Please note that some devices have multiple internal components, and sometimes register themselves twice.
+Please note that some devices have multiple internal components, and sometimes register themselves more than once.
 
 Devices:
 $DeviceList " --title="Seat Configuration" &
