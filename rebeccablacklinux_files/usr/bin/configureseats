@@ -102,7 +102,7 @@ done < <(find /dev/input/event*)
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-DeviceList+="     ${DeviceDisplayNames[$CurrentDeviceNumber]} ${DeviceTypes[$CurrentDeviceNumber]}
+DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}
 "
 done
 
@@ -122,6 +122,7 @@ touch /lib/udev/rules.d/99-westonseats.rules
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
 
+unset NewSeatNumber
 NewSeatNumber=$(echo "seat0
 seat1
 seat2
@@ -129,9 +130,9 @@ seat3
 seat4
 seat5" | zenity --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
-Select a seat for the $DeviceDisplayNames[$CurrentDeviceNumber] $DeviceTypes[$CurrentDeviceNumber]
+Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 
-Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}") --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
+Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" ) 
 
 if [[ -z $NewSeatNumber ]]
 then
