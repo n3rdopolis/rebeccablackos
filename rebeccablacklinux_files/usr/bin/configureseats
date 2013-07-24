@@ -99,6 +99,22 @@ fi
 
 done < <(find /dev/input/event*)
 
+#Get a list of all devices for the main form
+for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+do
+DeviceList+="     ${DeviceDisplayNames[$CurrentDeviceNumber]} ${DeviceTypes[$CurrentDeviceNumber]}
+"
+done
+
+#Show a guide for the users on what devices they have attached to their system, and what will be configured
+zenity --forms --text "This Dialog lists all the devices that will be configured by this wizard. You can close this dialog at anytime, as closing wit will not interfere with the wizard, but serves as a guide to tell you how many devices are left.
+
+Devices:
+$DeviceList " --title="Seat Configuration" &
+MainFormPID=$!
+
+
+
 #Create the config file
 touch /lib/udev/rules.d/99-westonseats.rules
 
@@ -111,19 +127,24 @@ seat1
 seat2
 seat3
 seat4
-seat5" | zenity --list --column=seats --hide-header --text="Select a seat for the $DeviceDisplayNames[$CurrentDeviceNumber] $DeviceTypes[$CurrentDeviceNumber]
+seat5" | zenity --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
-Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}") --title "Choose a seat"
+Select a seat for the $DeviceDisplayNames[$CurrentDeviceNumber] $DeviceTypes[$CurrentDeviceNumber]
+
+Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}") --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
 
 if [[ -z $NewSeatNumber ]]
 then
-zenity --info --text "Seat for Device not Changed"
+zenity --info --text "Seat for Device not Changed" --title="Seat Configuration"
 else
 cat /lib/udev/rules.d/99-westonseats.rules /tmp/99-westonseats.rules.work
 awk '!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/' /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
 echo "ID_SERIAL==\"${DeviceNames[$CurrentDeviceNumber]}\" ID_PATH==\"${DeviceConnections[$CurrentDeviceNumber]}\" ENV{ID_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
 fi
 done
+
+#Close the main zenity window that lists all devices
+kill -9 $MainFormPID
 
 #Reload the configuration into udev
 udevadm control --reload-rules
