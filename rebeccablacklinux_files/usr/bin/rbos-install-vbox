@@ -46,16 +46,16 @@ fi
 mkdir /tmp/vboxinstall
 cd /tmp/vboxinstall
 $VBOXMOUNT/VBoxLinuxAdditions.run --keep --target .
-#tar -axf
-#if [[ $CPUARCH == i686 ]]
-#then
-#tar -axf VBoxGuestAdditions-x86.tar.bz2
-#else 
-#tar -axf VBoxGuestAdditions-amd64.tar.bz2
-#fi
-#cd src/vboxguest-*
-#. /usr/bin/build_vars
-#make
+tar -axf
+if [[ $CPUARCH == i686 ]]
+then
+tar -axf VBoxGuestAdditions-x86.tar.bz2
+else 
+tar -axf VBoxGuestAdditions-amd64.tar.bz2
+fi
+cd src/vboxguest-*
+. /usr/bin/build_vars
+make
 
 if [[ UNMOUNT == 1 ]]
 then 
