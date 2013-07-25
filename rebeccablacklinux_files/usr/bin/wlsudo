@@ -16,11 +16,26 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-zenity --forms --text="The following command will be executed as root
-$*
-Please enter your password to continue:" --title=wlsudo --add-password="" | sudo -S -b -E waylandapp $*
+echo "" | sudo -S -b true 2>&1 >/dev/null
 result=${PIPESTATUS[1]}
+
 if [[ $result == 1 ]]
 then
-zenity --info --title=wlsudo --text="Invalid Password"
+zenity --forms --text="The following command will be executed as root
+$*
+Please enter your password to continue:" --title=wlsudo --add-password="" 2>/dev/null | sudo -S -b -E waylandapp $* 2>&1 >/dev/null
+result=${PIPESTATUS[1]}
+  if [[ $result == 1 ]]
+  then
+  zenity --info --title=wlsudo --text="Invalid Password, or command not found." 2>&1 >/dev/null
+  fi
+else
+zenity --title=wlsudo --forms --text="The following command will be executed as root
+$*
+Press OK to continue" 2>&1 >/dev/null
+result=$?
+  if [[ $result == 0 ]]
+  then
+  $*
+  fi
 fi
