@@ -26,6 +26,9 @@ fi
 #Allow Exclamation points to be used in commands by turning off the history
 set +H
 
+#Specify the maximum number of seats
+MaxNumberOfSeats=10
+
 NumberOfDevices=0
 #Get all input devices from udev, and store attributes into an array
 while read Device
@@ -123,8 +126,6 @@ You will be able to select what seat devices belong to.
 The devices are remembered by the device's name (usually containing the make and model), 
 and the port it's plugged into.
 
-Currently this script, can set up to 6 seats/pointers.
-
 This Dialog lists all the devices that will be configured by this wizard. 
 You can close this dialog at anytime, as closing with will not interfere with the wizard, 
 but serves as a guide to tell you how many devices are left.
@@ -140,17 +141,24 @@ sleep 5
 #Create the config file
 touch /lib/udev/rules.d/99-westonseats.rules
 
+#Generate a list of seats for the Zenity dialogs for selection
+unset SeatList
+for (( CurrentSeat=0; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
+do
+if [[ ! -z $SeatList ]]
+then
+SeatList+="
+"
+fi
+SeatList+="seat$CurrentSeat"
+done
+
 #Go through each probed input device and prompt for a new seat
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
 
 unset NewSeatNumber
-NewSeatNumber=$(echo "seat0
-seat1
-seat2
-seat3
-seat4
-seat5" | zenity --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+NewSeatNumber=$(echo "$SeatList" | zenity --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
 Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 
