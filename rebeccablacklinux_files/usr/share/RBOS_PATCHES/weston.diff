@@ -1,5 +1,5 @@
 diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
-index 9c3d17e..449dfc2 100644
+index 9c3d17e..332e541 100644
 --- a/src/compositor-fbdev.c
 +++ b/src/compositor-fbdev.c
 @@ -833,6 +833,15 @@ fbdev_compositor_create(struct wl_display *display, int *argc, char *argv[],
@@ -18,6 +18,16 @@ index 9c3d17e..449dfc2 100644
  	compositor->udev = udev_new();
  	if (compositor->udev == NULL) {
  		weston_log("Failed to initialize udev context.\n");
+@@ -880,6 +889,9 @@ out_udev:
+ out_compositor:
+ 	weston_compositor_shutdown(&compositor->base);
+ 
++err_compositor:
++	weston_compositor_shutdown(&ec->base);	
++	
+ out_free:
+ 	free(compositor);
+ 
 
 
 
