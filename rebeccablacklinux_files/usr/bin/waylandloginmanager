@@ -334,6 +334,8 @@ passwordresult=${PIPESTATUS[2]}
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
+else
+/usr/bin/wlsessionstarter "$AutoSessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
@@ -427,7 +429,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-su $AUTOLOGINUSER -- /usr/bin/wlsessionstarter "$AutoSessionTTY" "$WSESSIONDATA" &
+/usr/bin/wlsessionstarter "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1

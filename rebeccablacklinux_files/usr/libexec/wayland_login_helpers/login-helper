@@ -38,8 +38,4 @@ expect "Password:" {send "$password";}
 expect "Enter your login passphrase:" {send "$password";}
 catch wait result
 
-spawn su $LOGINUSER -- /usr/bin/wlsessionstarter "$usertty" "$usersession"
-expect "Password:" {send "$password";}
-catch wait result
-
 } else {exit 1}

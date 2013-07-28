@@ -16,8 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Change to the users homepath so weston starts in the right place
-cd ~
 
 #unset most varaibles
 while read var
@@ -25,14 +23,21 @@ do
 unset $var
 done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ ) 
 
-#Get variables from users bashrc
-. ~/.bashrc
+
 
 #Import Wayland variables
 . /usr/bin/weston_vars
 
 WESTONTTY=$1
-WSESSIONDATA=($2)
+LOGINUSER=$2
+WSESSIONDATA=($3)
+
+#Change to the users homepath so weston starts in the right place, and set some varaibles for the user
+export HOME=~$LOGINUSER
+export LOGNAME=$LOGINUSER
+export USER=$LOGINUSER
+export USERNAME=$LOGINUSER
+cd $HOME
 
 CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
@@ -40,22 +45,9 @@ SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' 
 AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 Name="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
-#Detect hardware abilities
-if [[ $(ls  /dev/dri/card* ) ]]
-then 
-WESTONBACKEND=drm-backend.so
-else
-WESTONBACKEND=fbdev-backend.so
-fi
-if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
-then
-WESTONBACKEND=fbdev-backend.so
-fi
-
-
 
 #Call weston TODO weston-launch needs https://bugs.freedesktop.org/show_bug.cgi?id=66853 for the CompositorExec key to be used
-weston-launch -t /dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" &
+weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" &
 
 echo "RegisterSession
 $WESTONTTY
