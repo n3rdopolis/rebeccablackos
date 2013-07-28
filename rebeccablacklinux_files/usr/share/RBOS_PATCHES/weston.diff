@@ -1,5 +1,5 @@
 diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
-index 9c3d17e..332e541 100644
+index 9c3d17e..0f1831a 100644
 --- a/src/compositor-fbdev.c
 +++ b/src/compositor-fbdev.c
 @@ -833,6 +833,15 @@ fbdev_compositor_create(struct wl_display *display, int *argc, char *argv[],
@@ -7,9 +7,9 @@ index 9c3d17e..332e541 100644
  		goto out_free;
  
 +	/* Check if we run drm-backend using weston-launch */
-+	ec->base.launcher_sock =
++	compositor->base.launcher_sock =
 +		weston_environment_get_fd("WESTON_LAUNCHER_SOCK");
-+	if (ec->base.launcher_sock == -1 && geteuid() != 0) {
++	if (compositor->base.launcher_sock == -1 && geteuid() != 0) {
 +		weston_log("fatal: drm backend should be run "
 +			   "using weston-launch binary or as root\n");
 +		goto err_compositor;
@@ -23,7 +23,7 @@ index 9c3d17e..332e541 100644
  	weston_compositor_shutdown(&compositor->base);
  
 +err_compositor:
-+	weston_compositor_shutdown(&ec->base);	
++	weston_compositor_shutdown(&compositor->base);	
 +	
  out_free:
  	free(compositor);
