@@ -186,3 +186,6 @@ for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDevi
 do
 udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
 done
+
+
+zenity --info --text "Seat Configuration for all devices is now complete." --title="Seat Configuration"
