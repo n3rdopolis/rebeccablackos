@@ -335,7 +335,7 @@ if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 else
-/usr/bin/wlsessionstarter "$AutoSessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+/usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
