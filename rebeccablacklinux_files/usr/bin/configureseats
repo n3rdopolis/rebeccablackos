@@ -158,7 +158,7 @@ for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDevi
 do
 
 unset NewSeatNumber
-NewSeatNumber=$(echo "$SeatList" | zenity --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
 Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 

@@ -196,7 +196,7 @@ fi
 done)
 
 #select the session
-WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --list --text "Select a Weston Desktop Environment to use" --column compositor --column backend --column session --column args --column name --hide-column=1,2,3,4 --print-column=1,2,3,4,5 --separator="\n" --hide-header 2>/dev/null )
+WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Weston Desktop Environment to use" --column compositor --column backend --column session --column args --column name --hide-column=1,2,3,4 --print-column=1,2,3,4,5 --separator="\n" --hide-header 2>/dev/null )
 
 if [[ -z $WSESSIONDATA ]]
 then 
@@ -317,7 +317,7 @@ fi
 ChooseSessionType
 
 #present the list of the users to the system
-export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
+export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
 
 #if there is no user selected then show a dialog. If a user was selected, prompt for its login
 if [[ -z $LOGINUSER ]]
@@ -353,7 +353,7 @@ function LeavePrompt
 ACTION=$(echo "Shutdown
 Restart
 Standby
-Hibernate" | zenity --title="Leave..." --list  --hide-header --text="What do you want to do?" --column 'action' 2>/dev/null | grep -v 'startup message: remove:' )
+Hibernate" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --column 'action' 2>/dev/null | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
