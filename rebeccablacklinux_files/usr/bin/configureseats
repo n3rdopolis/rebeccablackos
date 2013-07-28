@@ -29,6 +29,8 @@ set +H
 #Specify the maximum number of seats
 MaxNumberOfSeats=10
 
+CurrentTTY=$(fgconsole)
+
 NumberOfDevices=0
 #Get all input devices from udev, and store attributes into an array
 while read Device
@@ -54,7 +56,7 @@ fi
 
 if [[ -z $DeviceSeatID ]]
 then
-DeviceSeatID=seat0
+DeviceSeatID=default
 fi
 
 unset DeviceType
@@ -143,13 +145,11 @@ touch /lib/udev/rules.d/99-westonseats.rules
 
 #Generate a list of seats for the Zenity dialogs for selection
 unset SeatList
-for (( CurrentSeat=0; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
+SeatList="default"
+for (( CurrentSeat=1; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
 do
-if [[ ! -z $SeatList ]]
-then
 SeatList+="
 "
-fi
 SeatList+="seat$CurrentSeat"
 done
 
@@ -188,4 +188,17 @@ udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
 done
 
 
-zenity --info --text "Seat Configuration for all devices is now complete." --title="Seat Configuration"
+zenity --info --text "Seat Configuration for all devices is now complete.
+
+The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Seat Configuration"
+
+#Change in and out of the vts so that the display server gets the change
+if [[ $CurrentTTY != 7 ]]
+then
+chvt 7
+else
+chvt 6
+fi
+
+sleep 3
+chvt $CurrentTTY
