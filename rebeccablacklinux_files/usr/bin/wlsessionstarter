@@ -33,7 +33,7 @@ LOGINUSER=$2
 WSESSIONDATA=($3)
 
 #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
-export HOME=~$LOGINUSER
+export HOME=$(eval echo ~$LOGINUSER)
 export LOGNAME=$LOGINUSER
 export USER=$LOGINUSER
 export USERNAME=$LOGINUSER
