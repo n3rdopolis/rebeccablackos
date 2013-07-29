@@ -277,7 +277,7 @@ New Session...
 
 
 unset ChangeSession
-ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 --separator="\n" 2>/dev/null | head -1 )
+ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --height=450 --list --text "Select a running session to change into" --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 --separator="\n" 2>/dev/null | head -1 )
 
 if [[ $ChangeSession == "-1" ]]
 then
