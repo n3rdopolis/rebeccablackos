@@ -111,7 +111,8 @@ TTYInUse=1
 while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
 do
 ((LastTTY++))
-TTYInUse=$(openvt -c $LastTTY -- /bin/true 2>&1 | grep -c "is in use")
+openvt -c $LastTTY -- /bin/true 
+TTYInUse=$?
 done
 
 if [[ $TTYInUse -ne 0 ]]
