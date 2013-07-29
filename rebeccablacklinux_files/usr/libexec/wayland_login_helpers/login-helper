@@ -19,8 +19,6 @@
 #using the password argument sent, put it into a variable
 set LOGINUSER $::env(LOGINUSER)
 set password [read stdin]
-set usertty [lindex $argv 0]
-set usersession [lindex $argv 1]
 
 set env(LOGINUSER) ""
 
