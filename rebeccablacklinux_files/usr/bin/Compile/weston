@@ -62,7 +62,7 @@ patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-libunwind  --with-cairo-glesv2 --enable-tablet-shell
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-libunwind  --with-cairo-glesv2 --enable-tablet-shell --enable-demo-clients
 make 
 }
 
@@ -75,12 +75,6 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-#install Wayland clients into the PATH
-find /"$SOURCEDIR"/"$SOURCENAME"/clients -executable | while read CLIENT
-do
-cp "$CLIENT" /$INSTALLDIR/bin
-done
-
 #Install the screen capture utils
 find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
