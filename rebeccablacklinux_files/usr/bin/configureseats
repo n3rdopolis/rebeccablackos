@@ -126,7 +126,12 @@ zenity --forms --text "The changes made here will effect all users, as well as t
 
 You will be able to select what seat devices belong to. 
 The devices are remembered by the device's name (usually containing the make and model), 
-and the port it's plugged into.
+and the port it's plugged into, so in order for the configuration to work each time you plug your devices, 
+you need to plug them into the same port, (otherwise they will default to the default seat)
+
+A seat in the Wayland sense is a group of input devices, such as a mouse and keyboard, window focus,
+and clipboard and cursor. It is best to add at least 1 mouse device and 1 keyboard to each seat that 
+you add devices to. You don't have to fill all seats with a device. 
 
 This Dialog lists all the devices that will be configured by this wizard. 
 You can close this dialog at anytime, as closing with will not interfere with the wizard, 
