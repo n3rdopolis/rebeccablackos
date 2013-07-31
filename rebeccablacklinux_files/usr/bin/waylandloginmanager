@@ -238,7 +238,7 @@ BACKENDSTRING="Your system is using Weston with Kernel mode setting.
 
 This is the optimal way to run Weston."
 fi
-zenity --title="Information" --forms --text="This is a third party fan made distribution!
+zenity --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
 
 $BACKENDSTRING
 

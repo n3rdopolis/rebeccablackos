@@ -122,7 +122,7 @@ DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayName
 done
 
 #Show a guide for the users on what devices they have attached to their system, and what will be configured
-zenity --forms --text "The changes made here will effect all users, as well as the loginmanager.
+zenity --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager.
 
 You will be able to select what seat devices belong to. 
 The devices are remembered by the device's name (usually containing the make and model), 
