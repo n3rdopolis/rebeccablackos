@@ -24,10 +24,8 @@ Built: $(cat /etc/builddate)
 
 
 zenity --title="Help" --no-wrap --info --text 'Weston Key Bindings:
-=================================================================================
 Note: The super key on most keyboards is the Windows logo key.
 Note: The middle mouse button is usually pressing the scroll button on most mice.
-=================================================================================
 
 Zoom the display in and out: Super key + scroll wheel
 
@@ -40,7 +38,8 @@ Rotate Window: Super key: right mouse button
 
 Save a screenshot: Super key + s
 Start and stop video recording: Super key + r 
-(after recording run weston-video-convert in the panel to convert the capture file to a .webm video file)
+(after recording run weston-video-convert in the panel to 
+convert the capture file to a .webm video file)
 
 Dim the display (under native Weston): Super key + F9
 Brighten the display (under native Weston): Super key + F10
@@ -52,9 +51,8 @@ By default there are 2 workspaces
 Exit Weston: ctrl key + alt key + backspace' 
 
 zenity --title="Help" --no-wrap --info --text '
-=================================================================================
-=================================================================================
-The Application menu stays open, even after calling programs, and does not work with multiple instances of the Application Launcher 
+The Application menu stays open, even after calling programs, and 
+does not work with multiple instances of the Application Launcher 
 
 To launch another Application, currently, you have to find the already open instance of the Application Launcher
 
@@ -62,9 +60,8 @@ Some applications (mostly xwayland applications) might need to be resized to ref
 
 
 zenity --title="Help" --no-wrap --info --text 'To launch programs:
-=================================================================================
-=================================================================================
-Click on the "RBOS" Icon on the top for the Application menu. Be sure to check for the Wayland programs under "Applications"!
+Click on the "RBOS" Icon on the top for the Application menu. Be sure to check 
+for the Wayland programs under "Applications"!
 
 Click on the Desktop icon for viewing the contents of the Desktop folder
 
@@ -80,7 +77,8 @@ Click the Speaker icon to adjust the volume
 
 Click on the Antenna icon to launch the Network Manager
 
-The movie icon converts the Weston screenshot file to .WEBM files as mentioned in the previous dialog
+The movie icon converts the Weston screenshot file to .WEBM files as mentioned 
+in the previous dialog
 
 Click on the lightbulb icon for battery info
 
