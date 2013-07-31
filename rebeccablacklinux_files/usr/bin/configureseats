@@ -140,7 +140,7 @@ but serves as a guide to tell you how many devices are left.
 Please note that some devices have multiple internal components, and sometimes register themselves more than once.
 
 Devices:
-$DeviceList " --title="Seat Configuration" &
+$DeviceList " --title="Multipointer Configuration" &
 MainFormPID=$!
 sleep 5
 
@@ -163,15 +163,15 @@ for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDevi
 do
 
 unset NewSeatNumber
-NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
 Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 
-Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
+Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
 
 if [[ -z $NewSeatNumber ]]
 then
-zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
+zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
 else
 DeviceSeatIDs[CurrentDeviceNumber]=$NewSeatNumber
 
@@ -197,7 +197,7 @@ done
 
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Seat Configuration"
+The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Multipointer Configuration"
 
 #Change in and out of the vts so that the display server gets the change
 if [[ $CurrentTTY != 7 ]]
