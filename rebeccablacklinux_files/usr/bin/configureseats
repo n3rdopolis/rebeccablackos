@@ -171,8 +171,10 @@ Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "S
 
 if [[ -z $NewSeatNumber ]]
 then
-zenity --info --text "Seat for Device not Changed" --title="Seat Configuration"
+zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
 else
+DeviceSeatIDs[CurrentDeviceNumber]=$NewSeatNumber
+
 cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
 awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
 echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
