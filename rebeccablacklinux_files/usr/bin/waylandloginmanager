@@ -354,6 +354,7 @@ function LeavePrompt
 ACTION=$(echo "Shutdown
 Restart
 Standby
+Hybrid Sleep
 Hibernate" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --column 'action' 2>/dev/null | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
@@ -365,11 +366,15 @@ dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-
 RESULT=$?
 elif [[ $ACTION == "Standby" ]]
 then
-dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Suspend
+dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Suspend boolean:true
+RESULT=$?
+elif [[ $ACTION == "Hybrid Sleep" ]]
+then
+dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.HybridSleep boolean:true
 RESULT=$?
 elif [[ $ACTION == "Hibernate" ]]
 then
-dbus-send --system --print-reply --dest="org.freedesktop.UPower" /org/freedesktop/UPower org.freedesktop.UPower.Hibernate
+dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Hibernate boolean:true
 RESULT=$?
 else
 exit
