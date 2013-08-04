@@ -164,7 +164,7 @@ bzr update -r $SOURCEREVISION
 }
 
 #Function to download hg repos
-function DownloadBZR()
+function DownloadHG()
 {
 OLDSOURCEURL=$(hg paths default)
 if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
