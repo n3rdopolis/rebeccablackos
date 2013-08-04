@@ -163,6 +163,31 @@ bzr pull
 bzr update -r $SOURCEREVISION
 }
 
+#Function to download hg repos
+function DownloadBZR()
+{
+OLDSOURCEURL=$(hg paths default)
+if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+then
+rm -rf "$SOURCENAME"
+
+if [[ $MAKEDEBS == 1 ]]
+then
+rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+fi
+
+fi
+
+hg clone "$SOURCEURL" "$SOURCENAME"
+mkdir -p "$SOURCENAME"
+cd "$SOURCENAME"
+hg revert
+hg st -un0 | xargs -0 rm
+hg pull
+hg update -C -r $SOURCEREVISION
+}
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
@@ -201,6 +226,11 @@ function GetVersionBZR()
 REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
 }
 
+#function to get the version of HG repos
+function GetVersionHG()
+{
+REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i)"
+}
 
 #function that calls functions to get version based on repository type
 function GetSourceVersion()

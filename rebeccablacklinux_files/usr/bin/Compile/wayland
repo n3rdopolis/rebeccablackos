@@ -25,10 +25,10 @@ SOURCENAME=wayland
 #The URL of the Source code repo
 SOURCEURL=git://anongit.freedesktop.org/wayland/wayland
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', or 'BZR'.
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', and for BZR, it's 'last:1', without the quotes
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
 SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
