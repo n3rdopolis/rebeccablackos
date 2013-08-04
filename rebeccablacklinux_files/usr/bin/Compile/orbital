@@ -75,7 +75,7 @@ function PackageInstallSource()
 {
 cd build
 make install
-cp orbital-shell.so $INSTALLDIR/lib/$(dpkg-architecture)/weston
+cp orbital-shell.so $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
 cp orbital-client $INSTALLDIR/bin
 }
 
