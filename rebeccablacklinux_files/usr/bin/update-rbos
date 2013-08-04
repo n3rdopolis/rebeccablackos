@@ -26,7 +26,7 @@ fi
 cd /usr/share
 
 apt-get update
-yes Y |apt-get install subversion git bzr
+yes Y |apt-get install subversion git bzr mercurial
 #download off the SVN
 svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
 #make the files owned by root, and executable
