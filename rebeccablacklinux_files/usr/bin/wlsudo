@@ -21,7 +21,7 @@ result=${PIPESTATUS[1]}
 
 if [[ $result == 1 ]]
 then
-zenity --no-wrap --info --text="The following command will be executed as root
+zenity --forms --text="The following command will be executed as root
 
 $*
 
