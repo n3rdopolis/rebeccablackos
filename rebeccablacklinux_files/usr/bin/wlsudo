@@ -32,7 +32,7 @@ result=${PIPESTATUS[1]}
   zenity --info --title=wlsudo --text="Invalid Password, or command not found." 2>&1 >/dev/null
   fi
 else
-zenity --title=wlsudo --no-wrap --info --text="The following command will be executed as root
+zenity --title=wlsudo --forms --text="The following command will be executed as root
 
 $*
 
