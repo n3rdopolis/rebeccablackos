@@ -24,7 +24,7 @@ RBOSLOCATION=~/RBOS_Build_Files
 
 #####Tell User what script does
 echo "
-THIS SCRIPT INSTALLS debootstrap AND overlayroot
+THIS SCRIPT INSTALLS debootstrap AND aufs-tools on the build host (this computer)
 
 This requires Ubuntu Quantal or later due to the use of overlayfs
 
@@ -55,7 +55,19 @@ fi
 STARTTIME=$(date +%s)
 
 #install needed tools to get the build system to work
-apt-get install debootstrap overlayroot
+apt-get install debootstrap aufs-tools
+
+if [[ ! -f /usr/sbin/debootstrap ]]
+then 
+echo "debootstrap install apparently failed."
+exit
+fi
+
+if [[ ! -f /sbin/mount.aufs || ! -f /lib/modules/$(uname -r)/kernel/ubuntu/aufs/aufs.ko ]]
+then 
+echo "aufs install apparently failed."
+exit
+fi
 
 #get the size of the users home file system. 
 HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)

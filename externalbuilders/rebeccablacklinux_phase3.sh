@@ -62,8 +62,8 @@ umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
 rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3/*
 
 #create the union of phases 1, 2, and 3 at workdir
-mount -t overlayfs -o lowerdir=$RBOSLOCATION/build/$BUILDARCH/phase_1,upperdir=$RBOSLOCATION/build/$BUILDARCH/phase_2 overlayfs $RBOSLOCATION/build/$BUILDARCH/phase_2
-mount -t overlayfs -o lowerdir=$RBOSLOCATION/build/$BUILDARCH/phase_2,upperdir=$RBOSLOCATION/build/$BUILDARCH/phase_3 overlayfs $RBOSLOCATION/build/$BUILDARCH/workdir
+mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_3:$RBOSLOCATION/build/$BUILDARCH/phase_2:$RBOSLOCATION/build/$BUILDARCH/phase_1 none $RBOSLOCATION/build_mountpoints/workdir
+
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
