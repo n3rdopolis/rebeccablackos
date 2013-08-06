@@ -26,8 +26,6 @@ RBOSLOCATION=~/RBOS_Build_Files
 echo "
 THIS SCRIPT INSTALLS debootstrap AND aufs-tools on the build host (this computer)
 
-This requires Ubuntu Quantal or later due to the use of overlayfs
-
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            ${HOME}/RBOS_Build_Files/
