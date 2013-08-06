@@ -16,8 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "PHASE 0"
-ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
+SCRIPTFILEPATH=$(readlink -f "$0")
+ThIsScriPtSFolDerLoCaTion=$(dirname "$SCRIPTFILEPATH")
 
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
