@@ -60,7 +60,7 @@ touch $RBOSLOCATION/DontRestartPhase2$BUILDARCH
 fi
 
 #create the union of phases 1 and 2 at the workdir
-mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_2:$RBOSLOCATION/build/$BUILDARCH/phase_1 none $RBOSLOCATION/build_mountpoints/workdir
+mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_2:$RBOSLOCATION/build/$BUILDARCH/phase_1 none $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
