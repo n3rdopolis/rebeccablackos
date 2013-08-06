@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "PHASE 1"
 SCRIPTFILEPATH=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$SCRIPTFILEPATH")
+SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 RBOSLOCATION=~/RBOS_Build_Files
 unset HOME
@@ -63,7 +63,7 @@ mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 
 #copy in the files needed
 rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata/
-rsync "$ThIsScriPtSFolDerLoCaTion"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/importdata/
+rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/importdata/
 rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 #make the imported files executable 

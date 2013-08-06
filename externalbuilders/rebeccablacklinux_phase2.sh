@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "PHASE 2"  
 SCRIPTFILEPATH=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$SCRIPTFILEPATH")
+SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files
@@ -51,7 +51,7 @@ umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 #Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
-INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $ThIsScriPtSFolDerLoCaTion/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
+INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $SCRIPTFOLDERPATH/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
 if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $RBOSLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
 #Delete the phase 2 folder contents

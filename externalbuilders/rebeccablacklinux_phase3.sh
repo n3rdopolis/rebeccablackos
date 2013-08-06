@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 echo "PHASE 3"  
 SCRIPTFILEPATH=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$SCRIPTFILEPATH")
+SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 HOMELOCATION=~
 RBOSLOCATION=~/RBOS_Build_Files

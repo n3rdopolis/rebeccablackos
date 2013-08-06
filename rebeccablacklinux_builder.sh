@@ -18,7 +18,7 @@
   
 
 SCRIPTFILEPATH=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$SCRIPTFILEPATH")
+SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 RBOSLOCATION=~/RBOS_Build_Files
 
@@ -82,7 +82,7 @@ if [[ $HomeFileSysTemFSFrEESpaCe -le 12000000 ]]
 fi
 
 
-chmod +x $ThIsScriPtSFolDerLoCaTion/externalbuilders/*
+chmod +x $SCRIPTFOLDERPATH/externalbuilders/*
 
 echo "Setting up live system..."
 
@@ -92,14 +92,14 @@ REBUILT="to update"
 #only initilize the FS if the FS isn't there.
 if [ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH ]
 then
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase0.sh
+$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
 REBUILT="to rebuild from scratch"
 fi
 
 #run the build scripts
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase1.sh 
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase2.sh  
-$ThIsScriPtSFolDerLoCaTion/externalbuilders/rebeccablacklinux_phase3.sh 
+$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase1.sh 
+$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase2.sh  
+$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase3.sh 
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
