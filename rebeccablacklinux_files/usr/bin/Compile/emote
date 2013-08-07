@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=mesa
+SOURCENAME=emote
 
 #The URL of the Source code repo
-SOURCEURL=git://anongit.freedesktop.org/mesa/mesa
+SOURCEURL=git://git.enlightenment.org/devs/devilhorns/emote.git/
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=emote-2.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -58,13 +58,12 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 :
-#patch -p1 < /usr/share/RBOS_PATCHES/mesa.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --enable-driglx-direct --enable-dri --with-dri-drivers=r200,radeon,nouveau,i915,i965,swrast --enable-osmesa --enable-xa --enable-glx-tls --enable-shared-dricore --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast,radeonsi,ilo  --with-egl-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --with-llvm-prefix=/usr/lib/llvm-3.4/ --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 
 }
 
