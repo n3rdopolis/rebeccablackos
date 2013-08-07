@@ -156,9 +156,8 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 #unmount the debs data
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
-#unmount the FS at the workdir, and phase 2
+#unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 #Clean up Phase 3 data.
 rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3/*
