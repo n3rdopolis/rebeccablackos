@@ -109,6 +109,8 @@ rm /opt/bin/cmake
 rm /opt/bin/qdoc
 rm /opt/bin/uic
 rm /opt/bin/qdbuscpp2xml
+rm -r /opt/examples
+rm -r /opt/translations
 
 #Reduce binary sizes
 echo "Reducing binary file sizes"
