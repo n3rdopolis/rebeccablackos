@@ -285,7 +285,7 @@ mkdir -p "$INSTALLDIR/share/aclocal"
 GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 
 #create a variable for the package name that is the source name converted to all lower case.
-PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:])"
+PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
 
 #If the script is set to always rebuild, then detect if the revision info changed.
 if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
