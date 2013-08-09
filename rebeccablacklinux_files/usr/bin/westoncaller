@@ -18,4 +18,4 @@
 
 . /usr/bin/weston_vars
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID --modules=xwayland.so $*  
+weston-display-server --socket=$ServerID  $*  
