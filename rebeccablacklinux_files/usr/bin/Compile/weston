@@ -81,6 +81,9 @@ do
 cp "$CLIENT" /$INSTALLDIR/bin
 done
 
+#Install header manually as temporary workaround
+cp /"$SOURCEDIR"/"$SOURCENAME"/shared/zalloc.h $INSTALLDIR/include/weston
+
 #turn OFF setuid on weston
 chmod -s $INSTALLDIR/bin/weston
 
