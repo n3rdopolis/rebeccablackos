@@ -358,11 +358,11 @@ Hybrid Sleep
 Hibernate" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' 2>/dev/null | head -1 | grep -v 'startup message: remove:' )
 if [[ $ACTION == "Shutdown" ]]
 then
-dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Stop
+dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
 RESULT=$?
 elif [[ $ACTION == "Restart" ]]
 then
-dbus-send --system --dest=org.freedesktop.ConsoleKit --type=method_call --print-reply --reply-timeout=2000 /org/freedesktop/ConsoleKit/Manager org.freedesktop.ConsoleKit.Manager.Restart
+dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
 RESULT=$?
 elif [[ $ACTION == "Standby" ]]
 then
