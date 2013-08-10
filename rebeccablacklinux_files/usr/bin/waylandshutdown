@@ -34,7 +34,7 @@ then
 ecryptfs-umount-private
 echo "Change" > /run/loginmanager_control
 disown
-fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+fuser -k -15 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
 RESULT=$?
 
 elif [[ $ACTION == "Shutdown" ]]
