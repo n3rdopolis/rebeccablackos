@@ -77,6 +77,19 @@ index f9075ae..feae582 100644
 1.7.11.7
 
 
+diff --git a/src/weston-launch.c b/src/weston-launch.c
+index 8d8a903..deb3d3c 100644
+--- a/src/weston-launch.c
++++ b/src/weston-launch.c
+@@ -521,7 +521,6 @@ setup_session(struct weston_launch *wl)
+                error(1, errno, "dropping privileges failed");
+ 
+        term = getenv("TERM");
+-       clearenv();
+        setenv("TERM", term, 1);
+        setenv("USER", wl->pw->pw_name, 1);
+        setenv("LOGNAME", wl->pw->pw_name, 1);
+
 
 
 diff --git a/src/weston-launch.c b/src/weston-launch.c
