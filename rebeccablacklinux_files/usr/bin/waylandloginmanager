@@ -412,11 +412,6 @@ done
 
 function StartAutoLogin
 {
-if [[ $ISLIVE == 1 ]]
-then
-AUTOLOGINUSER=$(cat /etc/casper.conf | grep USERNAME= | awk -F = '{print $2}' | sed 's/\"//g' | head -1 )
-else
-
 if [[ -e /etc/waylandloginmanager.conf ]]
 then
 AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
@@ -425,7 +420,7 @@ AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = 
 echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
 fi
 
-fi
+
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
