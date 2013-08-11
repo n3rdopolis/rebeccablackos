@@ -28,9 +28,6 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 #update the apt cache
 apt-get update
 
-#install remastersys key
-wget -O - http://www.remastersys.com/ubuntu/remastersys.gpg.key | apt-key add -
-
 #install basic applications that the system needs to get repositories
 yes Y| apt-get install aptitude git bzr subversion mercurial
 
