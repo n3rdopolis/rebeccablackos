@@ -218,12 +218,6 @@ esac
 
 cdfs (){
 
-if [[ ! -f /usr/bin/ubiquity ]]
-then
-echo "No Ubiquity Installed"
-exit 1
-fi
-
 log_msg "Enabling remastersys-firstboot"
 chmod 755 /etc/init.d/remastersys-firstboot
 update-rc.d remastersys-firstboot defaults
