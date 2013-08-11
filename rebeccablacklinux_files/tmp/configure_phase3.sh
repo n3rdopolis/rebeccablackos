@@ -35,33 +35,6 @@ rm -r /usr/import
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
-#Edit remastersys to not detect the filesystem. df fails in chroot
-sed  -i 's/^DIRTYPE=.*/DIRTYPE=ext4/' /usr/bin/remastersys
-
-#get the installed kernel version in /lib/modules, there is only one installed in this CD, but take the first one by default.
-KERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
-
-#This is a kde distro. Force the remastersys script to install kde frontend, as Remastersys detects running process from kde to determine it is a kde distro, but since this is chroot, it's not running
-sed -i "s/\"\`ps axf | grep startkde | grep -v grep\`\" != \"\" -o \"\`ps axf | grep kwin | grep -v grep\`\" != \"\"/ 1 /g" /usr/bin/remastersys
-
-
-#replace all of remastersys's unames with the installed kernel version.
-sed -i "s/\`uname -r\`/$KERNELVERSION/g" /usr/bin/remastersys
-
-#make remastersys use xz compression
-sed -i 's/SQUASHFSOPTS="/SQUASHFSOPTS="-comp xz/g' /usr/bin/remastersys
-
-#Don't allow remastersys to remove ubiquity!!!
-grep -v "remove ubiquity" /usr/bin/remastersys > /usr/bin/remastersys.bak
-cat /usr/bin/remastersys.bak > /usr/bin/remastersys
-rm /usr/bin/remastersys.bak
-
-#remove the resolv.conf from the list of files in /etc that remastersys deletes, as it's a symlink to a dynamic file. 
-sed -i 's/resolv.conf,//g'  /usr/bin/remastersys
-
-#Remastersys deletes the tty startup files, and disables the ttys. Don't allow it to do so
-sed -i 's/rm -f \$WORKDIR\/dummysys\/etc\/init\/tty?.conf//g'  /usr/bin/remastersys
-
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
