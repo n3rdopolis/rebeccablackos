@@ -17,8 +17,6 @@
 #
 # Code cleanup with suggestions and code from Ivailo (a.k.a. SmiL3y) 
 
-. /etc/remastersys/remastersys.version
-
 #Detect Kernel Version
 KERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
 
