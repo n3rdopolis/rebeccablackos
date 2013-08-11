@@ -30,7 +30,9 @@ done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ )
 
 WESTONTTY=$1
 LOGINUSER=$2
+IFS=$'\n'
 WSESSIONDATA=($3)
+unset IFS
 
 #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
 export HOME=$(eval echo ~$LOGINUSER)
