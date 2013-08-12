@@ -1,0 +1,12 @@
+diff --git a/src/plugins/platforms/wayland_common/qwaylandintegration.cpp b/src/plugins/platforms/wayland_common/qwaylandintegration.cpp
+index a4ddbc9..495dec2 100644
+--- a/src/plugins/platforms/wayland_common/qwaylandintegration.cpp
++++ b/src/plugins/platforms/wayland_common/qwaylandintegration.cpp
+@@ -82,7 +82,6 @@ QWaylandIntegration::QWaylandIntegration()
+ #endif
+ {
+     QGuiApplicationPrivate::instance()->setEventDispatcher(mEventDispatcher);
+-    QGuiApplication::setDesktopSettingsAware(false);
+     mDisplay = new QWaylandDisplay();
+     mClipboard = new QWaylandClipboard(mDisplay);
+     mDrag = new QWaylandDrag(mDisplay);
