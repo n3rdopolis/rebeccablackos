@@ -50,15 +50,9 @@ By default there are 2 workspaces
 
 Exit Weston: ctrl key + alt key + backspace' 
 
-zenity --title="Help" --no-wrap --info --text '
-The Application menu stays open, even after calling programs, and 
-does not work with multiple instances of the Application Launcher 
 
-To launch another Application, currently, you have to find the already open instance of the Application Launcher
-
-Some applications (mostly xwayland applications) might need to be resized to refresh the contents of the window.'
-
-
+if [[ $SessionName == "Default Weston Desktop Shell" ]]
+then
 zenity --title="Help" --no-wrap --info --text 'To launch programs:
 Click on the "RBOS" Icon on the top for the Application menu. Be sure to check 
 for the Wayland programs under "Applications"!
@@ -67,7 +61,7 @@ Click on the Desktop icon for viewing the contents of the Desktop folder
 
 Click on the drive icon for the Removable Media Manager
 
-Click on the Globe icon for the Snowshoe Web Browser
+Click on the Globe icon for the Web Browser
 
 Click on the Terminal icon for a Wayland Terminal with Wayland variables
 
@@ -87,4 +81,12 @@ The I icon launches these help dialogs
 Click on the red X icon for shutdown options
 '
 
+zenity --title="Help" --no-wrap --info --text '
+The Application menu stays open, even after calling programs, and 
+does not work with multiple instances of the Application Launcher 
+
+To launch another Application, currently, you have to find the already open instance of the Application Launcher
+'
+
+fi
 
