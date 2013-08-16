@@ -92,7 +92,8 @@ cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/etc/apt/sources.list $RBOSLOCATIO
 #delete the temp folder
 rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
-
+#Import the old INSTALLS.txt file from the last build so it can be diffed
+cp $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $RBOSLOCATION/build/$BUILDARCH/phase_1/tmp/
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]

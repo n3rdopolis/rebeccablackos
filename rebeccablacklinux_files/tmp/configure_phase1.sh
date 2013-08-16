@@ -43,6 +43,11 @@ mkdir /usr/share/logs/package_operations/Downloads
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
+#Count the difference between the old INSTALLS.txt from the last build, and the current one
+INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
+
+if [[ $INSTALLSDIFFCOUNT != 0 ]]
+then 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
@@ -66,6 +71,8 @@ echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   
 fi
 
 done
+
+fi
 
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
