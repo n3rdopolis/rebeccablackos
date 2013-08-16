@@ -196,6 +196,19 @@ mkdir -p "$SOURCEDIR"
 cd "$SOURCEDIR"
 REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
+#create a variable for the package name that is the source name converted to all lower case.
+PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
+
+
+DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
+do
+dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
+done | wc -l)
+
+
+if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+then
+
 STARTTIME=$(date +%s)
 Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 ENDTIME=$(date +%s)
@@ -205,6 +218,8 @@ STARTTIME=$(date +%s)
 cd "$SOURCENAME"
 PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
 ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+
+fi
 
 }
 
