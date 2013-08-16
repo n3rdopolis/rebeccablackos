@@ -45,9 +45,13 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
+#unmount the debs data
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
 #unmount the FS at the workdir and phase 2
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
+
 
 
 #END PAST RUN CLEANUP##################
@@ -60,6 +64,10 @@ mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDAR
 mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
 mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
+
+#Mount in the folder with previously built debs
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #copy in the files needed
 rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata/
@@ -99,6 +107,9 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+
+#unmount the debs data
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir

@@ -46,6 +46,9 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
+#unmount the debs data
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
 #unmount the FS at the workdir and phase 2
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
@@ -67,6 +70,9 @@ mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
 mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
 mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 
+#Mount in the folder with previously built debs
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]

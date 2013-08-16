@@ -54,6 +54,9 @@ umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
 
+#unmount the debs data
+umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
 #unmount the FS at the workdir and phase 2
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
 umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
