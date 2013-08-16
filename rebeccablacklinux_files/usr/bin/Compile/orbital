@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/giucam/orbital
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=8ed311347bab6c6d3fa3d33d700b6bad7f4eee4d
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,14 +50,14 @@ REBUILDNEWREVISION=1
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-sed -i 's\/opt/qt5/include/QtGui/5.1.0/QtGui/\/opt/include/QtGui/5.2.0/QtGui\' src/client/CMakeLists.txt
+:
 }
 
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-git revert 0688a6c62e443b30f0f3a35eb5c4731f37ff7356
+:
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

@@ -66,7 +66,7 @@ Click on the Globe icon for the Web Browser
 Click on the Terminal icon for a Wayland Terminal with Wayland variables
 
 Click on the Xorg logo for a Xterm with X variables
-
+C
 Click the Speaker icon to adjust the volume
 
 Click on the Antenna icon to launch the Network Manager
@@ -90,3 +90,14 @@ To launch another Application, currently, you have to find the already open inst
 
 fi
 
+
+
+if [[ $SessionName == "Orbital Shell" ]]
+then
+
+zenity --title="Help" --no-wrap --info --text '
+Expose:			CTRL key + e
+Show Workspaces:	CTRL key + g
+'
+
+fi
