@@ -277,7 +277,8 @@ cd "$SOURCENAME"
 
 #Delete all .la files as they cause problems
 find / | grep "\.la$" | while read LAFILE
-do rm $LAFILE
+do 
+rm $LAFILE 2>/dev/null
 done
 
 
