@@ -40,6 +40,8 @@ mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
+INSTALLS="
+$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^- | grep -v "\---" | cut -d - -f2- | awk -F "#" '{print $1}' | awk -F :: '{print $1"::REMOVE"}')"
 
 #Archive this current list of installs.
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
@@ -62,6 +64,10 @@ elif [[ $METHOD == "BUILDDEP" ]]
 then
 echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+elif [[ $METHOD == "REMOVE" ]]
+then
+echo "Removing $PACKAGE"                                                        |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+yes Y | apt-get purge $PACKAGE -y --force-yes                                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 else
 echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 fi
