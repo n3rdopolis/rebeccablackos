@@ -38,14 +38,14 @@ rm -r /usr/share/logs/package_operations/Installs
 #Create folder to hold the install logs
 mkdir /usr/share/logs/package_operations/Installs
 
-#Archive this current list of installs.
-cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
-
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
 #Count the difference between the old INSTALLS.txt from the last build, and the current one
 INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
+
+#Archive this current list of installs.
+cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
 
 if [[ $INSTALLSDIFFCOUNT != 0 ]]
 then 
