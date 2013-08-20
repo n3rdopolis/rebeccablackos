@@ -40,7 +40,7 @@ mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
 INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep ^- | grep -v "\---" | cut -d - -f2- | awk -F "#" '{print $1}' | awk -F :: '{print $1"::REMOVE"}')"
-INSTALLS="
+INSTALLS+="
 $(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
 
 #Archive this current list of installs.
