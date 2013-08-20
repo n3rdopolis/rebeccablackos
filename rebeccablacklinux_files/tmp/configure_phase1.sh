@@ -41,8 +41,13 @@ rm -r /usr/share/logs/package_operations/Downloads
 mkdir /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
+INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
 
+#Count the difference between the old INSTALLS.txt from the last build, and the current one
+INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
+
+if [[ $INSTALLSDIFFCOUNT != 0 ]]
+then 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
@@ -67,6 +72,7 @@ fi
 
 done
 
+fi
 
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes

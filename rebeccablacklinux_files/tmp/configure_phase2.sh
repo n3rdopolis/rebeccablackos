@@ -39,13 +39,16 @@ rm -r /usr/share/logs/package_operations/Installs
 mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep ^- | grep -v "\---" | cut -d - -f2- | awk -F "#" '{print $1}' | awk -F :: '{print $1"::REMOVE"}')"
-INSTALLS+="
-$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
+INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
+
+#Count the difference between the old INSTALLS.txt from the last build, and the current one
+INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
 
 #Archive this current list of installs.
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
 
+if [[ $INSTALLSDIFFCOUNT != 0 ]]
+then 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
@@ -64,15 +67,13 @@ elif [[ $METHOD == "BUILDDEP" ]]
 then
 echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-elif [[ $METHOD == "REMOVE" ]]
-then
-echo "Removing $PACKAGE"                                                        |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-yes Y | apt-get purge $PACKAGE -y --force-yes                                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 else
 echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 fi
 
 done
+
+fi
 
 
 #remove old kernels!
