@@ -60,6 +60,8 @@ then
 #Delete the phase 2 folder contents
 rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_2/*
 touch $RBOSLOCATION/DontRestartPhase2$BUILDARCH
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp
+touch $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
 fi
 
 #create the union of phases 1 and 2 at the workdir
