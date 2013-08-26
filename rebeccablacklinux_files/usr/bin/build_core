@@ -79,6 +79,7 @@ git submodule foreach --recursive git clean -fdx
 git checkout -f $SOURCEREVISION 
 git reset --hard $SOURCEREVISION
 git reset --hard origin/$SOURCEREVISION
+git reset --hard MERGE_HEAD
 git clean -fdx
 git config user.email rbos@rbos
 git submodule sync --recursive
