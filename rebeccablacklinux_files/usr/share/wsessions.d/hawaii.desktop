@@ -7,7 +7,7 @@ CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
-SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so
+SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=$WESTON_PLUGIN_PATH/hawaii-desktop.so
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=$WESTON_PLUGIN_PATH/hawaii-desktop.so
 NeedsFile=/opt/bin/weston
