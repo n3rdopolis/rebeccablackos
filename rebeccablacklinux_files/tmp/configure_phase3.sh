@@ -44,16 +44,15 @@ remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
-REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v libpng12-dev | grep -v dpkg-dev)
 
 yes Y | apt-get purge $REMOVEDEVPGKS | tee /usr/share/logs/package_operations/removes.txt
 
-
-REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v libpng12-dev | grep -v dpkg-dev)
 yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
-REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
+REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v libpng12-dev | grep -v dpkg-dev)
 yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
 
 
