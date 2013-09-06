@@ -15,7 +15,18 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
+Server=$(echo $* | awk -F @@ '{print $1}')
+if [[ -z $Server ]]
+then
+Server=/opt/bin/weston-display-server
+fi
+ServerApprovedCount=$(cat /etc/waylandservers | grep -c "^$Server$")
+if [[ $ServerApprovedCount == 0 ]]
+then 
+echo "Unapproved Wayland Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
+exit
+fi
+Args=$(echo $* | awk -F @@ '{print $2}')
 . /usr/bin/weston_vars
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID  $*  
+$Server --socket=$ServerID  $Args 

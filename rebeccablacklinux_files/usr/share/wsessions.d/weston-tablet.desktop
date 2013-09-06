@@ -2,7 +2,7 @@
 Enabled=0
 Type=WSession
 Name=Weston Tablet Shell
-CompositorExec=weston
+CompositorExec=/opt/bin/weston-display-server
 CompositorSupportsKMS=1
 CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so

@@ -2,7 +2,7 @@
 Enabled=1
 Type=WSession
 Name=Default Weston Desktop Shell
-CompositorExec=weston
+CompositorExec=/opt/bin/weston-display-server
 CompositorSupportsKMS=1
 CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so
