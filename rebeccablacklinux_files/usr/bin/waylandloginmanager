@@ -168,6 +168,7 @@ Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' 
 SessionName=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- | tail -1 )
 Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- | tail -1 )
 SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- | tail -1 )
+CompositorDisplayArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorDisplayArgument" {print $0}' | cut -d = -f2- | tail -1 )
 BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- | tail -1 )
 SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | tail -1 )
 AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2-| tail -1 )
@@ -192,6 +193,7 @@ echo "$BackendArguments"
 echo "$SessionArgument"
 echo "$AdditionalArguments"
 echo "$SessionName"
+echo "$CompositorDisplayArgument$AllSessions"
 fi
 
 done)
@@ -210,6 +212,7 @@ WSESSIONDATA=echo "/opt/bin/weston-display-server
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=$HOME/weston.log
 Default Weston Desktop Shell
+--socket=$AllSessions
 "
 elif [[ $BackendType == FB ]]
 then 
@@ -218,6 +221,7 @@ WSESSIONDATA="/opt/bin/weston-display-server
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=$HOME/weston.log
 Default Weston Desktop Shell
+--socket=$AllSessions
 "
 fi
 

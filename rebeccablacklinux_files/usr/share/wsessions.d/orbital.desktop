@@ -7,6 +7,7 @@ CompositorSupportsKMS=1
 CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
+CompositorDisplayArgument=--socket=
 SessionArgument=--modules=orbital-shell.so,xwayland.so,cms-colord.so --shell=/opt/lib/orbital/orbital-shell.so --orbital-client=/opt/libexec/startorbital
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=$WESTON_PLUGIN_PATH/orbital-shell.so
