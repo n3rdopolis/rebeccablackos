@@ -192,8 +192,8 @@ echo "$CompositorExec"
 echo "$BackendArguments"
 echo "$SessionArgument"
 echo "$AdditionalArguments"
-echo "$SessionName"
 echo "$CompositorDisplayArgument$AllSessions"
+echo "$SessionName"
 fi
 
 done)
@@ -211,8 +211,8 @@ WSESSIONDATA=echo "/opt/bin/weston-display-server
 --backend=drm-backend.so
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=$HOME/weston.log
-Default Weston Desktop Shell
 --socket=$AllSessions
+Default Weston Desktop Shell
 "
 elif [[ $BackendType == FB ]]
 then 
@@ -220,8 +220,8 @@ WSESSIONDATA="/opt/bin/weston-display-server
 --backend=fbdev-backend.so
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=$HOME/weston.log
-Default Weston Desktop Shell
 --socket=$AllSessions
+Default Weston Desktop Shell
 "
 fi
 

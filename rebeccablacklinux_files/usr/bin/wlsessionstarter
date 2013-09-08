@@ -45,8 +45,8 @@ CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )
 BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-export SessionName="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-CompositorDisplayArgument="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
 #Call weston TODO weston-launch needs https://bugs.freedesktop.org/show_bug.cgi?id=66853 for the CompositorExec key to be used
 weston-launch $CompositorExec @@ --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &
