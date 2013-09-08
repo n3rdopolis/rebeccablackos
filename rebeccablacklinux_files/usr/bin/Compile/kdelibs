@@ -66,7 +66,7 @@ function PackageCompileSource()
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make -i
 }
 
@@ -84,6 +84,8 @@ function PackagePostInstall()
 cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/kcategorizedviewtest /$INSTALLDIR/bin
 cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/kcolorutilsdemo /$INSTALLDIR/bin
 cp /"$SOURCEDIR"/"$SOURCENAME"/build/kdeui/tests/krulertest /$INSTALLDIR/bin
+sed -i 's\bin/\/opt/bin/\g' $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/cmake/KConfig/KConfigTargets-relwithdebinfo.cmake
+
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core

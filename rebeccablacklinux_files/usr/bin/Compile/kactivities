@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=plasma-framework
+SOURCENAME=kactivities
 
 #The URL of the Source code repo
-SOURCEURL=git://anongit.kde.org/plasma-framework.git
+SOURCEURL=git://anongit.kde.org/kactivities
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=frameworks-scratch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
