@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 export LDFLAGS="-L$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)"
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-backend --with-flavour=wayland 
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-backend --enable-wayland-compositor --with-flavour=wayland 
 make 
 }
 
