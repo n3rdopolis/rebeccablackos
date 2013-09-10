@@ -23,7 +23,7 @@ Args=$(echo $* | awk -F @@ '{print $2}')
 if [[ -z $SessionName ]]
 then
 ServerID=wayland-$RANDOM
-$Server --socket=$ServerID  $* 
+weston-display-server --socket=$ServerID  $* 
 else
 
 if [[ -z $Args ]]
