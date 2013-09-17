@@ -20,7 +20,7 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=mutter
+SOURCENAME=mutter-x11
 
 #The URL of the Source code repo
 SOURCEURL=git://git.gnome.org/mutter
@@ -29,7 +29,7 @@ SOURCEURL=git://git.gnome.org/mutter
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=wip/wayland-work
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
