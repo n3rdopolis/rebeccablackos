@@ -57,6 +57,10 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
+find -type f| while read FILE
+do 
+sed -i 's/5.1/5.2/g' $FILE
+done
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
