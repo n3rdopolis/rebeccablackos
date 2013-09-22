@@ -150,7 +150,6 @@ done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Wa
 
 function ChooseSessionType
 {
-AttemptedSessionCount=$((AttemptedSessionCount++))
 WSESSIONSPATH="/usr/share/wsessions.d"
 
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
@@ -322,6 +321,7 @@ then
 USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
 fi
 
+
 ChooseSessionType
 
 #present the list of the users to the system
@@ -432,6 +432,7 @@ fi
 if [[ ! -z $AUTOLOGINUSER ]]
 then
 DialogWait 15
+AttemptedSessionCount=$((AttemptedSessionCount++))
 ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
@@ -468,6 +469,7 @@ then
 chvt $HostVT
 elif [[ $COMMAND == "Login" ]]
 then
+AttemptedSessionCount=$((AttemptedSessionCount++))
 AuthenticateUser &
 elif [[ $COMMAND == "Leave" ]] 
 then
