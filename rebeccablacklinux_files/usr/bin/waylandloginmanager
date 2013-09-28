@@ -406,7 +406,7 @@ do
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-weston-launch -- /opt/bin/weston-display-server @@ --tty=$HostVT --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
+weston-launch /opt/bin/weston-display-server @@ --tty=/dev/tty$HostVT -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay 
 fi
 
 sleep 5
