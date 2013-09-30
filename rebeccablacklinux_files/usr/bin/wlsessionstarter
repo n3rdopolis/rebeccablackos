@@ -49,7 +49,7 @@ CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$E
 export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
 #Call weston 
-weston-launch $CompositorExec @@ --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log &
+weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log &
 
 echo "RegisterSession
 $WESTONTTY
