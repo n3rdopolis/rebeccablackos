@@ -51,5 +51,11 @@ export ELM_ENGINE=wayland_shm
 export ECORE_EVAS_ENGINE=wayland_shm
 export SDL_VIDEODRIVER=wayland
 export GST_GL_WINDOW=wayland
-export $(exec ck-launch-session dbus-launch)
 
+dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames > /dev/null
+DBusErrorState=$?
+
+if [[ $DBusErrorState == 1 ]]
+then
+export $(exec ck-launch-session dbus-launch)
+fi
