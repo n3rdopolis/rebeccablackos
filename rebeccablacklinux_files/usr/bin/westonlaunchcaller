@@ -17,6 +17,13 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 . /usr/bin/weston_vars
+if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
+then
+export XDG_RUNTIME_DIR=/run/
+fi
+
+
+
 Server=$(echo $* | awk -F @@ '{print $1}' | sed 's/ *$//g')
 Args=$(echo $* | awk -F @@ '{print $2}')
 
