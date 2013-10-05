@@ -209,7 +209,7 @@ zenity --warning --text="No session selected. Defaulting to the Default Weston D
 export SelectedCompositorExec=weston
 if [[ $BackendType == KMS ]]
 then
-WSESSIONDATA=echo "/opt/bin/weston-display-server
+WSESSIONDATA="/opt/bin/weston-display-server
 --backend=drm-backend.so
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=$HOME/weston.log
