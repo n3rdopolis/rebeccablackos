@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+USER=$(id -u)
 . /usr/bin/weston_vars
 if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
 then
@@ -27,14 +28,18 @@ fi
 Server=$(echo $* | awk -F @@ '{print $1}' | sed 's/ *$//g')
 Args=$(echo $* | awk -F @@ '{print $2}')
 
-
+if [[ $USER != 0 ]]
+then
 #Detrermine if the server is safe
 ServerApprovedCount=$(cat /etc/waylandservers | grep -c ^$Server$)
+else
+ServerApprovedCount=1
+fi
 
 #Only run if the server is safe
 if [[ $ServerApprovedCount == 0 ]]
 then 
-echo "Unapproved Wayland Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
+echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
 exit
 else 
 #Execute the Wayland server
