@@ -18,6 +18,14 @@
 
 #Import Wayland variables
 . /usr/bin/weston_vars
+unset XDG_RUNTIME_DIR
+unset WAYLAND_DISPLAY
+unset WESTON_TTY_FD
+unset WESTON_LAUNCHER_SOCKET
+unset XDG_SESSION_COOKIE
+unset AutoSessionTTY
+unset UPSTART_JOB
+unset UPSTART_INSTANCE
 
 WESTONTTY=$1
 LOGINUSER=$2
@@ -40,7 +48,7 @@ CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$E
 export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
 #Call the server
-echo "Starting server $Server with the arguments of $Args for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
+echo "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
 weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log &
 
 echo "RegisterSession
