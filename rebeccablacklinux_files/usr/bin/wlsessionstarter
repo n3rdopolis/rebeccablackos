@@ -16,15 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
-#unset most varaibles
-while read var
-do 
-unset $var
-done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^LOGNAME$ ) 
-
-
-
 #Import Wayland variables
 . /usr/bin/weston_vars
 
@@ -48,7 +39,8 @@ AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}
 CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
-#Call weston 
+#Call the server
+echo "Starting server $Server with the arguments of $Args for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
 weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log &
 
 echo "RegisterSession
