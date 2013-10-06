@@ -431,7 +431,7 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
-DialogWait 15
+sleep 3
 AttemptedSessionCount=$((AttemptedSessionCount++))
 ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
