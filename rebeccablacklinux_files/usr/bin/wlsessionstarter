@@ -16,16 +16,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#unset most varaibles
+while read var
+do 
+unset $var
+done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ ) 
+
 #Import Wayland variables
 . /usr/bin/weston_vars
-unset XDG_RUNTIME_DIR
-unset WAYLAND_DISPLAY
-unset WESTON_TTY_FD
-unset WESTON_LAUNCHER_SOCKET
-unset XDG_SESSION_COOKIE
-unset AutoSessionTTY
-unset UPSTART_JOB
-unset UPSTART_INSTANCE
 
 WESTONTTY=$1
 LOGINUSER=$2
