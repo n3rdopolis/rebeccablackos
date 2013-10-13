@@ -57,21 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-:
-#sed -i '/kde4_no_enable_final/d' libs/solid/control/CMakeLists.txt
-#sed -i '/kde4_no_enable_final/d' libs/ksysguard/CMakeLists.txt
-#sed -i '/KDE4_MOC_HEADERS/d' libs/ksysguard/signalplotter/CMakeLists.txt
-#sed -i '/kde4_no_enable_final/d' kwin/kcmkwin/CMakeLists.txt
-#sed -i '/kde4_no_enable_final/d' kwin/effects/CMakeLists.txt
-#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/input/CMakeLists.txt
-#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/colors/CMakeLists.txt
-#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/style/CMakeLists.txt
-#sed -i '/kde4_no_enable_final/d' kcontrol/keys/CMakeLists.txt
-#sed -i '/KDE4_NO_ENABLE_FINAL/d' kcontrol/fonts/CMakeLists.txt
-#sed -i '/kde4_no_enable_final/d' klipper/CMakeLists.txt
-#sed -i '/check_symbol_exists/d' kdm/ConfigureChecks.cmake
-#sed -i '/kde4_no_enable_final/d' plasma/generic/applets/systemtray/CMakeLists.txt
-#sed -i '/AUTOMOC4_MOC_HEADERS/d' plasma/generic/dataengines/places/CMakeLists.txt
+patch -p1 < /usr/share/RBOS_PATCHES/kde-workspace.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -80,7 +66,7 @@ function PackageCompileSource()
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make 
 }
 
