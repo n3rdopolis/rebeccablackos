@@ -48,6 +48,8 @@ INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
 
 if [[ $INSTALLSDIFFCOUNT != 0 ]]
 then 
+rm /usr/share/logs/package_operations/Downloads/failedpackages.log
+
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
@@ -58,16 +60,25 @@ if [[ $METHOD == "PART" ]]
 then
 echo "Downloading with partial dependancies for $PACKAGE"                       |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "FULL" ]]
 then
 echo "Downloading with all dependancies for $PACKAGE"                           |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 yes Yes | apt-get install $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "BUILDDEP" ]]
 then
 echo "Downloading build dependancies for $PACKAGE"                              |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
+Result=${PIPESTATUS[1]}
 else
 echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+Result=1
+fi
+
+if [[ $Result != 0 ]]
+then
+echo "$PACKAGE failed to $METHOD" >> /usr/share/logs/package_operations/Downloads/failedpackages.log
 fi
 
 done

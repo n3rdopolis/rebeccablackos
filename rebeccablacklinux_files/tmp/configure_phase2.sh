@@ -57,18 +57,29 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
+rm /usr/share/logs/package_operations/Installs/failedpackages.log
+
 echo "Installing with partial dependancies for $PACKAGE"                        |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "FULL" ]]
 then
 echo "Installing with all dependancies for $PACKAGE"                            |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Yes | apt-get install $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "BUILDDEP" ]]
 then
 echo "Installing build dependancies for $PACKAGE"                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Y | apt-get build-dep $PACKAGE -y --force-yes                               |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+Result=${PIPESTATUS[1]}
 else
 echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+Result=1
+fi
+
+if [[ $Result != 0 ]]
+then
+echo "$PACKAGE failed to $METHOD" >> /usr/share/logs/package_operations/Installs/failedpackages.log
 fi
 
 done
