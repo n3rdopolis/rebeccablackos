@@ -58,7 +58,10 @@ mkdir -p $RBOSLOCATION
 cd $RBOSLOCATION
 
 #clean up old files
-rm -rf $RBOSLOCATION/build/$BUILDARCH/
+rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_1
+rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_2
+rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3
+rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #create a folder for the media mountpoints in the media folder
 mkdir -p $RBOSLOCATION/build/$BUILDARCH
@@ -76,6 +79,7 @@ debootstrap --arch $BUILDARCH saucy $RBOSLOCATION/build/$BUILDARCH/workdir http:
 
 #tell future calls of the first builder script that phase 1 is done
 touch $RBOSLOCATION/DontStartFromScratch$BUILDARCH
+touch $RBOSLOCATION/DontDebootstrap$BUILDARCH
 
 #unmount the chrooted procfs from the outside 
 umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc

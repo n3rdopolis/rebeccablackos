@@ -68,9 +68,9 @@ exit
 fi
 
 #get the size of the users home file system. 
-HomeFileSysTemFSFrEESpaCe=$(df ~ | awk '{print $4}' |  grep -v Av)
+FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 12gb or less tell the user and quit. If not continue.
-if [[ $HomeFileSysTemFSFrEESpaCe -le 12000000 ]] 
+if [[ $FreeSpace -le 12000000 ]] 
   then               
   echo "You have less then 12gb of free space on the partition that contains your home folder. Please free up some space." 
   echo "The script will now abort."
@@ -88,10 +88,14 @@ REBUILT="to update"
 
 
 #only initilize the FS if the FS isn't there.
+if [[ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH || ! -f $RBOSLOCATION/DontDebootstrap$BUILDARCH ]]
+then
 if [ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH ]
 then
-$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
+rm -rf $RBOSLOCATION/build/$BUILDARCH/buildoutput
 REBUILT="to rebuild from scratch"
+fi
+$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
 fi
 
 #run the build scripts
