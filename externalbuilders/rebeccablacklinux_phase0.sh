@@ -62,6 +62,7 @@ rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_1
 rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_2
 rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3
 rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir
+rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata
 
 #create a folder for the media mountpoints in the media folder
 mkdir -p $RBOSLOCATION/build/$BUILDARCH
