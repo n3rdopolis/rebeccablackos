@@ -496,12 +496,21 @@ logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!
 exit
 fi
 
-
 #Start the main login Weston server
 LoginWestonLauncher &
 
 #Start the autologin launcher
 StartAutoLogin &
+
+#Diagnostic terminal that is brought up by the waylandloginmanager once when the option wlmdebuginsecure is passed to the kernel. As it is possible to add init=/bin/bash to an unsecured Grub, and get a root terminal, with the same level of physical access, this doesn't open any new security holes. The action is also logged.
+if [[ $(cat /proc/cmdline | grep -c wlmdebuginsecure ) != 0 ]]
+then
+/opt/bin/weston-terminal &
+zenity --warning --title="SECURITY WARNING" --text="The option 'wlmdebuginsecure' option has been passed to the kernel command line.
+This has been logged to the waylandloginmanager's log, and the system log.
+This diagnostic option caused a weston-terminal to be run as root on the loginmanagerdisplay" 2>/dev/null &
+logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebuginsecure' option has been passed to the kernel. This diagnostic option caused the waylandloginmanager to start a single weston-terminal running as root onto the loginmanagerdisplay." -s  >>/var/log/waylandloginmanager 2>&1
+fi
 
 #Start the login managers IPC
 ReadCommandFIFO
