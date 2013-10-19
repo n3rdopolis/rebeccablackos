@@ -48,8 +48,24 @@ export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/
 #Call the server
 echo "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
 weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log &
+WESTONPID=$!
+
+#Find the logind session id
+SESSIONS=$(loginctl  list-sessions |grep "        c" |awk '{print $1}')
+echo "$SESSIONS" | while read SESSION
+do
+SessionPid=$(loginctl show-session $SESSION -p Leader |awk -F = '{print $2}')
+if [[ $SessionPid == $WESTONPID ]]
+then
+LOGINDSESSION=$SESSION
+break
+fi
+done
+
+loginctl activate $LOGINDSESSION
 
 echo "RegisterSession
 $WESTONTTY
-$!
-$LOGNAME" > /run/loginmanager_control
+$WESTONPID
+$LOGNAME
+$LOGINDSESSION" > /run/loginmanager_control

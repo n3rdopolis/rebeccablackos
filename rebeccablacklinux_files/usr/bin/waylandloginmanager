@@ -132,6 +132,7 @@ COMMANDSTRING=$1
 AllSessionTTYs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 2p )
 AllSessionPIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 3p )
 AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p )
+AllSessionIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 5p )
 ((AllSessions++))
 }
 
@@ -269,6 +270,7 @@ SessionList+="$NumberOfSessions
 ${AllSessionTTYs[$NumberOfSessions]}
 ${AllSessionPIDs[$NumberOfSessions]}
 ${AllSessionUsers[$NumberOfSessions]}
+${AllSessionIDs[$NumberOfSessions]}
 "
 fi
 ((NumberOfSessions--))
@@ -278,11 +280,12 @@ SessionList+="-1
 
 
 New Session...
+
 "
 
 
 unset ChangeSession
-ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --print-column=1 --hide-column=3 --separator="\n" 2>/dev/null | head -1 )
+ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null | head -1 )
 
 if [[ $ChangeSession == "-1" ]]
 then
@@ -294,6 +297,7 @@ then
 
 if [[ -e /proc/${AllSessionPIDs[$ChangeSession]}/environ ]]
 then
+loginctl activate ${AllSessionIDs[$ChangeSession]}
 chvt ${AllSessionTTYs[$ChangeSession]}
 else
 zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
