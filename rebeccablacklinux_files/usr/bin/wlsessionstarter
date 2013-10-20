@@ -52,7 +52,7 @@ WESTONPID=$!
 
 #Find the logind session id
 SESSIONS=$(loginctl  list-sessions |grep "        c" |awk '{print $1}')
-echo "$SESSIONS" | while read SESSION
+while read SESSION
 do
 SessionPid=$(loginctl show-session $SESSION -p Leader |awk -F = '{print $2}')
 if [[ $SessionPid == $WESTONPID ]]
@@ -60,7 +60,7 @@ then
 LOGINDSESSION=$SESSION
 break
 fi
-done
+done < <(echo "$SESSIONS")
 
 loginctl activate $LOGINDSESSION
 chvt $WESTONTTY
