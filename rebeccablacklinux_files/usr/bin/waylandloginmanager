@@ -409,6 +409,7 @@ if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
 weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
+chvt $HostVT
 fi
 
 sleep 15

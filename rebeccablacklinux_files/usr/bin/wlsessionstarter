@@ -63,6 +63,7 @@ fi
 done
 
 loginctl activate $LOGINDSESSION
+chvt $WESTONTTY
 
 echo "RegisterSession
 $WESTONTTY
