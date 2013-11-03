@@ -114,17 +114,3 @@ index f24a08d..34a5f56 100644
 +ecm_setup_version(5 VARIABLE_PREFIX XMLGUI
                          VERSION_HEADER "${CMAKE_CURRENT_BINARY_DIR}/xmlgui_version.h"
                          PACKAGE_VERSION_FILE "${CMAKE_CURRENT_BINARY_DIR}/XmlGuiConfigVersion.cmake")
- 
-diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 8ced1f1..c99b931 100644
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -650,7 +650,7 @@ endif(NEPOMUK)
- macro_optional_find_package(KActivities 6.1.0)
- macro_log_feature(KActivities_FOUND "KActivities" "Activities interface library" "https://projects.kde.org/projects/kde/kdelibs/kactivities" FALSE "" "Required for Activities integration.")
- if(KActivities_FOUND)
--    set(HAVE_KACTIVITIES TRUE)
-+    set(HAVE_KACTIVITIES FALSE)
- endif(KActivities_FOUND)
- 
- #Set the build of TextShape changetraker
