@@ -37,6 +37,7 @@ echo "Must be run as root."
 exit
 fi
 
+cd /run
 . /usr/bin/weston_vars
 export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
