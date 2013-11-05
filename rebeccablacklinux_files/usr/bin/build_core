@@ -71,21 +71,22 @@ fi
 
 fi
 
-git clone "$SOURCEURL" "$SOURCENAME"
+yes "" | git clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-git submodule foreach --recursive git reset --hard 
-git submodule foreach --recursive git clean -fdx
-git checkout -f $SOURCEREVISION 
-git reset --hard $SOURCEREVISION
-git reset --hard origin/$SOURCEREVISION
-git reset --hard MERGE_HEAD
-git clean -fdx
-git config user.email rbos@rbos
-git submodule sync --recursive
-git submodule init
-git submodule update --recursive --force
-git pull
+yes "" | git submodule foreach --recursive git reset --hard 
+yes "" | git submodule foreach --recursive git clean -fdx
+yes "" | git checkout -f $SOURCEREVISION 
+yes "" | git reset --hard $SOURCEREVISION
+yes "" | git reset --hard origin/$SOURCEREVISION
+yes "" | git reset --hard MERGE_HEAD
+yes "" | git clean -fdx
+yes "" | git config user.email rbos@rbos
+yes "" | git submodule sync --recursive
+yes "" | git submodule init
+yes "" | git submodule update --recursive --force
+yes "" | git pull
+
 
 #Get the number of revisions specified.
 SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
@@ -129,12 +130,12 @@ fi
 
 fi
 
-svn co "$SOURCEURL" "$SOURCENAME"
+yes "" | svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-svn revert --recursive .
-svn cleanup
-svn update -r $SOURCEREVISION
+yes "" | svn revert --non-interactive --recursive .
+yes "" | svn cleanup --non-interactive
+yes "" | svn update --non-interactive -r $SOURCEREVISION
 }
 
 
@@ -155,13 +156,13 @@ fi
 
 fi
 
-bzr branch "$SOURCEURL" "$SOURCENAME"
+yes "" | bzr branch "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-bzr revert
-bzr clean-tree --force --detritus
-bzr pull
-bzr update -r $SOURCEREVISION
+yes "" | bzr revert
+yes "" | bzr clean-tree --force --detritus
+yes "" | bzr pull
+yes "" | bzr update -r $SOURCEREVISION
 }
 
 #Function to download hg repos
@@ -181,13 +182,13 @@ fi
 
 fi
 
-hg clone "$SOURCEURL" "$SOURCENAME"
+yes "" | hg clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
-hg revert
-hg st -un0 | xargs -0 rm
-hg pull
-hg update -C -r $SOURCEREVISION
+yes "" | hg revert
+yes "" | hg st -un0 | xargs -0 rm
+yes "" | hg pull
+yes "" | hg update -C -r $SOURCEREVISION
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
