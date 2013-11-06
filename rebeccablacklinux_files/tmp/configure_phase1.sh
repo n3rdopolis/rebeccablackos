@@ -42,7 +42,7 @@ mkdir /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
 echo "" > touch /tmp/FAILEDDOWNLOADS.txt
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
+INSTALLS="$(diff -uN /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
 INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | awk '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
@@ -84,7 +84,7 @@ fi
 
 done < <(echo "$INSTALLS")
 
-
+cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
@@ -92,6 +92,4 @@ yes Y | apt-get dist-upgrade -d -y --force-yes
 
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-mount --bind /run/ /dev/
 compile_all download-only
-umount -lf /dev

@@ -71,17 +71,9 @@ chgrp  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 #bind mount the FS to the workdir. 
 mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_1:$BUILDLOCATION/build/$BUILDARCH/importdata/ none $BUILDLOCATION/build/$BUILDARCH/workdir
 
-#mounting critical fses on chrooted fs with bind 
-mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
-mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
-mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
-
 #Mount in the folder with previously built debs
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#Import the old INSTALLS.txt file from the last build so it can be diffed
-cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/
 
 #bring these files into phase_1 with aufs
 cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp

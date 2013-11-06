@@ -40,7 +40,7 @@ mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
 echo "" > touch /tmp/FAILEDINSTALLS.txt
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+INSTALLS="$(diff -uN /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
 INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
@@ -82,7 +82,7 @@ fi
 
 done < <(echo "$INSTALLS")
 
-
+cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak
 
 
 #remove old kernels!
