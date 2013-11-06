@@ -20,7 +20,7 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 HOMELOCATION=~
-RBOSLOCATION=~/RBOS_Build_Files
+BUILDLOCATION=~/RBOS_Build_Files
 unset HOME
 
 if [[ -z $BUILDARCH ]]
@@ -30,71 +30,71 @@ exit
 fi
 
 #If the lockfile for the build output does not exist, delete it so all debs get deleted, and the build restarts from scratch.
-if [[  ! -f $RBOSLOCATION/DontRestartBuildoutput$BUILDARCH ]]
+if [[  ! -f $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH ]]
 then
-rm -rf $RBOSLOCATION/build/$BUILDARCH/buildoutput
-touch $RBOSLOCATION/DontRestartBuildoutput$BUILDARCH 
+rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
+touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH 
 fi
 
 
 #create a folder for the media mountpoints in the media folder
-mkdir $RBOSLOCATION/build/$BUILDARCH
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_2
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_3
-mkdir $RBOSLOCATION/build/$BUILDARCH/buildoutput
-mkdir $RBOSLOCATION/build/$BUILDARCH/workdir
+mkdir $BUILDLOCATION/build/$BUILDARCH
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_1
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_2
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_3
+mkdir $BUILDLOCATION/build/$BUILDARCH/buildoutput
+mkdir $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir and phase 2
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 
 #Clean up Phase 3 data.
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3/*
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 
 #create the union of phases 1, 2, and 3 at workdir
-mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_3:$RBOSLOCATION/build/$BUILDARCH/phase_2:$RBOSLOCATION/build/$BUILDARCH/phase_1 none $RBOSLOCATION/build/$BUILDARCH/workdir
+mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_3:$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
 
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
-mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
-mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
+mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
+mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
+mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #copy the files to where they belong
-rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/
+rsync $BUILDLOCATION/build/$BUILDARCH/importdata/* -Cr $BUILDLOCATION/build/$BUILDARCH/workdir/
 
 #Handle /usr/import for the creation of the deb file that contains this systems files
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
-rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
-rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import/usr/import
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/usr/import
+rsync $BUILDLOCATION/build/$BUILDARCH/importdata/* -Cr $BUILDLOCATION/build/$BUILDARCH/workdir/usr/import
+rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir/usr/import/usr/import
 
 #delete the temp folder
-rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
+rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir/temp/
 
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-linux32 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
 else
-chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
 fi
 
 
@@ -102,32 +102,32 @@ fi
 ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
 
 #Create a folder for the log files with the date string
-mkdir -p "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH"
+mkdir -p "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 
 #Export the log files to the location
-cp -a "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH"
+cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 
 #dump out the logged revision numbers to a file
-ls "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/" | while read FILE 
+ls "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/" | while read FILE 
 do  
-cat "$RBOSLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
-done > "$RBOSLOCATION/logs/$ENDDATE $BUILDARCH/BuiltRevisions.log"
+cat "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
+done > "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH/BuiltRevisions.log"
 
 
 
 #If the live cd did not build then tell user  
-if [ ! -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+if [ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 
 fi 
 
 #If the live cd did  build then tell user   
-if [  -f $RBOSLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+if [  -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
 #move the iso out of the chroot fs    
-mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
-mv $RBOSLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
+mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
 
 
 echo "Live CD image build was successful."
@@ -141,19 +141,19 @@ fi
 
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #Clean up Phase 3 data.
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3/*
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*

@@ -20,7 +20,7 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 HOMELOCATION=~
-RBOSLOCATION=~/RBOS_Build_Files
+BUILDLOCATION=~/RBOS_Build_Files
 unset HOME
 
 if [[ -z $BUILDARCH ]]
@@ -30,73 +30,73 @@ exit
 fi
 
 #create a folder for the media mountpoints in the media folder
-mkdir $RBOSLOCATION/build/$BUILDARCH
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_1
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_2
-mkdir $RBOSLOCATION/build/$BUILDARCH/phase_3
-mkdir $RBOSLOCATION/build/$BUILDARCH/buildoutput
-mkdir $RBOSLOCATION/build/$BUILDARCH/workdir
+mkdir $BUILDLOCATION/build/$BUILDARCH
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_1
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_2
+mkdir $BUILDLOCATION/build/$BUILDARCH/phase_3
+mkdir $BUILDLOCATION/build/$BUILDARCH/buildoutput
+mkdir $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir and phase 2
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 
 #Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
-INSTALLREMOVECOUNT="$(diff -uN $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $SCRIPTFOLDERPATH/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
-if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $RBOSLOCATION/DontRestartPhase2$BUILDARCH ]]
+INSTALLREMOVECOUNT="$(diff -uN $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $SCRIPTFOLDERPATH/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
+if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
 #Delete the phase 2 folder contents
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_2/*
-touch $RBOSLOCATION/DontRestartPhase2$BUILDARCH
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp
-touch $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
+touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
+touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
 fi
 
 #create the union of phases 1 and 2 at the workdir
-mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_2:$RBOSLOCATION/build/$BUILDARCH/phase_1 none $RBOSLOCATION/build/$BUILDARCH/workdir
+mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
-mount --rbind /proc $RBOSLOCATION/build/$BUILDARCH/workdir/proc/
-mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
+mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
+mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
+mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-linux32 chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 else
-chroot $RBOSLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 fi
 
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 

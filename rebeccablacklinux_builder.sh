@@ -20,7 +20,7 @@
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-RBOSLOCATION=~/RBOS_Build_Files
+BUILDLOCATION=~/RBOS_Build_Files
 
 #####Tell User what script does
 echo "
@@ -28,7 +28,7 @@ THIS SCRIPT INSTALLS debootstrap AND aufs-tools on the build host (this computer
 
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
-   Folder:            ${HOME}/RBOS_Build_Files/
+   Folder:            $BUILDLOCATION
    File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
    File:              ${HOME}/RebeccaBlackLinux_Reduced_i386.iso or ${HOME}/RebeccaBlackLinux_Reduced_amd64.iso
 "
@@ -88,11 +88,11 @@ REBUILT="to update"
 
 
 #only initilize the FS if the FS isn't there.
-if [[ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH || ! -f $RBOSLOCATION/DontDebootstrap$BUILDARCH ]]
+if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
 then
-if [ ! -f $RBOSLOCATION/DontStartFromScratch$BUILDARCH ]
+if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
 then
-rm -rf $RBOSLOCATION/build/$BUILDARCH/buildoutput
+rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
 REBUILT="to rebuild from scratch"
 fi
 $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh

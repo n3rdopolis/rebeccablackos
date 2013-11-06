@@ -19,7 +19,7 @@ echo "PHASE 0"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-RBOSLOCATION=~/RBOS_Build_Files
+BUILDLOCATION=~/RBOS_Build_Files
 unset HOME
 
 if [[ -z $BUILDARCH ]]
@@ -31,65 +31,65 @@ fi
 ####CLEAN UP OLD SCRIPT FILES
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the debs data
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #unmount phase 2
-umount -lf $RBOSLOCATION/build/$BUILDARCH/phase_2
+umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2
 
 #END PAST RUN CLEANUP##################
 
 
 #make a folder containing the live cd tools in the users local folder
-mkdir -p $RBOSLOCATION
+mkdir -p $BUILDLOCATION
 
 #switch to that folder
-cd $RBOSLOCATION
+cd $BUILDLOCATION
 
 #clean up old files
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_1
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_2
-rm -rf $RBOSLOCATION/build/$BUILDARCH/phase_3
-rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir
-rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3
+rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir
+rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
 
 #create a folder for the media mountpoints in the media folder
-mkdir -p $RBOSLOCATION/build/$BUILDARCH
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_1
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_2
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/phase_3
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/buildoutput
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir
+mkdir -p $BUILDLOCATION/build/$BUILDARCH
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_3
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #bind mount the FS to the workdir
-mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
+mount --bind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #install a really basic Ubuntu installation in the new fs  
-debootstrap --arch $BUILDARCH saucy $RBOSLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
-touch $RBOSLOCATION/DontStartFromScratch$BUILDARCH
-touch $RBOSLOCATION/DontDebootstrap$BUILDARCH
+touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
+touch $BUILDLOCATION/DontDebootstrap$BUILDARCH
 
 #unmount the chrooted procfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $RBOSLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the FS at the workdir
-umount -lfd $RBOSLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
