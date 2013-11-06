@@ -44,7 +44,7 @@ mkdir /usr/share/logs/package_operations/Downloads
 echo "" > touch /tmp/FAILEDDOWNLOADS.txt
 INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
 INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | awk '{print $1}' | tee /tmp/FAILEDDOWNLOADS.txt )"
-INSTALLS="$(echo $INSTALLS | sort -u)"
+INSTALLS="$(echo "$INSTALLS" | sort -u)"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
