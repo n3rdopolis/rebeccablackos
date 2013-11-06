@@ -42,7 +42,7 @@ mkdir /usr/share/logs/package_operations/Installs
 echo "" > touch /tmp/FAILEDINSTALLS.txt
 INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
 INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
-INSTALLS="$(echo "$INSTALLS" | sort -u)"
+INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
