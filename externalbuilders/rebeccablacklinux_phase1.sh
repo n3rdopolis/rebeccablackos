@@ -61,7 +61,7 @@ rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata/
 rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $BUILDLOCATION/build/$BUILDARCH/importdata/
 
 #delete old logs
-rm $BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/
+rm -r $BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/*
 
 #make the imported files executable 
 chmod 0755 -R $BUILDLOCATION/build/$BUILDARCH/importdata/
@@ -84,8 +84,8 @@ mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$
 cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/
 
 #bring these files into phase_1 with aufs
-cp $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/INSTALLS.txt     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/INSTALLS.txt
-cp $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
+cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp
+cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
 
 
 #Configure the Live system########################################
