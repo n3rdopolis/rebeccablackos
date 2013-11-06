@@ -39,16 +39,11 @@ rm -r /usr/share/logs/package_operations/Installs
 mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
-INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
+echo "" > touch /tmp/FAILEDINSTALLS.txt
+INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
+INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' | tee /tmp/FAILEDINSTALLS.txt )"
+INSTALLS="$(echo $INSTALLS | sort -u)"
 
-#Count the difference between the old INSTALLS.txt from the last build, and the current one
-INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
-
-#Archive this current list of installs.
-cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.bak
-
-if [[ $INSTALLSDIFFCOUNT != 0 ]]
-then 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
 do
@@ -57,8 +52,6 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-rm /usr/share/logs/package_operations/Installs/failedpackages.log
-
 echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
 Result=${PIPESTATUS[1]}
@@ -80,11 +73,15 @@ fi
 if [[ $Result != 0 ]]
 then
 echo "$PACKAGE failed to $METHOD" >> /usr/share/logs/package_operations/Installs/failedpackages.log
+else
+grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDINSTALLS.txt > /tmp/FAILEDINSTALLS.txt.bak
+echo /tmp/FAILEDINSTALLS.txt.bak > /tmp/FAILEDINSTALLS.txt
+rm /tmp/FAILEDINSTALLS.txt.bak
 fi
 
 done
 
-fi
+
 
 
 #remove old kernels!

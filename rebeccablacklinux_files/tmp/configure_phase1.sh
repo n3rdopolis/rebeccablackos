@@ -41,14 +41,10 @@ rm -r /usr/share/logs/package_operations/Downloads
 mkdir /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
-INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
-
-#Count the difference between the old INSTALLS.txt from the last build, and the current one
-INSTALLSDIFFCOUNT=$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt  |wc -l)
-
-if [[ $INSTALLSDIFFCOUNT != 0 ]]
-then 
-rm /usr/share/logs/package_operations/Downloads/failedpackages.log
+echo "" > touch /tmp/FAILEDDOWNLOADS.txt
+INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
+INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | awk '{print $1}' | tee /tmp/FAILEDDOWNLOADS.txt )"
+INSTALLS="$(echo $INSTALLS | sort -u)"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 echo "$INSTALLS" | while read PACKAGEINSTRUCTION
@@ -79,11 +75,15 @@ fi
 if [[ $Result != 0 ]]
 then
 echo "$PACKAGE failed to $METHOD" >> /usr/share/logs/package_operations/Downloads/failedpackages.log
+else
+grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
+echo /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
+rm /tmp/FAILEDDOWNLOADS.txt.bak
 fi
 
 done
 
-fi
+
 
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
