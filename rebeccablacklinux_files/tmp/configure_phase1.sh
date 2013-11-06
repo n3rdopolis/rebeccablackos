@@ -89,5 +89,9 @@ done < <(echo "$INSTALLS")
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes
 
+
+
 #run the script that calls all compile scripts in a specified order, in download only mode
+mount --bind /run/ /dev/
 compile_all download-only
+umount -lf /dev
