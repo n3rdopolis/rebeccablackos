@@ -84,8 +84,8 @@ mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$
 cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/
 
 #bring these files into phase_1 with aufs
-touch $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/INSTALLS.txt
-touch $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
+cp $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/INSTALLS.txt     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/INSTALLS.txt
+cp $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
 
 
 #Configure the Live system########################################
