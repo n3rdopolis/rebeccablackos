@@ -81,7 +81,11 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #Import the old INSTALLS.txt file from the last build so it can be diffed
-cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/phase_1/tmp/
+cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/
+
+#bring these files into phase_1 with aufs
+touch $BUILDLOCATION/build/$BUILDARCH/workdir/tmp/INSTALLS.txt
+touch $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
 
 
 #Configure the Live system########################################
