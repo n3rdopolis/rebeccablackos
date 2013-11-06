@@ -58,21 +58,21 @@ METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
 if [[ $METHOD == "PART" ]]
 then
-echo "Downloading with partial dependancies for $PACKAGE"                       |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "FULL" ]]
 then
-echo "Downloading with all dependancies for $PACKAGE"                           |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Yes | apt-get install $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Yes | apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 Result=${PIPESTATUS[1]}
 elif [[ $METHOD == "BUILDDEP" ]]
 then
-echo "Downloading build dependancies for $PACKAGE"                              |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
+echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
 Result=${PIPESTATUS[1]}
 else
-echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
 Result=1
 fi
 
