@@ -60,6 +60,9 @@ umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata/
 rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $BUILDLOCATION/build/$BUILDARCH/importdata/
 
+#delete old logs
+rm $BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/
+
 #make the imported files executable 
 chmod 0755 -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 chown  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
@@ -80,8 +83,6 @@ mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$
 #Import the old INSTALLS.txt file from the last build so it can be diffed
 cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $BUILDLOCATION/build/$BUILDARCH/phase_1/tmp/
 
-#delete old logs
-rm $BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]

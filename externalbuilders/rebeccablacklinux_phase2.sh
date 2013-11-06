@@ -64,6 +64,9 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
 touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
 fi
 
+#delete old logs
+rm $BUILDLOCATION/build/$BUILDARCH/phase_2/usr/share/logs/
+
 #create the union of phases 1 and 2 at the workdir
 mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
 
@@ -76,8 +79,6 @@ mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
-#delete old logs
-rm $BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
