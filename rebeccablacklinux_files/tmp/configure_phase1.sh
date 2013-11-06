@@ -42,12 +42,12 @@ mkdir /usr/share/logs/package_operations/Downloads
 
 #LIST OF PACKAGES TO GET INSTALLED
 echo "" > touch /tmp/FAILEDDOWNLOADS.txt
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}')"
-INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | awk '{print $1}' | tee /tmp/FAILEDDOWNLOADS.txt )"
+INSTALLS="$(diff -uN /tmp/INSTALLS.txt.bak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
+INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | awk '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | sort -u)"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
-echo "$INSTALLS" | while read PACKAGEINSTRUCTION
+while read PACKAGEINSTRUCTION
 do
 PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
 METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
@@ -74,14 +74,15 @@ fi
 
 if [[ $Result != 0 ]]
 then
-echo "$PACKAGE failed to $METHOD" >> /usr/share/logs/package_operations/Downloads/failedpackages.log
+echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Downloads/failedpackages.log
 else
+echo "$PACKAGE successfully $METHOD"
 grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
-echo /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
+cat /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
 rm /tmp/FAILEDDOWNLOADS.txt.bak
 fi
 
-done
+done < <(echo "$INSTALLS")
 
 
 
