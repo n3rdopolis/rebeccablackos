@@ -36,10 +36,13 @@ mkdir -p /usr/share/xsessions
 cp -a /usr/import/usr/share/xsessions/* /usr/share/xsessions
 
 mkdir -p /usr/share/wallpapers/RebeccaBlackOS/
-cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/RebeccaBlackOS/
+cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/RebeccaBlackOS
 
 mkdir -p /etc/skel/.config
-cp -a /usr/import/etc/skel/.config/* /etc/skel/.config
+cp -a /usr/import/etc/skel/* /etc/skel
+
+mkdir -p /root
+cp -a /usr/import/root/* /etc/skel/root
 
 mkdir -p /etc/lightdm
 cp -a /usr/import/etc/lightdm/* /etc/lightdm
@@ -49,9 +52,6 @@ cp -a /usr/import/etc/init/* /etc/init
 
 mkdir -p /etc/X11
 cp -a /usr/import/etc/X11/* /etc/X11
-
-mkdir -p /var
-cp -a /usr/import/var/* /var
 
 #install the menu items for the wayland tests
 install_menu_items

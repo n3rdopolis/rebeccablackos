@@ -77,19 +77,12 @@ mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
-#copy in the files needed
-rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-
-
-#make the imported files executable 
-chmod 0755 -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-chown  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-
-
 #copy the files to where they belong
-cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/* $RBOSLOCATION/build/$BUILDARCH/workdir/
-cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/* $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
+rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/
+
+#Handle /usr/import for the creation of the deb file that contains this systems files
+mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
+rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import
 rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/usr/import/usr/import
 
 #delete the temp folder

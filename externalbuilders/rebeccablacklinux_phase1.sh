@@ -56,9 +56,17 @@ umount -lfd $RBOSLOCATION/build/$BUILDARCH/phase_2
 
 #END PAST RUN CLEANUP##################
 
+#copy in the files needed
+rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata/
+rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/importdata/
+
+#make the imported files executable 
+chmod 0755 -R $RBOSLOCATION/build/$BUILDARCH/importdata/
+chown  root  -R $RBOSLOCATION/build/$BUILDARCH/importdata/
+chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/importdata/
 
 #bind mount the FS to the workdir. 
-mount --bind $RBOSLOCATION/build/$BUILDARCH/phase_1 $RBOSLOCATION/build/$BUILDARCH/workdir
+mount -t aufs -o dirs=$RBOSLOCATION/build/$BUILDARCH/phase_1:$RBOSLOCATION/build/$BUILDARCH/importdata/ none $RBOSLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $RBOSLOCATION/build/$BUILDARCH/workdir/dev/
@@ -68,29 +76,6 @@ mount --rbind /sys $RBOSLOCATION/build/$BUILDARCH/workdir/sys/
 #Mount in the folder with previously built debs
 mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $RBOSLOCATION/build/$BUILDARCH/buildoutput $RBOSLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#copy in the files needed
-rm -rf $RBOSLOCATION/build/$BUILDARCH/importdata/
-rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $RBOSLOCATION/build/$BUILDARCH/importdata/
-rsync $RBOSLOCATION/build/$BUILDARCH/importdata/* -Cr $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-
-#make the imported files executable 
-chmod 0755 -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-chown  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-chgrp  root  -R $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
-
-#copy the ONLY minimal build files in, not any data files like wallpapers.
-mkdir -p $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/Compile/
-cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/tmp/* $RBOSLOCATION/build/$BUILDARCH/workdir/tmp
-cp -a $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/Compile/* $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/Compile/
-cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/compile_all $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/compile_all 
-cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/build_core $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/build_core
-cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/build_vars $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/build_vars
-cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/usr/bin/weston_vars $RBOSLOCATION/build/$BUILDARCH/workdir/usr/bin/weston_vars
-cp $RBOSLOCATION/build/$BUILDARCH/workdir/temp/etc/apt/sources.list $RBOSLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
-
-#delete the temp folder
-rm -rf $RBOSLOCATION/build/$BUILDARCH/workdir/temp/
 
 #Import the old INSTALLS.txt file from the last build so it can be diffed
 cp $RBOSLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $RBOSLOCATION/build/$BUILDARCH/phase_1/tmp/
