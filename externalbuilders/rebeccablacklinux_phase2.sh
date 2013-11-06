@@ -76,6 +76,9 @@ mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
+#delete old logs
+rm $BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/
+
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
