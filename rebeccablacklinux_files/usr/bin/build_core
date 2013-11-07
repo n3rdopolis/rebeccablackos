@@ -22,6 +22,19 @@ export REBUILDNEWREVISION=0
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
 
+function NonInteractive
+{
+export CMD=$*
+expect <<- DONE 
+spawn $CMD
+expect "*:*"
+send -- "\r"
+expect "*:*"
+send -- "\r"
+expect eof 
+DONE
+}
+
 function RunDownloadAndOrBuild 
 {
 
@@ -71,17 +84,8 @@ fi
 
 fi
 
-export $SOURCEURL
-export $SOURCENAME
-expect <<- DONE 
-spawn git clone $::env($SOURCEURL) $::env($SOURCENAME)
-expect "*:*"
-send -- "\r"
-expect "*:*"
-send -- "\r"
-expect eof 
-DONE
-mkdir -p "$SOURCENAME"
+ 
+NonInteractive git clone $SOURCEURL $SOURCENAME
 cd "$SOURCENAME"
 git submodule foreach --recursive git reset --hard 
 git submodule foreach --recursive git clean -fdx
@@ -139,7 +143,7 @@ fi
 
 fi
 
-svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
+NonInteractive svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 svn revert --non-interactive --recursive .
@@ -165,7 +169,7 @@ fi
 
 fi
 
-bzr branch "$SOURCEURL" "$SOURCENAME"
+NonInteractive bzr branch "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 bzr revert
@@ -191,7 +195,7 @@ fi
 
 fi
 
-hg clone "$SOURCEURL" "$SOURCENAME"
+NonInteractive hg clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 hg revert
