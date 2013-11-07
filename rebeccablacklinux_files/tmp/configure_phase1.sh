@@ -29,7 +29,7 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 apt-get update
 
 #install basic applications that the system needs to get repositories
-yes Y| apt-get install aptitude git bzr subversion mercurial
+yes Y| apt-get install aptitude git bzr subversion mercurial expect
 
 #create folder for install logs
 mkdir -p /usr/share/logs/package_operations
