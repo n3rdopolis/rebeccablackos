@@ -71,6 +71,11 @@ chgrp  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 #bind mount the FS to the workdir. 
 mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_1:$BUILDLOCATION/build/$BUILDARCH/importdata/ none $BUILDLOCATION/build/$BUILDARCH/workdir
 
+#mounting critical fses on chrooted fs with bind 
+mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
+mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
+mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
+
 #Mount in the folder with previously built debs
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
