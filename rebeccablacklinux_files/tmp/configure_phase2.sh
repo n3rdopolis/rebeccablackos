@@ -39,9 +39,12 @@ rm -r /usr/share/logs/package_operations/Installs
 mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
-echo "" > touch /tmp/FAILEDINSTALLS.txt
-INSTALLS="$(diff -uN /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
-INSTALLS+="$(echo; diff -uN /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
+sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
+sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
+sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
+touch /tmp/FAILEDINSTALLS.txt
+INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+INSTALLS+="$(echo; diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
 #DOWNLOAD THE PACKAGES SPECIFIED
