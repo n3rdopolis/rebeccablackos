@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=archiver
+SOURCENAME=hawaii-shell
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/hawaii-desktop/archiver.git
+SOURCEURL=https://github.com/mauios/hawaii-shell.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -35,7 +35,7 @@ SOURCEREVISION=master
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=0
+REBUILDNEWREVISION=1
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
@@ -67,6 +67,8 @@ rm CMakeCache.txt
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+sed -i 's\opt/opt\opt\g' src/shells/desktop/CMakeFiles/hawaii-desktop-shell.dir/link.txt
+sed -i 's\opt/opt\opt\g' src/shells/desktop/CMakeFiles/hawaii-desktop-shell.dir/build.make
 make 
 }
 
