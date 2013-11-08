@@ -22,20 +22,6 @@ export REBUILDNEWREVISION=0
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
 
-function NonInteractive
-{
-export CMD=$*
-expect <<- DONE 
-spawn $CMD
-expect "*name:*"
-send -- "\r"
-expect "*word:*"
-send -- "\r"
-expect eof 
-catch wait result
-DONE
-}
-
 function RunDownloadAndOrBuild 
 {
 
@@ -86,7 +72,8 @@ fi
 fi
 
  
-NonInteractive git clone $SOURCEURL $SOURCENAME
+git clone $SOURCEURL $SOURCENAME
+mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 git submodule foreach --recursive git reset --hard 
 git submodule foreach --recursive git clean -fdx
@@ -144,7 +131,7 @@ fi
 
 fi
 
-NonInteractive svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
+svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 svn revert --non-interactive --recursive .
@@ -170,7 +157,7 @@ fi
 
 fi
 
-NonInteractive bzr branch "$SOURCEURL" "$SOURCENAME"
+bzr branch "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 bzr revert
