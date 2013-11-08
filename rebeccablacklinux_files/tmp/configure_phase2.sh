@@ -18,6 +18,9 @@
 
 
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+rm /sbin/initctl.distrib
+rm /usr/sbin/grub-probe.distrib
+rm /usr/sbin/invoke-rc.d.distrib
 dpkg-divert --local --rename --add /usr/sbin/grub-probe
 dpkg-divert --local --rename --add /sbin/initctl
 dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
