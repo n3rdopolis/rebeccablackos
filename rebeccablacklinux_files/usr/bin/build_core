@@ -27,11 +27,12 @@ function NonInteractive
 export CMD=$*
 expect <<- DONE 
 spawn $CMD
-expect "*:*"
+expect "*name:*"
 send -- "\r"
-expect "*:*"
+expect "*word:*"
 send -- "\r"
 expect eof 
+catch wait result
 DONE
 }
 
