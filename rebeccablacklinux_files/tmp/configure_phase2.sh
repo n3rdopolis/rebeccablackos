@@ -20,8 +20,10 @@
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
 dpkg-divert --local --rename --add /usr/sbin/grub-probe
 dpkg-divert --local --rename --add /sbin/initctl
+dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
 ln -s /bin/true /sbin/initctl
 ln -s /bin/true /usr/sbin/grub-probe
+ls -s /bin/true /usr/sbin/invoke-rc.d
 
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
@@ -109,8 +111,10 @@ yes Y | apt-get --purge autoremove -y
 #Reset the utilites back to the way they are supposed to be.
 rm /sbin/initctl
 rm /usr/sbin/grub-probe
+rm /usr/sbin/invoke-rc.d
 dpkg-divert --local --rename --remove /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /sbin/initctl
+dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
 
 #delete the dpkg config file that speeds up the installs, so the user doesn't get it.
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
