@@ -23,7 +23,7 @@ dpkg-divert --local --rename --add /sbin/initctl
 dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
 ln -s /bin/true /sbin/initctl
 ln -s /bin/true /usr/sbin/grub-probe
-ls -s /bin/true /usr/sbin/invoke-rc.d
+ln -s /bin/true /usr/sbin/invoke-rc.d
 
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
