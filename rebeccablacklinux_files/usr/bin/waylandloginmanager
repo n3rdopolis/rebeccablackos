@@ -412,8 +412,8 @@ logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" 
 chvt $HostVT
 if [[ $(cat /proc/cmdline | grep -c wlmdebuginsecure ) != 0 ]]
 then
-weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so,xwayland.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
 logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebuginsecure' option has been passed to the kernel. This diagnostic option caused the waylandloginmanager to start the loginmanagerdisplay with xwayland enabled." -s  >>/var/log/waylandloginmanager 2>&1
+weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so,xwayland.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
 else
 weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
 fi
