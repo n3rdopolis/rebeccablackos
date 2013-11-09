@@ -104,17 +104,6 @@ ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
 #Create a folder for the log files with the date string
 mkdir -p "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 
-#Export the log files to the location
-cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
-
-#dump out the logged revision numbers to a file
-ls "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/" | while read FILE 
-do  
-cat "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/Buildlog/$FILE" | grep REVISION 
-done > "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH/BuiltRevisions.log"
-
-
-
 #If the live cd did not build then tell user  
 if [ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  

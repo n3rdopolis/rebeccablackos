@@ -64,8 +64,6 @@ yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations
 yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
 
 #hide buildlogs in tmp from remastersys
-mv /usr/share/Buildlog     /tmp
-mv /usr/share/Downloadlog /tmp
 mv /usr/share/logs	/tmp
 
 #delete bloated binary files that are for development, and are not needed on the smaller iso
@@ -101,6 +99,4 @@ rm -rf /var/lib/dlocate/*
 remastersys dist
 
 #move logs back
-mv /tmp/Buildlog /usr/share
-mv /tmp/Downloadlog /usr/share
 mv /tmp/logs /usr/share
