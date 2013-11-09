@@ -1,0 +1,17 @@
+diff --git a/tier3/kinit/src/kdeinit/CMakeLists.txt b/tier3/kinit/src/kdeinit/CMakeLists.txt
+index d07d434..05e73ec 100644
+--- a/tier3/kinit/src/kdeinit/CMakeLists.txt
++++ b/tier3/kinit/src/kdeinit/CMakeLists.txt
+@@ -31,9 +31,9 @@ target_link_libraries(kdeinit5 ${kdeinit_LIBS} ${KINIT_SOCKET_LIBRARY}
+     KF5::KI18n #i18n() used on some error messages
+ )
+ 
+-if (X11_FOUND)
+-  target_link_libraries(kdeinit5 ${X11_X11_LIB})
+-endif()
++#if (X11_FOUND)
++#  target_link_libraries(kdeinit5 ${X11_X11_LIB})
++#endif()
+ 
+ install(TARGETS kdeinit5 ${INSTALL_TARGETS_DEFAULT_ARGS} )
+ 
