@@ -124,10 +124,10 @@ yes Y | apt-get purge $PACKAGE
 done
 
 #install updates
-yes Y | apt-get dist-upgrade -y --force-yes
+yes Y | apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Installs/dist-upgrade.log
 
 #Delete the old depends of the packages no longer needed.
-yes Y | apt-get --purge autoremove -y 
+yes Y | apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge.log
 
 #Reset the utilites back to the way they are supposed to be.
 rm /sbin/initctl

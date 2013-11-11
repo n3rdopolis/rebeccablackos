@@ -90,8 +90,8 @@ done < <(echo "$INSTALLS")
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates
-yes Y | apt-get dist-upgrade -d -y --force-yes
-
+yes Y | apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dist-upgrade.log
+    
 
 
 #run the script that calls all compile scripts in a specified order, in download only mode
