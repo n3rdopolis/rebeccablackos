@@ -54,7 +54,7 @@ umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 
 #Reset phase 2 if DontRestartPhase2 file is missing.
-if [[ ! -f $RBOSLOCATION/DontRestartPhase2$BUILDARCH ]]
+if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
 #Delete the phase 2 folder contents
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
