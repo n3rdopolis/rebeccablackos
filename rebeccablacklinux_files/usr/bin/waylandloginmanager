@@ -298,6 +298,7 @@ then
 
 if [[ -e /proc/${AllSessionPIDs[$ChangeSession]}/environ ]]
 then
+chvt 63
 loginctl activate ${AllSessionIDs[$ChangeSession]}
 chvt ${AllSessionTTYs[$ChangeSession]}
 else
@@ -410,6 +411,7 @@ if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
 openvt -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
+chvt 63
 chvt $HostVT
 
 fi
@@ -467,10 +469,12 @@ COMMAND=$(cat /run/loginmanager_control)
 logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $COMMAND == "Switch" ]]
 then
+chvt 63
 chvt $HostVT
 SwitchUserDialog &
 elif [[ $COMMAND == "Change" ]]
 then
+chvt 63
 chvt $HostVT
 elif [[ $COMMAND == "Login" ]]
 then
