@@ -48,9 +48,13 @@ sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
 touch /tmp/FAILEDINSTALLS.txt
-INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
-INSTALLS+="$(echo; diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
+INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep -v ::REMOVE | grep ^- | grep -v "\---" | cut -d - -f2- | awk -F "#" '{print $1}' | awk -F :: '{print $1"::REMOVE"}')"
+INSTALLS+="
+$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+INSTALLS+="
+$(diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
+
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
@@ -91,6 +95,13 @@ echo "$PACKAGE successfully $METHOD"
 grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDINSTALLS.txt > /tmp/FAILEDINSTALLS.txt.bak
 cat /tmp/FAILEDINSTALLS.txt.bak > /tmp/FAILEDINSTALLS.txt
 rm /tmp/FAILEDINSTALLS.txt.bak
+if [[ $METHOD == "REMOVE" ]]
+then
+grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDREMOVES.txt > /tmp/FAILEDREMOVES.txt.bak
+cat /tmp/FAILEDREMOVES.txt.bak > /tmp/FAILEDREMOVES.txt
+rm /tmp/FAILEDREMOVES.txt.bak
+fi
+
 fi
 
 done < <(echo "$INSTALLS")

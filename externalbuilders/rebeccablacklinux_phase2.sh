@@ -53,9 +53,8 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 
-#Compare the /tmp/INSTALLS.txt file from previous builds, to the current one. If the current one has missing lines, (meaning that a package should not be installed) then reset phase 2.
-INSTALLREMOVECOUNT="$(diff -uN $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak $SCRIPTFOLDERPATH/../rebeccablacklinux_files/tmp/INSTALLS.txt | grep ^- | grep -v "\---" | wc -l)"
-if [[ $INSTALLREMOVECOUNT -gt 0 || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
+#Reset phase 2 if DontRestartPhase2 file is missing.
+if [[ ! -f $RBOSLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
 #Delete the phase 2 folder contents
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
