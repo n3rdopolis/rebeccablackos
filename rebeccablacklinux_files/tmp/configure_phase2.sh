@@ -44,15 +44,17 @@ rm -r /usr/share/logs/package_operations/Installs
 mkdir /usr/share/logs/package_operations/Installs
 
 #LIST OF PACKAGES TO GET INSTALLED
+sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
 touch /tmp/FAILEDINSTALLS.txt
-INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep -v ::REMOVE | grep ^- | grep -v "\---" | cut -d - -f2- | awk -F "#" '{print $1}' | awk -F :: '{print $1"::REMOVE"}')"
+diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep -v ::REMOVE | grep ^- | grep -v "\---" | cut -c 2- | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
+INSTALLS=$(diff -u -N -w1000 /tmp/FAILEDREMOVES.txt /tmp/INSTALLS.txt | grep ^- | grep -v "\---" | cut -c 2- | awk -F :: '{print $1"::REMOVE"}')
 INSTALLS+="
-$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | awk -F + '{print $2}' | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
 INSTALLS+="
-$(diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | awk '{print $1}' )"
+$(diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | cut -c 2- )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
 
