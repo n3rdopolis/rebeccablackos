@@ -110,7 +110,7 @@ fi
 function GetNextTTY
 {
 TTYInUse=1
-while [[ $TTYInUse -ne 0 && $LastTTY -lt 63 ]]
+while [[ $TTYInUse -ne 0 && $LastTTY -lt 62 ]]
 do
 ((LastTTY++))
 openvt -c $LastTTY -- /bin/true 
