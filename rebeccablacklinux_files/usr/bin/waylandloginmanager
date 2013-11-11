@@ -439,7 +439,6 @@ fi
 if [[ ! -z $AUTOLOGINUSER ]]
 then
 sleep 3
-AttemptedSessionCount=$((AttemptedSessionCount++))
 ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
@@ -478,7 +477,7 @@ chvt 63
 chvt $HostVT
 elif [[ $COMMAND == "Login" ]]
 then
-AttemptedSessionCount=$((AttemptedSessionCount++))
+AttemptedSessionCount=$((AttemptedSessionCount+1))
 AuthenticateUser &
 elif [[ $COMMAND == "Leave" ]] 
 then
@@ -509,6 +508,7 @@ fi
 LoginWestonLauncher &
 
 #Start the autologin launcher
+AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
 
 #Start the login managers IPC
