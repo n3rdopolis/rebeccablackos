@@ -409,13 +409,7 @@ do
 if [[ ! -e /run/loginmanagerdisplay ]]
 then 
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-if [[ $(cat /proc/cmdline | grep -c wlmdebuginsecure ) != 0 ]]
-then
-logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebuginsecure' option has been passed to the kernel. This diagnostic option caused the waylandloginmanager to start the loginmanagerdisplay with xwayland enabled." -s  >>/var/log/waylandloginmanager 2>&1
-openvt -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so,xwayland.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
-else
 openvt -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
-fi
 chvt $HostVT
 
 fi
@@ -512,17 +506,6 @@ LoginWestonLauncher &
 
 #Start the autologin launcher
 StartAutoLogin &
-
-#Diagnostic terminal that is brought up by the waylandloginmanager once when the option wlmdebuginsecure is passed to the kernel. As it is possible to add init=/bin/bash to an unsecured Grub, and get a root terminal, with the same level of physical access, this doesn't open any new security holes. The action is also logged.
-if [[ $(cat /proc/cmdline | grep -c wlmdebuginsecure ) != 0 ]]
-then
-sleep 5
-/opt/bin/weston-terminal &
-zenity --warning --title="SECURITY WARNING" --text="The option 'wlmdebuginsecure' option has been passed to the kernel command line.
-This has been logged to the waylandloginmanager's log, and the system log.
-This diagnostic option caused a weston-terminal to be run as root on the loginmanagerdisplay, and the loginmanagerdisplay to start with xwayland enabled" 2>/dev/null &
-logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebuginsecure' option has been passed to the kernel. This diagnostic option caused the waylandloginmanager to start a single weston-terminal running as root onto the loginmanagerdisplay." -s  >>/var/log/waylandloginmanager 2>&1
-fi
 
 #Start the login managers IPC
 ReadCommandFIFO
