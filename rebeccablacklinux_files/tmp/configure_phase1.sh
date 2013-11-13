@@ -98,7 +98,7 @@ yes Y | apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
 dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
 dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-echo Y | apt-get -d -u dselect-upgrade						2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
+echo Y | apt-get -d -u dselect-upgrade --no-install-recommends			2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
 #run the script that calls all compile scripts in a specified order, in download only mode
