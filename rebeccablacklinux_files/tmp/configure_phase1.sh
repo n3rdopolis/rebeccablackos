@@ -28,8 +28,11 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 #update the apt cache
 apt-get update
 
-#install basic applications that the system needs to get repositories
-yes Y| apt-get install aptitude git bzr subversion mercurial
+#install basic applications that the system needs to get repositories and packages
+yes Y| apt-get install aptitude git bzr subversion mercurial dselect
+
+#update the dselect database
+dselect update
 
 #create folder for install logs
 mkdir -p /usr/share/logs/package_operations
@@ -92,7 +95,11 @@ cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 #Download updates
 yes Y | apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dist-upgrade.log
     
-
+#Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
+dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
+dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
+echo Y | apt-get -d -u dselect-upgrade						2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
+dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only

@@ -34,9 +34,6 @@ echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
-#install aptitude
-yes Y| apt-get install aptitude
-
 #clean up possible older logs
 rm -r /usr/share/logs/package_operations/Installs
 
@@ -142,3 +139,6 @@ rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
 #delete the downloaded file cache
 apt-get clean
+
+#Capture the packages that are installed and not installed.
+dpkg --get-selections > /tmp/INSTALLSSTATUS.txt
