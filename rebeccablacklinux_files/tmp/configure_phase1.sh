@@ -99,6 +99,7 @@ yes Y | apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/
 dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
 dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
 echo Y | apt-get -d -u dselect-upgrade --no-install-recommends			2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
+dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
 #run the script that calls all compile scripts in a specified order, in download only mode
