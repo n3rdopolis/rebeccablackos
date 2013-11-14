@@ -10,6 +10,6 @@ CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=/opt/lib/nuclear-shell/nuclear-shell.so,xwayland.so,cms-colord.so --shell=/opt/lib/nuclear-shell/nuclear-shell.so --nuclear-client=/opt/libexec/startorbital
 AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=$WESTON_PLUGIN_PATH/orbital-shell.so
+NeedsFile=/opt/lib/nuclear-shell/nuclear-shell.so
 NeedsFile=/opt/bin/weston
 
