@@ -4,11 +4,11 @@ Type=WSession
 Name=Orbital Shell
 CompositorExec=/opt/bin/weston-display-server
 CompositorSupportsKMS=1
-CompositorSupportsFB=1
+CompositorSupportsFB=0
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
-SessionArgument=--modules=/opt/lib/nuclear-shell/nuclear-shell.so,xwayland.so,cms-colord.so --shell=/opt/lib/nuclear-shell/nuclear-shell.so --nuclear-client=/opt/libexec/startorbital
+SessionArgument=--modules=xwayland.so,cms-colord.so --shell=/opt/lib/nuclear-shell/nuclear-shell.so --nuclear-client=/opt/libexec/startorbital
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=/opt/lib/nuclear-shell/nuclear-shell.so
 NeedsFile=/opt/bin/weston
