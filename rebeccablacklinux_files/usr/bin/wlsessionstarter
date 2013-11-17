@@ -48,7 +48,7 @@ export SessionName="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/
 #Call the server
 echo "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
 chvt 63
-openvt -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
+openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
 sleep 5
 WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
 #Find the logind session id
