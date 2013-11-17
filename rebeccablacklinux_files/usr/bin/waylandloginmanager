@@ -43,7 +43,7 @@ export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
 LastTTY=0
 AllSessions=0
-AttemptedSessionCount=0
+export AttemptedSessionCount=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
@@ -477,7 +477,7 @@ chvt 63
 chvt $HostVT
 elif [[ $COMMAND == "Login" ]]
 then
-AttemptedSessionCount=$((AttemptedSessionCount+1))
+export AttemptedSessionCount=$((AttemptedSessionCount+1))
 AuthenticateUser &
 elif [[ $COMMAND == "Leave" ]] 
 then
@@ -508,7 +508,7 @@ fi
 LoginWestonLauncher &
 
 #Start the autologin launcher
-AttemptedSessionCount=$((AttemptedSessionCount+1))
+export AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
 
 #Start the login managers IPC
