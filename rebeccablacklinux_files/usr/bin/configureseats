@@ -200,12 +200,7 @@ zenity --info --text "Seat Configuration for all devices is now complete.
 The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Multipointer Configuration"
 
 #Change in and out of the vts so that the display server gets the change
-if [[ $CurrentTTY != 7 ]]
-then
-chvt 7
-else
-chvt 6
-fi
+chvt 63
 
 sleep 3
 chvt $CurrentTTY
