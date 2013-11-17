@@ -16,7 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #bring these to the defaults for this X11 
-export QT_QPA_PLATFORM=xcb
+. /etc/environment
+unset QT_QPA_PLATFORM
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 unset GDK_BACKEND
@@ -29,4 +30,7 @@ unset GST_GL_WINDOW
 unset XDG_DATA_DIRS
 unset QTVER
 unset QML2_IMPORT_PATH
+unset QT_PLUGIN_PATH
+unset WESTON_PLUGIN_PATH
+unset QTDIR
 $*
