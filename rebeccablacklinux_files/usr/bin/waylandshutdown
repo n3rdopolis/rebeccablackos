@@ -24,6 +24,12 @@ Standby
 Hybrid Sleep
 Hibernate" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' | head -1 | grep -v 'startup message: remove:' )
 
+
+zenity --title="Leave..." --question --text="Are you sure you want to $ACTION"
+CONFIRM=$?
+if [[ CONFIRM == 0 ]]
+then
+
 if [[ $ACTION == "Switch User" ]]
 then
 echo "Switch" > /run/loginmanager_control
@@ -36,7 +42,6 @@ echo "Change" > /run/loginmanager_control
 disown
 fuser -k -15 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
 RESULT=$?
-
 elif [[ $ACTION == "Shutdown" ]]
 then
 dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
@@ -64,4 +69,6 @@ fi
 if [[ $RESULT != 0 ]]
 then
 zenity --title="Failure" --warning --text="Failed to $ACTION"
+fi
+
 fi
