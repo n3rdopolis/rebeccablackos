@@ -188,13 +188,20 @@ then
 fi
 done < <(echo "$NeedsFile")
 
+if [[ ! -z $CompositorDisplayArgument ]]
+then
+CompositorDisplayArgument="$CompositorDisplayArgument$SESSIONID"
+else 
+CompositorDisplayArgument=""
+fi
+
 if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" ]]
 then
 echo "$CompositorExec"
 echo "$BackendArguments"
 echo "$SessionArgument"
 echo "$AdditionalArguments"
-echo "$CompositorDisplayArgument$SESSIONID"
+echo "$CompositorDisplayArgument"
 echo "$SessionName"
 fi
 
