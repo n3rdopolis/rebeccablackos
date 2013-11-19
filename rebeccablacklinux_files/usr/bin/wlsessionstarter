@@ -22,9 +22,6 @@ do
 unset $var
 done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ ) 
 
-#Import Wayland variables
-. /usr/bin/weston_vars
-
 WESTONTTY=$1
 LOGINUSER=$2
 IFS=$'\n'
