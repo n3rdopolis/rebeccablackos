@@ -1,0 +1,15 @@
+[Desktop Entry]
+Enabled=1
+Type=WSession
+Name=Gnome Shell Wayland
+CompositorExec=/opt/bin/gnome-shell-wayland
+CompositorSupportsKMS=1
+CompositorSupportsFB=0
+CompositorKMSArguments=
+CompositorFBArguments=
+CompositorDisplayArgument=
+SessionArgument=
+AdditionalArguments=--wayland
+NeedsFile=/opt/bin/gnome-shell-wayland
+EnvironmentFile=/usr/share/wsessions.d/gnome-shell-wayland.environment
+
