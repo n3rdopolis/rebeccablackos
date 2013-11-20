@@ -472,6 +472,14 @@ fi
 fi 
 }
 
+#This process wakes the fifo, at a given interval so that the main 'thread' can wake and perform maintenance tasks, that require access to the environment, that would require some type of environment syncing if it was in a subshell. 
+function FIFOWaker
+{
+echo "Wake" > /run/loginmanager_control
+sleep 1
+}
+
+
 #The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
 function ReadCommandFIFO
 {
@@ -483,7 +491,7 @@ mkfifo -m 777 /run/loginmanager_control
 while [ 1 ]
 do
 
-if [[ $ActiveSessionPID != 0 && -e /proc/$ActiveSessionPID/environ ]]
+if [[ $ActiveSessionPID != 0 && ! -e /proc/$ActiveSessionPID/environ ]]
 then
 chvt 63
 chvt $HostVT
@@ -520,6 +528,9 @@ RegisterSession "$COMMAND"
 elif [[ $COMMAND == "Info" ]]
 then
 ShowInfo &
+elif [[ $COMMAND == "Wake" ]]
+then
+:
 else
 logger -t waylandloginmanager "Invalid command" -s  >>/var/log/waylandloginmanager 2>&1
 fi
@@ -542,6 +553,9 @@ LoginWestonLauncher &
 #Start the autologin launcher
 export AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
+
+#Start the loop that wakes the main FIFO at an interval so that the main loop can wake and perform tasks
+FIFOWaker &
 
 #Start the login managers IPC
 ReadCommandFIFO
