@@ -494,13 +494,19 @@ COMMAND=$(cat /run/loginmanager_control)
 logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $COMMAND == "Switch" ]]
 then
-chvt 63
-chvt $HostVT
-SwitchUserDialog &
-elif [[ $COMMAND == "Change" ]]
+if [[ $(fgconsole) != $HostVT ]]
 then
 chvt 63
 chvt $HostVT
+fi
+SwitchUserDialog &
+elif [[ $COMMAND == "Change" ]]
+then
+if [[ $(fgconsole) != $HostVT ]]
+then
+chvt 63
+chvt $HostVT
+fi
 elif [[ $COMMAND == "Login" ]]
 then
 export AttemptedSessionCount=$((AttemptedSessionCount+1))
