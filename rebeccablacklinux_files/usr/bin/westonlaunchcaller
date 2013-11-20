@@ -18,6 +18,22 @@
 
 USER=$(id -u)
 . /usr/bin/weston_vars
+EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
+while read LINE
+do
+VARACTION=$(echo $LINE | awk -F ' *= *' '{print $1}')
+VARNAME=$(echo $LINE | awk -F ' *= *' '{print $2}')
+VARDATA=$(echo $LINE | awk -F ' *= *' '{print $3}')
+if [[ $VARACTION == "set" ]]
+then
+export $VARNAME=$VARDATA
+fi
+if [[ $VARACTION == "unset" ]]
+then
+unset $VARNAME
+fi
+done < <(echo "$EnvironmentFileData")
+
 if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
 then
 export XDG_RUNTIME_DIR=/run/
