@@ -499,7 +499,11 @@ ActiveSessionPID=0
 fi
 
 COMMAND=$(cat /run/loginmanager_control)
+if [[ $COMMAND != "Wake" ]]
+then
 logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
+fi
+
 if [[ $COMMAND == "Switch" ]]
 then
 if [[ $(fgconsole) != $HostVT ]]
