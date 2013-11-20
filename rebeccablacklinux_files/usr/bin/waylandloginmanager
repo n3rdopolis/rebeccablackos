@@ -472,30 +472,40 @@ fi
 fi 
 }
 
+function SetupFIFO
+{
+#Create communication fifo.
+rm -r /run/loginmanager_control
+mkfifo -m 777 /run/loginmanager_control
+}
+
 #This process wakes the fifo, at a given interval so that the main 'thread' can wake and perform maintenance tasks, that require access to the environment, that would require some type of environment syncing if it was in a subshell. 
 function FIFOWaker
 {
+while [ 1 ]
+do
 echo "Wake" > /run/loginmanager_control
 sleep 1
+done
 }
 
 
 #The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
 function ReadCommandFIFO
 {
-#Create communication fifo.
-rm -r /run/loginmanager_control
-mkfifo -m 777 /run/loginmanager_control
-
 
 while [ 1 ]
 do
 
 if [[ $ActiveSessionPID != 0 && ! -e /proc/$ActiveSessionPID/environ ]]
 then
+if [[ $(fgconsole) != $HostVT ]]
+then
 chvt 63
 chvt $HostVT
+fi
 ActiveSessionPID=0
+
 fi
 
 COMMAND=$(cat /run/loginmanager_control)
@@ -557,6 +567,9 @@ LoginWestonLauncher &
 #Start the autologin launcher
 export AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
+
+#Setup the FIFO before anything starts using the fifo
+SetupFIFO
 
 #Start the loop that wakes the main FIFO at an interval so that the main loop can wake and perform tasks
 FIFOWaker &
