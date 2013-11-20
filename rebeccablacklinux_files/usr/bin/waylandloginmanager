@@ -43,6 +43,7 @@ export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
 LastTTY=0
 AllSessions=0
+ActiveSessionPID=0
 export AttemptedSessionCount=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
@@ -130,10 +131,15 @@ echo $AvailibleTTY
 function RegisterSession
 {
 COMMANDSTRING=$1
-AllSessionTTYs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 2p )
-AllSessionPIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 3p )
-AllSessionUsers[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 4p )
-AllSessionIDs[$AllSessions]=$(echo "$COMMANDSTRING" | sed -ne 5p )
+SessionTTY=$(echo "$COMMANDSTRING" | sed -ne 2p )
+SessionPID=$(echo "$COMMANDSTRING" | sed -ne 3p )
+SessionUser=$(echo "$COMMANDSTRING" | sed -ne 4p )
+SessionID=$(echo "$COMMANDSTRING" | sed -ne 5p )
+AllSessionTTYs[$AllSessions]=$SessionTTY
+AllSessionPIDs[$AllSessions]=$SessionPID
+AllSessionUsers[$AllSessions]=$SessionUser
+AllSessionIDs[$AllSessions]=$SessionID
+ActiveSessionPID=$SessionPID
 ((AllSessions++))
 }
 
@@ -302,12 +308,16 @@ else
 
 if [[ $ChangeSession ]]
 then
+ChangeSessionPID=${AllSessionPIDs[$ChangeSession]}
+ChangeSessionTTY=${AllSessionTTYs[$ChangeSession]}
+ChangeSessionID=${AllSessionIDs[$ChangeSession]}
 
-if [[ -e /proc/${AllSessionPIDs[$ChangeSession]}/environ ]]
+if [[ -e /proc/$ChangeSessionPID/environ ]]
 then
 chvt 63
-chvt ${AllSessionTTYs[$ChangeSession]}
-loginctl activate ${AllSessionIDs[$ChangeSession]}
+chvt $ChangeSessionTTY
+loginctl activate $ChangeSessionID
+ActiveSessionPID=$ChangeSessionPID
 else
 zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
 fi
@@ -468,6 +478,13 @@ mkfifo -m 777 /run/loginmanager_control
 
 while [ 1 ]
 do
+
+if [[ $ActiveSessionPID != 0 && -e /proc/$ActiveSessionPID/environ ]]
+then
+chvt 63
+chvt $HostVT
+ActiveSessionPID=0
+fi
 
 COMMAND=$(cat /run/loginmanager_control)
 logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
