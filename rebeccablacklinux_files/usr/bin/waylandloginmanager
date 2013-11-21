@@ -307,7 +307,7 @@ ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --
 
 if [[ $ChangeSession == "-1" ]]
 then
-AuthenticateUser
+GetUserCredentials
 else 
 
 if [[ $ChangeSession ]]
@@ -333,9 +333,47 @@ fi
 
 }
 
+#Test users credentials
+function AuthenticateUser
+{
+PasswordSalt=$(cat /etc/shadow | awk -v LOGINUSER=$LOGINUSER -F ':' '$1 == LOGINUSER {print $2}')
+IFS=\$
+PasswordSaltData=($PasswordSalt)
+unset IFS
+PasswordSaltType=${PasswordSaltData[1]}
+if [[ $PasswordSaltType == 1 ]]
+then
+PasswordSaltType=MD5
+elif [[ $PasswordSaltType == 5 ]]
+then
+PasswordSaltType=SHA-256
+elif [[ $PasswordSaltType == 6 ]]
+then
+PasswordSaltType=SHA-512
+fi
+TryPassword=$(cat -)
+TryPasswordSalt=$(echo $TryPassword | mkpasswd -s -m $PasswordSaltType -S ${PasswordSaltData[2]})
+
+if [[ $PasswordSalt == $TryPasswordSalt ]]
+then
+expect < <(echo "spawn su $LOGINUSER -c ecryptfs-mount-private
+expect \"Password:\" {send \"$TryPassword\r\";}
+expect \"Enter your login passphrase:\" {send \"$TryPassword\r\";}
+catch wait result
+expect eof")
+
+/usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+return 0
+else
+return 1
+fi
+
+}
+
+
 
 #Attempt to get the users authentication
-function AuthenticateUser
+function GetUserCredentials
 {
 #Get the list of nonsystem users
 UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
@@ -532,7 +570,7 @@ fi
 elif [[ $COMMAND == "Login" ]]
 then
 export AttemptedSessionCount=$((AttemptedSessionCount+1))
-AuthenticateUser &
+GetUserCredentials &
 elif [[ $COMMAND == "Leave" ]] 
 then
 LeavePrompt &
