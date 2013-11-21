@@ -66,6 +66,10 @@ fi
 #delete old logs
 rm -r $BUILDLOCATION/build/$BUILDARCH/phase_2/usr/share/logs/*
 
+#copy the installs data copied in phase 1 into phase 2 
+cp $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/INSTALLS.txt $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt 
+
+
 #create the union of phases 1 and 2 at the workdir
 mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
 

@@ -63,7 +63,7 @@ rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $BUILDLOCATION/build/
 #delete old logs
 rm -r $BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/*
 
-#copy the dselect data saved in phase 1 into phase 2 
+#copy the dselect data saved in phase 2 into phase 1
 cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLSSTATUS.txt $BUILDLOCATION/build/$BUILDARCH/phase_1/tmp/INSTALLSSTATUS.txt
 
 #make the imported files executable 
