@@ -354,17 +354,23 @@ fi
 TryPassword=$(cat -)
 TryPasswordSalt=$(echo $TryPassword | mkpasswd -s -m $PasswordSaltType -S ${PasswordSaltData[2]})
 
+unset PasswordSaltData
+unset PasswordSaltType
+unset TryPassword
 if [[ $PasswordSalt == $TryPasswordSalt ]]
 then
-expect < <(echo "spawn su $LOGINUSER -c ecryptfs-mount-private
+unset PasswordSalt
+unset TryPasswordSalt
+echo "spawn su $LOGINUSER -c ecryptfs-mount-private
 expect \"Password:\" {send \"$TryPassword\r\";}
 expect \"Enter your login passphrase:\" {send \"$TryPassword\r\";}
-catch wait result
-expect eof")
+catch wait result" |expect
 
 /usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 return 0
 else
+unset PasswordSalt
+unset TryPasswordSalt
 return 1
 fi
 
