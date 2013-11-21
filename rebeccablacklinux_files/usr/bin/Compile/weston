@@ -75,6 +75,10 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
+#install the weston protocols xmls for weston
+mkdir -p $INSTALLDIR/share/weston/protocol
+cp /"$SOURCEDIR"/"$SOURCENAME"/protocol/*.xml $INSTALLDIR/share/weston/protocol
+
 #Install the screen capture utils
 find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read CLIENT
 do
