@@ -18,6 +18,8 @@
 
 USER=$(id -u)
 . /usr/bin/weston_vars
+if [[ -e $EnvironmentFile ]]
+then
 EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
 while read LINE
 do
@@ -33,6 +35,7 @@ then
 unset $VARNAME
 fi
 done < <(echo "$EnvironmentFileData")
+fi
 
 if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
 then
