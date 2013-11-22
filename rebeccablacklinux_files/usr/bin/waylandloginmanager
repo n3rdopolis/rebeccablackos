@@ -362,9 +362,8 @@ then
 unset PasswordSalt
 unset TryPasswordSalt
 echo "spawn su $LOGINUSER -c ecryptfs-mount-private
-expect \"Password:\" {send \"$TryPassword\r\";}
 expect \"Enter your login passphrase:\" {send \"$TryPassword\r\";}
-catch wait result" |expect
+close" |expect
 
 /usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 return 0
