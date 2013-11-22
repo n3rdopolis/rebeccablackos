@@ -172,6 +172,9 @@ BackendType=KMS
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
+if [[ "$(ls -A $WSESSIONSPATH 2>&1)" ]]
+then
+PROMPTED=1
 WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f -executable | sort | while read SESSIONFILE
 do 
 DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
@@ -219,10 +222,14 @@ done)
 
 #select the session
 WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column name --hide-column=1,2,3,4,5,6 --print-column=1,2,3,4,5,6,7 --separator="\n" --hide-header 2>/dev/null )
+fi
 
 if [[ -z $WSESSIONDATA ]]
 then 
+if [[ $PROMPTED == 1 ]]
+then
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
+fi
 export SelectedCompositorExec=weston
 if [[ $BackendType == KMS ]]
 then
