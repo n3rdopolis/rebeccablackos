@@ -372,10 +372,19 @@ CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$E
 export EnvironmentFile="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 export SessionName="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
+#determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+westonresult=$(weston --version &>/dev/null; echo $?) 
+
 #Call the server
-echo "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" >> /var/log/wlsessionstarter.log
+logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
 chvt 63
+if [[ $westonresult == 255 ]]
+then
 openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
+else
+logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
+openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
+fi
 sleep 5
 WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
 #Find the logind session id

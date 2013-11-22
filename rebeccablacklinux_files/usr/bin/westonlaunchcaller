@@ -16,6 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+if [[ $1 == "--version" ]]
+then
+echo "waylandloginmanager weston-launch addon"
+exit 255
+fi
+
 USER=$(id -u)
 . /usr/bin/weston_vars
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
