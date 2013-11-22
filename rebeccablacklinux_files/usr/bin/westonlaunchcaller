@@ -18,6 +18,7 @@
 
 USER=$(id -u)
 . /usr/bin/weston_vars
+EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
 if [[ -e $EnvironmentFile ]]
 then
 EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
