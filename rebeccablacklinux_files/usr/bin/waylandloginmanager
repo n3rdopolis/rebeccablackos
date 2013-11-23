@@ -493,14 +493,12 @@ export SessionTTY=$(GetNextTTY)
 if [[ $SessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | sudo -E -S -u daemon /usr/libexec/wayland_login_helpers/login-helper
+zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
 passwordresult=${PIPESTATUS[2]}
 
 if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
-else
-StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
