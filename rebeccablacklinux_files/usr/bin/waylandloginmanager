@@ -232,6 +232,8 @@ then
 if [[ $PROMPTED == 1 ]]
 then
 zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
+else
+logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 export SelectedCompositorExec=weston
 if [[ $BackendType == KMS ]]
@@ -383,10 +385,10 @@ logger -t waylandloginmanager "Starting server $CompositorExec with the argument
 chvt 63
 if [[ $westonresult == 255 ]]
 then
-openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
+openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
 else
 logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/wlsessionstarter.log
+openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
 fi
 sleep 5
 WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -443,7 +445,7 @@ echo "spawn su $LOGINUSER -c ecryptfs-mount-private
 expect \"Enter your login passphrase:\" {send \"$TryPassword\r\";}
 close" |expect
 
-/usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 return 0
 else
 unset PasswordSalt
@@ -489,7 +491,7 @@ if [[ $passwordresult != 0 ]]
 then
 zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
 else
-/usr/bin/wlsessionstarter "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 fi
 else
 zenity --warning --text="Not Enough TTYs!"
@@ -589,7 +591,7 @@ export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
 then
 logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-/usr/bin/wlsessionstarter "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
+StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
 else
 zenity --warning --text="Not Enough TTYs for autologin!"
 logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
