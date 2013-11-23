@@ -421,20 +421,28 @@ PasswordSalt=$(cat /etc/shadow | awk -v LOGINUSER=$LOGINUSER -F ':' '$1 == LOGIN
 IFS=\$
 PasswordSaltData=($PasswordSalt)
 unset IFS
+
 PasswordSaltType=${PasswordSaltData[1]}
+PasswordSaltBytes=${PasswordSaltData[2]}
+if [[ ! -z $PasswordSaltBytes ]]
+then
 if [[ $PasswordSaltType == 1 ]]
 then
-PasswordSaltType=MD5
+PasswordSaltType="-m MD5"
 elif [[ $PasswordSaltType == 5 ]]
 then
-PasswordSaltType=SHA-256
+PasswordSaltType="-m SHA-256"
 elif [[ $PasswordSaltType == 6 ]]
 then
-PasswordSaltType=SHA-512
+PasswordSaltType="-m SHA-512"
+fi
+else 
+PasswordSaltType=""
+PasswordSaltBytes=$(echo $PasswordSaltData | cut -c -2 )
 fi
 TryPassword=$(cat -)
-TryPasswordSalt=$(echo $TryPassword | mkpasswd -s -m $PasswordSaltType -S ${PasswordSaltData[2]})
-
+TryPasswordSalt=$(echo $TryPassword | mkpasswd -s $PasswordSaltType -S $PasswordSaltBytes )
+unset PasswordSaltBytes
 unset PasswordSaltData
 unset PasswordSaltType
 unset TryPassword
