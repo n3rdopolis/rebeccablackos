@@ -38,6 +38,7 @@ exit
 fi
 
 cd /run
+export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export GDK_BACKEND=wayland
@@ -238,7 +239,7 @@ fi
 export SelectedCompositorExec=weston
 if [[ $BackendType == KMS ]]
 then
-export WSESSIONDATA=$(echo "/opt/bin/weston-display-server
+export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
 --backend=drm-backend.so
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=\$HOME/weston.log
@@ -248,7 +249,7 @@ Default Weston Desktop Shell
 ")
 elif [[ $BackendType == FB ]]
 then 
-export WSESSIONDATA=$(echo "/opt/bin/weston-display-server
+export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
 --backend=fbdev-backend.so
 --modules=desktop-shell.so,xwayland.so,cms-colord.so
 --log=\$HOME/weston.log
@@ -563,10 +564,12 @@ westonresult=$(weston --version &>/dev/null; echo $?)
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $westonresult == 255 ]]
 then
-openvt -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- /opt/bin/weston-display-server @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
+openvt -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
 else
 logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
 openvt -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log 
+fi
+
 fi
 
 sleep 15
