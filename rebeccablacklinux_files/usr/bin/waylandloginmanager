@@ -43,6 +43,8 @@ export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/l
 export GDK_BACKEND=wayland
 export XDG_RUNTIME_DIR=/run/
 export WAYLAND_DISPLAY=loginmanagerdisplay
+export WSESSIONSPATH="/usr/share/wsessions.d"
+export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
 LastTTY=0
 AllSessions=0
 ActiveSessionPID=0
@@ -160,7 +162,6 @@ done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Wa
 
 function ChooseSessionType
 {
-WSESSIONSPATH="/usr/share/wsessions.d"
 export SESSIONID=$AttemptedSessionCount
 
 if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
@@ -172,9 +173,6 @@ BackendType=KMS
 fi
 
 #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-if [[ "$(ls -A $WSESSIONSPATH)" ]]
-then
-PROMPTED=1
 WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f -executable | sort | while read SESSIONFILE
 do 
 DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
@@ -220,6 +218,9 @@ fi
 
 done)
 
+if [[ ! -z $WSESSIONLIST ]]
+then
+PROMPTED=1
 #select the session
 WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column name --hide-column=1,2,3,4,5,6 --print-column=1,2,3,4,5,6,7 --separator="\n" --hide-header 2>/dev/null )
 else 
