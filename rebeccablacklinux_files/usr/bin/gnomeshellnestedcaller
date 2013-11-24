@@ -1,3 +1,4 @@
+#! /bin/bash
 #    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
 #
 #    This file is part of RebeccaBlackLinux.
@@ -14,7 +15,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-
-[Desktop Entry]
-Icon=/opt/share/weston/wayland.png
-Name=Wayland Tests and Nested Wayland Servers
+. /usr/bin/weston_vars
+unset GDK_BACKEND
+gnome-shell-wayland --wayland

@@ -16,5 +16,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 [Desktop Entry]
-Icon=/opt/share/weston/wayland.png
-Name=Wayland Tests and Nested Wayland Servers
+Type=Application
+Exec=/usr/bin/waylandapp /usr/bin/gnomeshellnestedcaller
+Icon=/usr/share/icons/oxygen/32x32/mimetypes/application-x-executable.png
+Name=Nested Gnome Shell Wayland
