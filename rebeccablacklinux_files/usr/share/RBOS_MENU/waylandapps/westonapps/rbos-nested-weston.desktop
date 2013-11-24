@@ -17,6 +17,6 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/waylandapp /usr/bin/westonnestedcaller
+Exec=/usr/bin/waylandapp /usr/bin/westonnestedcaller --shell=$WESTON_PLUGIN_PATH/desktop-shell.so
 Icon=/usr/share/icons/oxygen/32x32/mimetypes/application-x-executable.png
 Name=Nested Weston

@@ -17,6 +17,6 @@
 
 [Desktop Entry]
 Type=Application
-Exec=/usr/bin/waylandapp /usr/bin/westonnestedxwaylandcaller --shell=$WESTON_PLUGIN_PATH/desktop-shell.so
+Exec=/usr/bin/waylandapp /usr/bin/westonnestedcaller --shell=/opt/lib/nuclear-shell/nuclear-shell.so --nuclear-client=/opt/libexec/startorbital
 Icon=/usr/share/icons/oxygen/32x32/mimetypes/application-x-executable.png
-Name=Nested Weston (using Xwayland)
+Name=Nested Orbital
