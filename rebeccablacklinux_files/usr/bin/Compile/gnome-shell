@@ -77,6 +77,7 @@ make install
 function PackagePostInstall()
 {
 cp /usr/lib/gdm/Gdm-1.0.typelib /usr/lib/girepository-1.0/ 
+cp /usr/lib/gdm/libgdm.so.1 /usr/lib
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
