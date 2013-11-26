@@ -115,15 +115,15 @@ fi
 #Get the next TTY that is open for use
 function GetNextTTY
 {
-TTYInUse=1
-while [[ $TTYInUse -ne 0 && $LastTTY -lt 62 ]]
+TTYNotInUse=0
+while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
 do
 ((LastTTY++))
-openvt -c $LastTTY -- /bin/true 
-TTYInUse=$?
+fuser -s /dev/tty$LastTTY
+TTYNotInUse=$?
 done
 
-if [[ $TTYInUse -ne 0 ]]
+if [[ $TTYNotInUse -ne 1 ]]
 then
 AvailibleTTY=-1
 else
