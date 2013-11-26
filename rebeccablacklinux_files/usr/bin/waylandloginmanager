@@ -476,9 +476,11 @@ UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
 USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}')
 if [[ $ISLIVE == 1 ]]
 then
-USERLIST+=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
+LIVEUSER=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
+USERLIST+="
+$LIVEUSER"
 fi
-
+USERLIST=$(echo "$USERLIST" | sort |uniq)
 
 ChooseSessionType
 
