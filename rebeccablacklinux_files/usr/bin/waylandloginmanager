@@ -116,6 +116,7 @@ fi
 function GetNextTTY
 {
 TTYNotInUse=0
+LastTTY=0
 while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
 do
 ((LastTTY++))
