@@ -69,7 +69,8 @@ echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path
 exit
 else 
 #Execute the Wayland server
-$Server $Args 
+echo "Starting $Server $Args on $(date)--------------------------" &>>waylandserver.log
+$Server $Args &>>waylandserver.log
 fi
 
 
