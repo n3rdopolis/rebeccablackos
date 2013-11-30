@@ -215,6 +215,7 @@ echo "$SessionArgument"
 echo "$AdditionalArguments"
 echo "$CompositorDisplayArgument"
 echo "$EnvironmentFile"
+echo "$BackendType"
 echo "$SessionName"
 fi
 
@@ -224,7 +225,7 @@ if [[ ! -z $WSESSIONLIST ]]
 then
 PROMPTED=1
 #select the session
-WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column name --hide-column=1,2,3,4,5,6 --print-column=1,2,3,4,5,6,7 --separator="\n" --hide-header 2>/dev/null )
+WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
 else 
 unset WSESSIONDATA
 fi
@@ -246,6 +247,7 @@ export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
 --log=\$HOME/weston.log
 --socket=$SESSIONID
 
+KMS
 Default Weston Desktop Shell
 ")
 elif [[ $BackendType == FB ]]
@@ -256,6 +258,7 @@ export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
 --log=\$HOME/weston.log
 --socket=$SESSIONID
 
+FB
 Default Weston Desktop Shell
 ")
 fi
@@ -377,7 +380,8 @@ SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' 
 AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 export EnvironmentFile="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-export SessionName="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+export BackendType="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+export SessionName="$( echo "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
 
 #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
 westonresult=$(weston --version &>/dev/null; echo $?) 

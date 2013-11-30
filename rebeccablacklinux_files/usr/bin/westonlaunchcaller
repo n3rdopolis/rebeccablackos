@@ -30,16 +30,25 @@ then
 EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
 while read LINE
 do
-VARACTION=$(echo $LINE | awk -F ' *= *' '{print $1}')
-VARNAME=$(echo $LINE | awk -F ' *= *' '{print $2}')
-VARDATA=$(echo $LINE | awk -F ' *= *' '{print $3}')
+VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}')
+VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}')
+VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}')
+VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' )
+echo $VARNAME
+echo $VARBACKEND
+if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
+then
+
 if [[ $VARACTION == "set" ]]
 then
 export $VARNAME=$VARDATA
 fi
+
 if [[ $VARACTION == "unset" ]]
 then
 unset $VARNAME
+fi
+
 fi
 done < <(echo "$EnvironmentFileData")
 fi
