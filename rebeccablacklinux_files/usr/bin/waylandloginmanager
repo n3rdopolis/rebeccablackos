@@ -450,20 +450,27 @@ TryPasswordSalt=$(echo $TryPassword | mkpasswd -s $PasswordSaltType -S $Password
 unset PasswordSaltBytes
 unset PasswordSaltData
 unset PasswordSaltType
-unset TryPassword
 if [[ $PasswordSalt == $TryPasswordSalt ]]
 then
 unset PasswordSalt
 unset TryPasswordSalt
+
+if [[ -e $HOME/.ecryptfs ]]
+then
 echo "spawn login $LOGINUSER
 expect Password 
 send $TryPassword\r
 sleep 30
 exit" |expect &
+sleep 3
+fi
+
+unset TryPassword
 
 StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 return 0
 else
+unset TryPassword
 unset PasswordSalt
 unset TryPasswordSalt
 return 1
