@@ -455,7 +455,8 @@ then
 unset PasswordSalt
 unset TryPasswordSalt
 
-if [[ -e $HOME/.ecryptfs ]]
+export USERHOME=$(eval echo ~$LOGINUSER)
+if [[ -e $USERHOME/.ecryptfs ]]
 then
 echo "spawn login $LOGINUSER
 expect Password 
