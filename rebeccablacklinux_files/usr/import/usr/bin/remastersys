@@ -615,12 +615,6 @@ FOO
         rm -rf /home/*/Desktop/ubiquity*.desktop &> /dev/null
     fi
 
-    #remove frontend from the system so the Install menu item does not appear.
-    log_msg "Removing the ubiquity frontend as it has been included and is not needed on the normal system"
-    apt-get -y -q remove ubiquity-frontend-kde &> /dev/null
-    apt-get -y -q remove ubiquity-frontend-gtk &> /dev/null
-
-
     sleep 1
 
     #checking the size of the compressed filesystem to ensure it meets the iso9660 spec for a single file" 
