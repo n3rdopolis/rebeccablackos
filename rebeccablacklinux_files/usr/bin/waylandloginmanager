@@ -455,10 +455,12 @@ if [[ $PasswordSalt == $TryPasswordSalt ]]
 then
 unset PasswordSalt
 unset TryPasswordSalt
-echo "spawn su $LOGINUSER -c \"ecryptfs-mount-private; sleep 30\"
-expect \"Enter your login passphrase:\" {send \"$TryPassword\r\";}
-close" |expect &
-sleep 2
+echo "spawn login $LOGINUSER
+expect Password 
+send $TryPassword\r
+sleep 30
+exit" |expect &
+
 StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
 return 0
 else
