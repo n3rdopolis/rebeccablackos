@@ -24,16 +24,17 @@ fi
 
 USER=$(id -u)
 . /usr/bin/weston_vars
+BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
 if [[ -e $EnvironmentFile ]]
 then
 EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
 while read LINE
 do
-VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}')
-VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}')
-VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}')
-VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' )
+VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
+VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
+VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
+VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
 if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
 then
 
@@ -50,6 +51,8 @@ fi
 fi
 done < <(echo "$EnvironmentFileData")
 fi
+
+
 
 if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
 then
