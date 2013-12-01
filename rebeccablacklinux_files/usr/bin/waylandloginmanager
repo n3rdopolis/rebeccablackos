@@ -617,7 +617,7 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
-sleep 3
+sleep 5
 ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
