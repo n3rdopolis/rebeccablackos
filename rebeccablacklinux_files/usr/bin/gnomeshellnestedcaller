@@ -17,4 +17,6 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 . /usr/bin/weston_vars
 unset GDK_BACKEND
+unset COGL_RENDERER
+unset CLUTTER_BACKEND
 gnome-shell-wayland --wayland
