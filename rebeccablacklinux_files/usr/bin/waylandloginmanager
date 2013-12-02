@@ -391,10 +391,10 @@ logger -t waylandloginmanager "Starting server $CompositorExec with the argument
 chvt 63
 if [[ $westonresult == 255 ]]
 then
-openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
+openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
 else
 logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-openvt -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
+openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument" &>> /var/log/userwaylandsession.log
 fi
 sleep 5
 WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -587,10 +587,10 @@ westonresult=$(weston --version &>/dev/null; echo $?)
 logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
 if [[ $westonresult == 255 ]]
 then
-openvt -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
+openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
 else
 logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-openvt -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log 
+openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=root -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log 
 fi
 
 fi
