@@ -16,6 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 . /usr/bin/weston_vars
-unset WAYLAND_DISPLAY
+export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
 enlightenment_start
