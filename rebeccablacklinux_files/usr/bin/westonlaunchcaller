@@ -35,6 +35,11 @@ VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print
 VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
 VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
 VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
+if [[ $VARDATA == '$RANDOM' ]]
+then
+VARDATA=$RANDOM
+fi
+
 if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
 then
 
