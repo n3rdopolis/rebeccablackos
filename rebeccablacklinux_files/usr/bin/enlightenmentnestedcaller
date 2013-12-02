@@ -18,4 +18,5 @@
 . /usr/bin/weston_vars
 export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
+export $(exec ck-launch-session dbus-launch)
 enlightenment_start
