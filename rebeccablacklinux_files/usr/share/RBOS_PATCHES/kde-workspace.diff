@@ -1,3 +1,16 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 57c9497..cb8c326 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -284,7 +284,7 @@ ecm_optional_add_subdirectory( systemsettings )
+ # # core apps
+ if(NOT WIN32)
+    ecm_optional_add_subdirectory( kcheckpass )
+-   ecm_optional_add_subdirectory( kwin )
++   #ecm_optional_add_subdirectory( kwin )
+    ecm_optional_add_subdirectory( ksmserver )
+ #
+    find_package(JPEG REQUIRED)
 diff --git a/kwin/killer/CMakeLists.txt b/kwin/killer/CMakeLists.txt
 index db7855d..d6bb95f 100644
 --- a/kwin/killer/CMakeLists.txt
