@@ -617,7 +617,7 @@ fi
 
 if [[ ! -z $AUTOLOGINUSER ]]
 then
-sleep 5
+DialogWait 10
 ChooseSessionType
 export AutoSessionTTY=$(GetNextTTY)
 if [[ $AutoSessionTTY -ne -1 ]]
