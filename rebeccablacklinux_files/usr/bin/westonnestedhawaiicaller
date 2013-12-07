@@ -18,4 +18,4 @@
 . /usr/bin/weston_vars
 ServerID=wayland-$RANDOM
 export $(exec ck-launch-session dbus-launch)
-/opt/weston_1_3/bin/weston --socket=$ServerID --backend=wayland-backend.so --modules=xwayland.so --shell=/opt/lib/hawaii/hawaii-desktop.so
+weston-display-server --socket=$ServerID --backend=wayland-backend.so --modules=xwayland.so --shell=/opt/lib/hawaii/hawaii-desktop.so
