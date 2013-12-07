@@ -23,13 +23,13 @@
 SOURCENAME=SDL
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/Plombo/SDL
+SOURCEURL=https://github.com/rcgordon/SDL-wayland.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=wayland
+SOURCEREVISION=wayland-rebased-13-07-27
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -80,6 +80,8 @@ function PackagePostInstall()
 cd test
 ./configure
 make
+#Install more includes
+cp /"$SOURCEDIR"/"$SOURCENAME"/include/* $INSTALLDIR/include/SDL2
 #install sdl tests
 find /"$SOURCEDIR"/"$SOURCENAME"/test -executable | while read TEST
 do
