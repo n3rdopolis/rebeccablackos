@@ -58,6 +58,7 @@ function PackagePrepareBuild()
 {
 sed -i 's/-Werror-implicit-function-declaration//g' /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake
 sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/modules/FindKDE4Internal.cmake 
+git revert 2c9795795170d5e948d384deb0772bfc4cb6ebcc
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
