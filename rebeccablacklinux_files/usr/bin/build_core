@@ -184,7 +184,7 @@ fi
 
 fi
 
-NonInteractive hg clone "$SOURCEURL" "$SOURCENAME"
+hg clone "$SOURCEURL" "$SOURCENAME"
 mkdir -p "$SOURCENAME"
 cd "$SOURCENAME"
 hg revert
