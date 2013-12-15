@@ -23,13 +23,13 @@
 SOURCENAME=SDL
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/rcgordon/SDL-wayland.git
+SOURCEURL=http://hg.libsdl.org/SDL
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=GIT
+REPOSITORYTYPE=HG
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=wayland-rebased-13-07-27
+SOURCEREVISION=default
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
