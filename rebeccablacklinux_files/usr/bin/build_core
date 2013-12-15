@@ -249,7 +249,7 @@ REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{pri
 #function to get the version of HG repos
 function GetVersionHG()
 {
-REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i)"
+REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
 }
 
 #function that calls functions to get version based on repository type
