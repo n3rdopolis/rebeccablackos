@@ -57,11 +57,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 echo "* {
-  color: @fg_color;
-  border-color: shade (@bg_color, 0.6);
-  padding: 2px;
-  -GtkWindow-resize-grip-width: 0;
-  -GtkWindow-resize-grip-height: 0;
   -GtkWindow-decoration-button-layout: 'icon:minimize,maximize,close';
 }
 " >> /"$SOURCEDIR"/"$SOURCENAME"/gtk-3.0/gtk.css

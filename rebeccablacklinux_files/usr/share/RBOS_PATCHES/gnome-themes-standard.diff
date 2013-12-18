@@ -1,0 +1,21 @@
+diff --git a/themes/Adwaita/gtk-3.0/gtk.css b/themes/Adwaita/gtk-3.0/gtk.css
+index 6b4fc65..bc48314 100644
+--- a/themes/Adwaita/gtk-3.0/gtk.css
++++ b/themes/Adwaita/gtk-3.0/gtk.css
+@@ -1 +1,9 @@
+ @import url("resource:///org/gnome/adwaita/gtk-main.css");
++* {
++  -GtkWindow-decoration-button-layout: 'icon:minimize,maximize,close';
++}
+diff --git a/themes/HighContrast/gtk-3.0/gtk.css b/themes/HighContrast/gtk-3.0/gtk.css
+index ccff72c..11b2db6 100644
+--- a/themes/HighContrast/gtk-3.0/gtk.css
++++ b/themes/HighContrast/gtk-3.0/gtk.css
+@@ -86,6 +86,7 @@
+ 
+     -GtkWidget-link-color: @theme_highlight_color;
+     -GtkWidget-visited-link-color: #ff80ff;
++    -GtkWindow-decoration-button-layout: 'icon:minimize,maximize,close';
+ }
+ 
+ @import url("resource:///org/gnome/HighContrast/gtk-widgets.css");
