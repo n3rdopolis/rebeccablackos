@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=kdelibs
+SOURCENAME=kf5
 
 #The URL of the Source code repo
-SOURCEURL=git://anongit.kde.org/kdelibs
+SOURCEURL=https://github.com/n3rdopolis/kf5.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=frameworks
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
