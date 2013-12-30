@@ -1,0 +1,48 @@
+diff --git a/kate/app/kateapp.cpp b/kate/app/kateapp.cpp
+index 262a5fa..89f60e6 100644
+--- a/kate/app/kateapp.cpp
++++ b/kate/app/kateapp.cpp
+@@ -173,9 +173,9 @@ bool KateApp::startupKate ()
+     {
+       qCDebug(LOG_KATE) << "chooseSession returned false, exiting";
+       // we will exit kate now, notify the rest of the world we are done
+-#ifdef Q_WS_X11
+-      KStartupInfo::appStarted (startupId());
+-#endif
++//#ifdef Q_WS_X11
++//      KStartupInfo::appStarted (startupId());
++//#endif
+       return false;
+     }
+   }
+@@ -189,9 +189,9 @@ bool KateApp::startupKate ()
+     newMainWindow ();
+ 
+   // notify about start
+-#ifdef Q_WS_X11
+-  KStartupInfo::setNewStartupId( activeMainWindow(), startupId());
+-#endif
++//#ifdef Q_WS_X11
++//  KStartupInfo::setNewStartupId( activeMainWindow(), startupId());
++//#endif
+   
+   QTextCodec *codec = m_args.isSet("encoding") ? QTextCodec::codecForName(m_args.value("encoding").toUtf8()) : 0;
+   bool tempfileSet = m_args.isSet("tempfile");
+diff --git a/kate/app/katemain.cpp b/kate/app/katemain.cpp
+index 1178359..2797814 100644
+--- a/kate/app/katemain.cpp
++++ b/kate/app/katemain.cpp
+@@ -412,10 +412,10 @@ extern "C" Q_DECL_EXPORT int kdemain( int argc, char **argv )
+       QDBusConnection::sessionBus().connect(serviceName, QString("/MainApplication"), "org.kde.Kate.Application", "documentClosed", waiter, SLOT(documentClosed(QString)));
+     }
+     
+-#ifdef Q_WS_X11
++//#ifdef Q_WS_X11
+     // make the world happy, we are started, kind of...
+-    KStartupInfo::appStarted ();
+-#endif
++//    KStartupInfo::appStarted ();
++//#endif
+ 
+     // this will wait until exiting is emitted by the used instance, if wanted...
+     return needToBlock ? app.exec () : 0;
