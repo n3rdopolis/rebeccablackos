@@ -64,8 +64,7 @@ sed -i 's/-Werror=return-type//g'                   /usr/share/kde4/apps/cmake/m
 function PackageCompileSource()
 {
 rm CMakeCache.txt
-mkdir build
-cd build
+cd tier4
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=Release -DKDE_ENABLE_EXCEPTIONS=1 #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make -i
 }
@@ -73,7 +72,7 @@ make -i
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
+cd tier4
 make install -i
 }
 
