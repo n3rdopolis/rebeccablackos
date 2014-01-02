@@ -15,6 +15,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-. /usr/bin/weston_vars
+. /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
 weston-display-server --socket=$ServerID  $* 

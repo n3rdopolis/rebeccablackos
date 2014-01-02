@@ -23,7 +23,7 @@ exit 255
 fi
 
 USER=$(id -u)
-. /usr/bin/weston_vars
+. /usr/bin/wlruntime_vars
 BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
 if [[ -e $EnvironmentFile ]]

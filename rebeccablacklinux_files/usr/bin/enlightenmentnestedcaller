@@ -15,7 +15,7 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-. /usr/bin/weston_vars
+. /usr/bin/wlruntime_vars
 export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
 export $(exec ck-launch-session dbus-launch)
