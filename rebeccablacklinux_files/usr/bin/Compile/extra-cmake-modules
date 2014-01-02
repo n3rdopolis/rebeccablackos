@@ -57,7 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-:
+git revert ef93f7db4c1f4c432b053ae3b54d0a745d73c00f
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
