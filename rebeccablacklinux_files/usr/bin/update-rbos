@@ -92,7 +92,8 @@ dpkg-divert --local --rename --remove /sbin/initctl
 #delete the downloaded file cache
 apt-get clean
 
-
+#set default cursor theme
+update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
 
 compile_all build-only

@@ -55,3 +55,6 @@ cp -a /usr/import/etc/X11/* /etc/X11
 
 #install the menu items for the wayland tests
 install_menu_items
+
+#Set the cursor theme
+update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
