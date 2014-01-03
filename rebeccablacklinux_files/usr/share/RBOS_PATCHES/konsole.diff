@@ -1,0 +1,48 @@
+diff --git a/src/ColorSchemeManager.cpp b/src/ColorSchemeManager.cpp
+index 8fe888a..e9ffa7f 100644
+--- a/src/ColorSchemeManager.cpp
++++ b/src/ColorSchemeManager.cpp
+@@ -156,10 +156,10 @@ bool KDE3ColorSchemeReader::readTitleLine(const QString& line, ColorScheme* sche
+ ColorSchemeManager::ColorSchemeManager()
+     : _haveLoadedAll(false)
+ {
+-#if defined(Q_WS_X11)
++//#if defined(Q_WS_X11)
+     // Allow looking up colors in the X11 color database
+-    QColor::setAllowX11ColorNames(true);
+-#endif
++//    QColor::setAllowX11ColorNames(true);
++//#endif
+ }
+ 
+ ColorSchemeManager::~ColorSchemeManager()
+diff --git a/src/main.cpp b/src/main.cpp
+index ce1479f..17e3e3d 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -103,9 +103,9 @@ bool shouldUseNewProcess()
+     QStringList qtProblematicOptions;
+     qtProblematicOptions << "session" << "name" << "reverse"
+                          << "stylesheet" << "graphicssystem";
+-#if defined(Q_WS_X11)
+-    qtProblematicOptions << "display" << "visual";
+-#endif
++//#if defined(Q_WS_X11)
++//    qtProblematicOptions << "display" << "visual";
++//#endif
+     foreach(const QString& option, qtProblematicOptions) {
+         if ( qtArgs->isSet(option.toLocal8Bit()) ) {
+             return true;
+@@ -116,9 +116,9 @@ bool shouldUseNewProcess()
+     const KCmdLineArgs* kdeArgs = KCmdLineArgs::parsedArgs("kde");
+     QStringList kdeProblematicOptions;
+     kdeProblematicOptions << "config" << "style";
+-#if defined(Q_WS_X11)
+-    kdeProblematicOptions << "waitforwm";
+-#endif
++//#if defined(Q_WS_X11)
++//    kdeProblematicOptions << "waitforwm";
++//#endif
+     foreach(const QString& option, kdeProblematicOptions) {
+         if ( kdeArgs->isSet(option.toLocal8Bit()) ) {
+             return true;
