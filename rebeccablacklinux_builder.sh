@@ -1,5 +1,5 @@
 #! /usr/bin/sudo /bin/bash
-#    Copyright (c) 2012, nerdopolis (or n3rdopolis) <bluescreen_avenger@version.net>
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
 #
 #    This file is part of RebeccaBlackLinux.
 #
