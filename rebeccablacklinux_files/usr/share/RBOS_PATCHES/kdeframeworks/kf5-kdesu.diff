@@ -1,0 +1,11 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index c900ac8..89c05f8 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -1,5 +1,6 @@
+ include(CheckTypeSize)
+ include(CheckIncludeFiles)
++include(CheckFunctionExists)
+ 
+ check_function_exists(setpriority HAVE_SETPRIORITY)
+ check_function_exists(getpeereid HAVE_GETPEEREID)
