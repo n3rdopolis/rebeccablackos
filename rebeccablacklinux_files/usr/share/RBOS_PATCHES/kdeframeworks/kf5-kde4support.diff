@@ -1,0 +1,71 @@
+diff --git a/src/kdeui/kapplication.cpp b/src/kdeui/kapplication.cpp
+index 5a7f4c8..a2dd127 100644
+--- a/src/kdeui/kapplication.cpp
++++ b/src/kdeui/kapplication.cpp
+@@ -58,8 +58,9 @@
+ 
+ #if HAVE_X11
+ #include <qx11info_x11.h>
+-#include <kstartupinfo.h>
+ #endif
++#include <kstartupinfo.h>
++
+ 
+ #include <sys/types.h>
+ #if HAVE_SYS_STAT_H
+diff --git a/src/kdeui/kmenubar.cpp b/src/kdeui/kmenubar.cpp
+index a2d8561..d8d409c 100644
+--- a/src/kdeui/kmenubar.cpp
++++ b/src/kdeui/kmenubar.cpp
+@@ -97,7 +97,9 @@ public:
+ #endif
+     QTimer selection_timer;
+     QSize min_size;
++#if HAVE_X11
+     static Atom makeSelectionAtom();
++#endif
+ };
+ 
+ #if HAVE_X11
+@@ -118,6 +120,7 @@ void initAtoms()
+ }
+ #endif
+ 
++#if HAVE_X11
+ Atom KMenuBar::KMenuBarPrivate::makeSelectionAtom()
+ {
+ #if HAVE_X11
+@@ -129,6 +132,7 @@ Atom KMenuBar::KMenuBarPrivate::makeSelectionAtom()
+     return 0;
+ #endif
+ }
++#endif
+ 
+ KMenuBar::KMenuBar(QWidget *parent)
+     : QMenuBar(parent), d(new KMenuBarPrivate)
+@@ -314,13 +318,16 @@ void KMenuBar::selectionTimeout()
+     // nobody is managing us, handle resizing
+     if (d->topLevel) {
+         d->fallback_mode = true; // KMenuBar is handling its position itself
++#if HAVE_X11
+         KConfigGroup xineramaConfig(KSharedConfig::openConfig(), "Xinerama");
+         int screen = xineramaConfig.readEntry("MenubarScreen",
+                                               QApplication::desktop()->screenNumber(QPoint(0, 0)));
+         QRect area = QApplication::desktop()->screenGeometry(screen);
++
+         int margin = 0;
+         move(area.left() - margin, area.top() - margin);
+         setFixedSize(area.width() + 2 * margin, heightForWidth(area.width() + 2 * margin));
++#endif
+ #if HAVE_X11
+         int strut_height = height() - margin;
+         if (strut_height < 0) {
+@@ -418,7 +425,7 @@ QSize KMenuBar::sizeHint() const
+ }
+ 
+ #pragma message("Port to Qt5 native filter")
+-#if 0
++#if HAVE_X11
+ bool KMenuBar::x11Event(XEvent *ev)
+ {
+     if (ev->type == ClientMessage && ev->xclient.message_type == msg_type_atom
