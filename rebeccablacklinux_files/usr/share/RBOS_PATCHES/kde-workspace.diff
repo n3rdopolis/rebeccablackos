@@ -1,5 +1,5 @@
 diff --git a/kwin/CMakeLists.txt b/kwin/CMakeLists.txt
-index 3ac5e5b..7c00df3 100644
+index fca269f..4425773 100644
 --- a/kwin/CMakeLists.txt
 +++ b/kwin/CMakeLists.txt
 @@ -30,49 +30,8 @@ endif()
@@ -41,7 +41,7 @@ index 3ac5e5b..7c00df3 100644
 -
 -include_directories(${XCB_INCLUDE_DIR})
 -
--if(WAYLAND_FOUND AND KWIN_HAVE_EGL)
+-if(WAYLAND_FOUND)
 -    include_directories(${WAYLAND_INCLUDE_DIR})
 -endif()
 -
@@ -52,7 +52,7 @@ index 3ac5e5b..7c00df3 100644
  
  
  ########### global ###############
-@@ -88,273 +47,10 @@ include_directories(BEFORE
+@@ -88,285 +47,10 @@ include_directories(BEFORE
      )
  
  add_subdirectory( libkdecorations )
@@ -70,7 +70,7 @@ index 3ac5e5b..7c00df3 100644
 -add_subdirectory( effects )
 -add_subdirectory( scripts )
 -add_subdirectory( tabbox )
- 
+-
 -if(KWIN_BUILD_SCRIPTING)
 -    add_subdirectory(scripting)
 -endif()
@@ -116,6 +116,7 @@ index 3ac5e5b..7c00df3 100644
 -   scene.cpp
 -   scene_xrender.cpp
 -   scene_opengl.cpp
+-   scene_qpainter.cpp
 -   glxbackend.cpp
 -   thumbnailitem.cpp
 -   lanczosfilter.cpp
@@ -167,6 +168,8 @@ index 3ac5e5b..7c00df3 100644
 -        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
 -        appmenu.cpp
 -    )
+-    qt5_add_dbus_interface(kwin_KDEINIT_SRCS
+-        ${KDEBASE_WORKSPACE_SOURCE_DIR}/appmenu/org.kde.kappmenu.xml appmenu_interface)
 -endif()
 -
 -if(KWIN_BUILD_ACTIVITIES)
@@ -180,8 +183,11 @@ index 3ac5e5b..7c00df3 100644
 -    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} eglonxbackend.cpp)
 -endif()
 -
--if(WAYLAND_FOUND AND KWIN_HAVE_EGL)
--    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} egl_wayland_backend.cpp)
+-if(WAYLAND_FOUND)
+-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland_backend.cpp)
+-    if(KWIN_HAVE_EGL)
+-        set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} egl_wayland_backend.cpp)
+-    endif()
 -endif()
 -
 -kconfig_add_kcfg_files(kwin_KDEINIT_SRCS settings.kcfgc)
@@ -243,13 +249,16 @@ index 3ac5e5b..7c00df3 100644
 -    ${XCB_RENDER_LIBRARY}
 -    ${XCB_RANDR_LIBRARY}
 -    ${XCB_KEYSYMS_LIBRARY}
+-    ${XCB_SHM_LIBRARY}
 -)
 -
 -set(kwin_WAYLAND_LIBS
 -    ${WAYLAND_CLIENT_LIBRARIES}
--    ${WAYLAND_EGL_LIBRARIES}
--    ${XCB_SHM_LIBRARY}
 -    ${XCB_XTEST_LIBRARY}
+-)
+-
+-set(kwin_WAYLAND_EGL_LIBS
+-    ${WAYLAND_EGL_LIBRARIES}
 -)
 -
 -set(kwin_OPENGL_LIBS )
@@ -282,8 +291,11 @@ index 3ac5e5b..7c00df3 100644
 -    ${kwin_OPENGL_LIBS}
 -)
 -
--if(WAYLAND_FOUND  AND KWIN_HAVE_EGL)
+-if(WAYLAND_FOUND)
 -    set(kwinLibs ${kwinLibs} ${kwin_WAYLAND_LIBS})
+-    if(KWIN_HAVE_EGL)
+-        set(kwinLibs ${kwinLibs} ${kwin_WAYLAND_EGL_LIBS})
+-    endif()
 -endif()
 -
 -kf5_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
@@ -326,3 +338,4 @@ index 3ac5e5b..7c00df3 100644
  ecm_install_icons( ${ICON_INSTALL_DIR} )
  
 -add_subdirectory(tests)
++
