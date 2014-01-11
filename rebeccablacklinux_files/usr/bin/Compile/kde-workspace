@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.kde.org/kde-workspace
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=16c00371df99d1e74705581586ce84c202c795dd
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -p1 < /usr/share/RBOS_PATCHES/kde-workspace.diff
 cp -R /usr/share/RBOS_PATCHES/kde-workspace/ .
 }
 
@@ -64,9 +65,7 @@ cp -R /usr/share/RBOS_PATCHES/kde-workspace/ .
 function PackageCompileSource()
 {
 rm CMakeCache.txt
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_DISABLE_FIND_PACKAGE_OpenGL=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_X11=1 #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
+cmake . -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_DISABLE_FIND_PACKAGE_OpenGL=1 -DCMAKE_BUILD_TYPE=Release -DCMAKE_DISABLE_FIND_PACKAGE_X11=1 #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make -i
 }
 
