@@ -24,32 +24,30 @@ export ACTION=$1
 
 function RunDownloadAndOrBuild 
 {
+  #Require root privlages
+  if [[ $UID != 0 ]]
+  then
+    echo "Must be run as root."
+    exit
+  fi
 
-#Require root privlages
-if [[ $UID != 0 ]]
-then
-echo "Must be run as root."
-exit
-fi
+  mkdir -p /usr/share/logs/build_core/$SOURCENAME
 
-mkdir -p /usr/share/logs/build_core/$SOURCENAME
+  #Download source, unless the argument passed to the build script is 'build-only'
+  if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
+  then
+    #Download the source using specified variables.
+    DownloadSource 
+  fi
 
-#Download source, unless the argument passed to the build script is 'build-only'
-if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
-then
-#Download the source using specified variables.
-DownloadSource 
-fi
+  #Build the source and install it, unless the argument passed to the build script is 'download-only'
+  if [[ "$ACTION" != download-only && "$ACTION" != env-only ]]
+  then
 
+    #Start the compile or install Process
+    MakeAndInstall
 
-#Build the source and install it, unless the argument passed to the build script is 'download-only'
-if [[ "$ACTION" != download-only && "$ACTION" != env-only ]]
-then
-
-#Start the compile or install Process
-MakeAndInstall
-
-fi
+  fi
 }
 
 
@@ -57,60 +55,56 @@ fi
 #Function to download git repos
 function DownloadGIT()
 {
-OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
+  OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
+  if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+  then
+    rm -rf "$SOURCENAME"
 
-if [[ $MAKEDEBS == 1 ]]
-then
-rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
-fi
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+    fi
+  fi
 
-fi
+  git clone $SOURCEURL $SOURCENAME
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  git submodule foreach --recursive git reset --hard 
+  git submodule foreach --recursive git clean -fdx
+  git pull
+  git checkout -f $SOURCEREVISION 
+  git reset --hard $SOURCEREVISION
+  git reset --hard origin/$SOURCEREVISION
+  git reset --hard MERGE_HEAD
+  git clean -fdx
+  git config user.email rbos@rbos
+  git submodule sync --recursive
+  git submodule init
+  git submodule update --recursive --force
+  git pull
 
- 
-git clone $SOURCEURL $SOURCENAME
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
-git submodule foreach --recursive git reset --hard 
-git submodule foreach --recursive git clean -fdx
-git pull
-git checkout -f $SOURCEREVISION 
-git reset --hard $SOURCEREVISION
-git reset --hard origin/$SOURCEREVISION
-git reset --hard MERGE_HEAD
-git clean -fdx
-git config user.email rbos@rbos
-git submodule sync --recursive
-git submodule init
-git submodule update --recursive --force
-git pull
+  #Get the number of revisions specified.
+  SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
+  for (( SUBMODULEREVISION=0; SUBMODULEREVISION < SUBMODULEREVISIONCOUNT; SUBMODULEREVISION=SUBMODULEREVISION+2 ))
+  do
+    MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
+    MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
 
+    cd "$SOURCEDIR"
+    cd "$SOURCENAME"
 
-#Get the number of revisions specified.
-SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
-for (( SUBMODULEREVISION=0; SUBMODULEREVISION < SUBMODULEREVISIONCOUNT; SUBMODULEREVISION=SUBMODULEREVISION+2 ))
-do
-MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
-MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
+    mkdir -p $MODULENAME
+    cd $MODULENAME
+    git checkout -f $MODULEREVISION
+    git reset --hard $MODULEREVISION
+    git reset --hard origin/$MODULEREVISION
+    git clean -fdx
+    git config user.email rbos@rbos
+    git pull -s recursive -X theirs --no-edit
 
-cd "$SOURCEDIR"
-cd "$SOURCENAME"
-
-mkdir -p $MODULENAME
-cd $MODULENAME
-git checkout -f $MODULEREVISION
-git reset --hard $MODULEREVISION
-git reset --hard origin/$MODULEREVISION
-git clean -fdx
-git config user.email rbos@rbos
-git pull -s recursive -X theirs --no-edit
-
-done
-
+  done
 
 }
 
@@ -118,153 +112,147 @@ done
 #Function to download svn repos
 function DownloadSVN()
 {
-OLDSOURCEURL=$(svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
+  OLDSOURCEURL=$(svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
+  if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+  then
+    rm -rf "$SOURCENAME"
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+    fi
 
-if [[ $MAKEDEBS == 1 ]]
-then
-rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
-fi
+  fi
 
-fi
-
-svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
-svn revert --non-interactive --recursive .
-svn cleanup --non-interactive
-svn update --non-interactive -r $SOURCEREVISION
+  svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  svn revert --non-interactive --recursive .
+  svn cleanup --non-interactive
+  svn update --non-interactive -r $SOURCEREVISION
 }
 
 
 #Function to download bzr repos
 function DownloadBZR()
 {
-OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
+  OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
+  if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+  then
+    rm -rf "$SOURCENAME"
 
-if [[ $MAKEDEBS == 1 ]]
-then
-rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
-fi
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+    fi
 
-fi
+  fi
 
-bzr branch "$SOURCEURL" "$SOURCENAME"
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
-bzr revert
-bzr clean-tree --force --detritus
-bzr pull
-bzr update -r $SOURCEREVISION
+  bzr branch "$SOURCEURL" "$SOURCENAME"
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  bzr revert
+  bzr clean-tree --force --detritus
+  bzr pull
+  bzr update -r $SOURCEREVISION
 }
 
 #Function to download hg repos
 function DownloadHG()
 {
-OLDSOURCEURL=$(hg paths default)
-if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
-then
-rm -rf "$SOURCENAME"
+  OLDSOURCEURL=$(hg paths default)
+  if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+  then
+    rm -rf "$SOURCENAME"
 
-if [[ $MAKEDEBS == 1 ]]
-then
-rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
-rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
-fi
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+    fi
 
-fi
+  fi
 
-hg clone "$SOURCEURL" "$SOURCENAME"
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
-hg revert --all
-hg st -un0 | xargs -0 rm
-hg pull
-hg update -C -r $SOURCEREVISION
+  hg clone "$SOURCEURL" "$SOURCENAME"
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  hg revert --all
+  hg st -un0 | xargs -0 rm
+  hg pull
+  hg update -C -r $SOURCEREVISION
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
-mkdir -p "$SOURCEDIR"
-cd "$SOURCEDIR"
-REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
+  mkdir -p "$SOURCEDIR"
+  cd "$SOURCEDIR"
+  REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
-#create a variable for the package name that is the source name converted to all lower case.
-PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
+  #create a variable for the package name that is the source name converted to all lower case.
+  PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
+
+  DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
+  do
+    dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
+  done | wc -l)
 
 
-DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
-do
-dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
-done | wc -l)
+  #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
+  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+  then
+    STARTTIME=$(date +%s)
+    Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
+    ENDTIME=$(date +%s)
+    echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 
-
-#If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
-if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
-then
-
-STARTTIME=$(date +%s)
-Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
-ENDTIME=$(date +%s)
-echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
-
-STARTTIME=$(date +%s)
-cd "$SOURCENAME"
-PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
-ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
-
-fi
-
+    STARTTIME=$(date +%s)
+    cd "$SOURCENAME"
+    PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+  fi
 }
 
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
+  REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
 }
 
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
+  REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
 }
 
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
+  REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
 }
 
 #function to get the version of HG repos
 function GetVersionHG()
 {
-REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
+  REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
 }
 
 #function that calls functions to get version based on repository type
 function GetSourceVersion()
 {
-GetVersion$REPOSITORYTYPE
-echo "$REVISIONSTRING"
+  GetVersion$REPOSITORYTYPE
+  echo "$REVISIONSTRING"
 
-if [[ $MAKEDEBS == 1 ]]
-then
-mkdir -p "/$SOURCEDIR/buildoutput/versioninfo"
-echo "$REVISIONSTRING" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
-echo 
-fi
-
+  if [[ $MAKEDEBS == 1 ]]
+  then
+    mkdir -p "/$SOURCEDIR/buildoutput/versioninfo"
+    echo "$REVISIONSTRING" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+    echo 
+  fi
 }
 
 
@@ -272,156 +260,149 @@ fi
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function
 function PrepareBuild()
 {
-#Create build variables
-. /usr/bin/build_vars
+  #Create build variables
+  . /usr/bin/build_vars
 
-mkdir -p "$SOURCEDIR"
-cd "$SOURCEDIR"
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
+  mkdir -p "$SOURCEDIR"
+  cd "$SOURCEDIR"
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
 
-#Delete all .la files as they cause problems
-find / | grep "\.la$" | while read LAFILE
-do 
-rm $LAFILE 2>/dev/null
-done
+  #Delete all .la files as they cause problems
+  find / | grep "\.la$" | while read LAFILE
+  do 
+    rm $LAFILE 2>/dev/null
+  done
 
-
-STARTTIME=$(date +%s)
-PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
-ENDTIME=$(date +%s)
-echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
+  STARTTIME=$(date +%s)
+  PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
+  ENDTIME=$(date +%s)
+  echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
-mkdir -p "$SOURCEDIR"
-cd "$SOURCEDIR"
-mkdir -p "$SOURCENAME"
-cd "$SOURCENAME"
-mkdir -p "$INSTALLDIR/share/aclocal"
+  mkdir -p "$SOURCEDIR"
+  cd "$SOURCEDIR"
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  mkdir -p "$INSTALLDIR/share/aclocal"
 
-#Log the source version
-GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
+  #Log the source version
+  GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 
-#create a variable for the package name that is the source name converted to all lower case.
-PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
+  #create a variable for the package name that is the source name converted to all lower case.
+  PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
 
-#If the script is set to always rebuild, then detect if the revision info changed.
-if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
-then
-DIFFERENTREVISION="$(diff -q "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old" &>/dev/null ; echo $?)"
-cat "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
-else 
-DIFFERENTREVISION=0
-fi
+  #If the script is set to always rebuild, then detect if the revision info changed.
+  if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
+  then
+    DIFFERENTREVISION="$(diff -q "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old" &>/dev/null ; echo $?)"
+    cat "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+  else 
+    DIFFERENTREVISION=0
+  fi
 
+  DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
+  do
+    dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
+  done | wc -l)
 
-DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
-do
-dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
-done | wc -l)
+  #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
+  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+  then
+    #Call PrepareBuild functions
+    PrepareBuild 
 
-#If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
-if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
-then
+    #Complile the source
+    STARTTIME=$(date +%s)
+    PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
+    ENDTIME=$(date +%s)
+    echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
 
-#Call PrepareBuild functions
-PrepareBuild 
+    #Empty any possible logs inside the source folder
+    rm "/$SOURCEDIR/$SOURCENAME/Logs/"* 
 
-#Complile the source
-STARTTIME=$(date +%s)
-PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
-ENDTIME=$(date +%s)
-echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
+    #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
+    echo "#! /bin/bash
+    mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
+    $(declare -f PackageInstallSource)
+    $(declare -f PackagePostInstall)
+    export SOURCEDIR=$SOURCEDIR
+    export SOURCENAME=$SOURCENAME
+    export INSTALLDIR=$INSTALLDIR
 
-#Empty any possible logs inside the source folder
-rm "/$SOURCEDIR/$SOURCENAME/Logs/"* 
+    touch \"/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion\"
 
-#Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
-echo "#! /bin/bash
-mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
-$(declare -f PackageInstallSource)
-$(declare -f PackagePostInstall)
-export SOURCEDIR=$SOURCEDIR
-export SOURCENAME=$SOURCENAME
-export INSTALLDIR=$INSTALLDIR
+    STARTTIME=\$(date +%s)
+    PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
+    ENDTIME=\$(date +%s)
+    echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
 
-touch \"/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion\"
-
-STARTTIME=\$(date +%s)
-PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
-ENDTIME=\$(date +%s)
-echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
-
-STARTTIME=\$(date +%s)
-PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
-ENDTIME=\$(date +%s)
-echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
+    STARTTIME=\$(date +%s)
+    PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
+    ENDTIME=\$(date +%s)
+    echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
 " > packageinstallscript
 
-#Make the script executable
-chmod +x packageinstallscript
+    #Make the script executable
+    chmod +x packageinstallscript
 
+    #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      #create directories for output
+      mkdir "/$SOURCEDIR/buildoutput/"
+      mkdir "/$SOURCEDIR/buildoutput/control"
+      #checkinstall wants a debian/control file, otherwise it exits out.
+      mkdir debian
+      touch debian/control
 
-#if the script is configured to create debs then create the debs. If not, run the install routine as normal.
-if [[ $MAKEDEBS == 1 ]]
-then
+      #Update database containing the list of files that belong to packages
+      update-dlocatedb
 
-#create directories for output
-mkdir "/$SOURCEDIR/buildoutput/"
-mkdir "/$SOURCEDIR/buildoutput/control"
-#checkinstall wants a debian/control file, otherwise it exits out.
-mkdir debian
-touch debian/control
+      #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
+      DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
+      do
+	ldd "$FILE" | awk '{print $3}'
+      done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
+      do
+	dlocate -S --package-only "$LIBRARY"
+      done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg")
 
-#Update database containing the list of files that belong to packages
-update-dlocatedb
+      DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
 
-#Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
-DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
-do
-ldd "$FILE" | awk '{print $3}'
-done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
-do
-dlocate -S --package-only "$LIBRARY"
-done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg")
+      #.spec file seem to cause problems with checkinstall
+      rm *.spec
 
-DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
+      #remove any old deb files for this package
+      rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
 
-#.spec file seem to cause problems with checkinstall
-rm *.spec
+      #create the new deb
+      STARTTIME=$(date +%s)
+      checkinstall -y -D --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=$(date +%s) --pkglicense="OSI_COMPLIANT" --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+      ENDTIME=$(date +%s)
+      echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 
-#remove any old deb files for this package
-rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
+      #copy the resulting deb file into the buildoutput tree.
+      cp *.deb "/$SOURCEDIR/buildoutput/"
 
-#create the new deb
-STARTTIME=$(date +%s)
-checkinstall -y -D --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-rbos --pkgversion=1 --pkgrelease=$(date +%s) --pkglicense="OSI_COMPLIANT" --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
-ENDTIME=$(date +%s)
-echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+      #Create lock file that when removed forces the package to be rebuilt
+      touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 
-#copy the resulting deb file into the buildoutput tree.
-cp *.deb "/$SOURCEDIR/buildoutput/"
+    else
+      ./packageinstallscript
+    fi
 
-#Create lock file that when removed forces the package to be rebuilt
-touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+    #Copy the source logs correctly
+    cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
 
-else
-./packageinstallscript
-fi
-
-#Copy the source logs correctly
-cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
-
-#If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
-else
-STARTTIME=$(date +%s)
-dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
-ENDTIME=$(date +%s)
-echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
-fi
-
-
+    #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
+  else
+    STARTTIME=$(date +%s)
+    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
+    ENDTIME=$(date +%s)
+    echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
+  fi
 }
