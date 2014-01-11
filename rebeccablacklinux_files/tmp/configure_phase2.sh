@@ -58,50 +58,50 @@ INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
 do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
+  PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+  METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
-if [[ $METHOD == "PART" ]]
-then
-echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-elif [[ $METHOD == "FULL" ]]
-then
-echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-yes Yes | apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-elif [[ $METHOD == "BUILDDEP" ]]
-then
-echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-yes Y | apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-elif [[ $METHOD == "REMOVE" ]]
-then
-echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-yes Y | apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-else
-echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-Result=1
-fi
+  if [[ $METHOD == "PART" ]]
+  then
+    echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  elif [[ $METHOD == "FULL" ]]
+  then
+    echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    yes Yes | apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  elif [[ $METHOD == "BUILDDEP" ]]
+  then
+    echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    yes Y | apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  elif [[ $METHOD == "REMOVE" ]]
+  then
+    echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    yes Y | apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  else
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    Result=1
+  fi
 
-if [[ $Result != 0 ]]
-then
-echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Installs/failedpackages.log
-else
-echo "$PACKAGE successfully $METHOD"
-grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDINSTALLS.txt > /tmp/FAILEDINSTALLS.txt.bak
-cat /tmp/FAILEDINSTALLS.txt.bak > /tmp/FAILEDINSTALLS.txt
-rm /tmp/FAILEDINSTALLS.txt.bak
-if [[ $METHOD == "REMOVE" ]]
-then
-grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDREMOVES.txt > /tmp/FAILEDREMOVES.txt.bak
-cat /tmp/FAILEDREMOVES.txt.bak > /tmp/FAILEDREMOVES.txt
-rm /tmp/FAILEDREMOVES.txt.bak
-fi
+  if [[ $Result != 0 ]]
+  then
+    echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Installs/failedpackages.log
+  else
+    echo "$PACKAGE successfully $METHOD"
+    grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDINSTALLS.txt > /tmp/FAILEDINSTALLS.txt.bak
+    cat /tmp/FAILEDINSTALLS.txt.bak > /tmp/FAILEDINSTALLS.txt
+    rm /tmp/FAILEDINSTALLS.txt.bak
+    if [[ $METHOD == "REMOVE" ]]
+    then
+      grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDREMOVES.txt > /tmp/FAILEDREMOVES.txt.bak
+      cat /tmp/FAILEDREMOVES.txt.bak > /tmp/FAILEDREMOVES.txt
+      rm /tmp/FAILEDREMOVES.txt.bak
+    fi
 
-fi
+  fi
 
 done < <(echo "$INSTALLS")
 
@@ -112,12 +112,12 @@ cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
 if [[ -z $CURRENTKERNELVERSION ]]
 then
-CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
+  CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
 fi
 
 dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -v linux-image-generic | grep -v linux-headers-generic | while read PACKAGE
 do
-yes Y | apt-get purge $PACKAGE
+  yes Y | apt-get purge $PACKAGE
 done
 
 #install updates

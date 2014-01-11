@@ -17,9 +17,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
-. /usr/bin/wlruntime_vars
-LD_LIBRARY_PATH=/opt/lib/calligra:$LD_LIBRARY_PATH
-$*
+  . /usr/bin/wlruntime_vars
+  LD_LIBRARY_PATH=/opt/lib/calligra:$LD_LIBRARY_PATH
+  $*
 else
-kdialog --msgbox "This Application must be run from within Wayland"
+  kdialog --msgbox "This Application must be run from within Wayland"
 fi

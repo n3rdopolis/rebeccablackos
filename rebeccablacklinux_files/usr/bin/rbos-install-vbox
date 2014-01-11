@@ -19,8 +19,8 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-echo "Must be run as root."
-exit
+  echo "Must be run as root."
+  exit
 fi
 
 echo "Installing virtualbox additions with this distro is not recommended as they don't appear to support Weston.
@@ -37,10 +37,10 @@ CPUARCH=$(uname -m)
 
 if [[ -z $VBOXMOUNT ]]
 then
-UNMOUNT=1
-mkdir /tmp/vboxmount
-mount $VBOXMOUNT /tmp/vboxmount
-VBOXMOUNT=/tmp/vboxmount
+  UNMOUNT=1
+  mkdir /tmp/vboxmount
+  mount $VBOXMOUNT /tmp/vboxmount
+  VBOXMOUNT=/tmp/vboxmount
 fi
 
 mkdir /tmp/vboxinstall
@@ -49,9 +49,9 @@ $VBOXMOUNT/VBoxLinuxAdditions.run --keep --target .
 tar -axf
 if [[ $CPUARCH == i686 ]]
 then
-tar -axf VBoxGuestAdditions-x86.tar.bz2
+  tar -axf VBoxGuestAdditions-x86.tar.bz2
 else 
-tar -axf VBoxGuestAdditions-amd64.tar.bz2
+  tar -axf VBoxGuestAdditions-amd64.tar.bz2
 fi
 cd src/vboxguest-*
 . /usr/bin/build_vars
@@ -59,5 +59,5 @@ make
 
 if [[ UNMOUNT == 1 ]]
 then 
-umount /tmp/vboxmount
+  umount /tmp/vboxmount
 fi

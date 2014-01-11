@@ -22,7 +22,7 @@ USEWESTON=1
 
 while [[ $USEWESTON == 1 ]]
 do
-SERVER=$(kdialog --menu "- Choose weston to attempt to run the weston display server
+  SERVER=$(kdialog --menu "- Choose weston to attempt to run the weston display server
 
 - Choose Weston Fullscreen Under Xorg for running a fullscreen weston under an xserver 
 for hardware that doen't have the approriate drivers for running weston as a display server
@@ -38,57 +38,48 @@ or drivers that don't support hardware rendering.
 $WESTONRETURNSTRING Choose a Display Server." "Wayland" "Native Weston Display Server" "Xwayland" "Weston Fullscreen Under Xorg Display Server" "MinimalXwayland" "Weston Fullscreen Under Xorg Display Server With Software Rendering" "Xorg" "KDE Under Xorg Display Server" "NONE" "Logoff")
 
 
-if [ $SERVER == "Wayland" ]
-then
-
-USEWESTON=1
-/opt/bin/weston-launch
-WESTONRETURNSTRING="Weston either crashed, or been exited, or current drivers for your 
+  if [ $SERVER == "Wayland" ]
+  then
+    USEWESTON=1
+    /opt/bin/weston-launch
+    WESTONRETURNSTRING="Weston either crashed, or been exited, or current drivers for your 
 hardware do not support the functionality needed for it to run as a display server. 
 " 
-kdialog --msgbox "$WESTONRETURNSTRING"
+    kdialog --msgbox "$WESTONRETURNSTRING"
 
-elif [ $SERVER == "Xwayland" ]
-then
-USEWESTON=1
+  elif [ $SERVER == "Xwayland" ]
+  then
+    USEWESTON=1
+    DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
+    WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
+    HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
+    westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT
+    WESTONRETURNSTRING="Weston either crashed, or been exited." 
+    kdialog --msgbox "$WESTONRETURNSTRING"
 
-DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
-WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
-HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
-
-westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT
-WESTONRETURNSTRING="Weston either crashed, or been exited." 
-kdialog --msgbox "$WESTONRETURNSTRING"
-
-
-elif [ $SERVER == "MinimalXwayland" ]
-then
-USEWESTON=1
-
-
-DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
-WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
-HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
-
-westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT --use-pixman
-WESTONRETURNSTRING="Weston either crashed, or been exited." 
-kdialog --msgbox "$WESTONRETURNSTRING"
-
-
-#If user selects to not use weston, escape the loop
-else
-USEWESTON=0
-fi
+  elif [ $SERVER == "MinimalXwayland" ]
+  then
+    USEWESTON=1
+    DIMENSIONS=$(xwininfo -root | grep 'geometry' | awk '{print $2}' | awk -F + '{print $1}' )
+    WIDTH=$(echo $DIMENSIONS | awk -F x '{print $1}')
+    HEIGHT=$(echo $DIMENSIONS | awk -F x '{print $2}')
+    westoncaller --fullscreen --width=$WIDTH --height=$HEIGHT --use-pixman
+    WESTONRETURNSTRING="Weston either crashed, or been exited." 
+    kdialog --msgbox "$WESTONRETURNSTRING"
+  #If user selects to not use weston, escape the loop
+  else
+    USEWESTON=0
+  fi
 
 done
 
 
 if [ $SERVER == "Xorg" ]
 then
-startkde
+  startkde
 fi
 
 if [ $SERVER == "NONE" ]
 then
-exit
+  exit
 fi

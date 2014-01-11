@@ -19,8 +19,8 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-echo "Must be run as root."
-exit
+  echo "Must be run as root."
+  exit
 fi
 
 
@@ -28,7 +28,7 @@ fi
 CURRENTOPTION=cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | tr [:lower:] [:upper:] | grep VGA | awk -F VGA= '{print $2}' | awk '{print $1}'
 if [[ -z $CURRENTOPTION ]]
 then
-CURRENTOPTION="Not Specified"
+  CURRENTOPTION="Not Specified"
 fi
 
 dialog  --msgbox "This will assist you in configuring your system, so that a framebuffer is force created upon the next reboot, with the specified resolution." 7 60
@@ -40,24 +40,24 @@ OKSelected=$?
 if [[ $OKSelected == 0 && $RESOLUTION != 2 ]]
 then
 
-if [[ $RESOLUTION == 0 ]]
-then
-sed -ri 's/\bvga=\S*//gI' /etc/default/grub
-else
-sed -ri 's/\bvga=\S*//gI' /etc/default/grub
-sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"vga=$RESOLUTION /g" /etc/default/grub
-fi
+  if [[ $RESOLUTION == 0 ]]
+  then
+    sed -ri 's/\bvga=\S*//gI' /etc/default/grub
+  else
+    sed -ri 's/\bvga=\S*//gI' /etc/default/grub
+    sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"vga=$RESOLUTION /g" /etc/default/grub
+  fi
 
 
-update-grub
-dialog  --yesno "You will need to restart in order for the changes to apply
+  update-grub
+  dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
-OKSelected=$?
-if [[ $OKSelected == 0 ]]
-then
-reboot
-fi
+  OKSelected=$?
+  if [[ $OKSelected == 0 ]]
+  then
+    reboot
+  fi
 fi
 
 

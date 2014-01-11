@@ -30,9 +30,9 @@ Note: The middle mouse button is usually pressing the scroll button on most mice
 Zoom the display in and out: Super key + scroll wheel
 
 Terminate Active Application: Super key + K
-Move Window: Super key + left mouse button                    
+Move Window: Super key + left mouse button
 Resize Window: Super key + middle mouse button
-Switch Windows: Super key + tab                              
+Switch Windows: Super key + tab
 Change Window opacity: Super key + alt key + scroll wheel
 Rotate Window: Super key: right mouse button
 Expose: Super key (press and release)
@@ -52,9 +52,9 @@ By default there are 2 workspaces
 Exit Weston: ctrl key + alt key + backspace' 
 
 
-if [[ $SessionName == "Default Weston Desktop Shell" ]]
+if [[ $SessionName =~ "Default Weston" ]]
 then
-zenity --title="Help" --no-wrap --info --text 'To launch programs:
+  zenity --title="Help" --no-wrap --info --text 'To launch programs:
 Click on the "RBOS" Icon on the top for the Application menu. Be sure to check 
 for the Wayland programs under "Applications"!
 
@@ -82,7 +82,7 @@ The I icon launches these help dialogs
 Click on the red X icon for shutdown options
 '
 
-zenity --title="Help" --no-wrap --info --text '
+  zenity --title="Help" --no-wrap --info --text '
 The Application menu stays open, even after calling programs, and 
 does not work with multiple instances of the Application Launcher 
 
@@ -93,10 +93,10 @@ fi
 
 
 
-if [[ $SessionName == "Orbital Shell" ]]
+if [[ $SessionName =~ "Orbital" ]]
 then
 
-zenity --title="Help" --no-wrap --info --text '
+  zenity --title="Help" --no-wrap --info --text '
 Expose:			CTRL key + e
 Show Workspaces:	CTRL key + g
 '

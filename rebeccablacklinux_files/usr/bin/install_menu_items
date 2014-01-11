@@ -20,33 +20,30 @@ MENUPATH=/usr/share/RBOS_MENU
 #for each desktop file
 while read DESKTOPFILE
 do
+  #Reset variables as it's cumulative for each file
+  unset DIRECTORYFILELIST
+  unset FOLDERPATH
 
-#Reset variables as it's cumulative for each file
-unset DIRECTORYFILELIST
-unset FOLDERPATH
+  #Get the folder the desktop file is in
+  FOLDERPATH=$(dirname $DESKTOPFILE)
+  #Until empty
+  while [[ $FOLDERPATH != / ]]
+  do
+    FOLDERNAME=$(basename $FOLDERPATH)
+    DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/rbos-/g' | sed 's/$/.directory/g')
+    #list the chain of .directory files
+    DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
+    FOLDERPATH=$(dirname $FOLDERPATH)
 
-#Get the folder the desktop file is in
-FOLDERPATH=$(dirname $DESKTOPFILE)
-#Until empty
-while [[ $FOLDERPATH != / ]]
-do
-FOLDERNAME=$(basename $FOLDERPATH)
-DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/rbos-/g' | sed 's/$/.directory/g')
-#list the chain of .directory files
-DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
+  done
+  #Install the menu items with the structure
+  xdg-desktop-menu install $DIRECTORYFILELIST $MENUPATH/$DESKTOPFILE
 
-FOLDERPATH=$(dirname $FOLDERPATH)
-
-done
-
-#Install the menu items with the structure
-xdg-desktop-menu install $DIRECTORYFILELIST $MENUPATH/$DESKTOPFILE
-
-echo DesktopFile: $MENUPATH$DESKTOPFILE
-echo FolderPath:  $FOLDERPATH
-echo FolderName:  $FOLDERNAME
-echo DirFileName: $DIRECTORYFILENAME
-echo DirFilePath: $DIRECTORYFILELIST
+  echo DesktopFile: $MENUPATH$DESKTOPFILE
+  echo FolderPath:  $FOLDERPATH
+  echo FolderName:  $FOLDERNAME
+  echo DirFileName: $DIRECTORYFILENAME
+  echo DirFilePath: $DIRECTORYFILELIST
 
 #find desktop files in the menupath
 done < <(find $MENUPATH | grep "\.desktop$" | awk -F "$MENUPATH" '{print $2}')

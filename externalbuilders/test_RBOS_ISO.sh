@@ -26,23 +26,21 @@ unset SUDO_USER
 
 if [[ $UID != 0 ]]
 then
-
-if [[ $XALIVE == 0 ]]
-then
-
-if [[ -f /usr/bin/kdesudo ]]
-then
-kdesudo $0 $MOUNTISO
-elif [[ -f /usr/bin/gksudo ]]
-then
-gksudo $0 $MOUNTISO
-else
-zenity --info --text "This Needs to be run as root"
-fi
-else
-sudo $0 $MOUNTISO
-fi
-exit
+  if [[ $XALIVE == 0 ]]
+  then
+    if [[ -f /usr/bin/kdesudo ]]
+    then
+      kdesudo $0 $MOUNTISO
+    elif [[ -f /usr/bin/gksudo ]]
+    then
+      gksudo $0 $MOUNTISO
+    else
+      zenity --info --text "This Needs to be run as root"
+    fi
+  else
+    sudo $0 $MOUNTISO
+  fi
+  exit
 fi
 
 
@@ -51,73 +49,70 @@ function mountisoexit()
 {
 if [[ -f $MOUNTHOME/liveisotest/unionmountpoint/online ]]
 then
+  if [[ $XALIVE == 0 ]]
+  then
+    zenity --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated"
+  unmountanswer=$?
+  else
+    dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
+    unmountanswer=$?
+  fi
 
-if [[ $XALIVE == 0 ]]
-then
-zenity --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated"
-unmountanswer=$?
-else
-dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
-unmountanswer=$?
-fi
+  if [ $unmountanswer -eq 1 ]
+  then
+    echo "Cleaning up..."
+    #set the xserver security back to what it should be
+    xhost -LOCAL:
 
+    #don't allow access to the card for the testuser
+    setfacl -x u:999999999 /dev/dri/card*
 
+    #unmount the filesystems used by the CD
+    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/dev
+    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/sys
+    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/proc
+    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/tmp
 
-if [ $unmountanswer -eq 1 ]
-then
-echo "Cleaning up..."
-#set the xserver security back to what it should be
-xhost -LOCAL:
+    fuser -kmM   $MOUNTHOME/liveisotest/unionmountpoint 2> /dev/null
+    umount -lfd $MOUNTHOME/liveisotest/unionmountpoint
 
-#don't allow access to the card for the testuser
-setfacl -x u:999999999 /dev/dri/card*
+    fuser -kmM   $MOUNTHOME/liveisotest/squashfsmount 2> /dev/null
+    umount -lfd $MOUNTHOME/liveisotest/squashfsmount
 
-#unmount the filesystems used by the CD
-umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/dev
-umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/sys
-umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/proc
-umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/tmp
-
-fuser -kmM   $MOUNTHOME/liveisotest/unionmountpoint 2> /dev/null
-umount -lfd $MOUNTHOME/liveisotest/unionmountpoint
-
-fuser -kmM   $MOUNTHOME/liveisotest/squashfsmount 2> /dev/null
-umount -lfd $MOUNTHOME/liveisotest/squashfsmount
-
-fuser -kmM  $MOUNTHOME/liveisotest/isomount 2> /dev/null
-umount -lfd $MOUNTHOME/liveisotest/isomount
+    fuser -kmM  $MOUNTHOME/liveisotest/isomount 2> /dev/null
+    umount -lfd $MOUNTHOME/liveisotest/isomount
 
 
-if [[ $XALIVE == 0 ]]
-then
-zenity --question --text "Keep Temporary overlay files?"
-deleteanswer=$?
-else
-dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
-deleteanswer=$?
-fi
-if [ $deleteanswer -eq 1 ]
-then 
-rm -rf $MOUNTHOME/liveisotest/overlay
-fi
-fi
-exit
+    if [[ $XALIVE == 0 ]]
+    then
+      zenity --question --text "Keep Temporary overlay files?"
+      deleteanswer=$?
+    else
+      dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
+      deleteanswer=$?
+    fi
+    if [ $deleteanswer -eq 1 ]
+    then 
+      rm -rf $MOUNTHOME/liveisotest/overlay
+    fi
+  fi
+  exit
 fi
 }
 
 
 if [[ $XALIVE == 0 ]]
 then
-zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
+  zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 
-The password for the test user is no password. Just hit enter if you actually need it."
+  The password for the test user is no password. Just hit enter if you actually need it."
 else
-echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
+  echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
 
 The password for the test user is no password. Just hit enter if you actually need it.
 
 Press enter"
-read a
+  read a
 fi
 
 
@@ -131,44 +126,43 @@ ismount=$?
 if [ $ismount -eq 0 ]
 then
 
-
-if [[ $XALIVE == 0 ]]
-then
-zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
-xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
-else
-echo "A script is running that is already testing an ISO. will now chroot into it"
-echo "Type exit to go back to your system."
-chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
-fi
-mountisoexit
+  if [[ $XALIVE == 0 ]]
+  then
+    zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
+    xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  else
+    echo "A script is running that is already testing an ISO. will now chroot into it"
+    echo "Type exit to go back to your system."
+    chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  fi
+  mountisoexit
 fi
 
 #install needed tools to allow testing on a read only iso
 if [[ $XALIVE == 0 ]]
 then
-if [[ ! -f $(which xterm) ]]
-then
-zenity --question --text "xterm is needed for this script. Install xterm?"  
-xterminstall=$?
-if [[ $xterminstall -eq 0 ]]
-then 
-pkcon install xterm -y
+  if [[ ! -f $(which xterm) ]]
+  then
+    zenity --question --text "xterm is needed for this script. Install xterm?"  
+    xterminstall=$?
+    if [[ $xterminstall -eq 0 ]]
+    then 
+      pkcon install xterm -y
+    else
+      zenity --info --text "Can not continue without xterm. Exiting the script."
+      exit
+    fi
+  fi
+  xterm -e pkcon install unionfs-fuse
+  xterm -e pkcon install squashfs-tools
+  xterm -e pkcon install dialog
+  xterm -e pkcon install zenity
 else
-zenity --info --text "Can not continue without xterm. Exiting the script."
-exit
-fi
-fi
-xterm -e pkcon install unionfs-fuse
-xterm -e pkcon install squashfs-tools
-xterm -e pkcon install dialog
-xterm -e pkcon install zenity
-else
-pkcon install unionfs-fuse
-pkcon install squashfs-tools
-pkcon install dialog
-pkcon install zenity
-pkcon install xterm
+  pkcon install unionfs-fuse
+  pkcon install squashfs-tools
+  pkcon install dialog
+  pkcon install zenity
+  pkcon install xterm
 fi
 
 #make the folders for mounting the ISO
@@ -182,17 +176,17 @@ mkdir -p $MOUNTHOME/liveisotest/unionmountpoint
 if [ -z $MOUNTISO ]
 then 
 
-if [[ $XALIVE == 0 ]]
-then
-zenity --info --text "No ISO specified as an argument. Please select one in the next dialog."
-MOUNTISO=$(zenity --file-selection)
-else
-echo "
+  if [[ $XALIVE == 0 ]]
+  then
+    zenity --info --text "No ISO specified as an argument. Please select one in the next dialog."
+    MOUNTISO=$(zenity --file-selection)
+  else
+    echo "
 
 
 Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)"
-exit
-fi
+    exit
+  fi
 fi
 
 #mount the ISO
@@ -202,16 +196,16 @@ mount -o loop "$MOUNTISO" $MOUNTHOME/liveisotest/isomount
 #if the iso doesn't have a squashfs image
 if [ ! -f $MOUNTHOME/liveisotest/isomount/casper/filesystem.squashfs  ]
 then
-if [[ $XALIVE == 0 ]]
-then
-zenity --info --text "Invalid CDROM image. Not an Ubuntu based image. Exiting and unmounting the image."
-else
-echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
-read a 
-fi
-#unmount and exit
-umount $MOUNTHOME/liveisotest/isomount
-exit
+  if [[ $XALIVE == 0 ]]
+  then
+    zenity --info --text "Invalid CDROM image. Not an Ubuntu based image. Exiting and unmounting the image."
+  else
+    echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
+    read a 
+  fi
+  #unmount and exit
+  umount $MOUNTHOME/liveisotest/isomount
+  exit
 fi
 
 #mount the squashfs image
@@ -235,9 +229,9 @@ setfacl -m u:999999999:rwx /dev/dri/card*
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
-zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image"
+  zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image"
 else
-echo "
+  echo "
 Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
 fi
 
@@ -254,9 +248,9 @@ chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -
 touch $MOUNTHOME/liveisotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
 then
-xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 else
-chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 fi
 
 #go back to the users home folder

@@ -55,39 +55,38 @@ INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
 do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
+  PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+  METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
-if [[ $METHOD == "PART" ]]
-then
-echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-elif [[ $METHOD == "FULL" ]]
-then
-echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Yes | apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-Result=${PIPESTATUS[1]}
-elif [[ $METHOD == "BUILDDEP" ]]
-then
-echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
-Result=${PIPESTATUS[1]}
-else
-echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-Result=1
-fi
+  if [[ $METHOD == "PART" ]]
+  then
+    echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  elif [[ $METHOD == "FULL" ]]
+  then
+    echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    yes Yes | apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    Result=${PIPESTATUS[1]}
+  elif [[ $METHOD == "BUILDDEP" ]]
+  then
+    echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
+    Result=${PIPESTATUS[1]}
+  else
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+  Result=1
+  fi
 
-if [[ $Result != 0 ]]
-then
-echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Downloads/failedpackages.log
-else
-echo "$PACKAGE successfully $METHOD"
-grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
-cat /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
-rm /tmp/FAILEDDOWNLOADS.txt.bak
-fi
-
+  if [[ $Result != 0 ]]
+  then
+    echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Downloads/failedpackages.log
+  else
+    echo "$PACKAGE successfully $METHOD"
+    grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
+    cat /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
+    rm /tmp/FAILEDDOWNLOADS.txt.bak
+  fi
 done < <(echo "$INSTALLS")
 
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak

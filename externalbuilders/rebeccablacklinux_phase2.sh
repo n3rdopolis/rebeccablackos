@@ -25,8 +25,8 @@ unset HOME
 
 if [[ -z $BUILDARCH ]]
 then
-echo "BUILDARCH variable not set"
-exit
+  echo "BUILDARCH variable not set"
+  exit
 fi
 
 #create a folder for the media mountpoints in the media folder
@@ -56,11 +56,11 @@ umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 #Reset phase 2 if DontRestartPhase2 file is missing.
 if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
-#Delete the phase 2 folder contents
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
-touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
-touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+  #Delete the phase 2 folder contents
+  rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
+  touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
+  mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
+  touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
 fi
 
 #delete old logs
@@ -86,9 +86,9 @@ mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+  linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 else
-chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+  chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 fi
 
 

@@ -45,9 +45,9 @@ echo "Select Arch. Enter 1 for i386, 2 for amd64. Default=i386."
 read archselect
 if [[ $archselect == 2 ]]
 then
-export BUILDARCH=amd64
+  export BUILDARCH=amd64
 else
-export BUILDARCH=i386
+  export BUILDARCH=i386
 fi
 
 STARTTIME=$(date +%s)
@@ -57,21 +57,21 @@ apt-get install debootstrap aufs-tools
 
 if [[ ! -f /usr/sbin/debootstrap ]]
 then 
-echo "debootstrap install apparently failed."
-exit
+  echo "debootstrap install apparently failed."
+  exit
 fi
 
 if [[ ! -f /sbin/mount.aufs || ! -f /lib/modules/$(uname -r)/kernel/ubuntu/aufs/aufs.ko ]]
 then 
-echo "aufs install apparently failed."
-exit
+  echo "aufs install apparently failed."
+  exit
 fi
 
 #get the size of the users home file system. 
 FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 12gb or less tell the user and quit. If not continue.
 if [[ $FreeSpace -le 12000000 ]] 
-  then               
+then
   echo "You have less then 12gb of free space on the partition that contains your home folder. Please free up some space." 
   echo "The script will now abort."
   echo "free space:"
@@ -90,12 +90,12 @@ REBUILT="to update"
 #only initilize the FS if the FS isn't there.
 if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
 then
-if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
-then
-rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
-REBUILT="to rebuild from scratch"
-fi
-$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
+  if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
+  then
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
+    REBUILT="to rebuild from scratch"
+  fi
+  $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
 fi
 
 #run the build scripts

@@ -18,8 +18,8 @@
 
 if [[ $1 == "--version" ]]
 then
-echo "waylandloginmanager weston-launch addon"
-exit 255
+  echo "waylandloginmanager weston-launch addon"
+  exit 255
 fi
 
 USER=$(id -u)
@@ -28,33 +28,33 @@ BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
 if [[ -e $EnvironmentFile ]]
 then
-EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
-while read LINE
-do
-VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
-VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
-VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
-VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
-if [[ $VARDATA == '$RANDOM' ]]
-then
-VARDATA=$RANDOM
-fi
+  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
+  while read LINE
+  do
+    VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
+    VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
+    VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
+    VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
+    if [[ $VARDATA == '$RANDOM' ]]
+    then
+      VARDATA=$RANDOM
+    fi
 
-if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
-then
+    if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
+    then
 
-if [[ $VARACTION == "set" ]]
-then
-export $VARNAME=$VARDATA
-fi
+      if [[ $VARACTION == "set" ]]
+      then
+	export $VARNAME=$VARDATA
+      fi
 
-if [[ $VARACTION == "unset" ]]
-then
-unset $VARNAME
-fi
+      if [[ $VARACTION == "unset" ]]
+      then
+	unset $VARNAME
+      fi
 
-fi
-done < <(echo "$EnvironmentFileData")
+    fi
+  done < <(echo "$EnvironmentFileData")
 fi
 
 

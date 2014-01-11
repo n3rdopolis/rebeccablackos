@@ -19,8 +19,8 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-echo "Must be run as root."
-exit
+  echo "Must be run as root."
+  exit
 fi
 
 #Allow Exclamation points to be used in commands by turning off the history
@@ -35,89 +35,92 @@ NumberOfDevices=0
 #Get all input devices from udev, and store attributes into an array
 while read Device
 do
-DeviceProperties=$(udevadm info --query=property  --name=$Device)
-DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -e '/looking at/d' -e 's/    //g' -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 )
-DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SERIAL" {print $0}' | cut -d = -f2- | tail -1 )
-DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_PATH" {print $0}' | cut -d = -f2- | tail -1 )
-DeviceSeatID=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "WL_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
-IsDeviceMouse=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_MOUSE" {print $0}' | cut -d = -f2- | tail -1 )
-IsDeviceTouchscreen=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_TOUCHSCREEN" {print $0}' | cut -d = -f2- | tail -1 )
-IsDeviceTouchpad=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_TOUCHPAD" {print $0}' | cut -d = -f2- | tail -1 )
-IsDeviceKeyboard=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_KEYBOARD" {print $0}' | cut -d = -f2- | tail -1 )
+  DeviceProperties=$(udevadm info --query=property  --name=$Device)
+  DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -e '/looking at/d' -e 's/    //g' -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 )
+  DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SERIAL" {print $0}' | cut -d = -f2- | tail -1 )
+  DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_PATH" {print $0}' | cut -d = -f2- | tail -1 )
+  DeviceSeatID=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "WL_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
+  IsDeviceMouse=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_MOUSE" {print $0}' | cut -d = -f2- | tail -1 )
+  IsDeviceTouchscreen=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_TOUCHSCREEN" {print $0}' | cut -d = -f2- | tail -1 )
+  IsDeviceTouchpad=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_TOUCHPAD" {print $0}' | cut -d = -f2- | tail -1 )
+  IsDeviceKeyboard=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_KEYBOARD" {print $0}' | cut -d = -f2- | tail -1 )
 
-if [[ -z $DeviceDisplayName ]]
-then
-DeviceDisplayName=$DeviceName
-  if [[ $DeviceDisplayName == "noserial" ]]
+  if [[ -z $DeviceDisplayName ]]
   then
-  DeviceDisplayName="Generic"
+    DeviceDisplayName=$DeviceName
+    if [[ $DeviceDisplayName == "noserial" ]]
+    then
+      DeviceDisplayName="Generic"
+    fi
   fi
-fi
 
-if [[ -z $DeviceSeatID ]]
-then
-DeviceSeatID=default
-fi
+  if [[ -z $DeviceSeatID ]]
+  then
+    DeviceSeatID=default
+  fi
 
-unset DeviceType
-if [[ -z $IsDeviceMouse ]]
-then
-IsDeviceMouse=0
-else
+  unset DeviceType
+  if [[ -z $IsDeviceMouse ]]
+  then
+    IsDeviceMouse=0
+  else
+    if [[ ! -z $DeviceType ]]
+    then
+      DeviceType+=" / "
+    fi
+    DeviceType+="Mouse"
+  fi
+
+  if [[ -z $IsDeviceTouchscreen ]]
+  then
+    IsDeviceTouchscreen=0
+  else
+    if [[ ! -z $DeviceType ]]
+    then
+      DeviceType+=" / "
+    fi
+  DeviceType+="Touchscreen"
+  fi
+
+  if [[ -z $IsDeviceTouchpad ]]
+  then
+    IsDeviceTouchpad=0
+  else
+    if [[ ! -z $DeviceType ]]
+    then
+      DeviceType+=" / "
+    fi
+  DeviceType+="Touchpad"
+  fi
+
+  if [[ -z $IsDeviceKeyboard ]]
+  then
+    IsDeviceKeyboard=0
+  else
+    if [[ ! -z $DeviceType ]]
+    then
+      DeviceType+=" / "
+    fi
+  DeviceType+="Keyboard"
+  fi
+
   if [[ ! -z $DeviceType ]]
   then
-  DeviceType+=" / "
-  fi
-DeviceType+="Mouse"
-fi
-if [[ -z $IsDeviceTouchscreen ]]
-then
-IsDeviceTouchscreen=0
-else
-  if [[ ! -z $DeviceType ]]
-  then
-  DeviceType+=" / "
-  fi
-DeviceType+="Touchscreen"
-fi
-if [[ -z $IsDeviceTouchpad ]]
-then
-IsDeviceTouchpad=0
-else
-  if [[ ! -z $DeviceType ]]
-  then
-  DeviceType+=" / "
-  fi
-DeviceType+="Touchpad"
-fi
-if [[ -z $IsDeviceKeyboard ]]
-then
-IsDeviceKeyboard=0
-else
-  if [[ ! -z $DeviceType ]]
-  then
-  DeviceType+=" / "
-  fi
-DeviceType+="Keyboard"
-fi
-
-if [[ ! -z $DeviceType ]]
-then
-((NumberOfDevices++))
-DevicePaths[$NumberOfDevices]=$Device
-DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
-DeviceNames[$NumberOfDevices]=$DeviceName
-DeviceConnections[$NumberOfDevices]=$DeviceConnection
-DeviceSeatIDs[$NumberOfDevices]=$DeviceSeatID
-DeviceTypes[$NumberOfDevices]=$DeviceType
-fi
+    ((NumberOfDevices++))
+    DevicePaths[$NumberOfDevices]=$Device
+    DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
+    DeviceNames[$NumberOfDevices]=$DeviceName
+    DeviceConnections[$NumberOfDevices]=$DeviceConnection
+    DeviceSeatIDs[$NumberOfDevices]=$DeviceSeatID
+    DeviceTypes[$NumberOfDevices]=$DeviceType
+   fi
 
 done < <(find /dev/input/event*)
 
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}
+  DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}
 "
 done
 
@@ -153,33 +156,32 @@ unset SeatList
 SeatList="default"
 for (( CurrentSeat=1; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
 do
-SeatList+="
+  SeatList+="
 "
-SeatList+="seat$CurrentSeat"
+  SeatList+="seat$CurrentSeat"
 done
 
 #Go through each probed input device and prompt for a new seat
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
+  unset NewSeatNumber
+  NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
-unset NewSeatNumber
-NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+  Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
 
-Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
+  Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
 
-Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
+  if [[ -z $NewSeatNumber ]]
+  then
+    zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
+  else
+    DeviceSeatIDs[CurrentDeviceNumber]=$NewSeatNumber
 
-if [[ -z $NewSeatNumber ]]
-then
-zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
-else
-DeviceSeatIDs[CurrentDeviceNumber]=$NewSeatNumber
-
-cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
-awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
-echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
-rm /tmp/99-westonseats.rules.work
-fi
+    cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
+    awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
+    echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules 
+    rm /tmp/99-westonseats.rules.work
+  fi
 done
 
 #Close the main zenity window that lists all devices
@@ -191,7 +193,7 @@ udevadm control --reload-rules
 #Notify each input device about the changes
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
+  udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
 done
 
 

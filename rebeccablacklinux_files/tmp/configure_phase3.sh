@@ -89,7 +89,7 @@ rm -r /opt/translations
 echo "Reducing binary file sizes"
 find /opt/bin /opt/lib /opt/sbin | while read FILE
 do
-strip $FILE 2>/dev/null
+  strip $FILE 2>/dev/null
 done
 
 #clean more apt stuff

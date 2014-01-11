@@ -24,8 +24,8 @@ unset HOME
 
 if [[ -z $BUILDARCH ]]
 then
-echo "BUILDARCH variable not set"
-exit
+  echo "BUILDARCH variable not set"
+  exit
 fi
 
 #create a folder for the media mountpoints in the media folder
@@ -91,9 +91,9 @@ cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCA
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
+  linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 else
-chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
+  chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 fi
 
 #unmount the chrooted procfs from the outside 

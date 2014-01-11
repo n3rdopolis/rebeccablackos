@@ -25,15 +25,15 @@ unset HOME
 
 if [[ -z $BUILDARCH ]]
 then
-echo "BUILDARCH variable not set"
-exit
+  echo "BUILDARCH variable not set"
+  exit
 fi
 
 #If the lockfile for the build output does not exist, delete it so all debs get deleted, and the build restarts from scratch.
 if [[  ! -f $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH ]]
 then
-rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
-touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH 
+  rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
+  touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH 
 fi
 
 
@@ -92,9 +92,9 @@ rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir/temp/
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+  linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
 else
-chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+  chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
 fi
 
 
@@ -110,25 +110,23 @@ cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$BUILDLOCATION
 #If the live cd did not build then tell user  
 if [ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
-echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
+  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 
 fi 
 
 #If the live cd did  build then tell user   
 if [  -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
 then  
-#move the iso out of the chroot fs    
-mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
-mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
+  #move the iso out of the chroot fs    
+  mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+  mv $BUILDLOCATION/build/$BUILDARCH/phase_3/home/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
 
+  echo "Live CD image build was successful."
 
-echo "Live CD image build was successful."
-
-#allow the user to actually read the iso   
-chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
-
+  #allow the user to actually read the iso   
+  chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+  chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+  chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
 fi
 
 

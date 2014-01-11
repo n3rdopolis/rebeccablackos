@@ -19,8 +19,8 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-echo "Must be run as root."
-exit
+  echo "Must be run as root."
+  exit
 fi
 
 cd /usr/share
@@ -49,56 +49,51 @@ install_menu_items
 
 if [[ $1 == build ]]
 then 
+  #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+  dpkg-divert --local --rename --add /usr/sbin/grub-probe
+  dpkg-divert --local --rename --add /sbin/initctl
+  ln -s /bin/true /sbin/initctl
+  ln -s /bin/true /usr/sbin/grub-probe
 
+  #LIST OF PACKAGES TO GET INSTALLED
+  INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
+ 
+  #DOWNLOAD THE PACKAGES SPECIFIED
+  echo "$INSTALLS" | while read PACKAGEINSTRUCTION
+  do
+    PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+    METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
-#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-dpkg-divert --local --rename --add /usr/sbin/grub-probe
-dpkg-divert --local --rename --add /sbin/initctl
-ln -s /bin/true /sbin/initctl
-ln -s /bin/true /usr/sbin/grub-probe
+    if [[ $METHOD == "PART" ]]
+    then
+      yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
+    elif [[ $METHOD == "FULL" ]]
+    then
+      yes Yes | apt-get install $PACKAGE -y --force-yes
+    elif [[ $METHOD == "BUILDDEP" ]]
+    then
+      yes Y | apt-get build-dep $PACKAGE -y --force-yes
+    else
+      echo "Invalid Install Operation"
+    fi
 
-#LIST OF PACKAGES TO GET INSTALLED
-INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
+  done
 
-#DOWNLOAD THE PACKAGES SPECIFIED
-echo "$INSTALLS" | while read PACKAGEINSTRUCTION
-do
-PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
-METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
+  #Reset the utilites back to the way they are supposed to be.
+  rm /sbin/initctl
+  rm /usr/sbin/grub-probe
+  dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+  dpkg-divert --local --rename --remove /sbin/initctl
 
-if [[ $METHOD == "PART" ]]
-then
-yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
-elif [[ $METHOD == "FULL" ]]
-then
-yes Yes | apt-get install $PACKAGE -y --force-yes
-elif [[ $METHOD == "BUILDDEP" ]]
-then
-yes Y | apt-get build-dep $PACKAGE -y --force-yes
+  #delete the downloaded file cache
+  apt-get clean
+
+  #set default cursor theme
+  update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+ 
+  compile_all build-only
 else
-echo "Invalid Install Operation"
-fi
-
-done
-
-
-
-#Reset the utilites back to the way they are supposed to be.
-rm /sbin/initctl
-rm /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-
-#delete the downloaded file cache
-apt-get clean
-
-#set default cursor theme
-update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-
-
-compile_all build-only
-else
-echo "not building source because this script wasn't called with the option 'build'"
+  echo "not building source because this script wasn't called with the option 'build'"
 fi
 
 su $SUDO_USER -c update-rbos-user

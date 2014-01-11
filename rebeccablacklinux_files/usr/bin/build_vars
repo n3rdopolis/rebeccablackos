@@ -19,7 +19,7 @@
 
 if [[ -z $INSTALLDIR ]]
 then
-export INSTALLDIR=/opt
+  export INSTALLDIR=/opt
 fi
 
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"

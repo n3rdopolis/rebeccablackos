@@ -24,8 +24,8 @@ unset HOME
 
 if [[ -z $BUILDARCH ]]
 then
-echo "BUILDARCH variable not set"
-exit
+  echo "BUILDARCH variable not set"
+  exit
 fi
 
 ####CLEAN UP OLD SCRIPT FILES

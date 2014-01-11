@@ -19,8 +19,8 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-echo "Must be run as root."
-exit
+  echo "Must be run as root."
+  exit
 fi
 
 
@@ -28,7 +28,7 @@ fi
 CURRENTOPTION=$(cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | grep -c forcefbdev)
 if [[ $CURRENTOPTION != 0 ]]
 then
-CURRENTOPTION=1
+  CURRENTOPTION=1
 fi
 
 dialog  --msgbox "This will assist you in configuring your system, so that Weston's fbdev-backend is forced, even if your computer supports kernel mode setting" 7 60
@@ -39,28 +39,23 @@ OKSelected=$?
 if [[ $OKSelected == 0 && $FORCEFB != 2 ]]
 then
 
-if [[ $FORCEFB == 1 ]]
-then
-sed -ri 's/forcefbdev//gI' /etc/default/grub
-sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"forcefbdev /g" /etc/default/grub
-elif [[ $FORCEFB == 0 ]]
-then
-sed -ri 's/forcefbdev//gI' /etc/default/grub
-fi
+  if [[ $FORCEFB == 1 ]]
+  then
+    sed -ri 's/forcefbdev//gI' /etc/default/grub
+    sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"forcefbdev /g" /etc/default/grub
+  elif [[ $FORCEFB == 0 ]]
+   then
+    sed -ri 's/forcefbdev//gI' /etc/default/grub
+  fi
 
-update-grub
-dialog  --yesno "You will need to restart in order for the changes to apply
+  update-grub
+  dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
-OKSelected=$?
-if [[ $OKSelected == 0 ]]
-then
-reboot
-fi
+  OKSelected=$?
+  if [[ $OKSelected == 0 ]]
+  then
+    reboot
+  fi
 
 fi
-
-
-
-
-
