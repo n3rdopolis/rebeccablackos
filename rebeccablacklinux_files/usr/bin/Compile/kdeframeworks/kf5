@@ -17,6 +17,9 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #Create build variables
 
+argument=$1
+
+
 if [[ -z $INSTALLDIR ]]
 then
   export INSTALLDIR=/opt
