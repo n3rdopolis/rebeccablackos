@@ -18,7 +18,7 @@
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
   . /usr/bin/wlruntime_vars
-  LD_LIBRARY_PATH=/opt/lib/calligra:$LD_LIBRARY_PATH
+  LD_LIBRARY_PATH=/opt/calligra/lib:$LD_LIBRARY_PATH
   $*
 else
   kdialog --msgbox "This Application must be run from within Wayland"
