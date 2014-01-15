@@ -163,7 +163,7 @@ function DownloadBZR()
 #Function to download hg repos
 function DownloadHG()
 {
-  OLDSOURCEURL=$(hg paths default)
+  OLDSOURCEURL=$(cat $SOURCENAME/.hg/hgrc | grep default | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
