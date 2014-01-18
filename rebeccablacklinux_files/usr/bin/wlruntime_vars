@@ -19,7 +19,7 @@
 #If running under loginmanagerdisplay, then use the configuration for the loginmanagerdisplay
 if [[ ! -z $LOGINMANAGERDISPLAYHOME ]]
 then
-  export HOME=$LOGINMANAGERDISPLAYHOM
+  export HOME=$LOGINMANAGERDISPLAYHOME
 else
   unset HOME
   export HOME=$(echo ~)
