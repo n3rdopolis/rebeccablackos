@@ -62,7 +62,6 @@ plymouth hide-splash
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
-  setfacl -m "g:plugdev:rwx" /dev/dri/card*
   WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
 then
