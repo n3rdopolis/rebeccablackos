@@ -62,10 +62,12 @@ plymouth hide-splash
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
+  BackendType=KMS
   WESTONBACKEND=drm-backend.so
 elif [[ $(ls  /dev/fb* ) ]]
 then
   logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
+  BackendType=FB
   WESTONBACKEND=fbdev-backend.so
 else
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
@@ -98,6 +100,7 @@ then
   logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ $(ls /dev/fb* ) ]]
   then
+    BackendType=FB
     WESTONBACKEND=fbdev-backend.so
   else
     logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
@@ -162,14 +165,6 @@ function DialogWait
 function ChooseSessionType
 {
   export SESSIONID=$AttemptedSessionCount
-
-  if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
-  then
-    BackendType=FB
-  elif [[ $WESTONBACKEND == "drm-backend.so" ]]
-  then
-    BackendType=KMS
-  fi
 
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   WSESSIONLIST=$(find $WSESSIONSPATH -name "*\.desktop" -type f -executable | sort | while read SESSIONFILE
@@ -263,7 +258,8 @@ Default Weston Desktop Shell
 
 function ShowInfo
 {
-  if [[ $WESTONBACKEND == "fbdev-backend.so" ]]
+
+  if [[ $BackendType == "FB" ]]
   then
     BACKENDSTRING="Weston is using the framebuffer backend.
 
