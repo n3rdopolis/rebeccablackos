@@ -18,4 +18,4 @@
 
 #Wrapper for sudo pulling the LD_LIBRARY_PATH out of the Zenity env. waylandloginmanager exports WLM_LD_LIBRARY_PATH to be turned into LD_LIBRARY_PATH
 export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
-zenity $*
+zenity "$@"
