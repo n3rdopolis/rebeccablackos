@@ -16,8 +16,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-unset HOME
-export HOME=$(echo ~)
+#If running under loginmanagerdisplay, then use the configuration for the loginmanagerdisplay
+if [[ ! -z $LOGINMANAGERDISPLAYHOME ]]
+then
+  export HOME=$LOGINMANAGERDISPLAYHOM
+else
+  unset HOME
+  export HOME=$(echo ~)
+fi
 
 #Set XDG_RUNTIME_DIR if it doesn't exist
 if [[ -z $XDG_RUNTIME_DIR ]]

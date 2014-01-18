@@ -38,7 +38,7 @@ then
 fi
 
 cd /run
-export HOME=/etc/loginmanagerdisplay/
+export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
 export DAEMONUID=$(id daemon -u)
 export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
 export PATH=/opt/bin:$PATH
