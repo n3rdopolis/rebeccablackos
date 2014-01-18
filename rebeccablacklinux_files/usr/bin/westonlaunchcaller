@@ -15,8 +15,6 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
-rm -f waylandserver.log
-rm -f weston.log
 
 if [[ $1 == "--version" ]]
 then
@@ -77,8 +75,7 @@ echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path
 exit
 else 
 #Execute the Wayland server
-echo "Starting $Server $Args on $(date)--------------------------" &>>waylandserver.log
-$Server $Args &>>waylandserver.log
+$Server $Args
 fi
 
 
