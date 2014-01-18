@@ -66,7 +66,6 @@ then
 elif [[ $(ls  /dev/fb* ) ]]
 then
   logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
-  setfacl -m "g:plugdev:rwx" /dev/fb*
   WESTONBACKEND=fbdev-backend.so
 else
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
@@ -99,7 +98,6 @@ then
   logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ $(ls /dev/fb* ) ]]
   then
-    setfacl -m "g:plugdev:rwx" /dev/fb*
     WESTONBACKEND=fbdev-backend.so
   else
     logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
