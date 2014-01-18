@@ -95,3 +95,5 @@ then
 else
   echo "not building source because this script wasn't called with the option 'build'"
 fi
+
+su $SUDO_USER -c update-rbos-user
