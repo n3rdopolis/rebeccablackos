@@ -59,24 +59,15 @@ then
   done < <(echo "$EnvironmentFileData")
 fi
 
-
-
-if [[ $WAYLAND_DISPLAY == loginmanagerdisplay ]]
-then
-export XDG_RUNTIME_DIR=/run/
-fi
-
-
-
 Server=$(echo $* | awk -F @@ '{print $1}' | sed 's/ *$//g')
 Args=$(echo $* | awk -F @@ '{print $2}')
 
 if [[ $USER != 0 ]]
 then
-#Detrermine if the server is safe
-ServerApprovedCount=$(cat /etc/waylandservers | grep -c ^$Server$)
+  #Detrermine if the server is safe
+  ServerApprovedCount=$(cat /etc/waylandservers | grep -c ^$Server$)
 else
-ServerApprovedCount=1
+  ServerApprovedCount=1
 fi
 
 #Only run if the server is safe

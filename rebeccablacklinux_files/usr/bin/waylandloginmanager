@@ -42,7 +42,7 @@ export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export GDK_BACKEND=wayland
-export XDG_RUNTIME_DIR=/run/
+export XDG_RUNTIME_DIR=/run/user/$UID
 export WAYLAND_DISPLAY=loginmanagerdisplay
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
@@ -562,7 +562,7 @@ function LoginWestonLauncher
   while [ 1 ]
   do
 
-    if [[ ! -e /run/loginmanagerdisplay ]]
+    if [[ ! -e /run/user/$UID/loginmanagerdisplay ]]
     then 
       #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
       westonresult=$(weston --version &>/dev/null; echo $?) 
