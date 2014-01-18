@@ -48,6 +48,7 @@ export XDG_RUNTIME_DIR=/run/user/$DAEMONUID
 export WAYLAND_DISPLAY=loginmanagerdisplay
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
+export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 LastTTY=7
 AllSessions=0
 ActiveSessionPID=0
@@ -58,6 +59,15 @@ then
   ISLIVE=1
 fi
 
+#Detect presence of zenity launcher, if it exists, call it as the daemon user
+if [[ ! -z /usr/bin/wlm_zenity ]]
+then
+  ZENITYCMD='sudo -E -u daemon wlm_zenity'
+else
+  ZENITYCMD='zenity'
+fi
+
+#Hide the plymouth splash
 plymouth hide-splash
 
 #Detect hardware abilities
@@ -161,7 +171,7 @@ function DialogWait
     echo $percent
     ((countseconds++))
     sleep 1
-  done | zenity --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..." 2>/dev/null
+  done | $ZENITYCMD --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..." 2>/dev/null
 }
 
 function ChooseSessionType
@@ -218,7 +228,7 @@ function ChooseSessionType
   then
     PROMPTED=1
     #select the session
-    WSESSIONDATA=$(echo "$WSESSIONLIST" | zenity --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
+    WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
   else 
     unset WSESSIONDATA
   fi
@@ -227,7 +237,7 @@ function ChooseSessionType
   then 
     if [[ $PROMPTED == 1 ]]
     then
-      zenity --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
+      $ZENITYCMD --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
     else
       logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
     fi
@@ -272,7 +282,7 @@ support the native kernel mode setting that is optimal for Weston."
 
 This is the optimal way to run Weston."
   fi
-  zenity --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
+  $ZENITYCMD --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
 
 $BACKENDSTRING
 
@@ -314,7 +324,7 @@ New Session...
 
 
   unset ChangeSession
-  ChangeSession=$(echo "$SessionList"  | sed '$d'| zenity --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null | head -1 )
+  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null | head -1 )
 
   if [[ $ChangeSession == "-1" ]]
   then
@@ -333,7 +343,7 @@ New Session...
 	loginctl activate $ChangeSessionID
 	ActiveSessionPID=$ChangeSessionPID
       else
-	zenity --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
+	$ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
       fi
     fi
   fi
@@ -485,26 +495,26 @@ $LIVEUSER"
   ChooseSessionType
 
   #present the list of the users to the system
-  export LOGINUSER=$(echo "$USERLIST" | zenity --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
+  export LOGINUSER=$(echo "$USERLIST" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
 
   #if there is no user selected then show a dialog. If a user was selected, prompt for its login
   if [[ -z $LOGINUSER ]]
   then
-    zenity --warning --text="No User selected" 2>/dev/null
+    $ZENITYCMD --warning --text="No User selected" 2>/dev/null
   else
     export SessionTTY=$(GetNextTTY)
     if [[ $SessionTTY -ne -1 ]]
     then
       logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-      zenity --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
+      $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
       passwordresult=${PIPESTATUS[2]}
 
       if [[ $passwordresult != 0 ]]
       then
-	zenity --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
+	$ZENITYCMD --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
       fi
     else
-      zenity --warning --text="Not Enough TTYs!"
+      $ZENITYCMD --warning --text="Not Enough TTYs!"
       logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
     fi
   fi
@@ -523,7 +533,7 @@ Standby Computer
 Hybrid Sleep
 Hybrid Sleep
 Hibernate
-Hibernate Computer" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 | grep -v 'startup message: remove:' )
+Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 | grep -v 'startup message: remove:' )
   if [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
@@ -549,7 +559,7 @@ Hibernate Computer" | zenity --title="Leave..." --height=450 --list  --hide-head
   fi
   if [[ $RESULT != 0 ]]
   then
-    zenity --title="Failure" --warning --text="Failed to $ACTION" 2>/dev/null
+    $ZENITYCMD --title="Failure" --warning --text="Failed to $ACTION" 2>/dev/null
   fi
 }
 
@@ -604,7 +614,7 @@ function StartAutoLogin
       logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
       StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
     else
-      zenity --warning --text="Not Enough TTYs for autologin!"
+      $ZENITYCMD --warning --text="Not Enough TTYs for autologin!"
       logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
     fi
   fi 
