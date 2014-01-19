@@ -430,10 +430,10 @@ function AuthenticateUser
 {
   TryPassword=$(cat -)
   echo "spawn su $LOGINUSER -c /bin/true
-expect Password 
-send $TryPassword\r
-catch wait result
-exit [lindex \$result 3]" |sudo -u daemon expect
+	expect Password 
+	send $TryPassword\r
+	catch wait result
+	exit [lindex \$result 3]" |sudo -u daemon expect
   PasswordResult=$?
   if [[ 0 == $PasswordResult ]]
   then
@@ -441,10 +441,10 @@ exit [lindex \$result 3]" |sudo -u daemon expect
     if [[ -e $USERHOME/.ecryptfs ]]
     then
       echo "spawn login $LOGINUSER
-expect Password 
-send $TryPassword\r
-sleep 30
-exit" |expect &
+	    expect Password 
+	    send $TryPassword\r
+	    sleep 30
+	    exit" |expect &
       sleep 3
     fi
 
