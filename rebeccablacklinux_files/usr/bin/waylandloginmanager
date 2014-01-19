@@ -521,6 +521,7 @@ $LIVEUSER"
       if [[ $passwordresult != 0 ]]
       then
 	$ZENITYCMD --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
+	logger -t waylandloginmanager "Invalid password for $LOGINUSER" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     else
       $ZENITYCMD --warning --text="Not Enough TTYs!"
