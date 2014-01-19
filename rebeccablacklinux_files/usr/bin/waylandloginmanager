@@ -428,39 +428,15 @@ $LOGINDSESSION" > /run/loginmanager_control
 #Test users credentials
 function AuthenticateUser
 {
-  PasswordSalt=$(cat /etc/shadow | awk -v LOGINUSER=$LOGINUSER -F ':' '$1 == LOGINUSER {print $2}')
-  IFS=\$
-  PasswordSaltData=($PasswordSalt)
-  unset IFS
-
-  PasswordSaltType=${PasswordSaltData[1]}
-  PasswordSaltBytes=${PasswordSaltData[2]}
-  if [[ ! -z $PasswordSaltBytes ]]
-  then
-    if [[ $PasswordSaltType == 1 ]]
-    then
-      PasswordSaltType="-m MD5"
-    elif [[ $PasswordSaltType == 5 ]]
-    then
-      PasswordSaltType="-m SHA-256"
-    elif [[ $PasswordSaltType == 6 ]]
-    then
-      PasswordSaltType="-m SHA-512"
-    fi
-  else 
-    PasswordSaltType=""
-    PasswordSaltBytes=$(echo $PasswordSaltData | cut -c -2 )
-  fi
   TryPassword=$(cat -)
-  TryPasswordSalt=$(echo $TryPassword | mkpasswd -s $PasswordSaltType -S $PasswordSaltBytes )
-  unset PasswordSaltBytes
-  unset PasswordSaltData
-  unset PasswordSaltType
-  if [[ $PasswordSalt == $TryPasswordSalt ]]
+  echo "spawn su $LOGINUSER -c /bin/true
+expect Password 
+send $TryPassword\r
+catch wait result
+exit [lindex \$result 3]" |sudo -u daemon expect
+  PasswordResult=$?
+  if [[ 0 == $PasswordResult ]]
   then
-    unset PasswordSalt
-    unset TryPasswordSalt
-
     export USERHOME=$(eval echo ~$LOGINUSER)
     if [[ -e $USERHOME/.ecryptfs ]]
     then
@@ -478,8 +454,6 @@ exit" |expect &
     return 0
   else
       unset TryPassword
-      unset PasswordSalt
-      unset TryPasswordSalt
       return 1
   fi
 }
