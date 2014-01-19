@@ -281,20 +281,21 @@ function ShowInfo
 
   if [[ $BackendType == "FB" ]]
   then
-    BACKENDSTRING="Weston is using the framebuffer backend.
+    BACKENDSTRING="The framebuffer backend is being used.
 
 This probably means the current video card drivers do not 
-support the native kernel mode setting that is optimal for Weston."
+support the native kernel mode setting that is optimal for Weston or other Wayland servers.
+or the system was started with the forcefbdev argument."
   else
-    BACKENDSTRING="Your system is using Weston with Kernel mode setting.
+    BACKENDSTRING="Kernel mode setting is being used.
 
-This is the optimal way to run Weston."
+This is the optimal way to run Weston or other Wayland servers."
   fi
   $ZENITYCMD --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
 
 $BACKENDSTRING
 
-Login manager is running on tty: $HostVT
+The Login Manager Display is running on tty: $HostVT
 
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to swich between running sessions
