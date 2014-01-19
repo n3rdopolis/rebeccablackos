@@ -693,6 +693,13 @@ then
   exit
 fi
 
+#Enable full alt+sysrq when wlmdebug is passed as a kernel argument
+if [[ $(cat /proc/cmdline | grep -c wlmdebug ) != 0 ]]
+then
+echo 1 > /proc/sys/kernel/sysrq
+logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes" -s  >>/var/log/waylandloginmanager 2>&1
+fi
+
 #Start the main login Weston server
 LoginWestonLauncher &
 
