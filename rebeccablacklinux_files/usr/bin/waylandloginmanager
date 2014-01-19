@@ -83,7 +83,7 @@ then
   logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
   setfacl -m "g:plugdev:rwx" /dev/fb*
-  setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+  setfacl -m "u:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
   # ENDTODO
   BackendType=FB
   WESTONBACKEND=fbdev-backend.so
@@ -120,7 +120,7 @@ then
   then
     # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
     setfacl -m "g:plugdev:rwx" /dev/fb*
-    setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+    setfacl -m "u:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     BackendType=FB
     WESTONBACKEND=fbdev-backend.so
