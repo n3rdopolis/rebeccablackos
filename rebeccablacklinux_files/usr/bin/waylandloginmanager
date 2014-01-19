@@ -581,10 +581,10 @@ function LoginWestonLauncher
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
       if [[ $westonresult == 255 ]]
       then
-	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=daemon -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log
+	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=daemon -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
       else
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=daemon -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log &>> /var/log/loginmanagerdisplay.log 
+	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=daemon -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
       fi
     fi
     sleep 15
