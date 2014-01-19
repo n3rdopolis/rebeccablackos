@@ -35,6 +35,11 @@ rm -r /usr/import
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Turn the westonlaunchcaller in weston into a symlink
+rm /opt/bin/weston
+ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
+
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 

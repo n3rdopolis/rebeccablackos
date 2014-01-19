@@ -39,6 +39,8 @@ rm -rf /usr/import/tmp
 rm -rf /usr/import/usr/import
 
 rsync /usr/import/* -a /
+rm /opt/bin/weston
+ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 
 chmod 777 /tmp
 
