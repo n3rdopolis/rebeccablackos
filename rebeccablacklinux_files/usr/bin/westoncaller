@@ -17,4 +17,4 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID  $* 
+weston-display-server --socket=$ServerID  "$@" 

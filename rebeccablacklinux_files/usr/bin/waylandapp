@@ -18,7 +18,7 @@
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
   . /usr/bin/wlruntime_vars
-  $*
+  "$@"
 else
   kdialog --msgbox "This Application must be run from within Wayland"
 fi

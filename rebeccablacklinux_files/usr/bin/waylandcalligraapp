@@ -21,7 +21,7 @@ then
   export LD_LIBRARY_PATH=/opt/calligra/lib:$LD_LIBRARY_PATH
   export PATH=/opt/calligra/bin:$PATH
   export XDG_DATA_DIRS=/opt/calligra/share:$XDG_DATA_DIRS
-  $*
+  "$@"
 else
   kdialog --msgbox "This Application must be run from within Wayland"
 fi
