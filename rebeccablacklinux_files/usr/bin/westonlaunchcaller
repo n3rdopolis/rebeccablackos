@@ -57,8 +57,12 @@ then
   done < <(echo "$EnvironmentFileData")
 fi
 
-Server=$(echo $* | awk -F @@ '{print $1}' | sed 's/ *$//g')
-Args=$(echo $* | awk -F @@ '{print $2}')
+IFS=''
+ArgArray=("$@")
+unset IFS
+Server="${ArgArray[0]}"
+Server="$(echo $Server | sed 's/^ *//;s/ *$//')"
+Args="${ArgArray[@]:2}"
 
 if [[ $USER != 0 ]]
 then
