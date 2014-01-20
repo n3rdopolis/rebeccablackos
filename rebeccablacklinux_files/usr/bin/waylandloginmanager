@@ -161,10 +161,13 @@ function RegisterSession
   exec 128<> /run/loginmanager_register
   read -t 0 RegisterData <&128
   exec 128>&-
-  SessionTTY=$(echo "$RegisterData" | sed -ne 1p )
-  SessionPID=$(echo "$RegisterData" | sed -ne 2p )
-  SessionUser=$(echo "$RegisterData" | sed -ne 3p )
-  SessionID=$(echo "$RegisterData" | sed -ne 4p )
+  IFS=$'\n'
+  ArraySessionData=($@)
+  unset IFS
+  SessionTTY=${ArraySessionData[0]}
+  SessionPID=${ArraySessionData[1]}
+  SessionUser=${ArraySessionData[2]}
+  SessionID=${ArraySessionData[3]}
   AllSessionTTYs[$AllSessions]=$SessionTTY
   AllSessionPIDs[$AllSessions]=$SessionPID
   AllSessionUsers[$AllSessions]=$SessionUser
