@@ -158,11 +158,13 @@ function GetNextTTY
 
 function RegisterSession
 {
-  COMMANDSTRING=$1
-  SessionTTY=$(echo "$COMMANDSTRING" | sed -ne 2p )
-  SessionPID=$(echo "$COMMANDSTRING" | sed -ne 3p )
-  SessionUser=$(echo "$COMMANDSTRING" | sed -ne 4p )
-  SessionID=$(echo "$COMMANDSTRING" | sed -ne 5p )
+  exec 128<> /run/loginmanager_register
+  read -t 0 RegisterData <&128
+  exec 128>&-
+  SessionTTY=$(echo "$RegisterData" | sed -ne 1p )
+  SessionPID=$(echo "$RegisterData" | sed -ne 2p )
+  SessionUser=$(echo "$RegisterData" | sed -ne 3p )
+  SessionID=$(echo "$RegisterData" | sed -ne 4p )
   AllSessionTTYs[$AllSessions]=$SessionTTY
   AllSessionPIDs[$AllSessions]=$SessionPID
   AllSessionUsers[$AllSessions]=$SessionUser
@@ -420,11 +422,12 @@ function StartUserSession
 
   loginctl activate $LOGINDSESSION
 
-  echo "RegisterSession
-$WESTONTTY
+
+  echo "$WESTONTTY
 $WESTONPID
 $LOGNAME
-$LOGINDSESSION" > /run/loginmanager_control
+$LOGINDSESSION" > /run/loginmanager_register
+  echo "RegisterSession" >/run/loginmanager_control
 }
 
 #Test users credentials
@@ -610,7 +613,9 @@ function SetupFIFO
 {
   #Create communication fifo.
   rm -r /run/loginmanager_control
+  rm -r /run/loginmanager_register
   mkfifo -m 222 /run/loginmanager_control
+  mkfifo -m 700 /run/loginmanager_register
 }
 
 #This process wakes the fifo, at a given interval so that the main 'thread' can wake and perform maintenance tasks, that require access to the environment, that would require some type of environment syncing if it was in a subshell. 
@@ -641,7 +646,7 @@ function ReadCommandFIFO
       ActiveSessionPID=0
     fi
 
-    COMMAND=$(cat /run/loginmanager_control)
+    COMMAND=$(cat /run/loginmanager_control | sed -ne 1p)
     if [[ $COMMAND != "Wake" ]]
     then
       logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
@@ -669,9 +674,9 @@ function ReadCommandFIFO
     elif [[ $COMMAND == "Leave" ]] 
     then
       LeavePrompt &
-    elif [[ $COMMAND = RegisterSession* ]]
+    elif [[ $COMMAND = "RegisterSession" ]]
     then
-      RegisterSession "$COMMAND"
+      RegisterSession
     elif [[ $COMMAND == "Info" ]]
     then
       ShowInfo &
