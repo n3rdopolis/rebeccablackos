@@ -15,8 +15,10 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+unset HOME
+export HOME=$(echo ~root)
 
-echo "" | sudo -p "" -S -b true 2>&1 >/dev/null
+echo "" | sudo -p "" -S -b true >/dev/null 2>&1 
 result=${PIPESTATUS[1]}
 
 if [[ $result == 1 ]]
@@ -29,14 +31,14 @@ Please enter your password to continue:" --title=wlsudo --add-password="" 2>/dev
   result=${PIPESTATUS[1]}
   if [[ $result == 1 ]]
   then
-    zenity --info --title=wlsudo --text="Invalid Password, or command not found." 2>&1 >/dev/null
+    zenity --info --title=wlsudo --text="Invalid Password, or command not found." >/dev/null 2>&1 
   fi
 else
-  zenity --title=wlsudo --forms --text="The following command will be executed as root
+  zenity --title=wlsudo --forms --text="The following command will be executed as root >/dev/null 2>&1 
 
 $*
 
-Press OK to continue" 2>&1 >/dev/null
+Press OK to continue" >/dev/null 2>&1 
   result=$?
   if [[ $result == 0 ]]
   then
