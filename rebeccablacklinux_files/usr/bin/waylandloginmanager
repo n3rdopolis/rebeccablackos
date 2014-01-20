@@ -161,7 +161,7 @@ function RegisterSession
   exec 128<> /run/loginmanager_register
   read -t 0 RegisterData <&128
   exec 128>&-
-  IFS=$'\n'
+  IFS='!'
   ArraySessionData=($@)
   unset IFS
   SessionTTY=${ArraySessionData[0]}
@@ -426,10 +426,7 @@ function StartUserSession
   loginctl activate $LOGINDSESSION
 
 
-  echo "$WESTONTTY
-$WESTONPID
-$LOGNAME
-$LOGINDSESSION" > /run/loginmanager_register
+  echo "$WESTONTTY!$WESTONPID!$LOGNAME!$LOGINDSESSION" > /run/loginmanager_register
   echo "RegisterSession" >/run/loginmanager_control
 }
 
