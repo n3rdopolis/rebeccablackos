@@ -302,7 +302,7 @@ $BACKENDSTRING
 The Login Manager Display is running on tty: $HostVT
 
 The key icon brings up a login prompt
-The arrow icon brings up a prompt to swich between running sessions
+The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
 The i icon shows this help prompt" 2>/dev/null
 
@@ -686,6 +686,7 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command" -s  >>/var/log/waylandloginmanager 2>&1
     fi
+    sleep .1
   done
 }
 
