@@ -399,7 +399,7 @@ function StartUserSession
   chvt 63
   if [[ $westonresult == 255 ]]
   then
-    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
+    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- $CompositorExec @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
   else
     logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
     openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
@@ -567,7 +567,7 @@ function LoginWestonLauncher
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
       if [[ $westonresult == 255 ]]
       then
-	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
+	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
       else
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
 	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so

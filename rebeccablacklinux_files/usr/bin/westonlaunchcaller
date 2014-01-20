@@ -57,7 +57,9 @@ then
   done < <(echo "$EnvironmentFileData")
 fi
 
-ArgArray=("$@")
+Server=$(echo $* | awk -F @@ '{print $1}' | sed 's/ *$//g')
+Args=$(echo $* | awk -F @@ '{print $2}')
+
 if [[ $USER != 0 ]]
 then
   #Detrermine if the server is safe
@@ -73,7 +75,7 @@ echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path
 exit
 else 
 #Execute the Wayland server
-"${ArgArray[0]}" "${ArgArray[2]}" "${ArgArray[3]}" "${ArgArray[4]}" "${ArgArray[5]}" "${ArgArray[6]}" "${ArgArray[7]}" "${ArgArray[8]}" "${ArgArray[9]}" "${ArgArray[10]}"
+$Server $Args
 fi
 
 
