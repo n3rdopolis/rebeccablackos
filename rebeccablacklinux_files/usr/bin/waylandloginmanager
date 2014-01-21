@@ -533,8 +533,8 @@ function GetUserCredentials
 
     if [[ $passwordresult != 0 ]]
     then
-      $ZENITYCMD --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
-      logger -t waylandloginmanager "Invalid password for $LOGINUSER" -s  >>/var/log/waylandloginmanager 2>&1
+      $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
+      logger -t waylandloginmanager "Invalid password for $LOGINUSER, or username invalid" -s  >>/var/log/waylandloginmanager 2>&1
     fi
   else
     $ZENITYCMD --warning --text="Not Enough TTYs!"
@@ -647,7 +647,7 @@ function SetupFIFO
   #Create communication fifo.
   rm -r /run/loginmanager_control
   rm -r /run/loginmanager_register
-  mkfifo -m 222 /run/loginmanager_control
+  mkfifo -m 200 /run/loginmanager_control
   mkfifo -m 700 /run/loginmanager_register
 }
 
@@ -717,7 +717,7 @@ function ReadCommandFIFO
       then
       :
     else
-      logger -t waylandloginmanager "Invalid command" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
     sleep .1
   done
