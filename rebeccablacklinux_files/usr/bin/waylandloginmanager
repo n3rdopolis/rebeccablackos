@@ -647,8 +647,8 @@ function SetupFIFO
   #Create communication fifo.
   rm -r /run/loginmanager_control
   rm -r /run/loginmanager_register
-  mkfifo -m 200 /run/loginmanager_control
-  mkfifo -m 700 /run/loginmanager_register
+  mkfifo -m 222 /run/loginmanager_control
+  mkfifo -m 200 /run/loginmanager_register
 }
 
 #This process wakes the fifo, at a given interval so that the main 'thread' can wake and perform maintenance tasks, that require access to the environment, that would require some type of environment syncing if it was in a subshell. 
