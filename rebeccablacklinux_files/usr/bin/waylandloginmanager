@@ -701,6 +701,7 @@ function ReadCommandFIFO
       fi
     elif [[ $COMMAND == "Login" ]]
     then
+      #Increment the attempted session count always, as there is the possibility that two login diaglogs can be brought up, and because there is no IPC between them, they would both create argument strings with the same session ID
       export AttemptedSessionCount=$((AttemptedSessionCount+1))
       GetUserCredentials &
     elif [[ $COMMAND == "Leave" ]] 
