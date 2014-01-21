@@ -517,7 +517,7 @@ function GetUserCredentials
   ChooseSessionType
 
   #present the list of the users to the system
-  export LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
+  export LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null | head -1 )
 
   #if there is no user selected then show a dialog. If a user was selected, prompt for its login
   if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
@@ -527,7 +527,7 @@ function GetUserCredentials
   export SessionTTY=$(GetNextTTY)
   if [[ $SessionTTY -ne -1 ]]
   then
-    $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
+    $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null | AuthenticateUser
     passwordresult=${PIPESTATUS[2]}
 
     if [[ $passwordresult != 0 ]]
@@ -554,7 +554,7 @@ Standby Computer
 Hybrid Sleep
 Hybrid Sleep
 Hibernate
-Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 | grep -v 'startup message: remove:' )
+Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 )
   if [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
