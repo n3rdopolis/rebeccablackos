@@ -164,6 +164,7 @@ function RegisterSession
   IFS='@'
   ArraySessionData=($RegisterData)
   unset IFS
+  logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ ! -z $RegisterData ]]
   then
     SessionTTY=${ArraySessionData[0]}
@@ -262,30 +263,43 @@ function ChooseSessionType
     else
       logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    export SelectedCompositorExec=weston
     if [[ $BackendType == KMS ]]
     then
-      export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
---backend=drm-backend.so
---modules=desktop-shell.so,xwayland.so,cms-colord.so
---log=\$HOME/weston.log
---socket=$SESSIONID
+      WSESSIONDATA="$DEFAULTWAYLANDSERVER"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--backend=drm-backend.so"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--modules=desktop-shell.so,xwayland.so,cms-colord.so"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--log=\$HOME/weston.log"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--socket=$SESSIONID"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+=""
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="KMS"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="Default Weston Desktop Shell"
 
-KMS
-Default Weston Desktop Shell
-")
     elif [[ $BackendType == FB ]]
     then 
-      export WSESSIONDATA=$(echo "$DEFAULTWAYLANDSERVER
---backend=fbdev-backend.so
---modules=desktop-shell.so,xwayland.so,cms-colord.so
---log=\$HOME/weston.log
---socket=$SESSIONID
-
-FB
-Default Weston Desktop Shell
-")
+      WSESSIONDATA="$DEFAULTWAYLANDSERVER"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--backend=fbdev-backend.so"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--modules=desktop-shell.so,xwayland.so,cms-colord.so"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--log=\$HOME/weston.log"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--socket=$SESSIONID"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+=""
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="FB"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="Default Weston Desktop Shell"
     fi
+    export WSESSIONDATA
   fi
 }
 
@@ -483,7 +497,7 @@ function GetUserCredentials
   do
     IFS=":"
     UserData=($USER)
-    UserDisplayName=${UserData[0]}
+    UserDisplayName="${UserData[0]}   (${UserData[1]})" 
     UserName=${UserData[1]}
     if [[ -z $UserDisplayName ]]
     then
