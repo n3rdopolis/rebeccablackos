@@ -45,7 +45,8 @@ SUBSYSTEM=="firewire", ATTR{units}=="*0x00a02d:0x014001*", TAG+="uaccess"
 SUBSYSTEM=="drm", KERNEL=="card*", TAG+="uaccess"
 
 # Framebuffer devices
-SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
+# TODO: UNCOMMENT WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
+#SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
 
 # KVM
 SUBSYSTEM=="misc", KERNEL=="kvm", TAG+="uaccess"
