@@ -83,7 +83,7 @@ then
   logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
   setfacl -m "g:plugdev:rwx" /dev/fb*
-  setfacl -m "u:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+  setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
   # ENDTODO
   BackendType=FB
   WESTONBACKEND=fbdev-backend.so
@@ -120,7 +120,7 @@ then
   then
     # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
     setfacl -m "g:plugdev:rwx" /dev/fb*
-    setfacl -m "u:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+    setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     BackendType=FB
     WESTONBACKEND=fbdev-backend.so
@@ -159,21 +159,27 @@ function GetNextTTY
 function RegisterSession
 {
   exec 128<> /run/loginmanager_register
-  read -t 0 RegisterData <&128
+  RegisterData=$(while read -t 1 data <&128; do echo $data; done| head -1)
   exec 128>&-
-  IFS='!'
-  ArraySessionData=($@)
+  IFS='@'
+  ArraySessionData=($RegisterData)
   unset IFS
-  SessionTTY=${ArraySessionData[0]}
-  SessionPID=${ArraySessionData[1]}
-  SessionUser=${ArraySessionData[2]}
-  SessionID=${ArraySessionData[3]}
-  AllSessionTTYs[$AllSessions]=$SessionTTY
-  AllSessionPIDs[$AllSessions]=$SessionPID
-  AllSessionUsers[$AllSessions]=$SessionUser
-  AllSessionIDs[$AllSessions]=$SessionID
-  ActiveSessionPID=$SessionPID
-  ((AllSessions++))
+  if [[ ! -z $RegisterData ]]
+  then
+    SessionTTY=${ArraySessionData[0]}
+    SessionPID=${ArraySessionData[1]}
+    SessionUser=${ArraySessionData[2]}
+    SessionID=${ArraySessionData[3]}
+    AllSessionTTYs[$AllSessions]=$SessionTTY
+    AllSessionPIDs[$AllSessions]=$SessionPID
+    AllSessionUsers[$AllSessions]=$SessionUser
+    AllSessionIDs[$AllSessions]=$SessionID
+    if [[ ! -z $SessionPID ]]
+    then
+      ActiveSessionPID=$SessionPID
+    fi
+    ((AllSessions++))
+  fi
 }
 
 function DialogWait
@@ -371,7 +377,7 @@ function StartUserSession
   #unset most varaibles
   while read var
   do 
-    unset $var
+    unset "$var"
   done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ ) 
   WSESSIONARGS=$(echo "$3" | sed 's/$/ /g')
   WESTONTTY=$1
@@ -426,7 +432,7 @@ function StartUserSession
   loginctl activate $LOGINDSESSION
 
 
-  echo "$WESTONTTY!$WESTONPID!$LOGNAME!$LOGINDSESSION" > /run/loginmanager_register
+  echo "$WESTONTTY@$WESTONPID@$LOGNAME@$LOGINDSESSION" > /run/loginmanager_register &
   echo "RegisterSession" >/run/loginmanager_control
 }
 
