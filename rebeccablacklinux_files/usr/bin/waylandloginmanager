@@ -476,7 +476,7 @@ function AuthenticateUser
     fi
 
     unset TryPassword
-
+    logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
     return 0
   else
@@ -527,7 +527,6 @@ function GetUserCredentials
   export SessionTTY=$(GetNextTTY)
   if [[ $SessionTTY -ne -1 ]]
   then
-    logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
     $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
     passwordresult=${PIPESTATUS[2]}
 
