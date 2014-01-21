@@ -67,12 +67,12 @@ do
   echo ${ArgArray[$element]}
   ArgArray[$element]="$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')"
 done
-
+Server="${ArgArray[0]}"
 
 if [[ $USER != 0 ]]
 then
   #Detrermine if the server is safe
-  ServerApprovedCount=$(cat /etc/waylandservers | grep -c ^$Server$)
+  ServerApprovedCount=$(cat /etc/waylandservers | grep -c "^$Server$")
 else
   ServerApprovedCount=1
 fi
