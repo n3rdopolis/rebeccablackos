@@ -60,7 +60,14 @@ fi
 IFS=''
 ArgArray=("$@")
 unset IFS
-Server="$(echo "${ArgArray[0]}" | sed 's/^ *//;s/ *$//')"
+
+#Clean up trailing white space
+for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
+do
+  echo ${ArgArray[$element]}
+  ArgArray[$element]="$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')"
+done
+
 
 if [[ $USER != 0 ]]
 then
