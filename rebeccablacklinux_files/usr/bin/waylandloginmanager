@@ -366,7 +366,7 @@ New Session...
 
   if [[ $ChangeSession == "-1" ]]
   then
-    GetUserCredentials
+    echo "Login" >/run/loginmanager_control
   else 
     if [[ $ChangeSession ]]
     then
