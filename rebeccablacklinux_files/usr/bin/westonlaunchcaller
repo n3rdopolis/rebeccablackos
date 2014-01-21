@@ -64,7 +64,6 @@ unset IFS
 #Clean up trailing white space
 for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
 do
-  echo ${ArgArray[$element]}
   ArgArray[$element]="$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')"
 done
 Server="${ArgArray[0]}"
