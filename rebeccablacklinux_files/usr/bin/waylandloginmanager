@@ -471,7 +471,7 @@ function GetUserCredentials
   #Get the list of nonsystem users
   UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
   UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
-  USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}')
+  USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
   if [[ $ISLIVE == 1 ]]
   then
     LIVEUSER=$(cat /etc/passwd | awk -v UIDMIN=999 -v UIDMAX=999 -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $1}' )
@@ -479,33 +479,50 @@ function GetUserCredentials
 $LIVEUSER"
   fi
   USERLIST=$(echo "$USERLIST" | sort |uniq)
-
+  while read USER
+  do
+    IFS=":"
+    UserData=($USER)
+    UserDisplayName=${UserData[0]}
+    UserName=${UserData[1]}
+    if [[ -z $UserDisplayName ]]
+    then
+      UserDisplayName=$UserName
+    fi
+    unset IFS
+    USERLISTSTRING+="$UserDisplayName"
+    USERLISTSTRING+=$'\n'
+    USERLISTSTRING+="$UserName"
+    USERLISTSTRING+=$'\n'
+  done < <(echo "$USERLIST")
+  USERLISTSTRING+="Enter User Name..."
+  USERLISTSTRING+=$'\n'
+  USERLISTSTRING+="-1"
   ChooseSessionType
 
   #present the list of the users to the system
-  export LOGINUSER=$(echo "$USERLIST" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users  --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
+  export LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null | head -1 | grep -v 'startup message: remove:')
 
   #if there is no user selected then show a dialog. If a user was selected, prompt for its login
-  if [[ -z $LOGINUSER ]]
+  if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
   then
-    $ZENITYCMD --warning --text="No User selected" 2>/dev/null
-  else
-    export SessionTTY=$(GetNextTTY)
-    if [[ $SessionTTY -ne -1 ]]
-    then
-      logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
-      $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
-      passwordresult=${PIPESTATUS[2]}
+    LOGINUSER=$($ZENITYCMD --entry --text="Enter the User Name:" 2>/dev/null)
+  fi
+  export SessionTTY=$(GetNextTTY)
+  if [[ $SessionTTY -ne -1 ]]
+  then
+    logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
+    $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null| grep -v 'startup message: remove:' | AuthenticateUser
+    passwordresult=${PIPESTATUS[2]}
 
-      if [[ $passwordresult != 0 ]]
-      then
-	$ZENITYCMD --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
-	logger -t waylandloginmanager "Invalid password for $LOGINUSER" -s  >>/var/log/waylandloginmanager 2>&1
-      fi
-    else
-      $ZENITYCMD --warning --text="Not Enough TTYs!"
-      logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
+    if [[ $passwordresult != 0 ]]
+    then
+      $ZENITYCMD --warning --text="Invalid password for $LOGINUSER" 2>/dev/null
+      logger -t waylandloginmanager "Invalid password for $LOGINUSER" -s  >>/var/log/waylandloginmanager 2>&1
     fi
+  else
+    $ZENITYCMD --warning --text="Not Enough TTYs!"
+    logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
   fi
 }
 
