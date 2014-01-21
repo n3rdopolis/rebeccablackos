@@ -164,9 +164,9 @@ function RegisterSession
   IFS='@'
   ArraySessionData=($RegisterData)
   unset IFS
-  logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ ! -z $RegisterData ]]
   then
+    logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
     SessionTTY=${ArraySessionData[0]}
     SessionPID=${ArraySessionData[1]}
     SessionUser=${ArraySessionData[2]}
@@ -180,6 +180,8 @@ function RegisterSession
       ActiveSessionPID=$SessionPID
     fi
     ((AllSessions++))
+  else
+    logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
   fi
 }
 
