@@ -528,7 +528,7 @@ function GetUserCredentials
   if [[ $SessionTTY -ne -1 ]]
   then
     $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null | AuthenticateUser
-    passwordresult=${PIPESTATUS[2]}
+    passwordresult=${PIPESTATUS[1]}
 
     if [[ $passwordresult != 0 ]]
     then
