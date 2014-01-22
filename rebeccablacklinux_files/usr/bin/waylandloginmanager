@@ -523,7 +523,7 @@ function GetUserCredentials
   #if there is no user selected then show a dialog. If a user was selected, prompt for its login
   if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
   then
-    LOGINUSER=$($ZENITYCMD --entry --text="Enter the User Name:" 2>/dev/null)
+    LOGINUSER=$($ZENITYCMD --title="Username" --entry --text="Enter the User Name:" 2>/dev/null)
   fi
   export SessionTTY=$(GetNextTTY)
   if [[ $SessionTTY -ne -1 ]]
