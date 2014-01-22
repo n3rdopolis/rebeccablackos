@@ -499,7 +499,8 @@ function GetUserCredentials
   do
     IFS=":"
     UserData=($USER)
-    UserDisplayName="${UserData[0]}   (${UserData[1]})" 
+    UserDisplayName=$(echo ${UserData[0]} | awk -F , '{print $1}')
+    UserDisplayName="$UserDisplayName   (${UserData[1]})" 
     UserName=${UserData[1]}
     if [[ -z $UserDisplayName ]]
     then
