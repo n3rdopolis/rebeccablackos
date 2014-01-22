@@ -64,7 +64,7 @@ unset IFS
 #Clean up trailing white space
 for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
 do
-  ArgArray[$element]="$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')"
+  ArgArray[$element]=$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
 done
 SecondArg="${ArgArray[1]}"
 if [[ "$SecondArg" == "@@" ]]
@@ -86,9 +86,9 @@ then
     exit
   else 
     #Execute the Wayland server
-    "${ArgArray[0]}" "${ArgArray[@]:2}"
+    "${ArgArray[0]}" ${ArgArray[@]:2}
   fi
 else
-  weston-display-server "${ArgArray[@]}"
+  weston-display-server ${ArgArray[@]}
 fi
 
