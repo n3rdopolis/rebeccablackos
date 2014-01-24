@@ -31,7 +31,13 @@ else
   logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
   exit
 fi
-
+LOCKPROCPATH=$(dirname $(readlink "/run/waylandloginmanager/$SCRIPTNAME.lock" ))
+THISPROCPATH=/proc/$$
+if [[ $LOCKPROCPATH != $THISPROCPATH ]]
+then
+  logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
+  exit
+fi
 
 #Require root privlages
 if [[ $UID != 0 ]]
