@@ -31,8 +31,13 @@ Standby Computer
 Hybrid Sleep
 Hybrid Sleep
 Hibernate
-Hibernate Computer" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 | grep -v 'startup message: remove:' )
-
+Hibernate Computer" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null )
+CancelOrOK=$?
+ACTION=$(echo "$ACTION" | head -1 )
+if [[ $CancelOrOK != 0 ]]
+then
+  exit 1
+fi
 
 zenity --title="Leave..." --question --text="Are you sure you want to $ACTION"
 CONFIRM=$?
