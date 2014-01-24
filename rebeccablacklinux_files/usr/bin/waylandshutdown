@@ -41,12 +41,12 @@ then
 
   if [[ $ACTION == "Switch User" ]]
   then
-    echo "Switch" > /run/loginmanager_control
+    echo "Switch" > /run/waylandloginmanager/loginmanager_control
     RESULT=$?
   elif [[ $ACTION == "Logoff" ]]
   then
     ecryptfs-umount-private
-    echo "Change" > /run/loginmanager_control
+    echo "Change" > /run/waylandloginmanager/loginmanager_control
     disown
     fuser -k -15 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
     RESULT=$?
