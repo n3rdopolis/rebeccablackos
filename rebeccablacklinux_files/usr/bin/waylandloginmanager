@@ -159,7 +159,7 @@ function GetNextTTY
 function RegisterSession
 {
   exec 128<> /run/loginmanager_register
-  RegisterData=$(while read -t 1 data <&128; do echo $data; done| head -1)
+  RegisterData=$(while read -n 500 -t .000001 data <&128; do echo $data; done| head -1)
   exec 128>&-
   IFS='@'
   ArraySessionData=($RegisterData)
@@ -253,6 +253,11 @@ function ChooseSessionType
     PROMPTED=1
     #select the session
     WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
+    CancelOrOK=$?
+    if [[ $CancelOrOK != 0 ]]
+    then
+      exit 1
+    fi
   else 
     unset WSESSIONDATA
   fi
@@ -362,8 +367,13 @@ New Session...
 
 
   unset ChangeSession
-  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null | head -1 )
-
+  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null )
+  CancelOrOK=$?
+  ChangeSession=$(echo "$ChangeSession" | head -1 )
+  if [[ $CancelOrOK != 0 ]]
+  then
+    exit 1
+  fi
   if [[ $ChangeSession == "-1" ]]
   then
     echo "Login" >/run/loginmanager_control
@@ -455,6 +465,7 @@ function StartUserSession
 #Test users credentials
 function AuthenticateUser
 {
+  unset USERPASSWORD
   TryPassword=$(cat -)
   echo "spawn su $LOGINUSER -c /bin/true
 	expect Password 
@@ -518,19 +529,35 @@ function GetUserCredentials
   ChooseSessionType
 
   #present the list of the users to the system
-  export LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null | head -1 )
-
+  LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
+  CancelOrOK=$?
+  export LOGINUSER=$(echo "$LOGINUSER" | head -1)
+  if [[ $CancelOrOK != 0 ]]
+  then
+    exit 1
+  fi
   #if there is no user selected then show a dialog. If a user was selected, prompt for its login
   if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
   then
     LOGINUSER=$($ZENITYCMD --title="Username" --entry --text="Enter the User Name:" 2>/dev/null)
+    CancelOrOK=$?
+    if [[ $CancelOrOK != 0 ]]
+    then
+      exit 1
+    fi
   fi
   export SessionTTY=$(GetNextTTY)
   if [[ $SessionTTY -ne -1 ]]
   then
-    $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null | AuthenticateUser
+    USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
+    CancelOrOK=$?
+    if [[ $CancelOrOK != 0 ]]
+    then
+      exit 1
+    fi
+    echo $USERPASSWORD | AuthenticateUser
     passwordresult=${PIPESTATUS[1]}
-
+    unset USERPASSWORD
     if [[ $passwordresult != 0 ]]
     then
       $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
@@ -555,7 +582,13 @@ Standby Computer
 Hybrid Sleep
 Hybrid Sleep
 Hibernate
-Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null | head -1 )
+Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null )
+  CancelOrOK=$?
+  ACTION=$(echo "$ACTION" | head -1 )
+  if [[ $CancelOrOK != 0 ]]
+  then
+    return 1
+  fi
   if [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
@@ -630,6 +663,11 @@ function StartAutoLogin
   then
     sleep 5
     ChooseSessionType
+    CancelOrOK=$?
+    if [[ $CancelOrOK != 0 ]]
+    then
+      exit 1
+    fi
     export AutoSessionTTY=$(GetNextTTY)
     if [[ $AutoSessionTTY -ne -1 ]]
     then
@@ -651,17 +689,6 @@ function SetupFIFO
   mkfifo -m 200 /run/loginmanager_register
 }
 
-#This process wakes the fifo, at a given interval so that the main 'thread' can wake and perform maintenance tasks, that require access to the environment, that would require some type of environment syncing if it was in a subshell. 
-function FIFOWaker
-{
-  while [ 1 ]
-  do
-    echo "Wake" > /run/loginmanager_control
-    sleep 1
-  done
-}
-
-
 #The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
 function ReadCommandFIFO
 {
@@ -678,9 +705,10 @@ function ReadCommandFIFO
       fi
       ActiveSessionPID=0
     fi
-
-    COMMAND=$(cat /run/loginmanager_control | sed -ne 1p)
-    if [[ $COMMAND != "Wake" ]]
+    exec 64<> /run/loginmanager_control
+    COMMAND=$(while read -n 500 -t 1 data <&64; do echo $data; done| head -1)
+    exec 64>&-
+    if [[ $COMMAND != "" ]]
     then
       logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
     fi
@@ -714,7 +742,7 @@ function ReadCommandFIFO
     elif [[ $COMMAND == "Info" ]]
     then
       ShowInfo &
-    elif [[ $COMMAND == "Wake" ]]
+    elif [[ $COMMAND == "" ]]
       then
       :
     else
@@ -749,9 +777,6 @@ StartAutoLogin &
 
 #Setup the FIFO before anything starts using the fifo
 SetupFIFO
-
-#Start the loop that wakes the main FIFO at an interval so that the main loop can wake and perform tasks
-FIFOWaker &
 
 #Start the login managers IPC
 ReadCommandFIFO
