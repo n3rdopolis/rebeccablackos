@@ -596,8 +596,16 @@ Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-
   ACTION=$(echo "$ACTION" | head -1 )
   if [[ $CancelOrOK != 0 ]]
   then
-    return 1
+    exit 1
   fi
+
+  $ZENITYCMD --title="Leave..." --question --text="Are you sure you want to $ACTION"
+  CONFIRM=$?
+  if [[ $CONFIRM != 0 ]]
+  then
+    exit 1
+  fi
+
   if [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
