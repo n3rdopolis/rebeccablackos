@@ -194,8 +194,9 @@ function DownloadARCHIVE()
     mkdir -p "$SOURCENAME"
     cd "$SOURCENAME"
     wget $SOURCEURL -O SOURCEFILE
-    tar xaf SOURCEFILE -C .
   fi
+  rm -rf !(SOURCEFILE)
+  tar xaf SOURCEFILE -C .
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
