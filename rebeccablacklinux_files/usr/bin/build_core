@@ -195,7 +195,10 @@ function DownloadARCHIVE()
     cd "$SOURCENAME"
     wget $SOURCEURL -O SOURCEFILE
   fi
-  rm -rf !(SOURCEFILE)
+  find | grep -v ./SOURCEFILE$ | while read FILE
+  do
+    rm -rf $FILE
+  done
   tar xaf SOURCEFILE -C .
 }
 
