@@ -189,7 +189,7 @@ function DownloadHG()
 #Function to download archives
 function DownloadARCHIVE()
 {
-  if [[ ! -f "$SOURCENAME\SOURCEFILE" ]]
+  if [[ ! -f "$SOURCENAME/SOURCEFILE" ]]
   then
     mkdir -p "$SOURCENAME"
     cd "$SOURCENAME"
