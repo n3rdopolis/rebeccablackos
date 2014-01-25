@@ -737,7 +737,13 @@ function ReadCommandFIFO
 	chvt 63
 	chvt $HostVT
       fi
-      SwitchUserDialog &
+      if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
+      then
+	SwitchUserDialog &
+	LastSwitchPID=$!
+      else
+	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+      fi
     elif [[ $COMMAND == "Change" ]]
     then
       if [[ $(fgconsole) != $HostVT ]]
@@ -747,18 +753,36 @@ function ReadCommandFIFO
       fi
     elif [[ $COMMAND == "Login" ]]
     then
-      #Increment the attempted session count always, as there is the possibility that two login diaglogs can be brought up, and because there is no IPC between them, they would both create argument strings with the same session ID
-      export AttemptedSessionCount=$((AttemptedSessionCount+1))
-      GetUserCredentials &
+      if [[ $(jobs -p -r | grep -c ^$LastLogonPID$) == 0  ]]
+      then
+	#Increment the attempted session count always, as there is the possibility that two login diaglogs can be brought up, and because there is no IPC between them, they would both create argument strings with the same session ID
+	export AttemptedSessionCount=$((AttemptedSessionCount+1))
+	GetUserCredentials &
+	LastLogonPID=$!
+      else
+	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+      fi
     elif [[ $COMMAND == "Leave" ]] 
     then
-      LeavePrompt &
+      if [[ $(jobs -p -r | grep -c ^$LastLeavePID$) == 0  ]]
+      then
+	LeavePrompt &
+	LastLeavePID=$!
+      else
+	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+      fi
     elif [[ $COMMAND = "RegisterSession" ]]
     then
       RegisterSession
     elif [[ $COMMAND == "Info" ]]
     then
-      ShowInfo &
+      if [[ $(jobs -p -r | grep -c ^$LastInfoPID$) == 0  ]]
+      then
+	ShowInfo &
+	LastInfoPID=$!
+      else
+	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+      fi
     elif [[ $COMMAND == "" ]]
       then
       :
@@ -791,6 +815,7 @@ LoginWestonLauncher &
 #Start the autologin launcher
 export AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
+LastLogonPID=$!
 
 #Setup the FIFO before anything starts using the fifo
 SetupFIFO
