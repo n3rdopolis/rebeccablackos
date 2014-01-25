@@ -63,7 +63,6 @@ export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 LastTTY=7
 AllSessions=0
 ActiveSessionPID=0
-export AttemptedSessionCount=0
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
@@ -209,7 +208,7 @@ function DialogWait
 
 function ChooseSessionType
 {
-  export SESSIONID=$AttemptedSessionCount
+  export SESSIONID=$AllSessions
 
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   WSESSIONLIST=$(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f -executable | sort | while read SESSIONFILE
@@ -755,8 +754,6 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastLogonPID$) == 0  ]]
       then
-	#Increment the attempted session count always, as there is the possibility that two login diaglogs can be brought up, and because there is no IPC between them, they would both create argument strings with the same session ID
-	export AttemptedSessionCount=$((AttemptedSessionCount+1))
 	GetUserCredentials &
 	LastLogonPID=$!
       else
@@ -813,7 +810,6 @@ fi
 LoginWestonLauncher &
 
 #Start the autologin launcher
-export AttemptedSessionCount=$((AttemptedSessionCount+1))
 StartAutoLogin &
 LastLogonPID=$!
 
