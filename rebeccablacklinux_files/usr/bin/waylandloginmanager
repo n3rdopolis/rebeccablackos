@@ -167,7 +167,7 @@ function GetNextTTY
 function RegisterSession
 {
   exec 1001<> /run/waylandloginmanager/loginmanager_register
-  RegisterData=$(while read -n 500 -t .01 data <&1001; do echo $data; done| head -1)
+  RegisterData=$(while read -n 50 -t .01 data <&1001; do echo $data; done| head -1)
   exec 1001>&-
   IFS='@'
   ArraySessionData=($RegisterData)
@@ -722,7 +722,7 @@ function ReadCommandFIFO
       ActiveSessionPID=0
     fi
     exec 1000<> /run/waylandloginmanager/loginmanager_control
-    COMMAND=$(while read -n 500 -t 1 data <&1000; do echo $data; done| head -1)
+    COMMAND=$(while read -n 10 -t 1 data <&1000; do echo $data; done| head -1)
     exec 1000>&-
     if [[ $COMMAND != "" ]]
     then
