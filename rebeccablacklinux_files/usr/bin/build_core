@@ -186,6 +186,18 @@ function DownloadHG()
   hg update -C -r $SOURCEREVISION
 }
 
+#Function to download archives
+function DownloadARCHIVE()
+{
+  if [[ ! -f "$SOURCENAME\SOURCEFILE" ]]
+  then
+    mkdir -p "$SOURCENAME"
+    cd "$SOURCENAME"
+    wget $SOURCEURL -O SOURCEFILE
+    tar xaf SOURCEFILE -C .
+  fi
+}
+
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
@@ -239,6 +251,12 @@ function GetVersionBZR()
 function GetVersionHG()
 {
   REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
+}
+
+#function to get the version of Archives
+function GetVersionARCHIVE()
+{
+  REVISIONSTRING="Non-versioned File Archive"
 }
 
 #function that calls functions to get version based on repository type
