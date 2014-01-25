@@ -29,7 +29,7 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-yes Y| apt-get install aptitude git bzr subversion mercurial dselect
+yes Y| apt-get install aptitude git bzr subversion mercurial wget dselect
 
 #update the dselect database
 dselect update
