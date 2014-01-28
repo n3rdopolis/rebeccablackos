@@ -20,15 +20,15 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=gobject-introspection
+SOURCENAME=json-glib
 
 #The URL of the Source code repo
-SOURCEURL=git://git.gnome.org/gobject-introspection
+SOURCEURL=git://git.gnome.org/json-glib
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
 SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
@@ -76,7 +76,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp -n /usr/lib/girepository-1.0/* $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/girepository-1.0
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
