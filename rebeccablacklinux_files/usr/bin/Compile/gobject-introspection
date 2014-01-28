@@ -76,6 +76,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
+cp /usr/lib/gdm/Gdm-1.0.typelib /usr/lib/girepository-1.0/ 
 cp -n /usr/lib/girepository-1.0/* $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/girepository-1.0
 }
 
