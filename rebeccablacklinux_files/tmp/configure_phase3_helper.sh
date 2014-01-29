@@ -53,6 +53,9 @@ cp -a /usr/import/etc/init/* /etc/init
 mkdir -p /etc/X11
 cp -a /usr/import/etc/X11/* /etc/X11
 
+mkdir -p /etc/loginmanagerdisplay
+cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
+
 #install the menu items for the wayland tests
 install_menu_items
 
