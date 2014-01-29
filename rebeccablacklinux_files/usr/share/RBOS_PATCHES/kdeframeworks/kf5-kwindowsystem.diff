@@ -41,7 +41,7 @@ index 6a500fe..bb0a97c 100644
        Ws2_32 # gethostname()
     )
 +else()
-+  set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kwindoweffects_dummy.cpp
++  set(kwindowsystem_SRCS ${kwindowsystem_SRCS} #kwindoweffects_dummy.cpp
 +					       kwindowsystem_dummy.cpp)
 +					       #kwindowinfo_dummy.cpp)
  endif ()
@@ -323,3 +323,1251 @@ index 0000000..1a2e9c9
 +
 +#include "moc_kwindowsystem.cpp"
 \ No newline at end of file
+
+
+
+diff --git a/src/kwindowinfo.cpp b/src/kwindowinfo.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..7a1610bd02e0d188b90ccd6d5ef9b7b94d9ef05a
+--- /dev/null
++++ b/src/kwindowinfo.cpp
+@@ -0,0 +1,363 @@
++/*
++ *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
++ *
++ *   This library is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU Lesser General Public
++ *   License as published by the Free Software Foundation; either
++ *   version 2.1 of the License, or (at your option) version 3, or any
++ *   later version accepted by the membership of KDE e.V. (or its
++ *   successor approved by the membership of KDE e.V.), which shall
++ *   act as a proxy defined in Section 6 of version 3 of the license.
++ *
++ *   This library is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *   Lesser General Public License for more details.
++ *
++ *   You should have received a copy of the GNU Lesser General Public
++ *   License along with this library.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#include "kwindowinfo.h"
++#include "kwindowinfo_p.h"
++#include "kwindowsystem.h"
++#if HAVE_X11
++#include "kwindowinfo_p_x11.h"
++#else
++typedef KWindowInfoPrivateDummy KWindowInfoPrivateX11;
++#endif
++
++#include <QRect>
++#include <QGuiApplication>
++
++// private
++KWindowInfoPrivate *KWindowInfoPrivate::create(WId window, unsigned long properties, unsigned long properties2)
++{
++    KWindowInfoPrivate *d = Q_NULLPTR;
++#if HAVE_X11
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++        d = new KWindowInfoPrivateX11(window, properties, properties2);
++    }
++#endif
++    if (!d) {
++        d = new KWindowInfoPrivateDummy(window, properties, properties2);
++    }
++    return d;
++}
++
++KWindowInfoPrivate::KWindowInfoPrivate(PlatformImplementation platform, WId window, unsigned long properties, unsigned long properties2)
++    : m_window(window)
++    , m_properties(properties)
++    , m_properties2(properties2)
++    , m_platform(platform)
++{
++}
++
++KWindowInfoPrivate::~KWindowInfoPrivate()
++{
++}
++
++KWindowInfoPrivateDummy::KWindowInfoPrivateDummy(WId window, unsigned long properties, unsigned long properties2)
++    : KWindowInfoPrivate(KWindowInfoPrivate::DummyPlatform, window, properties, properties2)
++{
++}
++
++KWindowInfoPrivateDummy::~KWindowInfoPrivateDummy()
++{
++}
++
++bool KWindowInfoPrivateDummy::valid(bool withdrawn_is_valid) const
++{
++    Q_UNUSED(withdrawn_is_valid)
++    return false;
++}
++
++unsigned long KWindowInfoPrivateDummy::state() const
++{
++    return 0;
++}
++
++bool KWindowInfoPrivateDummy::isMinimized() const
++{
++    return false;
++}
++
++NET::MappingState KWindowInfoPrivateDummy::mappingState() const
++{
++    return NET::Visible;
++}
++
++NETExtendedStrut KWindowInfoPrivateDummy::extendedStrut() const
++{
++    return NETExtendedStrut();
++}
++
++NET::WindowType KWindowInfoPrivateDummy::windowType(int supported_types) const
++{
++    Q_UNUSED(supported_types)
++    return NET::Unknown;
++}
++
++QString KWindowInfoPrivateDummy::visibleName() const
++{
++    return QString();
++}
++
++QString KWindowInfoPrivateDummy::visibleNameWithState() const
++{
++    return QString();
++}
++
++QString KWindowInfoPrivateDummy::name() const
++{
++    return QString();
++}
++
++QString KWindowInfoPrivateDummy::visibleIconName() const
++{
++    return QString();
++}
++
++QString KWindowInfoPrivateDummy::visibleIconNameWithState() const
++{
++    return QString();
++}
++
++QString KWindowInfoPrivateDummy::iconName() const
++{
++    return QString();
++}
++
++bool KWindowInfoPrivateDummy::onAllDesktops() const
++{
++    return false;
++}
++
++bool KWindowInfoPrivateDummy::isOnDesktop(int desktop) const
++{
++    Q_UNUSED(desktop)
++    return false;
++}
++
++int KWindowInfoPrivateDummy::desktop() const
++{
++    return 0;
++}
++
++QRect KWindowInfoPrivateDummy::geometry() const
++{
++    return QRect();
++}
++
++QRect KWindowInfoPrivateDummy::frameGeometry() const
++{
++    return QRect();
++}
++
++WId KWindowInfoPrivateDummy::transientFor() const
++{
++    return 0;
++}
++
++WId KWindowInfoPrivateDummy::groupLeader() const
++{
++    return 0;
++}
++
++QByteArray KWindowInfoPrivateDummy::windowClassClass() const
++{
++    return QByteArray();
++}
++
++QByteArray KWindowInfoPrivateDummy::windowClassName() const
++{
++    return QByteArray();
++}
++
++QByteArray KWindowInfoPrivateDummy::windowRole() const
++{
++    return QByteArray();
++}
++
++QByteArray KWindowInfoPrivateDummy::clientMachine() const
++{
++    return QByteArray();
++}
++
++bool KWindowInfoPrivateDummy::actionSupported(NET::Action action) const
++{
++    Q_UNUSED(action)
++    return false;
++}
++
++// public
++KWindowInfo::KWindowInfo(WId window, unsigned long properties, unsigned long properties2)
++    : d(KWindowInfoPrivate::create(window, properties, properties2))
++{
++}
++
++KWindowInfo::KWindowInfo()
++    : d()
++{
++}
++
++KWindowInfo::KWindowInfo(const KWindowInfo &other)
++    : d(other.d)
++{
++}
++
++KWindowInfo::~KWindowInfo()
++{
++}
++
++KWindowInfo &KWindowInfo::operator=(const KWindowInfo &other)
++{
++    if (d != other.d) {
++        d = other.d;
++    }
++    return *this;
++}
++
++#define DELEGATE(name, args) \
++    switch (d->platform()) { \
++    case KWindowInfoPrivate::XcbPlatform: \
++        return d->name<KWindowInfoPrivateX11>( args ); \
++    default: \
++        return d->name<KWindowInfoPrivateDummy>( args ); \
++    }
++
++bool KWindowInfo::valid(bool withdrawn_is_valid) const
++{
++    DELEGATE(valid, withdrawn_is_valid)
++}
++
++WId KWindowInfo::win() const
++{
++    return d->win();
++}
++
++unsigned long KWindowInfo::state() const
++{
++    DELEGATE(state, )
++}
++
++bool KWindowInfo::hasState(unsigned long s) const
++{
++    return (state() & s) == s;
++}
++
++bool KWindowInfo::isMinimized() const
++{
++    DELEGATE(isMinimized, )
++}
++
++NET::MappingState KWindowInfo::mappingState() const
++{
++    DELEGATE(mappingState, )
++}
++
++NETExtendedStrut KWindowInfo::extendedStrut() const
++{
++    DELEGATE(extendedStrut, )
++}
++
++NET::WindowType KWindowInfo::windowType(int supported_types) const
++{
++    DELEGATE(windowType, supported_types)
++}
++
++QString KWindowInfo::visibleName() const
++{
++    DELEGATE(visibleName, )
++}
++
++QString KWindowInfo::visibleNameWithState() const
++{
++    DELEGATE(visibleIconNameWithState, )
++}
++
++QString KWindowInfo::name() const
++{
++    DELEGATE(name, )
++}
++
++QString KWindowInfo::visibleIconName() const
++{
++    DELEGATE(visibleIconName, )
++}
++
++QString KWindowInfo::visibleIconNameWithState() const
++{
++    DELEGATE(visibleIconNameWithState, )
++}
++
++QString KWindowInfo::iconName() const
++{
++    DELEGATE(iconName, )
++}
++
++bool KWindowInfo::isOnCurrentDesktop() const
++{
++    return isOnDesktop(KWindowSystem::currentDesktop());
++}
++
++bool KWindowInfo::isOnDesktop(int desktop) const
++{
++    DELEGATE(isOnDesktop, desktop)
++}
++
++bool KWindowInfo::onAllDesktops() const
++{
++    DELEGATE(onAllDesktops, )
++}
++
++int KWindowInfo::desktop() const
++{
++    DELEGATE(desktop, )
++}
++
++QRect KWindowInfo::geometry() const
++{
++    DELEGATE(geometry, )
++}
++
++QRect KWindowInfo::frameGeometry() const
++{
++    DELEGATE(frameGeometry, )
++}
++
++WId KWindowInfo::transientFor() const
++{
++    DELEGATE(transientFor, )
++}
++
++WId KWindowInfo::groupLeader() const
++{
++    DELEGATE(groupLeader, )
++}
++
++QByteArray KWindowInfo::windowClassClass() const
++{
++    DELEGATE(windowClassClass, )
++}
++
++QByteArray KWindowInfo::windowClassName() const
++{
++    DELEGATE(windowClassName, )
++}
++
++QByteArray KWindowInfo::windowRole() const
++{
++    DELEGATE(windowRole, )
++}
++
++QByteArray KWindowInfo::clientMachine() const
++{
++    DELEGATE(clientMachine, )
++}
++
++bool KWindowInfo::actionSupported(NET::Action action) const
++{
++    DELEGATE(actionSupported, action)
++}
++
++#undef DELEGATE
+diff --git a/src/kwindowinfo_p.h b/src/kwindowinfo_p.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..1ad6cf89e6e9dd8b070d0167410a1a758594f734
+--- /dev/null
++++ b/src/kwindowinfo_p.h
+@@ -0,0 +1,212 @@
++/*
++ *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
++ *
++ *   This library is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU Lesser General Public
++ *   License as published by the Free Software Foundation; either
++ *   version 2.1 of the License, or (at your option) version 3, or any
++ *   later version accepted by the membership of KDE e.V. (or its
++ *   successor approved by the membership of KDE e.V.), which shall
++ *   act as a proxy defined in Section 6 of version 3 of the license.
++ *
++ *   This library is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *   Lesser General Public License for more details.
++ *
++ *   You should have received a copy of the GNU Lesser General Public
++ *   License along with this library.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#ifndef KWINDOWINFO_P_H
++#define KWINDOWINFO_P_H
++#include "netwm_def.h"
++
++#include <QByteArray>
++#include <QRect>
++#include <QString>
++#include <QSharedData>
++#include <QWidgetList> //For WId
++
++/**
++ * To write a new platform specific implementation inherit from this class and extend the
++ * PlatformImplementation enum. One needs to provide all the methods which are templated in this
++ * class. The template delegates to the method in the implementation class. If a method is not
++ * provided compilation will fail.
++ *
++ * The header of the platform specific implementations needs to be included in kwindowinfo.cpp
++ * after the include of this header. As it's platform specific this should be ifdef'ed and the else
++ * branch must typedef the name of the new platform specific class to KWindowInfoPrivateDummy.
++ * Otherwise compilation will fail on other platforms.
++ * Also the DELEGATE macro in kwindowinfo.cpp needs to be adjusted so that the specific
++ * implementation is picked for the new platform.
++ *
++ * Last but not least the platform specific implementations are registered in the create() method.
++ */
++class KWindowInfoPrivate  : public QSharedData
++{
++public:
++    enum PlatformImplementation {
++        XcbPlatform,
++        DummyPlatform
++    };
++    virtual ~KWindowInfoPrivate();
++
++    WId win() const;
++    PlatformImplementation platform() const;
++
++    template <class T>
++    bool valid(bool withdrawn_is_valid) const;
++    template <class T>
++    unsigned long state() const;
++    template <class T>
++    bool isMinimized() const;
++    template <class T>
++    NET::MappingState mappingState() const;
++    template <class T>
++    NETExtendedStrut extendedStrut() const;
++    template <class T>
++    NET::WindowType windowType(int supported_types) const;
++    template <class T>
++    QString visibleName() const;
++    template <class T>
++    QString visibleNameWithState() const;
++    template <class T>
++    QString name() const;
++    template <class T>
++    QString visibleIconName() const;
++    template <class T>
++    QString visibleIconNameWithState() const;
++    template <class T>
++    QString iconName() const;
++    template <class T>
++    bool onAllDesktops() const;
++    template <class T>
++    bool isOnDesktop(int desktop) const;
++    template <class T>
++    int desktop() const;
++    template <class T>
++    QRect geometry() const;
++    template <class T>
++    QRect frameGeometry() const;
++    template <class T>
++    WId transientFor() const;
++    template <class T>
++    WId groupLeader() const;
++    template <class T>
++    QByteArray windowClassClass() const;
++    template <class T>
++    QByteArray windowClassName() const;
++    template <class T>
++    QByteArray windowRole() const;
++    template <class T>
++    QByteArray clientMachine() const;
++    template <class T>
++    bool actionSupported(NET::Action action) const;
++
++    static KWindowInfoPrivate *create(WId window, unsigned long properties, unsigned long properties2);
++
++protected:
++    KWindowInfoPrivate(PlatformImplementation platform, WId window, unsigned long properties, unsigned long properties2);
++    WId m_window;
++    unsigned long m_properties;
++    unsigned long m_properties2;
++
++private:
++    PlatformImplementation m_platform;
++};
++
++/**
++ * Dummy implementation for KWindowInfoPrivate. This is used as a fallback if there is no
++ * implementation for the currently used windowing system platform.
++ */
++class KWindowInfoPrivateDummy : public KWindowInfoPrivate
++{
++public:
++    KWindowInfoPrivateDummy(WId window, unsigned long properties, unsigned long properties2);
++    ~KWindowInfoPrivateDummy();
++
++    bool valid(bool withdrawn_is_valid) const;
++    unsigned long state() const;
++    bool isMinimized() const;
++    NET::MappingState mappingState() const;
++    NETExtendedStrut extendedStrut() const;
++    NET::WindowType windowType(int supported_types) const;
++    QString visibleName() const;
++    QString visibleNameWithState() const;
++    QString name() const;
++    QString visibleIconName() const;
++    QString visibleIconNameWithState() const;
++    QString iconName() const;
++    bool onAllDesktops() const;
++    bool isOnDesktop(int desktop) const;
++    int desktop() const;
++    QRect geometry() const;
++    QRect frameGeometry() const;
++    WId transientFor() const;
++    WId groupLeader() const;
++    QByteArray windowClassClass() const;
++    QByteArray windowClassName() const;
++    QByteArray windowRole() const;
++    QByteArray clientMachine() const;
++    bool actionSupported(NET::Action action) const;
++};
++
++inline
++WId KWindowInfoPrivate::win() const
++{
++    return m_window;
++}
++
++inline
++KWindowInfoPrivate::PlatformImplementation KWindowInfoPrivate::platform() const
++{
++    return m_platform;
++}
++
++#define DELGATE(type, name) \
++template <class T> \
++inline \
++type KWindowInfoPrivate::name() const \
++{ \
++    return static_cast<const T*>(this)->name(); \
++}
++
++DELGATE(unsigned long, state)
++DELGATE(bool, isMinimized)
++DELGATE(NET::MappingState, mappingState)
++DELGATE(NETExtendedStrut, extendedStrut)
++DELGATE(QString, visibleName)
++DELGATE(QString, visibleNameWithState)
++DELGATE(QString, name)
++DELGATE(QString, visibleIconName)
++DELGATE(QString, visibleIconNameWithState)
++DELGATE(QString, iconName)
++DELGATE(bool, onAllDesktops)
++DELGATE(int, desktop)
++DELGATE(QRect, geometry)
++DELGATE(QRect, frameGeometry)
++DELGATE(WId, transientFor)
++DELGATE(WId, groupLeader)
++DELGATE(QByteArray, windowClassClass)
++DELGATE(QByteArray, windowClassName)
++DELGATE(QByteArray, windowRole)
++DELGATE(QByteArray, clientMachine)
++
++#undef DELGATE
++
++#define DELGATE(type, name, argType, arg) \
++template <class T> \
++inline \
++type KWindowInfoPrivate::name( argType arg) const \
++{ \
++    return static_cast<const T*>(this)->name(arg); \
++}
++
++DELGATE(bool, valid, bool, withdrawn_is_valid)
++DELGATE(NET::WindowType, windowType, int, supported_types)
++DELGATE(bool, isOnDesktop, int, desktop)
++DELGATE(bool, actionSupported, NET::Action, action)
++
++#undef DELGATE
++
++#endif
+diff --git a/src/kwindowinfo_p_x11.h b/src/kwindowinfo_p_x11.h
+new file mode 100644
+index 0000000000000000000000000000000000000000..a74ea32aa51407d0a168dd807c29787ce856f2af
+--- /dev/null
++++ b/src/kwindowinfo_p_x11.h
+@@ -0,0 +1,67 @@
++/*
++ *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
++ *
++ *   This library is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU Lesser General Public
++ *   License as published by the Free Software Foundation; either
++ *   version 2.1 of the License, or (at your option) version 3, or any
++ *   later version accepted by the membership of KDE e.V. (or its
++ *   successor approved by the membership of KDE e.V.), which shall
++ *   act as a proxy defined in Section 6 of version 3 of the license.
++ *
++ *   This library is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *   Lesser General Public License for more details.
++ *
++ *   You should have received a copy of the GNU Lesser General Public
++ *   License along with this library.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#ifndef KWINDOWINFO_P_X11_H
++#define KWINDOWINFO_P_X11_H
++#include "kwindowinfo_p.h"
++#include <QScopedPointer>
++
++class NETWinInfo;
++
++class KWindowInfoPrivateX11 : public KWindowInfoPrivate
++{
++public:
++    KWindowInfoPrivateX11(WId window, long unsigned int properties, long unsigned int properties2);
++    ~KWindowInfoPrivateX11();
++
++    bool valid(bool withdrawn_is_valid) const;
++    unsigned long state() const;
++    bool isMinimized() const;
++    NET::MappingState mappingState() const;
++    NETExtendedStrut extendedStrut() const;
++    NET::WindowType windowType(int supported_types) const;
++    QString visibleName() const;
++    QString visibleNameWithState() const;
++    QString name() const;
++    QString visibleIconName() const;
++    QString visibleIconNameWithState() const;
++    QString iconName() const;
++    bool onAllDesktops() const;
++    bool isOnDesktop(int desktop) const;
++    int desktop() const;
++    QRect geometry() const;
++    QRect frameGeometry() const;
++    WId transientFor() const;
++    WId groupLeader() const;
++    QByteArray windowClassClass() const;
++    QByteArray windowClassName() const;
++    QByteArray windowRole() const;
++    QByteArray clientMachine() const;
++    bool actionSupported(NET::Action action) const;
++
++private:
++    QScopedPointer<NETWinInfo> m_info;
++    QString m_name;
++    QString m_iconic_name;
++    QRect m_geometry;
++    QRect m_frame_geometry;
++    bool m_valid;
++};
++
++#endif
+diff --git a/src/kwindowinfo_x11.cpp b/src/kwindowinfo_x11.cpp
+index 865d8bed085e987f97f479ea8aa0e6de8567586f..eda31f2d94e23b1dd411a40fd65e96f65c389ac0 100644
+--- a/src/kwindowinfo_x11.cpp
++++ b/src/kwindowinfo_x11.cpp
+@@ -2,6 +2,7 @@
+     This file is part of the KDE libraries
+     Copyright (C) 1999 Matthias Ettrich (ettrich@kde.org)
+     Copyright (C) 2007 Lubos Lunak (l.lunak@kde.org)
++    Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
+ 
+     This library is free software; you can redistribute it and/or
+     modify it under the terms of the GNU Library General Public
+@@ -19,44 +20,20 @@
+     Boston, MA 02110-1301, USA.
+ */
+ 
+-#include "kwindowinfo.h"
++#include "kwindowinfo_p_x11.h"
+ #include "kwindowsystem.h"
+ 
+ #include <QDebug>
+ #include <kxerrorhandler_p.h>
+ #include <netwm.h>
+-#include <QBitmap>
+-#include <QDesktopWidget>
+-#include <QDialog>
+ #include <QX11Info>
+ #include <X11/Xatom.h>
+ 
+-struct KWindowInfo::Private {
+-    Private()
+-        : info(NULL)
+-    {}
+-    ~Private()
+-    {
+-        delete info;
+-    }
+-    NETWinInfo *info;
+-    WId win_;
+-    QString name_;
+-    QString iconic_name_;
+-    QRect geometry_;
+-    QRect frame_geometry_;
+-    int ref;
+-    bool valid;
+-private:
+-    Private(const Private &);
+-    void operator=(const Private &);
+-};
+-
+ // KWindowSystem::info() should be updated too if something has to be changed here
+-KWindowInfo::KWindowInfo(WId _win, unsigned long properties, unsigned long properties2) : d(new Private)
++KWindowInfoPrivateX11::KWindowInfoPrivateX11(WId _win, unsigned long properties, unsigned long properties2)
++    : KWindowInfoPrivate(XcbPlatform, _win, properties, properties2)
+ {
+     KXErrorHandler handler;
+-    d->ref = 1;
+     if (properties & NET::WMVisibleIconName) {
+         properties |= NET::WMIconName | NET::WMVisibleName;    // force, in case it will be used as a fallback
+     }
+@@ -74,72 +51,37 @@ KWindowInfo::KWindowInfo(WId _win, unsigned long properties, unsigned long prope
+     }
+     properties |= NET::XAWMState; // force to get error detection for valid()
+     unsigned long props[ 2 ] = { properties, properties2 };
+-    d->info = new NETWinInfo(QX11Info::connection(), _win, QX11Info::appRootWindow(), props, 2);
+-    d->win_ = _win;
++    m_info.reset(new NETWinInfo(QX11Info::connection(), _win, QX11Info::appRootWindow(), props, 2));
+     if (properties & NET::WMName) {
+-        if (d->info->name() && d->info->name()[ 0 ] != '\0') {
+-            d->name_ = QString::fromUtf8(d->info->name());
++        if (m_info->name() && m_info->name()[ 0 ] != '\0') {
++            m_name = QString::fromUtf8(m_info->name());
+         } else {
+-            d->name_ = KWindowSystem::readNameProperty(_win, XA_WM_NAME);
++            m_name = KWindowSystem::readNameProperty(_win, XA_WM_NAME);
+         }
+     }
+     if (properties & NET::WMIconName) {
+-        if (d->info->iconName() && d->info->iconName()[ 0 ] != '\0') {
+-            d->iconic_name_ = QString::fromUtf8(d->info->iconName());
++        if (m_info->iconName() && m_info->iconName()[ 0 ] != '\0') {
++            m_iconic_name = QString::fromUtf8(m_info->iconName());
+         } else {
+-            d->iconic_name_ = KWindowSystem::readNameProperty(_win, XA_WM_ICON_NAME);
++            m_iconic_name = KWindowSystem::readNameProperty(_win, XA_WM_ICON_NAME);
+         }
+     }
+     if (properties & (NET::WMGeometry | NET::WMFrameExtents)) {
+         NETRect frame, geom;
+-        d->info->kdeGeometry(frame, geom);
+-        d->geometry_.setRect(geom.pos.x, geom.pos.y, geom.size.width, geom.size.height);
+-        d->frame_geometry_.setRect(frame.pos.x, frame.pos.y, frame.size.width, frame.size.height);
++        m_info->kdeGeometry(frame, geom);
++        m_geometry.setRect(geom.pos.x, geom.pos.y, geom.size.width, geom.size.height);
++        m_frame_geometry.setRect(frame.pos.x, frame.pos.y, frame.size.width, frame.size.height);
+     }
+-    d->valid = !handler.error(false);   // no sync - NETWinInfo did roundtrips
++    m_valid = !handler.error(false);   // no sync - NETWinInfo did roundtrips
+ }
+ 
+-// this one is only to make QList<> or similar happy
+-KWindowInfo::KWindowInfo()
+-    : d(NULL)
++KWindowInfoPrivateX11::~KWindowInfoPrivateX11()
+ {
+ }
+ 
+-KWindowInfo::~KWindowInfo()
++bool KWindowInfoPrivateX11::valid(bool withdrawn_is_valid) const
+ {
+-    if (d != NULL) {
+-        if (--d->ref == 0) {
+-            delete d;
+-        }
+-    }
+-}
+-
+-KWindowInfo::KWindowInfo(const KWindowInfo &wininfo)
+-    : d(wininfo.d)
+-{
+-    if (d != NULL) {
+-        ++d->ref;
+-    }
+-}
+-
+-KWindowInfo &KWindowInfo::operator=(const KWindowInfo &wininfo)
+-{
+-    if (d != wininfo.d) {
+-        if (d != NULL)
+-            if (--d->ref == 0) {
+-                delete d;
+-            }
+-        d = wininfo.d;
+-        if (d != NULL) {
+-            ++d->ref;
+-        }
+-    }
+-    return *this;
+-}
+-
+-bool KWindowInfo::valid(bool withdrawn_is_valid) const
+-{
+-    if (!d->valid) {
++    if (!m_valid) {
+         return false;
+     }
+     if (!withdrawn_is_valid && mappingState() == NET::Withdrawn) {
+@@ -148,45 +90,35 @@ bool KWindowInfo::valid(bool withdrawn_is_valid) const
+     return true;
+ }
+ 
+-WId KWindowInfo::win() const
+-{
+-    return d->win_;
+-}
+-
+-unsigned long KWindowInfo::state() const
++unsigned long KWindowInfoPrivateX11::state() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMState)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMState)) {
+         qWarning() << "Pass NET::WMState to KWindowInfo";
+     }
+ #endif
+-    return d->info->state();
++    return m_info->state();
+ }
+ 
+-bool KWindowInfo::hasState(unsigned long s) const
+-{
+-    return (state() & s) == s;
+-}
+-
+-NET::MappingState KWindowInfo::mappingState() const
++NET::MappingState KWindowInfoPrivateX11::mappingState() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::XAWMState)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::XAWMState)) {
+         qWarning() << "Pass NET::XAWMState to KWindowInfo";
+     }
+ #endif
+-    return d->info->mappingState();
++    return m_info->mappingState();
+ }
+ 
+-NETExtendedStrut KWindowInfo::extendedStrut() const
++NETExtendedStrut KWindowInfoPrivateX11::extendedStrut() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2ExtendedStrut)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2ExtendedStrut)) {
+         qWarning() << "Pass NET::WM2ExtendedStrut to KWindowInfo";
+     }
+ #endif
+-    NETExtendedStrut ext = d->info->extendedStrut();
+-    NETStrut str = d->info->strut();
++    NETExtendedStrut ext = m_info->extendedStrut();
++    NETStrut str = m_info->strut();
+     if (ext.left_width == 0 && ext.right_width == 0 && ext.top_width == 0 && ext.bottom_width == 0
+             && (str.left != 0 || str.right != 0 || str.top != 0 || str.bottom != 0)) {
+         // build extended from simple
+@@ -214,15 +146,15 @@ NETExtendedStrut KWindowInfo::extendedStrut() const
+     return ext;
+ }
+ 
+-NET::WindowType KWindowInfo::windowType(int supported_types) const
++NET::WindowType KWindowInfoPrivateX11::windowType(int supported_types) const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMWindowType)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMWindowType)) {
+         qWarning() << "Pass NET::WMWindowType to KWindowInfo";
+     }
+ #endif
+-    if (!d->info->hasWindowType()) { // fallback, per spec recommendation
+-        if (transientFor() != None) {  // dialog
++    if (!m_info->hasWindowType()) { // fallback, per spec recommendation
++        if (transientFor() != XCB_WINDOW_NONE) {  // dialog
+             if (supported_types & NET::DialogMask) {
+                 return NET::Dialog;
+             }
+@@ -232,10 +164,10 @@ NET::WindowType KWindowInfo::windowType(int supported_types) const
+             }
+         }
+     }
+-    return d->info->windowType(supported_types);
++    return m_info->windowType(supported_types);
+ }
+ 
+-QString KWindowInfo::visibleNameWithState() const
++QString KWindowInfoPrivateX11::visibleNameWithState() const
+ {
+     QString s = visibleName();
+     if (isMinimized()) {
+@@ -245,28 +177,28 @@ QString KWindowInfo::visibleNameWithState() const
+     return s;
+ }
+ 
+-QString KWindowInfo::visibleName() const
++QString KWindowInfoPrivateX11::visibleName() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMVisibleName)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMVisibleName)) {
+         qWarning() << "Pass NET::WMVisibleName to KWindowInfo";
+     }
+ #endif
+-    return d->info->visibleName() && d->info->visibleName()[ 0 ] != '\0'
+-           ? QString::fromUtf8(d->info->visibleName()) : name();
++    return m_info->visibleName() && m_info->visibleName()[ 0 ] != '\0'
++           ? QString::fromUtf8(m_info->visibleName()) : name();
+ }
+ 
+-QString KWindowInfo::name() const
++QString KWindowInfoPrivateX11::name() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMName)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMName)) {
+         qWarning() << "Pass NET::WMName to KWindowInfo";
+     }
+ #endif
+-    return d->name_;
++    return m_name;
+ }
+ 
+-QString KWindowInfo::visibleIconNameWithState() const
++QString KWindowInfoPrivateX11::visibleIconNameWithState() const
+ {
+     QString s = visibleIconName();
+     if (isMinimized()) {
+@@ -276,50 +208,45 @@ QString KWindowInfo::visibleIconNameWithState() const
+     return s;
+ }
+ 
+-QString KWindowInfo::visibleIconName() const
++QString KWindowInfoPrivateX11::visibleIconName() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMVisibleIconName)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMVisibleIconName)) {
+         qWarning() << "Pass NET::WMVisibleIconName to KWindowInfo";
+     }
+ #endif
+-    if (d->info->visibleIconName() && d->info->visibleIconName()[ 0 ] != '\0') {
+-        return QString::fromUtf8(d->info->visibleIconName());
++    if (m_info->visibleIconName() && m_info->visibleIconName()[ 0 ] != '\0') {
++        return QString::fromUtf8(m_info->visibleIconName());
+     }
+-    if (d->info->iconName() && d->info->iconName()[ 0 ] != '\0') {
+-        return QString::fromUtf8(d->info->iconName());
++    if (m_info->iconName() && m_info->iconName()[ 0 ] != '\0') {
++        return QString::fromUtf8(m_info->iconName());
+     }
+-    if (!d->iconic_name_.isEmpty()) {
+-        return d->iconic_name_;
++    if (!m_iconic_name.isEmpty()) {
++        return m_iconic_name;
+     }
+     return visibleName();
+ }
+ 
+-QString KWindowInfo::iconName() const
++QString KWindowInfoPrivateX11::iconName() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMIconName)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMIconName)) {
+         qWarning() << "Pass NET::WMIconName to KWindowInfo";
+     }
+ #endif
+-    if (d->info->iconName() && d->info->iconName()[ 0 ] != '\0') {
+-        return QString::fromUtf8(d->info->iconName());
++    if (m_info->iconName() && m_info->iconName()[ 0 ] != '\0') {
++        return QString::fromUtf8(m_info->iconName());
+     }
+-    if (!d->iconic_name_.isEmpty()) {
+-        return d->iconic_name_;
++    if (!m_iconic_name.isEmpty()) {
++        return m_iconic_name;
+     }
+     return name();
+ }
+ 
+-bool KWindowInfo::isOnCurrentDesktop() const
+-{
+-    return isOnDesktop(KWindowSystem::currentDesktop());
+-}
+-
+-bool KWindowInfo::isOnDesktop(int _desktop) const
++bool KWindowInfoPrivateX11::isOnDesktop(int _desktop) const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
+         qWarning() << "Pass NET::WMDesktop to KWindowInfo";
+     }
+ #endif
+@@ -327,32 +254,32 @@ bool KWindowInfo::isOnDesktop(int _desktop) const
+         if (onAllDesktops()) {
+             return true;
+         }
+-        return KWindowSystem::viewportWindowToDesktop(d->geometry_) == _desktop;
++        return KWindowSystem::viewportWindowToDesktop(m_geometry) == _desktop;
+     }
+-    return d->info->desktop() == _desktop || d->info->desktop() == NET::OnAllDesktops;
++    return m_info->desktop() == _desktop || m_info->desktop() == NET::OnAllDesktops;
+ }
+ 
+-bool KWindowInfo::onAllDesktops() const
++bool KWindowInfoPrivateX11::onAllDesktops() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
+         qWarning() << "Pass NET::WMDesktop to KWindowInfo";
+     }
+ #endif
+     if (KWindowSystem::mapViewport()) {
+-        if (d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMState) {
+-            return d->info->state() & NET::Sticky;
++        if (m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMState) {
++            return m_info->state() & NET::Sticky;
+         }
+-        NETWinInfo info(QX11Info::connection(), d->win_, QX11Info::appRootWindow(), NET::WMState);
++        NETWinInfo info(QX11Info::connection(), win(), QX11Info::appRootWindow(), NET::WMState);
+         return info.state() & NET::Sticky;
+     }
+-    return d->info->desktop() == NET::OnAllDesktops;
++    return m_info->desktop() == NET::OnAllDesktops;
+ }
+ 
+-int KWindowInfo::desktop() const
++int KWindowInfoPrivateX11::desktop() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMDesktop)) {
+         qWarning() << "Pass NET::WMDesktop to KWindowInfo";
+     }
+ #endif
+@@ -360,107 +287,107 @@ int KWindowInfo::desktop() const
+         if (onAllDesktops()) {
+             return NET::OnAllDesktops;
+         }
+-        return KWindowSystem::viewportWindowToDesktop(d->geometry_);
++        return KWindowSystem::viewportWindowToDesktop(m_geometry);
+     }
+-    return d->info->desktop();
++    return m_info->desktop();
+ }
+ 
+-QRect KWindowInfo::geometry() const
++QRect KWindowInfoPrivateX11::geometry() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMGeometry)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMGeometry)) {
+         qWarning() << "Pass NET::WMGeometry to KWindowInfo";
+     }
+ #endif
+-    return d->geometry_;
++    return m_geometry;
+ }
+ 
+-QRect KWindowInfo::frameGeometry() const
++QRect KWindowInfoPrivateX11::frameGeometry() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMFrameExtents)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS ] & NET::WMFrameExtents)) {
+         qWarning() << "Pass NET::WMFrameExtents to KWindowInfo";
+     }
+ #endif
+-    return d->frame_geometry_;
++    return m_frame_geometry;
+ }
+ 
+-WId KWindowInfo::transientFor() const
++WId KWindowInfoPrivateX11::transientFor() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2TransientFor)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2TransientFor)) {
+         qWarning() << "Pass NET::WM2TransientFor to KWindowInfo";
+     }
+ #endif
+-    return d->info->transientFor();
++    return m_info->transientFor();
+ }
+ 
+-WId KWindowInfo::groupLeader() const
++WId KWindowInfoPrivateX11::groupLeader() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2GroupLeader)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2GroupLeader)) {
+         qWarning() << "Pass NET::WM2GroupLeader to KWindowInfo";
+     }
+ #endif
+-    return d->info->groupLeader();
++    return m_info->groupLeader();
+ }
+ 
+-QByteArray KWindowInfo::windowClassClass() const
++QByteArray KWindowInfoPrivateX11::windowClassClass() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowClass)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowClass)) {
+         qWarning() << "Pass NET::WM2WindowClass to KWindowInfo";
+     }
+ #endif
+-    return d->info->windowClassClass();
++    return m_info->windowClassClass();
+ }
+ 
+-QByteArray KWindowInfo::windowClassName() const
++QByteArray KWindowInfoPrivateX11::windowClassName() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowClass)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowClass)) {
+         qWarning() << "Pass NET::WM2WindowClass to KWindowInfo";
+     }
+ #endif
+-    return d->info->windowClassName();
++    return m_info->windowClassName();
+ }
+ 
+-QByteArray KWindowInfo::windowRole() const
++QByteArray KWindowInfoPrivateX11::windowRole() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowRole)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2WindowRole)) {
+         qWarning() << "Pass NET::WM2WindowRole to KWindowInfo";
+     }
+ #endif
+-    return d->info->windowRole();
++    return m_info->windowRole();
+ }
+ 
+-QByteArray KWindowInfo::clientMachine() const
++QByteArray KWindowInfoPrivateX11::clientMachine() const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2ClientMachine)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2ClientMachine)) {
+         qWarning() << "Pass NET::WM2ClientMachine to KWindowInfo";
+     }
+ #endif
+-    return d->info->clientMachine();
++    return m_info->clientMachine();
+ }
+ 
+-bool KWindowInfo::actionSupported(NET::Action action) const
++bool KWindowInfoPrivateX11::actionSupported(NET::Action action) const
+ {
+ #if !defined(KDE_NO_WARNING_OUTPUT)
+-    if (!(d->info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2AllowedActions)) {
++    if (!(m_info->passedProperties()[ NETWinInfo::PROTOCOLS2 ] & NET::WM2AllowedActions)) {
+         qWarning() << "Pass NET::WM2AllowedActions to KWindowInfo";
+     }
+ #endif
+     if (KWindowSystem::allowedActionsSupported()) {
+-        return d->info->allowedActions() & action;
++        return m_info->allowedActions() & action;
+     } else {
+         return true;    // no idea if it's supported or not -> pretend it is
+     }
+ }
+ 
+ // see NETWM spec section 7.6
+-bool KWindowInfo::isMinimized() const
++bool KWindowInfoPrivateX11::isMinimized() const
+ {
+     if (mappingState() != NET::Iconic) {
+         return false;
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index e32a1150a2c190f23ad456ca8218b012c5d71507..7323a245a00fa356b8d89b2ce96b2468cfe59fe2 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,6 +10,7 @@ set(kwindowsystem_SRCS
+     kxutils.cpp
+     kwindoweffects.cpp
+     kwindoweffects_dummy.cpp
++    kwindowinfo.cpp
+     )
+ 
+ if (HAVE_X11)
+@@ -34,13 +35,17 @@ endif ()
+ if (APPLE)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_mac.cpp
+                                                 kwindowsystem_mac.cpp
+-                                                kwindowinfo_mac.cpp)
++# FIXME: adjust kwindowinfo_mac to inherit from KWindowInfoPrivate
++#                                                 kwindowinfo_mac.cpp
++)
+ endif ()
+ 
+ if (WIN32)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_win.cpp
+                                                 kwindowsystem_win.cpp
+-                                                kwindowinfo_win.cpp)
++# FIXME: adjust kwindowinfo_win to inherit from KWindowInfoPrivate
++#                                                 kwindowinfo_win.cpp
++)
+    set(platformLinkLibraries
+       Qt5::WinExtras # QtWin::fromHICON(), QtWin::toHICON()
+       Ws2_32 # gethostname()
+diff --git a/src/kwindowinfo.h b/src/kwindowinfo.h
+index 171f441ff329a5356ccf560341272199e20c837a..17464b486008c8b9bad03235deee987128a99a07 100644
+--- a/src/kwindowinfo.h
++++ b/src/kwindowinfo.h
+@@ -26,9 +26,12 @@
+ 
+ #include <kwindowsystem_export.h>
+ #include <QWidgetList> //For WId
++#include <QExplicitlySharedDataPointer>
+ 
+ #include <netwm_def.h>
+ 
++class KWindowInfoPrivate;
++
+ /**
+  * Information about a window.
+  */
+@@ -215,13 +218,7 @@ public:
+     KWindowInfo(const KWindowInfo &);
+     KWindowInfo &operator=(const KWindowInfo &);
+ private:
+-    class Private;
+-    Private *d;  //krazy:exclude=dpointer (implicitly shared)
+-#ifdef Q_OS_MAC
+-    // KWindowSystem needs access to the d-pointer
+-    friend class KWindowSystem;
+-    friend class KWindowSystemPrivate;
+-#endif
++    QExplicitlySharedDataPointer<KWindowInfoPrivate> d;
+ };
+ 
+ #endif // multiple inclusion guard
