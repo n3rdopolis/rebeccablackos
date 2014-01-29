@@ -326,12 +326,84 @@ index 0000000..1a2e9c9
 
 
 
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 39783988a292cb0dc62e3de91421e36930821fe2..1df8756581df5d28e7a306e1e6e19527050bab5f 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -10,6 +10,7 @@ set(kwindowsystem_SRCS
+     kxutils.cpp
+     kwindoweffects.cpp
+     kwindoweffects_dummy.cpp
++    kwindowinfo.cpp
+     )
+ 
+ if (KWINDOWSYSTEM_HAVE_X11)
+@@ -34,13 +35,17 @@ endif ()
+ if (APPLE)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_mac.cpp
+                                                 kwindowsystem_mac.cpp
+-                                                kwindowinfo_mac.cpp)
++# FIXME: adjust kwindowinfo_mac to inherit from KWindowInfoPrivate
++#                                                 kwindowinfo_mac.cpp
++)
+ endif ()
+ 
+ if (WIN32)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_win.cpp
+                                                 kwindowsystem_win.cpp
+-                                                kwindowinfo_win.cpp)
++# FIXME: adjust kwindowinfo_win to inherit from KWindowInfoPrivate
++#                                                 kwindowinfo_win.cpp
++)
+    set(platformLinkLibraries
+       Qt5::WinExtras # QtWin::fromHICON(), QtWin::toHICON()
+       Ws2_32 # gethostname()
+diff --git a/src/kwindowinfo.h b/src/kwindowinfo.h
+index 171f441ff329a5356ccf560341272199e20c837a..1e4a45895b567b4844b05cc3e848d773b6846910 100644
+--- a/src/kwindowinfo.h
++++ b/src/kwindowinfo.h
+@@ -26,9 +26,12 @@
+ 
+ #include <kwindowsystem_export.h>
+ #include <QWidgetList> //For WId
++#include <QExplicitlySharedDataPointer>
+ 
+ #include <netwm_def.h>
+ 
++class KWindowInfoPrivate;
++
+ /**
+  * Information about a window.
+  */
+@@ -39,7 +42,6 @@ public:
+      * Reads all the info about the given window.
+      */
+     KWindowInfo(WId window, unsigned long properties, unsigned long properties2 = 0);
+-    KWindowInfo(); // to make QList and others happy
+     ~KWindowInfo();
+     /**
+      * Returns false if this window info is not valid (most probably the given
+@@ -215,13 +217,7 @@ public:
+     KWindowInfo(const KWindowInfo &);
+     KWindowInfo &operator=(const KWindowInfo &);
+ private:
+-    class Private;
+-    Private *d;  //krazy:exclude=dpointer (implicitly shared)
+-#ifdef Q_OS_MAC
+-    // KWindowSystem needs access to the d-pointer
+-    friend class KWindowSystem;
+-    friend class KWindowSystemPrivate;
+-#endif
++    QExplicitlySharedDataPointer<KWindowInfoPrivate> d;
+ };
+ 
+ #endif // multiple inclusion guard
 diff --git a/src/kwindowinfo.cpp b/src/kwindowinfo.cpp
 new file mode 100644
-index 0000000000000000000000000000000000000000..7a1610bd02e0d188b90ccd6d5ef9b7b94d9ef05a
+index 0000000000000000000000000000000000000000..d04fdde213ad34d6412631539f0e0b133acdeae8
 --- /dev/null
 +++ b/src/kwindowinfo.cpp
-@@ -0,0 +1,363 @@
+@@ -0,0 +1,358 @@
 +/*
 + *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
 + *
@@ -354,7 +426,7 @@ index 0000000000000000000000000000000000000000..7a1610bd02e0d188b90ccd6d5ef9b7b9
 +#include "kwindowinfo.h"
 +#include "kwindowinfo_p.h"
 +#include "kwindowsystem.h"
-+#if HAVE_X11
++#if KWINDOWSYSTEM_HAVE_X11
 +#include "kwindowinfo_p_x11.h"
 +#else
 +typedef KWindowInfoPrivateDummy KWindowInfoPrivateX11;
@@ -367,7 +439,7 @@ index 0000000000000000000000000000000000000000..7a1610bd02e0d188b90ccd6d5ef9b7b9
 +KWindowInfoPrivate *KWindowInfoPrivate::create(WId window, unsigned long properties, unsigned long properties2)
 +{
 +    KWindowInfoPrivate *d = Q_NULLPTR;
-+#if HAVE_X11
++#if KWINDOWSYSTEM_HAVE_X11
 +    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
 +        d = new KWindowInfoPrivateX11(window, properties, properties2);
 +    }
@@ -526,11 +598,6 @@ index 0000000000000000000000000000000000000000..7a1610bd02e0d188b90ccd6d5ef9b7b9
 +// public
 +KWindowInfo::KWindowInfo(WId window, unsigned long properties, unsigned long properties2)
 +    : d(KWindowInfoPrivate::create(window, properties, properties2))
-+{
-+}
-+
-+KWindowInfo::KWindowInfo()
-+    : d()
 +{
 +}
 +
@@ -1507,67 +1574,3 @@ index 865d8bed085e987f97f479ea8aa0e6de8567586f..eda31f2d94e23b1dd411a40fd65e96f6
  {
      if (mappingState() != NET::Iconic) {
          return false;
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index e32a1150a2c190f23ad456ca8218b012c5d71507..7323a245a00fa356b8d89b2ce96b2468cfe59fe2 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -10,6 +10,7 @@ set(kwindowsystem_SRCS
-     kxutils.cpp
-     kwindoweffects.cpp
-     kwindoweffects_dummy.cpp
-+    kwindowinfo.cpp
-     )
- 
- if (HAVE_X11)
-@@ -34,13 +35,17 @@ endif ()
- if (APPLE)
-    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_mac.cpp
-                                                 kwindowsystem_mac.cpp
--                                                kwindowinfo_mac.cpp)
-+# FIXME: adjust kwindowinfo_mac to inherit from KWindowInfoPrivate
-+#                                                 kwindowinfo_mac.cpp
-+)
- endif ()
- 
- if (WIN32)
-    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_win.cpp
-                                                 kwindowsystem_win.cpp
--                                                kwindowinfo_win.cpp)
-+# FIXME: adjust kwindowinfo_win to inherit from KWindowInfoPrivate
-+#                                                 kwindowinfo_win.cpp
-+)
-    set(platformLinkLibraries
-       Qt5::WinExtras # QtWin::fromHICON(), QtWin::toHICON()
-       Ws2_32 # gethostname()
-diff --git a/src/kwindowinfo.h b/src/kwindowinfo.h
-index 171f441ff329a5356ccf560341272199e20c837a..17464b486008c8b9bad03235deee987128a99a07 100644
---- a/src/kwindowinfo.h
-+++ b/src/kwindowinfo.h
-@@ -26,9 +26,12 @@
- 
- #include <kwindowsystem_export.h>
- #include <QWidgetList> //For WId
-+#include <QExplicitlySharedDataPointer>
- 
- #include <netwm_def.h>
- 
-+class KWindowInfoPrivate;
-+
- /**
-  * Information about a window.
-  */
-@@ -215,13 +218,7 @@ public:
-     KWindowInfo(const KWindowInfo &);
-     KWindowInfo &operator=(const KWindowInfo &);
- private:
--    class Private;
--    Private *d;  //krazy:exclude=dpointer (implicitly shared)
--#ifdef Q_OS_MAC
--    // KWindowSystem needs access to the d-pointer
--    friend class KWindowSystem;
--    friend class KWindowSystemPrivate;
--#endif
-+    QExplicitlySharedDataPointer<KWindowInfoPrivate> d;
- };
- 
- #endif // multiple inclusion guard
