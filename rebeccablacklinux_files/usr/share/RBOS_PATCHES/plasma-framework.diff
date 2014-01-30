@@ -1,3 +1,29 @@
+diff --git a/src/declarativeimports/core/dialog.cpp b/src/declarativeimports/core/dialog.cpp
+index 0248596..8b62ac0 100644
+--- a/src/declarativeimports/core/dialog.cpp
++++ b/src/declarativeimports/core/dialog.cpp
+@@ -37,9 +37,9 @@
+ 
+ #include <QDebug>
+ 
+-#if HAVE_XCB_SHAPE
+-#include <QX11Info>
+-#include <xcb/shape.h>
++#ifdef HAVE_X11
++//#include <QX11Info>
++//#include <xcb/shape.h>
+ #endif
+ 
+ DialogProxy::DialogProxy(QQuickItem *parent)
+@@ -530,7 +530,7 @@ void DialogProxy::updateInputShape()
+     if (!isVisible()) {
+         return;
+     }
+-#if HAVE_XCB_SHAPE
++#if 0
+     if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
+         xcb_connection_t *c = QX11Info::connection();
+         static bool s_shapeExtensionChecked = false;
 diff --git a/src/declarativeimports/core/dialogshadows.cpp b/src/declarativeimports/core/dialogshadows.cpp
 index 5a0ee82..cd440b3 100644
 --- a/src/declarativeimports/core/dialogshadows.cpp
