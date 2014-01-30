@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.kde.org/kde-workspace
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=16c00371df99d1e74705581586ce84c202c795dd
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -p1 < /usr/share/RBOS_PATCHES/kde-workspace.diff
-cp -R /usr/share/RBOS_PATCHES/kde-workspace/ .
+cp -R /usr/share/RBOS_PATCHES/kde-workspace/. .
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -72,7 +72,6 @@ make -i
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
 make install -i
 }
 
