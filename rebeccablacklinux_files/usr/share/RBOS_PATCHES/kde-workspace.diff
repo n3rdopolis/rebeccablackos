@@ -1,0 +1,820 @@
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 9020d33..1936e0e 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -268,10 +268,10 @@ ecm_optional_add_subdirectory( systemsettings )
+ if(NOT WIN32)
+    ecm_optional_add_subdirectory( kcheckpass )
+    ecm_optional_add_subdirectory( kwin )
+-   ecm_optional_add_subdirectory( ksmserver )
++   #ecm_optional_add_subdirectory( ksmserver )
+ 
+    ecm_optional_add_subdirectory( ksplash )
+-   ecm_optional_add_subdirectory( powerdevil )
++   #ecm_optional_add_subdirectory( powerdevil )
+    if(Qt5WebKitWidgets_FOUND)
+         if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
+             ecm_optional_add_subdirectory( ksysguard )
+@@ -280,8 +280,8 @@ if(NOT WIN32)
+ endif()
+ #
+ ecm_optional_add_subdirectory(kcontrol)
+-ecm_optional_add_subdirectory(klipper)
+-ecm_optional_add_subdirectory(kmenuedit)
++#ecm_optional_add_subdirectory(klipper)
++#ecm_optional_add_subdirectory(kmenuedit)
+ #    macro_optional_add_subdirectory(krunner)
+ #    macro_optional_add_subdirectory(solid)
+ if(LIBBSD_FOUND)
+diff --git a/doc/kcontrol/CMakeLists.txt b/doc/kcontrol/CMakeLists.txt
+index ff92615..685b2ea 100644
+--- a/doc/kcontrol/CMakeLists.txt
++++ b/doc/kcontrol/CMakeLists.txt
+@@ -11,7 +11,7 @@ add_subdirectory(powerdevil)
+ add_subdirectory(kwincompositing)
+ add_subdirectory(kwinscreenedges)
+ 
+-if ( Q_WS_X11 )
++if ( HAVE_X11 )
+ add_subdirectory(autostart)
+ add_subdirectory(bell)
+ add_subdirectory(cursortheme)
+diff --git a/kcontrol/fonts/fonts.cpp b/kcontrol/fonts/fonts.cpp
+index 3556d55..9747761 100644
+--- a/kcontrol/fonts/fonts.cpp
++++ b/kcontrol/fonts/fonts.cpp
+@@ -50,11 +50,11 @@
+ #endif
+ #endif
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/Xlib.h>
+ #endif
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ // X11 headers
+ #undef Bool
+ #undef Unsorted
+@@ -636,7 +636,7 @@ KFonts::KFonts(QWidget *parent, const QVariantList &args)
+    lay->addWidget( aaSettingsButton, 0, 2 );
+    connect(cbAA, SIGNAL(activated(int)), SLOT(slotUseAntiAliasing()));
+ #endif
+-#ifdef HAVE_X11
++#if HAVE_X11
+    checkboxForceDpi = new QCheckBox( i18n( "Force fonts DPI:" ), this );
+    lay->addWidget( checkboxForceDpi, 1, 0 );
+    spinboxDpi = new QSpinBox( this );
+@@ -694,7 +694,7 @@ void KFonts::defaults()
+   cbAA->setCurrentIndex( useAA );
+   aaSettings->defaults();
+ #endif
+-#ifdef HAVE_X11
++#if HAVE_X11
+   checkboxForceDpi->setChecked( false );
+   spinboxDpi->setValue( 96 );
+ #endif
+@@ -716,7 +716,7 @@ void KFonts::load()
+ 
+   KConfig _cfgfonts( "kcmfonts" );
+   KConfigGroup cfgfonts(&_cfgfonts, "General");
+-#ifdef HAVE_X11
++#if HAVE_X11
+   int dpicfg = cfgfonts.readEntry( "forceFontDPI", 0 );
+   if (dpicfg <= 0) {
+     checkboxForceDpi->setChecked(false);
+@@ -751,7 +751,7 @@ void KFonts::save()
+ 
+   KConfig _cfgfonts( "kcmfonts" );
+   KConfigGroup cfgfonts(&_cfgfonts, "General");
+-#ifdef HAVE_X11
++#if HAVE_X11
+   int dpi = ( checkboxForceDpi->isChecked() ? spinboxDpi->value() : 0 );
+   cfgfonts.writeEntry( "forceFontDPI", dpi );
+ #endif
+@@ -759,7 +759,7 @@ void KFonts::save()
+   cfgfonts.writeEntry( "dontChangeAASettings", cbAA->currentIndex() == AASystem );
+ #endif
+   cfgfonts.sync();
+-#ifdef HAVE_X11
++#if HAVE_X11
+   // if the setting is reset in the module, remove the dpi value,
+   // otherwise don't explicitly remove it and leave any possible system-wide value
+   if( dpi == 0 && dpi_original != 0 ) {
+@@ -796,7 +796,7 @@ void KFonts::save()
+     dpi_original = dpi;
+   }
+ #else
+-#ifdef HAVE_X11
++#if HAVE_X11
+   if(dpi != dpi_original) {
+     KMessageBox::information(this,
+       i18n(
+diff --git a/kcontrol/fonts/fonts.h b/kcontrol/fonts/fonts.h
+index 72988ef..241fbfb 100644
+--- a/kcontrol/fonts/fonts.h
++++ b/kcontrol/fonts/fonts.h
+@@ -115,7 +115,7 @@ private:
+     QPushButton *aaSettingsButton;
+     FontAASettings *aaSettings;
+ #endif
+-#ifdef HAVE_X11
++#if HAVE_X11
+     int dpi_original;
+     QCheckBox *checkboxForceDpi;
+     QSpinBox* spinboxDpi;
+diff --git a/kcontrol/krdb/krdb.cpp b/kcontrol/krdb/krdb.cpp
+index b84e676..cddfe24 100644
+--- a/kcontrol/krdb/krdb.cpp
++++ b/kcontrol/krdb/krdb.cpp
+@@ -47,7 +47,7 @@
+ #include <KLocalizedString>
+ 
+ #include "krdb.h"
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/Xlib.h>
+ #include <QX11Info>
+ #endif
+@@ -558,7 +558,7 @@ void runRdb( uint flags )
+ 
+     delete settings;
+     QApplication::flush();
+-#ifdef HAVE_X11
++#if HAVE_X11
+     if (qApp->platformName() == QStringLiteral("xcb")) {
+         // We let KIPC take care of ourselves, as we are in a KDE app with
+         // QApp::setDesktopSettingsAware(false);
+diff --git a/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h b/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
+index 40adafa..4040b1a 100644
+--- a/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
++++ b/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
+@@ -30,7 +30,7 @@
+ 
+ #include <kdemacros.h>
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/Xlib.h>
+ #include <fixx11h.h>
+ #else
+diff --git a/klipper/klipper.cpp b/klipper/klipper.cpp
+index f658b35..cde65f5 100644
+--- a/klipper/klipper.cpp
++++ b/klipper/klipper.cpp
+@@ -58,7 +58,7 @@
+ #include <prison/QRCodeBarcode>
+ #endif
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <QX11Info>
+ #include <X11/Xlib.h>
+ #include <X11/Xatom.h>
+@@ -601,7 +601,7 @@ const int MAX_CLIPBOARD_CHANGES = 10; // max changes per second
+ 
+ bool Klipper::blockFetchingNewData()
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+ // Hacks for #85198 and #80302.
+ // #85198 - block fetching new clipboard contents if Shift is pressed and mouse is not,
+ //   this may mean the user is doing selection using the keyboard, in which case
+diff --git a/klipper/urlgrabber.cpp b/klipper/urlgrabber.cpp
+index c5848a9..923aa94 100644
+--- a/klipper/urlgrabber.cpp
++++ b/klipper/urlgrabber.cpp
+@@ -45,7 +45,7 @@
+ #include "history.h"
+ #include "historystringitem.h"
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/Xlib.h>
+ #include <X11/Xatom.h>
+ #include <fixx11h.h>
+@@ -357,7 +357,7 @@ void URLGrabber::saveSettings() const
+ // digged a little bit in netwm.cpp
+ bool URLGrabber::isAvoidedWindow() const
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     Display *d = QX11Info::display();
+     static Atom wm_class = XInternAtom( d, "WM_CLASS", true );
+     static Atom active_window = XInternAtom( d, "_NET_ACTIVE_WINDOW", true );
+diff --git a/kwin/CMakeLists.txt b/kwin/CMakeLists.txt
+index 9da6849..4425773 100644
+--- a/kwin/CMakeLists.txt
++++ b/kwin/CMakeLists.txt
+@@ -30,49 +30,8 @@ endif()
+ 
+ cmake_dependent_option(KWIN_BUILD_KAPPMENU "Build without appmenu support" ON "KWIN_BUILD_DECORATIONS" FALSE)
+ 
+-set(KWIN_BUILD_OPENGL FALSE)
+-set(KWIN_BUILD_OPENGLES FALSE)
+-if(OPENGL_FOUND AND (${Qt5Gui_OPENGL_IMPLEMENTATION} STREQUAL "GL"))
+-    set(KWIN_BUILD_OPENGL TRUE)
+-    message("Building KWin with OpenGL support")
+-endif()
+-if(OPENGLES_FOUND AND (${Qt5Gui_OPENGL_IMPLEMENTATION} STREQUAL "GLESv2"))
+-    set(KWIN_BUILD_OPENGLES TRUE)
+-    message("Building KWin with OpenGL ES 2 support")
+-endif()
+-
+-if(NOT KWIN_BUILD_OPENGL AND NOT KWIN_BUILD_OPENGLES)
+-    message(FATAL_ERROR "KWin needs to be built against either OpenGL or OpenGL ES 2. Check your Qt config!")
+-endif()
+-
+-# KWIN_HAVE_XRENDER_COMPOSITING - whether XRender-based compositing support is available: may be disabled
+-if( KWIN_BUILD_XRENDER_COMPOSITING )
+-    set( KWIN_HAVE_XRENDER_COMPOSITING 1 )
+-endif()
+-
+-if(KWIN_BUILD_OPENGL)
+-  include_directories(${OPENGL_INCLUDE_DIR})
+-endif()
+-
+-if(OPENGL_EGL_FOUND)
+-    include_directories(${OPENGLES_EGL_INCLUDE_DIR})
+-    set(KWIN_HAVE_EGL 1)
+-endif()
+-
+-if(KWIN_BUILD_OPENGLES)
+-  include_directories(${OPENGLES_INCLUDE_DIR})
+-endif()
+-
+-include_directories(${XCB_INCLUDE_DIR})
+-
+-if(WAYLAND_FOUND)
+-    include_directories(${WAYLAND_INCLUDE_DIR})
+-endif()
+-
+ # for things that are also used by kwin libraries
+ configure_file(libkwineffects/kwinconfig.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/libkwineffects/kwinconfig.h )
+-# for kwin internal things
+-configure_file(config-kwin.h.cmake ${CMAKE_CURRENT_BINARY_DIR}/config-kwin.h )
+ 
+ 
+ ########### global ###############
+@@ -88,285 +47,10 @@ include_directories(BEFORE
+     )
+ 
+ add_subdirectory( libkdecorations )
+-add_subdirectory( libkwineffects )
+-add_subdirectory( killer )
+-if(KWIN_BUILD_KCMS)
+-    add_subdirectory( kcmkwin )
+-endif()
+-
+-if( KWIN_BUILD_DECORATIONS )
+-    add_subdirectory( clients )
+-endif()
+-add_subdirectory( data )
+-
+-add_subdirectory( effects )
+-add_subdirectory( scripts )
+-add_subdirectory( tabbox )
+-
+-if(KWIN_BUILD_SCRIPTING)
+-    add_subdirectory(scripting)
+-endif()
+ 
+ add_definitions(-DKDE_DEFAULT_DEBUG_AREA=1212)
+ 
+-########### next target ###############
+-
+-set(kwin_KDEINIT_SRCS
+-   workspace.cpp 
+-   dbusinterface.cpp
+-   client.cpp 
+-   client_machine.cpp
+-   cursor.cpp
+-   tabgroup.cpp
+-   focuschain.cpp
+-   netinfo.cpp
+-   placement.cpp 
+-   atoms.cpp 
+-   utils.cpp 
+-   layers.cpp 
+-   main.cpp 
+-   options.cpp 
+-   outline.cpp
+-   decorations.cpp
+-   events.cpp 
+-   killwindow.cpp 
+-   geometrytip.cpp 
+-   screens.cpp
+-   shadow.cpp
+-   sm.cpp 
+-   group.cpp 
+-   bridge.cpp 
+-   manage.cpp 
+-   overlaywindow.cpp
+-   activation.cpp 
+-   useractions.cpp 
+-   geometry.cpp 
+-   rules.cpp
+-   composite.cpp
+-   toplevel.cpp
+-   unmanaged.cpp
+-   scene.cpp
+-   scene_xrender.cpp
+-   scene_opengl.cpp
+-   scene_qpainter.cpp
+-   glxbackend.cpp
+-   thumbnailitem.cpp
+-   lanczosfilter.cpp
+-   deleted.cpp
+-   effects.cpp
+-   compositingprefs.cpp
+-   paintredirector.cpp
+-   virtualdesktops.cpp
+-   xcbutils.cpp
+-   )
+-
+-if(KWIN_BUILD_SCRIPTING)
+-    set(
+-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+-        scripting/scripting.cpp
+-        scripting/workspace_wrapper.cpp
+-        scripting/meta.cpp
+-        scripting/scriptedeffect.cpp
+-        scripting/scriptingutils.cpp
+-        scripting/timer.cpp
+-        scripting/scripting_model.cpp
+-        scripting/dbuscall.cpp
+-        scripting/screenedgeitem.cpp
+-    )
+-endif()
+-
+-if(KWIN_BUILD_TABBOX)
+-    set(
+-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+-        tabbox/tabbox.cpp
+-        tabbox/clientmodel.cpp
+-        tabbox/desktopchain.cpp
+-        tabbox/desktopmodel.cpp
+-        tabbox/switcheritem.cpp
+-        tabbox/tabboxconfig.cpp
+-        tabbox/tabboxhandler.cpp
+-  )
+-endif()
+-
+-if(KWIN_BUILD_SCREENEDGES)
+-    set(
+-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+-        screenedge.cpp
+-    )
+-endif()
+-
+-if(KWIN_BUILD_KAPPMENU)
+-    set(
+-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+-        appmenu.cpp
+-    )
+-    qt5_add_dbus_interface(kwin_KDEINIT_SRCS
+-        ${KDEBASE_WORKSPACE_SOURCE_DIR}/appmenu/org.kde.kappmenu.xml appmenu_interface)
+-endif()
+-
+-if(KWIN_BUILD_ACTIVITIES)
+-    set(
+-        kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS}
+-        activities.cpp
+-    )
+-endif()
+-
+-if(KWIN_HAVE_EGL)
+-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} eglonxbackend.cpp)
+-endif()
+-
+-if(WAYLAND_FOUND)
+-    set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} wayland_backend.cpp)
+-    if(KWIN_HAVE_EGL)
+-        set(kwin_KDEINIT_SRCS ${kwin_KDEINIT_SRCS} egl_wayland_backend.cpp)
+-    endif()
+-endif()
+-
+-kconfig_add_kcfg_files(kwin_KDEINIT_SRCS settings.kcfgc)
+-
+-qt5_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.KWin.xml dbusinterface.h KWin::DBusInterface )
+-qt5_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.kwin.Compositing.xml composite.h KWin::Compositor )
+-qt5_add_dbus_adaptor( kwin_KDEINIT_SRCS org.kde.kwin.Effects.xml effects.h KWin::EffectsHandlerImpl )
+-
+-qt5_add_dbus_interface( kwin_KDEINIT_SRCS
+-  ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/org.kde.KSMServerInterface.xml ksmserver_interface)
+-qt5_add_dbus_interface( kwin_KDEINIT_SRCS
+-    ${KDEBASE_WORKSPACE_SOURCE_DIR}/ksmserver/screenlocker/dbus/org.freedesktop.ScreenSaver.xml screenlocker_interface)
+-
+-qt5_add_resources( kwin_KDEINIT_SRCS resources.qrc )
+-
+-########### target link libraries ###############
+-
+-set(kwin_OWN_LIBS
+-    kdecorations
+-    kwineffects
+-    kwin4_effect_builtins
+-)
+-
+-set(kwin_QT_LIBS
+-    Qt5::Concurrent
+-    Qt5::DBus
+-    Qt5::Quick
+-    Qt5::X11Extras
+-)
+-
+-set(kwin_KDE_LIBS
+-    KF5::Declarative
+-    KF5::ConfigCore
+-    KF5::CoreAddons
+-    KF5::Crash
+-    KF5::GlobalAccel
+-    KF5::I18n
+-    KF5::Notifications
+-    KF5::Service
+-    KF5::Plasma
+-    KF5::WindowSystem
+-    KF5::XmlGui
+-)
+-
+-set(kwin_XLIB_LIBS
+-    ${X11_X11_LIB}
+-    ${X11_Xext_LIB}
+-    ${X11_Xcursor_LIB}
+-    ${X11_ICE_LIB}
+-    ${X11_SM_LIB}
+-)
+-
+-set(kwin_XCB_LIBS
+-    ${XCB_XCB_LIBRARY}
+-    ${XCB_XFIXES_LIBRARY}
+-    ${XCB_DAMAGE_LIBRARY}
+-    ${XCB_COMPOSITE_LIBRARY}
+-    ${XCB_SHAPE_LIBRARY}
+-    ${XCB_SYNC_LIBRARY}
+-    ${XCB_RENDER_LIBRARY}
+-    ${XCB_RANDR_LIBRARY}
+-    ${XCB_KEYSYMS_LIBRARY}
+-    ${XCB_SHM_LIBRARY}
+-)
+-
+-set(kwin_WAYLAND_LIBS
+-    ${WAYLAND_CLIENT_LIBRARIES}
+-    ${XCB_XTEST_LIBRARY}
+-)
+-
+-set(kwin_WAYLAND_EGL_LIBS
+-    ${WAYLAND_EGL_LIBRARIES}
+-)
+-
+-set(kwin_OPENGL_LIBS )
+-
+-find_library(XF86VM_LIBRARY Xxf86vm)
+-if (XF86VM_LIBRARY)
+-    set(kwin_XLIB_LIBS ${kwin_XLIB_LIBS} ${XF86VM_LIBRARY})
+-else()
+-    add_definitions(-DKWIN_NO_XF86VM)
+-endif()
+-
+-if(KWIN_BUILD_SCRIPTING)
+-    set(kwin_QT_LIBS ${kwin_QT_LIBS} Qt5::Script)
+-endif()
+-
+-if(KWIN_BUILD_ACTIVITIES)
+-    set(kwin_KDE_LIBS ${kwin_KDE_LIBS} ${KACTIVITIES_LIBRARY})
+-endif()
+-
+-if(OPENGL_EGL_FOUND)
+-    set(kwin_OPENGL_LIBS ${kwin_OPENGL_LIBS} ${OPENGLES_EGL_LIBRARY})
+-endif()
+-
+-set(kwinLibs
+-    ${kwin_OWN_LIBS}
+-    ${kwin_QT_LIBS}
+-    ${kwin_KDE_LIBS}
+-    ${kwin_XLIB_LIBS}
+-    ${kwin_XCB_LIBS}
+-    ${kwin_OPENGL_LIBS}
+-)
+-
+-if(WAYLAND_FOUND)
+-    set(kwinLibs ${kwinLibs} ${kwin_WAYLAND_LIBS})
+-    if(KWIN_HAVE_EGL)
+-        set(kwinLibs ${kwinLibs} ${kwin_WAYLAND_EGL_LIBS})
+-    endif()
+-endif()
+-
+-kf5_add_kdeinit_executable( kwin ${kwin_KDEINIT_SRCS})
+-
+-target_link_libraries(kdeinit_kwin ${kwinLibs})
+-set_target_properties(kwin PROPERTIES OUTPUT_NAME ${KWIN_NAME})
+-generate_export_header(kdeinit_kwin EXPORT_FILE_NAME kwin_export.h)
+-
+-if(KWIN_BUILD_OPENGL)
+-    if( KWIN_BUILD_OPENGL_1_COMPOSITING )
+-        set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS -DKWIN_HAVE_OPENGL_1)
+-    endif()
+-  target_link_libraries(kdeinit_kwin kwinglutils ${OPENGL_gl_LIBRARY})
+-  # -ldl used by OpenGL code
+-  find_library(DL_LIBRARY dl)
+-  if (DL_LIBRARY)
+-    target_link_libraries(kdeinit_kwin ${DL_LIBRARY})
+-  endif()
+-elseif(KWIN_BUILD_OPENGLES)
+-  target_link_libraries(kdeinit_kwin ${kwinLibs} kwinglesutils ${OPENGLES_LIBRARIES})
+-  set_target_properties(kdeinit_kwin PROPERTIES COMPILE_FLAGS "-DKWIN_HAVE_OPENGLES")
+-endif()
+-
+-install(TARGETS kdeinit_kwin ${INSTALL_TARGETS_DEFAULT_ARGS} )
+-install(TARGETS kwin         ${INSTALL_TARGETS_DEFAULT_ARGS} )
+-
+-########### install files ###############
+-
+-install( FILES kwin.kcfg  DESTINATION  ${KCFG_INSTALL_DIR} RENAME ${KWIN_NAME}.kcfg )
+-install( FILES kwin.notifyrc  DESTINATION  ${DATA_INSTALL_DIR}/${KWIN_NAME} RENAME ${KWIN_NAME}.notifyrc)
+-install( FILES org.kde.KWin.xml DESTINATION ${DBUS_INTERFACES_INSTALL_DIR} )
+-install( FILES ${CMAKE_CURRENT_BINARY_DIR}/kwin_export.h DESTINATION ${INCLUDE_INSTALL_DIR} COMPONENT Devel)
+-
+-if( KWIN_BUILD_SCRIPTING )
+-    # Install the KWin/WindowSwitcher service type
+-    install( FILES scripting/kwinscript.desktop DESTINATION ${SERVICETYPES_INSTALL_DIR} )
+-endif()
+ 
+ ecm_install_icons( ${ICON_INSTALL_DIR} )
+ 
+-add_subdirectory(autotests)
++
+diff --git a/libs/CMakeLists.txt b/libs/CMakeLists.txt
+index 089b045..6889eba 100644
+--- a/libs/CMakeLists.txt
++++ b/libs/CMakeLists.txt
+@@ -5,12 +5,12 @@ add_subdirectory(oxygen)
+ #add_subdirectory(kdm)
+ #add_subdirectory(plasmagenericshell)
+ if(NOT WIN32)
+-    add_subdirectory(taskmanager)
++    #add_subdirectory(taskmanager)
+ endif()
+ 
+ if(NOT WIN32)
+     if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
+-        add_subdirectory(ksysguard)
++        #add_subdirectory(ksysguard)
+     endif ()
+ endif()
+ 
+diff --git a/libs/kworkspace/kdisplaymanager.cpp b/libs/kworkspace/kdisplaymanager.cpp
+index d562545..4a58bfb 100644
+--- a/libs/kworkspace/kdisplaymanager.cpp
++++ b/libs/kworkspace/kdisplaymanager.cpp
+@@ -19,7 +19,7 @@
+ 
+ #include "kdisplaymanager.h"
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ 
+ #include <kuser.h>
+ 
+diff --git a/libs/kworkspace/kdisplaymanager.h b/libs/kworkspace/kdisplaymanager.h
+index e83ab41..a53c943 100644
+--- a/libs/kworkspace/kdisplaymanager.h
++++ b/libs/kworkspace/kdisplaymanager.h
+@@ -37,7 +37,7 @@ typedef QList<SessEnt> SessList;
+ 
+ class KWORKSPACE_EXPORT KDisplayManager {
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ 
+ public:
+     KDisplayManager();
+@@ -91,7 +91,7 @@ public:
+ #endif // HAVE_X11
+ 
+ private:
+-#ifdef HAVE_X11
++#if HAVE_X11
+     class Private;
+     Private * const d;
+ #endif // HAVE_X11
+diff --git a/libs/kworkspace/kwindowlistmenu.cpp b/libs/kworkspace/kwindowlistmenu.cpp
+index 90c39e8..cd2f06e 100644
+--- a/libs/kworkspace/kwindowlistmenu.cpp
++++ b/libs/kworkspace/kwindowlistmenu.cpp
+@@ -27,12 +27,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ #include <QApplication>
+ #include <QtWidgets/QDesktopWidget>
+ #include <QtGui/QPainter>
++#if HAVE_X11
+ #include <QtX11Extras/QX11Info>
++#endif
+ 
+ #include <QtDBus/QtDBus>
+ #include <KLocalizedString>
+ #include <kwindowsystem.h>
++
++#if HAVE_X11
+ #include <netwm.h>
++#endif
+ 
+ #undef Bool
+ #include "kwindowlistmenu.moc"
+@@ -67,7 +72,7 @@ KWindowListMenu::~KWindowListMenu()
+ 
+ static bool standaloneDialog( const KWindowInfo* info, const QList<KWindowInfo*>& list )
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+   WId group = info->groupLeader();
+ 
+   if ( group == 0 )
+@@ -102,8 +107,8 @@ void KWindowListMenu::init()
+     addSeparator();
+ 
+   QList<KWindowInfo> windows;
+-  foreach ( WId id, KWindowSystem::windows() )
+-    windows.append( KWindowSystem::windowInfo( id, NET::WMDesktop ) );
++  //foreach ( WId id, KWindowSystem::windows() )
++  //  windows.append( KWindowSystem::windowInfo( id, NET::WMDesktop ) );
+ 
+   bool showAllDesktopsGroup = ( numberOfDesktops > 1 );
+ 
+@@ -117,7 +122,7 @@ void KWindowListMenu::init()
+         //setItemChecked(1000 + d, true);
+ 
+     QList<KWindowInfo*> list;
+-
++/*
+     foreach (const KWindowInfo &wi, windows) {
+       if ( (wi.desktop() == j) || (onAllDesktops && wi.onAllDesktops())
+            || (!showAllDesktopsGroup && wi.onAllDesktops()) ) {
+@@ -126,7 +131,7 @@ void KWindowListMenu::init()
+                          NET::WM2GroupLeader | NET::WM2TransientFor ) );
+       }
+     }
+-
++*/
+     qStableSort( list.begin(), list.end(), compareKWinWindowInfo );
+ 
+     foreach ( KWindowInfo* info, list ) {
+diff --git a/libs/kworkspace/kworkspace.cpp b/libs/kworkspace/kworkspace.cpp
+index 996d7ef..29a826f 100644
+--- a/libs/kworkspace/kworkspace.cpp
++++ b/libs/kworkspace/kworkspace.cpp
+@@ -29,7 +29,7 @@
+ #include <ksmserver_interface.h>
+ #include <QSocketNotifier>
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/Xlib.h>
+ #include <X11/Xutil.h>
+ #include <X11/Xatom.h>
+@@ -37,7 +37,7 @@
+ #include <fixx11h.h>
+ #endif
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #define DISPLAY "DISPLAY"
+ #elif defined(Q_WS_QWS)
+ #define DISPLAY "QWS_DISPLAY"
+@@ -56,7 +56,7 @@
+ 
+ namespace KWorkSpace
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+ static void save_yourself_callback( SmcConn conn_P, SmPointer, int, Bool , int, Bool )
+     {
+     SmcSaveYourselfDone( conn_P, True );
+@@ -68,7 +68,7 @@ static void dummy_callback( SmcConn, SmPointer )
+ #endif
+ KRequestShutdownHelper::KRequestShutdownHelper()
+     {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     SmcCallbacks calls;
+     calls.save_yourself.callback = save_yourself_callback;
+     calls.die.callback = dummy_callback;
+@@ -128,7 +128,7 @@ KRequestShutdownHelper::KRequestShutdownHelper()
+ 
+ KRequestShutdownHelper::~KRequestShutdownHelper()
+     {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     if( conn != NULL )
+         {
+         delete notifier;
+@@ -139,7 +139,7 @@ KRequestShutdownHelper::~KRequestShutdownHelper()
+ 
+ void KRequestShutdownHelper::processData()
+     {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     if( conn != NULL )
+         IceProcessMessages( SmcGetIceConnection( conn ), 0, 0 );
+ #endif    
+@@ -147,7 +147,7 @@ void KRequestShutdownHelper::processData()
+ 
+ bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
+     {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     if( conn == NULL )
+         return false;
+     SmcRequestSaveYourself( conn, SmSaveBoth, True, SmInteractStyleAny,
+@@ -157,7 +157,7 @@ bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
+ #endif    
+     return true;
+     }
+-#ifdef HAVE_X11
++#if HAVE_X11
+ static KRequestShutdownHelper* helper = NULL;
+ 
+ static void cleanup_sm()
+@@ -168,7 +168,7 @@ static void cleanup_sm()
+ 
+ void requestShutDown(ShutdownConfirm confirm, ShutdownType sdtype, ShutdownMode sdmode)
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     /*  use ksmserver's dcop interface if necessary  */
+     if ( confirm == ShutdownConfirmYes ||
+          sdtype != ShutdownTypeDefault ||
+@@ -192,7 +192,7 @@ bool canShutDown( ShutdownConfirm confirm,
+                   ShutdownType sdtype,
+                   ShutdownMode sdmode )
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     if ( confirm == ShutdownConfirmYes ||
+          sdtype != ShutdownTypeDefault ||
+          sdmode != ShutdownModeDefault )
+@@ -214,7 +214,7 @@ bool canShutDown( ShutdownConfirm confirm,
+ static QTime smModificationTime;
+ void propagateSessionManager()
+ {
+-#ifdef HAVE_X11
++#if HAVE_X11
+     QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)+"/KSMserver");
+     QString display = QString::fromLocal8Bit( ::getenv(DISPLAY) );
+     // strip the screen number from the display
+diff --git a/libs/kworkspace/kworkspace_p.h b/libs/kworkspace/kworkspace_p.h
+index 4a9dee8..2a3c15b 100644
+--- a/libs/kworkspace/kworkspace_p.h
++++ b/libs/kworkspace/kworkspace_p.h
+@@ -23,7 +23,7 @@
+ 
+ #include "kworkspace.h"
+ 
+-#ifdef HAVE_X11
++#if HAVE_X11
+ #include <X11/SM/SMlib.h>
+ #endif
+ 
+@@ -44,7 +44,7 @@ class KRequestShutdownHelper
+     private Q_SLOTS:
+         void processData();
+     private:
+-#ifdef HAVE_X11
++#if HAVE_X11
+         SmcConn connection() const { return conn; }
+         SmcConn conn;
+ #endif
+diff --git a/libs/taskmanager/task.h b/libs/taskmanager/task.h
+index 180a470..1b262dd 100644
+--- a/libs/taskmanager/task.h
++++ b/libs/taskmanager/task.h
+@@ -278,7 +278,7 @@ public:
+     //* @internal
+     ::TaskManager::TaskChanges refresh(WindowProperties dirty);
+     //* @internal
+-#ifdef HAVE_X11
++#if HAVE_X11
+     void addTransient(WId w, const KWindowInfo &info);
+ #endif
+     //* @internal
+diff --git a/libs/taskmanager/taskactions.cpp b/libs/taskmanager/taskactions.cpp
+index 0eebe13..0a0bc10 100644
+--- a/libs/taskmanager/taskactions.cpp
++++ b/libs/taskmanager/taskactions.cpp
+@@ -38,13 +38,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+ #include <KServiceTypeTrader>
+ #include <KDesktopFile>
+ #include <KRun>
++#if HAVE_X11
+ #include <NETRootInfo>
++#endif
+ 
+ #include <QtCore/QMap>
+ #include <QtGui/QHelpEvent>
+ #include <QtWidgets/QToolTip>
++#if HAVE_X11
+ #include <QX11Info>
+-
++#endif
+ ///////////////////////////////////////////////////////////////////////////////
+ // NOTE: if you change the menu, keep kde-workspace/kwin/useractions.cpp in sync
+ //////////////////////////////////////////////////////////////////////////////
