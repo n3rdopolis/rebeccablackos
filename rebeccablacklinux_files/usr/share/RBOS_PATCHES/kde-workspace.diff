@@ -263,6 +263,20 @@ index c5848a9..923aa94 100644
      Display *d = QX11Info::display();
      static Atom wm_class = XInternAtom( d, "WM_CLASS", true );
      static Atom active_window = XInternAtom( d, "_NET_ACTIVE_WINDOW", true );
+diff --git a/kstyles/oxygen/oxygenstylehelper.cpp b/kstyles/oxygen/oxygenstylehelper.cpp
+index 7e2de41..c0b17b9 100644
+--- a/kstyles/oxygen/oxygenstylehelper.cpp
++++ b/kstyles/oxygen/oxygenstylehelper.cpp
+@@ -681,7 +681,8 @@ namespace Oxygen
+         return reply && reply->owner;
+         #else
+         // use KWindowSystem
+-        return KWindowSystem::compositingActive();
++        //return KWindowSystem::compositingActive();
++	return 0;
+         #endif
+     }
+ 
 diff --git a/kwin/CMakeLists.txt b/kwin/CMakeLists.txt
 index 9da6849..4425773 100644
 --- a/kwin/CMakeLists.txt
