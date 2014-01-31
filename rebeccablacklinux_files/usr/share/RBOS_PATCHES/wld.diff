@@ -1,7 +1,15 @@
 diff --git a/config.mk b/config.mk
-index 4bb9a85..dbde346 100644
+index 4bb9a85..3489e7c 100644
 --- a/config.mk
 +++ b/config.mk
+@@ -1,6 +1,6 @@
+ # wld: config.mk
+ 
+-PREFIX              = /usr/local
++PREFIX              = /opt
+ LIBDIR              = $(PREFIX)/lib
+ INCLUDEDIR          = $(PREFIX)/include
+ PKGCONFIGDIR        = $(LIBDIR)/pkgconfig
 @@ -11,8 +11,8 @@ CFLAGS              = -pipe
  ENABLE_DEBUG        = 1
  
