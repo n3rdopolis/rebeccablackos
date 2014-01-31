@@ -1,5 +1,5 @@
 diff --git a/config.mk b/config.mk
-index 4bb9a85..3489e7c 100644
+index 4bb9a85..2c5b523 100644
 --- a/config.mk
 +++ b/config.mk
 @@ -1,6 +1,6 @@
@@ -10,14 +10,15 @@ index 4bb9a85..3489e7c 100644
  LIBDIR              = $(PREFIX)/lib
  INCLUDEDIR          = $(PREFIX)/include
  PKGCONFIGDIR        = $(LIBDIR)/pkgconfig
-@@ -11,8 +11,8 @@ CFLAGS              = -pipe
- ENABLE_DEBUG        = 1
+@@ -12,9 +12,9 @@ ENABLE_DEBUG        = 1
  
  ENABLE_PIXMAN       = 1
--ENABLE_DRM          = 1
+ ENABLE_DRM          = 1
 -ENABLE_WAYLAND      = 0
-+ENABLE_DRM          = 0
 +ENABLE_WAYLAND      = 1
  
- DRM_DRIVERS         = intel nouveau
+-DRM_DRIVERS         = intel nouveau
++#DRM_DRIVERS         = intel nouveau
  WAYLAND_INTERFACES  = shm
+ 
+ ifeq ($(ENABLE_DRM),1)
