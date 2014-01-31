@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9020d33..d6081a7 100644
+index 9020d33..e82b880 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -268,10 +268,10 @@ ecm_optional_add_subdirectory( systemsettings )
+@@ -268,20 +268,20 @@ ecm_optional_add_subdirectory( systemsettings )
  if(NOT WIN32)
     ecm_optional_add_subdirectory( kcheckpass )
     ecm_optional_add_subdirectory( kwin )
@@ -14,8 +14,10 @@ index 9020d33..d6081a7 100644
 +   #ecm_optional_add_subdirectory( powerdevil )
     if(Qt5WebKitWidgets_FOUND)
          if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
-             ecm_optional_add_subdirectory( ksysguard )
-@@ -280,8 +280,8 @@ if(NOT WIN32)
+-            ecm_optional_add_subdirectory( ksysguard )
++            #ecm_optional_add_subdirectory( ksysguard )
+         endif ()
+    endif()
  endif()
  #
  ecm_optional_add_subdirectory(kcontrol)
