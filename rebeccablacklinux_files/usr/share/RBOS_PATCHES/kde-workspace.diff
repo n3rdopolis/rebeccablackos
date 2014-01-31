@@ -878,3 +878,22 @@ index 0eebe13..0a0bc10 100644
  ///////////////////////////////////////////////////////////////////////////////
  // NOTE: if you change the menu, keep kde-workspace/kwin/useractions.cpp in sync
  //////////////////////////////////////////////////////////////////////////////
+diff --git a/plasma/desktop/applets/CMakeLists.txt b/plasma/desktop/applets/CMakeLists.txt
+index 2ae6812..16361ce 100644
+--- a/plasma/desktop/applets/CMakeLists.txt
++++ b/plasma/desktop/applets/CMakeLists.txt
+@@ -3,11 +3,11 @@ plasma_install_package(trash org.kde.plasma.trash)
+ 
+ if(NOT WIN32)
+    # tasks and windowlist depend on libs/taskmanager
+-   add_subdirectory(taskmanager)
+-   plasma_install_package(window-list org.kde.plasma.windowlist)
++   #add_subdirectory(taskmanager)
++   #plasma_install_package(window-list org.kde.plasma.windowlist)
+ 
+ if(KActivities_FOUND)
+-   add_subdirectory(pager)
++   #add_subdirectory(pager)
+    add_subdirectory(showActivityManager)
+ endif()
+ endif()
