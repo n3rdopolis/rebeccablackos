@@ -189,10 +189,10 @@ gst-plugins-gl
 gst-libav
 kmscon
 glmark
-wld
-dmenu
-st
-swc
+#wld
+#dmenu
+#st
+#swc
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
