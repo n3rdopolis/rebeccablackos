@@ -92,3 +92,8 @@ else
   weston-display-server ${ArgArray[@]}
 fi
 
+#Try to force FDs closed in case the server fails
+for FD in $(ls /proc/self/fd | grep -v -E '(0|1|2)')
+do
+eval "exec $FD>&-"
+done
