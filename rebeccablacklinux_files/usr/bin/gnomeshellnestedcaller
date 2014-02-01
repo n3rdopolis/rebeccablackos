@@ -20,4 +20,10 @@ unset GDK_BACKEND
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 export $(exec ck-launch-session dbus-launch)
-gnome-shell-wayland --wayland
+gnome-shell-wayland --wayland &
+sleep 3
+export WAYLAND_DISPLAY=wayland-0
+export GDK_BACKEND=wayland
+export CLUTTER_BACKEND=wayland
+export COGL_RENDERER=egl_wayland
+vte2_90
