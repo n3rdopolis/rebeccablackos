@@ -168,6 +168,7 @@ do
   NewSeatNumber=$(echo "$SeatList" | zenity --height=450 --list --column=seats --hide-header --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
   Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
+  Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
   Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
 
