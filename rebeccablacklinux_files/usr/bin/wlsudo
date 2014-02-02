@@ -34,7 +34,7 @@ Please enter your password to continue:" --title=wlsudo --add-password="" 2>/dev
     zenity --info --title=wlsudo --text="Invalid Password, or command not found." >/dev/null 2>&1 
   fi
 else
-  zenity --title=wlsudo --forms --text="The following command will be executed as root >/dev/null 2>&1 
+  zenity --title=wlsudo --forms --text="The following command will be executed as root 
 
 $*
 
