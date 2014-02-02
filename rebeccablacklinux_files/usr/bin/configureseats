@@ -120,7 +120,7 @@ done < <(find /dev/input/event*)
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-  DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}
+  DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})
 "
 done
 
