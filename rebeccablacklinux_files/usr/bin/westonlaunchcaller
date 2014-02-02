@@ -16,6 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+function SwitchBackExit
+{
+  echo Switch > /run/waylandloginmanager/loginmanager_control
+  exit
+}
+
 if [[ $1 == "--version" ]]
 then
   echo "waylandloginmanager weston-launch addon"
@@ -83,17 +89,19 @@ then
   if [[ $ServerApprovedCount == 0 ]]
   then 
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
-    exit
+    SwitchBackExit
   else 
+    STARTTIME=$(date +%s)
     #Execute the Wayland server
     "${ArgArray[0]}" ${ArgArray[@]:2}
+    ENDTIME=$(date +%s)
+    RUNTIME=$((ENDTIME-STARTTIME))
+    #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
+    if [[ $RUNTIME < 5 ]]
+    then
+      SwitchBackExit
+    fi
   fi
 else
   weston-display-server ${ArgArray[@]}
 fi
-
-#Try to force FDs closed in case the server fails
-for FD in $(ls /proc/self/fd | grep -v -E '(0|1|2)')
-do
-eval "exec $FD>&-"
-done
