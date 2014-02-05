@@ -22,6 +22,7 @@ unset CLUTTER_BACKEND
 export $(exec ck-launch-session dbus-launch)
 gnome-shell-wayland --wayland &
 sleep 3
+unset DISPLAY
 export WAYLAND_DISPLAY=wayland-0
 export GDK_BACKEND=wayland
 export CLUTTER_BACKEND=wayland
