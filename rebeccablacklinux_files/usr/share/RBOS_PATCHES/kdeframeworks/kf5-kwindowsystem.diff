@@ -1,6 +1,718 @@
+diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
+index 23133d581944a8373b9b753b300d97054b7d6f18..9c1d4523d7f630c7df8aff4eff984d25b2116db9 100644
+--- a/src/CMakeLists.txt
++++ b/src/CMakeLists.txt
+@@ -11,6 +11,7 @@ set(kwindowsystem_SRCS
+     kwindoweffects.cpp
+     kwindoweffects_dummy.cpp
+     kwindowinfo.cpp
++    kwindowsystem.cpp
+     )
+ 
+ if (KWINDOWSYSTEM_HAVE_X11)
+@@ -34,7 +35,7 @@ endif ()
+ 
+ if (APPLE)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_mac.cpp
+-                                                kwindowsystem_mac.cpp
++#                                                 kwindowsystem_mac.cpp
+ # FIXME: adjust kwindowinfo_mac to inherit from KWindowInfoPrivate
+ #                                                 kwindowinfo_mac.cpp
+ )
+@@ -42,7 +43,7 @@ endif ()
+ 
+ if (WIN32)
+    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_win.cpp
+-                                                kwindowsystem_win.cpp
++#                                                 kwindowsystem_win.cpp
+ # FIXME: adjust kwindowinfo_win to inherit from KWindowInfoPrivate
+ #                                                 kwindowinfo_win.cpp
+ )
+diff --git a/src/kwindowinfo.cpp b/src/kwindowinfo.cpp
+index c706b29b306b65c992a178d490819b76e1aeca84..3095932f7a3ed43076d246dfbd68f28e9089e4d7 100644
+--- a/src/kwindowinfo.cpp
++++ b/src/kwindowinfo.cpp
+@@ -20,6 +20,9 @@
+ #include "kwindowinfo.h"
+ #include "kwindowinfo_p.h"
+ #include "kwindowsystem.h"
++
++#include <config-kwindowsystem.h>
++
+ #if KWINDOWSYSTEM_HAVE_X11
+ #include "kwindowinfo_p_x11.h"
+ #else
+diff --git a/src/kwindowsystem.h b/src/kwindowsystem.h
+index d288e1ab7c49f68482c94285c2aab695f08f3524..c4e29d341d7d7d8fdae119bf52599a51fa8ccb41 100644
+--- a/src/kwindowsystem.h
++++ b/src/kwindowsystem.h
+@@ -29,7 +29,6 @@
+ #include <QWidgetList> //For WId
+ #include <netwm_def.h>
+ #include <kwindowinfo.h>
+-#include <config-kwindowsystem.h>
+ 
+ class KWindowSystemPrivate;
+ 
+@@ -81,7 +80,7 @@ public:
+       * \endcode
+       * @return the list of all toplevel windows
+       */
+-    static const QList<WId> &windows();
++    static QList<WId> windows();
+ 
+     /**
+      * Test to see if @p id still managed at present.
+@@ -228,7 +227,6 @@ public:
+      * that belongs to another application.
+      */
+     static void setMainWindow(QWidget *subwindow, WId mainwindow);
+-#if KWINDOWSYSTEM_HAVE_X11
+ #ifndef KWINDOWSYSTEM_NO_DEPRECATED
+     /**
+      * Returns the WM_TRANSIENT_FOR property for the given window, i.e. the mainwindow
+@@ -246,7 +244,6 @@ public:
+      */
+     KWINDOWSYSTEM_DEPRECATED static WId groupLeader(WId window);
+ #endif
+-#endif
+     /**
+      * Returns an icon for window @p win.
+      *
+@@ -498,7 +495,6 @@ public:
+      */
+     static void setBlockingCompositing(WId window, bool active);
+ 
+-#if KWINDOWSYSTEM_HAVE_X11
+     /**
+      * @internal
+      * Returns true if viewports are mapped to virtual desktops.
+@@ -526,7 +522,6 @@ public:
+      * valid desktop area.
+      */
+     static QPoint constrainViewportRelativePosition(const QPoint &pos);
+-#endif
+ 
+ Q_SIGNALS:
+ 
+@@ -638,15 +633,6 @@ private:
+     friend class KWindowSystemStaticContainer;
+ 
+     KWindowSystem() {}
+-
+-    enum { INFO_BASIC = 1, // desktop info, not per-window
+-           INFO_WINDOWS = 2
+-         }; // also per-window info
+-
+-    static void init(int);
+-
+-    friend class KWindowSystemPrivate;
+-    static KWindowSystemPrivate *s_d_func();
+ };
+ 
+ #endif
+diff --git a/src/kwindowsystem.cpp b/src/kwindowsystem.cpp
+new file mode 100644
+index 0000000000000000000000000000000000000000..db9df885c484a989fdfbb91f7a78aec15c970c88
+--- /dev/null
++++ b/src/kwindowsystem.cpp
+@@ -0,0 +1,593 @@
++/*
++ *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
++ *
++ *   This library is free software; you can redistribute it and/or
++ *   modify it under the terms of the GNU Lesser General Public
++ *   License as published by the Free Software Foundation; either
++ *   version 2.1 of the License, or (at your option) version 3, or any
++ *   later version accepted by the membership of KDE e.V. (or its
++ *   successor approved by the membership of KDE e.V.), which shall
++ *   act as a proxy defined in Section 6 of version 3 of the license.
++ *
++ *   This library is distributed in the hope that it will be useful,
++ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
++ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
++ *   Lesser General Public License for more details.
++ *
++ *   You should have received a copy of the GNU Lesser General Public
++ *   License along with this library.  If not, see <http://www.gnu.org/licenses/>.
++ */
++#include "kwindowsystem.h"
++#include "kwindowsystem_p.h"
++
++#include <config-kwindowsystem.h>
++
++#if KWINDOWSYSTEM_HAVE_X11
++#include "kwindowsystem_p_x11.h"
++#else
++typedef KWindowSystemPrivateDummy KWindowSystemPrivateX11;
++#endif
++
++#include <QGuiApplication>
++#include <QMetaMethod>
++#include <QPixmap>
++#include <QWidget>
++#include <QWindow>
++
++class KWindowSystemStaticContainer
++{
++public:
++    KWindowSystemStaticContainer() {
++#if KWINDOWSYSTEM_HAVE_X11
++        if (d.isNull() && (QGuiApplication::platformName() == QStringLiteral("xcb"))) {
++            d.reset(new KWindowSystemPrivateX11());
++            platform = XcbPlatform;
++        }
++#endif
++        if (d.isNull()) {
++            d.reset(new KWindowSystemPrivateDummy());
++            platform = DummyPlatform;
++        }
++    }
++    KWindowSystem kwm;
++    QScopedPointer<KWindowSystemPrivate> d;
++    enum PlatformImplementation {
++        XcbPlatform,
++        DummyPlatform
++    };
++    PlatformImplementation platform;
++};
++
++Q_GLOBAL_STATIC(KWindowSystemStaticContainer, g_kwmInstanceContainer)
++
++QList<WId> KWindowSystemPrivateDummy::windows()
++{
++    return QList<WId>();
++}
++
++QList<WId> KWindowSystemPrivateDummy::stackingOrder()
++{
++    return QList<WId>();
++}
++
++WId KWindowSystemPrivateDummy::activeWindow()
++{
++    return 0;
++}
++
++void KWindowSystemPrivateDummy::activateWindow(WId win, long time)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(time)
++}
++
++void KWindowSystemPrivateDummy::forceActiveWindow(WId win, long time)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(time)
++}
++
++void KWindowSystemPrivateDummy::demandAttention(WId win, bool set)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(set)
++}
++
++bool KWindowSystemPrivateDummy::compositingActive()
++{
++    return false;
++}
++
++int KWindowSystemPrivateDummy::currentDesktop()
++{
++    return 0;
++}
++
++int KWindowSystemPrivateDummy::numberOfDesktops()
++{
++    return 0;
++}
++
++void KWindowSystemPrivateDummy::setCurrentDesktop(int desktop)
++{
++    Q_UNUSED(desktop)
++}
++
++void KWindowSystemPrivateDummy::setOnAllDesktops(WId win, bool b)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(b)
++}
++
++void KWindowSystemPrivateDummy::setOnDesktop(WId win, int desktop)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(desktop)
++}
++
++#ifndef KWINDOWSYSTEM_NO_DEPRECATED
++WId KWindowSystemPrivateDummy::transientFor(WId window)
++{
++    Q_UNUSED(window)
++    return 0;
++}
++
++WId KWindowSystemPrivateDummy::groupLeader(WId window)
++{
++    Q_UNUSED(window)
++    return 0;
++}
++#endif
++
++QPixmap KWindowSystemPrivateDummy::icon(WId win, int width, int height, bool scale, int flags)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(width)
++    Q_UNUSED(height)
++    Q_UNUSED(scale)
++    Q_UNUSED(flags)
++    return QPixmap();
++}
++
++void KWindowSystemPrivateDummy::setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(icon)
++    Q_UNUSED(miniIcon)
++}
++
++void KWindowSystemPrivateDummy::setType(WId win, NET::WindowType windowType)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(windowType)
++}
++
++void KWindowSystemPrivateDummy::setState(WId win, NET::States state)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(state)
++}
++
++void KWindowSystemPrivateDummy::clearState(WId win, NET::States state)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(state)
++}
++
++void KWindowSystemPrivateDummy::minimizeWindow(WId win, bool animation)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(animation)
++}
++
++void KWindowSystemPrivateDummy::unminimizeWindow(WId win, bool animation)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(animation)
++}
++
++void KWindowSystemPrivateDummy::raiseWindow(WId win)
++{
++    Q_UNUSED(win)
++}
++
++void KWindowSystemPrivateDummy::lowerWindow(WId win)
++{
++    Q_UNUSED(win)
++}
++
++bool KWindowSystemPrivateDummy::icccmCompliantMappingState()
++{
++    return false;
++}
++
++QRect KWindowSystemPrivateDummy::workArea(int desktop)
++{
++    Q_UNUSED(desktop)
++    return QRect();
++}
++
++QRect KWindowSystemPrivateDummy::workArea(const QList<WId> &excludes, int desktop)
++{
++    Q_UNUSED(excludes)
++    Q_UNUSED(desktop)
++    return QRect();
++}
++
++QString KWindowSystemPrivateDummy::desktopName(int desktop)
++{
++    Q_UNUSED(desktop)
++    return QString();
++}
++
++void KWindowSystemPrivateDummy::setDesktopName(int desktop, const QString &name)
++{
++    Q_UNUSED(desktop)
++    Q_UNUSED(name)
++}
++
++bool KWindowSystemPrivateDummy::showingDesktop()
++{
++    return false;
++}
++
++void KWindowSystemPrivateDummy::setUserTime(WId win, long time)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(time)
++}
++
++void KWindowSystemPrivateDummy::setExtendedStrut(WId win, int left_width, int left_start, int left_end,
++                                                 int right_width, int right_start, int right_end, int top_width, int top_start, int top_end,
++                                                 int bottom_width, int bottom_start, int bottom_end)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(left_width)
++    Q_UNUSED(left_start)
++    Q_UNUSED(left_end)
++    Q_UNUSED(right_width)
++    Q_UNUSED(right_start)
++    Q_UNUSED(right_end)
++    Q_UNUSED(top_width)
++    Q_UNUSED(top_start)
++    Q_UNUSED(top_end)
++    Q_UNUSED(bottom_width)
++    Q_UNUSED(bottom_start)
++    Q_UNUSED(bottom_end)
++}
++
++void KWindowSystemPrivateDummy::setStrut(WId win, int left, int right, int top, int bottom)
++{
++    Q_UNUSED(win)
++    Q_UNUSED(left)
++    Q_UNUSED(right)
++    Q_UNUSED(top)
++    Q_UNUSED(bottom)
++}
++
++bool KWindowSystemPrivateDummy::allowedActionsSupported()
++{
++    return false;
++}
++
++QString KWindowSystemPrivateDummy::readNameProperty(WId window, unsigned long atom)
++{
++    Q_UNUSED(window)
++    Q_UNUSED(atom)
++    return QString();
++}
++
++void KWindowSystemPrivateDummy::allowExternalProcessWindowActivation(int pid)
++{
++    Q_UNUSED(pid)
++}
++
++void KWindowSystemPrivateDummy::setBlockingCompositing(WId window, bool active)
++{
++    Q_UNUSED(window)
++    Q_UNUSED(active)
++}
++
++bool KWindowSystemPrivateDummy::mapViewport()
++{
++    return false;
++}
++
++int KWindowSystemPrivateDummy::viewportToDesktop(const QPoint &pos)
++{
++    Q_UNUSED(pos)
++    return 0;
++}
++
++int KWindowSystemPrivateDummy::viewportWindowToDesktop(const QRect &r)
++{
++    Q_UNUSED(r)
++    return 0;
++}
++
++QPoint KWindowSystemPrivateDummy::desktopToViewport(int desktop, bool absolute)
++{
++    Q_UNUSED(desktop)
++    Q_UNUSED(absolute)
++    return QPoint();
++}
++
++QPoint KWindowSystemPrivateDummy::constrainViewportRelativePosition(const QPoint &pos)
++{
++    Q_UNUSED(pos)
++    return QPoint();
++}
++
++void KWindowSystemPrivateDummy::connectNotify(const QMetaMethod &signal)
++{
++    Q_UNUSED(signal)
++}
++
++KWindowSystem *KWindowSystem::self()
++{
++    return &(g_kwmInstanceContainer()->kwm);
++}
++
++#ifndef Q_CC_MSVC
++#define DELEGATE(name, args...) \
++    switch (g_kwmInstanceContainer()->platform) { \
++    case KWindowSystemStaticContainer::XcbPlatform: \
++        return static_cast<KWindowSystemPrivateX11*>(g_kwmInstanceContainer()->d.data())->name(args); \
++    case KWindowSystemStaticContainer::DummyPlatform: \
++    default: \
++        return static_cast<KWindowSystemPrivateDummy*>(g_kwmInstanceContainer()->d.data())->name(args); \
++    }
++#else
++#define DELEGATE(name, ...) \
++    static_cast<KWindowSystemPrivateDummy*>(g_kwmInstanceContainer()->d.data())->name(__VA_ARGS__);
++#endif
++
++void KWindowSystem::connectNotify(const QMetaMethod &signal)
++{
++    QObject::connectNotify(signal);
++    DELEGATE(connectNotify, signal);
++}
++
++QList<WId> KWindowSystem::windows()
++{
++    DELEGATE(windows, );
++}
++
++#ifndef KWINDOWSYSTEM_NO_DEPRECATED
++KWindowInfo KWindowSystem::windowInfo(WId win, unsigned long properties, unsigned long properties2)
++{
++    return KWindowInfo(win, NET::Properties(uint(properties)), NET::Properties2(uint(properties2)));
++}
++#endif
++
++bool KWindowSystem::hasWId(WId w)
++{
++    return windows().contains(w);
++}
++
++QList<WId> KWindowSystem::stackingOrder()
++{;
++    DELEGATE(stackingOrder, );
++}
++
++int KWindowSystem::currentDesktop()
++{
++    DELEGATE(currentDesktop, );
++}
++
++int KWindowSystem::numberOfDesktops()
++{
++    DELEGATE(numberOfDesktops, );
++}
++
++void KWindowSystem::setCurrentDesktop(int desktop)
++{
++    DELEGATE(setCurrentDesktop, desktop);
++}
++
++void KWindowSystem::setOnAllDesktops(WId win, bool b)
++{
++    DELEGATE(setOnAllDesktops, win, b);
++}
++
++void KWindowSystem::setOnDesktop(WId win, int desktop)
++{
++    DELEGATE(setOnDesktop, win, desktop);
++}
++
++WId KWindowSystem::activeWindow()
++{
++    DELEGATE(activeWindow, );
++}
++
++void KWindowSystem::activateWindow(WId win, long time)
++{
++    DELEGATE(activateWindow, win, time);
++}
++
++void KWindowSystem::forceActiveWindow(WId win, long time)
++{
++    DELEGATE(forceActiveWindow, win, time);
++}
++
++void KWindowSystem::demandAttention(WId win, bool set)
++{
++    DELEGATE(demandAttention, win, set);
++}
++
++#ifndef KWINDOWSYSTEM_NO_DEPRECATED
++WId KWindowSystem::transientFor(WId win)
++{
++    DELEGATE(transientFor, win);
++}
++#endif
++
++void KWindowSystem::setMainWindow(QWidget *subWidget, WId mainWindowId)
++{
++    // Set the WA_NativeWindow attribute to force the creation of the QWindow.
++    // Without this QWidget::windowHandle() returns 0.
++    subWidget->setAttribute(Qt::WA_NativeWindow, true);
++    QWindow *subWindow = subWidget->windowHandle();
++    Q_ASSERT(subWindow);
++
++    QWindow *mainWindow = QWindow::fromWinId(mainWindowId);
++    // mainWindow is not the child of any object, so make sure it gets deleted at some point
++    connect(subWidget, &QObject::destroyed, mainWindow, &QObject::deleteLater);
++    subWindow->setTransientParent(mainWindow);
++}
++
++#ifndef KWINDOWSYSTEM_NO_DEPRECATED
++WId KWindowSystem::groupLeader(WId win)
++{
++    DELEGATE(groupLeader, win);
++}
++#endif
++
++QPixmap KWindowSystem::icon(WId win, int width, int height, bool scale)
++{
++    return icon(win, width, height, scale, NETWM | WMHints | ClassHint | XApp);
++}
++
++QPixmap KWindowSystem::icon(WId win, int width, int height, bool scale, int flags)
++{
++    DELEGATE(icon, win, width, height, scale, flags);
++}
++
++void KWindowSystem::setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon)
++{
++    DELEGATE(setIcons, win, icon, miniIcon);
++}
++
++void KWindowSystem::setType(WId win, NET::WindowType windowType)
++{
++    DELEGATE(setType, win, windowType);
++}
++
++void KWindowSystem::setState(WId win, NET::States state)
++{
++    DELEGATE(setState, win, state);
++}
++
++void KWindowSystem::clearState(WId win, NET::States state)
++{
++    DELEGATE(clearState, win, state);
++}
++
++void KWindowSystem::minimizeWindow(WId win, bool animation)
++{
++    DELEGATE(minimizeWindow, win, animation);
++}
++
++void KWindowSystem::unminimizeWindow(WId win, bool animation)
++{
++    DELEGATE(unminimizeWindow, win, animation);
++}
++
++void KWindowSystem::raiseWindow(WId win)
++{
++    DELEGATE(raiseWindow, win);
++}
++
++void KWindowSystem::lowerWindow(WId win)
++{
++    DELEGATE(lowerWindow, win);
++}
++
++bool KWindowSystem::compositingActive()
++{
++    DELEGATE(compositingActive, );
++}
++
++QRect KWindowSystem::workArea(int desktop)
++{
++    DELEGATE(workArea, desktop);
++}
++
++QRect KWindowSystem::workArea(const QList<WId> &exclude, int desktop)
++{
++    DELEGATE(workArea, exclude, desktop);
++}
++
++QString KWindowSystem::desktopName(int desktop)
++{
++    DELEGATE(desktopName, desktop);
++}
++
++void KWindowSystem::setDesktopName(int desktop, const QString &name)
++{
++    DELEGATE(setDesktopName, desktop, name);
++}
++
++bool KWindowSystem::showingDesktop()
++{
++    DELEGATE(showingDesktop, );
++}
++
++void KWindowSystem::setUserTime(WId win, long time)
++{
++    DELEGATE(setUserTime, win, time);
++}
++
++void KWindowSystem::setExtendedStrut(WId win, int left_width, int left_start, int left_end,
++                                     int right_width, int right_start, int right_end, int top_width, int top_start, int top_end,
++                                     int bottom_width, int bottom_start, int bottom_end)
++{
++    DELEGATE(setExtendedStrut, win, left_width, left_start, left_end,
++                                 right_width, right_start, right_end, top_width, top_start, top_end,
++                                 bottom_width, bottom_start, bottom_end);
++}
++
++void KWindowSystem::setStrut(WId win, int left, int right, int top, int bottom)
++{
++    DELEGATE(setStrut, win, left, right, top, bottom);
++}
++
++bool KWindowSystem::icccmCompliantMappingState()
++{
++    DELEGATE(icccmCompliantMappingState, );
++}
++
++bool KWindowSystem::allowedActionsSupported()
++{
++    DELEGATE(allowedActionsSupported, );
++}
++
++QString KWindowSystem::readNameProperty(WId win, unsigned long atom)
++{
++    DELEGATE(readNameProperty, win, atom);
++}
++
++void KWindowSystem::allowExternalProcessWindowActivation(int pid)
++{
++    DELEGATE(allowExternalProcessWindowActivation, pid);
++}
++
++void KWindowSystem::setBlockingCompositing(WId window, bool active)
++{
++    DELEGATE(setBlockingCompositing, window, active);
++}
++
++bool KWindowSystem::mapViewport()
++{
++    DELEGATE(mapViewport, );
++}
++
++int KWindowSystem::viewportToDesktop(const QPoint &p)
++{
++    DELEGATE(viewportToDesktop, p);
++}
++
++int KWindowSystem::viewportWindowToDesktop(const QRect &r)
++{
++    DELEGATE(viewportWindowToDesktop, r);
++}
++
++QPoint KWindowSystem::desktopToViewport(int desktop, bool absolute)
++{
++    DELEGATE(desktopToViewport, desktop, absolute);
++}
++
++QPoint KWindowSystem::constrainViewportRelativePosition(const QPoint &pos)
++{
++    DELEGATE(constrainViewportRelativePosition, pos);
++}
 diff --git a/src/kwindowsystem_p.h b/src/kwindowsystem_p.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..75e81c96760139a8777f4d3d057f2854d59d6059
+index 0000000000000000000000000000000000000000..57cd7051310bd0cdb964bf496921e66751645c1b
 --- /dev/null
 +++ b/src/kwindowsystem_p.h
 @@ -0,0 +1,83 @@
@@ -54,10 +766,10 @@ index 0000000000000000000000000000000000000000..75e81c96760139a8777f4d3d057f2854
 +    WId groupLeader(WId window);
 +#endif
 +    QPixmap icon(WId win, int width, int height, bool scale, int flags);
-+    void  setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon);
++    void setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon);
 +    void setType(WId win, NET::WindowType windowType);
-+    void setState(WId win, unsigned long state);
-+    void clearState(WId win, unsigned long  state);
++    void setState(WId win, NET::States state);
++    void clearState(WId win, NET::States state);
 +    void minimizeWindow(WId win, bool animation = true);
 +    void unminimizeWindow(WId win, bool animation = true);
 +    void raiseWindow(WId win);
@@ -89,10 +801,10 @@ index 0000000000000000000000000000000000000000..75e81c96760139a8777f4d3d057f2854
 +#endif
 diff --git a/src/kwindowsystem_p_x11.h b/src/kwindowsystem_p_x11.h
 new file mode 100644
-index 0000000000000000000000000000000000000000..9c3709b2b6f3eff7193544f7b49fa360df9cbdb7
+index 0000000000000000000000000000000000000000..ba73c1326e1a0e5298196198b29dc93393b89358
 --- /dev/null
 +++ b/src/kwindowsystem_p_x11.h
-@@ -0,0 +1,133 @@
+@@ -0,0 +1,132 @@
 +/*
 + *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
 + *
@@ -142,10 +854,10 @@ index 0000000000000000000000000000000000000000..9c3709b2b6f3eff7193544f7b49fa360
 +    WId groupLeader(WId window);
 +#endif
 +    QPixmap icon(WId win, int width, int height, bool scale, int flags);
-+    void  setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon);
++    void setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon);
 +    void setType(WId win, NET::WindowType windowType);
-+    void setState(WId win, unsigned long state);
-+    void clearState(WId win, unsigned long  state);
++    void setState(WId win, NET::States state);
++    void clearState(WId win, NET::States state);
 +    void minimizeWindow(WId win, bool animation = true);
 +    void unminimizeWindow(WId win, bool animation = true);
 +    void raiseWindow(WId win);
@@ -198,7 +910,6 @@ index 0000000000000000000000000000000000000000..9c3709b2b6f3eff7193544f7b49fa360
 +    struct StrutData {
 +        StrutData(WId window_, const NETStrut &strut_, int desktop_)
 +            : window(window_), strut(strut_), desktop(desktop_) {}
-+        StrutData() {} // for QValueList to be happy
 +        WId window;
 +        NETStrut strut;
 +        int desktop;
@@ -227,7 +938,7 @@ index 0000000000000000000000000000000000000000..9c3709b2b6f3eff7193544f7b49fa360
 +
 +#endif
 diff --git a/src/kwindowsystem_x11.cpp b/src/kwindowsystem_x11.cpp
-index 0556ec6bff7b1b5b70018758c984906687890911..7f4d2118726c7885958cd7a91c22ca04844b7750 100644
+index 8d841cbcec41dc2d4df381338803902badf3f35e..95c396b65ae0a24db6a276b9b72f4175bb7c14cc 100644
 --- a/src/kwindowsystem_x11.cpp
 +++ b/src/kwindowsystem_x11.cpp
 @@ -2,6 +2,7 @@
@@ -472,7 +1183,7 @@ index 0556ec6bff7b1b5b70018758c984906687890911..7f4d2118726c7885958cd7a91c22ca04
 -#ifndef KWINDOWSYSTEM_NO_DEPRECATED
 -KWindowInfo KWindowSystem::windowInfo(WId win, unsigned long properties, unsigned long properties2)
 -{
--    return KWindowInfo(win, properties, properties2);
+-    return KWindowInfo(win, NET::Properties(uint(properties)), NET::Properties2(uint(properties2)));
 -}
 -#endif
 -
@@ -612,7 +1323,7 @@ index 0556ec6bff7b1b5b70018758c984906687890911..7f4d2118726c7885958cd7a91c22ca04
 +void KWindowSystemPrivateX11::demandAttention(WId win, bool set)
  {
      NETWinInfo info(QX11Info::connection(), win, QX11Info::appRootWindow(), NET::WMState);
-     info.setState(set ? NET::DemandsAttention : 0, NET::DemandsAttention);
+     info.setState(set ? NET::DemandsAttention : NET::States(0), NET::DemandsAttention);
  }
  
  #ifndef KWINDOWSYSTEM_NO_DEPRECATED
@@ -709,15 +1420,15 @@ index 0556ec6bff7b1b5b70018758c984906687890911..7f4d2118726c7885958cd7a91c22ca04
      info.setWindowType(windowType);
  }
  
--void KWindowSystem::setState(WId win, unsigned long state)
-+void KWindowSystemPrivateX11::setState(WId win, unsigned long state)
+-void KWindowSystem::setState(WId win, NET::States state)
++void KWindowSystemPrivateX11::setState(WId win, NET::States state)
  {
      NETWinInfo info(QX11Info::connection(), win, QX11Info::appRootWindow(), NET::WMState);
      info.setState(state, state);
  }
  
--void KWindowSystem::clearState(WId win, unsigned long state)
-+void KWindowSystemPrivateX11::clearState(WId win, unsigned long state)
+-void KWindowSystem::clearState(WId win, NET::States state)
++void KWindowSystemPrivateX11::clearState(WId win, NET::States state)
  {
      NETWinInfo info(QX11Info::connection(), win, QX11Info::appRootWindow(), NET::WMState);
      info.setState(0, state);
@@ -976,709 +1687,3 @@ index 0556ec6bff7b1b5b70018758c984906687890911..7f4d2118726c7885958cd7a91c22ca04
  }
 -
 -#include "moc_kwindowsystem.cpp"
-diff --git a/src/CMakeLists.txt b/src/CMakeLists.txt
-index 23133d581944a8373b9b753b300d97054b7d6f18..9c1d4523d7f630c7df8aff4eff984d25b2116db9 100644
---- a/src/CMakeLists.txt
-+++ b/src/CMakeLists.txt
-@@ -11,6 +11,7 @@ set(kwindowsystem_SRCS
-     kwindoweffects.cpp
-     kwindoweffects_dummy.cpp
-     kwindowinfo.cpp
-+    kwindowsystem.cpp
-     )
- 
- if (KWINDOWSYSTEM_HAVE_X11)
-@@ -34,7 +35,7 @@ endif ()
- 
- if (APPLE)
-    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_mac.cpp
--                                                kwindowsystem_mac.cpp
-+#                                                 kwindowsystem_mac.cpp
- # FIXME: adjust kwindowinfo_mac to inherit from KWindowInfoPrivate
- #                                                 kwindowinfo_mac.cpp
- )
-@@ -42,7 +43,7 @@ endif ()
- 
- if (WIN32)
-    set(kwindowsystem_SRCS ${kwindowsystem_SRCS} kkeyserver_win.cpp
--                                                kwindowsystem_win.cpp
-+#                                                 kwindowsystem_win.cpp
- # FIXME: adjust kwindowinfo_win to inherit from KWindowInfoPrivate
- #                                                 kwindowinfo_win.cpp
- )
-diff --git a/src/kwindowinfo.cpp b/src/kwindowinfo.cpp
-index 790c4458075ff0ddc22102111e2d96f8c636f0ee..b4d0347142cb54d11a3d6dbd9cee227ef1e5b42e 100644
---- a/src/kwindowinfo.cpp
-+++ b/src/kwindowinfo.cpp
-@@ -20,6 +20,9 @@
- #include "kwindowinfo.h"
- #include "kwindowinfo_p.h"
- #include "kwindowsystem.h"
-+
-+#include <config-kwindowsystem.h>
-+
- #if KWINDOWSYSTEM_HAVE_X11
- #include "kwindowinfo_p_x11.h"
- #else
-diff --git a/src/kwindowsystem.h b/src/kwindowsystem.h
-index 6c2338e28ae8bb9763dfcf14eeb239bdaebda73d..15caf1825bb2f38d7f66943572bf8d996df1127b 100644
---- a/src/kwindowsystem.h
-+++ b/src/kwindowsystem.h
-@@ -29,7 +29,6 @@
- #include <QWidgetList> //For WId
- #include <netwm_def.h>
- #include <kwindowinfo.h>
--#include <config-kwindowsystem.h>
- 
- class KWindowSystemPrivate;
- 
-@@ -81,7 +80,7 @@ public:
-       * \endcode
-       * @return the list of all toplevel windows
-       */
--    static const QList<WId> &windows();
-+    static QList<WId> windows();
- 
-     /**
-      * Test to see if @p id still managed at present.
-@@ -228,7 +227,6 @@ public:
-      * that belongs to another application.
-      */
-     static void setMainWindow(QWidget *subwindow, WId mainwindow);
--#if KWINDOWSYSTEM_HAVE_X11
- #ifndef KWINDOWSYSTEM_NO_DEPRECATED
-     /**
-      * Returns the WM_TRANSIENT_FOR property for the given window, i.e. the mainwindow
-@@ -246,7 +244,6 @@ public:
-      */
-     KWINDOWSYSTEM_DEPRECATED static WId groupLeader(WId window);
- #endif
--#endif
-     /**
-      * Returns an icon for window @p win.
-      *
-@@ -498,7 +495,6 @@ public:
-      */
-     static void setBlockingCompositing(WId window, bool active);
- 
--#if KWINDOWSYSTEM_HAVE_X11
-     /**
-      * @internal
-      * Returns true if viewports are mapped to virtual desktops.
-@@ -526,7 +522,6 @@ public:
-      * valid desktop area.
-      */
-     static QPoint constrainViewportRelativePosition(const QPoint &pos);
--#endif
- 
- Q_SIGNALS:
- 
-@@ -638,15 +633,6 @@ private:
-     friend class KWindowSystemStaticContainer;
- 
-     KWindowSystem() {}
--
--    enum { INFO_BASIC = 1, // desktop info, not per-window
--           INFO_WINDOWS = 2
--         }; // also per-window info
--
--    static void init(int);
--
--    friend class KWindowSystemPrivate;
--    static KWindowSystemPrivate *s_d_func();
- };
- 
- #endif
-diff --git a/src/kwindowsystem.cpp b/src/kwindowsystem.cpp
-new file mode 100644
-index 0000000000000000000000000000000000000000..ad72b32b5aff3523faacbd1ae90ede71a834fe7b
---- /dev/null
-+++ b/src/kwindowsystem.cpp
-@@ -0,0 +1,587 @@
-+/*
-+ *   Copyright 2014 Martin Gräßlin <mgraesslin@kde.org>
-+ *
-+ *   This library is free software; you can redistribute it and/or
-+ *   modify it under the terms of the GNU Lesser General Public
-+ *   License as published by the Free Software Foundation; either
-+ *   version 2.1 of the License, or (at your option) version 3, or any
-+ *   later version accepted by the membership of KDE e.V. (or its
-+ *   successor approved by the membership of KDE e.V.), which shall
-+ *   act as a proxy defined in Section 6 of version 3 of the license.
-+ *
-+ *   This library is distributed in the hope that it will be useful,
-+ *   but WITHOUT ANY WARRANTY; without even the implied warranty of
-+ *   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-+ *   Lesser General Public License for more details.
-+ *
-+ *   You should have received a copy of the GNU Lesser General Public
-+ *   License along with this library.  If not, see <http://www.gnu.org/licenses/>.
-+ */
-+#include "kwindowsystem.h"
-+#include "kwindowsystem_p.h"
-+
-+#include <config-kwindowsystem.h>
-+
-+#if KWINDOWSYSTEM_HAVE_X11
-+#include "kwindowsystem_p_x11.h"
-+#else
-+typedef KWindowSystemPrivateDummy KWindowSystemPrivateX11;
-+#endif
-+
-+#include <QGuiApplication>
-+#include <QPixmap>
-+#include <QWidget>
-+#include <QWindow>
-+
-+class KWindowSystemStaticContainer
-+{
-+public:
-+    KWindowSystemStaticContainer() {
-+#if KWINDOWSYSTEM_HAVE_X11
-+        if (d.isNull() && (QGuiApplication::platformName() == QStringLiteral("xcb"))) {
-+            d.reset(new KWindowSystemPrivateX11());
-+            platform = XcbPlatform;
-+        }
-+#endif
-+        if (d.isNull()) {
-+            d.reset(new KWindowSystemPrivateDummy());
-+            platform = DummyPlatform;
-+        }
-+    }
-+    KWindowSystem kwm;
-+    QScopedPointer<KWindowSystemPrivate> d;
-+    enum PlatformImplementation {
-+        XcbPlatform,
-+        DummyPlatform
-+    };
-+    PlatformImplementation platform;
-+};
-+
-+Q_GLOBAL_STATIC(KWindowSystemStaticContainer, g_kwmInstanceContainer)
-+
-+QList<WId> KWindowSystemPrivateDummy::windows()
-+{
-+    return QList<WId>();
-+}
-+
-+QList<WId> KWindowSystemPrivateDummy::stackingOrder()
-+{
-+    return QList<WId>();
-+}
-+
-+WId KWindowSystemPrivateDummy::activeWindow()
-+{
-+    return 0;
-+}
-+
-+void KWindowSystemPrivateDummy::activateWindow(WId win, long time)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(time)
-+}
-+
-+void KWindowSystemPrivateDummy::forceActiveWindow(WId win, long time)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(time)
-+}
-+
-+void KWindowSystemPrivateDummy::demandAttention(WId win, bool set)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(set)
-+}
-+
-+bool KWindowSystemPrivateDummy::compositingActive()
-+{
-+    return false;
-+}
-+
-+int KWindowSystemPrivateDummy::currentDesktop()
-+{
-+    return 0;
-+}
-+
-+int KWindowSystemPrivateDummy::numberOfDesktops()
-+{
-+    return 0;
-+}
-+
-+void KWindowSystemPrivateDummy::setCurrentDesktop(int desktop)
-+{
-+    Q_UNUSED(desktop)
-+}
-+
-+void KWindowSystemPrivateDummy::setOnAllDesktops(WId win, bool b)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(b)
-+}
-+
-+void KWindowSystemPrivateDummy::setOnDesktop(WId win, int desktop)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(desktop)
-+}
-+
-+#ifndef KWINDOWSYSTEM_NO_DEPRECATED
-+WId KWindowSystemPrivateDummy::transientFor(WId window)
-+{
-+    Q_UNUSED(window)
-+    return 0;
-+}
-+
-+WId KWindowSystemPrivateDummy::groupLeader(WId window)
-+{
-+    Q_UNUSED(window)
-+    return 0;
-+}
-+#endif
-+
-+QPixmap KWindowSystemPrivateDummy::icon(WId win, int width, int height, bool scale, int flags)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(width)
-+    Q_UNUSED(height)
-+    Q_UNUSED(scale)
-+    Q_UNUSED(flags)
-+    return QPixmap();
-+}
-+
-+void KWindowSystemPrivateDummy::setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(icon)
-+    Q_UNUSED(miniIcon)
-+}
-+
-+void KWindowSystemPrivateDummy::setType(WId win, NET::WindowType windowType)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(windowType)
-+}
-+
-+void KWindowSystemPrivateDummy::setState(WId win, unsigned long state)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(state)
-+}
-+
-+void KWindowSystemPrivateDummy::clearState(WId win, unsigned long  state)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(state)
-+}
-+
-+void KWindowSystemPrivateDummy::minimizeWindow(WId win, bool animation)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(animation)
-+}
-+
-+void KWindowSystemPrivateDummy::unminimizeWindow(WId win, bool animation)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(animation)
-+}
-+
-+void KWindowSystemPrivateDummy::raiseWindow(WId win)
-+{
-+    Q_UNUSED(win)
-+}
-+
-+void KWindowSystemPrivateDummy::lowerWindow(WId win)
-+{
-+    Q_UNUSED(win)
-+}
-+
-+bool KWindowSystemPrivateDummy::icccmCompliantMappingState()
-+{
-+    return false;
-+}
-+
-+QRect KWindowSystemPrivateDummy::workArea(int desktop)
-+{
-+    Q_UNUSED(desktop)
-+    return QRect();
-+}
-+
-+QRect KWindowSystemPrivateDummy::workArea(const QList<WId> &excludes, int desktop)
-+{
-+    Q_UNUSED(excludes)
-+    Q_UNUSED(desktop)
-+    return QRect();
-+}
-+
-+QString KWindowSystemPrivateDummy::desktopName(int desktop)
-+{
-+    Q_UNUSED(desktop)
-+    return QString();
-+}
-+
-+void KWindowSystemPrivateDummy::setDesktopName(int desktop, const QString &name)
-+{
-+    Q_UNUSED(desktop)
-+    Q_UNUSED(name)
-+}
-+
-+bool KWindowSystemPrivateDummy::showingDesktop()
-+{
-+    return false;
-+}
-+
-+void KWindowSystemPrivateDummy::setUserTime(WId win, long time)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(time)
-+}
-+
-+void KWindowSystemPrivateDummy::setExtendedStrut(WId win, int left_width, int left_start, int left_end,
-+                                                 int right_width, int right_start, int right_end, int top_width, int top_start, int top_end,
-+                                                 int bottom_width, int bottom_start, int bottom_end)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(left_width)
-+    Q_UNUSED(left_start)
-+    Q_UNUSED(left_end)
-+    Q_UNUSED(right_width)
-+    Q_UNUSED(right_start)
-+    Q_UNUSED(right_end)
-+    Q_UNUSED(top_width)
-+    Q_UNUSED(top_start)
-+    Q_UNUSED(top_end)
-+    Q_UNUSED(bottom_width)
-+    Q_UNUSED(bottom_start)
-+    Q_UNUSED(bottom_end)
-+}
-+
-+void KWindowSystemPrivateDummy::setStrut(WId win, int left, int right, int top, int bottom)
-+{
-+    Q_UNUSED(win)
-+    Q_UNUSED(left)
-+    Q_UNUSED(right)
-+    Q_UNUSED(top)
-+    Q_UNUSED(bottom)
-+}
-+
-+bool KWindowSystemPrivateDummy::allowedActionsSupported()
-+{
-+    return false;
-+}
-+
-+QString KWindowSystemPrivateDummy::readNameProperty(WId window, unsigned long atom)
-+{
-+    Q_UNUSED(window)
-+    Q_UNUSED(atom)
-+    return QString();
-+}
-+
-+void KWindowSystemPrivateDummy::allowExternalProcessWindowActivation(int pid)
-+{
-+    Q_UNUSED(pid)
-+}
-+
-+void KWindowSystemPrivateDummy::setBlockingCompositing(WId window, bool active)
-+{
-+    Q_UNUSED(window)
-+    Q_UNUSED(active)
-+}
-+
-+bool KWindowSystemPrivateDummy::mapViewport()
-+{
-+    return false;
-+}
-+
-+int KWindowSystemPrivateDummy::viewportToDesktop(const QPoint &pos)
-+{
-+    Q_UNUSED(pos)
-+    return 0;
-+}
-+
-+int KWindowSystemPrivateDummy::viewportWindowToDesktop(const QRect &r)
-+{
-+    Q_UNUSED(r)
-+    return 0;
-+}
-+
-+QPoint KWindowSystemPrivateDummy::desktopToViewport(int desktop, bool absolute)
-+{
-+    Q_UNUSED(desktop)
-+    Q_UNUSED(absolute)
-+    return QPoint();
-+}
-+
-+QPoint KWindowSystemPrivateDummy::constrainViewportRelativePosition(const QPoint &pos)
-+{
-+    Q_UNUSED(pos)
-+    return QPoint();
-+}
-+
-+void KWindowSystemPrivateDummy::connectNotify(const QMetaMethod &signal)
-+{
-+    Q_UNUSED(signal)
-+}
-+
-+KWindowSystem *KWindowSystem::self()
-+{
-+    return &(g_kwmInstanceContainer()->kwm);
-+}
-+
-+#define D(name, args...) \
-+    switch (g_kwmInstanceContainer()->platform) { \
-+    case KWindowSystemStaticContainer::XcbPlatform: \
-+        return static_cast<KWindowSystemPrivateX11*>(g_kwmInstanceContainer()->d.data())->name(args); \
-+    case KWindowSystemStaticContainer::DummyPlatform: \
-+    default: \
-+        return static_cast<KWindowSystemPrivateDummy*>(g_kwmInstanceContainer()->d.data())->name(args); \
-+    }
-+
-+void KWindowSystem::connectNotify(const QMetaMethod &signal)
-+{
-+    QObject::connectNotify(signal);
-+    D(connectNotify, signal);
-+}
-+
-+QList<WId> KWindowSystem::windows()
-+{
-+    D(windows, );
-+}
-+
-+#ifndef KWINDOWSYSTEM_NO_DEPRECATED
-+KWindowInfo KWindowSystem::windowInfo(WId win, unsigned long properties, unsigned long properties2)
-+{
-+    return KWindowInfo(win, properties, properties2);
-+}
-+#endif
-+
-+bool KWindowSystem::hasWId(WId w)
-+{
-+    return windows().contains(w);
-+}
-+
-+QList<WId> KWindowSystem::stackingOrder()
-+{;
-+    D(stackingOrder, );
-+}
-+
-+int KWindowSystem::currentDesktop()
-+{
-+    D(currentDesktop, );
-+}
-+
-+int KWindowSystem::numberOfDesktops()
-+{
-+    D(numberOfDesktops, );
-+}
-+
-+void KWindowSystem::setCurrentDesktop(int desktop)
-+{
-+    D(setCurrentDesktop, desktop);
-+}
-+
-+void KWindowSystem::setOnAllDesktops(WId win, bool b)
-+{
-+    D(setOnAllDesktops, win, b);
-+}
-+
-+void KWindowSystem::setOnDesktop(WId win, int desktop)
-+{
-+    D(setOnDesktop, win, desktop);
-+}
-+
-+WId KWindowSystem::activeWindow()
-+{
-+    D(activeWindow, );
-+}
-+
-+void KWindowSystem::activateWindow(WId win, long time)
-+{
-+    D(activateWindow, win, time);
-+}
-+
-+void KWindowSystem::forceActiveWindow(WId win, long time)
-+{
-+    D(forceActiveWindow, win, time);
-+}
-+
-+void KWindowSystem::demandAttention(WId win, bool set)
-+{
-+    D(demandAttention, win, set);
-+}
-+
-+#ifndef KWINDOWSYSTEM_NO_DEPRECATED
-+WId KWindowSystem::transientFor(WId win)
-+{
-+    D(transientFor, win);
-+}
-+#endif
-+
-+void KWindowSystem::setMainWindow(QWidget *subWidget, WId mainWindowId)
-+{
-+    // Set the WA_NativeWindow attribute to force the creation of the QWindow.
-+    // Without this QWidget::windowHandle() returns 0.
-+    subWidget->setAttribute(Qt::WA_NativeWindow, true);
-+    QWindow *subWindow = subWidget->windowHandle();
-+    Q_ASSERT(subWindow);
-+
-+    QWindow *mainWindow = QWindow::fromWinId(mainWindowId);
-+    // mainWindow is not the child of any object, so make sure it gets deleted at some point
-+    connect(subWidget, &QObject::destroyed, mainWindow, &QObject::deleteLater);
-+    subWindow->setTransientParent(mainWindow);
-+}
-+
-+#ifndef KWINDOWSYSTEM_NO_DEPRECATED
-+WId KWindowSystem::groupLeader(WId win)
-+{
-+    D(groupLeader, win);
-+}
-+#endif
-+
-+QPixmap KWindowSystem::icon(WId win, int width, int height, bool scale)
-+{
-+    return icon(win, width, height, scale, NETWM | WMHints | ClassHint | XApp);
-+}
-+
-+QPixmap KWindowSystem::icon(WId win, int width, int height, bool scale, int flags)
-+{
-+    D(icon, win, width, height, scale, flags);
-+}
-+
-+void KWindowSystem::setIcons(WId win, const QPixmap &icon, const QPixmap &miniIcon)
-+{
-+    D(setIcons, win, icon, miniIcon);
-+}
-+
-+void KWindowSystem::setType(WId win, NET::WindowType windowType)
-+{
-+    D(setType, win, windowType);
-+}
-+
-+void KWindowSystem::setState(WId win, unsigned long state)
-+{
-+    D(setState, win, state);
-+}
-+
-+void KWindowSystem::clearState(WId win, unsigned long state)
-+{
-+    D(clearState, win, state);
-+}
-+
-+void KWindowSystem::minimizeWindow(WId win, bool animation)
-+{
-+    D(minimizeWindow, win, animation);
-+}
-+
-+void KWindowSystem::unminimizeWindow(WId win, bool animation)
-+{
-+    D(unminimizeWindow, win, animation);
-+}
-+
-+void KWindowSystem::raiseWindow(WId win)
-+{
-+    D(raiseWindow, win);
-+}
-+
-+void KWindowSystem::lowerWindow(WId win)
-+{
-+    D(lowerWindow, win);
-+}
-+
-+bool KWindowSystem::compositingActive()
-+{
-+    D(compositingActive, );
-+}
-+
-+QRect KWindowSystem::workArea(int desktop)
-+{
-+    D(workArea, desktop);
-+}
-+
-+QRect KWindowSystem::workArea(const QList<WId> &exclude, int desktop)
-+{
-+    D(workArea, exclude, desktop);
-+}
-+
-+QString KWindowSystem::desktopName(int desktop)
-+{
-+    D(desktopName, desktop);
-+}
-+
-+void KWindowSystem::setDesktopName(int desktop, const QString &name)
-+{
-+    D(setDesktopName, desktop, name);
-+}
-+
-+bool KWindowSystem::showingDesktop()
-+{
-+    D(showingDesktop, );
-+}
-+
-+void KWindowSystem::setUserTime(WId win, long time)
-+{
-+    D(setUserTime, win, time);
-+}
-+
-+void KWindowSystem::setExtendedStrut(WId win, int left_width, int left_start, int left_end,
-+                                     int right_width, int right_start, int right_end, int top_width, int top_start, int top_end,
-+                                     int bottom_width, int bottom_start, int bottom_end)
-+{
-+    D(setExtendedStrut, win, left_width, left_start, left_end,
-+                                 right_width, right_start, right_end, top_width, top_start, top_end,
-+                                 bottom_width, bottom_start, bottom_end);
-+}
-+
-+void KWindowSystem::setStrut(WId win, int left, int right, int top, int bottom)
-+{
-+    D(setStrut, win, left, right, top, bottom);
-+}
-+
-+bool KWindowSystem::icccmCompliantMappingState()
-+{
-+    D(icccmCompliantMappingState, );
-+}
-+
-+bool KWindowSystem::allowedActionsSupported()
-+{
-+    D(allowedActionsSupported, );
-+}
-+
-+QString KWindowSystem::readNameProperty(WId win, unsigned long atom)
-+{
-+    D(readNameProperty, win, atom);
-+}
-+
-+void KWindowSystem::allowExternalProcessWindowActivation(int pid)
-+{
-+    D(allowExternalProcessWindowActivation, pid);
-+}
-+
-+void KWindowSystem::setBlockingCompositing(WId window, bool active)
-+{
-+    D(setBlockingCompositing, window, active);
-+}
-+
-+bool KWindowSystem::mapViewport()
-+{
-+    D(mapViewport, );
-+}
-+
-+int KWindowSystem::viewportToDesktop(const QPoint &p)
-+{
-+    D(viewportToDesktop, p);
-+}
-+
-+int KWindowSystem::viewportWindowToDesktop(const QRect &r)
-+{
-+    D(viewportWindowToDesktop, r);
-+}
-+
-+QPoint KWindowSystem::desktopToViewport(int desktop, bool absolute)
-+{
-+    D(desktopToViewport, desktop, absolute);
-+}
-+
-+QPoint KWindowSystem::constrainViewportRelativePosition(const QPoint &pos)
-+{
-+    D(constrainViewportRelativePosition, pos);
-+}
