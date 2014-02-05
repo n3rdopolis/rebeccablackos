@@ -8,7 +8,7 @@ There are many native Wayland toolkits and libraries installed, QT, KDE Framewor
 
 Xwayland is also included, which allows X applications to run under a Wayland server. Xwayland has a few issues, but is usable.
 
-There are also other Wayland Desktop environments installed: Orbital, and Hawaii, and two non Weston Wayland servers: Enlightenment, and Gnome Shell Wayland aside from the default Weston shell. Enlightenment currently only runs nested, and not on 'bare metal' yet.
+There are also other Wayland Desktop environments installed: Orbital, and Hawaii, and three non Weston Wayland servers: Enlightenment, swc, and Gnome Shell Wayland, aside from the default Weston shell. Enlightenment currently only runs nested, and not on 'bare metal' yet. Gnome shell's application support is limited.
 
 This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
