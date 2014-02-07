@@ -384,7 +384,7 @@ New Session...
   fi
   if [[ $ChangeSession == "-1" ]]
   then
-    echo "Login" >/run/waylandloginmanager/loginmanager_control
+    echo -e "\nLogin" >/run/waylandloginmanager/loginmanager_control
   else 
     if [[ $ChangeSession ]]
     then
@@ -408,6 +408,7 @@ New Session...
 #Function that starts the user sessions
 function StartUserSession 
 {
+  exec 1000>&-
   export WAYLAND_DISPLAY=$SESSIONID
   #unset most varaibles
   while read var
@@ -468,7 +469,7 @@ function StartUserSession
 
 
   echo "$WESTONTTY@$WESTONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
-  echo "RegisterSession" >/run/waylandloginmanager/loginmanager_control
+  echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
 }
 
 #Test users credentials
@@ -704,6 +705,7 @@ function SetupFIFO
   rm -r /run/waylandloginmanager/loginmanager_register
   mkfifo -m 222 /run/waylandloginmanager/loginmanager_control
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_register
+  exec 1000<> /run/waylandloginmanager/loginmanager_control
 }
 
 #The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
@@ -722,9 +724,7 @@ function ReadCommandFIFO
       fi
       ActiveSessionPID=0
     fi
-    exec 1000<> /run/waylandloginmanager/loginmanager_control
-    COMMAND=$(while read -n 20 -t 1 data <&1000; do echo $data; done| head -1)
-    exec 1000>&-
+    read -n 20 -t 1 COMMAND <&1000
     if [[ $COMMAND != "" ]]
     then
       logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
@@ -787,7 +787,7 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    sleep .01
+    sleep .0001
   done
 }
 

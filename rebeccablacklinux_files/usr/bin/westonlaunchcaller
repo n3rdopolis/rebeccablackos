@@ -18,7 +18,7 @@
 
 function SwitchBackExit
 {
-  echo Change > /run/waylandloginmanager/loginmanager_control
+  echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
   exit
 }
 
