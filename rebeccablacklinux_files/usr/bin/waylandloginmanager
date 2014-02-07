@@ -787,7 +787,7 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    sleep .1
+    sleep .01
   done
 }
 
