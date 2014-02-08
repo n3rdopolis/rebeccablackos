@@ -21,8 +21,8 @@ mkdir -p /run/waylandloginmanager
 
 #Detect another instance
 SCRIPTPATH=$(readlink -f "$0")
-SCRIPTNAME=$(basename "$SCRIPTPATH")
-LOCKSCRIPT=$(readlink -f "$(cat "/run/waylandloginmanager/$SCRIPTNAME.lock" | xargs -0 echo | awk '{print $2}')" )
+SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
+LOCKSCRIPT=$(readlink -f "$(strings "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
 if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
 then
   rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock"
@@ -31,6 +31,7 @@ else
   logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
   exit
 fi
+#second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
 LOCKPROCPATH=$(dirname $(readlink "/run/waylandloginmanager/$SCRIPTNAME.lock" ))
 THISPROCPATH=/proc/$$
 if [[ $LOCKPROCPATH != $THISPROCPATH ]]
