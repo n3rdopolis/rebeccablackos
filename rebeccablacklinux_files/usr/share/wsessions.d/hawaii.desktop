@@ -8,7 +8,7 @@ CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
-SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=/opt/lib/hawaii/hawaii-desktop.so
+SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=/opt/lib/weston/hawaii-desktop.so
 AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=/opt/lib/hawaii/hawaii-desktop.so
+NeedsFile=/opt/lib/weston/hawaii-desktop.so
 NeedsFile=/opt/bin/weston-display-server
