@@ -698,7 +698,7 @@ function StartAutoLogin
   fi 
 }
 
-function SetupFIFO
+function SetupLoggingAndFIFO
 {
   #Create communication fifo.
   rm -r /run/waylandloginmanager/loginmanager_control
@@ -706,6 +706,11 @@ function SetupFIFO
   mkfifo -m 222 /run/waylandloginmanager/loginmanager_control
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_register
   exec 1000<> /run/waylandloginmanager/loginmanager_control
+  #Prepare logging for the loginmanagerdisplay
+  touch /run/waylandloginmanager/waylandserver.log
+  chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/waylandserver.log
+  rm $LOGINMANAGERDISPLAYHOME/waylandserver.log
+  ln -s /run/waylandloginmanager/waylandserver.log $LOGINMANAGERDISPLAYHOME/waylandserver.log
 }
 
 #The part of the script that reads the FIFO for IPC from users logoff dialogs, the helper scripts on the login window, or the session startup scripts
@@ -814,8 +819,8 @@ LoginWestonLauncher &
 StartAutoLogin &
 LastLogonPID=$!
 
-#Setup the FIFO before anything starts using the fifo
-SetupFIFO
+#Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
+SetupLoggingAndFIFO
 
 #Start the login managers IPC
 ReadCommandFIFO
