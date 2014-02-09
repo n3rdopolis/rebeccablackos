@@ -15,5 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This file is called the weston-desktop-shell of the loginmanagerdisplay. It sends the 'Info' command to the WaylandLoginManager's FIFO.
+#This caused the WaylandLoginManager to bring up a help dialog.
 echo -e "\nInfo" > /run/waylandloginmanager/loginmanager_control
 
