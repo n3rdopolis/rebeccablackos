@@ -105,6 +105,7 @@ LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
 unset WINDOWID
 
+cd $(eval echo ~$USER)
 echo 'To exit Weston, hit CTRL-ALT-BACKSPACE'
 echo ' '
 echo 'When using Wayland, to run a program under xwayland, run'
