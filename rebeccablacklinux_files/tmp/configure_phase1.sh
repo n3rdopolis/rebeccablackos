@@ -43,7 +43,7 @@ rm -r /usr/share/logs/package_operations/Downloads
 #Create folder to hold the install logs
 mkdir /usr/share/logs/package_operations/Downloads
 
-#LIST OF PACKAGES TO GET INSTALLED
+#Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
@@ -57,17 +57,19 @@ while read PACKAGEINSTRUCTION
 do
   PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
   METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
-
+  #Partial install
   if [[ $METHOD == "PART" ]]
   then
     echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
+  #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     yes Yes | apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
+  #builddep
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
@@ -78,6 +80,7 @@ do
   Result=1
   fi
 
+  #if the install resut for the current package failed, then log it. If it worked, then remove it from the list of unfinished downloads
   if [[ $Result != 0 ]]
   then
     echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Downloads/failedpackages.log
@@ -89,6 +92,7 @@ do
   fi
 done < <(echo "$INSTALLS")
 
+#Save the INSTALLS.txt so that it can be compared with the next run
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates

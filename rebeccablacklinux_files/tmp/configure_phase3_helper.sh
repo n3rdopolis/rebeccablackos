@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
+
 #Copy select files into place, that are suitable for distribution.
 mkdir -p /usr/bin
 cp -a /usr/import/usr/bin/* /usr/bin

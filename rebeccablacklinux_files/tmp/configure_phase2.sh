@@ -40,7 +40,7 @@ rm -r /usr/share/logs/package_operations/Installs
 #Create folder to hold the install logs
 mkdir /usr/share/logs/package_operations/Installs
 
-#LIST OF PACKAGES TO GET INSTALLED
+#Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
@@ -61,21 +61,25 @@ do
   PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
   METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
+  #This is for partial installs
   if [[ $METHOD == "PART" ]]
   then
     echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
+  #This is for full installs
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     yes Yes | apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
+  #this is for build dependancies
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     yes Y | apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
+  #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
     echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
@@ -86,6 +90,7 @@ do
     Result=1
   fi
 
+  #if the install resut for the current package failed, then log it. If it worked, then remove it from the list of unfinished installs
   if [[ $Result != 0 ]]
   then
     echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Installs/failedpackages.log
