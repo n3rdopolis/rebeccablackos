@@ -16,14 +16,15 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-ThIsScriPtSFiLeLoCaTion=$(readlink -f "$0")
-ThIsScriPtSFolDerLoCaTion=$(dirname "$ThIsScriPtSFiLeLoCaTion")
+#This is a script for mounting a Ubuntu live CD, and creating a chroot session.
 
 MOUNTISO=$(readlink -f $1)
 MOUNTHOME=~
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+export HOME=$(eval echo ~$SUDO_USER)
 unset SUDO_USER
 
+#Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 ]]
 then
   if [[ $XALIVE == 0 ]]
@@ -41,6 +42,30 @@ then
     sudo $0 $MOUNTISO
   fi
   exit
+fi
+
+#Determine the terminal to use
+unset DBUS_SESSION_BUS_ADDRESS
+if [[ -f /usr/bin/konsole ]]
+then
+  TERMCOMMAND="konsole --nofork -e"
+elif [[ -f /usr/bin/gnome-terminal ]]
+then
+  TERMCOMMAND="gnome-terminal -e"
+else
+  TERMCOMMAND="xterm -e"
+  if [[ ! -f $(which xterm) ]]
+  then
+    zenity --question --text "xterm is needed for this script. Install xterm?"  
+    xterminstall=$?
+    if [[ $xterminstall -eq 0 ]]
+    then 
+      pkcon install xterm -y
+    else
+      zenity --info --text "Can not continue without xterm. Exiting the script."
+      exit
+    fi
+  fi
 fi
 
 
@@ -129,7 +154,7 @@ then
   if [[ $XALIVE == 0 ]]
   then
     zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
-    xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
@@ -141,28 +166,15 @@ fi
 #install needed tools to allow testing on a read only iso
 if [[ $XALIVE == 0 ]]
 then
-  if [[ ! -f $(which xterm) ]]
-  then
-    zenity --question --text "xterm is needed for this script. Install xterm?"  
-    xterminstall=$?
-    if [[ $xterminstall -eq 0 ]]
-    then 
-      pkcon install xterm -y
-    else
-      zenity --info --text "Can not continue without xterm. Exiting the script."
-      exit
-    fi
-  fi
-  xterm -e pkcon install unionfs-fuse
-  xterm -e pkcon install squashfs-tools
-  xterm -e pkcon install dialog
-  xterm -e pkcon install zenity
+  $TERMCOMMAND pkcon install unionfs-fuse
+  $TERMCOMMAND pkcon install squashfs-tools
+  $TERMCOMMAND pkcon install dialog
+  $TERMCOMMAND pkcon install zenity
 else
   pkcon install unionfs-fuse
   pkcon install squashfs-tools
   pkcon install dialog
   pkcon install zenity
-  pkcon install xterm
 fi
 
 #make the folders for mounting the ISO
@@ -208,6 +220,7 @@ then
   exit
 fi
 
+
 #mount the squashfs image
 mount -o loop $MOUNTHOME/liveisotest/isomount/casper/filesystem.squashfs $MOUNTHOME/liveisotest/squashfsmount
 
@@ -236,9 +249,9 @@ Type exit to go back to your system. If you want to test wayland, run the comman
 fi
 
 #Configure test system
-mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
-chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
-chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/livetest
+mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
 cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
 chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
 chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
@@ -248,7 +261,7 @@ chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -
 touch $MOUNTHOME/liveisotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
 then
-  xterm -e chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 else
   chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
 fi
