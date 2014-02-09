@@ -29,10 +29,10 @@ if [[ $UID != 0 ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    if [[ -f /usr/bin/kdesudo ]]
+    if [[ -f $(which kdesudo) ]]
     then
       kdesudo $0 $MOUNTISO
-    elif [[ -f /usr/bin/gksudo ]]
+    elif [[ -f $(which gksudo) ]]
     then
       gksudo $0 $MOUNTISO
     else
@@ -44,31 +44,65 @@ then
   exit
 fi
 
-#Determine the terminal to use
-unset DBUS_SESSION_BUS_ADDRESS
-if [[ -f /usr/bin/konsole ]]
+
+#Try to determine the package manager. It usually SHOULD be pkcon
+if [[ -f $(which pkcon) ]]
 then
-  TERMCOMMAND="konsole --nofork -e"
-elif [[ -f /usr/bin/gnome-terminal ]]
+  INSTALLCOMMAND="pkcon install"
+elif [[ -f $(which apt-get) ]]
 then
-  TERMCOMMAND="gnome-terminal -e"
+  INSTALLCOMMAND="apt-get install"
+elif [[ -f $(which yum) ]]
+then
+  INSTALLCOMMAND="yum install"
+elif [[ -f $(which pacman) ]]
+then
+  INSTALLCOMMAND="pacman -S"
+elif [[ -f $(which zypper) ]]
+then
+  INSTALLCOMMAND="zypper in"
+elif [[ -f $(which up2date) ]]
+then
+  INSTALLCOMMAND="up2date -i"
+elif [[ -f $(which urpmi) ]]
+then
+  INSTALLCOMMAND="urpmi"
 else
-  TERMCOMMAND="xterm -e"
-  if [[ ! -f $(which xterm) ]]
+  if [[ $XALIVE == 0 ]]
   then
-    zenity --question --text "xterm is needed for this script. Install xterm?"  
-    xterminstall=$?
-    if [[ $xterminstall -eq 0 ]]
-    then 
-      pkcon install xterm -y
-    else
-      zenity --info --text "Can not continue without xterm. Exiting the script."
-      exit
+    zenity --info --text "Cant find a install utility."
+  else
+    echo "Cant find a install utility."
+  fi
+  exit
+fi
+
+#Determine the terminal to use
+if [[ $XALIVE == 0 ]]
+then
+  unset DBUS_SESSION_BUS_ADDRESS
+  if [[ -f $(which konsole) ]]
+  then
+    TERMCOMMAND="konsole --nofork -e"
+  elif [[ -f $(which gnome-terminal) ]]
+  then
+    TERMCOMMAND="gnome-terminal -e"
+  else
+    TERMCOMMAND="xterm -e"
+    if [[ ! -f $(which xterm) ]]
+    then
+      zenity --question --text "xterm is needed for this script. Install xterm?"  
+      xterminstall=$?
+      if [[ $xterminstall -eq 0 ]]
+      then 
+	$INSTALLCOMMAND xterm -y
+      else
+	zenity --info --text "Can not continue without xterm. Exiting the script."
+	exit
+      fi
     fi
   fi
 fi
-
-
 
 function mountisoexit() 
 {
@@ -166,15 +200,15 @@ fi
 #install needed tools to allow testing on a read only iso
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND pkcon install unionfs-fuse
-  $TERMCOMMAND pkcon install squashfs-tools
-  $TERMCOMMAND pkcon install dialog
-  $TERMCOMMAND pkcon install zenity
+  $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
+  $TERMCOMMAND $INSTALLCOMMAND squashfs-tools
+  $TERMCOMMAND $INSTALLCOMMAND dialog
+  $TERMCOMMAND $INSTALLCOMMAND zenity
 else
-  pkcon install unionfs-fuse
-  pkcon install squashfs-tools
-  pkcon install dialog
-  pkcon install zenity
+  $INSTALLCOMMAND unionfs-fuse
+  $INSTALLCOMMAND squashfs-tools
+  $INSTALLCOMMAND dialog
+  $INSTALLCOMMAND zenity
 fi
 
 #make the folders for mounting the ISO
