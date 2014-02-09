@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script constructs the menu, and adds items to it. Each folder has a rbos-name.directory the 'name' of the folder it's in must match. The .desktop files next to it are in that sublevel. 
+
 MENUPATH=/usr/share/RBOS_MENU
 #for each desktop file
 while read DESKTOPFILE

@@ -16,6 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
+#It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the MAKEDEBS argument.
+
 argument=$1
 
 export MAKEDEBS=1

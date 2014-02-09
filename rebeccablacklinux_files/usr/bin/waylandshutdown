@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script provides a shutdown prompt with Zenity within a wayland session. It reports to the user if the requested action failed. 
+
 ACTION=$(echo "Switch User
 Switch User
 Logoff
@@ -44,10 +46,12 @@ CONFIRM=$?
 if [[ $CONFIRM == 0 ]]
 then
 
+  #For switch user, send the Switch command to the waylandloginmanager
   if [[ $ACTION == "Switch User" ]]
   then
     echo -e "\nSwitch" > /run/waylandloginmanager/loginmanager_control
     RESULT=$?
+  #If the request is logoff, then unmount ecryptfs, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
     ecryptfs-umount-private
@@ -79,6 +83,7 @@ then
     exit
   fi
 
+  #if the selected action failed, tell the user
   if [[ $RESULT != 0 ]]
   then
     zenity --title="Failure" --warning --text="Failed to $ACTION"

@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script performs an update from anything on the SVN, it can be specified to rerun the build scripts, but by default it doesn't. For most users, this shouldn't be run for all SVN updates, as many commits add new build scripts, or launchers, and they would have to run those.
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -39,16 +41,18 @@ rm -rf /usr/import/tmp
 rm -rf /usr/import/usr/import
 
 rsync /usr/import/* -a /
+
+#Ensure that the weston binary called by weston-launch is redirected to a symlink to the file in /usr/bin, so that it doesn't need to be updated in two places
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 
 chmod 777 /tmp
 
-#Install menu items
+#Run the script that creates the new menu objects from /usr/share/RBOS_MENU
 install_menu_items 
 
 
-
+#If the user opted to build, install all packages specified by INSTALLS.txt, and run compile_all
 if [[ $1 == build ]]
 then 
   #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
@@ -98,4 +102,5 @@ else
   echo "not building source because this script wasn't called with the option 'build'"
 fi
 
+#Get the user that called the script, and update the users profile from /etc/skel
 su $SUDO_USER -c update-rbos-user

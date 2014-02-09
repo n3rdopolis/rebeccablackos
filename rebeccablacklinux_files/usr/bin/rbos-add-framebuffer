@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script configures GRUB to pass a vga= argument to the kernel specified by the user. It tells the user what vga value gives what resolution
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -24,13 +26,14 @@ then
 fi
 
 
-
+#Find out the current vga= configuration if specified
 CURRENTOPTION=cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | tr [:lower:] [:upper:] | grep VGA | awk -F VGA= '{print $2}' | awk '{print $1}'
 if [[ -z $CURRENTOPTION ]]
 then
   CURRENTOPTION="Not Specified"
 fi
 
+#Tell the user what the script does
 dialog  --msgbox "This will assist you in configuring your system, so that a framebuffer is force created upon the next reboot, with the specified resolution." 7 60
 
 RESOLUTION=$(dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default
@@ -39,21 +42,24 @@ Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1
 OKSelected=$?
 if [[ $OKSelected == 0 && $RESOLUTION != 2 ]]
 then
-
+  #if the user selected to turn on the Framebuffer, then add the VGA= argument to the default command line. But make sure it's the only vga= being passed.
   if [[ $RESOLUTION == 0 ]]
   then
     sed -ri 's/\bvga=\S*//gI' /etc/default/grub
+  #if the user selected to turn off the Framebuffer, then remove the VGA= argument from the default command line.
   else
     sed -ri 's/\bvga=\S*//gI' /etc/default/grub
     sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"vga=$RESOLUTION /g" /etc/default/grub
   fi
 
-
+  #update the grub configs, and ask the user to restart now or later
   update-grub
   dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
   OKSelected=$?
+
+  #if the user opted to restart, then restart
   if [[ $OKSelected == 0 ]]
   then
     reboot
