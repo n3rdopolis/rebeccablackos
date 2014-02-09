@@ -15,7 +15,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script sets up a nested Hawaii session
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
 export $(exec ck-launch-session dbus-launch)
-weston-display-server --socket=$ServerID --backend=wayland-backend.so --modules=xwayland.so --shell=/opt/lib/hawaii/hawaii-desktop.so
+weston-display-server --socket=$ServerID --backend=wayland-backend.so --modules=xwayland.so --shell=/opt/lib/weston/hawaii-desktop.so
