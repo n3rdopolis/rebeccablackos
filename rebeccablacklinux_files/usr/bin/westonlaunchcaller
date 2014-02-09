@@ -16,40 +16,57 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This file is called by weston-launch, it's meant to replace /opt/bin/weston (while /opt/bin/weston is redirected to /opt/bin/weston-display-server for example)
+#This does some other things for waylandloginmanager, such as specify a different, but sanctioned server path in /etc/waylandservers, and send the Change command back to the Waylandloginmanager to make it switch back to the TTY if the server execution fails.
+#Weston-launch assists with running commands as an arbitrary user, on a tty, and registering it as a new logind session, so while many other items in /etc/waylandservers are the server specific setuid helpers, weston-launch does more, and not all compositors have setuid helpers.
+
+
+#Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure
 function SwitchBackExit
 {
   echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
   exit
 }
 
+#if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
 if [[ $1 == "--version" ]]
 then
   echo "waylandloginmanager weston-launch addon"
   exit 255
 fi
 
+
+#set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
 USER=$(id -u)
 . /usr/bin/wlruntime_vars
 BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
 if [[ -e $EnvironmentFile ]]
 then
+  #parse the session event file if specified, and it exists
   EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
   while read LINE
   do
+    #environment files are specified as action=var=data
+    #Examples
+    #set=varname=data sets variable called varname, with the content of data.
+    #unset=varname unsets a variable called varname
+    #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
     VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
     VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
     VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
     VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
 
+    #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
     if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
     then
-
+      #if it is set, then set the variable
       if [[ $VARACTION == "set" ]]
       then
 	export $VARNAME=$VARDATA
       fi
 
+      #if it is unset, then unset the variable
       if [[ $VARACTION == "unset" ]]
       then
 	unset $VARNAME
@@ -59,16 +76,19 @@ then
   done < <(echo "$EnvironmentFileData")
 fi
 
+#set all arguments into an array
 IFS=''
 ArgArray=("$@")
 unset IFS
 
-#Clean up trailing white space
+#Clean up trailing white space from the end of all arguments
 for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
 do
   ArgArray[$element]=$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
 done
 SecondArg="${ArgArray[1]}"
+
+#If the second argument is @@, that means run a custom server. Only run it if the server is specified in /etc/waylandservers
 if [[ "$SecondArg" == "@@" ]]
 then
   Server="${ArgArray[0]}"
@@ -81,7 +101,7 @@ then
     ServerApprovedCount=1
   fi
 
-  #Only run if the server is safe
+  #if the server is not in /etc/waylandservers then exit. if it is, then run the server
   if [[ $ServerApprovedCount == 0 ]]
   then 
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
@@ -98,6 +118,7 @@ then
       SwitchBackExit
     fi
   fi
+#If @@ is not passed as the second argument, pass all arguments to weston-display-server by default
 else
   weston-display-server ${ArgArray[@]}
 fi
