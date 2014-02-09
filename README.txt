@@ -20,7 +20,7 @@ How to use the ISO:
 
 You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script executable, and run the script from a terminal, and pass the path to the ISO file as an argument. You can usually do this by dragging the iso onto the terminal window after the path to the script, and a space. (and selecting paste text if needed)
 it will give you a shell running as a test user account, where you can run the command westonnestedxwaylandcaller. The password for this user account is no password
-It requires xterm,unionfs-fuse,squashfs-tools, dialog and zenity to be installed, all of which the script tries to install automatically with packagekit. If packagekit is uninstalled, you will need to install pkcon
+It requires unionfs-fuse,squashfs-tools, dialog and zenity to be installed, all of which the script tries to install automatically with packagekit. It also needs either konsole, gnome-terminal OR xterm. If none of these are installed, it tries to install Xterm. If packagekit is uninstalled, or not installed on your system, you will need to install pkcon, or install those packages manually.
 
  
 How to use Wayland:
