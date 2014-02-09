@@ -16,6 +16,10 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#This script is for configuring multiple seats in Weston. It matches the devices connection ID, and the devices serial ID, and sets the ENV{WL_SEAT}= value in a the udev file /lib/udev/rules.d/99-westonseats.rules 
+#This makes it easier for users to configure multiple pointers and keyboard focuses.
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -26,15 +30,17 @@ fi
 #Allow Exclamation points to be used in commands by turning off the history
 set +H
 
-#Specify the maximum number of seats
+#Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
+#get the current tty so the script knows what TTY to switch back to
 CurrentTTY=$(fgconsole)
 
 NumberOfDevices=0
 #Get all input devices from udev, and store attributes into an array
 while read Device
 do
+  #get properties of the device
   DeviceProperties=$(udevadm info --query=property  --name=$Device)
   DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -e '/looking at/d' -e 's/    //g' -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 )
   DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SERIAL" {print $0}' | cut -d = -f2- | tail -1 )
@@ -45,6 +51,7 @@ do
   IsDeviceTouchpad=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_TOUCHPAD" {print $0}' | cut -d = -f2- | tail -1 )
   IsDeviceKeyboard=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT_KEYBOARD" {print $0}' | cut -d = -f2- | tail -1 )
 
+  #if the device doesn't have a serial ID, which usually tells the make and model, then display it as 'generic' to the user
   if [[ -z $DeviceDisplayName ]]
   then
     DeviceDisplayName=$DeviceName
@@ -54,12 +61,16 @@ do
     fi
   fi
 
+  #if the device has no configured WL_SEAT value, then weston sees it as it being under the default seat
   if [[ -z $DeviceSeatID ]]
   then
     DeviceSeatID=default
   fi
 
+  #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a logitech transciver, will appear as "Mouse / Keyboard"
   unset DeviceType
+
+  #if the device is reported as a mouse, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
   if [[ -z $IsDeviceMouse ]]
   then
     IsDeviceMouse=0
@@ -71,6 +82,7 @@ do
     DeviceType+="Mouse"
   fi
 
+  #if the device is reported as a touchscreen, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
   if [[ -z $IsDeviceTouchscreen ]]
   then
     IsDeviceTouchscreen=0
@@ -82,6 +94,7 @@ do
   DeviceType+="Touchscreen"
   fi
 
+  #if the device is reported as a touchpad (as in a laptop touchpad), then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
   if [[ -z $IsDeviceTouchpad ]]
   then
     IsDeviceTouchpad=0
@@ -93,6 +106,7 @@ do
   DeviceType+="Touchpad"
   fi
 
+  #if the device is reported as a keyboard, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
   if [[ -z $IsDeviceKeyboard ]]
   then
     IsDeviceKeyboard=0
@@ -104,6 +118,7 @@ do
   DeviceType+="Keyboard"
   fi
 
+  #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is a  mouse, keyboard, touchpad and/or touchscreen. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat.
   if [[ ! -z $DeviceType ]]
   then
     ((NumberOfDevices++))
@@ -161,7 +176,7 @@ do
   SeatList+="seat$CurrentSeat"
 done
 
-#Go through each probed input device and prompt for a new seat
+#Go through each probed input device and prompt for a the seata to add the device to
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
   unset NewSeatNumber
@@ -171,7 +186,7 @@ do
   Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
   Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
-
+  #only change the seat id in udev if the user specified to do so
   if [[ -z $NewSeatNumber ]]
   then
     zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
@@ -185,19 +200,19 @@ do
   fi
 done
 
-#Close the main zenity window that lists all devices
+#Close the main zenity window that lists all devices when this script is exiting
 kill -9 $MainFormPID
 
-#Reload the configuration into udev
+#Reload the new configuration into udev
 udevadm control --reload-rules
 
-#Notify each input device about the changes
+#Notify each input device about the change with udev, instead of doing a full trigger on all devices on the system
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
   udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
 done
 
-
+#tell the user that Weston is going to 'flicker' as the tty is switched in and out so that Weston is forced to see the new Udev config
 zenity --info --text "Seat Configuration for all devices is now complete.
 
 The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Multipointer Configuration"
