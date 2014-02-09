@@ -16,12 +16,43 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This script is called by all of the scripts in /usr/bin/Compile. It contains many functions so that it doesn't have to be duplicated throughout the multiple scripts. It handles downloading the source specified by the scripts, and running the build and install functions. It also passes the install process through checkinstall to create deb files out of the scripts if the environment variable is 1.
+#
+#These options are specified in the build scripts
+#SOURCENAME: Set the name of the directory to save the source in, and the name of the deb if checkinstall is specified
+#SOURCEURL: The download location of the file or source repo do download
+#REPOSITORYTYPE: The type of source repo. Supported types are GIT, SVN, BZR, HG, and ARCHIVE (for archive files instead of a source repo)
+#SOURCEREVISION: The revision to use from the source repo. This is ignored if the REPOSITORYTYPE is archive
+#INSTALLDIR: This specifies the location to install the source. This variable must be used or must match when specified to autogen or cmake or the like.
+#	It is used by build_vars to set the needed variables.
+#REBUILDNEWREVISION: This is for MAkEDEBS. Some packages are worth rebuilding even if the deb file for this is already built, as it might be getting features faster, and is a smaller source package.
+
+
+#GIT SUBMODULES
+#This script specifies setting values for GIT submodules
+#Specify any custom revisions for git submodules in the format shown below
+# SUBMODULEREVISIONS=(examplesubmodule master 
+# nested/submodule 1.0
+# 'submodule with spaces' master
+# commitsubmodule 0123456789abcdef )
+
+
+#The following Functions for the build scripts are supported
+#PackageDownloadSource: any additional downloads that are needed that might not be in the source repo. This is called after the routine for downloading the archive type
+#PackagePrepareBuild: Any changes to the source. This is called first during a build.
+#PackageCompileSource: Routine for compiling (but not installing the source). This is called second in a build.
+#PackageInstallSource: Routine for installing the source. The actions here are intercepted by checkinstall if MAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
+#PackagePostInstall: Routines after the source in installed. The actions here are intercepted by checkinstall if MAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
+
+#Each function is started with the CWD as the source download folder. For example If PackageCompileSource cd's to ./build and make is called, then PackageInstallSource will also need to cd to ./build
+
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
 
+#This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
 function RunDownloadAndOrBuild 
 {
   #Require root privlages
