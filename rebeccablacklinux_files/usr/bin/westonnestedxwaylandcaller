@@ -15,5 +15,8 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#secondary scriot that calls westoncaller with arguments to run it as a xwaylandapp instead of running it as a wayland program
+export $(exec ck-launch-session dbus-launch)
 westoncaller --backend=x11-backend.so --modules=xwayland.so,desktop-shell.so
 

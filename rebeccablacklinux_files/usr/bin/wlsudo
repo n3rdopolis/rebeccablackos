@@ -15,12 +15,18 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script uses zenity to act as a graphical sudo prompt in Wayland. It also preserves Wayland variables
+
+#Set to root's $HOME instead of the users, so that applications don't create root owned files in the users directory. This is the same behaviour as kdesudo
 unset HOME
 export HOME=$(echo ~root)
 
+#Test if sudo needs a password by attempting to execute /bin/true
 echo "" | sudo -p "" -S -b true >/dev/null 2>&1 
 result=${PIPESTATUS[1]}
 
+#if sudo needs a password, ask for the password
 if [[ $result == 1 ]]
 then
   zenity --forms --text="The following command will be executed as root
@@ -33,6 +39,7 @@ Please enter your password to continue:" --title=wlsudo --add-password="" 2>/dev
   then
     zenity --info --title=wlsudo --text="Invalid Password, or command not found." >/dev/null 2>&1 
   fi
+#if not, tell the user that the command will be run as root. kdesudo and gksudo don't do this, but this is more like UAC. This doesn't really add any real security as a direct call to sudo during the 15 minute window will succeed, but I think it's best to be informitive...
 else
   zenity --title=wlsudo --forms --text="The following command will be executed as root 
 

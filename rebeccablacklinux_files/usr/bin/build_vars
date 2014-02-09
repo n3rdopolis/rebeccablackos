@@ -17,6 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 #Create build variables
 
+#This file contains the variables needed for building packages, relative to the INSTALLDIR. by default, and unless specified otherwise, INSTALLDIR is set to /opt
+
 if [[ -z $INSTALLDIR ]]
 then
   export INSTALLDIR=/opt

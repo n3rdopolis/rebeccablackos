@@ -15,6 +15,9 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script calls the program and arguments passed to the arguments of this script, sets runtime vars for Wayland, and executes the program, and arguments. This has additional variables for running KDE programs
+#If there is no WAYLAND_DISPLAY, then it brings up a kdialog stating that it must be run in wayland. This is legacy for before waylandloginmanager.
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
   . /usr/bin/wlruntime_vars

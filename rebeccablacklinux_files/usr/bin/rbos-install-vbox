@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This file is to build Virtualbox drivers, and install it into Mesa in /opt. It's not supported as it doesn't work. Virtualbox drivers don't support Weston, so only the fbdev-backend can be used
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -31,10 +33,14 @@ Virtualbox's framebuffer driver is much more reliable then the Virtualbox Kernel
 if you still want to install virtualbox addtions andpossibly break weston, remove the exit line from $(readlink -f $0)"
 exit
 
+#Find a virtualbox additions install disk
 VBOXDISK=$(find /dev/disk/by-label/VBOXADDITIONS* | tail -1)
+#Find where a virtualbox additions install disk is mounted
 VBOXMOUNT=$(findmnt -f -c -o TARGET -n $VBOXDISK)
+#get the arch of the kernel
 CPUARCH=$(uname -m)
 
+#If the virtualbox is not mounted, mount it, and mark it to be unmounted when the script completes
 if [[ -z $VBOXMOUNT ]]
 then
   UNMOUNT=1
@@ -43,6 +49,7 @@ then
   VBOXMOUNT=/tmp/vboxmount
 fi
 
+#Extract, and build the drivers
 mkdir /tmp/vboxinstall
 cd /tmp/vboxinstall
 $VBOXMOUNT/VBoxLinuxAdditions.run --keep --target .
@@ -57,6 +64,7 @@ cd src/vboxguest-*
 . /usr/bin/build_vars
 make
 
+#If the disk was marked to be unmounted (because it was 'manually' mounted by the script), unmount it again
 if [[ UNMOUNT == 1 ]]
 then 
   umount /tmp/vboxmount
