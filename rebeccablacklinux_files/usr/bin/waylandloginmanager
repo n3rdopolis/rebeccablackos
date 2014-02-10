@@ -162,8 +162,8 @@ Will now reboot" 20 50 --no-cancel
 fi
 
 
-#This function is used by the WaylandLoginManager to find the next availible tty
-#it prints the TTY number to stdio. takes no arguments
+#This function is used by the WaylandLoginManager to find the next availible tty, starting from LastTTY+1
+#it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
 {
   TTYNotInUse=0
@@ -239,7 +239,8 @@ function DialogWait
 }
 
 
-#This is first called when the loginmanager_control FIFO recives the Login command. It's the first in the login process, which is have the user select the session they want to use, then have the user login. This is similar to how X login managers prompt for the session before the login.
+#This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
+#it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
 function ChooseSessionType
 {
   export SESSIONID=$AllSessions
@@ -503,7 +504,7 @@ function StartUserSession
   #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
   westonresult=$(weston --version &>/dev/null; echo $?) 
 
-  #Call the server
+  #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   chvt 63
   #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
@@ -541,16 +542,19 @@ function StartUserSession
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
 #Expect has to be run as a non root user, otherwise it always reports success. Run it as the user specified with $PROBETESTUSER
 #it returns failure or success
+#This is called by GetUserCredentials, after it collects the user name and password for the user. It reads the password from stdin
 function AuthenticateUser
 {
   unset USERPASSWORD
   TryPassword=$(cat -)
+  #Test the users login with an embedded expect script running as PROBETESTUSER
   echo "spawn su $LOGINUSER -c /bin/true
 	expect Password 
 	send $TryPassword\r
 	catch wait result
 	exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect
   PasswordResult=$?
+  #If the password is correct try to mount the users possible ecryptfs encrpted home folder with an emedded expect script.
   if [[ 0 == $PasswordResult ]]
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
@@ -580,34 +584,45 @@ function AuthenticateUser
 
 
 
-#Attempt to get the users authentication
+#Get the users username and password by allowing the user to select the username in a list, or enter it manually, and then enter thier password
 function GetUserCredentials
 {
-  #Get the list of nonsystem users
+  #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
+  #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
   UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
   UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
   USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
+  #sort the list
   USERLIST=$(echo "$USERLIST" | sort |uniq)
+  #go through each line of users found, to handle the display of the real name (passwd gecos feild)
   while read USER
   do
     IFS=":"
+    #handle the line as an array, with two elements
     UserData=($USER)
+    #The passwd gecos feild is formated with username,buildingnumber,phonenumber,otherdata. only get the username subfeild.
     UserDisplayName=$(echo ${UserData[0]} | awk -F , '{print $1}')
+    #The display in the zenity dialog should be "Firstname Lastname    (loginname)"
     UserDisplayName="$UserDisplayName   (${UserData[1]})" 
     UserName=${UserData[1]}
+    #If the user has no display name, then set it to be the users login name
     if [[ -z $UserDisplayName ]]
     then
       UserDisplayName=$UserName
     fi
     unset IFS
+    #add the data to the USERLISTSTRING that gets sent into zenity. Line 1 is the display name, line 2 is the user login name, and then line 3 is the display name of the next user...
     USERLISTSTRING+="$UserDisplayName"
     USERLISTSTRING+=$'\n'
     USERLISTSTRING+="$UserName"
     USERLISTSTRING+=$'\n'
   done < <(echo "$USERLIST")
+  #Append a default value with the display string to enter the username with -1. When selected, this tells the script to bring up a dialog to allow the user to enter a manual name
   USERLISTSTRING+="Enter User Name..."
   USERLISTSTRING+=$'\n'
   USERLISTSTRING+="-1"
+
+  #Prompt for the session type
   ChooseSessionType
 
   #present the list of the users to the system
@@ -618,7 +633,7 @@ function GetUserCredentials
   then
     exit 1
   fi
-  #if there is no user selected then show a dialog. If a user was selected, prompt for its login
+  #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
   if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
   then
     LOGINUSER=$($ZENITYCMD --title="Username" --entry --text="Enter the User Name:" 2>/dev/null)
@@ -628,16 +643,20 @@ function GetUserCredentials
       exit 1
     fi
   fi
+  #get the TTY to start the session on
   export SessionTTY=$(GetNextTTY)
   if [[ $SessionTTY -ne -1 ]]
   then
+    #Prompt for the users password
     USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
     then
       exit 1
     fi
+    #send the password to an AuthenticateUser function with stdin
     echo $USERPASSWORD | AuthenticateUser
+    #get the result from AuthenticateUser in the pipe, (and not the echo command)
     passwordresult=${PIPESTATUS[1]}
     unset USERPASSWORD
     if [[ $passwordresult != 0 ]]
