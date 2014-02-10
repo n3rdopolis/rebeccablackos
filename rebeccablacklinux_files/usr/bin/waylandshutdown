@@ -18,6 +18,7 @@
 
 #This script provides a shutdown prompt with Zenity within a wayland session. It reports to the user if the requested action failed. 
 
+#The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 ACTION=$(echo "Switch User
 Switch User
 Logoff
