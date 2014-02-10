@@ -59,6 +59,7 @@ then
     disown
     fuser -k -15 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
     RESULT=$?
+  #For all other actions, use logind dbus commands
   elif [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
