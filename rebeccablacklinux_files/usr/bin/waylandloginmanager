@@ -19,7 +19,7 @@
 #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
 mkdir -p /run/waylandloginmanager
 
-#Detect another instance
+#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line matches.
 SCRIPTPATH=$(readlink -f "$0")
 SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
 LOCKSCRIPT=$(readlink -f "$(strings "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
@@ -32,6 +32,7 @@ else
   exit
 fi
 #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
+#this ensures that the linked /proc/pid/cmdline is this pid
 LOCKPROCPATH=$(dirname $(readlink "/run/waylandloginmanager/$SCRIPTNAME.lock" ))
 THISPROCPATH=/proc/$$
 if [[ $LOCKPROCPATH != $THISPROCPATH ]]
@@ -47,6 +48,7 @@ then
   exit
 fi
 
+#Set up the needed environment variables
 cd /run/waylandloginmanager
 export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
 export LOGINMANAGERDISPLAYUSER=daemon
@@ -61,9 +63,12 @@ export WAYLAND_DISPLAY=loginmanagerdisplay
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+#set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
 AllSessions=0
 ActiveSessionPID=0
+
+#Determine if this is running on a live instance, if the root filesystem is overlayfs.
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE == overlayfs ]]
 then
@@ -78,10 +83,10 @@ else
   ZENITYCMD='zenity'
 fi
 
-#Hide the plymouth splash
+#Tell the plymouth splash to hide as the loginmanager is starting.
 plymouth hide-splash
 
-#Detect hardware abilities
+#Detect hardware abilities, first try using kernel mode setting, then try framebuffer
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
@@ -96,6 +101,8 @@ then
   # ENDTODO
   BackendType=FB
   WESTONBACKEND=fbdev-backend.so
+#if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY13, and restart.
+#Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
 else
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
   if [[ $ISLIVE == 1 ]]
@@ -121,7 +128,7 @@ Will now reboot." 20 50 --no-cancel
   exit
 fi
 
-#if the user booted with a hidden option forcefbdev
+#if the user booted with a hidden option forcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
 if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
 then
   logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
@@ -133,6 +140,7 @@ then
     # ENDTODO
     BackendType=FB
     WESTONBACKEND=fbdev-backend.so
+  #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY13, and restart.
   else
     logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
     openvt -c 13 -s -f -w -- dialog --msgbox "The forcefbdev overide is set, but no framebuffer device is found!
@@ -143,7 +151,8 @@ Will now reboot" 20 50 --no-cancel
 fi
 
 
-#Get the next TTY that is open for use
+#This function is used by the WaylandLoginManager to find the next availible tty
+#it prints the TTY number to stdio. takes no arguments
 function GetNextTTY
 {
   TTYNotInUse=0
@@ -165,17 +174,25 @@ function GetNextTTY
   echo $AvailibleTTY
 }
 
+#This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
+#Before a process calls RegisterSession to loginmanager_control, the process must also start an attempt to send the data to loginmanager_register, because the timeout period is .01 seconds. If nothing is in loginmanager_register, as if it's not called correctly, or because it's an underprivlaged process that can't write to loginmanager_register, it is ignored.
+#it expects the data to be sent in fields seperated by the @ charachter in this order:
+# TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID
+#It also sets the ActiveSessionPID to be the PIS_Of_Session_Process, to watch for when that PID dies, to switch back to the loginmanagerdisplay tty.
 function RegisterSession
 {
+  #get the data from loginmanager_register
   exec 1001<> /run/waylandloginmanager/loginmanager_register
   RegisterData=$(while read -n 100 -t .01 data <&1001; do echo $data; done| head -1)
   exec 1001>&-
+  #get the register data, and put it into an array so it can be handled
   IFS='@'
   ArraySessionData=($RegisterData)
   unset IFS
   if [[ ! -z $RegisterData ]]
   then
     logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
+    #Add the session data to the arrays that store info about the sessions.
     SessionTTY=${ArraySessionData[0]}
     SessionPID=${ArraySessionData[1]}
     SessionUser=${ArraySessionData[2]}
@@ -184,16 +201,19 @@ function RegisterSession
     AllSessionPIDs[$AllSessions]=$SessionPID
     AllSessionUsers[$AllSessions]=$SessionUser
     AllSessionIDs[$AllSessions]=$SessionID
+    #Set the active sesssion PID to the session PID
     if [[ ! -z $SessionPID ]]
     then
       ActiveSessionPID=$SessionPID
     fi
+    #increment the number of sessions
     ((AllSessions++))
   else
     logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
   fi
 }
 
+#This function takes an argument of a number of seconds, and shows a Zenity dialog with a progress bar to count down the specified time.
 function DialogWait
 {
   waitseconds=$1
@@ -319,9 +339,11 @@ function ChooseSessionType
   fi
 }
 
+
+#This function is called when the loginmanager_control recives the Info command. It brings up a help dialog for the user.
 function ShowInfo
 {
-
+  #If the backend type is FB, then add a string to tell the user that in the help dialog
   if [[ $BackendType == "FB" ]]
   then
     BACKENDSTRING="The framebuffer backend is being used.
@@ -473,7 +495,9 @@ function StartUserSession
   echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
 }
 
-#Test users credentials
+#Test users credentials, by making sure the user name and password match by trying to test with su and expect.
+#Expect has to be run as a non root user, otherwise it always reports success. Run it as the user specified with $PROBETESTUSER
+#it returns failure or success
 function AuthenticateUser
 {
   unset USERPASSWORD
@@ -496,13 +520,17 @@ function AuthenticateUser
 	    exit" |expect &
       sleep 3
     fi
-
+    #Remove the password from the environment
     unset TryPassword
+    #if the password and username is correct, start the session
     logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+    #report success
     return 0
   else
+      #Remove the password from the environment
       unset TryPassword
+      #report failure
       return 1
   fi
 }
