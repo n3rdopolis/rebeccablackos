@@ -19,7 +19,7 @@
 #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
 mkdir -p /run/waylandloginmanager
 
-#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line matches.
+#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
 SCRIPTPATH=$(readlink -f "$0")
 SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
 LOCKSCRIPT=$(readlink -f "$(strings "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
@@ -84,18 +84,19 @@ then
   ISLIVE=1
 fi
 
-#Detect presence of zenity launcher, if it exists, call it as the loginmanagerdisplay user
+#Detect presence of the wlm_zenity zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
 if [[ ! -z /usr/bin/wlm_zenity ]]
 then
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_zenity"
 else
+  logger -t waylandloginmanager "WARNING: the wlm_zenity helper does not exist. All zenity dialogs used by the waylandloginmanager will start as root." -s  >>/var/log/waylandloginmanager 2>&1
   ZENITYCMD='zenity'
 fi
 
 #Tell the plymouth splash to hide as the loginmanager is starting.
 plymouth hide-splash
 
-#Detect hardware abilities, first try using kernel mode setting, then try framebuffer
+#Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
@@ -678,22 +679,24 @@ Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-
 
 
 
-#Call the host server for the login gui, running as a seperate user
+#This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 15 seconds, then try to call it back up
 function LoginWestonLauncher
 {
 
   while [ 1 ]
   do
-
+    #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
     if [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay; echo $?) == 1 ]]
     then 
       #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
       westonresult=$(weston --version &>/dev/null; echo $?) 
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
+      #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
       if [[ $westonresult == 255 ]]
       then
 	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
       else
+	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
 	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so
       fi
@@ -704,9 +707,11 @@ function LoginWestonLauncher
 
 
 
-
+#This determines if the autologin user was specified by ubiquity, and then configures that value to /etc/waylandloginmanager.conf, as in an unsafe shutdown, the lightdm config file has sometimes dropped the autologin user.
+#If autologin is specified, prompt to select the session type to start, then start the session as the autologin user
 function StartAutoLogin
 {
+  #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
   if [[ -e /etc/waylandloginmanager.conf ]]
   then
     AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
@@ -715,6 +720,7 @@ function StartAutoLogin
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
 
+  #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
   then
     sleep 5
@@ -736,6 +742,8 @@ function StartAutoLogin
   fi 
 }
 
+#This function is part of the startup for the waylandloginmanager. it creates the FIFO files, giving ONLY write access to loginmanager_control for ALL users, and only write access to loginmanager_register is given to root. Any other permissions, including read is denied.
+#This also creates a symlink in $LOGINMANAGERDISPLAYHOME, that points to a log file in /run/waylandloginmanager, which gives permissions to the $LOGINMANAGERDISPLAYUSER, so that the log isn't placed in /etc
 function SetupLoggingAndFIFO
 {
   #Create communication fifo.
@@ -743,6 +751,7 @@ function SetupLoggingAndFIFO
   rm -r /run/waylandloginmanager/loginmanager_register
   mkfifo -m 222 /run/waylandloginmanager/loginmanager_control
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_register
+  #open the FIFO.
   exec 1000<> /run/waylandloginmanager/loginmanager_control
   #Prepare logging for the loginmanagerdisplay
   touch /run/waylandloginmanager/waylandserver.log
