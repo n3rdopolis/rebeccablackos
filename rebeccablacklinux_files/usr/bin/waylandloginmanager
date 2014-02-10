@@ -50,11 +50,17 @@ fi
 
 #Set up the needed environment variables
 cd /run/waylandloginmanager
+#The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
 export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
+#User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
 export LOGINMANAGERDISPLAYUSER=daemon
+#User that the su test in AuthenticateUser user runs as
 export PROBETESTUSER=daemon
+#Get the UID of the $LOGINMANAGERDISPLAYUSER
 export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
+#Set the default path for the weston-display-server
 export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
+#Set Wayland/runtime vars
 export PATH=/opt/bin:$PATH
 export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
 export GDK_BACKEND=wayland
@@ -62,10 +68,13 @@ export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
 export WAYLAND_DISPLAY=loginmanagerdisplay
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
+#WLM_LD_LIBRARY_PATH is exported so that wlm_zenity can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
+#default the number of sessions registered to be 0
 AllSessions=0
+#default ActiveSessionPID, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
 ActiveSessionPID=0
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
