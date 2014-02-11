@@ -286,6 +286,7 @@ fi
 mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
 chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
 chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+rm $MOUNTHOME/liveisotest/unionmountpoint/etc/resolv.conf
 cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
 chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
 chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
