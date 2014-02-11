@@ -30,7 +30,7 @@
 #/usr/bin/westonlaunchcaller 
   #Should be symlinked to /opt/bin/weston . This is needed to replace some functionality for weston-launch. it allows weston-launch to handle the execution of custom Wayland servers specified in /etc/waylandservers . It handles the resetting of environment variables, and it sends commands back to the waylandloginmanager FIFO to notify it of failure, to switch back to the loginmanager display tty.
   #/usr/bin/westonlaunchcaller makes it so that if the second argument passed to weston-launch (past the -- separator), the first argument is treated as the custom server, and then it must be in /etc/waylandservers
-  #it also handles the environment file, which is documented within westonlaunchcaller
+  #it also handles the environment file, which is documented within /usr/share/wsession/aboutwsessions.txt
 #/etc/waylandloginmanager.conf
   #Otherwise it uses /etc/lightdm/lightdm.conf . the only supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
 #/usr/libexec/wayland_login_helpers/*
@@ -39,6 +39,7 @@
   #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/wayland_login_helpers to the launcher bar, which send commands to the FIFO.
 #/usr/share/wsessions.d/*
   #These are .desktop files, (and .environment files as well) which describe how to start different Wayland servers or sessions
+  #These files are documented in /usr/share/wsession/aboutwsessions.txt
 
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager

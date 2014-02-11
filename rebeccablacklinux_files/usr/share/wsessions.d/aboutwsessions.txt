@@ -1,0 +1,45 @@
+About the wsession file:
+
+The wsession file must be executable, the wsession file must end in .desktop, and must start with [Desktop File] at the top line 
+It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of that folder are not probed.
+
+An example:
+
+    [Desktop Entry]
+    Enabled=1
+    Type=WSession
+    Name=Default Weston Desktop Shell
+    CompositorExec=/opt/bin/weston-display-server
+    CompositorSupportsKMS=1
+    CompositorSupportsFB=1
+    CompositorKMSArguments=--backend=drm-backend.so
+    CompositorFBArguments=--backend=fbdev-backend.so
+    CompositorDisplayArgument=--socket=
+    SessionArgument=--modules=desktop-shell.so,xwayland.so,cms-colord.so
+    AdditionalArguments=--log=$HOME/weston.log
+    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
+    NeedsFile=/opt/bin/weston
+    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+
+
+
+
+The environment file can be placed anywhere, as long as it is specified by the EnvironmentFile value in the wsession file. While the first line must be [EnvironmentFile], an example looks like this 
+
+1.|    [EnvironmentFile]
+2.|    set=E_WL_FORCE=kms@KMS
+3.|    set=E_WL_FORCE=fb@FB
+4.|    set=WAYLAND_DEBUG=server
+5.|    unset=GDK_BACKEND
+
+the options are: set=varname=vardata		(set a variable to be something)
+		 unset=varname			(unset a variable)
+		 set=varname=vardata@BACKEND	(set a variable to be something if @BACKEND matches BackendType)
+		 unset=varname@BACKEND		(unset a variable if @BACKEND matches BackendType)
+
+If it ends with @BACKEND, then the variable action is only performed, if the BackendType is BACKEND. Otherwise if it is unspecified, it is performed on ALL backends.
+  in Line 2 of the example the variable E_WL_FORCE to be kms (export E_WL_FORCE=kms) only if the BackendType is KMS.
+  in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is. 
+  
+
+ 

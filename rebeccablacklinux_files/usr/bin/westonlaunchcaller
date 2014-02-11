@@ -20,6 +20,7 @@
 #This does some other things for waylandloginmanager, such as specify a different, but sanctioned server path in /etc/waylandservers, and send the Change command back to the Waylandloginmanager to make it switch back to the TTY if the server execution fails.
 #Weston-launch assists with running commands as an arbitrary user, on a tty, and registering it as a new logind session, so while many other items in /etc/waylandservers are the server specific setuid helpers, weston-launch does more, and not all compositors have setuid helpers.
 
+#This also handles specified environment files for the session, which are documented in /usr/share/wsession/aboutwsessions.txt
 
 #Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure
 function SwitchBackExit
@@ -108,7 +109,7 @@ then
     SwitchBackExit
   else 
     STARTTIME=$(date +%s)
-    #Execute the Wayland server
+    #Execute the Wayland server, and log it to ~/waylandserver.log
     "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
