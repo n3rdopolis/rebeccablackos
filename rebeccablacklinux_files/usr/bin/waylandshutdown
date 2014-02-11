@@ -42,6 +42,7 @@ then
   exit 1
 fi
 
+#Prompt the user if they are sure they want to execute the selected action
 zenity --title="Leave..." --question --text="Are you sure you want to $ACTION"
 CONFIRM=$?
 if [[ $CONFIRM == 0 ]]

@@ -168,6 +168,7 @@ function GetNextTTY
 {
   TTYNotInUse=0
   LastTTY=7
+  #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
   while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
   do
     ((LastTTY++))
@@ -264,6 +265,7 @@ function ChooseSessionType
     AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2-| tail -1 )
     CompositorExec=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- | tail -1 )
     EnvironmentFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "EnvironmentFile" {print $0}' | cut -d = -f2- | tail -1 )
+    #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
     NeedsFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
 
     #Iterate through all NeedsFile values, to make sure that they exist. if one doesn't exist increment NotFoundCount.
@@ -307,6 +309,7 @@ function ChooseSessionType
     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
     WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column args --column displayargs --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
+    #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
     then
@@ -397,14 +400,24 @@ The i icon shows this help prompt" 2>/dev/null
 
 }
 
+#This function is called when the loginmanager_control FIFO recives the command "Switch". It brings up a dialog containing the list of all running login sessions, to allow the user to pick and switch to start a mew session, by containing the FIFO.
 function SwitchUserDialog 
 {
   unset SessionList
+  #get the number of registered sessions
   NumberOfSessions=${#AllSessionPIDs[@]}
   ((NumberOfSessions--))
 
+  #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
+  #The session list variable is multiline, and used by a zenity dialog.
+  #line 1 is the session number
+  #line 2 is the TTY for the session
+  #line 3 is the PID of the session
+  #line 4 is the user name
+  #line 5 is the logind session id.
   while [[ $NumberOfSessions -ge 0 ]]
   do
+    #determine if the current session is alive, before adding it to the list
     if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
     then
       SessionList+="$NumberOfSessions
@@ -416,7 +429,7 @@ ${AllSessionIDs[$NumberOfSessions]}
     fi
     ((NumberOfSessions--))
   done
-
+  #Add a element with a sessionid of -1. When the selected element is -1, it prompts for a user login for a new session, with GetUserCredentials
   SessionList+="-1
 
 
@@ -426,27 +439,34 @@ New Session...
 
 
   unset ChangeSession
+  #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
   ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null )
   CancelOrOK=$?
   ChangeSession=$(echo "$ChangeSession" | head -1 )
+  #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
     exit 1
   fi
+  #if the chosen session is -1 then contact the FIFO with a login prompt, otherwise switch to the selected session
   if [[ $ChangeSession == "-1" ]]
   then
     echo -e "\nLogin" >/run/waylandloginmanager/loginmanager_control
   else 
+    #if a session is selected, then get the PID, TTY, logind session ID with the selected Session ID as the array element number.
     if [[ $ChangeSession ]]
     then
       ChangeSessionPID=${AllSessionPIDs[$ChangeSession]}
       ChangeSessionTTY=${AllSessionTTYs[$ChangeSession]}
       ChangeSessionID=${AllSessionIDs[$ChangeSession]}
 
+      #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
+	#change to tty63, and then the destination TTY of the session ID as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63
 	chvt $ChangeSessionTTY
+	#hand over the logind session ID to allow desktop permissions to work.
 	loginctl activate $ChangeSessionID
 	ActiveSessionPID=$ChangeSessionPID
       else
@@ -506,6 +526,7 @@ function StartUserSession
 
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
+  #change to tty63, before starting the session, as switching directly between two Weston session doesn't work.
   chvt 63
   #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
   if [[ $westonresult == 255 ]]
@@ -585,6 +606,7 @@ function AuthenticateUser
 
 
 #Get the users username and password by allowing the user to select the username in a list, or enter it manually, and then enter thier password
+#This function is called when the loginmanager_control FIFO recives the command "Login"
 function GetUserCredentials
 {
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
@@ -629,6 +651,7 @@ function GetUserCredentials
   LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
   CancelOrOK=$?
   export LOGINUSER=$(echo "$LOGINUSER" | head -1)
+  #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
     exit 1
@@ -638,6 +661,7 @@ function GetUserCredentials
   then
     LOGINUSER=$($ZENITYCMD --title="Username" --entry --text="Enter the User Name:" 2>/dev/null)
     CancelOrOK=$?
+    #Abort if the user selected cancel on the zenity dialog
     if [[ $CancelOrOK != 0 ]]
     then
       exit 1
@@ -650,6 +674,7 @@ function GetUserCredentials
     #Prompt for the users password
     USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
     CancelOrOK=$?
+    #Abort if the user selected cancel on the zenity dialog
     if [[ $CancelOrOK != 0 ]]
     then
       exit 1
@@ -687,11 +712,13 @@ Hibernate
 Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null )
   CancelOrOK=$?
   ACTION=$(echo "$ACTION" | head -1 )
+  #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
     exit 1
   fi
 
+  #Prompt the user if they are sure they want to execute the selected action
   $ZENITYCMD --title="Leave..." --question --text="Are you sure you want to $ACTION"
   CONFIRM=$?
   if [[ $CONFIRM != 0 ]]
@@ -699,6 +726,7 @@ Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-
     exit 1
   fi
 
+  #For all actions use the dbus commands to logind
   if [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
@@ -722,6 +750,7 @@ Hibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-
   else
     exit
   fi
+  #if the selected action failed, tell the user
   if [[ $RESULT != 0 ]]
   then
     $ZENITYCMD --title="Failure" --warning --text="Failed to $ACTION" 2>/dev/null
@@ -778,12 +807,15 @@ function StartAutoLogin
   then
     sleep 5
     ChooseSessionType
+    #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
     then
       exit 1
     fi
+    #get the TTY to start the autologin session on
     export AutoSessionTTY=$(GetNextTTY)
+    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
     if [[ $AutoSessionTTY -ne -1 ]]
     then
       logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
@@ -824,6 +856,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63
 	chvt $HostVT
       fi
@@ -839,6 +872,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63
 	chvt $HostVT
       fi
@@ -853,6 +887,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63
 	chvt $HostVT
       fi
@@ -912,15 +947,15 @@ echo 1 > /proc/sys/kernel/sysrq
 logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
-#Start the main login Weston server
+#Start the main loginmanagerdisplay Weston server
 LoginWestonLauncher &
 
-#Start the autologin launcher
+#Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
 StartAutoLogin &
 LastLogonPID=$!
 
 #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
 SetupLoggingAndFIFO
 
-#Start the login managers IPC
+#Start the login managers FIFO reader, and function that determines if the ActiveSessionPID is still alive, and if it should switch back.
 ReadCommandFIFO
