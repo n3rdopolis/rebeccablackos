@@ -105,7 +105,7 @@ then
   #if the server is not in /etc/waylandservers then exit. if it is, then run the server
   if [[ $ServerApprovedCount == 0 ]]
   then 
-    echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run."
+    echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run." |& tee -a $HOME/waylandserver.log
     SwitchBackExit
   else 
     STARTTIME=$(date +%s)
