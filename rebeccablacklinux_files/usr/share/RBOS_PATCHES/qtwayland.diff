@@ -1,3 +1,29 @@
+--- a/src/client/qwaylandintegration.cpp
++++ b/src/client/qwaylandintegration.cpp
+@@ -84,15 +84,18 @@
+         if (QGuiApplication::desktopSettingsAware()) {
+             const QByteArray desktopEnvironment = QGuiApplicationPrivate::platformIntegration()->services()->desktopEnvironment();
+ 
+-            // Ignore X11 desktop environments
+-            if (!desktopEnvironment.isEmpty() &&
++            if (desktopEnvironment == QByteArrayLiteral("KDE")) {
++#ifndef QT_NO_SETTINGS
++                result.push_back(QStringLiteral("kde"));
++#endif
++            } else if (!desktopEnvironment.isEmpty() &&
+                 desktopEnvironment != QByteArrayLiteral("UNKNOWN") &&
+-                desktopEnvironment != QByteArrayLiteral("KDE") &&
+                 desktopEnvironment != QByteArrayLiteral("GNOME") &&
+                 desktopEnvironment != QByteArrayLiteral("UNITY") &&
+                 desktopEnvironment != QByteArrayLiteral("MATE") &&
+                 desktopEnvironment != QByteArrayLiteral("XFCE") &&
+                 desktopEnvironment != QByteArrayLiteral("LXDE"))
++                // Ignore X11 desktop environments
+                 result.push_back(QString::fromLocal8Bit(desktopEnvironment.toLower()));
+         }
+ 
+
+
 diff --git a/src/plugins/platforms/wayland_common/qwaylandintegration.cpp b/src/plugins/platforms/wayland_common/qwaylandintegration.cpp
 index a4ddbc9..b0d5b27 100644
 --- a/src/plugins/platforms/wayland_common/qwaylandintegration.cpp
