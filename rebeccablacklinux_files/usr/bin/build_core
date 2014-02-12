@@ -74,11 +74,19 @@ function RunDownloadAndOrBuild
 
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
 
+  #If the argument passed is cleanup, then cleanup the source only
+  if [[ "$ACTION" == clean ]]
+  then
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE"
+    exit
+  fi
+
   #Download source, unless the argument passed to the build script is 'build-only'
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then
     #Download the source using specified variables.
     DownloadSource 
+    exit
   fi
 
   #Build the source and install it, unless the argument passed to the build script is 'download-only'
@@ -87,7 +95,7 @@ function RunDownloadAndOrBuild
 
     #Start the compile or install Process
     MakeAndInstall
-
+    exit
   fi
 }
 
@@ -97,6 +105,20 @@ function RunDownloadAndOrBuild
 function GetVersionGIT()
 {
   REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
+}
+
+#Function to cleanup GIT repos
+function CleanupGIT()
+{
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  git submodule foreach --recursive git reset --hard 
+  git submodule foreach --recursive git clean -fdx
+  git checkout -f $SOURCEREVISION 
+  git reset --hard $SOURCEREVISION
+  git reset --hard origin/$SOURCEREVISION
+  git reset --hard MERGE_HEAD
+  git clean -fdx
 }
 
 #Function to download git repos
@@ -118,14 +140,7 @@ function DownloadGIT()
   git clone $SOURCEURL $SOURCENAME
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  git submodule foreach --recursive git reset --hard 
-  git submodule foreach --recursive git clean -fdx
   git pull
-  git checkout -f $SOURCEREVISION 
-  git reset --hard $SOURCEREVISION
-  git reset --hard origin/$SOURCEREVISION
-  git reset --hard MERGE_HEAD
-  git clean -fdx
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule init
@@ -161,6 +176,15 @@ function GetVersionSVN()
   REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
 }
 
+#Function to cleanup SVN repos
+function CleanupSVN()
+{
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  svn revert --non-interactive --recursive .
+  svn cleanup --non-interactive
+}
+
 #Function to download svn repos
 function DownloadSVN()
 {
@@ -180,8 +204,6 @@ function DownloadSVN()
   svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  svn revert --non-interactive --recursive .
-  svn cleanup --non-interactive
   svn update --non-interactive -r $SOURCEREVISION
 }
 
@@ -190,6 +212,15 @@ function DownloadSVN()
 function GetVersionBZR()
 {
   REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
+}
+
+#Function to cleanup BZR repos
+function CleanupBZR()
+{
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  bzr revert
+  bzr clean-tree --force --detritus
 }
 
 #Function to download bzr repos
@@ -212,8 +243,6 @@ function DownloadBZR()
   bzr branch "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  bzr revert
-  bzr clean-tree --force --detritus
   bzr pull
   bzr update -r $SOURCEREVISION
 }
@@ -222,6 +251,15 @@ function DownloadBZR()
 function GetVersionHG()
 {
   REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
+}
+
+#Function to cleanup BZR repos
+function CleanupHG()
+{
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  hg revert --all
+  hg st -un0 | xargs -0 rm
 }
 
 #Function to download hg repos
@@ -244,8 +282,6 @@ function DownloadHG()
   hg clone "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  hg revert --all
-  hg st -un0 | xargs -0 rm
   hg pull
   hg update -C -r $SOURCEREVISION
 }
@@ -257,6 +293,16 @@ function GetVersionARCHIVE()
   REVISIONSTRING="Non-versioned File Archive"
 }
 
+#Function to cleanup archives
+function CleanupARCHIVE()
+{
+  mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
+  find | grep -v ./SOURCEFILE$ | while read FILE
+  do
+    rm -rf $FILE
+  done
+}
 #Function to download archives
 function DownloadARCHIVE()
 {
@@ -266,10 +312,6 @@ function DownloadARCHIVE()
     cd "$SOURCENAME"
     wget $SOURCEURL -O SOURCEFILE
   fi
-  find | grep -v ./SOURCEFILE$ | while read FILE
-  do
-    rm -rf $FILE
-  done
   tar xaf SOURCEFILE -C .
 }
 
@@ -294,6 +336,7 @@ function DownloadSource()
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
     STARTTIME=$(date +%s)
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE"
     Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"

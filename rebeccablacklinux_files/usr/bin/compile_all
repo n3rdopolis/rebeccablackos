@@ -213,6 +213,13 @@ do
     "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
   fi
 
+  #compile_all is running to clean the source
+  if [[ "$argument" == clean ]]
+  then
+    echo "Cleaning $BUILDNAME"
+    "/usr/bin/Compile/$BUILDNAME" clean 2>&1
+  fi
+
   #compile_all is running to download and build
   if [[ ! -n "$argument" ]]
   then
