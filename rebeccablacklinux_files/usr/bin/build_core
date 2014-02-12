@@ -86,7 +86,6 @@ function RunDownloadAndOrBuild
   then
     #Download the source using specified variables.
     DownloadSource 
-    exit
   fi
 
   #Build the source and install it, unless the argument passed to the build script is 'download-only'
@@ -95,7 +94,6 @@ function RunDownloadAndOrBuild
 
     #Start the compile or install Process
     MakeAndInstall
-    exit
   fi
 }
 
