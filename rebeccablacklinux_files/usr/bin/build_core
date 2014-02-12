@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#It depends on git, bzr, hg, svn, checkinstall, and dlocate
+
 #This script is called by all of the scripts in /usr/bin/Compile. It contains many functions so that it doesn't have to be duplicated throughout the multiple scripts. It handles downloading the source specified by the scripts, and running the build and install functions. It also passes the install process through checkinstall to create deb files out of the scripts if the environment variable is 1.
 #
 #These options are specified in the build scripts
@@ -45,6 +47,14 @@
 #PackagePostInstall: Routines after the source in installed. The actions here are intercepted by checkinstall if MAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
 
 #Each function is started with the CWD as the source download folder. For example If PackageCompileSource cd's to ./build and make is called, then PackageInstallSource will also need to cd to ./build
+
+#About MAKEDEBS. 
+#MAKEDEBS causes debs to be built in /srcbuild/buildoutput fo the packages it compiles, with checkinstall, which watches the files touched and created by the install functions.
+#It finds all built libraries and binaries in the source, finds what libraries they all depend on with ldd, and then finds what packages the depends are in, to give a rough dependancy manament for the built debs.
+#When a deb is built, it installs the deb on the next run instead of a compile. UNLESS REBUILDNEWREVISION=1 is set, AND the revision number/ID based on the source revision control software changes.
+#or the control file is deleted, or the deb is nonexistant or empty.
+
+#removing /srcbuild/buildoutput/control/PACKAGENAME causes PACKAGENAME to be rebuilt manually
 
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
@@ -243,6 +253,7 @@ function DownloadSource()
   #create a variable for the package name that is the source name converted to all lower case.
   PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
 
+  #count the number of non-empty debs for this package
   DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
   do
     dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
@@ -357,6 +368,7 @@ function MakeAndInstall()
     DIFFERENTREVISION=0
   fi
 
+  #Count the number of non-empty debs
   DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb -type f -maxdepth 1 | while read DEBFILE
   do
     dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
@@ -445,6 +457,7 @@ function MakeAndInstall()
       touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 
     else
+      #call the package install script directly if MAKEDEBS isn't used
       ./packageinstallscript
     fi
 

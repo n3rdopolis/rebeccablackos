@@ -20,7 +20,9 @@
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 
-#It depends on
+#It depends on zenity and expect
+
+#as well as:
 #/usr/bin/wlm_zenity
   #a helper script for exporting WLM_LD_LIBRARY_PATH as LD_LIBRARY_PATH for starting zenity as a non root user, while this script runs as root. Because it uses sudo to start it as the specific user, which drops LD_LIBRARY_PATH.
 #/opt/bin/weston-display-server
