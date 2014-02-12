@@ -100,6 +100,7 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the external archive folder
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_1/var/cache/apt/archives
 umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
 #unmount the debs data

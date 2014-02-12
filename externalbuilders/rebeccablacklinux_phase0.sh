@@ -53,10 +53,9 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
-#bind mount the FS to the workdir, and bind mount the external archives folder
-mount --bind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+#Initilize the two systems, Phase1 is the download system, for filling  $BUILDLOCATION/build/$BUILDARCH/archives and  $BUILDLOCATION/build/$BUILDARCH/srcbuild, and phase2 is the base of the installed system
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1/var/cache/apt/archives
+mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/phase_1/var/cache/apt/archives
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
@@ -64,7 +63,7 @@ mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUIL
 
 #install a really basic Ubuntu installation for usage. 
 echo "Setting up chroot for downloading archives and software..."
-debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
+debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_1 http://ubuntu.osuosl.org/ubuntu/
 echo "Setting up chroot for the Live CD..."
 debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
 
