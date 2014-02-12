@@ -86,7 +86,40 @@ echo "Setting up live system..."
 
 REBUILT="to update"
 
+#This function unmounts all known mountpoints created by all of the scripts in externalbuilders
+function UnmountAll()
+{
+#unmount the chrooted procfs from the outside 
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
+#unmount the chrooted sysfs from the outside
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
+
+#unmount the chrooted devfs from the outside 
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
+
+#unmount the external archive folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+
+#unmount the source download folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+
+#unmount the debs data
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
+#unmount the cache /var/tmp folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
+
+#unmount the cache /var/tmp folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
+
+#unmount the FS at the workdir and phase 2
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
+umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
+}
+
+
+UnmountAll
 #only initilize the FS if the FS isn't there.
 if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
 then
@@ -101,9 +134,18 @@ then
 fi
 
 #run the build scripts
+UnmountAll
 $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase1.sh 
+UnmountAll
 $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase2.sh  
+UnmountAll
 $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase3.sh 
+UnmountAll
+
+#Clean up Phase 3 data.
+rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
+rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
+rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"

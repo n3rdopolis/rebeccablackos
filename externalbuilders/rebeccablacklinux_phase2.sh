@@ -39,28 +39,6 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-
-#unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#unmount the FS at the workdir and phase 2
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
-
 #Reset phase 2 if DontRestartPhase2 file is missing.
 if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
@@ -101,25 +79,3 @@ then
 else
   chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 fi
-
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-
-#unmount the FS at the workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-

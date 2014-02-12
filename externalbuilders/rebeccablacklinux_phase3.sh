@@ -49,34 +49,6 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/remastersys
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/vartmp
 
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-
-#unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
-
-#unmount the FS at the workdir and phase 2
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
-
 #Clean up Phase 3 data.
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 
@@ -151,34 +123,3 @@ then
   chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
 fi
 
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
-
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-
-#unmount the FS at the workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-
-#Clean up Phase 3 data.
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
-rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
-rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys

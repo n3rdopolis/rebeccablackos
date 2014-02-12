@@ -28,41 +28,6 @@ then
   exit
 fi
 
-####CLEAN UP OLD SCRIPT FILES
-
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-
-#unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-
-#unmount the FS at the workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
-
-#unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
-
-#unmount phase 2
-umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2
-
-#END PAST RUN CLEANUP##################
-
-
 #make a folder containing the live cd tools in the users local folder
 mkdir -p $BUILDLOCATION
 
@@ -98,18 +63,3 @@ debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http
 #tell future calls of the first builder script that phase 1 is done
 touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
 touch $BUILDLOCATION/DontDebootstrap$BUILDARCH
-
-#unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
-
-#unmount the FS at the workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
