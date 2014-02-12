@@ -53,7 +53,7 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/vartmp
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 
 #create the union of phases 1, 2, and 3 at workdir
-mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_3:$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
+mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_3:$BUILDLOCATION/build/$BUILDARCH/phase_2 none $BUILDLOCATION/build/$BUILDARCH/workdir
 
 
 #mounting critical fses on chrooted fs with bind 
@@ -65,11 +65,10 @@ mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
-mount --bind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-mount --bind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-mount --bind  $BUILDLOCATION/build/$BUILDARCH/remastersys $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
-mount --bind  $BUILDLOCATION/build/$BUILDARCH/vartmp $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind  $BUILDLOCATION/build/$BUILDARCH/remastersys $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
+mount --rbind  $BUILDLOCATION/build/$BUILDARCH/vartmp $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
 
 #copy the files to where they belong
 rsync $BUILDLOCATION/build/$BUILDARCH/importdata/* -Cr $BUILDLOCATION/build/$BUILDARCH/workdir/

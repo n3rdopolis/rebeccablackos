@@ -100,12 +100,13 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
 #unmount the external archive folder
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-
-#unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
 #unmount the debs data
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
+#unmount the source download folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
 
 #unmount the cache /var/tmp folder
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
@@ -120,6 +121,18 @@ umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
 
 
 UnmountAll
+
+#Delete DontDebootstrap file if Phase2 is restarted and Reset phase 2 if DontRestartPhase2 file is missing.
+if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
+then
+  #Delete the phase 2 folder contents
+  rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
+  touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
+  mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
+  touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+  rm $BUILDLOCATION/DontDebootstrap$BUILDARCH
+fi
+
 #only initilize the FS if the FS isn't there.
 if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
 then

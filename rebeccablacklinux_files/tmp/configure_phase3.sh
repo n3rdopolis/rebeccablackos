@@ -39,7 +39,6 @@ compile_all build-only
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 
-
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 

@@ -31,6 +31,15 @@ ln -s /bin/true /usr/sbin/invoke-rc.d
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
+#update the apt cache
+apt-get update
+
+#install basic applications that the system needs to get repositories and packages
+yes Y| apt-get install aptitude git bzr subversion mercurial wget dselect
+
+#update the dselect database
+dselect update
+
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
@@ -38,7 +47,7 @@ export DEBIAN_FRONTEND=noninteractive
 rm -r /usr/share/logs/package_operations/Installs
 
 #Create folder to hold the install logs
-mkdir /usr/share/logs/package_operations/Installs
+mkdir -p /usr/share/logs/package_operations/Installs
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
@@ -141,9 +150,6 @@ dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
 
 #delete the dpkg config file that speeds up the installs, so the user doesn't get it.
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
-
-#delete the downloaded file cache
-apt-get clean
 
 #Capture the packages that are installed and not installed.
 dpkg --get-selections > /tmp/INSTALLSSTATUS.txt

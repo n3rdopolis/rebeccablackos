@@ -55,7 +55,7 @@ chown  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 chgrp  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 
 #bind mount the FS to the workdir. 
-mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_1:$BUILDLOCATION/build/$BUILDARCH/importdata/ none $BUILDLOCATION/build/$BUILDARCH/workdir
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
@@ -64,14 +64,13 @@ mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --bind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-mount --bind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
 
-
-#bring these files into phase_1 with aufs
-cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp
-cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
+#copy the files to where they belong
+rsync $BUILDLOCATION/build/$BUILDARCH/importdata/* -Cr $BUILDLOCATION/build/$BUILDARCH/workdir/ 
 
 
 #Configure the Live system########################################

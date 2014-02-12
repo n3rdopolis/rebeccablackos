@@ -39,16 +39,6 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
-#Reset phase 2 if DontRestartPhase2 file is missing.
-if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
-then
-  #Delete the phase 2 folder contents
-  rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
-  touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
-  mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
-  touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
-fi
-
 #delete old logs
 rm -r $BUILDLOCATION/build/$BUILDARCH/phase_2/usr/share/logs/*
 
@@ -57,7 +47,7 @@ cp $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/INSTALLS.txt $BUILDLOCATION/bu
 
 
 #create the union of phases 1 and 2 at the workdir
-mount -t aufs -o dirs=$BUILDLOCATION/build/$BUILDARCH/phase_2:$BUILDLOCATION/build/$BUILDARCH/phase_1 none $BUILDLOCATION/build/$BUILDARCH/workdir
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_2 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
@@ -65,12 +55,11 @@ mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
 mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --bind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-mount --bind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mount --rbind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
 
-
+#Bring in needed files.
+cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]

@@ -55,10 +55,18 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
 #bind mount the FS to the workdir, and bind mount the external archives folder
 mount --bind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
 mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
+mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
-#install a really basic Ubuntu installation in the new fs  
+
+
+#install a really basic Ubuntu installation for usage. 
+echo "Setting up chroot for downloading archives and software..."
 debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
+echo "Setting up chroot for the Live CD..."
+debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
 
 #tell future calls of the first builder script that phase 1 is done
 touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
