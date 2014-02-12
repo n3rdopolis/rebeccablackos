@@ -118,6 +118,12 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
 #unmount the FS at the workdir and phase 2
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
+
+#Terminate processess using files in the build folder for the architecture
+lsof -t +D $BUILDLOCATION/build/$BUILDARCH |while read PID 
+do 
+kill -9 $PID
+done
 }
 
 
