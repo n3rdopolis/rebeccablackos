@@ -29,12 +29,14 @@ then
 fi
 
 #create a folder for the media mountpoints in the media folder
-mkdir $BUILDLOCATION/build/$BUILDARCH
-mkdir $BUILDLOCATION/build/$BUILDARCH/phase_1
-mkdir $BUILDLOCATION/build/$BUILDARCH/phase_2
-mkdir $BUILDLOCATION/build/$BUILDARCH/phase_3
-mkdir $BUILDLOCATION/build/$BUILDARCH/buildoutput
-mkdir $BUILDLOCATION/build/$BUILDARCH/workdir
+mkdir -p $BUILDLOCATION/build/$BUILDARCH
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_3
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/srcbuild
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
 #unmount the chrooted procfs from the outside 
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
@@ -44,6 +46,12 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
+
+#unmount the external archive folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+
+#unmount the source download folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
 
 #unmount the debs data
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
@@ -81,7 +89,10 @@ mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --bind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+mount --bind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+
 
 #bring these files into phase_1 with aufs
 cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp
@@ -96,6 +107,9 @@ else
   chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 fi
 
+#unmount the external archive folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+
 #unmount the chrooted procfs from the outside 
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
 
@@ -104,6 +118,9 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 
 #unmount the debs data
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+
+#unmount the source download folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
 
 #unmount the FS at the workdir
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir

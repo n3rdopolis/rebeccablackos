@@ -39,11 +39,23 @@ umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
 
+#unmount the external archive folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+
+#unmount the source download folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+
 #unmount the debs data
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the FS at the workdir
 umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
+
+#unmount the cache /var/tmp folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
+
+#unmount the cache /var/tmp folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
 
 #unmount phase 2
 umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2
@@ -63,17 +75,22 @@ rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3
 rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir
 rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
+rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
+rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
 
 #create a folder for the media mountpoints in the media folder
 mkdir -p $BUILDLOCATION/build/$BUILDARCH
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_3
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/srcbuild
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
 
-#bind mount the FS to the workdir
+#bind mount the FS to the workdir, and bind mount the external archives folder
 mount --bind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
+mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
 
 #install a really basic Ubuntu installation in the new fs  
 debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http://ubuntu.osuosl.org/ubuntu/
@@ -81,6 +98,9 @@ debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/workdir http
 #tell future calls of the first builder script that phase 1 is done
 touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
 touch $BUILDLOCATION/DontDebootstrap$BUILDARCH
+
+#unmount the external archive folder
+umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
 
 #unmount the chrooted procfs from the outside 
 umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc

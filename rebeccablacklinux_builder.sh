@@ -93,6 +93,8 @@ then
   if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
   then
     rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/srcbuild
     REBUILT="to rebuild from scratch"
   fi
   $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
