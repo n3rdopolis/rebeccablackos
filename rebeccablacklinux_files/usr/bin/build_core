@@ -93,6 +93,12 @@ function RunDownloadAndOrBuild
 
 
 
+#function to get the revison of GIT repos
+function GetVersionGIT()
+{
+  REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
+}
+
 #Function to download git repos
 function DownloadGIT()
 {
@@ -149,6 +155,11 @@ function DownloadGIT()
 
 }
 
+#function to get the revison of SVN repos
+function GetVersionSVN()
+{
+  REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
+}
 
 #Function to download svn repos
 function DownloadSVN()
@@ -174,6 +185,12 @@ function DownloadSVN()
   svn update --non-interactive -r $SOURCEREVISION
 }
 
+
+#function to get the version of BZR repos
+function GetVersionBZR()
+{
+  REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
+}
 
 #Function to download bzr repos
 function DownloadBZR()
@@ -201,6 +218,12 @@ function DownloadBZR()
   bzr update -r $SOURCEREVISION
 }
 
+#function to get the version of HG repos
+function GetVersionHG()
+{
+  REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
+}
+
 #Function to download hg repos
 function DownloadHG()
 {
@@ -225,6 +248,13 @@ function DownloadHG()
   hg st -un0 | xargs -0 rm
   hg pull
   hg update -C -r $SOURCEREVISION
+}
+
+
+#function to get the version of Archives
+function GetVersionARCHIVE()
+{
+  REVISIONSTRING="Non-versioned File Archive"
 }
 
 #Function to download archives
@@ -273,36 +303,6 @@ function DownloadSource()
     PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
     ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
   fi
-}
-
-#function to get the revison of GIT repos
-function GetVersionGIT()
-{
-  REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
-}
-
-#function to get the revison of SVN repos
-function GetVersionSVN()
-{
-  REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
-}
-
-#function to get the version of BZR repos
-function GetVersionBZR()
-{
-  REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
-}
-
-#function to get the version of HG repos
-function GetVersionHG()
-{
-  REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
-}
-
-#function to get the version of Archives
-function GetVersionARCHIVE()
-{
-  REVISIONSTRING="Non-versioned File Archive"
 }
 
 #function that calls functions to get version based on repository type
