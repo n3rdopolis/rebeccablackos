@@ -47,6 +47,18 @@ remastersys dist
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
+
+#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+rm /sbin/initctl.distrib
+rm /usr/sbin/grub-probe.distrib
+rm /usr/sbin/invoke-rc.d.distrib
+dpkg-divert --local --rename --add /usr/sbin/grub-probe
+dpkg-divert --local --rename --add /sbin/initctl
+dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
+ln -s /bin/true /sbin/initctl
+ln -s /bin/true /usr/sbin/grub-probe
+ln -s /bin/true /usr/sbin/invoke-rc.d
+
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
@@ -68,6 +80,14 @@ yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations
 
 
 yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
+
+#Reset the utilites back to the way they are supposed to be.
+rm /sbin/initctl
+rm /usr/sbin/grub-probe
+rm /usr/sbin/invoke-rc.d
+dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /sbin/initctl
+dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
 
 #hide buildlogs in tmp from remastersys
 mv /usr/share/logs	/tmp
