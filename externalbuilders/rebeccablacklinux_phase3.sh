@@ -90,6 +90,7 @@ ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
 mkdir -p "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 
 #Export the log files to the location
+cp -a "$BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/"* "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 
 #If the live cd did not build then tell user  
