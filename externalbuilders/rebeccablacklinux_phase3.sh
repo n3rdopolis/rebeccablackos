@@ -29,14 +29,6 @@ then
   exit
 fi
 
-#If the lockfile for the build output does not exist, delete it so all debs get deleted, and the build restarts from scratch.
-if [[  ! -f $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH ]]
-then
-  rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
-  touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH 
-fi
-
-
 #create a folder for the media mountpoints in the media folder
 mkdir -p $BUILDLOCATION/build/$BUILDARCH
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
