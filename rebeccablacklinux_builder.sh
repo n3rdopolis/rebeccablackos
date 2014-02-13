@@ -129,26 +129,43 @@ done
 
 UnmountAll
 
-#Delete DontDebootstrap file if Phase2 is restarted and Reset phase 2 if DontRestartPhase2 file is missing.
-if [[ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
-then
-  #Delete the phase 2 folder contents
-  rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
-  touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
-  mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
-  touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
-  rm $BUILDLOCATION/DontDebootstrap$BUILDARCH
-fi
 
-#only initilize the FS if the FS isn't there.
-if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontDebootstrap$BUILDARCH ]]
+#Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
+if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
+  #if set to rebuild phase 1
+  if [ ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH ]
+  then
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1/*
+  fi
+
+  #if set to rebuild phase 2
+  if [ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]
+  then
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
+    mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
+    touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+  fi
+
   if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
   then
+    #clean up old files
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
+    rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
     rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
     rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
     rm -rf $BUILDLOCATION/build/$BUILDARCH/srcbuild
     REBUILT="to rebuild from scratch"
+    rm $BUILDLOCATION/DontRestartPhase1$BUILDARCH
+    rm $BUILDLOCATION/DontRestartPhase2$BUILDARCH
+    touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
+    mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
+    touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
   fi
   $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
 fi

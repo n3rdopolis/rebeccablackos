@@ -34,15 +34,6 @@ mkdir -p $BUILDLOCATION
 #switch to that folder
 cd $BUILDLOCATION
 
-#clean up old files
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3
-rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir
-rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
-rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
-rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
-
 #create a folder for the media mountpoints in the media folder
 mkdir -p $BUILDLOCATION/build/$BUILDARCH
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
@@ -61,12 +52,20 @@ mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUIL
 
 
 
-#install a really basic Ubuntu installation for usage. 
-echo "Setting up chroot for downloading archives and software..."
-debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_1 http://ubuntu.osuosl.org/ubuntu/
-echo "Setting up chroot for the Live CD..."
-debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
+#setup a really basic Ubuntu installation for downloading 
+#if set to rebuild phase 1
+if [ ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH ]
+then
+  echo "Setting up chroot for downloading archives and software..."
+  debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_1 http://ubuntu.osuosl.org/ubuntu/
+  touch $BUILDLOCATION/DontRestartPhase1$BUILDARCH
+fi
 
-#tell future calls of the first builder script that phase 1 is done
-touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
-touch $BUILDLOCATION/DontDebootstrap$BUILDARCH
+#if set to rebuild phase 1
+if [ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]
+then
+  #setup a really basic Ubuntu installation for the live cd
+  echo "Setting up chroot for the Live CD..."
+  debootstrap --arch $BUILDARCH saucy $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
+  touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
+fi
