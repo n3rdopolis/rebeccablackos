@@ -31,6 +31,12 @@ ln -s /bin/true /usr/sbin/invoke-rc.d
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
+#perl outputs complaints if a locale isn't generated
+sudo locale-gen en_US.UTF-8
+
+#Create the correct /etc/resolv.conf symlink
+ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
+
 #update the apt cache
 apt-get update
 
