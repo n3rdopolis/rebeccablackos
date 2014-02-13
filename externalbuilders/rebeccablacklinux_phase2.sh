@@ -60,6 +60,8 @@ mount --rbind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUI
 
 #Bring in needed files.
 cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/*     $BUILDLOCATION/build/$BUILDARCH/workdir/tmp
+cp -a $BUILDLOCATION/build/$BUILDARCH/importdata/etc/apt/sources.list $BUILDLOCATION/build/$BUILDARCH/workdir/etc/apt/sources.list 
+
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
