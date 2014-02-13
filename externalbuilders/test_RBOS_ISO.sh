@@ -19,9 +19,9 @@
 #This is a script for mounting a Ubuntu live CD, and creating a chroot session.
 
 MOUNTISO=$(readlink -f $1)
-MOUNTHOME=~
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 export HOME=$(eval echo ~$SUDO_USER)
+MOUNTHOME=$HOME
 unset SUDO_USER
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
@@ -301,7 +301,12 @@ Weston Session commands:
 westonnestedcaller
 westonnestedhawaiicaller
 westonnestedorbitalcaller
-enlightenmentnestedcaller\"" >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
+enlightenmentnestedcaller
+
+
+NOTE: Any commands entered in this tab will effect the mounted system.
+If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
+Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
 
 touch $MOUNTHOME/liveisotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
