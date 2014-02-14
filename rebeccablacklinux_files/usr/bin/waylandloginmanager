@@ -45,7 +45,7 @@
 
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
-  #/run/waylandloginmanager/waylandserver.log : This is the log file for the Weston server that is the loginmanagerdisplay
+  #/var/log/waylandserver.log : This is the log file for the Weston server that is the loginmanagerdisplay
   #~/waylandserver.log : This is where all wayland servers get logged as the run as the user.
 
 #Runtime Files"
@@ -882,10 +882,10 @@ function SetupLoggingAndFIFO
   #open the FIFO.
   exec 1000<> /run/waylandloginmanager/loginmanager_control
   #Prepare logging for the loginmanagerdisplay
-  touch /run/waylandloginmanager/waylandserver.log
-  chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/waylandserver.log
+  touch /var/log/waylandserver.log
+  chown $LOGINMANAGERDISPLAYUSER /var/log/waylandserver.log
   rm $LOGINMANAGERDISPLAYHOME/waylandserver.log
-  ln -s /run/waylandloginmanager/waylandserver.log $LOGINMANAGERDISPLAYHOME/waylandserver.log
+  ln -s /var/log/waylandserver.log $LOGINMANAGERDISPLAYHOME/waylandserver.log
 }
 
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_control FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the westonlaunchcaller, waylandshutdown, or even some functions within this script.
