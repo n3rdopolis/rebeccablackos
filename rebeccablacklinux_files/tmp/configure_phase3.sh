@@ -49,6 +49,9 @@ mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom
 
 
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+dpkg-divert --local --rename --remove /usr/sbin/grub-probe
+dpkg-divert --local --rename --remove /sbin/initctl
+dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
 rm /sbin/initctl.distrib
 rm /usr/sbin/grub-probe.distrib
 rm /usr/sbin/invoke-rc.d.distrib

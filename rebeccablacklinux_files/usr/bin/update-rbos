@@ -55,12 +55,6 @@ install_menu_items
 #If the user opted to build, install all packages specified by INSTALLS.txt, and run compile_all
 if [[ $1 == build ]]
 then 
-  #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-  dpkg-divert --local --rename --add /usr/sbin/grub-probe
-  dpkg-divert --local --rename --add /sbin/initctl
-  ln -s /bin/true /sbin/initctl
-  ln -s /bin/true /usr/sbin/grub-probe
-
   #LIST OF PACKAGES TO GET INSTALLED
   INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
  
@@ -84,12 +78,6 @@ then
     fi
 
   done
-
-  #Reset the utilites back to the way they are supposed to be.
-  rm /sbin/initctl
-  rm /usr/sbin/grub-probe
-  dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-  dpkg-divert --local --rename --remove /sbin/initctl
 
   #delete the downloaded file cache
   apt-get clean
