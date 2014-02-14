@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.kde.org/kde-baseapps
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=frameworks-scratch
+SOURCEREVISION=frameworks
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -78,7 +78,7 @@ function PackageCompileSource()
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)   
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_DISABLE_FIND_PACKAGE_OpenGL=1 -DCMAKE_DISABLE_FIND_PACKAGE_X11=1 #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make 
 }
 
