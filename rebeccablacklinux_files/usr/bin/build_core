@@ -486,6 +486,7 @@ function MakeAndInstall()
 
       #remove any old deb files for this package
       rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
+      rm *.deb
 
       #create the new deb
       STARTTIME=$(date +%s)
