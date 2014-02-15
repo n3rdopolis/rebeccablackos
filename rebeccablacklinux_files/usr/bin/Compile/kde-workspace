@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -p1 < /usr/share/RBOS_PATCHES/kde-workspace.diff
-#cp -R /usr/share/RBOS_PATCHES/kde-workspace/. .
+cp -R /usr/share/RBOS_PATCHES/kde-workspace/. .
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
