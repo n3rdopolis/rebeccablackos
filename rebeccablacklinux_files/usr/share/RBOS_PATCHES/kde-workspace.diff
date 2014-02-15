@@ -1,8 +1,8 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 9020d33..e82b880 100644
+index 5cd2ea1..95aa5a6 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -268,20 +268,20 @@ ecm_optional_add_subdirectory( systemsettings )
+@@ -252,10 +252,10 @@ ecm_optional_add_subdirectory( systemsettings )
  if(NOT WIN32)
     ecm_optional_add_subdirectory( kcheckpass )
     ecm_optional_add_subdirectory( kwin )
@@ -14,10 +14,8 @@ index 9020d33..e82b880 100644
 +   #ecm_optional_add_subdirectory( powerdevil )
     if(Qt5WebKitWidgets_FOUND)
          if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
--            ecm_optional_add_subdirectory( ksysguard )
-+            #ecm_optional_add_subdirectory( ksysguard )
-         endif ()
-    endif()
+             ecm_optional_add_subdirectory( ksysguard )
+@@ -264,8 +264,8 @@ if(NOT WIN32)
  endif()
  #
  ecm_optional_add_subdirectory(kcontrol)
@@ -28,37 +26,20 @@ index 9020d33..e82b880 100644
  #    macro_optional_add_subdirectory(krunner)
  #    macro_optional_add_subdirectory(solid)
  if(LIBBSD_FOUND)
-@@ -301,10 +301,10 @@ endif ()
+@@ -285,7 +285,7 @@ endif ()
  
  if(NOT WIN32)
     ecm_optional_add_subdirectory(kcminit)
 -   ecm_optional_add_subdirectory(khotkeys)
-+#   ecm_optional_add_subdirectory(khotkeys)
++   #ecm_optional_add_subdirectory(khotkeys)
  #       macro_optional_add_subdirectory(kwrited)
  #       macro_optional_add_subdirectory(ksystraycmd)
--   ecm_optional_add_subdirectory(appmenu)
-+#   ecm_optional_add_subdirectory(appmenu)
- endif()
- 
- if(NOT WIN32)
-diff --git a/doc/kcontrol/CMakeLists.txt b/doc/kcontrol/CMakeLists.txt
-index ff92615..685b2ea 100644
---- a/doc/kcontrol/CMakeLists.txt
-+++ b/doc/kcontrol/CMakeLists.txt
-@@ -11,7 +11,7 @@ add_subdirectory(powerdevil)
- add_subdirectory(kwincompositing)
- add_subdirectory(kwinscreenedges)
- 
--if ( Q_WS_X11 )
-+if ( HAVE_X11 )
- add_subdirectory(autostart)
- add_subdirectory(bell)
- add_subdirectory(cursortheme)
+    ecm_optional_add_subdirectory(appmenu)
 diff --git a/kcontrol/CMakeLists.txt b/kcontrol/CMakeLists.txt
-index 456e6dc..5ea203b 100644
+index 456e6dc..891d085 100644
 --- a/kcontrol/CMakeLists.txt
 +++ b/kcontrol/CMakeLists.txt
-@@ -15,33 +15,33 @@ if(X11_Xkb_FOUND)
+@@ -15,21 +15,21 @@ if(X11_Xkb_FOUND)
  endif()
  
  if(NOT WIN32)
@@ -85,11 +66,8 @@ index 456e6dc..5ea203b 100644
 +#add_subdirectory( style )
  add_subdirectory( desktoptheme )
  add_subdirectory( standard_actions )
--add_subdirectory( keys )
-+#add_subdirectory( keys )
- 
- add_subdirectory( hardware )
- add_subdirectory( desktoppaths )
+ add_subdirectory( keys )
+@@ -39,7 +39,7 @@ add_subdirectory( desktoppaths )
  
  if( FREETYPE_FOUND )
     if( WIN32 OR FONTCONFIG_FOUND )
@@ -98,191 +76,19 @@ index 456e6dc..5ea203b 100644
     endif()
  endif()
  if(FONTCONFIG_FOUND AND FREETYPE_FOUND AND NOT WIN32)
--    add_subdirectory( kfontinst )
-+    #add_subdirectory( kfontinst )
- endif()
-diff --git a/kcontrol/fonts/fonts.cpp b/kcontrol/fonts/fonts.cpp
-index 3556d55..9747761 100644
---- a/kcontrol/fonts/fonts.cpp
-+++ b/kcontrol/fonts/fonts.cpp
-@@ -50,11 +50,11 @@
- #endif
- #endif
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/Xlib.h>
- #endif
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- // X11 headers
- #undef Bool
- #undef Unsorted
-@@ -636,7 +636,7 @@ KFonts::KFonts(QWidget *parent, const QVariantList &args)
-    lay->addWidget( aaSettingsButton, 0, 2 );
-    connect(cbAA, SIGNAL(activated(int)), SLOT(slotUseAntiAliasing()));
- #endif
--#ifdef HAVE_X11
-+#if HAVE_X11
-    checkboxForceDpi = new QCheckBox( i18n( "Force fonts DPI:" ), this );
-    lay->addWidget( checkboxForceDpi, 1, 0 );
-    spinboxDpi = new QSpinBox( this );
-@@ -694,7 +694,7 @@ void KFonts::defaults()
-   cbAA->setCurrentIndex( useAA );
-   aaSettings->defaults();
- #endif
--#ifdef HAVE_X11
-+#if HAVE_X11
-   checkboxForceDpi->setChecked( false );
-   spinboxDpi->setValue( 96 );
- #endif
-@@ -716,7 +716,7 @@ void KFonts::load()
- 
-   KConfig _cfgfonts( "kcmfonts" );
-   KConfigGroup cfgfonts(&_cfgfonts, "General");
--#ifdef HAVE_X11
-+#if HAVE_X11
-   int dpicfg = cfgfonts.readEntry( "forceFontDPI", 0 );
-   if (dpicfg <= 0) {
-     checkboxForceDpi->setChecked(false);
-@@ -751,7 +751,7 @@ void KFonts::save()
- 
-   KConfig _cfgfonts( "kcmfonts" );
-   KConfigGroup cfgfonts(&_cfgfonts, "General");
--#ifdef HAVE_X11
-+#if HAVE_X11
-   int dpi = ( checkboxForceDpi->isChecked() ? spinboxDpi->value() : 0 );
-   cfgfonts.writeEntry( "forceFontDPI", dpi );
- #endif
-@@ -759,7 +759,7 @@ void KFonts::save()
-   cfgfonts.writeEntry( "dontChangeAASettings", cbAA->currentIndex() == AASystem );
- #endif
-   cfgfonts.sync();
--#ifdef HAVE_X11
-+#if HAVE_X11
-   // if the setting is reset in the module, remove the dpi value,
-   // otherwise don't explicitly remove it and leave any possible system-wide value
-   if( dpi == 0 && dpi_original != 0 ) {
-@@ -796,7 +796,7 @@ void KFonts::save()
-     dpi_original = dpi;
-   }
- #else
--#ifdef HAVE_X11
-+#if HAVE_X11
-   if(dpi != dpi_original) {
-     KMessageBox::information(this,
-       i18n(
-diff --git a/kcontrol/fonts/fonts.h b/kcontrol/fonts/fonts.h
-index 72988ef..241fbfb 100644
---- a/kcontrol/fonts/fonts.h
-+++ b/kcontrol/fonts/fonts.h
-@@ -115,7 +115,7 @@ private:
-     QPushButton *aaSettingsButton;
-     FontAASettings *aaSettings;
- #endif
--#ifdef HAVE_X11
-+#if HAVE_X11
-     int dpi_original;
-     QCheckBox *checkboxForceDpi;
-     QSpinBox* spinboxDpi;
-diff --git a/kcontrol/krdb/krdb.cpp b/kcontrol/krdb/krdb.cpp
-index b84e676..cddfe24 100644
---- a/kcontrol/krdb/krdb.cpp
-+++ b/kcontrol/krdb/krdb.cpp
-@@ -47,7 +47,7 @@
- #include <KLocalizedString>
- 
- #include "krdb.h"
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/Xlib.h>
- #include <QX11Info>
- #endif
-@@ -558,7 +558,7 @@ void runRdb( uint flags )
- 
-     delete settings;
-     QApplication::flush();
--#ifdef HAVE_X11
-+#if HAVE_X11
-     if (qApp->platformName() == QStringLiteral("xcb")) {
-         // We let KIPC take care of ourselves, as we are in a KDE app with
-         // QApp::setDesktopSettingsAware(false);
-diff --git a/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h b/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
-index 40adafa..4040b1a 100644
---- a/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
-+++ b/khotkeys/libkhotkeysprivate/conditions/existing_window_condition.h
-@@ -30,7 +30,7 @@
- 
- #include <kdemacros.h>
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/Xlib.h>
- #include <fixx11h.h>
- #else
-diff --git a/klipper/klipper.cpp b/klipper/klipper.cpp
-index f658b35..cde65f5 100644
---- a/klipper/klipper.cpp
-+++ b/klipper/klipper.cpp
-@@ -58,7 +58,7 @@
- #include <prison/QRCodeBarcode>
- #endif
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <QX11Info>
- #include <X11/Xlib.h>
- #include <X11/Xatom.h>
-@@ -601,7 +601,7 @@ const int MAX_CLIPBOARD_CHANGES = 10; // max changes per second
- 
- bool Klipper::blockFetchingNewData()
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
- // Hacks for #85198 and #80302.
- // #85198 - block fetching new clipboard contents if Shift is pressed and mouse is not,
- //   this may mean the user is doing selection using the keyboard, in which case
-diff --git a/klipper/urlgrabber.cpp b/klipper/urlgrabber.cpp
-index c5848a9..923aa94 100644
---- a/klipper/urlgrabber.cpp
-+++ b/klipper/urlgrabber.cpp
-@@ -45,7 +45,7 @@
- #include "history.h"
- #include "historystringitem.h"
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/Xlib.h>
- #include <X11/Xatom.h>
- #include <fixx11h.h>
-@@ -357,7 +357,7 @@ void URLGrabber::saveSettings() const
- // digged a little bit in netwm.cpp
- bool URLGrabber::isAvoidedWindow() const
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     Display *d = QX11Info::display();
-     static Atom wm_class = XInternAtom( d, "WM_CLASS", true );
-     static Atom active_window = XInternAtom( d, "_NET_ACTIVE_WINDOW", true );
-diff --git a/kstyles/oxygen/oxygenstylehelper.cpp b/kstyles/oxygen/oxygenstylehelper.cpp
-index 7e2de41..c0b17b9 100644
---- a/kstyles/oxygen/oxygenstylehelper.cpp
-+++ b/kstyles/oxygen/oxygenstylehelper.cpp
-@@ -681,7 +681,8 @@ namespace Oxygen
-         return reply && reply->owner;
-         #else
-         // use KWindowSystem
--        return KWindowSystem::compositingActive();
-+        //return KWindowSystem::compositingActive();
-+	return 0;
-         #endif
-     }
- 
 diff --git a/kwin/CMakeLists.txt b/kwin/CMakeLists.txt
-index 9da6849..4425773 100644
+index 29bac16..4425773 100644
 --- a/kwin/CMakeLists.txt
 +++ b/kwin/CMakeLists.txt
+@@ -11,7 +11,7 @@ option(KWIN_BUILD_SCRIPTING "Enable building of KWin with scripting support" ON)
+ option(KWIN_BUILD_KAPPMENU "Enable building of KWin with application menu support" ON)
+ option(KWIN_BUILD_XRENDER_COMPOSITING "Enable building of KWin with XRender Compositing support" ON)
+ option(KWIN_BUILD_OPENGL_1_COMPOSITING "Enable support for OpenGL 1.x, automatically disabled when building for OpenGL ES 2.0" ON)
+-cmake_dependent_option(KWIN_BUILD_ACTIVITIES "Enable building of KWin with kactivities support" ON "KF5Activities_FOUND" OFF)
++option(KWIN_BUILD_ACTIVITIES "Enable building of KWin with kactivities support" OFF)
+ option(KWIN_PLASMA_ACTIVE "Enable building KWin for Plasma Active." OFF)
+ 
+ # Binary name of KWin
 @@ -30,49 +30,8 @@ endif()
  
  cmake_dependent_option(KWIN_BUILD_KAPPMENU "Build without appmenu support" ON "KWIN_BUILD_DECORATIONS" FALSE)
@@ -333,7 +139,7 @@ index 9da6849..4425773 100644
  
  
  ########### global ###############
-@@ -88,285 +47,10 @@ include_directories(BEFORE
+@@ -88,286 +47,10 @@ include_directories(BEFORE
      )
  
  add_subdirectory( libkdecorations )
@@ -557,7 +363,7 @@ index 9da6849..4425773 100644
 -endif()
 -
 -if(KWIN_BUILD_ACTIVITIES)
--    set(kwin_KDE_LIBS ${kwin_KDE_LIBS} ${KACTIVITIES_LIBRARY})
+-    set(kwin_KDE_LIBS ${kwin_KDE_LIBS} KF5::Activities)
 -endif()
 -
 -if(OPENGL_EGL_FOUND)
@@ -619,12 +425,18 @@ index 9da6849..4425773 100644
  ecm_install_icons( ${ICON_INSTALL_DIR} )
  
 -add_subdirectory(autotests)
+-add_subdirectory(tests)
 +
 diff --git a/libs/CMakeLists.txt b/libs/CMakeLists.txt
-index 089b045..6889eba 100644
+index 089b045..82b0bc2 100644
 --- a/libs/CMakeLists.txt
 +++ b/libs/CMakeLists.txt
-@@ -5,12 +5,12 @@ add_subdirectory(oxygen)
+@@ -1,11 +1,11 @@
+-add_subdirectory(kworkspace)
++#add_subdirectory(kworkspace)
+ add_subdirectory(oxygen)
+ #add_subdirectory(plasmaclock)
+ 
  #add_subdirectory(kdm)
  #add_subdirectory(plasmagenericshell)
  if(NOT WIN32)
@@ -633,269 +445,8 @@ index 089b045..6889eba 100644
  endif()
  
  if(NOT WIN32)
-     if (NOT CMAKE_SYSTEM_NAME MATCHES Darwin)
--        add_subdirectory(ksysguard)
-+        #add_subdirectory(ksysguard)
-     endif ()
- endif()
- 
-diff --git a/libs/kworkspace/kdisplaymanager.cpp b/libs/kworkspace/kdisplaymanager.cpp
-index d562545..4a58bfb 100644
---- a/libs/kworkspace/kdisplaymanager.cpp
-+++ b/libs/kworkspace/kdisplaymanager.cpp
-@@ -19,7 +19,7 @@
- 
- #include "kdisplaymanager.h"
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- 
- #include <kuser.h>
- 
-diff --git a/libs/kworkspace/kdisplaymanager.h b/libs/kworkspace/kdisplaymanager.h
-index e83ab41..a53c943 100644
---- a/libs/kworkspace/kdisplaymanager.h
-+++ b/libs/kworkspace/kdisplaymanager.h
-@@ -37,7 +37,7 @@ typedef QList<SessEnt> SessList;
- 
- class KWORKSPACE_EXPORT KDisplayManager {
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- 
- public:
-     KDisplayManager();
-@@ -91,7 +91,7 @@ public:
- #endif // HAVE_X11
- 
- private:
--#ifdef HAVE_X11
-+#if HAVE_X11
-     class Private;
-     Private * const d;
- #endif // HAVE_X11
-diff --git a/libs/kworkspace/kwindowlistmenu.cpp b/libs/kworkspace/kwindowlistmenu.cpp
-index 90c39e8..cd2f06e 100644
---- a/libs/kworkspace/kwindowlistmenu.cpp
-+++ b/libs/kworkspace/kwindowlistmenu.cpp
-@@ -27,12 +27,17 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- #include <QApplication>
- #include <QtWidgets/QDesktopWidget>
- #include <QtGui/QPainter>
-+#if HAVE_X11
- #include <QtX11Extras/QX11Info>
-+#endif
- 
- #include <QtDBus/QtDBus>
- #include <KLocalizedString>
- #include <kwindowsystem.h>
-+
-+#if HAVE_X11
- #include <netwm.h>
-+#endif
- 
- #undef Bool
- #include "kwindowlistmenu.moc"
-@@ -67,7 +72,7 @@ KWindowListMenu::~KWindowListMenu()
- 
- static bool standaloneDialog( const KWindowInfo* info, const QList<KWindowInfo*>& list )
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
-   WId group = info->groupLeader();
- 
-   if ( group == 0 )
-@@ -102,8 +107,8 @@ void KWindowListMenu::init()
-     addSeparator();
- 
-   QList<KWindowInfo> windows;
--  foreach ( WId id, KWindowSystem::windows() )
--    windows.append( KWindowSystem::windowInfo( id, NET::WMDesktop ) );
-+  //foreach ( WId id, KWindowSystem::windows() )
-+  //  windows.append( KWindowSystem::windowInfo( id, NET::WMDesktop ) );
- 
-   bool showAllDesktopsGroup = ( numberOfDesktops > 1 );
- 
-@@ -117,7 +122,7 @@ void KWindowListMenu::init()
-         //setItemChecked(1000 + d, true);
- 
-     QList<KWindowInfo*> list;
--
-+/*
-     foreach (const KWindowInfo &wi, windows) {
-       if ( (wi.desktop() == j) || (onAllDesktops && wi.onAllDesktops())
-            || (!showAllDesktopsGroup && wi.onAllDesktops()) ) {
-@@ -126,7 +131,7 @@ void KWindowListMenu::init()
-                          NET::WM2GroupLeader | NET::WM2TransientFor ) );
-       }
-     }
--
-+*/
-     qStableSort( list.begin(), list.end(), compareKWinWindowInfo );
- 
-     foreach ( KWindowInfo* info, list ) {
-diff --git a/libs/kworkspace/kworkspace.cpp b/libs/kworkspace/kworkspace.cpp
-index 996d7ef..29a826f 100644
---- a/libs/kworkspace/kworkspace.cpp
-+++ b/libs/kworkspace/kworkspace.cpp
-@@ -29,7 +29,7 @@
- #include <ksmserver_interface.h>
- #include <QSocketNotifier>
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/Xlib.h>
- #include <X11/Xutil.h>
- #include <X11/Xatom.h>
-@@ -37,7 +37,7 @@
- #include <fixx11h.h>
- #endif
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #define DISPLAY "DISPLAY"
- #elif defined(Q_WS_QWS)
- #define DISPLAY "QWS_DISPLAY"
-@@ -56,7 +56,7 @@
- 
- namespace KWorkSpace
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
- static void save_yourself_callback( SmcConn conn_P, SmPointer, int, Bool , int, Bool )
-     {
-     SmcSaveYourselfDone( conn_P, True );
-@@ -68,7 +68,7 @@ static void dummy_callback( SmcConn, SmPointer )
- #endif
- KRequestShutdownHelper::KRequestShutdownHelper()
-     {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     SmcCallbacks calls;
-     calls.save_yourself.callback = save_yourself_callback;
-     calls.die.callback = dummy_callback;
-@@ -128,7 +128,7 @@ KRequestShutdownHelper::KRequestShutdownHelper()
- 
- KRequestShutdownHelper::~KRequestShutdownHelper()
-     {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     if( conn != NULL )
-         {
-         delete notifier;
-@@ -139,7 +139,7 @@ KRequestShutdownHelper::~KRequestShutdownHelper()
- 
- void KRequestShutdownHelper::processData()
-     {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     if( conn != NULL )
-         IceProcessMessages( SmcGetIceConnection( conn ), 0, 0 );
- #endif    
-@@ -147,7 +147,7 @@ void KRequestShutdownHelper::processData()
- 
- bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
-     {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     if( conn == NULL )
-         return false;
-     SmcRequestSaveYourself( conn, SmSaveBoth, True, SmInteractStyleAny,
-@@ -157,7 +157,7 @@ bool KRequestShutdownHelper::requestShutdown( ShutdownConfirm confirm )
- #endif    
-     return true;
-     }
--#ifdef HAVE_X11
-+#if HAVE_X11
- static KRequestShutdownHelper* helper = NULL;
- 
- static void cleanup_sm()
-@@ -168,7 +168,7 @@ static void cleanup_sm()
- 
- void requestShutDown(ShutdownConfirm confirm, ShutdownType sdtype, ShutdownMode sdmode)
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     /*  use ksmserver's dcop interface if necessary  */
-     if ( confirm == ShutdownConfirmYes ||
-          sdtype != ShutdownTypeDefault ||
-@@ -192,7 +192,7 @@ bool canShutDown( ShutdownConfirm confirm,
-                   ShutdownType sdtype,
-                   ShutdownMode sdmode )
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     if ( confirm == ShutdownConfirmYes ||
-          sdtype != ShutdownTypeDefault ||
-          sdmode != ShutdownModeDefault )
-@@ -214,7 +214,7 @@ bool canShutDown( ShutdownConfirm confirm,
- static QTime smModificationTime;
- void propagateSessionManager()
- {
--#ifdef HAVE_X11
-+#if HAVE_X11
-     QByteArray fName = QFile::encodeName(QStandardPaths::writableLocation(QStandardPaths::RuntimeLocation)+"/KSMserver");
-     QString display = QString::fromLocal8Bit( ::getenv(DISPLAY) );
-     // strip the screen number from the display
-diff --git a/libs/kworkspace/kworkspace_p.h b/libs/kworkspace/kworkspace_p.h
-index 4a9dee8..2a3c15b 100644
---- a/libs/kworkspace/kworkspace_p.h
-+++ b/libs/kworkspace/kworkspace_p.h
-@@ -23,7 +23,7 @@
- 
- #include "kworkspace.h"
- 
--#ifdef HAVE_X11
-+#if HAVE_X11
- #include <X11/SM/SMlib.h>
- #endif
- 
-@@ -44,7 +44,7 @@ class KRequestShutdownHelper
-     private Q_SLOTS:
-         void processData();
-     private:
--#ifdef HAVE_X11
-+#if HAVE_X11
-         SmcConn connection() const { return conn; }
-         SmcConn conn;
- #endif
-diff --git a/libs/taskmanager/task.h b/libs/taskmanager/task.h
-index 180a470..1b262dd 100644
---- a/libs/taskmanager/task.h
-+++ b/libs/taskmanager/task.h
-@@ -278,7 +278,7 @@ public:
-     //* @internal
-     ::TaskManager::TaskChanges refresh(WindowProperties dirty);
-     //* @internal
--#ifdef HAVE_X11
-+#if HAVE_X11
-     void addTransient(WId w, const KWindowInfo &info);
- #endif
-     //* @internal
-diff --git a/libs/taskmanager/taskactions.cpp b/libs/taskmanager/taskactions.cpp
-index 0eebe13..0a0bc10 100644
---- a/libs/taskmanager/taskactions.cpp
-+++ b/libs/taskmanager/taskactions.cpp
-@@ -38,13 +38,16 @@ CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
- #include <KServiceTypeTrader>
- #include <KDesktopFile>
- #include <KRun>
-+#if HAVE_X11
- #include <NETRootInfo>
-+#endif
- 
- #include <QtCore/QMap>
- #include <QtGui/QHelpEvent>
- #include <QtWidgets/QToolTip>
-+#if HAVE_X11
- #include <QX11Info>
--
-+#endif
- ///////////////////////////////////////////////////////////////////////////////
- // NOTE: if you change the menu, keep kde-workspace/kwin/useractions.cpp in sync
- //////////////////////////////////////////////////////////////////////////////
 diff --git a/plasma/desktop/applets/CMakeLists.txt b/plasma/desktop/applets/CMakeLists.txt
-index 2ae6812..16361ce 100644
+index 875b426..f59deeb 100644
 --- a/plasma/desktop/applets/CMakeLists.txt
 +++ b/plasma/desktop/applets/CMakeLists.txt
 @@ -3,11 +3,11 @@ plasma_install_package(trash org.kde.plasma.trash)
@@ -903,11 +454,10 @@ index 2ae6812..16361ce 100644
  if(NOT WIN32)
     # tasks and windowlist depend on libs/taskmanager
 -   add_subdirectory(taskmanager)
--   plasma_install_package(window-list org.kde.plasma.windowlist)
 +   #add_subdirectory(taskmanager)
-+   #plasma_install_package(window-list org.kde.plasma.windowlist)
+    plasma_install_package(window-list org.kde.plasma.windowlist)
  
- if(KActivities_FOUND)
+ if(KF5Activities_FOUND)
 -   add_subdirectory(pager)
 +   #add_subdirectory(pager)
     add_subdirectory(showActivityManager)
