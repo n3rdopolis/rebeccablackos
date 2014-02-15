@@ -131,7 +131,7 @@ UnmountAll
 
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
-if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
+if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
   #if set to rebuild phase 1
   if [ ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH ]
