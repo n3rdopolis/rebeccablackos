@@ -1,21 +1,17 @@
 diff --git a/config.mk b/config.mk
-index 4bb9a85..2c5b523 100644
+index da93c6e..9ed1f77 100644
 --- a/config.mk
 +++ b/config.mk
-@@ -1,6 +1,6 @@
+@@ -1,5 +1,6 @@
  # wld: config.mk
  
--PREFIX              = /usr/local
 +PREFIX              = /opt
- LIBDIR              = $(PREFIX)/lib
- INCLUDEDIR          = $(PREFIX)/include
- PKGCONFIGDIR        = $(LIBDIR)/pkgconfig
-@@ -12,9 +12,9 @@ ENABLE_DEBUG        = 1
+ CC                  = gcc
+ CFLAGS              = -pipe
  
- ENABLE_PIXMAN       = 1
+@@ -9,7 +10,7 @@ ENABLE_PIXMAN       = 1
  ENABLE_DRM          = 1
--ENABLE_WAYLAND      = 0
-+ENABLE_WAYLAND      = 1
+ ENABLE_WAYLAND      = 1
  
 -DRM_DRIVERS         = intel nouveau
 +#DRM_DRIVERS         = intel nouveau
