@@ -23,8 +23,18 @@ unset COGL_RENDERER
 unset CLUTTER_BACKEND
 export $(exec ck-launch-session dbus-launch)
 gnome-shell-wayland --wayland &
+GNOMESHELLPID=$!
 sleep 3
-unset DISPLAY
+#attempt to get the xwayland DISPLAY for the called gnome-shell-wayland
+ls /tmp/.X11-unix | while read FILE
+do
+  INUSECOUNT=$(fuser $FILE | grep -c $FILE)
+  if [[ $INUSECOUNT != 0 ]]
+  then
+    export DISPLAY=$(echo $FILE | sed 's/X/:/g')
+    break
+  fi
+done
 export WAYLAND_DISPLAY=wayland-0
 export GDK_BACKEND=wayland
 export CLUTTER_BACKEND=wayland
