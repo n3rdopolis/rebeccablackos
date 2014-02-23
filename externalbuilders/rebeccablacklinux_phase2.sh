@@ -46,7 +46,7 @@ rm -r $BUILDLOCATION/build/$BUILDARCH/phase_2/usr/share/logs/*
 cp $BUILDLOCATION/build/$BUILDARCH/importdata/tmp/INSTALLS.txt $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt 
 
 
-#create the union of phases 1 and 2 at the workdir
+#bind mount phase2 at the workdir
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_2 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 

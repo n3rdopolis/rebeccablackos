@@ -24,7 +24,7 @@ BUILDLOCATION=~/RBOS_Build_Files
 
 #####Tell User what script does
 echo "
-THIS SCRIPT INSTALLS debootstrap AND aufs-tools on the build host (this computer)
+THIS SCRIPT INSTALLS debootstrap on the build host (this computer)
 
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
@@ -52,21 +52,14 @@ fi
 
 STARTTIME=$(date +%s)
 
-#install needed tools to get the build system to work
-apt-get install debootstrap aufs-tools
+#install debootstrap
+apt-get install debootstrap
 
 if [[ ! -f /usr/sbin/debootstrap ]]
 then 
   echo "debootstrap install apparently failed."
   exit
 fi
-
-if [[ ! -f /sbin/mount.aufs || ! -f /lib/modules/$(uname -r)/kernel/ubuntu/aufs/aufs.ko ]]
-then 
-  echo "aufs install apparently failed."
-  exit
-fi
-
 #get the size of the users home file system. 
 FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 12gb or less tell the user and quit. If not continue.

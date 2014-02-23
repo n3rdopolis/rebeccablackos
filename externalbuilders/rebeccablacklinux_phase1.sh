@@ -54,7 +54,7 @@ chmod 0755 -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 chown  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 chgrp  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
 
-#bind mount the FS to the workdir. 
+#bind mount phase1 to the workdir. 
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
