@@ -62,7 +62,7 @@ patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-qmake
+qmake CONFIG+=wayland-compositor
 make
 }
 
