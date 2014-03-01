@@ -45,7 +45,8 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH/vartmp
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 
 #Copy phase3 from phase2, and bind mount phase3 at the workdir
-cp -a $BUILDLOCATION/build/$BUILDARCH/phase_2/. $BUILDLOCATION/build/$BUILDARCH/phase_3
+echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
+cp --reflink=auto -a $BUILDLOCATION/build/$BUILDARCH/phase_2/. $BUILDLOCATION/build/$BUILDARCH/phase_3
 mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_3 $BUILDLOCATION/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
