@@ -903,7 +903,7 @@ Switch User...
 Leave
 Shutdown...
 Info
-Help..."|$ZENITYCMD  --title="Wayland Login Manager" --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" | head -1 )
+Help..."|$ZENITYCMD  --title="Login Manager" --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" | head -1 )
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
