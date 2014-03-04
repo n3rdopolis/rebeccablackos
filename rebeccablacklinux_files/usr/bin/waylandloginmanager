@@ -908,6 +908,8 @@ Help..."|$ZENITYCMD  --title="Login Manager" --hide-column 1 --separator="\n" --
   if [[ ! -z $USERACTION ]]
   then
     echo -e "\n$USERACTION" > /run/waylandloginmanager/loginmanager_control
+  else
+    sleep .1
   fi
   done
 }
