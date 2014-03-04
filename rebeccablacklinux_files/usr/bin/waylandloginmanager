@@ -1027,12 +1027,13 @@ fi
 #Start the main loginmanagerdisplay Weston server
 LoginWestonLauncher &
 
+#Start the thread for the useraction dialog, which displays the main fourm for the waylandloginmanager
+UserActionDialog &
+sleep .1
+
 #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
 StartAutoLogin &
 LastLogonPID=$!
-
-#Start the thread for the useraction dialog, which displays the main fourm for the waylandloginmanager
-UserActionDialog &
 
 #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
 SetupLoggingAndFIFO
