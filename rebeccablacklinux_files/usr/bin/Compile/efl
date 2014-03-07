@@ -76,7 +76,6 @@ make install -i
 function PackagePostInstall()
 {
 make install -i 
-ln $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/ecore_drm/bin/v-1.9/ecore_drm_launch $INSTALLDIR/bin/efl-launch
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
