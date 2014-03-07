@@ -748,7 +748,7 @@ function GetUserCredentials
 function LeavePrompt
 {
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
-  ACTION=$(echo -e "Shutdown\nShutdown Computer\nRestart\nRestart Computer\nStandby\nStandby Computer\nHybrid Sleep\nHybrid Sleep\nHibernate\nHibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1  2>/dev/null | head -1)
+  ACTION=$(echo -e "Shutdown\nShutdown Computer\nRestart\nRestart Computer\nStandby\nStandby Computer\nHybrid Sleep\nHybrid Sleep\nHibernate\nHibernate Computer" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --hide-column 1 --print-column=1  2>/dev/null | head -1)
   CancelOrOK=$?
   ACTION=$(echo "$ACTION" | head -1 )
   #Abort if the user selected cancel on the zenity dialog
