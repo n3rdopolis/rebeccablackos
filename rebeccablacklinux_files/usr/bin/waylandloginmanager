@@ -512,8 +512,9 @@ New Session...
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
 	#change to tty63, and then the destination TTY of the session ID as a workaround, as switching directly between two Weston session doesn't work.
-	chvt 63
-	chvt $ChangeSessionTTY
+	chvt 63 &
+	sleep .1
+	chvt $ChangeSessionTTY &
 	#hand over the logind session ID to allow desktop permissions to work.
 	loginctl activate $ChangeSessionID
 	#set the active session pid for the script to watch to be the PID of the session
@@ -576,7 +577,8 @@ function StartUserSession
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   #change to tty63, before starting the session, as switching directly between two Weston session doesn't work.
-  chvt 63
+  chvt 63 &
+  sleep .1
   #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
   if [[ $westonresult == 255 ]]
   then
@@ -912,8 +914,9 @@ function ReadCommandFIFO
       if [[ $(fgconsole) != $HostVT ]]
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
-	chvt 63
-	chvt $HostVT
+	chvt 63 &
+	sleep .1
+	chvt $HostVT &
       fi
       ActiveSessionPID=0
     fi
@@ -930,8 +933,9 @@ function ReadCommandFIFO
       if [[ $(fgconsole) != $HostVT ]]
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
-	chvt 63
-	chvt $HostVT
+	chvt 63 &
+	sleep .1
+	chvt $HostVT &
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
@@ -946,8 +950,9 @@ function ReadCommandFIFO
       if [[ $(fgconsole) != $HostVT ]]
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
-	chvt 63
-	chvt $HostVT
+	chvt 63 &
+	sleep .1
+	chvt $HostVT &
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
