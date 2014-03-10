@@ -105,33 +105,5 @@ echo Y | apt-get -d -u dselect-upgrade --no-install-recommends			2>&1 |tee -a /u
 dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
-#Download a newer kernel not in the Ubuntu archives
-cd /tmp
-if [[ ! $(ls /var/cache/apt/archives/linux-headers-3.13.6-*all.deb) ]]
-then
-  wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.13.6-trusty/linux-headers-3.13.6-031306_3.13.6-031306.201403070154_all.deb			|tee /usr/share/logs/package_operations/Downloads/CustomKernel.log
-  result=$?
-  if [[ $result == 0 ]]
-  then
-    mv linux-headers-3.13.6-*all.deb /var/cache/apt/archives
-  fi
-fi
-if [[ ! $(ls /var/cache/apt/archives/linux-headers-3.13.6-*$BUILDARCH.deb) ]]
-then
-  wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.13.6-trusty/linux-headers-3.13.6-031306-generic_3.13.6-031306.201403070154_$BUILDARCH.deb		|tee -a /usr/share/logs/package_operations/Downloads/CustomKernel.log
-  if [[ $result == 0 ]]
-  then
-    mv linux-headers-3.13.6-*$BUILDARCH.deb /var/cache/apt/archives
-  fi
-fi
-if [[ ! $(ls /var/cache/apt/archives/linux-image-3.13.6-*$BUILDARCH.deb) ]]
-then
-  wget http://kernel.ubuntu.com/~kernel-ppa/mainline/v3.13.6-trusty/linux-image-3.13.6-031306-generic_3.13.6-031306.201403070154_$BUILDARCH.deb	|tee -a /usr/share/logs/package_operations/Downloads/CustomKernel.log
-  if [[ $result == 0 ]]
-  then
-    mv linux-image-3.13.6-*$BUILDARCH.deb /var/cache/apt/archives
-  fi
-fi
-
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only

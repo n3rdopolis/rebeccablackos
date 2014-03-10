@@ -130,32 +130,7 @@ done < <(echo "$INSTALLS")
 
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak
 
-#Install a new kernel not in the Ubuntu archives
-cd /var/cache/apt/archives/
-
-PKGNAME=$(dpkg-deb -W linux-headers-3.13.6-*all.deb | awk '{print $1}')
-PKGINSTALLCOUNT=$(dpkg --get-selections | awk '{print $1}' | grep -c $PKGNAME$ )
-if [[ $PKGINSTALLCOUNT == 0 ]]
-then
-  dpkg -i linux-headers-3.13.6-*all.deb
-fi
-
-PKGNAME=$(dpkg-deb -W linux-headers-3.13.6-*$BUILDARCH.deb | awk '{print $1}')
-PKGINSTALLCOUNT=$(dpkg --get-selections | awk '{print $1}' | grep -c $PKGNAME$ )
-if [[ $PKGINSTALLCOUNT == 0 ]]
-then
-  dpkg -i linux-headers-3.13.6-*$BUILDARCH.deb
-fi
-
-PKGNAME=$(dpkg-deb -W linux-image-3.13.6-*$BUILDARCH.deb | awk '{print $1}')
-PKGINSTALLCOUNT=$(dpkg --get-selections | awk '{print $1}' | grep -c $PKGNAME$ )
-if [[ $PKGINSTALLCOUNT == 0 ]]
-then
-  dpkg -i linux-image-3.13.6-*$BUILDARCH.deb
-fi
-
-
-
+zz
 #remove old kernels!
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
 if [[ -z $CURRENTKERNELVERSION ]]
