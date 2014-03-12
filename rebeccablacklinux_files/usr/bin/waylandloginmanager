@@ -123,6 +123,8 @@ LastTTY=7
 AllSessions=0
 #default ActiveSessionPID, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
 ActiveSessionPID=0
+#Array that stores all backend types that is supported by the hardware
+SupportedBackends=()
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
@@ -146,21 +148,31 @@ plymouth hide-splash
 if [[ $(ls  /dev/dri/card* ) ]]
 then 
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
-  BackendType=KMS
+  SupportedBackends+=(KMS)
+  DefaultBackendType=KMS
   WESTONBACKEND=drm-backend.so
-elif [[ $(ls  /dev/fb* ) ]]
+  HardwareSupported=1
+fi
+if [[ $(ls  /dev/fb* ) ]]
 then
   logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
   setfacl -m "g:plugdev:rwx" /dev/fb*
   setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
   # ENDTODO
-  BackendType=FB
-  WESTONBACKEND=fbdev-backend.so
+  SupportedBackends+=(FB)
+  #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
+  if [[ $HardwareSupported != 1 ]]
+  then
+    DefaultBackendType=FB
+    WESTONBACKEND=fbdev-backend.so
+  fi
+  HardwareSupported=1
+fi
 #if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY13, and restart.
 #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
-else
-  FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $HardwareSupported != 1 ]]
+then
   if [[ $ISLIVE == 1 ]]
   then
     logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
@@ -194,7 +206,8 @@ then
     setfacl -m "g:plugdev:rwx" /dev/fb*
     setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
-    BackendType=FB
+    SupportedBackends=(FB)
+    DefaultBackendType=FB
     WESTONBACKEND=fbdev-backend.so
   #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY13, and restart.
   else
@@ -304,7 +317,17 @@ function ChooseSessionType
     Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' | cut -d = -f2- | tail -1 )
     SessionName=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- | tail -1 )
     Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- | tail -1 )
-    SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- | tail -1 )
+    #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
+    for (( element = 0 ; element < ${#SupportedBackends[@]} ; element++ ))
+    do
+      export $BackendType=${SupportedBackends[$element]}
+      SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- | tail -1 )
+      #Once a supported backend is found, then stop.
+      if [[ $SupportsBackend != 0 ]]
+      then
+	break
+      fi
+    done
     CompositorDisplayArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorDisplayArgument" {print $0}' | cut -d = -f2- | tail -1 )
     BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- | tail -1 )
     SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | tail -1 )
@@ -376,7 +399,7 @@ function ChooseSessionType
       logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
     fi
     #There are different commands needed to support different backends
-    if [[ $BackendType == KMS ]]
+    if [[ $DefaultBackendType == KMS ]]
     then
       WSESSIONDATA="$DEFAULTWAYLANDSERVER"
       WSESSIONDATA+=$'\n'
@@ -394,7 +417,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
 
-    elif [[ $BackendType == FB ]]
+    elif [[ $DefaultBackendType == FB ]]
     then 
       WSESSIONDATA="$DEFAULTWAYLANDSERVER"
       WSESSIONDATA+=$'\n'
@@ -422,7 +445,7 @@ function ChooseSessionType
 function ShowInfo
 {
   #If the backend type is FB, then add a string to tell the user that in the help dialog
-  if [[ $BackendType == "FB" ]]
+  if [[ $DefaultBackendType == "FB" ]]
   then
     BACKENDSTRING="The framebuffer backend is being used.
 
