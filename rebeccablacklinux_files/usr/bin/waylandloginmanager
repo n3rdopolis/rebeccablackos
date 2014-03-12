@@ -136,8 +136,7 @@ if [[ ! -z /usr/bin/wlm_zenity ]]
 then
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_zenity"
 else
-  logger -t waylandloginmanager "WARNING: the wlm_zenity helper does not exist. All zenity dialogs used by the waylandloginmanager will start as root." -s  >>/var/log/waylandloginmanager 2>&1
-  ZENITYCMD='zenity'
+  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER zenity"
 fi
 
 #Tell the plymouth splash to hide as the loginmanager is starting.
