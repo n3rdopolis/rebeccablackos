@@ -320,7 +320,7 @@ function ChooseSessionType
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     for (( element = 0 ; element < ${#SupportedBackends[@]} ; element++ ))
     do
-      export $BackendType=${SupportedBackends[$element]}
+      export BackendType=${SupportedBackends[$element]}
       SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- | tail -1 )
       #Once a supported backend is found, then stop.
       if [[ $SupportsBackend != 0 ]]
