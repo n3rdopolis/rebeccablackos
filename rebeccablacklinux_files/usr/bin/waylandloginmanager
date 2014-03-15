@@ -838,7 +838,7 @@ function LeavePrompt
 #This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 15 seconds, then try to call it back up
 function LoginWestonLauncher
 {
-  Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSE
+  Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
   while [ 1 ]
   do
     #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
