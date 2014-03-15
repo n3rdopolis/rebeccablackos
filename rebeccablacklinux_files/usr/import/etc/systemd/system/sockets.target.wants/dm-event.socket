@@ -1,0 +1,12 @@
+[Unit]
+Description=Device-mapper event daemon FIFOs
+Documentation=man:dmeventd(8)
+DefaultDependencies=no
+
+[Socket]
+ListenFIFO=/run/dmeventd-server
+ListenFIFO=/run/dmeventd-client
+SocketMode=0600
+
+[Install]
+WantedBy=sockets.target

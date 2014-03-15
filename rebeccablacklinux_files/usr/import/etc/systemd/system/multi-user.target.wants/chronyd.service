@@ -1,0 +1,13 @@
+[Unit]
+Description=NTP client/server
+After=ntpdate.service sntp.service
+Conflicts=ntpd.service
+
+[Service]
+Type=forking
+EnvironmentFile=-/etc/sysconfig/chronyd
+ExecStart=/usr/sbin/chronyd -u chrony $OPTIONS
+ExecStartPost=/usr/libexec/chrony-helper add-dhclient-servers
+
+[Install]
+WantedBy=multi-user.target
