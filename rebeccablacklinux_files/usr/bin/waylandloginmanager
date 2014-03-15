@@ -220,6 +220,16 @@ Will now reboot" 20 50 --no-cancel
 fi
 
 
+#This function creates an XDG_RUNTIME_DIR for the user, specified in the first argument
+function Create_XDG_RUNTIME_DIR
+{
+  USERUID=$(id -u $1)
+  USERGID=$(id -g $1)
+  mkdir /run/user/$USERUID
+  chown $USERUID:$USERGID /run/user/$USERUID
+  chmod 700 /run/user/$USERUID
+}
+
 #This function is used by the WaylandLoginManager to find the next availible tty, starting from LastTTY+1
 #it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
@@ -603,6 +613,7 @@ function StartUserSession
   #change to tty63, before starting the session, as switching directly between two Weston session doesn't work.
   chvt 63 &
   sleep .1
+  Create_XDG_RUNTIME_DIR $LOGINUSER
   #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
   if [[ $westonresult == 255 ]]
   then
@@ -826,7 +837,7 @@ function LeavePrompt
 #This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 15 seconds, then try to call it back up
 function LoginWestonLauncher
 {
-
+  Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSE
   while [ 1 ]
   do
     #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
