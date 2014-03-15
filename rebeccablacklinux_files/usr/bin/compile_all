@@ -30,6 +30,7 @@ drm
 macros
 glproto
 dri2proto
+dri3proto
 mesa
 libxkbcommon
 libevdev
@@ -38,6 +39,8 @@ cairo
 libva
 intel-driver
 libinput
+kmod
+systemd
 weston
 cmake
 extra-cmake-modules
@@ -139,10 +142,13 @@ hawaii-shell
 libxtrans
 xextproto
 presentproto
+x11proto
+fontsproto
+xshmfence
 xserver
-#glamor
-xf86-video-wayland
-#xf86-video-wlglamor
+glamor
+#xf86-video-wayland
+xf86-video-wlglamor
 glib
 json-glib
 harfbuzz
