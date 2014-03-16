@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh
-./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --disable-polkit --enable-split-usr --disable-selinux --enable-compat-libs
+./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --disable-polkit --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 make 
 }
 
@@ -77,8 +77,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-rm /lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security/pam_systemd.so
-ln -s /lib/security/pam_systemd.so /lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security/pam_systemd.so
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
