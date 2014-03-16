@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
-./configure CFLAGS='-g -O2' --prefix=$INSTALLDIR --sysconfdir=$INSTALLDIR/etc --libdir=$INSTALLDIR/lib
+./configure CFLAGS='-g -O2' --prefix=$INSTALLDIR --sysconfdir=$INSTALLDIR/etc --libdir=$INSTALLDIR/lib --disable-manpages 
 make 
 }
 
