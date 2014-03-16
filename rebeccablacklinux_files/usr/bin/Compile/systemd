@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh
-./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --disable-polkit --enable-split-usr
+./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --disable-polkit --enable-split-usr --disable-selinux --enable-compat-libs
 make 
 }
 
