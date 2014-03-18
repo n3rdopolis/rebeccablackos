@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh
-./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --disable-polkit --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
+./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 make 
 }
 
