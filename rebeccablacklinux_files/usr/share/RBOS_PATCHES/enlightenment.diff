@@ -1,3 +1,18 @@
+diff --git a/src/modules/wl_drm/e_mod_main.c b/src/modules/wl_drm/e_mod_main.c
+index dfcd643..13b9137 100644
+--- a/src/modules/wl_drm/e_mod_main.c
++++ b/src/modules/wl_drm/e_mod_main.c
+@@ -3,8 +3,8 @@
+ #include "e_comp_wl.h"
+ #include <Ecore_Wayland.h>
+ 
+-#define SCREEN_WIDTH 1920
+-#define SCREEN_HEIGHT 1200
++#define SCREEN_WIDTH 1024
++#define SCREEN_HEIGHT 768
+ 
+ EAPI E_Module_Api e_modapi = { E_MODULE_API_VERSION, "Wl_Drm" };
+ 
 diff --git a/src/modules/wl_x11/e_mod_main.c b/src/modules/wl_x11/e_mod_main.c
 index 2978386..0b556a1 100644
 --- a/src/modules/wl_x11/e_mod_main.c
