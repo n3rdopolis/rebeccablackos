@@ -196,8 +196,8 @@ Will now reboot." 20 50 --no-cancel
   exit
 fi
 
-#if the user booted with a hidden option forcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-if [[ $(cat /proc/cmdline | grep -c forcefbdev ) != 0 ]]
+#if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
+if [[ $(cat /proc/cmdline | grep -c wlmforcefbdev ) != 0 ]]
 then
   logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ $(ls /dev/fb* ) ]]
@@ -211,8 +211,8 @@ then
     WESTONBACKEND=fbdev-backend.so
   #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY13, and restart.
   else
-    logger -t waylandloginmanager "ERROR: No framebuffer device found for forcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 13 -s -f -w -- dialog --msgbox "The forcefbdev overide is set, but no framebuffer device is found!
+    logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
+    openvt -c 13 -s -f -w -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
     reboot
@@ -464,7 +464,7 @@ function ShowInfo
 
 This probably means the current video card drivers do not 
 support the native kernel mode setting that is optimal for Weston or other Wayland servers.
-or the system was started with the forcefbdev argument."
+or the system was started with the wlmforcefbdev argument."
   else
     BACKENDSTRING="Kernel mode setting is being used.
 
