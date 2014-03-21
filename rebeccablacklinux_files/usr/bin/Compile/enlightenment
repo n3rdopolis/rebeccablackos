@@ -51,6 +51,7 @@ REBUILDNEWREVISION=0
 function PackageDownloadSource
 {
 patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
+git revert -n ffe4bf794e0eb530cc6102cac620134c24ef9059
 }
 
 
