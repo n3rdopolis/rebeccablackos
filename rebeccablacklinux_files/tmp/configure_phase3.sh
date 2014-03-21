@@ -129,3 +129,6 @@ remastersys dist
 
 #move logs back
 mv /tmp/logs /usr/share
+
+#Run the compile_all script in the mode that causes the cleanup routine to be run for each build scripts repository type
+compile_all clean
