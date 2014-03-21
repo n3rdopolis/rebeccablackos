@@ -1,0 +1,85 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script tries to convert upstart files into systemd files
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
+#Get data from the unit files
+
+#get exec start commands
+ExecExecScript=$(echo "$UNITDATA" | sed -n "/^\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/^\Wscript//g")
+ExecExecLine=$(echo "$UNITDATA" | sed -n "/exec/p" | sed "s/exec//g")
+
+#get pre exec commands
+ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/post-start\Wscript//g")
+ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/p" | sed "s/post-start\Wexec//g")
+
+#get pre stop commands
+ExecPreStopScript=$(echo "$UNITDATA"  | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
+ExecPreStopLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
+
+#get post stop commands
+ExecPostStopScript=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-stop\Wscript//g")
+ExecPostStopLine=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/p" | sed "s/post-stop\Wexec//g")
+
+#get post exec commands
+ExecPostExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
+ExecPostExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-stop\Wexec//g")
+
+#get the environment strings
+EnvironmentStrings=$(echo "$UNITDATA" | sed -n "/env/ p")
+
+IsForking=$(echo "$UNITDATA" | grep -Ec "expect\Wfork|expect\Wdaemon")
+
+
+#Get the unit files start on conditions
+ParenthCount=0
+StartOnData=$(echo "$UNITDATA" | sed -n "/start\Won/,//p" |while read LINE
+do
+  OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
+  CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
+  ParenthCount=$(( ParenthCount + OpenCount ))
+  ParenthCount=$(( ParenthCount - CloseCount ))
+  echo $LINE
+  if [[ $ParenthCount == 0 ]]
+  then
+    break
+  fi
+done)
+
+
+#Get the unit files stop on conditions
+ParenthCount=0
+StopOnData=$(echo "$UNITDATA" | sed -n "/stop\Won/,//p" |while read LINE
+do
+  OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
+  CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
+  ParenthCount=$(( ParenthCount + OpenCount ))
+  ParenthCount=$(( ParenthCount - CloseCount ))
+  echo $LINE
+  if [[ $ParenthCount == 0 ]]
+  then
+    break
+  fi
+done)
