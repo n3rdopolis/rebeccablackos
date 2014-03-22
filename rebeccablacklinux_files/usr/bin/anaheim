@@ -169,7 +169,7 @@ function AddToFile {
   then
     for (( element = 0 ; element < ${#StringArray[@]} ; element++ ))
     do
-      InsString=$(echo ${StringArray[$element]} | sed -e 's/[]\/()$*.^|[]/\\&/g')
+      InsString=$(echo ${StringArray[$element]} | sed -e 's/[]\/()$*.^|[]/\\&/g' | sed 's/\&/\\&/g')
       if [[ ! -z $InsString ]]
       then
 	SystemdUnitSkel[$UnitSkel]=$(echo "${SystemdUnitSkel[$UnitSkel]}" | sed "s/@$Segment$Destination@/$InsString\n@$Segment$Destination@/g")
@@ -179,7 +179,7 @@ function AddToFile {
   then
     for (( element = $(( ${#StringArray[@]} -1 )) ; element >= 0 ; element-- ))
     do
-      InsString=$(echo ${StringArray[$element]} | sed -e 's/[]\/()$*.^|[]/\\&/g')
+      InsString=$(echo ${StringArray[$element]} | sed -e 's/[]\/()$*.^|[]/\\&/g' | sed 's/\&/\\&/g')
       if [[ ! -z $InsString ]]
       then
 	SystemdUnitSkel[$UnitSkel]=$(echo "${SystemdUnitSkel[$UnitSkel]}" | sed "s/@$Segment$Destination@/@$Segment$Destination@\n$InsString/g")
