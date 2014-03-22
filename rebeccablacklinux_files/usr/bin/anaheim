@@ -27,66 +27,101 @@ fi
 
 #Get data from the unit files
 function ParseUpstartFile {
-#Get the contents of the file
-UNITDATA=$(cat $1)
-UnitFileName=$(basename $1 | awk -F .conf '{print $1}' )
+  #Get the contents of the file
+  UNITDATA=$(cat $1)
+  UnitFileName=$(basename $1 | awk -F .conf '{print $1}' )
+}
+
 
 #get pre exec commands
-ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
-ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
+function ConvertPreExec {
+  ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
+  ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
+}
 
-#get post exec commands
-ExecPostExecScript=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-start\Wscript//g")
-ExecPostExecLine=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/p" | sed "s/post-start\Wexec//g")
 
 #get exec start commands 
-ExecExecScript=$(echo "$UNITDATA" | sed -n "/^\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/^\Wscript//g")
-ExecExecLine=$(echo "$UNITDATA" | sed -n "/exec/p" | sed "s/exec//g")
+function ConvertExec {
+  ExecExecScript=$(echo "$UNITDATA" | sed -n "/^\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/^\Wscript//g")
+  ExecExecLine=$(echo "$UNITDATA" | sed -n "/exec/p" | sed "s/exec//g")
+}
+
+#get post exec commands
+function ConvertPostExec {
+  ExecPostExecScript=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-start\Wscript//g")
+  ExecPostExecLine=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/p" | sed "s/post-start\Wexec//g")
+}
+
 
 #get pre stop commands
-ExecPreStopScript=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-stop\Wscript//g")
-ExecPreStopLine=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/p" | sed "s/pre-stop\Wexec//g")
+function ConvertPreStop {
+  ExecPreStopScript=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-stop\Wscript//g")
+  ExecPreStopLine=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/p" | sed "s/pre-stop\Wexec//g")
+}
 
 #get post stop commands
-ExecPostStopScript=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-stop\Wscript//g")
-ExecPostStopLine=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/p" | sed "s/post-stop\Wexec//g")
+function ConvertPostStop {
+  ExecPostStopScript=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-stop\Wscript//g")
+  ExecPostStopLine=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/p" | sed "s/post-stop\Wexec//g")
+}
 
 
 #get the environment strings
-EnvironmentStrings=$(echo "$UNITDATA" | sed -n "/env/ p")
+function ConvertEnvironment {
+  EnvironmentStrings=$(echo "$UNITDATA" | sed -n "/env/ p")
+}
 
-IsForking=$(echo "$UNITDATA" | grep -Ec "expect\Wfork|expect\Wdaemon")
+#Get if the unit file specifies forking
+function ConvertForkingStatus {
+  IsForking=$(echo "$UNITDATA" | grep -Ec "expect\Wfork|expect\Wdaemon")
+}
 
+#Get all limit status
+function ConvertLimitEntries {
+  LimitData=$(echo "$UNITDATA" | sed -nE '/^limit\W/p')
+  #Conversion for limit lines
+  while read LINE
+  do
+    LimitLine=($LINE)
+    LimitType=$(echo ${LimitLine[1]} | tr [:lower:] [:upper:])
+    LimitLimit=${LimitLine[2]}
+  done < <(echo $LimitData)
+}
 
 #Get the unit files start on conditions
-ParenthCount=0
-StartOnData=$(echo "$UNITDATA" | sed -n "/start\Won/,//p" |while read LINE
-do
-  OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
-  CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
-  ParenthCount=$(( ParenthCount + OpenCount ))
-  ParenthCount=$(( ParenthCount - CloseCount ))
-  echo $LINE
-  if [[ $ParenthCount == 0 ]]
-  then
-    break
-  fi
-done)
+function ConvertStartOn {
+  ParenthCount=0
+  StartOnData=$(echo "$UNITDATA" | sed -n "/start\Won/,//p" |while read LINE
+  do
+    OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
+    CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
+    ParenthCount=$(( ParenthCount + OpenCount ))
+    ParenthCount=$(( ParenthCount - CloseCount ))
+    echo $LINE
+    #When all parenths are closed then thats the end of the start on info
+    if [[ $ParenthCount == 0 ]]
+    then
+      break
+    fi
+  done)
+}
 
 
 #Get the unit files stop on conditions
-ParenthCount=0
-StopOnData=$(echo "$UNITDATA" | sed -n "/stop\Won/,//p" |while read LINE
-do
-  OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
-  CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
-  ParenthCount=$(( ParenthCount + OpenCount ))
-  ParenthCount=$(( ParenthCount - CloseCount ))
-  echo $LINE
-  if [[ $ParenthCount == 0 ]]
-  then
-    break
-  fi
-done)
-
+function ConvertStopOn
+{
+  ParenthCount=0
+  StopOnData=$(echo "$UNITDATA" | sed -n "/stop\Won/,//p" |while read LINE
+  do
+    OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
+    CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
+    ParenthCount=$(( ParenthCount + OpenCount ))
+    ParenthCount=$(( ParenthCount - CloseCount ))
+    echo $LINE
+    #When all parenths are closed then thats the end of the stop on info
+    if [[ $ParenthCount == 0 ]]
+    then
+      break
+    fi
+  done)
 }
