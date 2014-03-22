@@ -25,7 +25,10 @@ then
   exit
 fi
 
-SystemdUnitSkel="
+#Where to put extracted scripts/environment files from upstart files
+UnitHelperPath=/etc/upstart2systemd/
+
+SystemdUnitSkel[SERVICE]="
 [Unit]
 @UNITABOVE@
 @UNITBELOW@
@@ -44,6 +47,7 @@ function ParseUpstartFile {
   #Get the contents of the file
   UNITDATA=$(cat $1)
   UnitFileName=$(basename $1 | awk -F .conf '{print $1}' )
+  UnitHelperPath=$UnitHelperPath/$UnitFileName
 }
 
 
@@ -148,12 +152,13 @@ function ConvertStopOn
 
 
 
-#Function to add to the building unit file. first argument is INI segment (SERVICE UNIT or INSTALL), second argument is if it should be at the top or bottom of the segment, third argument is the quoted string
+#Function to add to the building unit file. first argument is INI segment (SERVICE UNIT or INSTALL), second argument is if it should be at the top or bottom of the segment, third argument is the file array that should be edited for example the SERVICE or the TARGET, fourth argument is the quoted string
 function AddToFile {
   Segment=$(echo $1 | tr [:lower:] [:upper:])
   Destination=$(echo $2 | tr [:lower:] [:upper:])
+  UnitSkel=$(echo $3 | tr [:lower:] [:upper:])
   IFS=$'\n'
-  StringArray=($3)
+  StringArray=($4)
   unset IFS
 
   if [[ $Destination == "BELOW" ]]
@@ -163,7 +168,7 @@ function AddToFile {
       InsString=${StringArray[$element]}
       if [[ ! -z $InsString ]]
       then
-	SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed "s/@$Segment$Destination@/$InsString\n@$Segment$Destination@/g")
+	SystemdUnitSkel[$UnitSkel]=$(echo "${SystemdUnitSkel[$UnitSkel]}" | sed "s/@$Segment$Destination@/$InsString\n@$Segment$Destination@/g")
       fi
     done
   elif [[ $Destination == "ABOVE" ]]
@@ -173,8 +178,13 @@ function AddToFile {
       InsString=${StringArray[$element]}
       if [[ ! -z $InsString ]]
       then
-	SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed "s/@$Segment$Destination@/@$Segment$Destination@\n$InsString/g")
+	SystemdUnitSkel[$UnitSkel]=$(echo "${SystemdUnitSkel[$UnitSkel]}" | sed "s/@$Segment$Destination@/@$Segment$Destination@\n$InsString/g")
       fi
     done
   fi
+}
+
+#Remove the replaceable marker strings before the file is actually written
+function FinalizeFile {
+  SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed '/^@*@/d')
 }
