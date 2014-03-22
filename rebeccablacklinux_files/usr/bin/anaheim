@@ -25,6 +25,20 @@ then
   exit
 fi
 
+SystemdUnitSkel="
+[Unit]
+@UNITABOVE@
+@UNITBELOW@
+
+[Service]
+@SERVICEABOVE@
+@SERVICEBELOW@
+
+[Install]
+@INSTALLABOVE@
+@INSTALLBELOW@
+"
+
 #Get data from the unit files
 function ParseUpstartFile {
   #Get the contents of the file
@@ -84,7 +98,9 @@ function ConvertLimitEntries {
   do
     LimitLine=($LINE)
     LimitType=$(echo ${LimitLine[1]} | tr [:lower:] [:upper:])
-    LimitLimit=${LimitLine[2]}
+    SoftLimit=${LimitLine[2]}
+    HardLimit=${LimitLine[3]}
+
   done < <(echo $LimitData)
 }
 
@@ -124,4 +140,41 @@ function ConvertStopOn
       break
     fi
   done)
+}
+
+
+
+
+
+
+
+#Function to add to the building unit file. first argument is INI segment (SERVICE UNIT or INSTALL), second argument is if it should be at the top or bottom of the segment, third argument is the quoted string
+function AddToFile {
+  Segment=$(echo $1 | tr [:lower:] [:upper:])
+  Destination=$(echo $2 | tr [:lower:] [:upper:])
+  IFS=$'\n'
+  StringArray=($3)
+  unset IFS
+
+  if [[ $Destination == "BELOW" ]]
+  then
+    for (( element = 0 ; element < ${#StringArray[@]} ; element++ ))
+    do
+      InsString=${StringArray[$element]}
+      if [[ ! -z $InsString ]]
+      then
+	SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed "s/@$Segment$Destination@/$InsString\n@$Segment$Destination@/g")
+      fi
+    done
+  elif [[ $Destination == "ABOVE" ]]
+  then
+    for (( element = $(( ${#StringArray[@]} -1 )) ; element >= 0 ; element-- ))
+    do
+      InsString=${StringArray[$element]}
+      if [[ ! -z $InsString ]]
+      then
+	SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed "s/@$Segment$Destination@/@$Segment$Destination@\n$InsString/g")
+      fi
+    done
+  fi
 }
