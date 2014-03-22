@@ -63,7 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./old-configure --prefix=$INSTALLDIR  --enable-wayland --disable-x11 --disable-sdl2 --disable-libass
+./old-configure --prefix=$INSTALLDIR  --enable-wayland --disable-x11 --disable-sdl2 --disable-libass --disable-optimization --disable-debug 
 make 
 }
 
