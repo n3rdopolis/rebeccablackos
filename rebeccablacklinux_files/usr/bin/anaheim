@@ -26,26 +26,31 @@ then
 fi
 
 #Get data from the unit files
+function ParseUpstartFile {
+#Get the contents of the file
+UNITDATA=$(cat $1)
+UnitFileName=$(basename $1 | awk -F .conf '{print $1}' )
 
-#get exec start commands
+#get pre exec commands
+ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
+ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
+
+#get post exec commands
+ExecPostExecScript=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-start\Wscript//g")
+ExecPostExecLine=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/p" | sed "s/post-start\Wexec//g")
+
+#get exec start commands 
 ExecExecScript=$(echo "$UNITDATA" | sed -n "/^\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/^\Wscript//g")
 ExecExecLine=$(echo "$UNITDATA" | sed -n "/exec/p" | sed "s/exec//g")
 
-#get pre exec commands
-ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/post-start\Wscript//g")
-ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/post-start\Wscript/p" | sed "s/post-start\Wexec//g")
-
 #get pre stop commands
-ExecPreStopScript=$(echo "$UNITDATA"  | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
-ExecPreStopLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
+ExecPreStopScript=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-stop\Wscript//g")
+ExecPreStopLine=$(echo "$UNITDATA" | sed -n "/pre-stop\Wscript/p" | sed "s/pre-stop\Wexec//g")
 
 #get post stop commands
 ExecPostStopScript=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/post-stop\Wscript//g")
 ExecPostStopLine=$(echo "$UNITDATA" | sed -n "/post-stop\Wscript/p" | sed "s/post-stop\Wexec//g")
 
-#get post exec commands
-ExecPostExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p"  | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
-ExecPostExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-stop\Wexec//g")
 
 #get the environment strings
 EnvironmentStrings=$(echo "$UNITDATA" | sed -n "/env/ p")
@@ -83,3 +88,5 @@ do
     break
   fi
 done)
+
+}
