@@ -25,10 +25,17 @@ then
   exit
 fi
 
-#Where to put extracted scripts/environment files from upstart files
-UnitHelperPath=/etc/upstart2systemd/
 
-SystemdUnitSkel[SERVICE]="
+#Where to put extracted scripts/environment files from upstart files, where upstart files are, where systemd files are
+UnitHelperPath=/etc/upstart2systemd/
+UpstartPath=/etc/init
+SystemdPath=/etc/systemd
+
+#Set up the environment for converting an upstart job, for each file
+function PrepareEnvironment {
+
+
+  SystemdUnitSkel[SERVICE]="
 [Unit]
 @UNITABOVE@
 @UNITBELOW@
@@ -42,18 +49,40 @@ SystemdUnitSkel[SERVICE]="
 @INSTALLBELOW@
 "
 
-#Get data from the unit files
+}
+
+#Get data from the unit files. This takes the argument of the upstart file to convert
 function ParseUpstartFile {
+  if [[ ! -e $1 ]]
+  then
+    echo "File Not Found"
+    return 1
+  fi
   #Get the contents of the file
   UNITDATA=$(cat $1)
   UnitFileName=$(basename $1 | awk -F .conf '{print $1}' )
   UnitHelperPath=$UnitHelperPath/$UnitFileName
+  if [[ -e $SystemdPath/$UnitFileName.conf ]]
+  then
+    echo "$UnitFileName already converted"
+    return 2
+  else
+    return 0
+  fi
+}
+
+#Create a script file with data extracted from Upstart unit files, takes argument of script type (as in post-exec pre-stop)
+function CreateExecScript {
+
 }
 
 
 #get pre exec commands
 function ConvertPreExec {
   ExecPreExecScript=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/,/end\Wscript/p" | sed "s/end\Wscript//g" | sed "s/pre-start\Wscript//g")
+  if [[ -z $ExecPreExecScript ]]
+  then
+
   ExecPreExecLine=$(echo "$UNITDATA" | sed -n "/pre-start\Wscript/p" | sed "s/pre-start\Wexec//g")
 }
 
@@ -189,6 +218,31 @@ function AddToFile {
 }
 
 #Remove the replaceable marker strings before the file is actually written
-function FinalizeFile {
-  SystemdUnitSkel=$(echo "$SystemdUnitSkel" | sed '/^@*@/d')
+function FinalizeFiles {
+  SystemdUnitSkel[$UnitSkel]=$(echo "${SystemdUnitSkel[$UnitSkel]}" | sed '/^@*@/d')
 }
+
+
+function ConvertOneFile {
+  #Initilize
+  PrepareEnvironment
+  ParseUpstartFile $1
+  ExitResult=$?
+  if [[ $ExitResult != 2 ]]
+  then
+    #Finalize
+    FinalizeFiles
+  fi
+}
+
+
+#Convert all upstart jobs to systemd files if no argument specified, and if an argument is specified, convert the full path
+if [[ ! -z $1 ]]
+then
+  find $UpstartPath | while read FILE
+  do
+    ConvertOneFile $FILE
+  done
+else
+  ConvertOneFile $UpstartPath/$1
+fi
