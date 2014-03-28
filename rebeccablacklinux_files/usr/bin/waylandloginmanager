@@ -225,7 +225,7 @@ function Create_XDG_RUNTIME_DIR
 {
   USERUID=$(id -u $1)
   USERGID=$(id -g $1)
-  mkdir /run/user/$USERUID
+  mkdir -p /run/user/$USERUID
   chown $USERUID /run/user/$USERUID
   chgrp $USERGID /run/user/$USERUID
   chmod 700 /run/user/$USERUID
