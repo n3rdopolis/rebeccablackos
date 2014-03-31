@@ -34,7 +34,8 @@ SystemdPath=/etc/systemd
 #Set up the environment for converting an upstart job, for each file
 function PrepareEnvironment {
 
-
+#Create an editable template with replaceable strings for AddToFile 
+#SystemdUnitSkel is an array, and the element ID is the file template ID
   SystemdUnitSkel[SERVICE]="
 [Unit]
 @UNITABOVE@
@@ -55,7 +56,7 @@ function PrepareEnvironment {
 function ParseUpstartFile {
   if [[ ! -e $1 ]]
   then
-    echo "File Not Found"
+    echo "Upstart File Not Found"
     return 1
   fi
   #Get the contents of the file
@@ -76,6 +77,10 @@ function CreateExecScript {
 
 }
 
+#Takes an argument of one string, that should be the start on/ stop on conditions extracted from an upstart unit file
+function HeuristicStartStopOn {
+
+}
 
 #get pre exec commands
 function ConvertPreExec {
@@ -157,27 +162,29 @@ function ConvertStartOn {
       break
     fi
   done)
+  HeuristicStartStopOn $StartOnData
 }
 
 
 #Get the unit files stop on conditions
-function ConvertStopOn
-{
-  ParenthCount=0
-  StopOnData=$(echo "$UNITDATA" | sed -n "/stop\Won/,//p" |while read LINE
-  do
-    OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
-    CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
-    ParenthCount=$(( ParenthCount + OpenCount ))
-    ParenthCount=$(( ParenthCount - CloseCount ))
-    echo $LINE
-    #When all parenths are closed then thats the end of the stop on info
-    if [[ $ParenthCount == 0 ]]
-    then
-      break
-    fi
-  done)
-}
+#function ConvertStopOn
+#{
+#  ParenthCount=0
+#  StopOnData=$(echo "$UNITDATA" | sed -n "/stop\Won/,//p" |while read LINE
+#  do
+#    OpenCount=$(echo $LINE  | tr -cd '\(' | wc -c )
+#    CloseCount=$(echo $LINE | tr -cd '\)' | wc -c )
+#    ParenthCount=$(( ParenthCount + OpenCount ))
+#    ParenthCount=$(( ParenthCount - CloseCount ))
+#    echo $LINE
+#    #When all parenths are closed then thats the end of the stop on info
+#    if [[ $ParenthCount == 0 ]]
+#    then
+#      break
+#    fi
+#  done)
+#  HeuristicStartStopOn $StopOnData
+#}
 
 
 
