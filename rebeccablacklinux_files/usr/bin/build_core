@@ -140,6 +140,7 @@ function DownloadGIT()
   git clone $SOURCEURL $SOURCENAME
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
+  git checkout -f $SOURCEREVISION 
   git pull
   git config user.email rbos@rbos
   git submodule sync --recursive
