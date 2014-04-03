@@ -776,7 +776,7 @@ function GetUserCredentials
       logger -t waylandloginmanager "Invalid password for $LOGINUSER, or username invalid" -s  >>/var/log/waylandloginmanager 2>&1
     fi
   else
-    $ZENITYCMD --warning --text="Not Enough TTYs!"
+    $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
     logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
   fi
 }
@@ -796,7 +796,7 @@ function LeavePrompt
   fi
 
   #Prompt the user if they are sure they want to execute the selected action
-  $ZENITYCMD --title="Leave..." --question --text="Are you sure you want to $ACTION"
+  $ZENITYCMD --title="Leave..." --question --text="Are you sure you want to $ACTION" 2>/dev/null
   CONFIRM=$?
   if [[ $CONFIRM != 0 ]]
   then
@@ -895,7 +895,7 @@ function StartAutoLogin
       logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
       StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
     else
-      $ZENITYCMD --warning --text="Not Enough TTYs for autologin!"
+      $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
       logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
     fi
   fi 
@@ -925,7 +925,7 @@ function UserActionDialog
   #Loop forever
   while [ 1 ]
   do
-    USERACTION=$(echo -e "Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."|$ZENITYCMD  --title="Login Manager" --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" | head -1 )
+    USERACTION=$(echo -e "Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."|$ZENITYCMD  --title="Login Manager" --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1 )
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
