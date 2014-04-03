@@ -65,24 +65,24 @@ ln -s /bin/true /usr/sbin/invoke-rc.d
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-yes Y | apt-get purge $REMOVEDEVPGKS | tee /usr/share/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /usr/share/logs/package_operations/removes.txt
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /usr/share/logs/package_operations/removes.txt
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /usr/share/logs/package_operations/removes.txt
 
 REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr mercurial checkinstall texinfo"
-yes Y | apt-get purge $REMOVEDEVPGKS | tee -a /usr/share/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /usr/share/logs/package_operations/removes.txt
 
 
-yes Y | apt-get autoremove >> /usr/share/logs/package_operations/removes.txt
+apt-get autoremove -y --force-yes >> /usr/share/logs/package_operations/removes.txt
 
 #Reset the utilites back to the way they are supposed to be.
 rm /sbin/initctl

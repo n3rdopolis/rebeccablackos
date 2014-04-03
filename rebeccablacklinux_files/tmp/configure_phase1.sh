@@ -29,10 +29,10 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-yes Y| apt-get install aptitude git bzr subversion mercurial wget dselect
+apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
 
 #update the dselect database
-dselect update
+yes Y | dselect update
 
 #create folder for install logs
 mkdir -p /usr/share/logs/package_operations
@@ -61,19 +61,19 @@ do
   if [[ $METHOD == "PART" ]]
   then
     echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    yes Yes | apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    yes Yes | apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   #builddep
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    yes Y | apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
+    apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
     Result=${PIPESTATUS[1]}
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
@@ -96,12 +96,12 @@ done < <(echo "$INSTALLS")
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates
-yes Y | apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dist-upgrade.log
+apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dist-upgrade.log
     
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
 dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
 dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-echo Y | apt-get -d -u dselect-upgrade --no-install-recommends			2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
+apt-get -d -u dselect-upgrade --no-install-recommends -y --force-yes 	2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
 dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 

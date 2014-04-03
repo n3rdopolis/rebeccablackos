@@ -44,10 +44,10 @@ ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-yes Y| apt-get install aptitude git bzr subversion mercurial wget dselect
+apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
 
 #update the dselect database
-dselect update
+yes Y | dselect update
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
@@ -83,25 +83,25 @@ do
   if [[ $METHOD == "PART" ]]
   then
     echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   #This is for full installs
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    yes Yes | apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   #this is for build dependancies
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    yes Y | apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
     echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    yes Y | apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[1]}
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
@@ -140,14 +140,14 @@ fi
 
 dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -v linux-image-generic | grep -v linux-headers-generic | while read PACKAGE
 do
-  yes Y | apt-get purge $PACKAGE
+  apt-get purge $PACKAGE -y --force-yes 
 done
 
 #install updates
-yes Y | apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Installs/dist-upgrade.log
+apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Installs/dist-upgrade.log
 
 #Delete the old depends of the packages no longer needed.
-yes Y | apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge.log
+apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge.log
 
 #Reset the utilites back to the way they are supposed to be.
 rm /sbin/initctl
