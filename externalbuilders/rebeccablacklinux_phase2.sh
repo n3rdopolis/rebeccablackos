@@ -34,7 +34,7 @@ mkdir -p $BUILDLOCATION/build/$BUILDARCH
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_3
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/srcbuild
+mkdir -p $BUILDLOCATION/build/$BUILDARCH/srcbuild/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
