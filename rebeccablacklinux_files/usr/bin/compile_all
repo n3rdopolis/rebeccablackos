@@ -41,6 +41,7 @@ intel-driver
 libinput
 kmod
 systemd
+polkit
 weston
 cmake
 extra-cmake-modules
@@ -157,9 +158,9 @@ presentproto
 x11proto
 fontsproto
 xshmfence
-xserver
 glamor
-xf86-video-wayland
+xserver
+#xf86-video-wayland
 #xf86-video-wlglamor
 glib
 json-glib
