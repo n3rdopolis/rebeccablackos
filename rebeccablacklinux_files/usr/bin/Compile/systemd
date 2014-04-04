@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.freedesktop.org/systemd/systemd
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=v212
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh
-./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
+./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security --disable-xattr 
 make 
 }
 
