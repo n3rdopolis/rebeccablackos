@@ -25,200 +25,200 @@ export MAKEDEBS=1
 
 #build these packages in this order. # symbol is a comment
 echo "
-# wayland
-# drm
-# macros
-# glproto
-# dri2proto
-# dri3proto
-# mesa
-# libxkbcommon
-# libevdev
-# pixman
-# cairo
-# libva
-# intel-driver
-# libinput
+wayland
+drm
+macros
+glproto
+dri2proto
+dri3proto
+mesa
+libxkbcommon
+libevdev
+pixman
+cairo
+libva
+intel-driver
+libinput
 kmod
 systemd
-# weston
-# cmake
-# extra-cmake-modules
-# extra-cmake-modules-calligra
-# qt5
-# qtwayland
-# otter
-# libdbusmenu-qt
-# phonon
-# #phonon-vlc
-# attica
-# sprinter
-# kdeframeworks/kf5umbrella
-# kdeframeworks/kitemmodels
-# kdeframeworks/kitemviews
-# kdeframeworks/kplotting
-# kdeframeworks/threadweaver
-# kdeframeworks/kcodecs
-# kdeframeworks/kguiaddons
-# kdeframeworks/kidletime
-# kdeframeworks/kwidgetsaddons
-# kdeframeworks/sonnet
-# kdeframeworks/kconfig
-# kdeframeworks/kwindowsystem
-# kdeframeworks/solid
-# kdeframeworks/kglobalaccel
-# kdeframeworks/karchive
-# kdeframeworks/kdbusaddons
-# kdeframeworks/kcoreaddons
-# kdeframeworks/kjs
-# kdeframeworks/kimageformats
-# kdeframeworks/kauth
-# kdeframeworks/kcrash
-# kdeframeworks/kjobwidgets
-# kdeframeworks/ki18n
-# kdeframeworks/kdoctools
-# kdeframeworks/kservice
-# kdeframeworks/kconfigwidgets
-# kdeframeworks/kiconthemes
-# kdeframeworks/knotifications
-# kdeframeworks/kcompletion
-# kdeframeworks/kdnssd
-# kdeframeworks/kwallet
-# kdeframeworks/kpty
-# kdeframeworks/kemoticons
-# kdeframeworks/kdesu
-# kdeframeworks/ktextwidgets
-# kdeframeworks/kxmlgui
-# kdeframeworks/kbookmarks
-# kdeframeworks/kcmutils
-# kdeframeworks/kio
-# kdeframeworks/kdesignerplugin
-# kdeframeworks/knewstuff
-# kdeframeworks/kparts
-# kdeframeworks/kdeclarative
-# kdeframeworks/kinit
-# kdeframeworks/kded
-# kdeframeworks/knotifyconfig
-# kdeframeworks/kprintutils
-# kdeframeworks/kunitconversion
-# kdeframeworks/kjsembed
-# kdeframeworks/kross
-# kdeframeworks/kmediaplayer
-# kdeframeworks/kdewebkit
-# kdeframeworks/ktexteditor
-# kdeframeworks/kapidox
-# kdeframeworks/frameworkintegration
-# kdeframeworks/kde4support
-# kdeframeworks/kfileaudiopreview
-# kdeframeworks/khtml
-# kactivities
-# plasma-framework
-# kdeframeworks/krunner
-# kde-runtime
-# kde-baseapps
-# libksysguard
-# ksysguard
-# kwin
-# oxygen
-# plasma-workspace
-# plasma-desktop
-# khotkeys
-# kinfocenter
-# kmenuedit
-# systemsettings
-# powerdevil
-# rekonq
-# konsole
-# kate
-# okteta
-# plasmate
-# kdeplasma-addons
-# calligra
-# fluid
-# qtconfiguration
-# widget-styles
-# widget-factory
-# wallpapers
-# icon-themes
-# eyesight
-# yat
-# hawaii-terminal
-# cinema
-# swordfish
-# qtaccountsservice
-# polkit-qt-1
-# system-preferences
-# greenisland
-# libhawaii
-# hawaii-shell
-# libxtrans
-# xextproto
-# presentproto
-# x11proto
-# fontsproto
-# xshmfence
-# xserver
-# glamor
-# xf86-video-wayland
-# #xf86-video-wlglamor
-# glib
-# json-glib
-# harfbuzz
-# freetype2
-# fontconfig
-# pango
-# gdk-pixbuf
-# librsvg
-# atk
-# gtk
-# gnome-themes-standard
-# dconf
-# gsettings-desktop-schemas
-# unico
-# vte
-# cogl
-# clutter
-# #clutter-gtk
-# mozjs
-# gobject-introspection
-# gjs
-# libusbx
-# upower
-# mutter-wayland
-# mutter-x11
-# gnome-shell
-# nuclear
-# orbital
-# efl
-# evas_generic_loaders
-# emotion_generic_players
-# elementary
-# enlightenment
-# terminology
-# etrophy
-# e_cho
-# elemines
-# econcentration
-# equate
-# ecrire
-# ephoto
-# SDL
-# ffmpeg
-# mplayer2-wayland
-# mpv
-# gstreamer
-# gst-plugins-base
-# gst-plugins-bad
-# gst-plugins-good
-# gst-plugins-ugly
-# gst-plugins-gl
-# gst-libav
-# kmscon
-# glmark
-# wld
-# dmenu
-# st
-# swc
+weston
+cmake
+extra-cmake-modules
+extra-cmake-modules-calligra
+qt5
+qtwayland
+otter
+libdbusmenu-qt
+phonon
+#phonon-vlc
+attica
+sprinter
+kdeframeworks/kf5umbrella
+kdeframeworks/kitemmodels
+kdeframeworks/kitemviews
+kdeframeworks/kplotting
+kdeframeworks/threadweaver
+kdeframeworks/kcodecs
+kdeframeworks/kguiaddons
+kdeframeworks/kidletime
+kdeframeworks/kwidgetsaddons
+kdeframeworks/sonnet
+kdeframeworks/kconfig
+kdeframeworks/kwindowsystem
+kdeframeworks/solid
+kdeframeworks/kglobalaccel
+kdeframeworks/karchive
+kdeframeworks/kdbusaddons
+kdeframeworks/kcoreaddons
+kdeframeworks/kjs
+kdeframeworks/kimageformats
+kdeframeworks/kauth
+kdeframeworks/kcrash
+kdeframeworks/kjobwidgets
+kdeframeworks/ki18n
+kdeframeworks/kdoctools
+kdeframeworks/kservice
+kdeframeworks/kconfigwidgets
+kdeframeworks/kiconthemes
+kdeframeworks/knotifications
+kdeframeworks/kcompletion
+kdeframeworks/kdnssd
+kdeframeworks/kwallet
+kdeframeworks/kpty
+kdeframeworks/kemoticons
+kdeframeworks/kdesu
+kdeframeworks/ktextwidgets
+kdeframeworks/kxmlgui
+kdeframeworks/kbookmarks
+kdeframeworks/kcmutils
+kdeframeworks/kio
+kdeframeworks/kdesignerplugin
+kdeframeworks/knewstuff
+kdeframeworks/kparts
+kdeframeworks/kdeclarative
+kdeframeworks/kinit
+kdeframeworks/kded
+kdeframeworks/knotifyconfig
+kdeframeworks/kprintutils
+kdeframeworks/kunitconversion
+kdeframeworks/kjsembed
+kdeframeworks/kross
+kdeframeworks/kmediaplayer
+kdeframeworks/kdewebkit
+kdeframeworks/ktexteditor
+kdeframeworks/kapidox
+kdeframeworks/frameworkintegration
+kdeframeworks/kde4support
+kdeframeworks/kfileaudiopreview
+kdeframeworks/khtml
+kactivities
+plasma-framework
+kdeframeworks/krunner
+kde-runtime
+kde-baseapps
+libksysguard
+ksysguard
+kwin
+oxygen
+plasma-workspace
+plasma-desktop
+khotkeys
+kinfocenter
+kmenuedit
+systemsettings
+powerdevil
+rekonq
+konsole
+kate
+okteta
+plasmate
+kdeplasma-addons
+calligra
+fluid
+qtconfiguration
+widget-styles
+widget-factory
+wallpapers
+icon-themes
+eyesight
+yat
+hawaii-terminal
+cinema
+swordfish
+qtaccountsservice
+polkit-qt-1
+system-preferences
+greenisland
+libhawaii
+hawaii-shell
+libxtrans
+xextproto
+presentproto
+x11proto
+fontsproto
+xshmfence
+xserver
+glamor
+xf86-video-wayland
+#xf86-video-wlglamor
+glib
+json-glib
+harfbuzz
+freetype2
+fontconfig
+pango
+gdk-pixbuf
+librsvg
+atk
+gtk
+gnome-themes-standard
+dconf
+gsettings-desktop-schemas
+unico
+vte
+cogl
+clutter
+#clutter-gtk
+mozjs
+gobject-introspection
+gjs
+libusbx
+upower
+mutter-wayland
+mutter-x11
+gnome-shell
+nuclear
+orbital
+efl
+evas_generic_loaders
+emotion_generic_players
+elementary
+enlightenment
+terminology
+etrophy
+e_cho
+elemines
+econcentration
+equate
+ecrire
+ephoto
+SDL
+ffmpeg
+mplayer2-wayland
+mpv
+gstreamer
+gst-plugins-base
+gst-plugins-bad
+gst-plugins-good
+gst-plugins-ugly
+gst-plugins-gl
+gst-libav
+kmscon
+glmark
+wld
+dmenu
+st
+swc
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
