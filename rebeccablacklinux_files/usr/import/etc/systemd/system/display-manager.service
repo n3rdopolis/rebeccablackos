@@ -1,0 +1,11 @@
+[Unit]
+Description=The Wayland Login Manager for RebeccaBlackOS
+After=systemd-user-sessions.service getty@tty1.service plymouth-quit.service
+
+[Service]
+ExecStart=/usr/bin/waylandloginmanager
+Restart=always
+IgnoreSIGPIPE=no
+
+[Install]
+Alias=display-manager.service
