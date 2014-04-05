@@ -35,6 +35,19 @@ rm -r /usr/import
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Create a user for the PolicyKit Daemon
+useradd -u 300 polkitd -d /
+mkdir -p /usr/share/polkit-1/rules.d
+chown -R polkitd /etc/polkit-1/rules.d
+chown -R polkit /usr/share/polkit-1/rules.d
+
+#Change the default init system to systemd if it exists
+if [[ -e /lib/systemd/systemd ]]
+then
+  mv /sbin/init /sbin/init.upstart
+  ln -s /lib/systemd/systemd /sbin/init
+fi
+
 #Turn the westonlaunchcaller in weston into a symlink
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
