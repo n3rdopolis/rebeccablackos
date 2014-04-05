@@ -5,7 +5,7 @@ Documentation=man:upowerd(8)
 [Service]
 Type=dbus
 BusName=org.freedesktop.UPower
-ExecStart=/usr/libexec/upowerd
+ExecStart=/usr/lib/upower/upowerd
 
 [Install]
 # We pull this in by graphical.target instead of waiting for the bus
