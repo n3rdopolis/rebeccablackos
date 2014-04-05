@@ -41,6 +41,10 @@ mkdir -p /usr/share/polkit-1/rules.d
 chown -R polkitd /etc/polkit-1/rules.d
 chown -R polkit /usr/share/polkit-1/rules.d
 
+#disable systemd networkd, and enable NetworkManager
+systemctl disable systemd-networkd.service
+systemctl enable NetworkManager.service
+
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then

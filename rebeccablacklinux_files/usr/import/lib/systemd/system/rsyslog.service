@@ -5,7 +5,7 @@ Description=System Logging Service
 [Service]
 Type=notify
 EnvironmentFile=-/etc/sysconfig/rsyslog
-ExecStart=/usr/sbin/rsyslogd -n $SYSLOGD_OPTIONS
+ExecStart=/usr/sbin/rsyslogd -c5
 StandardOutput=null
 
 [Install]
