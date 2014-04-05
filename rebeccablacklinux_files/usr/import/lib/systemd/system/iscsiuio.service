@@ -1,0 +1,17 @@
+[Unit]
+Description=iSCSI UserSpace I/O driver
+Documentation=man:iscsiuio(8)
+DefaultDependencies=no
+Conflicts=shutdown.target
+Requires=iscsid.service
+BindTo=iscsid.service
+After=network.target
+Before=remote-fs-pre.target iscsid.service
+
+[Service]
+Type=forking
+PIDFile=/var/run/iscsiuio.pid
+ExecStart=/usr/sbin/iscsiuio
+
+[Install]
+WantedBy=multi-user.target

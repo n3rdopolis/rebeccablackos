@@ -1,0 +1,9 @@
+[Unit]
+Description=OpenSSH per-connection server daemon
+Wants=sshd-keygen.service
+After=auditd.service sshd-keygen.service
+
+[Service]
+EnvironmentFile=-/etc/sysconfig/sshd
+ExecStart=-/usr/sbin/sshd -i $OPTIONS
+StandardInput=socket

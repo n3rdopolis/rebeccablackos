@@ -1,0 +1,25 @@
+[Unit]
+Description=Initial Setup configuration program (text mode)
+After=livesys.service plymouth-quit-wait.service
+After=systemd-vconsole-setup.service
+Before=display-manager.service getty@tty1.service getty@ttyUSB0.service
+Before=serial-getty@ttyS0.service serial-getty@ttyO0.service serial-getty@ttyO2.service
+Before=serial-getty@ttyAMA0.service serial-getty@ttymxc0.service serial-getty@ttymxc3.service
+Conflicts=plymouth-quit-wait.service
+Conflicts=initial-setup-graphical.service
+After=initial-setup-graphical.service
+ConditionKernelCommandLine=!rd.live.image
+
+[Service]
+Type=oneshot
+ExecStartPre=/bin/kill -55 1
+ExecStart=/bin/initial-setup
+ExecStartPost=/bin/kill -54 1
+TimeoutSec=0
+RemainAfterExit=yes
+SysVStartPriority=99
+StandardInput=tty
+StandardOutput=tty
+
+[Install]
+WantedBy=multi-user.target

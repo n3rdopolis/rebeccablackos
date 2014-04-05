@@ -1,0 +1,10 @@
+[Unit]
+Description=Terminate Plymouth Boot Screen
+After=rc-local.service plymouth-start.service systemd-user-sessions.service
+
+[Service]
+ExecStart=-/usr/bin/plymouth quit
+Type=oneshot
+TimeoutSec=20
+[Install]
+WantedBy=multi-user.target

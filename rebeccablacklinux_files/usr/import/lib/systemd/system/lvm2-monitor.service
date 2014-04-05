@@ -1,0 +1,19 @@
+[Unit]
+Description=Monitoring of LVM2 mirrors, snapshots etc. using dmeventd or progress polling
+Documentation=man:dmeventd(8) man:lvcreate(8) man:lvchange(8) man:vgchange(8)
+Requires=dm-event.socket lvm2-lvmetad.socket
+After=dm-event.socket lvm2-lvmetad.socket lvm2-activation.service lvm2-lvmetad.service
+Before=local-fs.target
+DefaultDependencies=no
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+Environment=LVM_SUPPRESS_LOCKING_FAILURE_MESSAGES=1
+ExecStart=/usr/sbin/lvm vgchange --monitor y
+# The lvmetad must be disabled here, it needs https://bugzilla.redhat.com/show_bug.cgi?id=843587 to be resolved first.
+ExecStop=/usr/sbin/lvm vgchange --monitor n --config 'global{use_lvmetad=0}'
+RemainAfterExit=yes
+
+[Install]
+WantedBy=sysinit.target

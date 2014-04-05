@@ -1,0 +1,11 @@
+[Unit]
+Description=dnf makecache timer
+ConditionKernelCommandLine=!rd.live.image
+
+[Timer]
+OnBootSec=10min
+OnUnitInactiveSec=1h
+Unit=dnf-makecache.service
+
+[Install]
+WantedBy=basic.target

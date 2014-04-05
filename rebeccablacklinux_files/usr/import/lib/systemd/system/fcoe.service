@@ -1,0 +1,12 @@
+[Unit]
+Description=Open-FCoE Inititator.
+After=syslog.target network.target lldpad.service
+
+[Service]
+Type=forking
+EnvironmentFile=/etc/sysconfig/fcoe
+ExecStartPre=/sbin/modprobe -qa $SUPPORTED_DRIVERS
+ExecStart=/usr/sbin/fcoemon $FCOEMON_OPTS
+
+[Install]
+WantedBy=multi-user.target

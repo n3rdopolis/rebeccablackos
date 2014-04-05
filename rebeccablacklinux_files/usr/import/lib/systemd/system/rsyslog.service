@@ -1,0 +1,13 @@
+[Unit]
+Description=System Logging Service
+;Requires=syslog.socket
+
+[Service]
+Type=notify
+EnvironmentFile=-/etc/sysconfig/rsyslog
+ExecStart=/sbin/rsyslogd -n $SYSLOGD_OPTIONS
+StandardOutput=null
+
+[Install]
+WantedBy=multi-user.target
+;Alias=syslog.service

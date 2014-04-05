@@ -1,0 +1,8 @@
+[Unit]
+Description=Realm and Domain Configuration
+Documentation=man:realmd(8)
+
+[Service]
+Type=dbus
+BusName=org.freedesktop.realmd
+ExecStart=/usr/lib64/realmd/realmd

@@ -1,0 +1,8 @@
+[Unit]
+Description=OpenSSH Server Key Generation
+ConditionPathExists=|!/etc/ssh/ssh_host_rsa_key
+ConditionPathExists=|!/etc/ssh/ssh_host_dsa_key
+
+[Service]
+ExecStart=/usr/sbin/sshd-keygen
+Type=oneshot

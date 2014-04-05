@@ -1,0 +1,11 @@
+[Unit]
+Description=Ethernet Bridge Filtering tables
+
+[Service]
+Type=oneshot
+RemainAfterExit=yes
+ExecStart=/usr/libexec/ebtables start
+ExecStop=/usr/libexec/ebtables stop
+
+[Install]
+WantedBy=multi-user.target

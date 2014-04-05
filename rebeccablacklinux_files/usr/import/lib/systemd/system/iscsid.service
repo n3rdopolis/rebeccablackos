@@ -1,0 +1,16 @@
+[Unit]
+Description=Open-iSCSI
+Documentation=man:iscsid(8) man:iscsiadm(8)
+DefaultDependencies=no
+Conflicts=shutdown.target
+After=network.target iscsiuio.service
+Before=remote-fs-pre.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/iscsid.pid
+ExecStart=/usr/sbin/iscsid
+ExecStop=/sbin/iscsiadm -k 0 2
+
+[Install]
+WantedBy=multi-user.target

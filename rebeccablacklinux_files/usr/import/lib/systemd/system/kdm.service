@@ -1,0 +1,13 @@
+[Unit]
+Description=The KDE login manager
+Conflicts=getty@tty1.service
+After=systemd-user-sessions.service getty@tty1.service plymouth-quit.service
+Conflicts=plymouth-quit.service
+
+[Service]
+ExecStart=/usr/bin/kdm vt1
+Restart=always
+IgnoreSIGPIPE=no
+
+[Install]
+Alias=display-manager.service
