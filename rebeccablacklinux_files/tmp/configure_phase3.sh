@@ -48,6 +48,10 @@ systemctl enable NetworkManager.service
 #Disable the sandboxing service so that Ubiquity works
 systemctl disable sandbox.service
 
+#Get mtab to work
+rm /etc/mtab
+ln -s /proc/self/mounts /etc/mtab
+
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then
