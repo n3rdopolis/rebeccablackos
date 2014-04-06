@@ -49,8 +49,21 @@ cp -a /usr/import/root/* /etc/skel/root
 mkdir -p /etc/lightdm
 cp -a /usr/import/etc/lightdm/* /etc/lightdm
 
+mkdir -p /etc/pam.d
+cp -a /usr/import/etc/pam.d/* /etc/pam.d
+
+mkdir -p /etc/sysctl.d
+cp -a /usr/import/etc/sysctl.d/* /etc/sysctl.d
+
+mkdir -p /etc/systemd
+cp -a /usr/import/etc/systemd/* /etc/systemd
+
+mkdir -p /lib
+cp -a /usr/import/lib/* /lib
+
 mkdir -p /etc/init
 cp -a /usr/import/etc/init/* /etc/init
+
 
 mkdir -p /etc/X11
 cp -a /usr/import/etc/X11/* /etc/X11
