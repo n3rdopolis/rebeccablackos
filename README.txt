@@ -38,5 +38,6 @@ TODO:
 PROBLEMS:
       Wayland is still new, things are still a bit unstable, but "somewhat" useable.
 
+      The distribution is now using systemd v212 as its init system, replacing Ubuntu's upstart/systemd v204 hybrid. As the first tier packages are still built around the assumption that upstart is the default init system, there might be breakerage.
 
 
