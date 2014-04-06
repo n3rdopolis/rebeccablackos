@@ -13,6 +13,6 @@ After=systemd-user-sessions.service
 User=%I
 PAMName=systemd-user
 Type=notify
-ExecStart=-/usr/lib/systemd/systemd --user
+ExecStart=-/lib/systemd/systemd --user
 Environment=DBUS_SESSION_BUS_ADDRESS=unix:path=/run/user/%I/dbus/user_bus_socket
 Slice=user-%i.slice

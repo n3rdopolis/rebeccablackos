@@ -11,5 +11,5 @@ Documentation=man:systemd-initctl.service(8)
 DefaultDependencies=no
 
 [Service]
-ExecStart=/usr/lib/systemd/systemd-initctl
+ExecStart=/lib/systemd/systemd-initctl
 NotifyAccess=all

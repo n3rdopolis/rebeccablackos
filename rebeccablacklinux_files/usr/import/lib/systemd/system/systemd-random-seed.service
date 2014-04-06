@@ -17,5 +17,5 @@ Before=sysinit.target shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-random-seed load
-ExecStop=/usr/lib/systemd/systemd-random-seed save
+ExecStart=/lib/systemd/systemd-random-seed load
+ExecStop=/lib/systemd/systemd-random-seed save

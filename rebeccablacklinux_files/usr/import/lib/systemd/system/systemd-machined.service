@@ -13,7 +13,7 @@ Wants=machine.slice
 After=machine.slice
 
 [Service]
-ExecStart=/usr/lib/systemd/systemd-machined
+ExecStart=/lib/systemd/systemd-machined
 Restart=always
 RestartSec=0
 BusName=org.freedesktop.machine1

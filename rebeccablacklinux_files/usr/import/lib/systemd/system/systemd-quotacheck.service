@@ -16,5 +16,5 @@ ConditionPathExists=/usr/sbin/quotacheck
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-quotacheck
+ExecStart=/lib/systemd/systemd-quotacheck
 TimeoutSec=0

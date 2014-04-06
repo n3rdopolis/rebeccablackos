@@ -13,5 +13,5 @@ After=remote-fs.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-user-sessions start
-ExecStop=/usr/lib/systemd/systemd-user-sessions stop
+ExecStart=/lib/systemd/systemd-user-sessions start
+ExecStop=/lib/systemd/systemd-user-sessions stop

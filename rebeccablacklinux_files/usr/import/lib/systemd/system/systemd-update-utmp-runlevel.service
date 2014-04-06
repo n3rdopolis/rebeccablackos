@@ -18,4 +18,4 @@ Before=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/lib/systemd/systemd-update-utmp runlevel
+ExecStart=/lib/systemd/systemd-update-utmp runlevel

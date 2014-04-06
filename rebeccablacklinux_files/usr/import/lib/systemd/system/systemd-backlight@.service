@@ -17,5 +17,5 @@ Before=sysinit.target shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-backlight load %I
-ExecStop=/usr/lib/systemd/systemd-backlight save %I
+ExecStart=/lib/systemd/systemd-backlight load %I
+ExecStop=/lib/systemd/systemd-backlight save %I

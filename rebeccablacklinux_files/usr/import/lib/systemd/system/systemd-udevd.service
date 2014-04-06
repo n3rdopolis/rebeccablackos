@@ -20,4 +20,4 @@ OOMScoreAdjust=-1000
 Sockets=systemd-udevd-control.socket systemd-udevd-kernel.socket
 Restart=always
 RestartSec=0
-ExecStart=/usr/lib/systemd/systemd-udevd
+ExecStart=/lib/systemd/systemd-udevd

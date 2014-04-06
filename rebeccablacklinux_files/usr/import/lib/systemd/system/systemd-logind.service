@@ -14,7 +14,7 @@ Wants=user.slice
 After=nss-user-lookup.target user.slice
 
 [Service]
-ExecStart=/usr/lib/systemd/systemd-logind
+ExecStart=/lib/systemd/systemd-logind
 Restart=always
 RestartSec=0
 BusName=org.freedesktop.login1

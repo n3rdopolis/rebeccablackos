@@ -11,5 +11,5 @@ Documentation=man:systemd-shutdownd.service(8)
 DefaultDependencies=no
 
 [Service]
-ExecStart=/usr/lib/systemd/systemd-shutdownd
+ExecStart=/lib/systemd/systemd-shutdownd
 NotifyAccess=all

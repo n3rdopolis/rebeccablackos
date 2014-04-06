@@ -16,6 +16,6 @@ Before=shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-fsck %f
+ExecStart=/lib/systemd/systemd-fsck %f
 StandardOutput=journal+console
 TimeoutSec=0

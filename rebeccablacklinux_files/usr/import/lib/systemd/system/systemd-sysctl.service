@@ -22,4 +22,4 @@ ConditionDirectoryNotEmpty=|/run/sysctl.d
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-sysctl
+ExecStart=/lib/systemd/systemd-sysctl

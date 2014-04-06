@@ -11,6 +11,6 @@ Documentation=man:systemd-timedated.service(8) man:localtime(5)
 Documentation=http://www.freedesktop.org/wiki/Software/systemd/timedated
 
 [Service]
-ExecStart=/usr/lib/systemd/systemd-timedated
+ExecStart=/lib/systemd/systemd-timedated
 BusName=org.freedesktop.timedate1
 CapabilityBoundingSet=CAP_SYS_TIME

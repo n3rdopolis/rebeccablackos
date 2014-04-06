@@ -19,4 +19,4 @@ ConditionPathExists=/etc/fstab
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-remount-fs
+ExecStart=/lib/systemd/systemd-remount-fs

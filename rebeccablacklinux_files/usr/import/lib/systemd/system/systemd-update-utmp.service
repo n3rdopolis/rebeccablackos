@@ -17,5 +17,5 @@ Before=sysinit.target shutdown.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/lib/systemd/systemd-update-utmp reboot
-ExecStop=/usr/lib/systemd/systemd-update-utmp shutdown
+ExecStart=/lib/systemd/systemd-update-utmp reboot
+ExecStop=/lib/systemd/systemd-update-utmp shutdown
