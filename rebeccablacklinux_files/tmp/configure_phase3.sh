@@ -45,6 +45,9 @@ chown -R polkit /usr/share/polkit-1/rules.d
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
 
+#Disable the sandboxing service so that Ubiquity works
+systemctl disable sandbox.service
+
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then
