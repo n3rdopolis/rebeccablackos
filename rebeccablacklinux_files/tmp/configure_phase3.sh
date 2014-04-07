@@ -45,12 +45,11 @@ chown -R polkit /usr/share/polkit-1/rules.d
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
 
-#Disable the sandboxing service so that Ubiquity works
+#Enable and disable services to enable Ubuntu specific functionality
 systemctl disable sandbox.service
-
-#Get mtab to work
-rm /etc/mtab
-ln -s /proc/self/mounts /etc/mtab
+systemctl enable make-mtab-symlink.service
+systemctl enable make-root-private.service
+systemctl enable mount-run-shm.service
 
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]

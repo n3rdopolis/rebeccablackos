@@ -7,11 +7,13 @@
 
 [Unit]
 Description=Bind mount /dev/shm to /run/shm
-After=systemd-readahead-collect.service systemd-readahead-replay.service proc-sys-fs-binfmt_misc.automount
-Before=sysinit.target shutdown.target
+After=local-fs.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
 ExecStartPre=/bin/rm /etc/mtab
 ExecStart=/bin/ln -sf /proc/self/mounts /etc/mtab
+
+[Install]
+WantedBy=multi-user.target
