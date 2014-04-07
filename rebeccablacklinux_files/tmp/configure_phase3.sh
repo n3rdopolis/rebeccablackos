@@ -39,7 +39,7 @@ compile_all build-only
 useradd -u 300 polkitd -d /
 mkdir -p /usr/share/polkit-1/rules.d
 chown -R polkitd /etc/polkit-1/rules.d
-chown -R polkit /usr/share/polkit-1/rules.d
+chown -R polkitd /usr/share/polkit-1
 
 #disable systemd networkd, and enable NetworkManager
 systemctl disable systemd-networkd.service
