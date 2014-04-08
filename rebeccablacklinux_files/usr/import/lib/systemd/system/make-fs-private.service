@@ -12,7 +12,7 @@ After=local-fs.target
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/bin/mount --make-private /
+ExecStart=/usr/bin/make-rprivate
 
 [Install]
 WantedBy=multi-user.target
