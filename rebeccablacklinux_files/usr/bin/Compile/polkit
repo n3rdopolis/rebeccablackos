@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.freedesktop.org/polkit
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=master
+SOURCEREVISION=0.105
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -63,7 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --localstatedir=/var --disable-test --enable-libsystemd-login --libexecdir=/usr/lib/policykit-1 --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --enable-introspection --with-authfw=pam --with-pam-module-dir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
+./autogen.sh --prefix=/usr --sysconfdir=/etc --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --localstatedir=/var --disable-test --enable-libsystemd --libexecdir=/usr/lib/policykit-1 --disable-maintainer-mode --disable-dependency-tracking --disable-silent-rules --enable-introspection --with-authfw=pam --with-pam-module-dir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 make 
 }
 
