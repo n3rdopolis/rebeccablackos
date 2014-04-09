@@ -4,7 +4,7 @@ Description=Network Manager Script Dispatcher Service
 [Service]
 Type=dbus
 BusName=org.freedesktop.nm_dispatcher
-ExecStart=/usr/libexec/nm-dispatcher.action
+ExecStart=/usr/lib/NetworkManager/nm-dispatcher.action
 
 [Install]
 Alias=dbus-org.freedesktop.nm-dispatcher.service
