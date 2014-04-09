@@ -51,6 +51,7 @@ systemctl enable NetworkManager.service
 systemctl disable sandbox.service
 systemctl enable make-mtab-symlink.service
 systemctl enable make-fs-private.service
+systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
 systemctl enable resolvconf.service
 
