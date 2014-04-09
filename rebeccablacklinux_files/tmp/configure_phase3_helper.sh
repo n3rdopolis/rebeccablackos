@@ -64,6 +64,8 @@ cp -a /usr/import/lib/* /lib
 mkdir -p /etc/init
 cp -a /usr/import/etc/init/* /etc/init
 
+mkdir -p /usr/lib/tmpfiles.d
+cp -a /usr/import/usr/lib/tmpfiles.d/* /usr/lib/tmpfiles.d
 
 mkdir -p /etc/X11
 cp -a /usr/import/etc/X11/* /etc/X11
