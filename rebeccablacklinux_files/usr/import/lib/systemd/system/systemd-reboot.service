@@ -14,4 +14,4 @@ After=shutdown.target umount.target final.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/systemctl --force reboot
+ExecStart=/bin/systemctl --force reboot
