@@ -52,6 +52,8 @@ systemctl disable sandbox.service
 systemctl enable make-mtab-symlink.service
 systemctl enable make-fs-private.service
 systemctl enable mount-run-shm.service
+systemctl enable resolvconf.service
+
 
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]

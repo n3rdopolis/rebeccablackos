@@ -6,13 +6,13 @@
 #  (at your option) any later version.
 
 [Unit]
-Description=Bind mount /dev/shm to /run/shm
+Description=Configure Resolvconf
 After=local-fs.target
 
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStart=/usr/share/systemd/scripts/make-rprivate.exec.sh
+ExecStart=/usr/share/systemd/scripts/resolvconf.exec.sh
 
 [Install]
 WantedBy=multi-user.target
