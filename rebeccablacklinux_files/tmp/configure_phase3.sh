@@ -62,6 +62,8 @@ systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
 systemctl enable resolvconf.service
 
+#Configure users that can see journal logs
+sed -i 's/systemd-journal/sudo/g' /usr/lib/tmpfiles.d/systemd.conf
 
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
