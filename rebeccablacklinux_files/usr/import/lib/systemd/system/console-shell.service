@@ -16,7 +16,7 @@ Before=getty.target
 Environment=HOME=/root
 WorkingDirectory=/root
 ExecStart=-/sbin/sulogin
-ExecStopPost=-/usr/bin/systemctl poweroff
+ExecStopPost=-/bin/systemctl poweroff
 Type=idle
 StandardInput=tty-force
 StandardOutput=inherit

@@ -19,5 +19,5 @@ ConditionDirectoryNotEmpty=|/run/tmpfiles.d
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/systemd-tmpfiles --clean
+ExecStart=/bin/systemd-tmpfiles --clean
 IOSchedulingClass=idle

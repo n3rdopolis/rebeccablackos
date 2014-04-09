@@ -14,5 +14,5 @@ After=systemd-journald.service local-fs.target remote-fs.target
 Before=systemd-user-sessions.service
 
 [Service]
-ExecStart=/usr/bin/systemctl kill --kill-who=main --signal=SIGUSR1 systemd-journald.service
+ExecStart=/bin/systemctl kill --kill-who=main --signal=SIGUSR1 systemd-journald.service
 Type=oneshot

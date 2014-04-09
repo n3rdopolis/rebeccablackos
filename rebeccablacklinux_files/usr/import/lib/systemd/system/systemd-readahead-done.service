@@ -15,7 +15,7 @@ Before=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=/usr/bin/systemd-notify --readahead=done
+ExecStart=/bin/systemd-notify --readahead=done
 
 [Install]
 Also=systemd-readahead-collect.service
