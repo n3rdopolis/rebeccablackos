@@ -19,7 +19,7 @@
 Description=RealtimeKit Scheduling Policy Service
 
 [Service]
-ExecStart=/usr/libexec/rtkit-daemon
+ExecStart=/usr/lib/rtkit/rtkit-daemon
 Type=dbus
 BusName=org.freedesktop.RealtimeKit1
 NotifyAccess=main
