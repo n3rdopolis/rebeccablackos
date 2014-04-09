@@ -169,27 +169,27 @@ then
   fi
   HardwareSupported=1
 fi
-#if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY13, and restart.
+#if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY63, and restart.
 #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
 if [[ $HardwareSupported != 1 ]]
 then
   if [[ $ISLIVE == 1 ]]
   then
     logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+    openvt -c 63 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
   else 
-    openvt -c 13 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+    openvt -c 63 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
-    openvt -c 13 -s -f -w -- rbos-add-framebuffer
+    openvt -c 63 -s -f -w -- rbos-add-framebuffer
   fi
-  openvt -c 13 -s -f -w -- dialog --msgbox "Can not start Weston.
+  openvt -c 63 -s -f -w -- dialog --msgbox "Can not start Weston.
 
 Will now reboot." 20 50 --no-cancel
   reboot
@@ -209,10 +209,10 @@ then
     SupportedBackends=(FB)
     DefaultBackendType=FB
     WESTONBACKEND=fbdev-backend.so
-  #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY13, and restart.
+  #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY63, and restart.
   else
     logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 13 -s -f -w -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+    openvt -c 63 -s -f -w -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
     reboot
