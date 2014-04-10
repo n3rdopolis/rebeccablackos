@@ -42,13 +42,6 @@ chown -R polkitd /etc/polkit-1/rules.d
 chown -R polkitd /usr/share/polkit-1
 chown -R polkitd /var/lib/polkit-1
 
-#Make all systemd units nonexecutable
-find /etc/systemd/system /lib/systemd/system -type f | while read FILE
-do
-  chmod -X "$FILE"
-done
-
-
 
 #disable systemd networkd, and enable NetworkManager
 systemctl disable systemd-networkd.service
