@@ -61,6 +61,7 @@ systemctl enable make-fs-private.service
 systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
 systemctl enable resolvconf.service
+systemctl enable unset-grub-fail.service
 
 #Configure users that can see journal logs
 sed -i 's/systemd-journal/sudo/g' /usr/lib/tmpfiles.d/systemd.conf
