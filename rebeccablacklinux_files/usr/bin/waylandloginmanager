@@ -192,7 +192,7 @@ Will now start a utility to assist you in configuring your system to boot with a
   openvt -c 63 -s -f -w -- dialog --msgbox "Can not start Weston.
 
 Will now reboot." 20 50 --no-cancel
-  reboot
+  dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
   exit
 fi
 
@@ -215,7 +215,7 @@ then
     openvt -c 63 -s -f -w -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
-    reboot
+    dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
   fi
 fi
 
