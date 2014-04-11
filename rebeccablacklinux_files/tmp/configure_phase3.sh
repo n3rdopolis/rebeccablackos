@@ -47,7 +47,7 @@ chown -R polkitd /var/lib/polkit-1
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
 
-#Enable and disable services to enable Ubuntu specific functionality
+#Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
 systemctl disable sandbox.service
 systemctl enable make-mtab-symlink.service
 systemctl enable make-fs-private.service
@@ -55,6 +55,7 @@ systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
 systemctl enable resolvconf.service
 systemctl enable unset-grub-fail.service
+systemctl enable wlm.service
 
 #Configure users that can see journal logs
 mkdir -p /var/log/journal
