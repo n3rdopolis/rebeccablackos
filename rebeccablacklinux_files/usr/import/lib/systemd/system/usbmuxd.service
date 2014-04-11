@@ -3,5 +3,5 @@ Description=iOS USB Muxer
 
 [Service]
 Type=simple
-ExecStart=/sbin/usbmuxd -u -U usbmuxd
+ExecStart=/usr/sbin/usbmuxd -u -U usbmuxd
 PIDFile=/var/run/usbmuxd.pid

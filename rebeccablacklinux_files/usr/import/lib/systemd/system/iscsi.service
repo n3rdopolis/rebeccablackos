@@ -11,10 +11,10 @@ ConditionDirectoryNotEmpty=/var/lib/iscsi/nodes
 Type=oneshot
 RemainAfterExit=true
 ExecStart=/usr/libexec/iscsi-mark-root-nodes
-ExecStart=/sbin/iscsiadm -m node --loginall=automatic
+ExecStart=/usr/bin/iscsiadm -m node --loginall=automatic
 ExecStop=/bin/sync
-ExecStop=/sbin/iscsiadm -m node --logoutall=automatic
-ExecReload=/sbin/iscsiadm -m node --loginall=automatic
+ExecStop=/usr/bin/iscsiadm -m node --logoutall=automatic
+ExecReload=/usr/bin/iscsiadm -m node --loginall=automatic
 
 [Install]
 WantedBy=sysinit.target

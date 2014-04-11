@@ -4,7 +4,7 @@ After=syslog.target
 
 [Service]
 Type=forking
-ExecStart=/sbin/tcsd
+ExecStart=/usr/sbin/tcsd
 
 [Install]
 WantedBy=multi-user.target

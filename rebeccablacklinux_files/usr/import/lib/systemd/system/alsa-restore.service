@@ -13,5 +13,5 @@ Conflicts=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=-/sbin/alsactl -E ALSA_CONFIG_PATH=/etc/alsa/alsactl.conf --initfile=/lib/alsa/init/00main restore
+ExecStart=-/usr/sbin/alsactl -E ALSA_CONFIG_PATH=/etc/alsa/alsactl.conf --initfile=/lib/alsa/init/00main restore
 StandardOutput=syslog

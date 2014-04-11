@@ -11,5 +11,5 @@ Before=shutdown.target
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/alsactl -E ALSA_CONFIG_PATH=/etc/alsa/alsactl.conf store
+ExecStart=/usr/sbin/alsactl -E ALSA_CONFIG_PATH=/etc/alsa/alsactl.conf store
 StandardOutput=syslog

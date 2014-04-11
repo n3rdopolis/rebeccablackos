@@ -7,7 +7,7 @@ Before=network.target
 
 [Service]
 Type=oneshot
-ExecStart=/sbin/arp -f /etc/ethers
+ExecStart=/usr/sbin/arp -f /etc/ethers
 RemainAfterExit=yes
 
 [Install]

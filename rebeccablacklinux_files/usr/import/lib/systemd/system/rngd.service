@@ -2,7 +2,7 @@
 Description=Hardware RNG Entropy Gatherer Daemon
 
 [Service]
-ExecStart=/sbin/rngd -f
+ExecStart=/usr/sbin/rngd -f
 
 [Install]
 WantedBy=multi-user.target
