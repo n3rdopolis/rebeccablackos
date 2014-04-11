@@ -42,6 +42,13 @@ rm -rf /usr/import/usr/import
 
 rsync /usr/import/* -a /
 
+#Make all systemd units nonexecutable
+find /etc/systemd/system /lib/systemd/system -type f | while read FILE
+do
+  chmod -X "$FILE"
+done
+
+
 #Ensure that the weston binary called by weston-launch is redirected to a symlink to the file in /usr/bin, so that it doesn't need to be updated in two places
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
