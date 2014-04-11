@@ -55,11 +55,11 @@ cp -a /usr/import/etc/pam.d/* /etc/pam.d
 mkdir -p /etc/sysctl.d
 cp -a /usr/import/etc/sysctl.d/* /etc/sysctl.d
 
-mkdir -p /etc/systemd
-cp -a /usr/import/etc/systemd/* /etc/systemd
-
 mkdir -p /lib
 cp -a /usr/import/lib/* /lib
+
+mkdir -p /etc/systemd
+cp -a /usr/import/etc/systemd/* /etc/systemd
 
 mkdir -p /etc/init
 cp -a /usr/import/etc/init/* /etc/init
