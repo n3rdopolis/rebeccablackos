@@ -49,10 +49,6 @@ systemctl enable resolvconf.service
 systemctl enable unset-grub-fail.service
 systemctl enable wlm.service
 
-#Configure users that can see journal logs
-mkdir -p /var/log/journal
-sed -i 's/systemd-journal/sudo/g' /usr/lib/tmpfiles.d/systemd.conf
-
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then
