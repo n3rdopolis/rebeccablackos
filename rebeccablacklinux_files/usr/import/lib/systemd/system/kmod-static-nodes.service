@@ -15,5 +15,5 @@ ConditionPathExists=/lib/modules/%v/modules.devname
 [Service]
 Type=oneshot
 RemainAfterExit=yes
-ExecStartPre=/usr/bin/mkdir -p /run/tmpfiles.d
-ExecStart=/usr/bin/kmod static-nodes --format=tmpfiles --output=/run/tmpfiles.d/kmod.conf
+ExecStartPre=/bin/mkdir -p /run/tmpfiles.d
+ExecStart=/opt/bin/kmod static-nodes --format=tmpfiles --output=/run/tmpfiles.d/kmod.conf
