@@ -35,14 +35,6 @@ rm -r /usr/import
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
-#Create a user for the PolicyKit Daemon
-useradd -u 300 polkitd -d /
-mkdir -p /usr/share/polkit-1/rules.d
-chown -R polkitd /etc/polkit-1/rules.d
-chown -R polkitd /usr/share/polkit-1
-chown -R polkitd /var/lib/polkit-1
-
-
 #disable systemd networkd, and enable NetworkManager
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
