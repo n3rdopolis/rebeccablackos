@@ -63,6 +63,9 @@ ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
+#Get all Source 
+cat build_core/*/GetSourceVersion > /usr/share/buildcore_revisions.txt
+
 #start the remastersys job
 remastersys dist
 
