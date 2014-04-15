@@ -172,10 +172,14 @@ UnmountAll
 $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase3.sh 
 UnmountAll
 
+
+echo "CLEANUP PHASE 3"  
+
 #Clean up Phase 3 data.
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
 rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
+$SCRIPTFOLDERPATH/externalbuilders/cleanup_srcbuild.sh
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
