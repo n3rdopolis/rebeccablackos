@@ -130,7 +130,7 @@ done < <(echo "$INSTALLS")
 
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak
 
-zz
+
 #remove old kernels!
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
 if [[ -z $CURRENTKERNELVERSION ]]
