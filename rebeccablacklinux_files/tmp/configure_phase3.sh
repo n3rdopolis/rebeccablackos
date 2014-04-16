@@ -64,7 +64,7 @@ ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 echo "$(date)" > /etc/builddate
 
 #Get all Source 
-cat build_core/*/GetSourceVersion > /usr/share/buildcore_revisions.txt
+cat /usr/share/logs/build_core/*/GetSourceVersion > /usr/share/build_core_revisions.txt
 
 #start the remastersys job
 remastersys dist
