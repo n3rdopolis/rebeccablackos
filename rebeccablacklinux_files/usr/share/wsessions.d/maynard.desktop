@@ -1,0 +1,14 @@
+[Desktop Entry]
+Enabled=1
+Type=WSession
+Name=Maynard Desktop
+CompositorExec=/opt/bin/weston-display-server
+CompositorSupportsKMS=1
+CompositorSupportsFB=1
+CompositorKMSArguments=--backend=drm-backend.so
+CompositorFBArguments=--backend=fbdev-backend.so
+CompositorDisplayArgument=--socket=
+SessionArgument=--modules=xwayland.so,cms-colord.so --shell=/lib/weston/maynard.so
+AdditionalArguments=--log=$HOME/weston.log
+NeedsFile=/lib/weston/maynard.so
+NeedsFile=/opt/bin/weston
