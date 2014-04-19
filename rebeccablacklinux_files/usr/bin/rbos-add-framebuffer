@@ -38,7 +38,7 @@ dialog  --msgbox "This will assist you in configuring your system, so that a fra
 
 RESOLUTION=$(dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default
 
-Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1024x768 off 795 1280x1024 off 834 1400x1050 off 867 1440x900 off 799 1600x1200 off 0 "Disable Framebuffer Boot" off 2 "Leave Unchanged" on --stdout)
+Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1024x768 off 795 1280x1024 off 799 1600x1200 off 0 "Disable Framebuffer Boot" off 2 "Leave Unchanged" on --stdout)
 OKSelected=$?
 if [[ $OKSelected == 0 && $RESOLUTION != 2 ]]
 then
