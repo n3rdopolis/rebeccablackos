@@ -72,9 +72,8 @@ function PackageCompileSource()
 {
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked -compile-examples -fully-process -no-warnings-are-errors
+../configure -confirm-license  -opensource -qpa -xcb -egl -opengl es2 -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -no-gtkstyle -openssl-linked -fully-process -no-warnings-are-errors
 make -i
-make module-qtwebkit-examples -i
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
@@ -82,20 +81,25 @@ function PackageInstallSource()
 {
 cd build
 make install -i
-make module-qtwebkit-examples install -i
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp /$INSTALLDIR/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/widgets/itemviews/dirview/dirview $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/widgets/mainwindows/mainwindow/mainwindow $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/widgets/widgets/calculator/calculator $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/webkitwidgets/browser/browser $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/webkitwidgets/fancybrowser/fancybrowser $INSTALLDIR/bin
-cp /$INSTALLDIR/examples/webkitwidgets/embedded/anomaly/anomaly $INSTALLDIR/bin 
+cd "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/wiggly
+qmake
+make
+cp "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
+
+cd "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/tetrix
+qmake
+make
+cp "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
+
+cd "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/calculator
+qmake
+make
+cp "$SOURCEDIR"/"$SOURCENAME"/qtbase/examples/widgets/widgets/calculator/calculator $INSTALLDIR/bin
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
