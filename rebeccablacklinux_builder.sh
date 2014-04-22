@@ -122,6 +122,13 @@ done
 
 UnmountAll
 
+#Delete buildoutput based on a control file
+if [[ ! -f $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH ]]
+then
+  rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
+  mkdir $BUILDLOCATION/build/$BUILDARCH/buildoutput
+  touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH
+fi
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
 if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
@@ -153,12 +160,12 @@ then
     rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
     rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
     rm -rf $BUILDLOCATION/build/$BUILDARCH/srcbuild
-    REBUILT="to rebuild from scratch"
     rm $BUILDLOCATION/DontRestartPhase1$BUILDARCH
     rm $BUILDLOCATION/DontRestartPhase2$BUILDARCH
     touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
     mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
     touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+    REBUILT="to rebuild from scratch"
   fi
   $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
 fi
