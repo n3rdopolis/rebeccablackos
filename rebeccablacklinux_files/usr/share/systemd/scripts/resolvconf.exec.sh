@@ -22,3 +22,5 @@ mkdir -p /run/resolvconf/interface
 touch /run/resolvconf/postponed-update
 # Enable updates and perform the postponed update.
 resolvconf --enable-updates
+# Create resolvconf dirs
+resolvconf --create-runtime-directories
