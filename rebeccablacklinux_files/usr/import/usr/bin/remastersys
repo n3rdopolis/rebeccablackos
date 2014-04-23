@@ -306,6 +306,7 @@ update-rc.d remastersys-firstboot defaults
         do
             touch $WORKDIR/dummysys/var/log/${i}
         done
+	mkdir /var/log/journal
 
         log_msg "Cleaning up passwd, group, shadow and gshadow files for the live system"
         grep '^[^:]*:[^:]*:[0-9]:' /etc/passwd > $WORKDIR/dummysys/etc/passwd
