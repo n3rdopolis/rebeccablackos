@@ -18,6 +18,7 @@
 
 
 mkdir -p /run/resolvconf/interface
+mkdir /run/sendsigs.omit.d
 # Request a postponed update (needed in case the base file has content).
 touch /run/resolvconf/postponed-update
 # Enable updates and perform the postponed update.
