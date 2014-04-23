@@ -4,7 +4,7 @@ Use the latest ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
 This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is Rebecca Black Linux. 
 
-There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support Wayland as well as mplayer, and gstreamer. There are a few applications that don't work, but many more are starting to work.
+There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support Wayland as well as mpv, and gstreamer. There are a few applications that don't work, but many more are starting to work.
 
 Xwayland is also included, which allows X applications to run under a Wayland server. Xwayland has a few issues, but is usable.
 
