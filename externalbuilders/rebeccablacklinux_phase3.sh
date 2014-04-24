@@ -95,24 +95,30 @@ cp -a "$BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/"* "$BUILDLOCATION
 cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/logs/"* "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH"
 cp -a "$BUILDLOCATION/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" "$BUILDLOCATION/logs/$ENDDATE $BUILDARCH" 
 #If the live cd did not build then tell user  
-if [ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+if [[ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom-full.iso ]]
 then  
-  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
-
+  ISOFAILED=1
+else
+    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+fi 
+if [[ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ]]
+then  
+  ISOFAILED=1
+else
+    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
 fi 
 
+
+#allow the user to actually read the iso   
+chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
+chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
+
 #If the live cd did  build then tell user   
-if [  -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ];
+if [[ $ISOFAILED != 1  ]];
 then  
-  #move the iso out of the chroot fs    
-  mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
-  mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
-
   echo "Live CD image build was successful."
-
-  #allow the user to actually read the iso   
-  chown $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-  chgrp $SUDO_USER $HOMELOCATION/RebeccaBlackLinux*.iso
-  chmod 777 $HOMELOCATION/RebeccaBlackLinux*.iso
+else
+  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 fi
 
