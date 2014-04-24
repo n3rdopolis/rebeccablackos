@@ -302,11 +302,11 @@ update-rc.d remastersys-firstboot defaults
 		cd $WORKDIR/dummysys/var
 		ln -sf ../run run
 	fi
+	mkdir -p $WORKDIR/var/log/journal
         for i in dpkg.log lastlog mail.log syslog auth.log daemon.log faillog lpr.log mail.warn user.log boot debug mail.err messages wtmp bootstrap.log dmesg kern.log mail.info
         do
             touch $WORKDIR/dummysys/var/log/${i}
         done
-	mkdir $WORKDIR/var/log/journal
 
         log_msg "Cleaning up passwd, group, shadow and gshadow files for the live system"
         grep '^[^:]*:[^:]*:[0-9]:' /etc/passwd > $WORKDIR/dummysys/etc/passwd
