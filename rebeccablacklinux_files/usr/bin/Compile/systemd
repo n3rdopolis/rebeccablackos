@@ -79,6 +79,7 @@ function PackagePostInstall()
 {
 #Configure users that can see journal logs
 mkdir -p /var/log/journal
+touch /var/log/journal/.checkinstall
 sed -i 's/systemd-journal/sudo/g' /usr/lib/tmpfiles.d/systemd.conf
 }
 

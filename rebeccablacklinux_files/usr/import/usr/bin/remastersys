@@ -302,7 +302,7 @@ update-rc.d remastersys-firstboot defaults
 		cd $WORKDIR/dummysys/var
 		ln -sf ../run run
 	fi
-	mkdir -p $WORKDIR/var/log/journal
+	mkdir -p $WORKDIR/dummysys/var/log/journal
         for i in dpkg.log lastlog mail.log syslog auth.log daemon.log faillog lpr.log mail.warn user.log boot debug mail.err messages wtmp bootstrap.log dmesg kern.log mail.info
         do
             touch $WORKDIR/dummysys/var/log/${i}
