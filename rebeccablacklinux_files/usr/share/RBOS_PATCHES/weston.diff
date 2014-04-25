@@ -30,14 +30,19 @@ index 7264f7e..f689131 100644
  	if (setup_tty(&wl, tty) < 0)
  		exit(EXIT_FAILURE);
 
-
-
-
-
-
-
-
-
+diff --git a/src/screen-share.c b/src/screen-share.c
+index d3e3f05..eb0633a 100644
+--- a/src/screen-share.c
++++ b/src/screen-share.c
+@@ -1060,7 +1060,7 @@ share_output_binding(struct weston_seat *seat, uint32_t time, uint32_t key,
+                     void *data)
+ {
+        struct weston_output *output;
+-       const char *path = BINDIR "/weston";
++       const char *path = BINDIR "/weston-display-server";
+ 
+        if (!seat->pointer) {
+                weston_log("Cannot pick output: Seat does not have pointer\n");
 
 
 
