@@ -529,3 +529,326 @@ index 41cc52c..685bfd9 100644
  int
  main(int argc, char *argv[])
  {
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+From: Ander Conselvan de Oliveira <ander.conselvan.de.oliveira at intel.com>
+
+That would be the case of a touch screen mapped to an output that was
+unplugged.
+---
+ src/libinput-device.c | 3 +++
+ 1 file changed, 3 insertions(+)
+
+diff --git a/src/libinput-device.c b/src/libinput-device.c
+index 0ca6c4b..a67c119 100644
+--- a/src/libinput-device.c
++++ b/src/libinput-device.c
+@@ -147,6 +147,9 @@ handle_touch_with_coords(struct libinput_device *libinput_device,
+ 	uint32_t time;
+ 	int32_t slot;
+ 
++	if (!device->output)
++		return;
++
+ 	time = libinput_event_touch_get_time(touch_event);
+ 	slot = libinput_event_touch_get_seat_slot(touch_event);
+ 
+-- 
+1.8.3.2
+
+From: Ander Conselvan de Oliveira <ander.conselvan.de.oliveira at intel.com>
+
+Commit 17bccaed intended to make the events coming from a touchscreen
+paired with an unplugged output to be discarded, while an unpaired one
+would just choose a different output. However, the logic was inverted
+causing the opposite to happen.
+
+Later in commit 161c6c56, the default behavior was changed to map an
+output to a default output if the one specified via udev is not
+present. This change is reverted by this patch.
+
+v2: undo the change from commit 161c6c56.
+
+v3: deal with libinput too.
+---
+ src/evdev.c           | 2 +-
+ src/libinput-device.c | 2 +-
+ src/libinput-seat.c   | 4 +---
+ src/udev-seat.c       | 4 +---
+ 4 files changed, 4 insertions(+), 8 deletions(-)
+
+diff --git a/src/evdev.c b/src/evdev.c
+index bc8e5ef..9d97c87 100644
+--- a/src/evdev.c
++++ b/src/evdev.c
+@@ -602,7 +602,7 @@ notify_output_destroy(struct wl_listener *listener, void *data)
+ 	struct weston_compositor *c = device->seat->compositor;
+ 	struct weston_output *output;
+ 
+-	if (device->output_name) {
++	if (!device->output_name) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+diff --git a/src/libinput-device.c b/src/libinput-device.c
+index a67c119..753583a 100644
+--- a/src/libinput-device.c
++++ b/src/libinput-device.c
+@@ -264,7 +264,7 @@ notify_output_destroy(struct wl_listener *listener, void *data)
+ 	struct weston_compositor *c = device->seat->compositor;
+ 	struct weston_output *output;
+ 
+-	if (device->output_name) {
++	if (!device->output_name) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+diff --git a/src/libinput-seat.c b/src/libinput-seat.c
+index 8bf538c..6e83717 100644
+--- a/src/libinput-seat.c
++++ b/src/libinput-seat.c
+@@ -84,9 +84,7 @@ device_added(struct udev_input *input, struct libinput_device *libinput_device)
+ 		wl_list_for_each(output, &c->output_list, link)
+ 			if (strcmp(output->name, device->output_name) == 0)
+ 				evdev_device_set_output(device, output);
+-	}
+-
+-	if (device->output == NULL) {
++	} else if (device->output == NULL) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+diff --git a/src/udev-seat.c b/src/udev-seat.c
+index 5e018de..dfeb17f 100644
+--- a/src/udev-seat.c
++++ b/src/udev-seat.c
+@@ -125,9 +125,7 @@ device_added(struct udev_device *udev_device, struct udev_input *input)
+ 		wl_list_for_each(output, &c->output_list, link)
+ 			if (strcmp(output->name, device->output_name) == 0)
+ 				evdev_device_set_output(device, output);
+-	}
+-
+-	if (device->output == NULL) {
++	} else if (device->output == NULL) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+-- 
+1.8.3.2
+
+
+
+From: Ander Conselvan de Oliveira <ander.conselvan.de.oliveira at intel.com>
+
+If the output a touchscreen is paired to is unplugged, events coming
+from it should be ignored. Commit 17bccaed introduced logic for that
+in evdev_flush_pending_damage(). However, the break statements it
+introduced would cause the assertion after the switch statement to
+fail.
+
+That function has the odd behavior that goto's are used to skip the
+assertion after the switch statement and jump to the hunk of code that
+marks the event as processed. Only in the case where the event type has
+an invalid value the assertion should trigger. So this patch fixes the
+problem by moving the assertion into the default case of the switch
+and replacing the goto statements with break ones.
+
+https://bugs.freedesktop.org/show_bug.cgi?id=73950
+---
+ src/evdev.c | 19 +++++++++----------
+ 1 file changed, 9 insertions(+), 10 deletions(-)
+
+diff --git a/src/evdev.c b/src/evdev.c
+index 9d97c87..ff951d3 100644
+--- a/src/evdev.c
++++ b/src/evdev.c
+@@ -100,7 +100,7 @@ evdev_flush_pending_event(struct evdev_device *device, uint32_t time)
+ 		notify_motion(master, time, device->rel.dx, device->rel.dy);
+ 		device->rel.dx = 0;
+ 		device->rel.dy = 0;
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_MT_DOWN:
+ 		if (device->output == NULL)
+ 			break;
+@@ -113,7 +113,7 @@ evdev_flush_pending_event(struct evdev_device *device, uint32_t time)
+ 		master->slot_map |= 1 << seat_slot;
+ 
+ 		notify_touch(master, time, seat_slot, x, y, WL_TOUCH_DOWN);
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_MT_MOTION:
+ 		if (device->output == NULL)
+ 			break;
+@@ -123,12 +123,12 @@ evdev_flush_pending_event(struct evdev_device *device, uint32_t time)
+ 						   &x, &y);
+ 		seat_slot = device->mt.slots[slot].seat_slot;
+ 		notify_touch(master, time, seat_slot, x, y, WL_TOUCH_MOTION);
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_MT_UP:
+ 		seat_slot = device->mt.slots[slot].seat_slot;
+ 		master->slot_map &= ~(1 << seat_slot);
+ 		notify_touch(master, time, seat_slot, 0, 0, WL_TOUCH_UP);
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_TOUCH_DOWN:
+ 		if (device->output == NULL)
+ 			break;
+@@ -141,7 +141,7 @@ evdev_flush_pending_event(struct evdev_device *device, uint32_t time)
+ 		device->abs.seat_slot = seat_slot;
+ 		master->slot_map |= 1 << seat_slot;
+ 		notify_touch(master, time, seat_slot, x, y, WL_TOUCH_DOWN);
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_MOTION:
+ 		if (device->output == NULL)
+ 			break;
+@@ -156,17 +156,16 @@ evdev_flush_pending_event(struct evdev_device *device, uint32_t time)
+ 				     x, y, WL_TOUCH_MOTION);
+ 		else if (device->seat_caps & EVDEV_SEAT_POINTER)
+ 			notify_motion_absolute(master, time, x, y);
+-		goto handled;
++		break;
+ 	case EVDEV_ABSOLUTE_TOUCH_UP:
+ 		seat_slot = device->abs.seat_slot;
+ 		master->slot_map &= ~(1 << seat_slot);
+ 		notify_touch(master, time, seat_slot, 0, 0, WL_TOUCH_UP);
+-		goto handled;
++		break;
++	default:
++		assert(0 && "Unknown pending event type");
+ 	}
+ 
+-	assert(0 && "Unknown pending event type");
+-
+-handled:
+ 	device->pending_event = EVDEV_NONE;
+ }
+ 
+-- 
+1.8.3.2
+
+
+
+From: Ander Conselvan de Oliveira <ander.conselvan.de.oliveira at intel.com>
+
+Make sure that we don't map a device to an invalid output pointer and
+intead remap devices when an output is created.
+
+v2: fix the error with libinput too.
+---
+ src/evdev.c           | 2 +-
+ src/libinput-device.c | 2 +-
+ src/libinput-seat.c   | 8 ++++++--
+ src/udev-seat.c       | 8 ++++++--
+ 4 files changed, 14 insertions(+), 6 deletions(-)
+
+diff --git a/src/evdev.c b/src/evdev.c
+index ff951d3..888dfbd 100644
+--- a/src/evdev.c
++++ b/src/evdev.c
+@@ -601,7 +601,7 @@ notify_output_destroy(struct wl_listener *listener, void *data)
+ 	struct weston_compositor *c = device->seat->compositor;
+ 	struct weston_output *output;
+ 
+-	if (!device->output_name) {
++	if (!device->output_name && !wl_list_empty(&c->output_list)) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+diff --git a/src/libinput-device.c b/src/libinput-device.c
+index 753583a..4605a76 100644
+--- a/src/libinput-device.c
++++ b/src/libinput-device.c
+@@ -264,7 +264,7 @@ notify_output_destroy(struct wl_listener *listener, void *data)
+ 	struct weston_compositor *c = device->seat->compositor;
+ 	struct weston_output *output;
+ 
+-	if (!device->output_name) {
++	if (!device->output_name && !wl_list_empty(&c->output_list)) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+diff --git a/src/libinput-seat.c b/src/libinput-seat.c
+index 6e83717..b18562e 100644
+--- a/src/libinput-seat.c
++++ b/src/libinput-seat.c
+@@ -84,7 +84,7 @@ device_added(struct udev_input *input, struct libinput_device *libinput_device)
+ 		wl_list_for_each(output, &c->output_list, link)
+ 			if (strcmp(output->name, device->output_name) == 0)
+ 				evdev_device_set_output(device, output);
+-	} else if (device->output == NULL) {
++	} else if (device->output == NULL && !wl_list_empty(&c->output_list)) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+@@ -314,11 +314,15 @@ notify_output_create(struct wl_listener *listener, void *data)
+ 	struct evdev_device *device;
+ 	struct weston_output *output = data;
+ 
+-	wl_list_for_each(device, &seat->devices_list, link)
++	wl_list_for_each(device, &seat->devices_list, link) {
+ 		if (device->output_name &&
+ 		    strcmp(output->name, device->output_name) == 0) {
+ 			evdev_device_set_output(device, output);
+ 		}
++
++		if (device->output_name == NULL && device->output == NULL)
++			evdev_device_set_output(device, output);
++	}
+ }
+ 
+ static struct udev_seat *
+diff --git a/src/udev-seat.c b/src/udev-seat.c
+index dfeb17f..93984e1 100644
+--- a/src/udev-seat.c
++++ b/src/udev-seat.c
+@@ -125,7 +125,7 @@ device_added(struct udev_device *udev_device, struct udev_input *input)
+ 		wl_list_for_each(output, &c->output_list, link)
+ 			if (strcmp(output->name, device->output_name) == 0)
+ 				evdev_device_set_output(device, output);
+-	} else if (device->output == NULL) {
++	} else if (device->output == NULL && !wl_list_empty(&c->output_list)) {
+ 		output = container_of(c->output_list.next,
+ 				      struct weston_output, link);
+ 		evdev_device_set_output(device, output);
+@@ -357,11 +357,15 @@ notify_output_create(struct wl_listener *listener, void *data)
+ 	struct evdev_device *device;
+ 	struct weston_output *output = data;
+ 
+-	wl_list_for_each(device, &seat->devices_list, link)
++	wl_list_for_each(device, &seat->devices_list, link) {
+ 		if (device->output_name &&
+ 		    strcmp(output->name, device->output_name) == 0) {
+ 			evdev_device_set_output(device, output);
+ 		}
++
++		if (device->output_name == NULL && device->output == NULL)
++			evdev_device_set_output(device, output);
++	}
+ }
+ 
+ static struct udev_seat *
+-- 
+1.8.3.2
