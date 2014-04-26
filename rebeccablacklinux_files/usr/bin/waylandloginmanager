@@ -150,7 +150,7 @@ then
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
   SupportedBackends+=(KMS)
   DefaultBackendType=KMS
-  WESTONBACKEND=drm-backend.so
+  WESTONBACKEND="drm-backend.so --use-pixman"
   HardwareSupported=1
 fi
 if [[ $(ls  /dev/fb* ) ]]
@@ -850,11 +850,11 @@ function LoginWestonLauncher
       #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
       if [[ $westonresult == 255 ]]
       then
-	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --use-pixman --log=/var/log/loginmanagerdisplay.log
+	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       else
 	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --use-pixman --log=/var/log/loginmanagerdisplay.log
+	openvt -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       fi
     fi
     sleep 15
