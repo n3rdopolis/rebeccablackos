@@ -307,6 +307,7 @@ enlightenmentnestedcaller
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
 Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
+echo 'cd $(eval echo ~$LOGNAME)' >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
 
 touch $MOUNTHOME/liveisotest/unionmountpoint/online
 if [[ $XALIVE == 0 ]]
