@@ -282,20 +282,23 @@ else
 Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
 fi
 
-#Configure test system
-mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-rm $MOUNTHOME/liveisotest/unionmountpoint/etc/resolv.conf
-cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
-chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
-chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
-chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
-#mkdir -p $MOUNTHOME/liveisotest/unionmountpoint/var/run/dbus
-#chroot $MOUNTHOME/liveisotest/unionmountpoint dbus-daemon --system --fork
-#chroot $MOUNTHOME/liveisotest/unionmountpoint upower &
-#give more information in the testuser .bashrc
-echo "
+#Only configure the systemd if the online file doesn't exist so it is only configured once
+if [[ ! -f $MOUNTHOME/liveisotest/unionmountpoint/online ]]
+then
+  #Configure test system
+  mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+  chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+  chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
+  rm $MOUNTHOME/liveisotest/unionmountpoint/etc/resolv.conf
+  cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
+  chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
+  chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
+  chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
+  #mkdir -p $MOUNTHOME/liveisotest/unionmountpoint/var/run/dbus
+  #chroot $MOUNTHOME/liveisotest/unionmountpoint dbus-daemon --system --fork
+  #chroot $MOUNTHOME/liveisotest/unionmountpoint upower &
+  #give more information in the testuser .bashrc
+  echo "
 echo \"
 Weston Session commands:
 westonnestedcaller
@@ -307,9 +310,11 @@ enlightenmentnestedcaller
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
 Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
-echo 'cd $(eval echo ~$LOGNAME)' >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
+  echo 'cd $(eval echo ~$LOGNAME)' >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
 
-touch $MOUNTHOME/liveisotest/unionmountpoint/online
+  touch $MOUNTHOME/liveisotest/unionmountpoint/online
+fi
+
 if [[ $XALIVE == 0 ]]
 then
   $TERMCOMMAND chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
