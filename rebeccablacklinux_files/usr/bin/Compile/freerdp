@@ -57,7 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-:
+patch -p1 < /usr/share/RBOS_PATCHES/freerdp.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -82,6 +82,8 @@ function PackagePostInstall()
 {
 cd build
 cp winpr/include/winpr/config.h $INSTALLDIR/include/winpr
+cp winpr/tools/makecert/cli/winpr-makecert $INSTALLDIR/bin
+cp winpr/tools/hash/winpr-hash $INSTALLDIR/bin
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
