@@ -22,7 +22,7 @@ cd ~
 mkdir weston-rdp
 cd weston-rdp
 winpr-makecert -rdp
-zenity --forms --text="A new Weston server supporting RDP connections has started in the background. 
+zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
 The RDP session is running as the current user $USER
 Using an RDP client, you can connect to:
 
@@ -32,5 +32,26 @@ or the IP addresses:
 $(hostname -I | sed 's/ /\n/g')
 to connect to the session
 
-*Please note that this RDP session is NOT password protected." &
-weston-display-server --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key
+*Please note that the RDP session will NOT be password protected." 
+
+
+zenity --forms --text="Close this dialog to terminate the Weston RDP server.
+
+Otherwise, leave this dialog open" &
+DIALOGPID=$!
+
+weston-display-server --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key 
+WESTONPID=$!
+
+#Wait until the zenity form dies, or until the remote enabled weston dies
+while [ 1 ]
+do
+  #If either the weston server dies, or the dialog dies, terminate both, and exit
+  if [[ ! -e /proc/$DIALOGPID || ! -e /proc/$WESTONPID ]]
+  then
+    kill -9 $WESTONPID
+    kill -9 $DIALOGPID
+    exit
+  fi
+sleep 1
+done
