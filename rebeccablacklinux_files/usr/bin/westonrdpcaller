@@ -40,7 +40,7 @@ zenity --forms --text="Close this dialog to terminate the Weston RDP server.
 Otherwise, leave this dialog open" &
 DIALOGPID=$!
 
-weston-display-server --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key 
+weston-display-server --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key &
 WESTONPID=$!
 
 #Wait until the zenity form dies, or until the remote enabled weston dies
