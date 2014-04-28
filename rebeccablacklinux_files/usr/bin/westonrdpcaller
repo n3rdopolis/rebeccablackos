@@ -1,0 +1,30 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script calls a Weston server with the RDP backend
+
+cd ~
+mkdir weston-rdp
+cd weston-rdp
+winpr-makecert -rdp
+zenity --info --text="A new Weston server supporting RDP connections has started in the background. Using an RDP client, you can connect to:
+$(hostname)
+or the IP addresses:
+$(hostname -i | sed 's/ /\n/g')
+to connect to the session" &
+weston-display-server --backend=rdp-backend.so -rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key
