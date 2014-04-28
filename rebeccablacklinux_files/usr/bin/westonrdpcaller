@@ -21,7 +21,11 @@
 cd ~
 mkdir weston-rdp
 cd weston-rdp
-winpr-makecert -rdp
+#Only generate the key if it doesn't exist
+if [[ ! -e rdpkey.rdp ]]
+then
+  winpr-makecert -rdp > rdpkey.rdp
+fi
 zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
 The RDP session is running as the current user $USER
 Using an RDP client, you can connect to:
