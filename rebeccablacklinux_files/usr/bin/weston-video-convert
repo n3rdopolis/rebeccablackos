@@ -19,7 +19,7 @@
 #This script processess various output files from Weston, by calling upon some helpers to convert the output files into a playable format, or to copy screenshots into a random ID so that the next screenshot doesn't overwrite it
 export FILENAMEID=$RANDOM
 
-zenity --warning --text="This will convert any weston screencapture data into usable formats." &
+zenity --info --text="This will convert any weston screencapture data into usable formats." &
 
 vte2_90 -c /usr/libexec/wayland_helpers/weston-video-convert-helper
 vte2_90 -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
