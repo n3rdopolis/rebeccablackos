@@ -28,4 +28,4 @@ hostname: $(hostname)
 or the IP addresses:
 $(hostname -I | sed 's/ /\n/g')
 to connect to the session" &
-weston-display-server --backend=rdp-backend.so -rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key
+weston-display-server --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key
