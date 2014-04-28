@@ -22,9 +22,10 @@ cd ~
 mkdir weston-rdp
 cd weston-rdp
 winpr-makecert -rdp
-zenity --info --text="A new Weston server supporting RDP connections has started in the background. Using an RDP client, you can connect to:
-$(hostname)
+zenity --info --text="A new Weston server supporting RDP connections has started in the background. 
+Using an RDP client, you can connect to:
+hostname: $(hostname)
 or the IP addresses:
-$(hostname -i | sed 's/ /\n/g')
+$(hostname -I | sed 's/ /\n/g')
 to connect to the session" &
 weston-display-server --backend=rdp-backend.so -rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key
