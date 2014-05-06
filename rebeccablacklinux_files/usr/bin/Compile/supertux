@@ -58,6 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cp -n /$INSTALLDIR/include/SDL2/* /"$SOURCEDIR"/"$SOURCENAME"/src/SDL2/
+patch -p1 < /usr/share/RBOS_PATCHES/supertux.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
