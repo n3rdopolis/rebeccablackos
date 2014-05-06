@@ -71,3 +71,16 @@ index 98e8740..36fdc11 100644
  /** ticks (as returned from SDL_GetTicks) per frame */
  static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
  /** don't skip more than every 2nd frame */
+diff --git a/src/video/sdl/sdl_lightmap.cpp b/src/video/sdl/sdl_lightmap.cpp
+index b523fbc..7937818 100644
+--- a/src/video/sdl/sdl_lightmap.cpp
++++ b/src/video/sdl/sdl_lightmap.cpp
+@@ -31,7 +31,7 @@ SDLLightmap::SDLLightmap() :
+   denominator(),
+   LIGHTMAP_DIV()
+ {
+-  screen = SDL_GetVideoSurface();
++  screen = SDL_GetWindowSurface(SDL_GetMouseFocus());
+ 
+   //float xfactor = 1.0f; // FIXME: (float) config->screenwidth / SCREEN_WIDTH;
+   //float yfactor = 1.0f; // FIXME: (float) config->screenheight / SCREEN_HEIGHT;
