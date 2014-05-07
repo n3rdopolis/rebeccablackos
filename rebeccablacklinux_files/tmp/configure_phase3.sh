@@ -48,6 +48,7 @@ systemctl enable mount-run-shm.service
 systemctl enable resolvconf.service
 systemctl enable unset-grub-fail.service
 systemctl enable wlm.service
+systemctl enable loglevel.service
 
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
