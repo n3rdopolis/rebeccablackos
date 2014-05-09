@@ -361,10 +361,10 @@ function ChooseSessionType
       fi
     done < <(echo "$NeedsFile")
 
-    #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the SESSIONID to the end of the command.
+    #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the SESSIONIDNAME to the end of the command.
     if [[ ! -z $CompositorDisplayArgument ]]
     then
-      CompositorDisplayArgument="$CompositorDisplayArgument$SESSIONID"
+      CompositorDisplayArgument="$CompositorDisplayArgument$SESSIONIDNAME"
     else 
       CompositorDisplayArgument=""
     fi
@@ -422,7 +422,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$SESSIONID"
+      WSESSIONDATA+="--socket=$SESSIONIDNAME"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -440,7 +440,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$SESSIONID"
+      WSESSIONDATA+="--socket=$SESSIONIDNAME"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -566,8 +566,9 @@ function StartUserSession
 {
   #ensure the loginmanager_control fd doesn't get leaked
   exec 1000>&-
-  #set the WAYLAND_DISPLAY variable to be the SESSIONID
-  export WAYLAND_DISPLAY=$SESSIONID
+  #set the WAYLAND_DISPLAY variable to be waylannd-$SESSIONID
+  export SESSIONIDNAME=wayland-$SESSIONID
+  export WAYLAND_DISPLAY=$SESSIONIDNAME
   #unset most varaibles, except PATH and WAYLAND_DISPLAY
   while read var
   do 
