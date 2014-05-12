@@ -315,6 +315,7 @@ function ChooseSessionType
 {
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=$AllSessions
+  export SESSIONIDNAME=wayland-$SESSIONID
 
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
@@ -566,9 +567,9 @@ function StartUserSession
 {
   #ensure the loginmanager_control fd doesn't get leaked
   exec 1000>&-
-  #set the WAYLAND_DISPLAY variable to be waylannd-$SESSIONID
-  export SESSIONIDNAME=wayland-$SESSIONID
+  #set the WAYLAND_DISPLAY variable to be $SESSIONIDNAME
   export WAYLAND_DISPLAY=$SESSIONIDNAME
+
   #unset most varaibles, except PATH and WAYLAND_DISPLAY
   while read var
   do 
