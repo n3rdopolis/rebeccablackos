@@ -45,11 +45,8 @@ then
 fi
 
 
-#Try to determine the package manager. It usually SHOULD be pkcon
-if [[ -f $(which pkcon) ]]
-then
-  INSTALLCOMMAND="pkcon install"
-elif [[ -f $(which apt-get) ]]
+#Try to determine the package manager.
+if [[ -f $(which apt-get) ]]
 then
   INSTALLCOMMAND="apt-get install"
 elif [[ -f $(which yum) ]]
