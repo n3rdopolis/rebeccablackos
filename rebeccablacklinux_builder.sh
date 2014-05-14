@@ -55,7 +55,6 @@ if [[ ! -e $BUILDLOCATION/debootstrap/debootstrap || ! -e $BUILDLOCATION/DontDow
 then
   touch $BUILDLOCATION/DontDownloadDebootstrapScript
   mkdir -p $BUILDLOCATION/debootstrap
-  export $DEBOOTSTRAP_DIR=$BUILDLOCATION/debootstrap
   FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
 ascii
 user anonymous " "

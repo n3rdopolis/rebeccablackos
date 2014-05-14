@@ -50,7 +50,8 @@ mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUIL
 mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
-
+#Set the debootstrap dir
+export DEBOOTSTRAP_DIR=$BUILDLOCATION/debootstrap
 
 #setup a really basic Ubuntu installation for downloading 
 #if set to rebuild phase 1
