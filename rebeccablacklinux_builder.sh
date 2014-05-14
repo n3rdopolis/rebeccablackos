@@ -69,6 +69,13 @@ EOT)
   tar xaf $BUILDLOCATION/debootstrap/debootstrap.tar.gz -C $BUILDLOCATION/debootstrap --strip 1
 fi
 
+#If debootstrap fails
+if [[ ! -e $BUILDLOCATION/debootstrap/debootstrap ]]
+then 
+  echo "Download of debootstrap failed, this script needs to be able to download debootstrap from ftp.debian.org in order to be able to continue."
+  exit 1
+fi
+
 #get the size of the users home file system. 
 FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 12gb or less tell the user and quit. If not continue.
