@@ -57,7 +57,7 @@ mount --bind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUIL
 if [ ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH ]
 then
   echo "Setting up chroot for downloading archives and software..."
-  debootstrap --arch $BUILDARCH trusty $BUILDLOCATION/build/$BUILDARCH/phase_1 http://ubuntu.osuosl.org/ubuntu/
+  $BUILDLOCATION/debootstrap/debootstrap --arch $BUILDARCH trusty $BUILDLOCATION/build/$BUILDARCH/phase_1 http://ubuntu.osuosl.org/ubuntu/
   touch $BUILDLOCATION/DontRestartPhase1$BUILDARCH
 fi
 
@@ -66,6 +66,6 @@ if [ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]
 then
   #setup a really basic Ubuntu installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  debootstrap --arch $BUILDARCH trusty $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
+  $BUILDLOCATION/debootstrap/debootstrap --arch $BUILDARCH trusty $BUILDLOCATION/build/$BUILDARCH/phase_2 http://ubuntu.osuosl.org/ubuntu/
   touch $BUILDLOCATION/DontRestartPhase2$BUILDARCH
 fi

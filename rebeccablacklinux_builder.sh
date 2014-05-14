@@ -24,8 +24,6 @@ BUILDLOCATION=~/RBOS_Build_Files
 
 #####Tell User what script does
 echo "
-THIS SCRIPT INSTALLS debootstrap on the build host (this computer)
-
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
@@ -52,14 +50,25 @@ fi
 
 STARTTIME=$(date +%s)
 
-#install debootstrap
-apt-get install debootstrap
-
-if [[ ! -f /usr/sbin/debootstrap ]]
-then 
-  echo "debootstrap install apparently failed."
-  exit
+#prepare debootstrap
+if [[ ! -e $BUILDLOCATION/debootstrap/debootstrap || ! -e $BUILDLOCATION/DontDownloadDebootstrapScript ]]
+then
+  touch $BUILDLOCATION/DontDownloadDebootstrapScript
+  mkdir -p $BUILDLOCATION/debootstrap
+  export $DEBOOTSTRAP_DIR=$BUILDLOCATION/debootstrap
+  FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
+ascii
+user anonymous " "
+prompt
+cd debian/pool/main/d/debootstrap/
+ls 
+bye
+EOT)
+  FTPFILE=$(echo "$FTPFILELIST" | awk '{print $9}' | grep tar| tail -1)
+  wget http://ftp.debian.org/debian/pool/main/d/debootstrap/$FTPFILE -O $BUILDLOCATION/debootstrap/debootstrap.tar.gz
+  tar xaf $BUILDLOCATION/debootstrap/debootstrap.tar.gz -C $BUILDLOCATION/debootstrap --strip 1
 fi
+
 #get the size of the users home file system. 
 FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
 #if there is 12gb or less tell the user and quit. If not continue.
