@@ -19,7 +19,6 @@ echo "PHASE 1"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-BUILDLOCATION=~/RBOS_Build_Files
 unset HOME
 
 if [[ -z $BUILDARCH ]]
