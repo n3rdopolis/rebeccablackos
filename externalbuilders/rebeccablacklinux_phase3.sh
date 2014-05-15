@@ -22,9 +22,9 @@ SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 HOMELOCATION=~
 unset HOME
 
-if [[ -z $BUILDARCH ]]
+if [[ -z $BUILDARCH || -z $BUILDLOCATION || $UID != 0 ]]
 then
-  echo "BUILDARCH variable not set"
+  echo "BUILDARCH variable not set, or BUILDLOCATION not set, or not run as root. This external build script should be called by the main build script."
   exit
 fi
 
