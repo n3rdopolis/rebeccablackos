@@ -67,8 +67,6 @@ rm CMakeCache.txt
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
-sed -i 's\opt/opt\opt\g' src/shells/desktop/CMakeFiles/hawaii-desktop-shell.dir/link.txt
-sed -i 's\opt/opt\opt\g' src/shells/desktop/CMakeFiles/hawaii-desktop-shell.dir/build.make
 make 
 }
 
