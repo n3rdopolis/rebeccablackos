@@ -1,0 +1,19 @@
+diff --git a/src/main.cpp b/src/main.cpp
+index f25eb87..a72cec1 100644
+--- a/src/main.cpp
++++ b/src/main.cpp
+@@ -1,5 +1,4 @@
+ /* ============================================================
+-*
+ * This file is a part of the rekonq project
+ *
+ * Copyright (C) 2008-2014 by Andrea Diamantini <adjam7 at gmail dot com>
+@@ -62,7 +61,7 @@ extern "C" Q_DECL_EXPORT int kdemain(int argc, char **argv)
+                      QL1S("rekonq"),
+                      QL1S(REKONQ_VERSION),
+                      i18n(description),
+-                     KAboutData::License_GPL_V3,
++                     KAboutLicense::GPL_V3,
+                      i18n("(C) 2008-2014 Andrea Diamantini"),
+                      QString(),
+                      QL1S("http://rekonq.kde.org")
