@@ -11,3 +11,27 @@ index 17c99b8..adb16b6 100644
  # BINDIR          = $(PREFIX)/bin
  # LIBDIR          = $(PREFIX)/lib
  # INCLUDEDIR      = $(PREFIX)/include
+diff --git a/libswc/local.mk b/libswc/local.mk
+index 8d6c537..da2faf5 100644
+--- a/libswc/local.mk
++++ b/libswc/local.mk
+@@ -75,8 +75,8 @@ $(dir)_PACKAGES +=                  \
+ 
+ SWC_SOURCES +=                      \
+     libswc/xserver.c                \
+-    libswc/xwm.c                    \
+-    protocol/xserver-protocol.c
++    libswc/xwm.c                    
++    #protocol/xserver-protocol.c
+ endif
+ 
+ SWC_STATIC_OBJECTS = $(SWC_SOURCES:%.c=%.o)
+@@ -85,7 +85,7 @@ SWC_SHARED_OBJECTS = $(SWC_SOURCES:%.c=%.lo)
+ # Explicitly state dependencies on generated files
+ objects = $(foreach obj,$(1),$(dir)/$(obj).o $(dir)/$(obj).lo)
+ $(call objects,drm drm_buffer): protocol/wayland-drm-server-protocol.h
+-$(call objects,xserver): protocol/xserver-server-protocol.h
++#$(call objects,xserver): protocol/xserver-server-protocol.h
+ $(call objects,panel_manager panel): protocol/swc-server-protocol.h
+ $(call objects,pointer): cursor/cursor_data.h
+ 
