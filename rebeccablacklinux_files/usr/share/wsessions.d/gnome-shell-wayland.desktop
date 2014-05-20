@@ -2,14 +2,14 @@
 Enabled=1
 Type=WSession
 Name=Wayland Gnome Shell
-CompositorExec=/opt/bin/mutter-launch
+CompositorExec=/opt/bin/gnome-shell
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=-- gnome-shell --wayland --display-server
+AdditionalArguments=--wayland --display-server
 NeedsFile=/opt/bin/gnome-shell
 EnvironmentFile=/usr/share/wsessions.d/gnome-shell-wayland.environment
 
