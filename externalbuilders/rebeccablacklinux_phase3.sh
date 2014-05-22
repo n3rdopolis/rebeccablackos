@@ -98,13 +98,13 @@ if [[ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/
 then  
   ISOFAILED=1
 else
-    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
+    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom-full.iso $HOMELOCATION/RebeccaBlackLinux_DevDbg_$BUILDARCH.iso
 fi 
 if [[ ! -f $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ]]
 then  
   ISOFAILED=1
 else
-    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_Reduced_$BUILDARCH.iso
+    mv $BUILDLOCATION/build/$BUILDARCH/remastersys/remastersys/custom.iso $HOMELOCATION/RebeccaBlackLinux_$BUILDARCH.iso
 fi 
 
 

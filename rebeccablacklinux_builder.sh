@@ -28,7 +28,7 @@ NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CON
     
    Folder:            $BUILDLOCATION
    File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
-   File:              ${HOME}/RebeccaBlackLinux_Reduced_i386.iso or ${HOME}/RebeccaBlackLinux_Reduced_amd64.iso
+   File:              ${HOME}/RebeccaBlackLinux_DevDbg_i386.iso or ${HOME}/RebeccaBlackLinux_DevDbg_amd64.iso
 "
 
 
