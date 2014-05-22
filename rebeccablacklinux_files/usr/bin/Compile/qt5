@@ -72,7 +72,7 @@ function PackageCompileSource()
 {
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa -xcb -egl -prefix $INSTALLDIR -no-reduce-relocations -reduce-exports -dbus -no-gtkstyle -system-sqlite -openssl-linked -fully-process -no-warnings-are-errors -no-separate-debug-info
+../configure -confirm-license  -opensource -qpa -xcb -egl -prefix $INSTALLDIR -release  -no-reduce-relocations -reduce-exports -dbus -no-gtkstyle -system-sqlite -openssl-linked -fully-process -no-warnings-are-errors -no-separate-debug-info
 make -i
 }
 
