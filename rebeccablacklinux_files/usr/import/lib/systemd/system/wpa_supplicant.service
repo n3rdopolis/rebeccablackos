@@ -7,7 +7,7 @@ After=syslog.target
 Type=dbus
 BusName=fi.w1.wpa_supplicant1
 EnvironmentFile=-/etc/sysconfig/wpa_supplicant
-ExecStart=/usr/sbin/wpa_supplicant -u -f /var/log/wpa_supplicant.log -c /etc/wpa_supplicant/wpa_supplicant.conf $INTERFACES $DRIVERS $OTHER_ARGS
+ExecStart=/sbin/wpa_supplicant -u -f /var/log/wpa_supplicant.log -c /etc/wpa_supplicant/wpa_supplicant.conf $INTERFACES $DRIVERS $OTHER_ARGS
 
 [Install]
 WantedBy=multi-user.target
