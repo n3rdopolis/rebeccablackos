@@ -6,7 +6,6 @@ After=syslog.target
 [Service]
 Type=dbus
 BusName=fi.w1.wpa_supplicant1
-EnvironmentFile=-/etc/sysconfig/wpa_supplicant
 ExecStart=/sbin/wpa_supplicant -u -f /var/log/wpa_supplicant.log -c /etc/wpa_supplicant/wpa_supplicant.conf $INTERFACES $DRIVERS $OTHER_ARGS
 
 [Install]

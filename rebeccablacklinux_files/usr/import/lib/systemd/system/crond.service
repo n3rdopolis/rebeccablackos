@@ -3,8 +3,7 @@ Description=Command Scheduler
 After=syslog.target auditd.service systemd-user-sessions.service time-sync.target
 
 [Service]
-EnvironmentFile=/etc/sysconfig/crond
-ExecStart=/usr/sbin/cron -n $CRONDARGS
+ExecStart=/usr/sbin/cron
 KillMode=process
 
 [Install]

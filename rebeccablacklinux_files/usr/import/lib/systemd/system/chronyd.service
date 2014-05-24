@@ -5,7 +5,6 @@ Conflicts=ntpd.service
 
 [Service]
 Type=forking
-EnvironmentFile=-/etc/sysconfig/chronyd
 ExecStart=/usr/sbin/chronyd -u chrony $OPTIONS
 ExecStartPost=/usr/libexec/chrony-helper add-dhclient-servers
 
