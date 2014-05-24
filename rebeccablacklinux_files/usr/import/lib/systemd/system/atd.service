@@ -3,7 +3,6 @@ Description=Job spooling tools
 After=syslog.target systemd-user-sessions.service
 
 [Service]
-EnvironmentFile=/etc/sysconfig/atd
 ExecStart=/usr/sbin/atd -f $OPTS
 
 [Install]
