@@ -3,9 +3,9 @@ Description=System Logging Service
 ;Requires=syslog.socket
 
 [Service]
-Type=notify
+Type=forking
 EnvironmentFile=-/etc/sysconfig/rsyslog
-ExecStart=/usr/sbin/rsyslogd -c5
+ExecStart=/usr/sbin/rsyslogd
 StandardOutput=null
 
 [Install]
