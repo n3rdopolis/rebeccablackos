@@ -20,6 +20,6 @@ esac
 
 log_begin_msg "$DESCRIPTION"
 
-echo "Storage=none" >> /etc/systemd/journald.conf
+echo "Storage=none" >> /root/etc/systemd/journald.conf
 
 log_end_msg 
