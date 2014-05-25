@@ -22,4 +22,5 @@ unset GDK_BACKEND
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 export $(exec ck-launch-session dbus-launch)
+export WAYLAND_DISPLAY=wayland-$RANDOM
 gnome-shell --wayland
