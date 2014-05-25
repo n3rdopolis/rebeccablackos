@@ -60,6 +60,9 @@ fi
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 
+#Complie glib schemas
+glib-compile-schemas /opt/share/glib-2.0/schemas 
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
