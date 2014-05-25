@@ -105,8 +105,8 @@ LIBGL_DEBUG=verbose
 WAYLAND_DEBUG=1
 unset WINDOWID
 
-echo 'To exit Weston, hit CTRL-ALT-BACKSPACE'
-echo 'To exit other sessions, run waylandshutdown, and select "Log Off"'
+echo 'To exit Weston, hit CTRL-ALT-BACKSPACE,'
+echo 'or run waylandshutdown, and select "Log Off"'
 echo ' '
 echo 'When using Wayland, to run a program under xwayland, run'
 echo 'xwaylandapp programname --args --args2...'
