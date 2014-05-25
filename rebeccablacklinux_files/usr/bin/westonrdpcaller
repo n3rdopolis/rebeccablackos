@@ -27,6 +27,12 @@ then
   winpr-makecert -rdp > rdpkey.rdp
 fi
 zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
+
+*Please note that the RDP session will NOT be password protected." 
+
+
+zenity --forms --text="The Weston RDP Server session is now running
+
 The RDP session is running as the current user $USER
 Using an RDP client, you can connect to:
 
@@ -35,11 +41,6 @@ hostname: $(hostname)
 or the IP addresses:
 $(hostname -I | sed 's/ /\n/g')
 to connect to the session
-
-*Please note that the RDP session will NOT be password protected." 
-
-
-zenity --forms --text="The Weston RDP Server session is now running
 
 Close this dialog to terminate the Weston RDP server.
 
