@@ -291,9 +291,9 @@ then
   chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
   chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
   chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
-  #mkdir -p $MOUNTHOME/liveisotest/unionmountpoint/var/run/dbus
-  #chroot $MOUNTHOME/liveisotest/unionmountpoint dbus-daemon --system --fork
-  #chroot $MOUNTHOME/liveisotest/unionmountpoint upower &
+  mkdir -p $MOUNTHOME/liveisotest/unionmountpoint/var/run/dbus
+  chroot $MOUNTHOME/liveisotest/unionmountpoint dbus-daemon --system --fork
+  chroot $MOUNTHOME/liveisotest/unionmountpoint upower &
   #give more information in the testuser .bashrc
   echo "
 echo \"
@@ -302,7 +302,7 @@ westonnestedcaller
 westonnestedhawaiicaller
 westonnestedorbitalcaller
 enlightenmentnestedcaller
-
+gnomeshellnestedcaller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
