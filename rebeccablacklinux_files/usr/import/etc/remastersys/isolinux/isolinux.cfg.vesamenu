@@ -18,7 +18,30 @@ devices that do have drivers that most Wayland servers prefer.
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-MENU SEPARATOR
+label livenouveau
+  menu label live - boot the Live System with a workaround for Nvida/Nouveau
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminputinsecure nouveau.config=NvMSI=0 --
+TEXT HELP
+Start as normal, with a kernel option for some Nvida cards as a workaround
+
+Live user name is 'beccaholic' with no password
+ENDTEXT
+
+label livefbdefault
+  menu label live - boot the Live System with a workaround for Nvida/Nouveau
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev --
+TEXT HELP
+Start with a default framebuffer size specified by the drivers, 
+and force all sessions to use the framebuffer backend instead of kernel mode setting
+
+This is for diagnostics on systems that have kernel mode settings drivers
+and provide a virtual framebuffer device the size of the screen, but
+have problems when kernel mode setting is used directly.
+
+Live user name is 'beccaholic' with no password
+ENDTEXT
 
 label livefb786
   menu label live - boot the Live System with a 640x480(x24) framebuffer
@@ -27,6 +50,9 @@ label livefb786
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
+
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
 
 Live user name is 'beccaholic' with no password
 ENDTEXT
@@ -39,6 +65,9 @@ TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
 
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
@@ -49,6 +78,9 @@ label livefb792
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
+
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
 
 Live user name is 'beccaholic' with no password
 ENDTEXT
@@ -62,6 +94,9 @@ TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
 
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
@@ -73,6 +108,9 @@ TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
 **This resolution may not be supported by all hardware**
+
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
 
 Live user name is 'beccaholic' with no password
 ENDTEXT
@@ -86,6 +124,9 @@ Start with a fallback framebuffer, for hardware devices
 that don't have drivers that most Wayland servers prefer. 
 **This resolution may not be supported by all hardware**
 
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
@@ -98,10 +139,12 @@ Start with a fallback framebuffer, for hardware devices that
 don't have drivers that most Wayland servers prefer. 
 **This resolution may not be supported by all hardware**
 
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-MENU SEPARATOR
 
 label memtest
   menu label memtest - Run memtest
