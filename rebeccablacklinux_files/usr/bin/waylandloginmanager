@@ -841,11 +841,12 @@ function LeavePrompt
 function LoginWestonLauncher
 {
   Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
-  for (( StartTimes = 0 ; StartTimes < 5 ; StartTimes++ ))
+  for (( StartTimes = 0 ; StartTimes < 5 ;))
   do
     #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
     if [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay; echo $?) == 1 ]]
     then 
+      (( StartTimes++ ))
       chvt 63
       #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
       westonresult=$(weston --version &>/dev/null; echo $?) 
