@@ -868,7 +868,11 @@ function LoginWestonLauncher
 
 It is possible that if you logged into sessions, they might still be open on other TTYs. Press Enter to view the log." 20 50 --no-cancel
 
-  openvt -c 63 -s -f -w -- dialog --textbox /var/log/loginmanagerdisplay.log 20 50 --no-cancel
+  openvt -c 63 -s -f -w -- dialog --textbox /var/log/loginmanagerdisplay.log 500 500 --no-cancel
+
+  openvt -c 63 -s -f -w -- dialog --msgbox "Will now restart..." 20 50 --no-cancel
+  dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+  exit
 }
 
 
