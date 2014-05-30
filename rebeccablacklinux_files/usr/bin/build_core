@@ -27,7 +27,7 @@
 #SOURCEREVISION: The revision to use from the source repo. This is ignored if the REPOSITORYTYPE is archive
 #INSTALLDIR: This specifies the location to install the source. This variable must be used or must match when specified to autogen or cmake or the like.
 #	It is used by build_vars to set the needed variables.
-#REBUILDNEWREVISION: This is for MAkEDEBS. Some packages are worth rebuilding even if the deb file for this is already built, as it might be getting features faster, and is a smaller source package.
+#REBUILDNEWREVISION: This is for MAKEDEBS. Some packages are worth rebuilding even if the deb file for this is already built, as it might be getting features faster, and is a smaller source package.
 
 
 #GIT SUBMODULES
