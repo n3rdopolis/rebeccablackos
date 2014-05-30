@@ -477,7 +477,9 @@ function MakeAndInstall()
 	ldd "$FILE" | awk '{print $3}'
       done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
       do
-	dlocate -S --package-only "$LIBRARY"
+	DEPEND=$(dlocate -S --package-only "$LIBRARY")
+	echo $DEPEND
+	echo "$LIBRARY:$DEPEND" >> "/usr/share/logs/build_core/$SOURCENAME/CheckInstallDepends"
       done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg" | grep -v cmake | grep -v git | grep -v svn | grep -v bzr )
 
       DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
