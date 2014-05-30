@@ -29,7 +29,7 @@ SOURCEURL=git://git.enlightenment.org/core/enlightenment.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=devs/devilhorns/e_comp_wl
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,8 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
-git revert -n ffe4bf794e0eb530cc6102cac620134c24ef9059
+:
 }
 
 
