@@ -8,7 +8,7 @@ menu color title 1;37;44 #c0ffffff #00000000 std
 
 
 label live
-  menu label live - boot the Live System
+  menu label Startup normally
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminputinsecure --
 TEXT HELP
@@ -19,7 +19,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livenouveau
-  menu label live - boot the Live System with a workaround for Nvida/Nouveau
+  menu label Startup with a workaround for Nvida/Nouveau
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminputinsecure nouveau.config=NvMSI=0 --
 TEXT HELP
@@ -29,7 +29,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefbdefault
-  menu label live - boot the Live System with a workaround for Nvida/Nouveau
+  menu label Startup forcing to a default sized framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev --
 TEXT HELP
@@ -44,7 +44,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb786
-  menu label live - boot the Live System with a 640x480(x24) framebuffer
+  menu label Startup with a 640x480(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=786 --
 TEXT HELP
@@ -58,7 +58,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb789
-  menu label live - boot the Live System with a 800x600(x24) framebuffer
+  menu label Startup with a 800x600(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=789 --
 TEXT HELP
@@ -72,7 +72,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb792
-  menu label live - boot the Live System with a 1024x768(x24) framebuffer
+  menu label Startup with a 1024x768(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=792 --
 TEXT HELP
@@ -87,7 +87,7 @@ ENDTEXT
 
 
 label livefb795
-  menu label live - boot the Live System with a 1280x1024(x24) framebuffer
+  menu label Startup with a 1280x1024(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=795 --
 TEXT HELP
@@ -101,7 +101,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb838
-  menu label live - boot the Live System with a 1400x1050(x24) framebuffer
+  menu label Startup with a 1400x1050(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=838 --
 TEXT HELP
@@ -116,7 +116,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb867
-  menu label live - boot the Live System with a 1400x900(x24) framebuffer
+  menu label Startup with a 1400x900(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=867 --
 TEXT HELP
@@ -131,7 +131,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb799
-  menu label live - boot the Live System with a 1600x1200(x24) framebuffer
+  menu label Startup with a 1600x1200(x24) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=799 --
 TEXT HELP
