@@ -474,12 +474,15 @@ function MakeAndInstall()
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
       do
-	ldd "$FILE" | awk '{print $3}'
-      done | sort | uniq | grep -v ^$ | grep -v dynamic | grep -v not | while read LIBRARY
+	ldd "$FILE" | grep =\> | awk '{print $3}'
+      done | sort | uniq | grep -v ^$ | while read LIBRARY
       do
-	DEPEND=$(dlocate -S --package-only "$LIBRARY")
-	echo $DEPEND
-	echo "$LIBRARY:$DEPEND" >> "/usr/share/logs/build_core/$SOURCENAME/CheckInstallDepends"
+	if [[ -e "$LIBRARY" ]]
+	then
+	  DEPEND=$(dlocate -S --package-only "$LIBRARY")
+	  echo $DEPEND
+	  echo "$LIBRARY:$DEPEND" >> "/usr/share/logs/build_core/$SOURCENAME/CheckInstallDepends"
+	fi
       done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg" | grep -v cmake | grep -v git | grep -v svn | grep -v bzr )
 
       DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
