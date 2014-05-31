@@ -847,7 +847,7 @@ function LoginWestonLauncher
     if [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay; echo $?) == 1 ]]
     then 
       (( StartTimes++ ))
-      chvt 63
+      chvt 63 &
       #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
       westonresult=$(weston --version &>/dev/null; echo $?) 
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
