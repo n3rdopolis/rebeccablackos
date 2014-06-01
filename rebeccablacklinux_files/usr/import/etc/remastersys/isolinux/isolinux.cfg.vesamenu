@@ -25,8 +25,8 @@ label livefbdefault
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev --
 TEXT HELP
-Start with a default framebuffer size specified by the drivers, 
-and force all sessions to use the framebuffer backend instead of kernel mode setting
+Start with a default framebuffer size specified by the drivers, and force 
+all sessions to use the framebuffer backend instead of kernel mode setting
 
 This is for diagnostics on systems that have kernel mode settings drivers
 and provide a virtual framebuffer device the size of the screen, but
