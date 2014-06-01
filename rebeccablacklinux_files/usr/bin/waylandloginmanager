@@ -236,7 +236,6 @@ function Create_XDG_RUNTIME_DIR
 function GetNextTTY
 {
   TTYNotInUse=0
-  LastTTY=7
   #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
   while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
   do
