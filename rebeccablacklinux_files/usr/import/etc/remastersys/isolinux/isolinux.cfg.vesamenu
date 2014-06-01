@@ -18,15 +18,7 @@ devices that do have drivers that most Wayland servers prefer.
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livenouveau
-  menu label Startup with a workaround for Nvida/Nouveau
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminputinsecure nouveau.config=NvMSI=0 --
-TEXT HELP
-Start as normal, with a kernel option for some Nvida cards as a workaround
-
-Live user name is 'beccaholic' with no password
-ENDTEXT
+MENU SEPARATOR
 
 label livefbdefault
   menu label Startup forcing to a default sized framebuffer
