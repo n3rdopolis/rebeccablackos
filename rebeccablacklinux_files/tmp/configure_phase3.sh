@@ -69,6 +69,9 @@ echo "$(date)" > /etc/builddate
 #Get all Source 
 cat /usr/share/logs/build_core/*/GetSourceVersion > /usr/share/build_core_revisions.txt
 
+#hide buildlogs in tmp from remastersys
+mv /usr/share/logs	/tmp
+
 #start the remastersys job
 remastersys dist
 
@@ -118,9 +121,6 @@ rm /usr/sbin/invoke-rc.d
 dpkg-divert --local --rename --remove /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /sbin/initctl
 dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
-
-#hide buildlogs in tmp from remastersys
-mv /usr/share/logs	/tmp
 
 #delete bloated binary files that are for development, and are not needed on the smaller iso
 rm /opt/bin/Xnest
