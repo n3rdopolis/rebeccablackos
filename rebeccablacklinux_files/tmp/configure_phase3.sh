@@ -78,7 +78,7 @@ remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
 
-#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+#Redirect these utilitues to /bin/true during package manager operations. This gets reverted before the second remastersys is called, so it's suitable for the ISO
 dpkg-divert --local --rename --remove /usr/sbin/grub-probe
 dpkg-divert --local --rename --remove /sbin/initctl
 dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
