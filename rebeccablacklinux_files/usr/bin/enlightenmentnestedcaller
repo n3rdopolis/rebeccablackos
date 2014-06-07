@@ -20,9 +20,7 @@
 . /usr/bin/wlruntime_vars
 DIALOG=$(sleep 3; zenity --forms --text "Menu selection in Enlightenment:
 While you can hover over the desktop menus with the mouse, to make a menu selection
-you must press Enter on the keyboard.
-
-The mouse cursor inside the Elementary window is not usable. The cursor that is usable is the system cursor." --title="Enlightenment Note") &
+you must press Enter on the keyboard." --title="Enlightenment Note") &
 export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
 export $(exec ck-launch-session dbus-launch)
