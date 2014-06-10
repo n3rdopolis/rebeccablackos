@@ -45,7 +45,7 @@ if [[ -z $VBOXMOUNT ]]
 then
   UNMOUNT=1
   mkdir /tmp/vboxmount
-  mount $VBOXMOUNT /tmp/vboxmount
+  mount $VBOXDISK /tmp/vboxmount
   VBOXMOUNT=/tmp/vboxmount
 fi
 
