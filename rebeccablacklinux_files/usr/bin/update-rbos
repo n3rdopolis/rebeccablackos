@@ -28,7 +28,7 @@ fi
 cd /usr/share
 
 apt-get update
-yes Y |apt-get install subversion git bzr mercurial
+apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
 #download off the SVN
 svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
 #make the files owned by root, and executable
@@ -73,13 +73,13 @@ then
 
     if [[ $METHOD == "PART" ]]
     then
-      yes Yes | apt-get --no-install-recommends install $PACKAGE -y --force-yes
+      apt-get --no-install-recommends install $PACKAGE -y --force-yes
     elif [[ $METHOD == "FULL" ]]
     then
-      yes Yes | apt-get install $PACKAGE -y --force-yes
+      apt-get install $PACKAGE -y --force-yes
     elif [[ $METHOD == "BUILDDEP" ]]
     then
-      yes Y | apt-get build-dep $PACKAGE -y --force-yes
+      apt-get build-dep $PACKAGE -y --force-yes
     else
       echo "Invalid Install Operation"
     fi
