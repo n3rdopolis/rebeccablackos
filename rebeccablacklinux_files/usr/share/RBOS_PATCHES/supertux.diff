@@ -1,86 +1,12 @@
-diff --git a/src/SDL2/SDL_config.h b/src/SDL2/SDL_config.h
-index 7440940..3ca3d01 100644
---- a/src/SDL2/SDL_config.h
-+++ b/src/SDL2/SDL_config.h
-@@ -41,7 +41,7 @@
- #include "SDL_config_psp.h"
- #else
- /* This is a minimal configuration just to get SDL running on new platforms */
--#include "SDL_config_minimal.h"
-+#include <SDL2/SDL_config_minimal.h>
- #endif /* platform config */
- 
- #ifdef USING_GENERATED_CONFIG_H
-diff --git a/src/gui/menu_item.cpp b/src/gui/menu_item.cpp
-index f25a4d7..02eb90c 100644
---- a/src/gui/menu_item.cpp
-+++ b/src/gui/menu_item.cpp
+diff --git a/src/video/sdl/sdl_texture.hpp b/src/video/sdl/sdl_texture.hpp
+index 97c38cb..d5fa80f 100644
+--- a/src/video/sdl/sdl_texture.hpp
++++ b/src/video/sdl/sdl_texture.hpp
 @@ -19,6 +19,7 @@
- #include "supertux/resources.hpp"
- #include "supertux/timer.hpp"
- #include "video/font.hpp"
-+#include <stdio.h>
- 
- static const float FLICK_CURSOR_TIME   = 0.5f;
- 
-diff --git a/src/physfs/physfs_sdl.cpp b/src/physfs/physfs_sdl.cpp
-index b751a8e..277f993 100644
---- a/src/physfs/physfs_sdl.cpp
-+++ b/src/physfs/physfs_sdl.cpp
-@@ -20,6 +20,7 @@
- #include <sstream>
- #include <stdexcept>
- #include <assert.h>
-+#include <stdio.h>
- 
- #include "util/log.hpp"
- 
-diff --git a/src/supertux/main.cpp b/src/supertux/main.cpp
-index 87d5389..c96690b 100644
---- a/src/supertux/main.cpp
-+++ b/src/supertux/main.cpp
-@@ -23,6 +23,7 @@
- #include <binreloc.h>
- #include <tinygettext/log.hpp>
- #include <boost/format.hpp>
-+#include <stdio.h>
- extern "C" {
- #include <findlocale.h>
- }
-diff --git a/src/supertux/menu/options_menu.cpp b/src/supertux/menu/options_menu.cpp
-index 222540f..13d6c30 100644
---- a/src/supertux/menu/options_menu.cpp
-+++ b/src/supertux/menu/options_menu.cpp
-@@ -30,6 +30,7 @@
  
  #include <algorithm>
- #include <sstream>
-+#include <stdio.h>
+ #include <config.h>
++#include <string.h>
  
- enum OptionsMenuIDs {
-   MNID_FULLSCREEN,
-diff --git a/src/supertux/screen_manager.cpp b/src/supertux/screen_manager.cpp
-index 98e8740..36fdc11 100644
---- a/src/supertux/screen_manager.cpp
-+++ b/src/supertux/screen_manager.cpp
-@@ -35,6 +35,7 @@
- #include "video/drawing_context.hpp"
- #include "video/renderer.hpp"
+ #include <SDL.h>
  
-+#include <stdio.h>
- /** ticks (as returned from SDL_GetTicks) per frame */
- static const Uint32 TICKS_PER_FRAME = (Uint32) (1000.0 / LOGICAL_FPS);
- /** don't skip more than every 2nd frame */
-diff --git a/src/video/sdl/sdl_lightmap.cpp b/src/video/sdl/sdl_lightmap.cpp
-index b523fbc..7937818 100644
---- a/src/video/sdl/sdl_lightmap.cpp
-+++ b/src/video/sdl/sdl_lightmap.cpp
-@@ -31,7 +31,7 @@ SDLLightmap::SDLLightmap() :
-   denominator(),
-   LIGHTMAP_DIV()
- {
--  screen = SDL_GetVideoSurface();
-+  screen = SDL_GetWindowSurface(SDL_GetMouseFocus());
- 
-   //float xfactor = 1.0f; // FIXME: (float) config->screenwidth / SCREEN_WIDTH;
-   //float yfactor = 1.0f; // FIXME: (float) config->screenheight / SCREEN_HEIGHT;
