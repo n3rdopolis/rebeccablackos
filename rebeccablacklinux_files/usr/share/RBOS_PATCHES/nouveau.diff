@@ -1,5 +1,5 @@
 diff --git a/drm/Kbuild b/drm/Kbuild
-index e2933db..8c0c702 100644
+index b3fa1ba..19ffe92 100644
 --- a/drm/Kbuild
 +++ b/drm/Kbuild
 @@ -6,6 +6,8 @@ ccflags-y := -Iinclude/drm
@@ -11,43 +11,6 @@ index e2933db..8c0c702 100644
  
  nouveau-y := core/core/client.o
  nouveau-y += core/core/engctx.o
-
-
-
-
-
-From ff527544b0048d41a56097a66ff954fb9b0a2c75 Mon Sep 17 00:00:00 2001
-From: Mario Kleiner <mario.kleiner.de@gmail.com>
-Date: Wed, 19 Mar 2014 07:12:51 +0000
-Subject: mc/nv50-: fix kms pageflip events by reordering irq handling order.
-
-Whenever a single nouveau_mc_intr() main gpu irq-handler invocation was
-responsible for calling both, the vblank-irq handler (display engine irq)
-and kms-pageflip completion handler (from fifo irq), the order of
-invocation was wrong. nouveau_finish_flip() was called before
-drm_handle_vblank() for the vblank of pageflip completion, so the
-emitted pageflip event contained stale vblank count and timestamp
-from previous vblank. This caused failure in userspace to timestamp
-properly.
-
-Reorder order of invocation of engine irq handlers: Put
-NVDEV_ENGINE_DISP always on top, and thereby before NVDEV_ENGINE_FIFO,
-so that drm_handle_vblank() gets called to update vblank timestamps
-and count before potential pageflip events make use of that
-information.
-
-This works on nv-50 and later, where kms-pageflip completion triggers
-an irq either after a separate vblank irq, or both pageflip and vblank
-trigger one common irq invocation, but never before vblank irqs.
-
-v2 (Ben):
-- removed mods for nv04-nv40, it doesn't help there anyway
-- this is considered a hack, and a better solution should be found
-
-Signed-off-by: Mario Kleiner <mario.kleiner.de@gmail.com>
-Signed-off-by: Ben Skeggs <bskeggs@redhat.com>
-Cc: <stable@vger.kernel.org> # 3.13+
----
 diff --git a/nvkm/subdev/mc/nv50.c b/nvkm/subdev/mc/nv50.c
 index e8822a9..90d8bf8 100644
 --- a/nvkm/subdev/mc/nv50.c
@@ -89,7 +52,7 @@ index f8a6f18..95b3d35 100644
  	{ 0x80000000, NVDEV_ENGINE_SW },
  	{ 0x0042d101, NVDEV_SUBDEV_FB },
 diff --git a/nvkm/subdev/mc/nvc0.c b/nvkm/subdev/mc/nvc0.c
-index 34472d3..ac7f99a 100644
+index c02b476..c809743 100644
 --- a/nvkm/subdev/mc/nvc0.c
 +++ b/nvkm/subdev/mc/nvc0.c
 @@ -26,6 +26,7 @@
@@ -100,13 +63,11 @@ index 34472d3..ac7f99a 100644
  	{ 0x00000001, NVDEV_ENGINE_PPP },
  	{ 0x00000020, NVDEV_ENGINE_COPY0 },
  	{ 0x00000040, NVDEV_ENGINE_COPY1 },
-@@ -40,7 +41,6 @@ nvc0_mc_intr[] = {
+@@ -39,7 +40,6 @@ nvc0_mc_intr[] = {
  	{ 0x00200000, NVDEV_SUBDEV_GPIO },
  	{ 0x01000000, NVDEV_SUBDEV_PWR },
  	{ 0x02000000, NVDEV_SUBDEV_LTCG },
 -	{ 0x04000000, NVDEV_ENGINE_DISP },
- 	{ 0x08000000, NVDEV_SUBDEV_FB },
  	{ 0x10000000, NVDEV_SUBDEV_BUS },
  	{ 0x40000000, NVDEV_SUBDEV_IBUS },
---
-cgit v0.9.0.2-2-gbebe
+ 	{ 0x80000000, NVDEV_ENGINE_SW },
