@@ -80,7 +80,7 @@ make -C /lib/modules/$CURRENTKERNELVERSION/build M=$PWD modules_install
 function PackagePostInstall()
 {
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
-cp /lib/modules/$CURRENTKERNELVERSION/extra/nouveau.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/drm/nouveau/nouveau.ko
+cp /lib/modules/$CURRENTKERNELVERSION/extra/nouveau.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/nouveau/nouveau.ko
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
