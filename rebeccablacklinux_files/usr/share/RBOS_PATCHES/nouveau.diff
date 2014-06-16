@@ -1,20 +1,7 @@
-diff --git a/drm/Kbuild b/drm/Kbuild
-index b3fa1ba..19ffe92 100644
---- a/drm/Kbuild
-+++ b/drm/Kbuild
-@@ -6,6 +6,8 @@ ccflags-y := -Iinclude/drm
- ccflags-y += -I$(src)/core/include
- ccflags-y += -I$(src)/core
- ccflags-y += -I$(src)
-+ccflags-y += -Wno-error=implicit-function-declaration
-+
- 
- nouveau-y := core/core/client.o
- nouveau-y += core/core/engctx.o
-diff --git a/nvkm/subdev/mc/nv50.c b/nvkm/subdev/mc/nv50.c
+diff --git a/drivers/gpu/drm/nouveau/core/subdev/mc/nv50.c b/drivers/gpu/drm/nouveau/core/subdev/mc/nv50.c
 index e8822a9..90d8bf8 100644
---- a/nvkm/subdev/mc/nv50.c
-+++ b/nvkm/subdev/mc/nv50.c
+--- a/drivers/gpu/drm/nouveau/core/subdev/mc/nv50.c
++++ b/drivers/gpu/drm/nouveau/core/subdev/mc/nv50.c
 @@ -26,6 +26,7 @@
  
  const struct nouveau_mc_intr
@@ -31,10 +18,10 @@ index e8822a9..90d8bf8 100644
  	{ 0x10000000, NVDEV_SUBDEV_BUS },
  	{ 0x80000000, NVDEV_ENGINE_SW },
  	{ 0x0002d101, NVDEV_SUBDEV_FB },
-diff --git a/nvkm/subdev/mc/nv98.c b/nvkm/subdev/mc/nv98.c
+diff --git a/drivers/gpu/drm/nouveau/core/subdev/mc/nv98.c b/drivers/gpu/drm/nouveau/core/subdev/mc/nv98.c
 index f8a6f18..95b3d35 100644
---- a/nvkm/subdev/mc/nv98.c
-+++ b/nvkm/subdev/mc/nv98.c
+--- a/drivers/gpu/drm/nouveau/core/subdev/mc/nv98.c
++++ b/drivers/gpu/drm/nouveau/core/subdev/mc/nv98.c
 @@ -26,6 +26,7 @@
  
  static const struct nouveau_mc_intr
@@ -51,10 +38,10 @@ index f8a6f18..95b3d35 100644
  	{ 0x10000000, NVDEV_SUBDEV_BUS },
  	{ 0x80000000, NVDEV_ENGINE_SW },
  	{ 0x0042d101, NVDEV_SUBDEV_FB },
-diff --git a/nvkm/subdev/mc/nvc0.c b/nvkm/subdev/mc/nvc0.c
+diff --git a/drivers/gpu/drm/nouveau/core/subdev/mc/nvc0.c b/drivers/gpu/drm/nouveau/core/subdev/mc/nvc0.c
 index c02b476..c809743 100644
---- a/nvkm/subdev/mc/nvc0.c
-+++ b/nvkm/subdev/mc/nvc0.c
+--- a/drivers/gpu/drm/nouveau/core/subdev/mc/nvc0.c
++++ b/drivers/gpu/drm/nouveau/core/subdev/mc/nvc0.c
 @@ -26,6 +26,7 @@
  
  const struct nouveau_mc_intr

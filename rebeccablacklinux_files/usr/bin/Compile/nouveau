@@ -23,13 +23,13 @@
 SOURCENAME=nouveau
 
 #The URL of the Source code repo
-SOURCEURL=git://people.freedesktop.org/~darktama/nouveau
+SOURCEURL=git://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-3.13
+SOURCEREVISION=v3.13
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -63,16 +63,16 @@ patch -p1 < /usr/share/RBOS_PATCHES/nouveau.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+cd drivers/gpu/drm/nouveau
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
-cd drm
 make -C /lib/modules/$CURRENTKERNELVERSION/build M=$PWD
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+cd drivers/gpu/drm/nouveau
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
-cd drm
 make -C /lib/modules/$CURRENTKERNELVERSION/build M=$PWD modules_install
 }
 
