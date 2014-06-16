@@ -58,3 +58,31 @@ index c02b476..c809743 100644
  	{ 0x10000000, NVDEV_SUBDEV_BUS },
  	{ 0x40000000, NVDEV_SUBDEV_IBUS },
  	{ 0x80000000, NVDEV_ENGINE_SW },
+diff --git a/drivers/gpu/drm/nouveau/nouveau_display.c b/drivers/gpu/drm/nouveau/nouveau_display.c
+index 25ea82f..c015d4c 100644
+--- a/drivers/gpu/drm/nouveau/nouveau_display.c
++++ b/drivers/gpu/drm/nouveau/nouveau_display.c
+@@ -691,6 +691,7 @@ nouveau_finish_page_flip(struct nouveau_channel *chan,
+ 	struct drm_device *dev = drm->dev;
+ 	struct nouveau_page_flip_state *s;
+ 	unsigned long flags;
++	int crtcid = -1;
+ 
+ 	spin_lock_irqsave(&dev->event_lock, flags);
+ 
+@@ -701,8 +702,13 @@ nouveau_finish_page_flip(struct nouveau_channel *chan,
+ 	}
+ 
+ 	s = list_first_entry(&fctx->flip, struct nouveau_page_flip_state, head);
+-	if (s->event)
+-		drm_send_vblank_event(dev, s->crtc, s->event);
++	if (s->event) {
++		/* Vblank timestamps/counts are only correct on >= NV-50 */
++		if (nv_device(drm->device)->card_type >= NV_50)
++			crtcid = s->crtc;
++
++		drm_send_vblank_event(dev, crtcid, s->event);
++	}
+ 
+ 	list_del(&s->head);
+ 	if (ps)
