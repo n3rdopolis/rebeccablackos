@@ -293,10 +293,11 @@ function RegisterSession
   fi
 }
 
-#This function takes an argument of a number of seconds, and shows a Zenity dialog with a progress bar to count down the specified time.
+#This function takes two arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string.
 function DialogWait
 {
   waitseconds=$1
+  displaystring="$2"
   countseconds=0
   while [[ $countseconds -lt $waitseconds ]]
   do
@@ -304,7 +305,7 @@ function DialogWait
     echo $percent
     ((countseconds++))
     sleep 1
-  done | $ZENITYCMD --title="autologin" --no-cancel --progress --auto-close --text="Waiting for Autologin timeout..." 2>/dev/null
+  done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
 }
 
 
@@ -680,6 +681,7 @@ function AuthenticateUser
     unset TryPassword
     #if the password and username is correct, start the session
     logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
+    DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
     #report success
     return 0
