@@ -904,6 +904,7 @@ function StartAutoLogin
     fi
     #get the TTY to start the autologin session on
     export AutoSessionTTY=$(GetNextTTY)
+    DialogWait 3 "Attempting to start the selected session..."
     #if there is a tty for the autologin session, the autologin is configured, start the autologin session
     if [[ $AutoSessionTTY -ne -1 ]]
     then
