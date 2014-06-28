@@ -11,3 +11,135 @@ index 2978386..0b556a1 100644
                                 e_comp_wl_cb_keymap_changed, NULL);
  
     ecore_wl_init(NULL);
+diff --git a/src/modules/wl_drm/e_mod_main.c b/src/modules/wl_drm/e_mod_main.c
+index 9a8757b..5338242 100644
+Copyright (c) 2012 Arvin Schnell <arvin.schnell@gmail.com>
+Copyright (c) 2012 Rob Clark <rob@ti.com>
+Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+--- a/src/modules/wl_drm/e_mod_main.c
++++ b/src/modules/wl_drm/e_mod_main.c
+@@ -6,6 +6,95 @@
+ #define SCREEN_WIDTH 1920
+ #define SCREEN_HEIGHT 1200
+ 
++
++#define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
++int screenx;
++int screeny;
++static struct {
++	struct gbm_device *dev;
++	struct gbm_surface *surface;
++} gbm;
++
++static struct {
++	int fd;
++	drmModeModeInfo *mode;
++	uint32_t crtc_id;
++	uint32_t connector_id;
++} drm;
++
++struct drm_fb {
++	struct gbm_bo *bo;
++	uint32_t fb_id;
++};
++
++int GetScreenSize(void)
++{
++static const char *modules[] = {
++"i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "msm"
++};
++drmModeRes *resources;
++drmModeConnector *connector = NULL;
++drmModeEncoder *encoder = NULL;
++int i, area;
++
++for (i = 0; i < ARRAY_SIZE(modules); i++) {
++printf("trying to load module %s...", modules[i]);
++drm.fd = drmOpen(modules[i], NULL);
++if (drm.fd < 0) {
++printf("failed.\n");
++} else {
++printf("success.\n");
++break;
++}
++}
++
++if (drm.fd < 0) {
++printf("could not open drm device\n");
++return -1;
++}
++
++resources = drmModeGetResources(drm.fd);
++if (!resources) {
++printf("drmModeGetResources failed: %s\n", strerror(errno));
++return -1;
++}
++
++/* find a connected connector: */
++for (i = 0; i < resources->count_connectors; i++) {
++connector = drmModeGetConnector(drm.fd, resources->connectors[i]);
++if (connector->connection == DRM_MODE_CONNECTED) {
++/* it's connected, let's use this! */
++break;
++}
++drmModeFreeConnector(connector);
++connector = NULL;
++}
++
++if (!connector) {
++/* we could be fancy and listen for hotplug events and wait for
++* a connector..
++*/
++printf("no connected connector!\n");
++return -1;
++}
++/* find highest resolution mode: */
++for (i = 0, area = 0; i < connector->count_modes; i++) {
++drmModeModeInfo *current_mode = &connector->modes[i];
++int current_area = current_mode->hdisplay * current_mode->vdisplay;
++if (current_area > area) {
++drm.mode = current_mode;
++area = current_area;
++screenx=current_mode->hdisplay;
++screeny=current_mode->vdisplay;
++}
++}
++printf("%d", x);
++return 0;
++}
++
++
++
++
+ EAPI E_Module_Api e_modapi = { E_MODULE_API_VERSION, "Wl_Drm" };
+ 
+ EAPI void *
+@@ -14,7 +103,7 @@ e_modapi_init(E_Module *m)
+    E_Comp *comp;
+ 
+    printf("LOAD WL_DRM MODULE\n");
+-
++   GetScreenSize();
+    /* try to init ecore_drm */
+    /* if (!ecore_drm_init()) */
+    /*   { */
+@@ -24,7 +113,7 @@ e_modapi_init(E_Module *m)
+ 
+    comp = e_comp_new();
+    comp->comp_type = E_PIXMAP_TYPE_WL;
+-   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
++   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, screenx, screeny);
+    if (!comp->ee)
+      {
+         fprintf(stderr, "Could not create ecore_evas_drm canvas");
+@@ -41,8 +130,8 @@ e_modapi_init(E_Module *m)
+         screen->escreen = screen->screen = 0;
+         screen->x = 0;
+         screen->y = 0;
+-        screen->w = SCREEN_WIDTH;
+-        screen->h = SCREEN_HEIGHT;
++        screen->w = screenx;
++        screen->h = screeny;
+         e_xinerama_screens_set(eina_list_append(NULL, screen));
+      }
+ 
