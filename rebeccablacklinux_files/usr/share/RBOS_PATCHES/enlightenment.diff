@@ -1,18 +1,5 @@
-diff --git a/src/modules/wl_x11/e_mod_main.c b/src/modules/wl_x11/e_mod_main.c
-index 2978386..0b556a1 100644
---- a/src/modules/wl_x11/e_mod_main.c
-+++ b/src/modules/wl_x11/e_mod_main.c
-@@ -54,7 +54,7 @@ e_modapi_init(E_Module *m)
-    /* setup keymap_change event handler */
-    if (!_e_wl_comp->kbd_handler)
-      _e_wl_comp->kbd_handler = 
--       ecore_event_handler_add(ECORE_X_EVENT_XKB_STATE_NOTIFY, 
-+       ecore_event_handler_add(ecore_event_type_new(), 
-                                e_comp_wl_cb_keymap_changed, NULL);
- 
-    ecore_wl_init(NULL);
 diff --git a/src/modules/wl_drm/e_mod_main.c b/src/modules/wl_drm/e_mod_main.c
-index 9a8757b..5338242 100644
+index 9a8757b..d184a32 100644
 Copyright (c) 2012 Arvin Schnell <arvin.schnell@gmail.com>
 Copyright (c) 2012 Rob Clark <rob@ti.com>
 Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
@@ -132,7 +119,7 @@ Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
     if (!comp->ee)
       {
          fprintf(stderr, "Could not create ecore_evas_drm canvas");
-@@ -41,8 +130,8 @@ e_modapi_init(E_Module *m)
+@@ -41,12 +130,12 @@ e_modapi_init(E_Module *m)
          screen->escreen = screen->screen = 0;
          screen->x = 0;
          screen->y = 0;
@@ -142,4 +129,9 @@ Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
 +        screen->h = screeny;
          e_xinerama_screens_set(eina_list_append(NULL, screen));
       }
+ 
+-   comp->man = e_manager_new(0, comp, SCREEN_WIDTH, SCREEN_HEIGHT);
++   comp->man = e_manager_new(0, comp, screenx, screeny);
+    if (!e_comp_canvas_init(comp)) return NULL;
+    e_comp_canvas_fake_layers_init(comp);
  
