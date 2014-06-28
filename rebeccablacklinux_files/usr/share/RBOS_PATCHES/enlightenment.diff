@@ -1,8 +1,5 @@
 diff --git a/src/modules/wl_drm/e_mod_main.c b/src/modules/wl_drm/e_mod_main.c
-index 9a8757b..d184a32 100644
-Copyright (c) 2012 Arvin Schnell <arvin.schnell@gmail.com>
-Copyright (c) 2012 Rob Clark <rob@ti.com>
-Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+index 9a8757b..35c73c4 100644
 --- a/src/modules/wl_drm/e_mod_main.c
 +++ b/src/modules/wl_drm/e_mod_main.c
 @@ -6,6 +6,95 @@
@@ -110,15 +107,6 @@ Copyright (c) 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
     /* try to init ecore_drm */
     /* if (!ecore_drm_init()) */
     /*   { */
-@@ -24,7 +113,7 @@ e_modapi_init(E_Module *m)
- 
-    comp = e_comp_new();
-    comp->comp_type = E_PIXMAP_TYPE_WL;
--   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-+   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, screenx, screeny);
-    if (!comp->ee)
-      {
-         fprintf(stderr, "Could not create ecore_evas_drm canvas");
 @@ -41,12 +130,12 @@ e_modapi_init(E_Module *m)
          screen->escreen = screen->screen = 0;
          screen->x = 0;
