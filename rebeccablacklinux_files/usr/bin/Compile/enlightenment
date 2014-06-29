@@ -29,7 +29,7 @@ SOURCEURL=git://git.enlightenment.org/core/enlightenment.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=devs/devilhorns/e_comp_wl
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -58,6 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cp /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig/tslib-0.0.pc /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig/tslib.pc
+patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
