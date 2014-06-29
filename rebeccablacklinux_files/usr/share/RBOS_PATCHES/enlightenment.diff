@@ -1,13 +1,11 @@
 diff --git a/src/modules/wl_drm/e_mod_main.c b/src/modules/wl_drm/e_mod_main.c
-index 9a8757b..f3823e2 100644
+index dfcd643..874af03 100644
 --- a/src/modules/wl_drm/e_mod_main.c
 +++ b/src/modules/wl_drm/e_mod_main.c
-@@ -1,11 +1,46 @@
- #include "e.h"
+@@ -3,9 +3,43 @@
  #include "e_comp_wl.h"
- #include "e_comp_wl_input.h"
-+
-+
+ #include <Ecore_Wayland.h>
+ 
 +#include <sys/types.h>
 +#include <sys/stat.h>
 +#include <fcntl.h>
@@ -20,8 +18,7 @@ index 9a8757b..f3823e2 100644
 +#include <xf86drmMode.h>
 +#include <gbm.h>
 +
- /* #include <Ecore_Drm.h> */
- 
++
  #define SCREEN_WIDTH 1920
  #define SCREEN_HEIGHT 1200
  
@@ -49,12 +46,11 @@ index 9a8757b..f3823e2 100644
  EAPI E_Module_Api e_modapi = { E_MODULE_API_VERSION, "Wl_Drm" };
  
  EAPI void *
-@@ -14,7 +49,63 @@ e_modapi_init(E_Module *m)
+@@ -14,7 +48,63 @@ e_modapi_init(E_Module *m)
     E_Comp *comp;
  
     printf("LOAD WL_DRM MODULE\n");
--
-+    static const char *modules[] = {
++   static const char *modules[] = {
 +      "i915", "radeon", "nouveau", "vmwgfx", "omapdrm", "exynos", "msm"
 +    };
 +   drmModeRes *resources;
@@ -93,7 +89,7 @@ index 9a8757b..f3823e2 100644
 +    connector = NULL;
 +    
 +  }
-+
+ 
 +  if (!connector) {
 +    /* we could be fancy and listen for hotplug events and wait for
 +     * a connector..
@@ -114,7 +110,16 @@ index 9a8757b..f3823e2 100644
     /* try to init ecore_drm */
     /* if (!ecore_drm_init()) */
     /*   { */
-@@ -41,12 +132,12 @@ e_modapi_init(E_Module *m)
+@@ -24,7 +114,7 @@ e_modapi_init(E_Module *m)
+ 
+    comp = e_comp_new();
+    comp->comp_type = E_PIXMAP_TYPE_WL;
+-   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
++   comp->ee = ecore_evas_drm_new(NULL, 0, 0, 0, screenx, screeny);
+    if (!comp->ee)
+      {
+         fprintf(stderr, "Could not create ecore_evas_drm canvas");
+@@ -39,11 +129,11 @@ e_modapi_init(E_Module *m)
          screen->escreen = screen->screen = 0;
          screen->x = 0;
          screen->y = 0;
@@ -124,9 +129,8 @@ index 9a8757b..f3823e2 100644
 +        screen->h = screeny;
          e_xinerama_screens_set(eina_list_append(NULL, screen));
       }
- 
 -   comp->man = e_manager_new(0, comp, SCREEN_WIDTH, SCREEN_HEIGHT);
 +   comp->man = e_manager_new(0, comp, screenx, screeny);
-    if (!e_comp_canvas_init(comp)) return NULL;
+    if (!e_comp_wl_init()) return NULL;
+    e_comp_canvas_init(comp);
     e_comp_canvas_fake_layers_init(comp);
- 
