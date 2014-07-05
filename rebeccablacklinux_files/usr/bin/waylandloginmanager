@@ -1071,11 +1071,12 @@ then
   logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
-#Enable full access to /dev/input/ when wlminputinsecure is passed as a kernel argument TODO remove when EFL/enlightenment works without this
-if [[ $(cat /proc/cmdline | grep -c wlminputinsecure ) != 0 ]]
+#Enable full access to /dev/input/ when  is passed as a kernel argument TODO remove when EFL/enlightenment works without this
+if [[ $(cat /proc/cmdline | grep -c wlminsecurepermissions ) != 0 ]]
 then
   setfacl -m "g:plugdev:rwx" /dev/input/*
-  logger -t waylandloginmanager "WARNING: The 'wlminputinsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable the plugdev group to have constant full access to the devices in /dev/input" -s  >>/var/log/waylandloginmanager 2>&1
+  setfacl -m "g:plugdev:rwx" /dev/dri/card*
+  logger -t waylandloginmanager "WARNING: The 'wlminsecurepermissions' option has been passed to the kernel. This causes the waylandloginmanager to enable the plugdev group to have constant full access to the devices in /dev/input and to all card devices in /dev/dri/" -s  >>/var/log/waylandloginmanager 2>&1
 fi
 
 #Start the main loginmanagerdisplay Weston server

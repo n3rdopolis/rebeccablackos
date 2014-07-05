@@ -10,7 +10,7 @@ menu color title 1;37;44 #c0ffffff #00000000 std
 label live
   menu label Startup normally
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminputinsecure --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlminsecurepermissions --
 TEXT HELP
 Start with no configured framebuffer, for hardware
 devices that do have drivers that most Wayland servers prefer.
