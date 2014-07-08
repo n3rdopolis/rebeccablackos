@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cp /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig/tslib-0.0.pc /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig/tslib.pc
-#patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
+patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
