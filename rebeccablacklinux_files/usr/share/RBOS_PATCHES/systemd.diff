@@ -1,0 +1,12 @@
+diff --git a/src/core/socket.c b/src/core/socket.c
+index 7c18a2b..c1dbaa2 100644
+--- a/src/core/socket.c
++++ b/src/core/socket.c
+@@ -30,6 +30,7 @@
+ #include <netinet/tcp.h>
+ #include <mqueue.h>
+ #ifdef HAVE_XATTR
++#include <sys/xattr.h>
+ #include <attr/xattr.h>
+ #endif
+ 
