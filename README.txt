@@ -38,6 +38,3 @@ PROBLEMS:
       Wayland is still new, things are still a bit unstable, but "somewhat" useable.
 
       The distribution is now using systemd v212 as its init system, replacing Ubuntu's upstart/systemd v204 hybrid. As the first tier packages are still built around the assumption that upstart is the default init system, there might be breakerage.
-
-      Enlightenment requires wlminsecurepermissions to be passed to the kernel command line. This causes the waylandloginmanager to allow full access to all input devices in /dev/input/*, and to all video devices in /dev/dri/card*. wlminsecurepermissions is passed by default on the Live CD, but isn't passed if you choose to use a framebuffer. wlminsecurepermissions is NOT passed by default if you install the system as well.
-
