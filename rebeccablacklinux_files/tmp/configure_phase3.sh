@@ -49,6 +49,9 @@ systemctl enable resolvconf.service
 systemctl enable unset-grub-fail.service
 systemctl enable wlm.service
 
+#Add a systemd-journal group
+groupadd -r systemd-journal 
+
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then
