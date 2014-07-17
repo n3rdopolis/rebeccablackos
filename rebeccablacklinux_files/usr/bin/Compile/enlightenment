@@ -29,7 +29,7 @@ SOURCEURL=git://git.enlightenment.org/core/enlightenment.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=devs/devilhorns/xwayland
+SOURCEREVISION=devs/devilhorns/e_comp_wl
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -64,7 +64,8 @@ patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wayland-clients --enable-wl-fb --enable-wl-drm --enable-wl-x11 --enable-wayland-only
+./autogen.sh 
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wayland-clients --enable-wl-fb --enable-wl-drm --enable-wl-x11 --enable-wayland-only
 make -i
 }
 
