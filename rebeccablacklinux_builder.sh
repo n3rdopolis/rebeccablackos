@@ -211,6 +211,7 @@ echo "CLEANUP PHASE 3"
 rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
 rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
 rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
+rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
 $SCRIPTFOLDERPATH/externalbuilders/cleanup_srcbuild.sh
 
 ENDTIME=$(date +%s)
