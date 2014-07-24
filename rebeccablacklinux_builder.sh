@@ -147,6 +147,14 @@ then
   touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH
 fi
 
+#Delete archives based on a control file
+if [[ ! -f $BUILDLOCATION/DontRestartArchives$BUILDARCH ]]
+then
+  rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
+  mkdir $BUILDLOCATION/build/$BUILDARCH/archives
+  touch $BUILDLOCATION/DontRestartArchives$BUILDARCH
+fi
+
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
 if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
 then
