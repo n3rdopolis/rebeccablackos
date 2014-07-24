@@ -33,16 +33,3 @@ index 7264f7e..f689131 100644
 
 
 
-diff --git a/src/screen-share.c b/src/screen-share.c
-index 6f60b81..d1d4560 100644
---- a/src/screen-share.c
-+++ b/src/screen-share.c
-@@ -1056,7 +1056,7 @@ share_output_binding(struct weston_seat *seat, uint32_t time, uint32_t key,
- 		     void *data)
- {
- 	struct weston_output *output;
--	const char *path = BINDIR "/weston";
-+	const char *path = BINDIR "/weston-display-server";
- 
- 	if (!seat->pointer) {
- 		weston_log("Cannot pick output: Seat does not have pointer\n");
