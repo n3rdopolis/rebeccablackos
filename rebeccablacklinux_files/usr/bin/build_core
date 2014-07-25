@@ -168,6 +168,8 @@ function DownloadGIT()
     git clean -fdx
     git config user.email rbos@rbos
     git pull -s recursive -X theirs --no-edit
+    git checkout -f $MODULEREVISION
+    git pull
 
   done
 
