@@ -377,7 +377,6 @@ update-rc.d remastersys-firstboot defaults
     if [ ! -f /etc/remastersys/customisolinux/isolinux.cfg ]; then
         log_msg "Creating isolinux setup for the live system"
         find /usr -name 'isolinux.bin' -exec cp {} $WORKDIR/ISOTMP/isolinux/ \;
-        find /usr -name 'efilinux.efi' -exec cp {} $WORKDIR/ISOTMP/isolinux/ \;
         #find fix for vesamenu.32 provided by Krasimir S. Stefanov <lokiisyourmaster@gmail.com>
         VESAMENU=`find /usr -print0 | grep -FzZ "syslinux/vesamenu.c32"`
         cp $VESAMENU $WORKDIR/ISOTMP/isolinux/ 
@@ -688,7 +687,7 @@ iso (){
 
     # Step 8 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR"
-    $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table  -eltorito-alt-boot -e isolinux/efilinux.efi -no-emul-boot -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+    $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
     if [ ! -f $WORKDIR/$CUSTOMISO ]; then
         log_msg "The iso was not created. There was a problem. Exiting"
         exit 1
