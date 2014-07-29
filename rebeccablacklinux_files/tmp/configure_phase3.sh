@@ -56,7 +56,8 @@ addgroup --system systemd-journal
 if [[ -e /lib/systemd/systemd ]]
 then
   mv /sbin/init /sbin/init.upstart
-  ln -s /lib/systemd/systemd /sbin/init
+  mv /lib/systemd/systemd /sbin/init
+  ln -s /sbin/init /lib/systemd/systemd
 fi
 
 #Turn the westonlaunchcaller in weston into a symlink
