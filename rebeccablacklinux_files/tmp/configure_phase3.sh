@@ -45,7 +45,7 @@ systemctl enable make-mtab-symlink.service
 systemctl enable make-fs-private.service
 systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
-systemctl enable resolvconf.service
+systemctl enable configure-resolvconf.service
 systemctl enable unset-grub-fail.service
 systemctl enable wlm.service
 
