@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=SDL
+SOURCENAME=SDL_image
 
 #The URL of the Source code repo
-SOURCEURL=http://hg.libsdl.org/SDL
+SOURCEURL=http://hg.libsdl.org/SDL_image
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=HG
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=release-2.0.3
+SOURCEREVISION=release-2.0.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./autogen.sh 
-./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 make 
 }
 
