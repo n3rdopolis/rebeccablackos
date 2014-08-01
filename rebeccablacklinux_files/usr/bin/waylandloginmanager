@@ -943,7 +943,8 @@ function UserActionDialog
   #Loop forever
   while [ 1 ]
   do
-    USERACTION=$(echo -e "Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1 )
+    USERACTION=$(echo -e "Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1; exit ${PIPESTATUS[1]})
+    ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
@@ -952,6 +953,11 @@ function UserActionDialog
     sleep .1
   fi
   done
+  #If Zenity reports an error, sleep so that it doesn't thrash the CPU with failing instances every .1 seconds
+  if [[ $ZENITYSTATUS != 0 ]]
+  then
+    sleep 5
+  fi
 }
 
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_control FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the westonlaunchcaller, waylandshutdown, or even some functions within this script.
