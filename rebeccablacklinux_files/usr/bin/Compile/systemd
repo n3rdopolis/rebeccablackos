@@ -63,6 +63,7 @@ patch -p1 < /usr/share/RBOS_PATCHES/systemd.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+export CC=gcc-4.8
 ./autogen.sh
 ./configure --sysconfdir=/etc --localstatedir=/var --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc --with-rootprefix= --with-rootlibdir=/lib --disable-tests --disable-maintainer-mode --enable-split-usr --disable-selinux --enable-compat-libs --with-pamlibdir=/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 make 
@@ -71,6 +72,7 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+export CC=gcc-4.8
 make install
 }
 
