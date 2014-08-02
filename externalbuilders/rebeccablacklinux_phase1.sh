@@ -28,54 +28,54 @@ then
 fi
 
 #create a folder for the media mountpoints in the media folder
-mkdir -p $BUILDLOCATION/build/$BUILDARCH
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_1
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_3
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/srcbuild/buildoutput
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/buildoutput
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/archives
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_1
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_2
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_3
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/workdir
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
 
 
 #copy in the files needed
-rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata/
-rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr $BUILDLOCATION/build/$BUILDARCH/importdata/
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata/
+rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 
 #delete old logs
-rm -r $BUILDLOCATION/build/$BUILDARCH/phase_1/usr/share/logs/*
+rm -r "$BUILDLOCATION"/build/$BUILDARCH/phase_1/usr/share/logs/*
 
 #copy the dselect data saved in phase 2 into phase 1
-cp $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLSSTATUS.txt $BUILDLOCATION/build/$BUILDARCH/phase_1/tmp/INSTALLSSTATUS.txt
+cp "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/$BUILDARCH/phase_1/tmp/INSTALLSSTATUS.txt
 
 #make the imported files executable 
-chmod 0755 -R $BUILDLOCATION/build/$BUILDARCH/importdata/
-chown  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
-chgrp  root  -R $BUILDLOCATION/build/$BUILDARCH/importdata/
+chmod 0755 -R "$BUILDLOCATION"/build/$BUILDARCH/importdata/
+chown  root  -R "$BUILDLOCATION"/build/$BUILDARCH/importdata/
+chgrp  root  -R "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 
 #bind mount phase1 to the workdir. 
-mount --rbind $BUILDLOCATION/build/$BUILDARCH/phase_1 $BUILDLOCATION/build/$BUILDARCH/workdir
+mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/phase_1 "$BUILDLOCATION"/build/$BUILDARCH/workdir
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev $BUILDLOCATION/build/$BUILDARCH/workdir/dev/
-mount --rbind /proc $BUILDLOCATION/build/$BUILDARCH/workdir/proc/
-mount --rbind /sys $BUILDLOCATION/build/$BUILDARCH/workdir/sys/
+mount --rbind /dev "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev/
+mount --rbind /proc "$BUILDLOCATION"/build/$BUILDARCH/workdir/proc/
+mount --rbind /sys "$BUILDLOCATION"/build/$BUILDARCH/workdir/sys/
 
 #Mount in the folder with previously built debs
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mkdir -p $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-mount --rbind $BUILDLOCATION/build/$BUILDARCH/srcbuild $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
-mount --rbind $BUILDLOCATION/build/$BUILDARCH/buildoutput $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
-mount --rbind $BUILDLOCATION/build/$BUILDARCH/archives $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
+mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/srcbuild "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild
+mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/buildoutput "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild/buildoutput
+mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/archives "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
 
 #copy the files to where they belong
-rsync $BUILDLOCATION/build/$BUILDARCH/importdata/* -Cr $BUILDLOCATION/build/$BUILDARCH/workdir/ 
+rsync "$BUILDLOCATION"/build/$BUILDARCH/importdata/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/workdir/ 
 
 
 #Configure the Live system########################################
 if [[ $BUILDARCH == i386 ]]
 then
-  linux32 chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
+  linux32 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 else
-  chroot $BUILDLOCATION/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
+  chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase1.sh
 fi

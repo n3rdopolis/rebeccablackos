@@ -52,10 +52,10 @@ fi
 STARTTIME=$(date +%s)
 
 #prepare debootstrap
-if [[ ! -e $BUILDLOCATION/debootstrap/debootstrap || ! -e $BUILDLOCATION/DontDownloadDebootstrapScript ]]
+if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
-  touch $BUILDLOCATION/DontDownloadDebootstrapScript
-  mkdir -p $BUILDLOCATION/debootstrap
+  touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
+  mkdir -p "$BUILDLOCATION"/debootstrap
   FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
 ascii
 user anonymous " "
@@ -65,13 +65,13 @@ ls
 bye
 EOT)
   FTPFILE=$(echo "$FTPFILELIST" | awk '{print $9}' | grep tar| tail -1)
-  wget http://ftp.debian.org/debian/pool/main/d/debootstrap/$FTPFILE -O $BUILDLOCATION/debootstrap/debootstrap.tar.gz
-  tar xaf $BUILDLOCATION/debootstrap/debootstrap.tar.gz -C $BUILDLOCATION/debootstrap --strip 1
-  make -C $BUILDLOCATION/debootstrap/ devices.tar.gz
+  wget http://ftp.debian.org/debian/pool/main/d/debootstrap/$FTPFILE -O "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
+  tar xaf "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz -C "$BUILDLOCATION"/debootstrap --strip 1
+  make -C "$BUILDLOCATION"/debootstrap/ devices.tar.gz
 fi
 
 #If debootstrap fails
-if [[ ! -e $BUILDLOCATION/debootstrap/debootstrap ]]
+if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap ]]
 then 
   echo "Download of debootstrap failed, this script needs to be able to download debootstrap from ftp.debian.org in order to be able to continue."
   exit 1
@@ -90,7 +90,7 @@ then
 fi
 
 
-chmod +x $SCRIPTFOLDERPATH/externalbuilders/*
+chmod +x "$SCRIPTFOLDERPATH"/externalbuilders/*
 
 echo "Setting up live system..."
 
@@ -100,37 +100,37 @@ REBUILT="to update"
 function UnmountAll()
 {
 #unmount the chrooted procfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/proc
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/sys
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/dev
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev
 
 #unmount the external archive folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/cache/apt/archives
-umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_1/var/cache/apt/archives
-umount -lf $BUILDLOCATION/build/$BUILDARCH/phase_2/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/phase_1/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/phase_2/var/cache/apt/archives
 
 #unmount the debs data
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild/buildoutput
 
 #unmount the source download folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/srcbuild
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild
 
 #unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/var/tmp
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/tmp
 
 #unmount the cache /var/tmp folder
-umount -lf $BUILDLOCATION/build/$BUILDARCH/workdir/home/remastersys
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/home/remastersys
 
 #unmount the FS at the workdir and phase 2
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/workdir
-umount -lfd $BUILDLOCATION/build/$BUILDARCH/phase_2
+umount -lfd "$BUILDLOCATION"/build/$BUILDARCH/workdir
+umount -lfd "$BUILDLOCATION"/build/$BUILDARCH/phase_2
 
 #Terminate processess using files in the build folder for the architecture
-lsof -t +D $BUILDLOCATION/build/$BUILDARCH |while read PID 
+lsof -t +D "$BUILDLOCATION"/build/$BUILDARCH |while read PID 
 do 
 kill -9 $PID
 done
@@ -140,79 +140,79 @@ done
 UnmountAll
 
 #Delete buildoutput based on a control file
-if [[ ! -f $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH ]]
 then
-  rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
-  mkdir $BUILDLOCATION/build/$BUILDARCH/buildoutput
-  touch $BUILDLOCATION/DontRestartBuildoutput$BUILDARCH
+  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
+  mkdir "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
+  touch "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH
 fi
 
 #Delete archives based on a control file
-if [[ ! -f $BUILDLOCATION/DontRestartArchives$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontRestartArchives$BUILDARCH ]]
 then
-  rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
-  mkdir $BUILDLOCATION/build/$BUILDARCH/archives
-  touch $BUILDLOCATION/DontRestartArchives$BUILDARCH
+  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/archives
+  mkdir "$BUILDLOCATION"/build/$BUILDARCH/archives
+  touch "$BUILDLOCATION"/DontRestartArchives$BUILDARCH
 fi
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
-if [[ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH || ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH ]]
 then
   #if set to rebuild phase 1
-  if [ ! -f $BUILDLOCATION/DontRestartPhase1$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH ]
   then
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1/*
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_1/*
   fi
 
   #if set to rebuild phase 2
-  if [ ! -f $BUILDLOCATION/DontRestartPhase2$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH ]
   then
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2/*
-    mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
-    touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_2/*
+    mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp
+    touch "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
   fi
 
-  if [ ! -f $BUILDLOCATION/DontStartFromScratch$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH ]
   then
     #clean up old files
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_1
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_2
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/workdir
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/buildoutput
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/archives
-    rm -rf $BUILDLOCATION/build/$BUILDARCH/srcbuild
-    rm $BUILDLOCATION/DontRestartPhase1$BUILDARCH
-    rm $BUILDLOCATION/DontRestartPhase2$BUILDARCH
-    touch $BUILDLOCATION/DontStartFromScratch$BUILDARCH
-    mkdir -p $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp
-    touch $BUILDLOCATION/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_1
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_2
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/workdir
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/archives
+    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
+    rm "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH
+    rm "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH
+    touch "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH
+    mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp
+    touch "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
     REBUILT="to rebuild from scratch"
   fi
-  $SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase0.sh
+  "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase0.sh
 fi
 
 #run the build scripts
 UnmountAll
-$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase1.sh 
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase1.sh 
 UnmountAll
-$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase2.sh  
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase2.sh  
 UnmountAll
-$SCRIPTFOLDERPATH/externalbuilders/rebeccablacklinux_phase3.sh 
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase3.sh 
 UnmountAll
 
 
 echo "CLEANUP PHASE 3"  
 
 #Clean up Phase 3 data.
-rm -rf $BUILDLOCATION/build/$BUILDARCH/phase_3/*
-rm -rf $BUILDLOCATION/build/$BUILDARCH/vartmp
-rm -rf $BUILDLOCATION/build/$BUILDARCH/remastersys
-rm -rf $BUILDLOCATION/build/$BUILDARCH/importdata
-$SCRIPTFOLDERPATH/externalbuilders/cleanup_srcbuild.sh
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3/*
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
+"$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
