@@ -49,6 +49,7 @@ systemctl enable configure-resolvconf.service
 systemctl enable unset-grub-fail.service
 systemctl enable wlm.service
 systemctl disable friendly-recovery.service
+systemctl disable lightdm.service
 
 #Make all systemd units nonexecutable
 find /etc/systemd/system /lib/systemd/system -type f | while read FILE
