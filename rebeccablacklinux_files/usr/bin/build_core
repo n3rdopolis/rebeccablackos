@@ -161,6 +161,7 @@ function DownloadGIT()
 
     mkdir -p $MODULENAME
     cd $MODULENAME
+    git fetch --all
     git checkout -f $MODULEREVISION
     git reset --hard $MODULEREVISION
     git reset --hard origin/$MODULEREVISION
