@@ -73,12 +73,6 @@ cp -a /usr/import/etc/X11/* /etc/X11
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 
-#Make all systemd units nonexecutable
-find /etc/systemd/system /lib/systemd/system -type f | while read FILE
-do
-  chmod -X "$FILE"
-done
-
 #install the menu items for the wayland tests
 install_menu_items
 
