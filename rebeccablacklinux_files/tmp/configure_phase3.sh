@@ -57,8 +57,9 @@ do
   chmod -X "$FILE"
 done
 
-#Add a systemd-journal group
+#Add groups for systemd
 addgroup --system systemd-journal 
+addgroup --system lock 
 
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
