@@ -170,6 +170,10 @@ function DownloadGIT()
     git pull -s recursive -X theirs --no-edit
     git checkout -f $MODULEREVISION
     git pull
+    git fetch --all
+    git checkout -f $MODULEREVISION
+    git reset --hard $MODULEREVISION
+    git reset --hard origin/$MODULEREVISION
   done
 
 }
