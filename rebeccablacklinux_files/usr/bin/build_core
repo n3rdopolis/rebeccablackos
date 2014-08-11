@@ -142,12 +142,12 @@ function DownloadGIT()
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   git checkout -f $SOURCEREVISION 
-  git pull
+  git pull -f
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule init
   git submodule update --recursive --force
-  git pull
+  git pull -f
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
