@@ -21,7 +21,7 @@
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 export HOME=$(eval echo ~$SUDO_USER)
-MOUNTHOME=$HOME
+MOUNTHOME="$HOME"
 unset SUDO_USER
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
@@ -31,15 +31,15 @@ then
   then
     if [[ -f $(which kdesudo) ]]
     then
-      kdesudo $0 $MOUNTISO
+      kdesudo $0 "$MOUNTISO"
     elif [[ -f $(which gksudo) ]]
     then
-      gksudo $0 $MOUNTISO
+      gksudo $0 "$MOUNTISO"
     else
       zenity --info --text "This Needs to be run as root"
     fi
   else
-    sudo $0 $MOUNTISO
+    sudo $0 "$MOUNTISO"
   fi
   exit
 fi
@@ -103,7 +103,7 @@ fi
 
 function mountisoexit() 
 {
-if [[ -f $MOUNTHOME/liveisotest/unionmountpoint/online ]]
+if [[ -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -124,19 +124,19 @@ then
     setfacl -x u:999999999 /dev/dri/card*
 
     #unmount the filesystems used by the CD
-    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/dev
-    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/sys
-    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/proc
-    umount -lf  $MOUNTHOME/liveisotest/unionmountpoint/tmp
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 
-    fuser -kmM   $MOUNTHOME/liveisotest/unionmountpoint 2> /dev/null
-    umount -lfd $MOUNTHOME/liveisotest/unionmountpoint
+    fuser -kmM   "$MOUNTHOME"/liveisotest/unionmountpoint 2> /dev/null
+    umount -lfd "$MOUNTHOME"/liveisotest/unionmountpoint
 
-    fuser -kmM   $MOUNTHOME/liveisotest/squashfsmount 2> /dev/null
-    umount -lfd $MOUNTHOME/liveisotest/squashfsmount
+    fuser -kmM   "$MOUNTHOME"/liveisotest/squashfsmount 2> /dev/null
+    umount -lfd "$MOUNTHOME"/liveisotest/squashfsmount
 
-    fuser -kmM  $MOUNTHOME/liveisotest/isomount 2> /dev/null
-    umount -lfd $MOUNTHOME/liveisotest/isomount
+    fuser -kmM  "$MOUNTHOME"/liveisotest/isomount 2> /dev/null
+    umount -lfd "$MOUNTHOME"/liveisotest/isomount
 
 
     if [[ $XALIVE == 0 ]]
@@ -149,7 +149,7 @@ then
     fi
     if [ $deleteanswer -eq 1 ]
     then 
-      rm -rf $MOUNTHOME/liveisotest/overlay
+      rm -rf "$MOUNTHOME"/liveisotest/overlay
     fi
   fi
   exit
@@ -175,9 +175,9 @@ fi
 
 
 #enter users home directory
-cd $MOUNTHOME
+cd "$MOUNTHOME"
 
-mountpoint $MOUNTHOME/liveisotest/unionmountpoint
+mountpoint "$MOUNTHOME"/liveisotest/unionmountpoint
 ismount=$?
 if [ $ismount -eq 0 ]
 then
@@ -185,11 +185,11 @@ then
   if [[ $XALIVE == 0 ]]
   then
     zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
-    $TERMCOMMAND chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
-    chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+    chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   fi
   mountisoexit
 fi
@@ -209,14 +209,14 @@ else
 fi
 
 #make the folders for mounting the ISO
-mkdir -p $MOUNTHOME/liveisotest/isomount
-mkdir -p $MOUNTHOME/liveisotest/squashfsmount
-mkdir -p $MOUNTHOME/liveisotest/overlay
-mkdir -p $MOUNTHOME/liveisotest/unionmountpoint
+mkdir -p "$MOUNTHOME"/liveisotest/isomount
+mkdir -p "$MOUNTHOME"/liveisotest/squashfsmount
+mkdir -p "$MOUNTHOME"/liveisotest/overlay
+mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint
 
 
 #if there is no iso specified 
-if [ -z $MOUNTISO ]
+if [ -z "$MOUNTISO" ]
 then 
 
   if [[ $XALIVE == 0 ]]
@@ -233,11 +233,11 @@ Please specify a path to an ISO as an argument to this script (with quotes aroun
 fi
 
 #mount the ISO
-mount -o loop "$MOUNTISO" $MOUNTHOME/liveisotest/isomount
+mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/isomount
 
 
 #if the iso doesn't have a squashfs image
-if [ ! -f $MOUNTHOME/liveisotest/isomount/casper/filesystem.squashfs  ]
+if [ ! -f "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs  ]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -247,22 +247,22 @@ then
     read a 
   fi
   #unmount and exit
-  umount $MOUNTHOME/liveisotest/isomount
+  umount "$MOUNTHOME"/liveisotest/isomount
   exit
 fi
 
 
 #mount the squashfs image
-mount -o loop $MOUNTHOME/liveisotest/isomount/casper/filesystem.squashfs $MOUNTHOME/liveisotest/squashfsmount
+mount -o loop "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/squashfsmount
 
 #Create the union between squashfs and the overlay
-unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 $MOUNTHOME/liveisotest/overlay=RW:$MOUNTHOME/liveisotest/squashfsmount $MOUNTHOME/liveisotest/unionmountpoint
+unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
 
 #bind mount in the critical filesystems
-mount --rbind /dev $MOUNTHOME/liveisotest/unionmountpoint/dev
-mount --rbind /proc $MOUNTHOME/liveisotest/unionmountpoint/proc
-mount --rbind /sys $MOUNTHOME/liveisotest/unionmountpoint/sys
-mount --rbind /tmp $MOUNTHOME/liveisotest/unionmountpoint/tmp
+mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+mount --rbind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+mount --rbind /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+mount --rbind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 
 #allow all local connections to the xserver
 xhost +LOCAL:
@@ -280,20 +280,20 @@ Type exit to go back to your system. If you want to test wayland, run the comman
 fi
 
 #Only configure the systemd if the online file doesn't exist so it is only configured once
-if [[ ! -f $MOUNTHOME/liveisotest/unionmountpoint/online ]]
+if [[ ! -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
 then
   #Configure test system
-  mkdir -p  $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-  chmod 700 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-  chown 999999999 $MOUNTHOME/liveisotest/unionmountpoint/run/user/999999999
-  rm $MOUNTHOME/liveisotest/unionmountpoint/etc/resolv.conf
-  cp /etc/resolv.conf $MOUNTHOME/liveisotest/unionmountpoint/etc
-  chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -g 999999999 livetest
-  chroot $MOUNTHOME/liveisotest/unionmountpoint groupadd -r admin 
-  chroot $MOUNTHOME/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
-  mkdir -p $MOUNTHOME/liveisotest/unionmountpoint/var/run/dbus
-  chroot $MOUNTHOME/liveisotest/unionmountpoint dbus-daemon --system --fork
-  chroot $MOUNTHOME/liveisotest/unionmountpoint upower &
+  mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
+  chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
+  chown 999999999 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
+  rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
+  cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g 999999999 livetest
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
+  mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
   #give more information in the testuser .bashrc
   echo "
 echo \"
@@ -306,21 +306,21 @@ gnomeshellnestedcaller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
-Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
-  echo 'cd $(eval echo ~$LOGNAME)' >> $MOUNTHOME/liveisotest/unionmountpoint/home/livetest/.bashrc
+Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc
+  echo 'cd $(eval echo ~$LOGNAME)' >> "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc
 
-  touch $MOUNTHOME/liveisotest/unionmountpoint/online
+  touch "$MOUNTHOME"/liveisotest/unionmountpoint/online
 fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 else
-  chroot $MOUNTHOME/liveisotest/unionmountpoint su livetest
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 fi
 
 #go back to the users home folder
-cd $MOUNTHOME
+cd "$MOUNTHOME"
 
 
 mountisoexit
