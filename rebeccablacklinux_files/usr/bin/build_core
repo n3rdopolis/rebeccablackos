@@ -161,6 +161,11 @@ function DownloadGIT()
 
     mkdir -p $MODULENAME
     cd $MODULENAME
+    #Delete all git files, this also removes submodules. this preseves the downloaded packs (for submodules as well) so they don't need to be redownloaded, just unpacked
+    git ls-files| while read GITFILE
+    do
+      rm -rf $GITFILE
+    done
     git fetch --all
     git checkout -f $MODULEREVISION
     git reset --hard $MODULEREVISION
