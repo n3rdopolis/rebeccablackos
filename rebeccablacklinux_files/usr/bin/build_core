@@ -116,9 +116,6 @@ function CleanupGIT()
   git submodule foreach --recursive git clean -fdx
   git clean -fdx
   git reset --hard
-  git reset --hard $SOURCEREVISION
-  git reset --hard origin/$SOURCEREVISION
-  git reset --hard MERGE_HEAD
   git clean -fdx
 }
 
@@ -141,10 +138,19 @@ function DownloadGIT()
   git clone $SOURCEURL $SOURCENAME
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
+  if [[ -z $SOURCEREVISION ]]
+    then
+      SOURCEREVISION=$(git rev-parse --abbrev-ref HEAD)
+  fi
   git checkout -f $SOURCEREVISION 
   git reset --hard
-  git rebase $SOURCEREVISION
-  git rebase origin/$SOURCEREVISION
+  IsBranch=$(git branch --list $SOURCEREVISION | grep -c '')
+  if [[ $IsBranch == 1 ]]
+  then
+    git rebase origin/$SOURCEREVISION
+  else
+    git rebase $SOURCEREVISION
+  fi
   git pull -f
   git config user.email rbos@rbos
   git submodule sync --recursive
@@ -164,18 +170,25 @@ function DownloadGIT()
 
     mkdir -p $MODULENAME
     cd $MODULENAME
-    git checkout -f $MODULEREVISION
-    git reset --hard $MODULEREVISION
-    git reset --hard origin/$MODULEREVISION
-    git clean -fdx
+    if [[ -z $MODULEREVISION ]]
+    then
+      MODULEREVISION=$(git rev-parse --abbrev-ref HEAD)
+    fi
+    git checkout -f $MODULEREVISION 
+    git reset --hard
+    IsBranch=$(git branch --list $MODULEREVISION | grep -c '')
+    if [[ $IsBranch == 1 ]]
+    then
+      git rebase origin/$MODULEREVISION
+    else
+      git rebase $MODULEREVISION
+    fi
+    git pull -f
     git config user.email rbos@rbos
-    git pull -s recursive -X theirs --no-edit
-    git checkout -f $MODULEREVISION
-    git pull
-    git fetch --all
-    git checkout -f $MODULEREVISION
-    git reset --hard $MODULEREVISION
-    git reset --hard origin/$MODULEREVISION
+    git submodule sync --recursive
+    git submodule init
+    git submodule update --recursive --force
+    git pull -f
   done
 
 }
