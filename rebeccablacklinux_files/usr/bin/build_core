@@ -183,11 +183,7 @@ function DownloadGIT()
     else
       git rebase $MODULEREVISION
     fi
-    git pull -f
     git config user.email rbos@rbos
-    git submodule sync --recursive
-    git submodule init
-    git submodule update --recursive --force
     git pull -f
   done
 
