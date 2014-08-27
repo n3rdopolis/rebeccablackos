@@ -16,20 +16,28 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#function to handle moving back dpkg redirect files for chroot
+function RevertFile {
+  TargetFile=$1
+  SourceFile=$(dpkg-divert --truename "$1")
+  if [[ "$TargetFile" != "$SourceFile" ]]
+  then
+    rm "$1"
+    dpkg-divert --local --rename --remove "$1"
+  fi
+}
+
+#function to handle temporarily moving files with dpkg that attempt to cause issues with chroot
+function RedirectFile {
+  RevertFile "$1"
+  dpkg-divert --local --rename --add "$1" 
+  ln -s /bin/true "$1"
+}
 
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
-rm /sbin/initctl.distrib
-rm /usr/sbin/grub-probe.distrib
-rm /usr/sbin/invoke-rc.d.distrib
-dpkg-divert --local --rename --add /usr/sbin/grub-probe
-dpkg-divert --local --rename --add /sbin/initctl
-dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
-ln -s /bin/true /sbin/initctl
-ln -s /bin/true /usr/sbin/grub-probe
-ln -s /bin/true /usr/sbin/invoke-rc.d
+RedirectFile /usr/sbin/grub-probe
+RedirectFile /sbin/initctl
+RedirectFile /usr/sbin/invoke-rc.d
 
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
@@ -150,12 +158,9 @@ apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_ope
 apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge.log
 
 #Reset the utilites back to the way they are supposed to be.
-rm /sbin/initctl
-rm /usr/sbin/grub-probe
-rm /usr/sbin/invoke-rc.d
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
+RevertFile /usr/sbin/grub-probe
+RevertFile /sbin/initctl
+RevertFile /usr/sbin/invoke-rc.d
 
 #delete the dpkg config file that speeds up the installs, so the user doesn't get it.
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io

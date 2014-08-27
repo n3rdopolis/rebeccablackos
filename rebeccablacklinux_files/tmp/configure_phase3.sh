@@ -16,6 +16,25 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#function to handle moving back dpkg redirect files for chroot
+function RevertFile {
+  TargetFile=$1
+  SourceFile=$(dpkg-divert --truename "$1")
+  if [[ "$TargetFile" != "$SourceFile" ]]
+  then
+    rm "$1"
+    dpkg-divert --local --rename --remove "$1"
+  fi
+}
+
+#function to handle temporarily moving files with dpkg that attempt to cause issues with chroot
+function RedirectFile {
+  RevertFile "$1"
+  dpkg-divert --local --rename --add "$1" 
+  ln -s /bin/true "$1"
+}
+
+
 #Copy the import files into the system, and create menu items while creating a deb with checkinstall.
 cd /tmp
 mkdir debian
@@ -91,19 +110,11 @@ remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
 
-#Redirect these utilitues to /bin/true during package manager operations. This gets reverted before the second remastersys is called, so it's suitable for the ISO
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
-rm /sbin/initctl.distrib
-rm /usr/sbin/grub-probe.distrib
-rm /usr/sbin/invoke-rc.d.distrib
-dpkg-divert --local --rename --add /usr/sbin/grub-probe
-dpkg-divert --local --rename --add /sbin/initctl
-dpkg-divert --local --rename --add /usr/sbin/invoke-rc.d
-ln -s /bin/true /sbin/initctl
-ln -s /bin/true /usr/sbin/grub-probe
-ln -s /bin/true /usr/sbin/invoke-rc.d
+
+#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
+RedirectFile /usr/sbin/grub-probe
+RedirectFile /sbin/initctl
+RedirectFile /usr/sbin/invoke-rc.d
 
 #This will remove my abilities to build packages from the ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
@@ -128,12 +139,9 @@ apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operation
 apt-get autoremove -y --force-yes >> /tmp/logs/package_operations/removes.txt
 
 #Reset the utilites back to the way they are supposed to be.
-rm /sbin/initctl
-rm /usr/sbin/grub-probe
-rm /usr/sbin/invoke-rc.d
-dpkg-divert --local --rename --remove /usr/sbin/grub-probe
-dpkg-divert --local --rename --remove /sbin/initctl
-dpkg-divert --local --rename --remove /usr/sbin/invoke-rc.d
+RevertFile /usr/sbin/grub-probe
+RevertFile /sbin/initctl
+RevertFile /usr/sbin/invoke-rc.d
 
 #delete bloated binary files that are for development, and are not needed on the smaller iso
 rm /opt/bin/Xnest
