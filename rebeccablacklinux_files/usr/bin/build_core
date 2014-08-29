@@ -151,7 +151,7 @@ function DownloadGIT()
   else
     git rebase $SOURCEREVISION
   fi
-  git pull -f
+  git pull -f --rebase
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule init
@@ -184,6 +184,7 @@ function DownloadGIT()
       git rebase $MODULEREVISION
     fi
     git config user.email rbos@rbos
+    git pull --rebase
     git pull -f
   done
 
