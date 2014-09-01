@@ -143,7 +143,7 @@ UnmountAll
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH ]]
 then
   rm -rf "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
-  mkdir "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
+  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
   touch "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH
 fi
 
@@ -151,7 +151,7 @@ fi
 if [[ ! -f "$BUILDLOCATION"/DontRestartArchives$BUILDARCH ]]
 then
   rm -rf "$BUILDLOCATION"/build/$BUILDARCH/archives
-  mkdir "$BUILDLOCATION"/build/$BUILDARCH/archives
+  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
   touch "$BUILDLOCATION"/DontRestartArchives$BUILDARCH
 fi
 
