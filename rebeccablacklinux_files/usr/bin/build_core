@@ -144,14 +144,8 @@ function DownloadGIT()
   fi
   git checkout -f $SOURCEREVISION 
   git reset --hard
-  IsBranch=$(git branch --list $SOURCEREVISION | grep -c '')
-  if [[ $IsBranch == 1 ]]
-  then
-    git rebase origin/$SOURCEREVISION
-  else
-    git rebase $SOURCEREVISION
-  fi
-  git pull -f --rebase
+  git rebase
+  git pull -f
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule init
@@ -176,15 +170,12 @@ function DownloadGIT()
     fi
     git checkout -f $MODULEREVISION 
     git reset --hard
-    IsBranch=$(git branch --list $MODULEREVISION | grep -c '')
-    if [[ $IsBranch == 1 ]]
-    then
-      git rebase origin/$MODULEREVISION
-    else
-      git rebase $MODULEREVISION
-    fi
+    git rebase
+    git pull -f
     git config user.email rbos@rbos
-    git pull --rebase
+    git submodule sync --recursive
+    git submodule init
+    git submodule update --recursive --force
     git pull -f
   done
 
