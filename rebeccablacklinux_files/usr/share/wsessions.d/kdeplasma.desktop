@@ -1,5 +1,5 @@
 [Desktop Entry]
-Enabled=1
+Enabled=0
 Type=WSession
 Name=KDE Plasma
 CompositorExec=/opt/bin/kwin_wayland
@@ -9,5 +9,5 @@ CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=
+AdditionalArguments=--x-server=xwayland
 
