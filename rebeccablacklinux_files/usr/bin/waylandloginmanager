@@ -658,7 +658,8 @@ function AuthenticateUser
   unset USERPASSWORD
   TryPassword=$(cat -)
   #Test the users login with an embedded expect script running as PROBETESTUSER
-  echo "spawn su $LOGINUSER -c /bin/true
+  echo "log_user 0
+	spawn su $LOGINUSER -c /bin/true
 	expect Password 
 	send $TryPassword\r
 	catch wait result
