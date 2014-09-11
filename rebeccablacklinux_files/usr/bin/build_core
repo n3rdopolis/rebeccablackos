@@ -146,6 +146,7 @@ function DownloadGIT()
   git reset --hard
   git rebase
   git pull -f
+  git rebase
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule init
@@ -172,6 +173,7 @@ function DownloadGIT()
     git reset --hard
     git rebase
     git pull -f
+    git rebase
     git config user.email rbos@rbos
     git submodule sync --recursive
     git submodule init
