@@ -944,7 +944,12 @@ function UserActionDialog
   #Loop forever
   while [ 1 ]
   do
-    USERACTION=$(echo -e "Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1; exit ${PIPESTATUS[1]})
+    ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
+    if [[ $wlmdebug == 1 ]]
+    then
+      ActionMenu+="\nDebug\nDebug..."
+    fi
+    USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1; exit ${PIPESTATUS[1]})
     ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
@@ -1049,6 +1054,22 @@ function ReadCommandFIFO
       else
 	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
       fi
+    #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
+    elif [[ $COMMAND == "Debug" ]]
+    then
+      if [[ $wlmdebug == 1 ]]
+      then
+	if [[ $(jobs -p -r | grep -c ^$LastInfoPID$) == 0  ]]
+	then
+	  vte2_90 -c login &
+	  LastDebugPid=$!
+	  logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+	else
+	  logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+	fi
+      else
+	logger -t waylandloginmanager "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel." -s  >>/var/log/waylandloginmanager 2>&1
+      fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
       then
@@ -1071,11 +1092,12 @@ then
   exit
 fi
 
-#Enable full alt+sysrq when wlmdebug is passed as a kernel argument
+#Enable full alt+sysrq when wlmdebug is passed as a kernel argument, and allow a debug login terminal window.
 if [[ $(cat /proc/cmdline | grep -c wlmdebug ) != 0 ]]
 then
   echo 1 > /proc/sys/kernel/sysrq
   logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes" -s  >>/var/log/waylandloginmanager 2>&1
+  wlmdebug=1
 fi
 
 #Start the main loginmanagerdisplay Weston server
