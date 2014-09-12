@@ -142,6 +142,11 @@ function DownloadGIT()
     then
       SOURCEREVISION=$(git rev-parse --abbrev-ref HEAD)
   fi
+  find .git |grep index.lock|
+  while read LOCKFILE
+  do
+    rm "$LOCKFILE"
+  done
   git checkout -f $SOURCEREVISION 
   git reset --hard
   git rebase
