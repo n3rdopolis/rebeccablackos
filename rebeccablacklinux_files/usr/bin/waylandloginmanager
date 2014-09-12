@@ -125,7 +125,12 @@ AllSessions=0
 ActiveSessionPID=0
 #Array that stores all backend types that is supported by the hardware
 SupportedBackends=()
-SupportedBackends+=(WL)
+#determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+westonresult=$(weston --version &>/dev/null; echo $?) 
+if [[ $westonresult == 255 ]]
+then
+  SupportedBackends+=(WL)
+fi
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
