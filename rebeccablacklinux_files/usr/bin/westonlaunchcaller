@@ -112,7 +112,17 @@ then
   else 
     if [[ $BackendType == WL ]]
     then
-      weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log &
+      if [[ $DefaultBackendType == FB ]]
+      then
+	HostBackendArgument="--backend=fbdev-backend.so"
+      else
+	HostBackendArgument="--backend=drm-backend.so"
+      fi
+      if [[ $IsFallbackSession == 1 ]]
+      then
+	HostBackendArgument+=" --use-pixman"
+      fi
+      weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
       HostServerPID=$!
       export WAYLAND_DISPLAY=$WAYLAND_HOST
     else
