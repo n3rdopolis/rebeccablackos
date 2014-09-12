@@ -22,6 +22,8 @@
 
 #This also handles specified environment files for the session, which are documented in /usr/share/wsession/aboutwsessions.txt
 
+#This also handles the automatic execution of a host Wayland server, if the Wayland session runs on fullscreen-shell enabled servers as opposed to direct access to hardware
+
 #Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure
 function SwitchBackExit
 {
