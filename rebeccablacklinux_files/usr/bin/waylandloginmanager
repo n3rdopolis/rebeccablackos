@@ -315,7 +315,8 @@ function ChooseSessionType
 {
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=$AllSessions
-  export SESSIONIDNAME=wayland-$SESSIONID
+  export WAYLAND_HOST=wlhost-$SESSIONID
+  export WAYLAND_GUEST=wayland-$SESSIONID
 
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
@@ -362,10 +363,10 @@ function ChooseSessionType
       fi
     done < <(echo "$NeedsFile")
 
-    #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the SESSIONIDNAME to the end of the command.
+    #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
     if [[ ! -z $CompositorDisplayArgument ]]
     then
-      CompositorDisplayArgument="$CompositorDisplayArgument$SESSIONIDNAME"
+      CompositorDisplayArgument="$CompositorDisplayArgument$WAYLAND_GUEST"
     else 
       CompositorDisplayArgument=""
     fi
@@ -423,7 +424,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$SESSIONIDNAME"
+      WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -441,7 +442,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$SESSIONIDNAME"
+      WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -567,14 +568,13 @@ function StartUserSession
 {
   #ensure the loginmanager_control fd doesn't get leaked
   exec 1000>&-
-  #set the WAYLAND_DISPLAY variable to be $SESSIONIDNAME
-  export WAYLAND_DISPLAY=$SESSIONIDNAME
 
-  #unset most varaibles, except PATH and WAYLAND_DISPLAY
+
+  #unset most varaibles, except PATH and WAYLAND_HOST and WAYLAND_GUEST
   while read var
   do 
     unset "$var"
-  done < <(env | awk -F = '{print $1}' | grep -v ^PATH$ | grep -v ^WAYLAND_DISPLAY$ ) 
+  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$" ) 
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONARGS=$(echo "$3" | sed 's/$/ /g')

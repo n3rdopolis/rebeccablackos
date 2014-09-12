@@ -108,6 +108,7 @@ then
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run." |& tee -a $HOME/waylandserver.log
     SwitchBackExit
   else 
+    export WAYLAND_DISPLAY=$WAYLAND_GUEST
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
     "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log
