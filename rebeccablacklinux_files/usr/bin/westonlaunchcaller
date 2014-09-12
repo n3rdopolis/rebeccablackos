@@ -108,10 +108,18 @@ then
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run." |& tee -a $HOME/waylandserver.log
     SwitchBackExit
   else 
-    export WAYLAND_DISPLAY=$WAYLAND_GUEST
+    if [[ $BackendType == WL ]]
+    then
+      weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log &
+      HostServerPID=$!
+      export WAYLAND_DISPLAY=$WAYLAND_HOST
+    else
+      export WAYLAND_DISPLAY=$WAYLAND_GUEST
+    fi
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
     "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log
+    killall -9 $HostServerPID
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
     #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
