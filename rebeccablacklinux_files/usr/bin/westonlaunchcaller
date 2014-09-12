@@ -115,6 +115,7 @@ then
       export WAYLAND_DISPLAY=$WAYLAND_HOST
     else
       export WAYLAND_DISPLAY=$WAYLAND_GUEST
+      unset WAYLAND_HOST
     fi
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
