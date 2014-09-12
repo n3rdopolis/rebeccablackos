@@ -42,6 +42,9 @@ SessionArgument:
 if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or hawaii shell module opposed to the weston-desktop-shell. See line 11 in the example
 
 
+IsFallbackSession:
+This specifies if the current session is a fallback session, so that the session can be handled in a paticular way, for example sessions that use a fullscreen-shell enabled Weston, but to have the host weston server run using the pixman renderer.
+
 AdditionalArguments:
 Any other arguments that should be passed to the server, but are more generic, for example in line 12 in the example, it specifies where weston should log. See line 12 in the example.
 

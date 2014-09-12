@@ -342,6 +342,11 @@ function ChooseSessionType
 	break
       fi
     done
+    IsFallbackSession=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "IsFallbackSession" {print $0}' | cut -d = -f2- | tail -1 )
+    if [[ -z $IsFallbackSession ]]
+    then
+      IsFallbackSession=0
+    fi
     CompositorDisplayArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorDisplayArgument" {print $0}' | cut -d = -f2- | tail -1 )
     BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- | tail -1 )
     SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | tail -1 )
@@ -382,7 +387,7 @@ function ChooseSessionType
       echo "$AdditionalArguments"
       echo "$CompositorDisplayArgument"
       echo "$EnvironmentFile"
-      echo "$BackendType"
+      echo "$BackendType_$DefaultBackendType_$IsFallbackSession"
       echo "$SessionName"
     fi
   done)
@@ -429,7 +434,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="KMS"
+      WSESSIONDATA+="KMS_KMS_0"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
 
@@ -447,7 +452,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="FB"
+      WSESSIONDATA+="FB_FB_0"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
     fi
@@ -598,16 +603,22 @@ function StartUserSession
   #line 3 is the argument to start the Wayland server with a specific WAYLAND_DISPLAY
   #line 4 is any other arguments needed
   #line 5 specifies the environment file which is process by westonlaunchcaller, which is documented at the top of the script, and in westonlaunchcaller.
-  #line 6 specifies the backend type, which tells westonlaunchcaller what backend is being used. this is exported as a variable.
+  #line 6 specifies the backend data, which tells westonlaunchcaller what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
   #line 7 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
   CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  BackendData="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   export EnvironmentFile="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export BackendType="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   export SessionName="$( echo "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  IFS=_
+  BackendData=($BackendData)
+  unset IFS
+  export BackendType=${BackendData[0]}
+  export DefaultBackendType=${BackendData[1]}
+  export IsFallbackSession=${BackendData[2]}
 
   #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
   westonresult=$(weston --version &>/dev/null; echo $?) 
