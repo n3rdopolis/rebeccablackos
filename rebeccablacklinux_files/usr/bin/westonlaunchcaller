@@ -24,6 +24,9 @@
 
 #This also handles the automatic execution of a host Wayland server, if the Wayland session runs on fullscreen-shell enabled servers as opposed to direct access to hardware
 
+#Enable job control in this script
+set -m
+
 #Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure
 function SwitchBackExit
 {
@@ -131,8 +134,9 @@ then
     fi
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
-    "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log
-    killall -9 $HostServerPID
+    "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log &
+    SessionServerPID=$!
+    fg 1
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
     #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
