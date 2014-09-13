@@ -43,7 +43,7 @@ function TerminateHostOnGuestTermination
     sleep 5
     ps -p $1 > /dev/null
   done
-  kill -9 $2
+  kill -15 $2
 }
 
 #if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
@@ -168,7 +168,7 @@ then
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
     #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
-    if [[ $RUNTIME < 5 ]]
+    if [[ $RUNTIME < 15 ]]
     then
       SwitchBackExit
     fi
