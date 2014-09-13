@@ -418,7 +418,7 @@ function ChooseSessionType
       echo "$AdditionalArguments"
       echo "$CompositorDisplayArgument"
       echo "$EnvironmentFile"
-      echo "$BackendType_$DefaultBackendType_$IsFallbackSession"
+      echo ""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession""
       echo "$SessionName"
     fi
   done)
