@@ -349,7 +349,7 @@ function ChooseSessionType
       export BackendType=${SupportedBackends[$element]}
       SupportsBackend=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "CompositorSupports"BackendType {print $0}' | cut -d = -f2- | tail -1 )
       #Once a supported backend is found, then stop.
-      if [[ $SupportsBackend != 0 ]]
+      if [[ $SupportsBackend == 1 ]]
       then
 	break
       fi
