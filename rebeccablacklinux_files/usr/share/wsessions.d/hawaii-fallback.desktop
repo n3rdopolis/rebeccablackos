@@ -12,3 +12,4 @@ SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=/o
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=/opt/lib/weston/hawaii-desktop.so
 NeedsFile=/opt/bin/weston-display-server
+IsFallbackSession=1
