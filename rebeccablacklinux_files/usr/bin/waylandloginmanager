@@ -328,8 +328,13 @@ function ChooseSessionType
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
   #ONLY the session lines should be set through stdio in the while loop. This string is sent to a zenity dialog.
-  WSESSIONLIST=$(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f -executable | sort | while read SESSIONFILE
-  do 
+  WSESSIONLIST=$(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort | while read SESSIONFILE
+  do
+    IsExecutable=$(find $SESSIONFILE |wc -l)
+    if [[ $IsExecutable == 0 ]]
+    then
+      logger -t waylandloginmanager "Warning: $SESSIONFILE is not executable, the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+    fi
     #split away all the data from this file, starting at [Desktop Entry]
     DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
     #Read all the supported values that are specified in the wsession file
@@ -382,17 +387,17 @@ function ChooseSessionType
 
     if [[ $Enabled != 1 ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE is disabled" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Warning: $SESSIONFILE is disabled, the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
     fi
 
     if [[ $SupportsBackend != 1 ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}"" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}" , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
     fi
 
     if [[ $Type != "WSession" ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE does not have a Type of 'WSession'" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Warning: $SESSIONFILE does not have a Type of 'WSession' , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
@@ -403,9 +408,9 @@ function ChooseSessionType
       CompositorDisplayArgument=""
     fi
 
-    #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, add the lines describing the session to the string.
+    #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
-    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" ]]
+    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
     then
       echo "$CompositorExec"
       echo "$BackendArguments"
