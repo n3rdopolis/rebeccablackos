@@ -34,6 +34,18 @@ function SwitchBackExit
   exit
 }
 
+#Function to terminate the host server if the guest server dies, so the user isn't left with a blank screen. First argument is the PID of the guest server, second argument is the pid of the host server that gets terminated when the guest PID dies
+function TerminateHostOnGuestTermination
+{
+  ServerStatus=0
+  while [[ $? == 0 ]]
+  do
+    sleep 5
+    ps -p $1 > /dev/null
+  done
+  kill -9 $2
+}
+
 #if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
 if [[ $1 == "--version" ]]
 then
@@ -126,6 +138,7 @@ then
 	HostBackendArgument+=" --use-pixman"
       fi
       weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
+      HostServerPID=$!
       export WAYLAND_DISPLAY=$WAYLAND_HOST
       WaitTimes=0
       #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
@@ -146,6 +159,11 @@ then
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
     "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log &
+    GuestServerPID=$!
+    if [[ $BackendType == WL ]]
+    then
+      TerminateHostOnGuestTermination $GuestServerPID $HostServerPID &
+    fi
     fg 1
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
