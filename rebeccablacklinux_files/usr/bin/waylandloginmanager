@@ -377,7 +377,7 @@ function ChooseSessionType
     ServerApprovedCount=$(cat /etc/waylandservers | grep -c "^$CompositorExec$")
     if [[ $ServerApprovedCount == 0 ]]
     then 
-      logger -t waylandloginmanager "Warning: $CompositorExec is not in /etc/waylandservers , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Warning: $CompositorExec specified in $SESSIONFILE is not in /etc/waylandservers , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
