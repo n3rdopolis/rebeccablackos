@@ -129,7 +129,7 @@ SupportedBackends=()
 westonresult=$(weston --version &>/dev/null; echo $?) 
 if [[ $westonresult == 255 ]]
 then
-  F
+  SupportedBackends+=(WL)
 fi
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
@@ -213,7 +213,10 @@ then
     setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     SupportedBackends=()
-    SupportedBackends+=(WL)
+    if [[ $westonresult == 255 ]]
+    then
+      SupportedBackends+=(WL)
+    fi
     SupportedBackends+=(FB)
     DefaultBackendType=FB
     WESTONBACKEND=fbdev-backend.so
