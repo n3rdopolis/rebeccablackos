@@ -129,7 +129,7 @@ SupportedBackends=()
 westonresult=$(weston --version &>/dev/null; echo $?) 
 if [[ $westonresult == 255 ]]
 then
-  SupportedBackends+=(WL)
+  F
 fi
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
@@ -212,7 +212,9 @@ then
     setfacl -m "g:plugdev:rwx" /dev/fb*
     setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
-    SupportedBackends=(FB)
+    SupportedBackends=()
+    SupportedBackends+=(WL)
+    SupportedBackends+=(FB)
     DefaultBackendType=FB
     WESTONBACKEND=fbdev-backend.so
   #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY63, and restart.
