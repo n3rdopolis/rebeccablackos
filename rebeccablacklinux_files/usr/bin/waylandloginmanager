@@ -390,6 +390,11 @@ function ChooseSessionType
       logger -t waylandloginmanager "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}"" -s  >>/var/log/waylandloginmanager 2>&1
     fi
 
+    if [[ $Type != "WSession" ]]
+    then
+      logger -t waylandloginmanager "Warning: $SESSIONFILE does not have a Type of 'WSession'" -s  >>/var/log/waylandloginmanager 2>&1
+    fi
+
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
     if [[ ! -z $CompositorDisplayArgument ]]
     then
