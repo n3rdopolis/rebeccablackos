@@ -126,8 +126,19 @@ then
 	HostBackendArgument+=" --use-pixman"
       fi
       weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
-      HostServerPID=$!
       export WAYLAND_DISPLAY=$WAYLAND_HOST
+      WaitTimes=0
+      #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
+      while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<15 ]]
+      do
+	sleep 1
+	((WaitTimes++))
+      done
+      #If the socket doesn't exist, then the server failed to start, and switch back
+      if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+      then
+	SwitchBackExit
+      fi
     else
       export WAYLAND_DISPLAY=$WAYLAND_GUEST
       unset WAYLAND_HOST
@@ -135,7 +146,6 @@ then
     STARTTIME=$(date +%s)
     #Execute the Wayland server, and log it to ~/waylandserver.log
     "${ArgArray[0]}" ${ArgArray[@]:2} |& tee -a $HOME/waylandserver.log &
-    SessionServerPID=$!
     fg 1
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
