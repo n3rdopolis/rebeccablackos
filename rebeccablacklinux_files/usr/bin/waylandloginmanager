@@ -423,7 +423,7 @@ function ChooseSessionType
       echo "$AdditionalArguments"
       echo "$CompositorDisplayArgument"
       echo "$EnvironmentFile"
-      echo ""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession""
+      echo ""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"
       echo "$SessionName"
     fi
   done)
@@ -470,7 +470,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="KMS_KMS_0"
+      WSESSIONDATA+="KMS_KMS_0_"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
 
@@ -488,7 +488,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="FB_FB_0"
+      WSESSIONDATA+="FB_FB_0_"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
     fi
