@@ -168,7 +168,7 @@ then
     ENDTIME=$(date +%s)
     RUNTIME=$((ENDTIME-STARTTIME))
     #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
-    if [[ $RUNTIME < 15 ]]
+    if [[ $RUNTIME < 4kde5 ]]
     then
       SwitchBackExit
     fi
