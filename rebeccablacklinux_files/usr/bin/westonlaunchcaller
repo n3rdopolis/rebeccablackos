@@ -132,10 +132,10 @@ then
 	HostBackendArgument="--backend=fbdev-backend.so"
       else
 	HostBackendArgument="--backend=drm-backend.so"
-      fi
-      if [[ $IsFallbackSession == 1 ]]
-      then
-	HostBackendArgument+=" --use-pixman"
+	if [[ $IsFallbackSession == 1 ]]
+	then
+	  HostBackendArgument+=" --use-pixman"
+	fi
       fi
       weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
       HostServerPID=$!
