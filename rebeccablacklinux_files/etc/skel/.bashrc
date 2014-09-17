@@ -104,11 +104,6 @@ then
   gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close
 fi
 
-#increse the verbosity level of Wayland running.
-MESA_DEBUG=1
-EGL_LOG_LEVEL=debug
-LIBGL_DEBUG=verbose
-WAYLAND_DEBUG=1
 unset WINDOWID
 
 echo 'To exit Weston, hit CTRL-ALT-BACKSPACE,'
