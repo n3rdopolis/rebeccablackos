@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=calligra
+SOURCENAME=extra-cmake-modules-calligra
 
 #The URL of the Source code repo
-SOURCEURL=git://anongit.kde.org/calligra
+SOURCEURL=git://anongit.kde.org/extra-cmake-modules
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=calligra-qt5-rempt
+SOURCEREVISION=b02c357508afdaf2c1425b743559f914670f1986
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -53,29 +53,28 @@ function PackageDownloadSource
 :
 }
 
+
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -p1 < /usr/share/RBOS_PATCHES/calligra.diff
+:
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export CMAKE_PREFIX_PATH=$INSTALLDIR/calligra:$CMAKE_PREFIX_PATH
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/calligra -DCMAKE_PREFIX_PATH=$INSTALLDIR/calligra -DCMAKE_DISABLE_FIND_PACKAGE_KActivities=1 -DKDE4_ENABLE_EXCEPTIONS=1 -DCMAKE_BUILD_TYPE=Release
-make -i
+cmake .. -DCMAKE_INSTALL_PREFIX:PATH=$INSTALLDIR/calligra -DLIB_INSTALL_DIR:PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/calligra 
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-export CMAKE_PREFIX_PATH=$INSTALLDIR/calligra:$CMAKE_PREFIX_PATH
 cd build
-make install -i
+make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
