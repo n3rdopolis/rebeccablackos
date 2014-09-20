@@ -29,7 +29,7 @@ SOURCEURL=git://anongit.kde.org/calligra
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=calligra-qt5-rempt
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -62,18 +62,16 @@ patch -p1 < /usr/share/RBOS_PATCHES/calligra.diff
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export CMAKE_PREFIX_PATH=$INSTALLDIR/calligra:$CMAKE_PREFIX_PATH
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR/calligra -DCMAKE_PREFIX_PATH=$INSTALLDIR/calligra -DCMAKE_DISABLE_FIND_PACKAGE_KActivities=1 -DKDE4_ENABLE_EXCEPTIONS=1 -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_DISABLE_FIND_PACKAGE_KActivities=1 -DKDE4_ENABLE_EXCEPTIONS=1 -DCMAKE_BUILD_TYPE=Release
 make -i
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-export CMAKE_PREFIX_PATH=$INSTALLDIR/calligra:$CMAKE_PREFIX_PATH
 cd build
 make install -i
 }
