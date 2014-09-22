@@ -48,9 +48,6 @@ sudo locale-gen en_US.UTF-8
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
-#update the apt cache
-apt-get update
-
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
 
