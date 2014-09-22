@@ -54,9 +54,6 @@ apt-get update
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
 
-#update the dselect database
-yes Y | dselect update
-
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
