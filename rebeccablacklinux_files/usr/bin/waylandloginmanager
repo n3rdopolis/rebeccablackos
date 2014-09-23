@@ -23,8 +23,8 @@
 #It depends on zenity and expect
 
 #as well as:
-#/usr/bin/wlm_zenity
-  #a helper script for exporting WLM_LD_LIBRARY_PATH as LD_LIBRARY_PATH for starting zenity as a non root user, while this script runs as root. Because it uses sudo to start it as the specific user, which drops LD_LIBRARY_PATH.
+#/usr/bin/wlm_ui
+  #a helper script for exporting WLM_LD_LIBRARY_PATH as LD_LIBRARY_PATH for starting UI processess as a non root user, while this script runs as root. Because it uses sudo to start it as the specific user, which drops LD_LIBRARY_PATH.
 #/opt/bin/weston-display-server
   #which is moved from /opt/bin/weston . /opt/bin/weston needs to be redirected to /opt/bin/weston-display-server because of weston-launch which is described later
 #/opt/bin/weston-launch
@@ -115,7 +115,7 @@ export WAYLAND_DISPLAY=loginmanagerdisplay
 #Specify where wsession files are found
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
-#WLM_LD_LIBRARY_PATH is exported so that wlm_zenity can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH
+#WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
@@ -139,12 +139,14 @@ then
   ISLIVE=1
 fi
 
-#Detect presence of the wlm_zenity zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
+#Detect presence of the wlm_ui zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
 if [[ ! -z /usr/bin/wlm_zenity ]]
 then
-  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_zenity"
+  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui zenity"
+  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui vte2_90"
 else
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER zenity"
+  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER vte2_90"
 fi
 
 #Tell the plymouth splash to hide as the loginmanager is starting.
