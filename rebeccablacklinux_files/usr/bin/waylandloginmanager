@@ -499,7 +499,7 @@ function ChooseSessionType
   fi
 }
 
-#This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and isn't accessible to the rest of the system
+#This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system
 function DiagnosticTerminal 
 {
   cp /bin/login /run/waylandloginmanager
