@@ -132,7 +132,7 @@ apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operation
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr mercurial checkinstall texinfo"
+REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr mercurial checkinstall texinfo autoconf"
 apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
 
 
@@ -143,7 +143,8 @@ RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
 RevertFile /usr/sbin/invoke-rc.d
 
-#delete bloated binary files that are for development, and are not needed on the smaller iso
+#delete larger binary files that are for development, and are not needed on the smaller iso
+rm /opt/bin/Xorg
 rm /opt/bin/Xnest
 rm /opt/bin/Xvfb
 rm /opt/bin/rcc
@@ -159,6 +160,9 @@ rm /opt/bin/uic
 rm /opt/bin/qdbuscpp2xml
 rm -r /opt/examples
 rm -r /opt/translations
+
+#Delete all /opt includes
+rm -rf /opt/include
 
 #Reduce binary sizes
 echo "Reducing binary file sizes"
