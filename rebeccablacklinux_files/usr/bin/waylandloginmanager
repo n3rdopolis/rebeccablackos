@@ -505,7 +505,6 @@ function DiagnosticTerminal
 {
   mkdir /run/waylandloginmanager/logincmd
   chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/logincmd
-  chmod 700 /run/waylandloginmanager/logincmd
   cp /bin/login /run/waylandloginmanager/logincmd
   chmod +s /run/waylandloginmanager/logincmd/login
   $TERMINALCMD -c /run/waylandloginmanager/logincmd/login
