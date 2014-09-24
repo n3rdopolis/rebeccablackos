@@ -144,10 +144,8 @@ fi
 if [[ ! -z /usr/bin/wlm_zenity ]]
 then
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui zenity"
-  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui vte2_90"
 else
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER zenity"
-  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER vte2_90"
 fi
 
 #Tell the plymouth splash to hide as the loginmanager is starting.
@@ -499,18 +497,6 @@ function ChooseSessionType
     export WSESSIONDATA
   fi
 }
-
-#This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system
-function DiagnosticTerminal 
-{
-  mkdir -p /var/tmp/waylandloginmanager/logincmd
-  chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
-  cp /bin/login /var/tmp/waylandloginmanager/logincmd
-  chmod +s /var/tmp/waylandloginmanager/logincmd/login
-  $TERMINALCMD -c /var/tmp/waylandloginmanager/logincmd/login
-  rm /var/tmp/waylandloginmanager/login/login
-}
-
 
 #This function is called when the loginmanager_control recives the Info command. It brings up a help dialog for the user, about the waylandloginmanager and the system.
 function ShowInfo
@@ -1124,7 +1110,7 @@ function ReadCommandFIFO
       then
 	if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
 	then
-	  DiagnosticTerminal &
+	  vte2_90 -c login &
 	  LastDebugPid=$!
 	  logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
 	else
