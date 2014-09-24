@@ -115,8 +115,9 @@ export WAYLAND_DISPLAY=loginmanagerdisplay
 #Specify where wsession files are found
 export WSESSIONSPATH="/usr/share/wsessions.d"
 export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
-#WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH
+#WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+export WLM_PATH=$PATH
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
 #default the number of sessions registered to be 0
@@ -502,11 +503,13 @@ function ChooseSessionType
 #This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system
 function DiagnosticTerminal 
 {
-  cp /bin/login /run/waylandloginmanager
-  chown root:$LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/login
-  chmod +s /run/waylandloginmanager/login
-  $TERMINALCMD -c /run/waylandloginmanager/login
-  rm /run/waylandloginmanager/login
+  mkdir /run/waylandloginmanager/logincmd
+  chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/logincmd
+  chmod 700 /run/waylandloginmanager/logincmd
+  cp /bin/login /run/waylandloginmanager/logincmd
+  chmod +s /run/waylandloginmanager/logincmd/login
+  $TERMINALCMD -c /run/waylandloginmanager/logincmd/login
+  rm /run/waylandloginmanager/login/login
 }
 
 

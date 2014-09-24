@@ -16,6 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Wrapper for sudo pulling the LD_LIBRARY_PATH out of the env. waylandloginmanager exports WLM_LD_LIBRARY_PATH to be turned into LD_LIBRARY_PATH
+#Wrapper for sudo pulling the LD_LIBRARY_PATH and PATH out of the env. waylandloginmanager exports WLM_LD_LIBRARY_PATH to be turned into LD_LIBRARY_PATH and PATH as WLM_PATH
 export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
+export PATH=$WLM_PATH
 "$@"
