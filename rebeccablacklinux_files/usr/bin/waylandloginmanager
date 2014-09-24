@@ -503,7 +503,7 @@ function ChooseSessionType
 #This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system
 function DiagnosticTerminal 
 {
-  mkdir /var/tmp/waylandloginmanager/logincmd
+  mkdir -p /var/tmp/waylandloginmanager/logincmd
   chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
   cp /bin/login /var/tmp/waylandloginmanager/logincmd
   chmod +s /var/tmp/waylandloginmanager/logincmd/login
