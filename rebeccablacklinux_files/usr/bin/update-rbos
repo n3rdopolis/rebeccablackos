@@ -25,77 +25,85 @@ then
   exit
 fi
 
-cd /usr/share
-
-apt-get update
-apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
-#download off the SVN
-svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
-#make the files owned by root, and executable
-chmod +x -R /usr/share/rebeccablackos/
-chown  root  /usr/share/rebeccablackos/
-chgrp  root  -R /usr/share/rebeccablackos/
-#copy the files where they belong
-cp -a /usr/share/rebeccablackos/rebeccablacklinux_files/* /
-rm -rf /usr/import/tmp
-rm -rf /usr/import/usr/import
-
-rsync /usr/import/* -a /
-
-#Make all systemd units nonexecutable
-find /etc/systemd/system /lib/systemd/system -type f | while read FILE
-do
-  chmod -X "$FILE"
-done
+echo "This updater script downloads the latest changes from the SVN, and replaces any local files, with the files from the SVN. There might be changes that assume a full rebuild of the entire system, and there might be incompatible changes"
+echo "Running this script is usually for development, and testing. Are you sure you want to continue? (y/n)"
+read answer
 
 
-#Ensure that the weston binary called by weston-launch is redirected to a symlink to the file in /usr/bin, so that it doesn't need to be updated in two places
-rm /opt/bin/weston
-ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
+if [[ $answer == Y* || $answer == y* ]]
+then
+  cd /usr/share
 
-chmod 777 /tmp
+  apt-get update
+  apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
+  #download off the SVN
+  svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
+  #make the files owned by root, and executable
+  chmod +x -R /usr/share/rebeccablackos/
+  chown  root  /usr/share/rebeccablackos/
+  chgrp  root  -R /usr/share/rebeccablackos/
+  #copy the files where they belong
+  cp -a /usr/share/rebeccablackos/rebeccablacklinux_files/* /
+  rm -rf /usr/import/tmp
+  rm -rf /usr/import/usr/import
 
-#Run the script that creates the new menu objects from /usr/share/RBOS_MENU
-install_menu_items 
+  rsync /usr/import/* -a /
 
-
-#If the user opted to build, install all packages specified by INSTALLS.txt, and run compile_all
-if [[ $1 == build ]]
-then 
-  #LIST OF PACKAGES TO GET INSTALLED
-  INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
- 
-  #DOWNLOAD THE PACKAGES SPECIFIED
-  echo "$INSTALLS" | while read PACKAGEINSTRUCTION
+  #Make all systemd units nonexecutable
+  find /etc/systemd/system /lib/systemd/system -type f | while read FILE
   do
-    PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
-    METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
-
-    if [[ $METHOD == "PART" ]]
-    then
-      apt-get --no-install-recommends install $PACKAGE -y --force-yes
-    elif [[ $METHOD == "FULL" ]]
-    then
-      apt-get install $PACKAGE -y --force-yes
-    elif [[ $METHOD == "BUILDDEP" ]]
-    then
-      apt-get build-dep $PACKAGE -y --force-yes
-    else
-      echo "Invalid Install Operation"
-    fi
-
+    chmod -X "$FILE"
   done
 
-  #delete the downloaded file cache
-  apt-get clean
 
-  #set default cursor theme
-  update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+  #Ensure that the weston binary called by weston-launch is redirected to a symlink to the file in /usr/bin, so that it doesn't need to be updated in two places
+  rm /opt/bin/weston
+  ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
+
+  chmod 777 /tmp
+
+  #Run the script that creates the new menu objects from /usr/share/RBOS_MENU
+  install_menu_items 
+
+
+  #If the user opted to build, install all packages specified by INSTALLS.txt, and run compile_all
+  if [[ $1 == build ]]
+  then 
+    #LIST OF PACKAGES TO GET INSTALLED
+    INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
  
-  compile_all build-only
-else
-  echo "not building source because this script wasn't called with the option 'build'"
-fi
+    #DOWNLOAD THE PACKAGES SPECIFIED
+    echo "$INSTALLS" | while read PACKAGEINSTRUCTION
+    do
+      PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
+      METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
 
-#Get the user that called the script, and update the users profile from /etc/skel
-su $SUDO_USER -c update-rbos-user
+      if [[ $METHOD == "PART" ]]
+      then
+	apt-get --no-install-recommends install $PACKAGE -y --force-yes
+      elif [[ $METHOD == "FULL" ]]
+      then
+	apt-get install $PACKAGE -y --force-yes
+      elif [[ $METHOD == "BUILDDEP" ]]
+      then
+	apt-get build-dep $PACKAGE -y --force-yes
+      else
+	echo "Invalid Install Operation"
+      fi
+
+    done
+
+    #delete the downloaded file cache
+    apt-get clean
+
+    #set default cursor theme
+    update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+
+    compile_all build-only
+  else
+    echo "not building source because this script wasn't called with the option 'build'"
+  fi
+
+  #Get the user that called the script, and update the users profile from /etc/skel
+  su $SUDO_USER -c update-rbos-user
+fi
