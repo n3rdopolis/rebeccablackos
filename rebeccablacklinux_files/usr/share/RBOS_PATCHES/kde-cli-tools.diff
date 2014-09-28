@@ -1,0 +1,29 @@
+diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
+index cc9cef1..fff43a7 100644
+--- a/kioclient/kioclient.cpp
++++ b/kioclient/kioclient.cpp
+@@ -29,7 +29,8 @@
+ #include <KAboutData>
+ #include <KLocalizedString>
+ #include <KMimeTypeTrader>
+-
++#include <kurl.h>
++#include "kopenwithdialog.h"
+ #include <QDBusConnection>
+ #include <QCommandLineParser>
+ #include <QFileDialog>
+@@ -340,6 +341,14 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+                              argc == 3 ? parser.positionalArguments().last() : QString(),
+                              true );
+     }
++    else if ( command == "appmenu" )
++    {
++      QList<QUrl> list;
++      KOpenWithDialog dlg(list);
++      if (dlg.exec()) {
++          KRun::run(*dlg.service(), list, 0);
++      }
++    }
+     else if ( command == "download" )
+     {
+         checkArgumentCount(argc, 0, 0);
