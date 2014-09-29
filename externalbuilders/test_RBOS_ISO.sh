@@ -152,6 +152,7 @@ then
       rm -rf "$MOUNTHOME"/liveisotest/overlay
     fi
   fi
+  rm "$MOUNTHOME"/liveisotest/unionmountpoint/online
   exit
 fi
 }
@@ -256,8 +257,22 @@ fi
 mount -o loop "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/squashfsmount
 
 #Create the union between squashfs and the overlay
-unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
 
+if [[ $XALIVE == 0 ]]
+then
+  zenity --question --text "Do you want to use union mounting? If not, the files will be copied into the temporary location, and will use more space."
+  unionmountanswer=$?
+else
+  dialog --stdout --yesno "Do you want to use union mounting? If not, the files will be copied into the temporary location, and will use more space" 30 30
+  unionmountanswer=$?
+fi
+
+if [[ $unionmountanswer == 0 ]]
+then
+  unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
+else
+  cp -a "$MOUNTHOME"/liveisotest/squashfsmount/* "$MOUNTHOME"/liveisotest/unionmountpoint
+fi
 #bind mount in the critical filesystems
 mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
 mount --rbind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
