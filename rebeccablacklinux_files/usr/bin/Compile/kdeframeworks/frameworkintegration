@@ -57,7 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 git revert -n 0c42e21578386a37453ee1dd8f88767fd033c899
-patch -p1 < /usr/share/RBOS_PATCHES/kdeframeworks/kf5-frameworkintegration.diff
+patch -p0 < /usr/share/RBOS_PATCHES/kdeframeworks/kf5-frameworkintegration.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
