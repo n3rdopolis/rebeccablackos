@@ -1133,7 +1133,13 @@ function ReadCommandFIFO
 }
 
 #Get the TTY that will hold the Wayland server that displays the login screen.
-HostVT=$(GetNextTTY)
+OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay)
+if [[ ! -z $OLDPID ]]
+then
+  HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
+else
+  HostVT=$(GetNextTTY)
+fi
 LastTTY=$HostVT
 if [[ $HostVT -eq -1 ]]
 then
