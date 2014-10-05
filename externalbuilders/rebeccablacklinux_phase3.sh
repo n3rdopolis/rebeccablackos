@@ -95,7 +95,7 @@ cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/logs/"* ""$BUILDLOCAT
 rm ""$BUILDLOCATION"/logs/latest"
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE $BUILDARCH" ""$BUILDLOCATION"/logs/latest"
 cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE $BUILDARCH" 
-cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackLinux_Revisions.txt"
+cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt"
 #If the live cd did not build then tell user  
 if [[ ! -f "$BUILDLOCATION"/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom-full.iso ]]
 then  
