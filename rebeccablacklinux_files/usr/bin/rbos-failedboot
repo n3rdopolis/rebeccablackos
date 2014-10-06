@@ -1,0 +1,68 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackLinux.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script presents options when the loginmanagerdisplay crashes too many times
+
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
+FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $FSTYPE == overlayfs ]]
+then
+  ISLIVE=1
+fi
+
+#Ask the user what to do
+while [[ $Option != 3 && $Option != 4 ]]
+do
+  Option=$(dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart" off 4 "Exit this menu" off --stdout)
+  if [[ $Option == 0 ]]
+  then
+    dialog --textbox /var/log/loginmanagerdisplay.log 500 500 --no-cancel
+  elif [[ $Option == 1 ]]
+  then
+    if [[ $ISLIVE != 1 ]]
+    then
+      rbos-add-framebuffer
+    else
+      dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
+    fi
+  elif [[ $Option == 2 ]]
+  then
+    if [[ $ISLIVE != 1 ]]
+    then
+      rbos-force-framebuffer
+    else
+      dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
+    fi
+  elif [[ $Option == 3 ]]
+  then
+    dialog --msgbox "Will now restart..." 20 50
+    dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+    exit
+  elif [[ $Option == 4 ]]
+  then
+    exit
+  fi
+  sleep 3
+done

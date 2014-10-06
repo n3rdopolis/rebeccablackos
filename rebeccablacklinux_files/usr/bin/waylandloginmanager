@@ -917,12 +917,9 @@ function LoginWestonLauncher
   logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
   openvt -c 63 -s -f -w -- dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
 
-It is possible that if you logged into sessions, they might still be open on other TTYs. Press Enter to view the log." 20 50 --no-cancel
+Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
-  openvt -c 63 -s -f -w -- dialog --textbox /var/log/loginmanagerdisplay.log 500 500 --no-cancel
-
-  openvt -c 63 -s -f -w -- dialog --msgbox "Will now restart..." 20 50 --no-cancel
-  dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+  openvt -c 63 -s -f -w -- rbos-failedboot
   exit
 }
 
