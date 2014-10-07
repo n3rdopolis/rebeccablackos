@@ -53,6 +53,7 @@ export ECORE_EVAS_ENGINE=wayland_shm
 export SDL_VIDEODRIVER=wayland
 export GST_GL_WINDOW=wayland
 export QML2_IMPORT_PATH=/opt/lib/$DEB_HOST_MULTIARCH/qml
+export QML_IMPORT_PATH=$QML2_IMPORT_PATH
 #export QT_WAYLAND_RESIZE_AFTER_SWAP=1
 export KDE_DEBUG=1
 export KSCREEN_BACKEND=QScreen
