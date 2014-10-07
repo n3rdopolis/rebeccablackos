@@ -38,7 +38,7 @@ do
   Option=$(dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart" off 4 "Exit this menu" off --stdout)
   if [[ $Option == 0 ]]
   then
-    dialog --textbox /var/log/loginmanagerdisplay.log 500 500 --no-cancel
+    dialog --textbox /var/log/loginmanagerdisplay.log 500 500
   elif [[ $Option == 1 ]]
   then
     if [[ $ISLIVE != 1 ]]
@@ -65,5 +65,5 @@ do
     chvt 1
     exit
   fi
-  sleep 3
+  dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
 done
