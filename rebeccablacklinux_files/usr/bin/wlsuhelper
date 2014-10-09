@@ -90,7 +90,7 @@ else
     NewServerName=$NewServerName-$ServerID
   fi
   OLD_WAYLAND_DISPLAY=$WAYLAND_DISPLAY
-  export $WAYLAND_DISPLAY=$NewServerName
+  export WAYLAND_DISPLAY=$NewServerName
 
   #Link the Wayland socket file
   ln -s $OLD_XDG_RUNTIME_DIR/$OLD_WAYLAND_DISPLAY $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
