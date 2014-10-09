@@ -40,7 +40,7 @@ wlhost --
     Unshare the WAYLAND_DISPLAY.
 wlhost ?
     List all users that are have access to the WAYLAND_DISPLAY
-wlhost username
+wlhost ? username
     States if the user username has access to the WAYLAND_DISPLAY , and returns 0 if they do, and 1 if they don't.
 
 Sharing a WAYLAND_DISPLAY also gives the user execute permissions to the XDG_RUNTIME_DIR to the specified user
@@ -98,13 +98,6 @@ elif [[ "$FIRSTARGUMENT" == "0" ]]
 then
   setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
-  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
-  #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
-  if [[ $ACCESS_COUNT == 0 ]]
-  then
-    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
-    ((ErrorCount+=$?))
-  fi
   if [[ $ErrorCount == 0 ]]
   then
     echo "Reset $WAYLAND_DISPLAY permissions"
@@ -151,7 +144,7 @@ then
     echo "$ACCESSUSERS"
     exit
   else
-    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT$ )
     if [[ $ACCESS_COUNT == 0 ]]
     then
       echo "$SECONDARGUMENT does not have additional access to $WAYLAND_DISPLAY"
@@ -161,4 +154,6 @@ then
       exit 0
     fi
   fi
+else 
+  echo "wlhost: please run with no arguments for help output"
 fi
