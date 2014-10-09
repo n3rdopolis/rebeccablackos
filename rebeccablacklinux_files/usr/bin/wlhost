@@ -54,9 +54,9 @@ then
     "Must specify a user to give permissions to."
     exit 1
   fi
-  setfacl -m u:$SECONDARGUMENT:x $XDG_RUNTIME_DIR
+  setfacl -m u:$SECONDARGUMENT:x $XDG_RUNTIME_DIR 2>/dev/null
   ((ErrorCount+=$?))
-  setfacl -m u:$SECONDARGUMENT:rwx $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  setfacl -m u:$SECONDARGUMENT:rwx $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
   if [[ $ErrorCount == 0 ]]
   then
@@ -72,16 +72,16 @@ elif [[ "$FIRSTARGUMENT" == "-" ]]
 then
   if [[ -z "$SECONDARGUMENT" ]]
   then
-    "Must specify a user to remove permissions from."
+    echo "Must specify a user to remove permissions from."
     exit 1
   fi
-  setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
-  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
    #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
   if [[ $ACCESS_COUNT == 0 ]]
   then
-    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR
+    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
     ((ErrorCount+=$?))
   fi
   if [[ $ErrorCount == 0 ]]
@@ -96,13 +96,13 @@ then
 #Reset the permissions to the WAYLAND_DISPLAY to the default
 elif [[ "$FIRSTARGUMENT" == "0" ]]
 then
-  setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
   ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
   #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
   if [[ $ACCESS_COUNT == 0 ]]
   then
-    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR
+    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
     ((ErrorCount+=$?))
   fi
   if [[ $ErrorCount == 0 ]]
@@ -146,17 +146,18 @@ elif [[ "$FIRSTARGUMENT" == "?" ]]
 then
   if [[ -z "$SECONDARGUMENT" ]]
   then
-    ACCESSUSERS=$(getfacl $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY |grep -v :: | grep -c -E "[a-z] *rwx")
+    ACCESSUSERS=$(getfacl $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}')
+    echo "These users have access to $WAYLAND_DISPLAY"
     echo "$ACCESSUSERS"
     exit
   else
-    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
     if [[ $ACCESS_COUNT == 0 ]]
     then
-      echo "$SECONDARGUMENT does not have access to $WAYLAND_DISPLAY"
+      echo "$SECONDARGUMENT does not have additional access to $WAYLAND_DISPLAY"
       exit 1
     else 
-      echo "$SECONDARGUMENT does have access to $WAYLAND_DISPLAY"
+      echo "$SECONDARGUMENT does have additional access to $WAYLAND_DISPLAY"
       exit 0
     fi
   fi
