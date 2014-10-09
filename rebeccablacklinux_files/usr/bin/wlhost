@@ -48,6 +48,7 @@ which allows the user to access files in the XDG_RUNTIME_DIR only if they know t
 
 #Add the selected users permissions to the WAYLAND_DISPLAY
 elif [[ "$FIRSTARGUMENT" == "+" ]]
+then
   if [[ -z "$SECONDARGUMENT" ]]
   then
     "Must specify a user to give permissions to."
@@ -68,6 +69,7 @@ elif [[ "$FIRSTARGUMENT" == "+" ]]
 
 #Remove the selected users permissions to the WAYLAND_DISPLAY
 elif [[ "$FIRSTARGUMENT" == "-" ]]
+then
   if [[ -z "$SECONDARGUMENT" ]]
   then
     "Must specify a user to remove permissions from."
