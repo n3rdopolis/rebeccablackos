@@ -21,6 +21,13 @@
 FIRSTARGUMENT=$1
 SECONDARGUMENT=$2
 
+if [[ -z "$WAYLAND_DISPLAY" ]]
+then
+  echo "WAYLAND_DISPLAY not set"
+  exit 1
+fi
+
+
 if [[ -z "$FIRSTARGUMENT" ]]
 then
 echo "wlhost usage:
