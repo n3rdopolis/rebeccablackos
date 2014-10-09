@@ -36,7 +36,7 @@ wlsuhelper is to be called running as the guest user the server was shared to.
 Under the main session it can be run as
 su username -c wlsuhelper programname --args --args 2
 or
-sudo -u username wlsuhelper programname --args --args2
+sudo -E -u username wlsuhelper programname --args --args2
 
 If you are already running a shell as the guest user the server was shared to you can run
 wlsuhelper programname --args --args2"
@@ -57,7 +57,7 @@ else
 
   if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
   then
-    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running, or permissions error. Please ensure the server is runnint, and this user has permissions to it with wlhost."
+    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running, or permissions error. Please ensure the server is running, and this user has permissions to it with wlhost."
     ((ErrorCount++))
   fi
 
