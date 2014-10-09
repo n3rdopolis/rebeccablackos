@@ -57,7 +57,7 @@ else
 
   if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
   then
-    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running"
+    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running, or permissions error. Please ensure the server is runnint, and this user has permissions to it with wlhost."
     ((ErrorCount++))
   fi
 
