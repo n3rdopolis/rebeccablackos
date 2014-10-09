@@ -35,6 +35,8 @@ wlhost + username
     Give the user username permission to the current WAYLAND_DISPLAY
 wlhost - username
     Remove permissions from the user to the current WAYLAND_DISPLAY
+wlhost @
+    Give all users permissions to the Wayland server
 wlhost 0
     Reset permissions to the Wayland server
 wlhost ++
@@ -100,10 +102,25 @@ then
     exit 1
   fi
 
+#Give all users permissions to the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "@" ]]
+then
+  chmod 777 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+   if [[ $? == 0 ]]
+  then
+    echo "Gave all users permissions to Wayland display: $WAYLAND_DISPLAY "
+    exit 0
+  else
+    echo "Failed to give all users permissions to Wayland display: $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
 #Reset the permissions to the WAYLAND_DISPLAY to the default
 elif [[ "$FIRSTARGUMENT" == "0" ]]
 then
   setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  chmod 700 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
   if [[ $ErrorCount == 0 ]]
   then
