@@ -118,7 +118,7 @@ then
 elif [[ "$FIRSTARGUMENT" == "++" ]]
 then
   mkdir /run/shm/waylandservers
-  ln $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
+  ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
   if [[ $? == 0 ]]
   then
     echo "Wayland display: $WAYLAND_DISPLAY shared. Insure permissions are set, and from the target user export XDG_RUNTIME_DIR=/run/shm/waylandservers, and export WAYLAND_DISPLAY=$UID-$WAYLAND_DISPLAY"
