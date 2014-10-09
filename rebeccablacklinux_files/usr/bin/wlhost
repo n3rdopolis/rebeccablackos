@@ -21,16 +21,39 @@
 FIRSTARGUMENT=$1
 SECONDARGUMENT=$2
 
-if [[ -z "$WAYLAND_DISPLAY" ]]
-then
-  echo "WAYLAND_DISPLAY not set"
-  exit 1
-fi
 
+if [[ ! -z "$FIRSTARGUMENT" ]]
+then
+  if [[ -z "$WAYLAND_DISPLAY" ]]
+  then
+    echo "WAYLAND_DISPLAY not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ -z "$XDG_RUNTIME_DIR" ]]
+  then
+    echo "XDG_RUNTIME_DIR not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+  then
+    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running"
+    ((ErrorCount++))
+  fi
+
+  if [[ $ErrorCount != 0 ]]
+  then
+    exit 1
+  fi
+fi
 
 if [[ -z "$FIRSTARGUMENT" ]]
 then
-echo "wlhost usage:
+echo "wlhost:
+Grant and remove permissions from users to the current Wayland server
+
+wlhost usage:
 wlhost + username 
     Give the user username permission to the current WAYLAND_DISPLAY
 wlhost - username
