@@ -71,6 +71,7 @@ else
   if [[ ! -d $NewRuntimeDir ]]
   then
     mkdir /run/shm/$UID
+    chmod 700 /run/shm/$UID
     NewRuntimeDir=/run/shm/$UID
   fi
   OLD_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
