@@ -106,7 +106,10 @@ then
 elif [[ "$FIRSTARGUMENT" == "@" ]]
 then
   chmod 777 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
-   if [[ $? == 0 ]]
+  ((ErrorCount+=$?))
+  chmod 711 $XDG_RUNTIME_DIR
+  ((ErrorCount+=$?))
+   if [[ $ErrorCount == 0 ]]
   then
     echo "Gave all users permissions to Wayland display: $WAYLAND_DISPLAY "
     exit 0
@@ -121,6 +124,8 @@ then
   setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
   chmod 700 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
   ((ErrorCount+=$?))
   if [[ $ErrorCount == 0 ]]
   then
