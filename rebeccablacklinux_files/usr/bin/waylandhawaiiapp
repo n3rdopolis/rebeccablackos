@@ -31,6 +31,8 @@ then
   export QT_PLUGIN_PATH="$QT_PLUGIN_PATH:/opt/lib/hawaii/plugins"
   export QT_QUICK_CONTROLS_STYLE=Aluminium
   "$@"
+  exit $?
 else
   kdialog --msgbox "This Application must be run from within Wayland"
+  exit 1
 fi

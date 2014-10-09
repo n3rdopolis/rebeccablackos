@@ -85,7 +85,6 @@ else
   then
     while [[ -e $XDG_RUNTIME_DIR/$NewServerName-$ServerID ]]
     do
-      echo test
       ((ServerID++))
     done
     NewServerName=$NewServerName-$ServerID
@@ -98,4 +97,5 @@ else
 
   #Execute the program
   "$@"
+  exit $?
 fi

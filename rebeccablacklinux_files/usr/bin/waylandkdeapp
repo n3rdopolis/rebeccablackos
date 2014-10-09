@@ -29,6 +29,8 @@ then
   export $(exec ck-launch-session dbus-launch)
   kbuildsycoca5
   "$@"
+  echo $?
 else
   kdialog --msgbox "This Application must be run from within Wayland"
+  exit 1
 fi
