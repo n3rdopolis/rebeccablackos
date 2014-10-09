@@ -61,7 +61,7 @@ else
     ((ErrorCount++))
   fi
 
-  if [[ $ErrorCount != 0 ]]
+  if [[ -z $ErrorCount ]]
   then
     exit 1
   fi
