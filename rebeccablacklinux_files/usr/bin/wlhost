@@ -42,7 +42,7 @@ then
     ((ErrorCount++))
   fi
 
-  if [[ -z $ErrorCount ]]
+  if [[ ! -z $ErrorCount ]]
   then
     exit 1
   fi
