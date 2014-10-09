@@ -21,7 +21,7 @@
 FIRSTARGUMENT=$1
 SECONDARGUMENT=$2
 
-if [[ -z $1 ]]
+if [[ -z "$FIRSTARGUMENT" ]]
 then
 echo "wlhost usage:
 wlhost + username 
@@ -47,8 +47,8 @@ Sharing a WAYLAND_DISPLAY also gives the user execute permissions to the XDG_RUN
 which allows the user to access files in the XDG_RUNTIME_DIR only if they know the file name."
 
 #Add the selected users permissions to the WAYLAND_DISPLAY
-elif [[ $FIRSTARGUMENT == "+" ]]
-  if [[ -z $SECONDARGUMENT ]]
+elif [[ "$FIRSTARGUMENT" == "+" ]]
+  if [[ -z "$SECONDARGUMENT" ]]
   then
     "Must specify a user to give permissions to."
     exit 1
@@ -67,8 +67,8 @@ elif [[ $FIRSTARGUMENT == "+" ]]
   fi
 
 #Remove the selected users permissions to the WAYLAND_DISPLAY
-elif [[ $FIRSTARGUMENT == "-" ]]
-  if [[ -z $SECONDARGUMENT ]]
+elif [[ "$FIRSTARGUMENT" == "-" ]]
+  if [[ -z "$SECONDARGUMENT" ]]
   then
     "Must specify a user to remove permissions from."
     exit 1
@@ -92,7 +92,7 @@ elif [[ $FIRSTARGUMENT == "-" ]]
   fi
 
 #Reset the permissions to the WAYLAND_DISPLAY to the default
-elif [[ $FIRSTARGUMENT == "0" ]]
+elif [[ "$FIRSTARGUMENT" == "0" ]]
 then
   setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
   ((ErrorCount+=$?))
@@ -113,7 +113,7 @@ then
   fi
 
 #Share the WAYLAND_DISPLAY
-elif [[ $FIRSTARGUMENT == "++" ]]
+elif [[ "$FIRSTARGUMENT" == "++" ]]
 then
   mkdir /run/shm/waylandservers
   ln $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
@@ -127,7 +127,7 @@ then
   fi
 
 #Unshare the WAYLAND_DISPLAY
-elif [[ $FIRSTARGUMENT == "--" ]]
+elif [[ "$FIRSTARGUMENT" == "--" ]]
 then
   unlink /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
   if [[ $? == 0 ]]
@@ -140,9 +140,9 @@ then
   fi
 
 #Query the WAYLAND_DISPLAY permissions
-elif [[ $FIRSTARGUMENT == ? ]]
+elif [[ "$FIRSTARGUMENT" == "?" ]]
 then
-  if [[ -z $SECONDARGUMENT ]]
+  if [[ -z "$SECONDARGUMENT" ]]
   then
     ACCESSUSERS=$(getfacl $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY |grep -v :: | grep -c -E "[a-z] *rwx")
     echo "$ACCESSUSERS"
