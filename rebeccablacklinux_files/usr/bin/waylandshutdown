@@ -19,20 +19,55 @@
 #This script provides a shutdown prompt with Zenity within a wayland session. It reports to the user if the requested action failed. 
 
 #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
-ACTION=$(echo "Switch User
+
+
+ACTIONSTRING="Switch User
 Switch User
 Logoff
-Logoff Session
-Shutdown
-Shutdown Computer
-Restart
-Restart Computer
-Standby
-Standby Computer
-Hybrid Sleep
-Hybrid Sleep
-Hibernate
-Hibernate Computer" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null )
+Logoff Session"
+
+CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
+if [[ $CanPowerOff == 1 ]]
+then
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Shutdown"
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Shutdown Computer"
+fi
+CanReboot=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanReboot |grep -c yes)
+if [[ $CanReboot == 1 ]]
+then
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Restart"
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Restart Computer"
+fi
+CanSuspend=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanSuspend |grep -c yes)
+if [[ $CanSuspend == 1 ]]
+then
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Standby"
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Standby Computer"
+fi
+CanHybridSleep=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHybridSleep |grep -c yes)
+if [[ $CanHybridSleep == 1 ]]
+then
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Hybrid Sleep"
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Hybrid Sleep Computer"
+fi
+CanHibernate=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHibernate |grep -c yes)
+if [[ $CanHibernate == 1 ]]
+then
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Hibernate"
+  ACTIONSTRING+=$'\n'
+  ACTIONSTRING+="Hibernate Computer"
+fi
+
+ACTION=$(echo "$ACTIONSTRING" | zenity --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --print-column=1 --hide-column=1 2>/dev/null )
 CancelOrOK=$?
 ACTION=$(echo "$ACTION" | head -1 )
 if [[ $CancelOrOK != 0 ]]
