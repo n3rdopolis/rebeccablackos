@@ -1,8 +1,0 @@
-[Unit]
-Description=Fingerprint Authentication Daemon
-Documentation=man:fprintd(1)
-
-[Service]
-Type=dbus
-BusName=net.reactivated.Fprint
-ExecStart=/usr/sbin/fprintd

@@ -1,9 +1,0 @@
-[Unit]
-Description=dnf makecache
-
-[Service]
-Type=oneshot
-Nice=19
-IOSchedulingClass=2
-IOSchedulingPriority=7
-ExecStart=/usr/bin/dnf -v makecache timer
