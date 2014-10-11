@@ -98,6 +98,12 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
+#Change dconf settings only if user is first time run to allow more buttons in gtk titlebars 
+if [[ ! -e ~/.config/dconf/user ]]
+then
+  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close
+fi
+
 echo 'To exit Weston, hit CTRL-ALT-BACKSPACE,'
 echo 'or run waylandshutdown, and select "Log Off" '
 echo ' '
