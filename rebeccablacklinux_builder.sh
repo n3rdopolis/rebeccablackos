@@ -213,6 +213,7 @@ rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
 "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
+UnmountAll
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
