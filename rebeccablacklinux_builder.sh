@@ -79,7 +79,7 @@ fi
 
 #get the size of the users home file system. 
 FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
-#if there is 12gb or less tell the user and quit. If not continue.
+#if there is 25gb or less tell the user and quit. If not continue.
 if [[ $FreeSpace -le 25000000 ]] 
 then
   echo "You have less then 25gb of free space on the partition that contains your home folder. Please free up some space." 
