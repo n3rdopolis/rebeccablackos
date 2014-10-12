@@ -1162,7 +1162,7 @@ function ReadCommandFIFO
       then
 	if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
 	then
-	  vte2_90 -c login &
+	  vte-2.91 -g 80x25 -c login &
 	  LastDebugPid=$!
 	  logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
 	else
