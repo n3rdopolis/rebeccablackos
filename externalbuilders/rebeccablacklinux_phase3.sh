@@ -112,9 +112,9 @@ fi
 
 
 #allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso RebeccaBlackLinux_*.txt
-chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso RebeccaBlackLinux_*.txt
-chmod 777 "$HOMELOCATION"/RebeccaBlackLinux*.iso RebeccaBlackLinux_*.txt
+chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt
+chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt
+chmod 777 "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt
 
 #If the live cd did  build then tell user   
 if [[ $ISOFAILED != 1  ]];
