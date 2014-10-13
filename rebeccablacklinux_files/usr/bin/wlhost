@@ -150,6 +150,8 @@ then
   ((ErrorCount+=$?))
   chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
   ((ErrorCount+=$?))
+  setfacl -m mask:x $XDG_RUNTIME_DIR 2>/dev/null
+  ((ErrorCount+=$?))
   if [[ $ErrorCount == 0 ]]
   then
     echo "Reset $WAYLAND_DISPLAY permissions"
