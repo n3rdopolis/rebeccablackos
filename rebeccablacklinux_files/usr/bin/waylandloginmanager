@@ -514,8 +514,8 @@ function DiagnosticTerminal
   chmod +s /var/tmp/waylandloginmanager/logincmd/login
   $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &
   TERMINALJOB=$!
-  rm /var/tmp/waylandloginmanager/logincmd/login
   wait -n $TERMINALJOB
+  rm /var/tmp/waylandloginmanager/logincmd/login
 }
 
 #This function is called when the loginmanager_control recives the Info command. It brings up a help dialog for the user, about the waylandloginmanager and the system.
