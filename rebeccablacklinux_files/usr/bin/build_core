@@ -111,7 +111,7 @@ function GetVersionGIT()
   SUBMODULEREVISIONS_EXPORT=($(git submodule | awk '{print "\""$2 "\" \"" $1 "\"" }' ORS=' '))
   SUBMODULEREVISIONS=$(declare -p SUBMODULEREVISIONS_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; $SUBMODULEREVISIONS ; SUBMODULEREVISIONS=(\\\${SUBMODULEREVISIONS_EXPORT[*]}) ; }"
-  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup GIT repos
@@ -201,7 +201,7 @@ function GetVersionSVN()
   SOURCEREVISION_EXPORT=$(svnversion .)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup SVN repos
@@ -242,7 +242,7 @@ function GetVersionBZR()
   SOURCEREVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -284,7 +284,7 @@ function GetVersionHG()
   SOURCEREVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
   SOURCEREVISION=$(declare -p REVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -327,7 +327,7 @@ function GetVersionARCHIVE()
   SOURCEREVISION_EXPORT=$(echo "Non-versioned File Archive")
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup archives
@@ -359,7 +359,7 @@ function DownloadSource()
   if [[ -e /tmp/buildcore_revisions.txt ]]
   then
     . /tmp/buildcore_revisions.txt
-    SETREV_$SOURCENAME
+    OverrideRevisions_$SOURCENAME
   fi
   mkdir -p "$SOURCEDIR"
   cd "$SOURCEDIR"
