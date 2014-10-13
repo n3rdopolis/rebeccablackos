@@ -110,7 +110,7 @@ then
   setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
   ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
-   #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+  #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
   if [[ $ACCESS_COUNT == 0 ]]
   then
     setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
@@ -132,7 +132,7 @@ then
   ((ErrorCount+=$?))
   chmod 711 $XDG_RUNTIME_DIR
   ((ErrorCount+=$?))
-   if [[ $ErrorCount == 0 ]]
+  if [[ $ErrorCount == 0 ]]
   then
     echo "Gave all users permissions to Wayland display: $WAYLAND_DISPLAY "
     exit 0
@@ -148,10 +148,15 @@ then
   ((ErrorCount+=$?))
   chmod 700 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
   ((ErrorCount+=$?))
-  chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
-  ((ErrorCount+=$?))
-  setfacl -m mask:x $XDG_RUNTIME_DIR 2>/dev/null
-  ((ErrorCount+=$?))
+  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
+  ACCESS_COUNT+=$(($(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "#|^$" | grep "mask::"|grep -c "x$")))
+  #If no users have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+  if [[ $ACCESS_COUNT == 0 ]]
+  then
+    chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
+    ((ErrorCount+=$?))
+  fi
+
   if [[ $ErrorCount == 0 ]]
   then
     echo "Reset $WAYLAND_DISPLAY permissions"
