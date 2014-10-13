@@ -17,5 +17,22 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #Decode weston h264 captures
-gst-launch filesrc location=capture.h264 ! h264parse ! mp4mux ! filesink location=~/weston-capture-264-$FILENAMEID.mp4
+
+
+NewFileName=weston-264
+FileNumber=1
+if [[ -e ~/weston-screenshots/"$NewFileName".mp4 ]]
+then
+  while [[ -e ~/weston-screenshots/$NewFileName-$FileNumber.mp4 ]]
+  do
+    ((FileNumber++))
+  done
+  NewFileName=$NewFileName-$FileNumber.mp4
+else 
+  NewFileName=weston-264.mp4
+fi
+
+
+cp ~/wayland-screenshot.png ~/weston-screenshots/$NewFileName
+gst-launch filesrc location=capture.h264 ! h264parse ! mp4mux ! filesink location=~/weston-screenshots/$NewFileName
 
