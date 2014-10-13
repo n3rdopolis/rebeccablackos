@@ -94,6 +94,9 @@ then
   exit
 fi
 
+#prevent the WaylandLoginManager from being killed with CTRL+C
+trap '' 2
+
 #Set up the needed environment variables
 cd /run/waylandloginmanager
 #The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
