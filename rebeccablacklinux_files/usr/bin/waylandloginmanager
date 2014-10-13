@@ -509,7 +509,7 @@ function DiagnosticTerminal
   chmod 700 /var/tmp/waylandloginmanager/logincmd
   cp /bin/login /var/tmp/waylandloginmanager/logincmd
   chmod +s /var/tmp/waylandloginmanager/logincmd/login
-  $TERMINALCMD -g 80x25 -c screen -s /var/tmp/waylandloginmanager/logincmd/login
+  $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login"
   rm /var/tmp/waylandloginmanager/logincmd/login
 }
 
