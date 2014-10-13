@@ -104,7 +104,11 @@ function RunDownloadAndOrBuild
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-  REVISIONSTRING="$SOURCENAME REVISION $(git rev-parse HEAD; git submodule | awk -v SOURCENAME=$SOURCENAME $'{print $2 " REVISION " $1 " ("SOURCENAME" submodule)"}')"
+  REVISION_EXPORT=$(git rev-parse HEAD)
+  REVISION=$(declare -p REVISION_EXPORT)
+  SUBMODULES_EXPORT=($(git submodule | awk '{print "\""$2 "\" \"" $1 "\"" }' ORS=' '))
+  SUBMODULES=$(declare -p SUBMODULES_EXPORT)
+  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ; $SUBMODULES ; SUBMODULES=(\${SUBMODULES_EXPORT[*]}) ; }"
 }
 
 #Function to cleanup GIT repos
@@ -191,7 +195,9 @@ function DownloadGIT()
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-  REVISIONSTRING="$SOURCENAME REVISION $(svnversion .)"
+  REVISION_EXPORT=$(svnversion .)
+  REVISION=$(declare -p REVISION_EXPORT)
+  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
 }
 
 #Function to cleanup SVN repos
@@ -229,7 +235,9 @@ function DownloadSVN()
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-  REVISIONSTRING="$SOURCENAME REVISION $(bzr version-info | grep revno | awk '{print $2}')"
+  REVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
+  REVISION=$(declare -p REVISION_EXPORT)
+  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
 }
 
 #Function to cleanup BZR repos
@@ -268,7 +276,9 @@ function DownloadBZR()
 #function to get the version of HG repos
 function GetVersionHG()
 {
-  REVISIONSTRING="$SOURCENAME REVISION $(hg --debug id -i | sed 's/+//g')"
+  REVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
+  REVISION=$(declare -p REVISION_EXPORT)
+  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
 }
 
 #Function to cleanup BZR repos
@@ -308,7 +318,9 @@ function DownloadHG()
 #function to get the version of Archives
 function GetVersionARCHIVE()
 {
-  REVISIONSTRING="$SOURCENAME Non-versioned File Archive"
+  REVISION_EXPORT=$(echo "Non-versioned File Archive")
+  REVISION=$(declare -p REVISION_EXPORT)
+  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ; }"
 }
 
 #Function to cleanup archives
