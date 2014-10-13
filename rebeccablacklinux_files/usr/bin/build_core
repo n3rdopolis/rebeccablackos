@@ -104,11 +104,12 @@ function RunDownloadAndOrBuild
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-  REVISION_EXPORT=$(git rev-parse HEAD)
-  REVISION=$(declare -p REVISION_EXPORT)
-  SUBMODULES_EXPORT=($(git submodule | awk '{print "\""$2 "\" \"" $1 "\"" }' ORS=' '))
-  SUBMODULES=$(declare -p SUBMODULES_EXPORT)
-  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ; $SUBMODULES ; SUBMODULES=(\${SUBMODULES_EXPORT[*]}) ; }"
+  SOURCEREVISION_EXPORT=$(git rev-parse HEAD)
+  SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
+  SUBMODULEREVISIONS_EXPORT=($(git submodule | awk '{print "\""$2 "\" \"" $1 "\"" }' ORS=' '))
+  SUBMODULEREVISIONS=$(declare -p SUBMODULEREVISIONS_EXPORT)
+  FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; $SUBMODULEREVISIONS ; SUBMODULEREVISIONS=(\\\${SUBMODULEREVISIONS_EXPORT[*]}) ; }"
+  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup GIT repos
@@ -195,9 +196,10 @@ function DownloadGIT()
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-  REVISION_EXPORT=$(svnversion .)
-  REVISION=$(declare -p REVISION_EXPORT)
-  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
+  SOURCEREVISION_EXPORT=$(svnversion .)
+  SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
+  FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
+  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup SVN repos
@@ -235,9 +237,10 @@ function DownloadSVN()
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-  REVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
-  REVISION=$(declare -p REVISION_EXPORT)
-  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
+  SOURCEREVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
+  SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
+  FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
+  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -276,9 +279,10 @@ function DownloadBZR()
 #function to get the version of HG repos
 function GetVersionHG()
 {
-  REVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
-  REVISION=$(declare -p REVISION_EXPORT)
-  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ;}"
+  SOURCEREVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
+  SOURCEREVISION=$(declare -p REVISION_EXPORT)
+  FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
+  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -318,9 +322,10 @@ function DownloadHG()
 #function to get the version of Archives
 function GetVersionARCHIVE()
 {
-  REVISION_EXPORT=$(echo "Non-versioned File Archive")
-  REVISION=$(declare -p REVISION_EXPORT)
-  REVISIONSTRING="function SETREV { $REVISION ; REVISION=\$REVISION_EXPORT ; }"
+  SOURCEREVISION_EXPORT=$(echo "Non-versioned File Archive")
+  SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
+  FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
+  REVISIONSTRING="eval \"SETREV_${SOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup archives
