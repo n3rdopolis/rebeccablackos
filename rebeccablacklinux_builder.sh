@@ -38,8 +38,6 @@ NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CON
 
 echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PGDOWN (OR THE SCROLL WHEEL OR SCROLL BAR IF AVALIBLE) AND THEN PRESS ENTER TO CONTINUE..."
 
-read a
-
 echo "Select Arch. Enter 1 for i386, 2 for amd64. Default=i386."
 read archselect
 if [[ $archselect == 2 ]]
@@ -48,6 +46,10 @@ then
 else
   export BUILDARCH=i386
 fi
+
+echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
+echo "Most users can ignore this message. Press Enter to continue..."
+read a
 
 STARTTIME=$(date +%s)
 

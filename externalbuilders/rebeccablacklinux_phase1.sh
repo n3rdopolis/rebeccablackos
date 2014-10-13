@@ -42,6 +42,15 @@ mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 
+#Support importing the control file to use fixed revisions of the source code
+rm "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/RebeccaBlackLinux_Revisions_$BUILDARCH.txt
+rm "$BUILDLOCATION"/build/$BUILDARCH/workdir/tmp/RebeccaBlackLinux_Revisions_$BUILDARCH.txt
+if [[ -e "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt ]]
+then
+  cp "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/
+  rm "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt
+fi
+
 #delete old logs
 rm -r "$BUILDLOCATION"/build/$BUILDARCH/phase_1/usr/share/logs/*
 
