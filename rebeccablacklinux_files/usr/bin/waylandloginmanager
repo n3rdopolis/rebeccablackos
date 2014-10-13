@@ -512,12 +512,8 @@ function DiagnosticTerminal
   chmod 700 /var/tmp/waylandloginmanager/logincmd
   cp /bin/login /var/tmp/waylandloginmanager/logincmd
   chmod +s /var/tmp/waylandloginmanager/logincmd/login
-  $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &
-  TERMINALJOB=$!
-  while [[ -e /proc/$TERMINALJOB ]]
-  do
-    sleep 1
-  done
+  $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login"
+  wait -n $TERMINALJOB
   rm /var/tmp/waylandloginmanager/logincmd/login
 }
 
@@ -1186,7 +1182,7 @@ function ReadCommandFIFO
 	if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
 	then
 	  DiagnosticTerminal &
-	  LastDebugPid=$!
+	  LastDebugPID=$!
 	  logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
 	else
 	  logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
