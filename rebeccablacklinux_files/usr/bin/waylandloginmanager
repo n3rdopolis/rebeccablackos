@@ -514,7 +514,10 @@ function DiagnosticTerminal
   chmod +s /var/tmp/waylandloginmanager/logincmd/login
   $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &
   TERMINALJOB=$!
-  wait -n $TERMINALJOB
+  while [[ -e /proc/$TERMINALJOB ]]
+  do
+    sleep 1
+  done
   rm /var/tmp/waylandloginmanager/logincmd/login
 }
 
