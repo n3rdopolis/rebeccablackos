@@ -56,6 +56,8 @@
 
 #removing /srcbuild/buildoutput/control/PACKAGENAME causes PACKAGENAME to be rebuilt manually
 
+#buildcore also uses /tmp/buildcore_revisions.txt, when it is formatted from the list of all built revisions exported by the project. If it exists, the revision specified by the build script is overidden, and the exact commit is used instead
+
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 
@@ -353,6 +355,12 @@ function DownloadARCHIVE()
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
+  #If /tmp/buildcore_revisions.txt exists, then import it.
+  if [[ -e /tmp/buildcore_revisions.txt ]]
+  then
+    . /tmp/buildcore_revisions.txt
+    SETREV_$SOURCENAME
+  fi
   mkdir -p "$SOURCEDIR"
   cd "$SOURCEDIR"
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])

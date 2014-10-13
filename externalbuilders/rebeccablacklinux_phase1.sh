@@ -43,11 +43,11 @@ rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 
 #Support importing the control file to use fixed revisions of the source code
-rm "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/RebeccaBlackLinux_Revisions.txt
-rm "$BUILDLOCATION"/build/$BUILDARCH/workdir/tmp/RebeccaBlackLinux_Revisions.txt
+rm "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/buildcore_revisions.txt
+rm "$BUILDLOCATION"/build/$BUILDARCH/workdir/tmp/buildcore_revisions.txt
 if [[ -e "$BUILDLOCATION"/RebeccaBlackLinux_Revisions.txt ]]
 then
-  cp "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/RebeccaBlackLinux_Revisions.txt
+  cp "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/buildcore_revisions.txt
   rm "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt
 fi
 
