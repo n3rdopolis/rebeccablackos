@@ -100,7 +100,8 @@ glib-compile-schemas /opt/share/glib-2.0/schemas
 echo "$(date)" > /etc/builddate
 
 #Get all Source 
-cat /usr/share/logs/build_core/*/GetSourceVersion > /usr/share/build_core_revisions.txt
+echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/build_core_revisions.txt
+cat /usr/share/logs/build_core/*/GetSourceVersion >> /usr/share/build_core_revisions.txt
 
 #hide buildlogs in tmp from remastersys
 mv /usr/share/logs	/tmp
