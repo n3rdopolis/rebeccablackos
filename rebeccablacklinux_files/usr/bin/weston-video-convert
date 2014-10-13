@@ -21,6 +21,6 @@ export FILENAMEID=$RANDOM
 
 zenity --info --text="This will convert any weston screencapture data into usable formats." &
 
-vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper
-vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
+vte -g 80x25 -c /usr/libexec/wayland_helpers/weston-video-convert-helper
+vte -g 80x25 -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
 cp ~/wayland-screenshot.png ~/wayland-screenshot-$RANDOM.png
