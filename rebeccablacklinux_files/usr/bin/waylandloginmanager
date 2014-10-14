@@ -307,10 +307,6 @@ function RegisterSession
     AllSessionPIDs[$AllSessions]=$SessionPID
     AllSessionUsers[$AllSessions]=$SessionUser
     AllSessionIDs[$AllSessions]=$SessionID
-    declare -p AllSessionTTYs   > /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionPIDs  >> /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionUsers >> /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionIDs   >> /run/waylandloginmanager/sessiondata 
     #Set the active sesssion PID to the session PID
     if [[ ! -z $SessionPID ]]
     then
@@ -318,6 +314,13 @@ function RegisterSession
     fi
     #increment the number of running sessions, now that one is added and running successfuly
     ((AllSessions++))
+
+    #Export session data so the waylandloginmanager has user switching data in case of a reload
+    declare -p AllSessions      > /run/waylandloginmanager/sessiondata
+    declare -p AllSessionTTYs  >> /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionPIDs  >> /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionUsers >> /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionIDs   >> /run/waylandloginmanager/sessiondata 
   else
     logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
   fi
