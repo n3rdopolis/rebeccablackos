@@ -33,9 +33,9 @@ then
 fi
 
 #Ask the user what to do
-while [[ $Option != 3 && $Option != 4 ]]
+while [[ $Option != 3 && $Option != 4 && $Option != 5 ]]
 do
-  Option=$(dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart" off 4 "Exit this menu" off --stdout)
+  Option=$(dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart the system" off 4 "Exit this menu" off 5 "Restart the login manager" off --stdout)
   if [[ $Option == 0 ]]
   then
     dialog --textbox /var/log/loginmanagerdisplay.log 500 500
@@ -64,6 +64,12 @@ do
   then
     chvt 1
     exit
+  elif [[ $Option == 5 ]]
+  then
+    systemctl restart wlm
   fi
-  dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
+  if [[ $Option != 3 && $Option != 4 && $Option != 5  ]]
+  then
+    dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
+  fi
 done
