@@ -395,7 +395,6 @@ function DownloadSource()
 function GetSourceVersion()
 {
   GetVersion$REPOSITORYTYPE
-  echo "$REVISIONSTRING"
 
   if [[ $MAKEDEBS == 1 ]]
   then
