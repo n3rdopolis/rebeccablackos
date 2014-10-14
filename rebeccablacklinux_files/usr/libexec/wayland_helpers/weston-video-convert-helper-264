@@ -34,5 +34,7 @@ fi
 
 
 cp ~/wayland-screenshot.png ~/weston-screenshots/$NewFileName
-gst-launch filesrc location=capture.h264 ! h264parse ! mp4mux ! filesink location=~/weston-screenshots/$NewFileName
-
+if [[ -e ~/capture.h264 ]]
+then
+  gst-launch filesrc location=~/capture.h264 ! h264parse ! mp4mux ! filesink location=~/weston-screenshots/$NewFileName
+fi
