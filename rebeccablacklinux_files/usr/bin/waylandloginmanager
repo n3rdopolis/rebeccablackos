@@ -97,6 +97,15 @@ fi
 #prevent the WaylandLoginManager from being killed with CTRL+C
 trap '' 2
 
+#Attempt to import fast user switching data from a crashed WaylandLoginManager
+if [[ -e /run/waylandloginmanager/sessiondata ]]
+then
+  . /run/waylandloginmanager/sessiondata
+else
+  touch /run/waylandloginmanager/sessiondata
+  chmod 700 /run/waylandloginmanager/sessiondata
+fi
+
 #Set up the needed environment variables
 cd /run/waylandloginmanager
 #The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
@@ -298,6 +307,10 @@ function RegisterSession
     AllSessionPIDs[$AllSessions]=$SessionPID
     AllSessionUsers[$AllSessions]=$SessionUser
     AllSessionIDs[$AllSessions]=$SessionID
+    declare -p AllSessionTTYs   > /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionPIDs  >> /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionUsers >> /run/waylandloginmanager/sessiondata 
+    declare -p AllSessionIDs   >> /run/waylandloginmanager/sessiondata 
     #Set the active sesssion PID to the session PID
     if [[ ! -z $SessionPID ]]
     then
