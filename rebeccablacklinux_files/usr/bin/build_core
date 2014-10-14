@@ -395,6 +395,7 @@ function DownloadSource()
 function GetSourceVersion()
 {
   GetVersion$REPOSITORYTYPE
+  echo "$REVISIONSTRING"
 
   if [[ $MAKEDEBS == 1 ]]
   then
@@ -439,7 +440,7 @@ function MakeAndInstall()
   mkdir -p "$INSTALLDIR/share/aclocal"
 
   #Log the source version
-  GetSourceVersion 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
+  GetSourceVersion > "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion" 2>&1
 
   #create a variable for the package name that is the source name converted to all lower case.
   PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
