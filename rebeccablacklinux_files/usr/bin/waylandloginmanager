@@ -132,8 +132,11 @@ export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export WLM_PATH=$PATH
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
-#default the number of sessions registered to be 0
-AllSessions=0
+#default the number of sessions registered to be 0 if unset
+if [[ -z $AllSessions ]]
+then
+  AllSessions=0
+fi
 #default ActiveSessionPID, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
 ActiveSessionPID=0
 #Array that stores all backend types that is supported by the hardware
