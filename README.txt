@@ -38,3 +38,10 @@ PROBLEMS:
       Wayland is still new, things are still a bit unstable, but "somewhat" useable.
 
       The distribution is now using systemd v212 as its init system, replacing Ubuntu's upstart/systemd v204 hybrid. As the first tier packages are still built around the assumption that upstart is the default init system, there might be breakerage.
+
+BUILDING: 
+     Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
+          svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
+     run the rebeccablacklinux_builder.sh, and then select the build architechture to run. The build process only works on Linux computers, but should work on most distros. A full build from scratch may take about a day depending on your hardware, and may take several GB. If nothing is selected to be rebuilt on the second build attempt, it may take less than an hour depending on your hardware.
+
+     If you need to select specific revisions of the packages, copy RebeccaBlackLinux_Revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 2945 are fully compatible.
