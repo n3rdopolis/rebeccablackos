@@ -44,4 +44,4 @@ BUILDING:
           svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
      run the rebeccablacklinux_builder.sh, and then select the build architechture to run. The build process only works on Linux computers, but should work on most distros. A full build from scratch may take about a day depending on your hardware, and may take several GB. If nothing is selected to be rebuilt on the second build attempt, it may take less than an hour depending on your hardware.
 
-     If you need to select specific revisions of the packages, copy RebeccaBlackLinux_Revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 2945 are fully compatible.
+     If you need to select specific revisions of the packages, copy RebeccaBlackLinux_Revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 2953 are fully compatible.
