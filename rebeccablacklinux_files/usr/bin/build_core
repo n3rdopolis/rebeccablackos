@@ -109,7 +109,7 @@ function GetVersionGIT()
   SOURCEREVISION_EXPORT=$(git rev-parse HEAD)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   SUBMODULESTRING=$(git submodule | awk '{print $2 "|" $1 "|" }')
-  export IFS="|"
+  export IFS="|"$'\n'
   SUBMODULEREVISIONS_EXPORT=($SUBMODULESTRING)
   unset IFS
   SUBMODULEREVISIONS=$(declare -p SUBMODULEREVISIONS_EXPORT)
