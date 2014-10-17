@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 function PackageCompileSource()
 {
 ./bootstrap
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make 
 }
 
