@@ -140,8 +140,11 @@ if [[ -z $AllSessions ]]
 then
   AllSessions=0
 fi
-#default ActiveSessionPID, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
-ActiveSessionPID=0
+#default ActiveSessionPID if unset, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
+if [[ -z $ActiveSessionPID ]]
+then
+  ActiveSessionPID=0
+fi
 #Array that stores all backend types that is supported by the hardware
 SupportedBackends=()
 #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
