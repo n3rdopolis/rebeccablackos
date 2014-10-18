@@ -1121,7 +1121,7 @@ function CommandFIFOProxy
 {
   while [ 1 ]
   do
-    sudo -u $FIFOREADERUSER bash -c "grep -Eom 1 \"^Switch$|^Change$|^Login$|^Leave$|^RegisterSession$|^Info$|^Debug$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
+    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch$|^Change$|^Login$|^Leave$|^RegisterSession$|^Info$|^Debug$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
     sleep .1
   done
 }
