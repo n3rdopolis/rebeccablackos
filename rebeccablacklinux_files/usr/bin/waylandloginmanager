@@ -1238,8 +1238,7 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    #Sleep for a small amount of time, to allow fast service, but to try to reduce the possible CPU usage if someone tries to overload the FIFO
-    sleep .0001
+    sleep .05
   done
 }
 
