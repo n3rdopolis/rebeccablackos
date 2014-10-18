@@ -47,10 +47,11 @@ BUILDING:
      If you need to select specific revisions of the packages, copy RebeccaBlackLinux_Revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 2954 are fully compatible.
 
 
-     CONTROL FILES:
+     CONTROL FILES (relative to ~/RBOS_Build_Files):
         DontDownloadDebootstrapScript: Delete this file to force the downloaded debootstrap in RBOS_Build_Files to run again at the next build
         DontRestartArchives(architechture): Delete this file to force all the downloaded packages to be downloaded again for the respective architechture.
         DontRestartPhase1(architechture): Delete this file to force Phase1 to debootstrap again for the respective architechture. This only hosts the smaller chroot system that downloads everything
         DontRestartPhase2(architechture): Delete this file to force Phase2 to debootstrap again for the respective architechture. This is the chroot that gets copied to Phase3, and is on the output ISO files.
         DontRestartBuildoutput(architechture): Delete this file to force all deb packages to rebuild for the respective architechture. This will increase the build time.
         DontStartFromScratch(architechture): Delete this file to force delete everything included downloaded repositories for the respective architechture, and cause it to start from scratch.
+        build/(architechture)/buildoutput/control/(packagename): Delete these files to specify a specific package to rebuild.
