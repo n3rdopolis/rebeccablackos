@@ -81,7 +81,7 @@ function RunDownloadAndOrBuild
   then
     mkdir -p "$SOURCEDIR"
     cd "$SOURCEDIR"
-    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE"
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
   fi
 
@@ -89,7 +89,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then
     #Download the source using specified variables.
-    DownloadSource 
+    DownloadSource | sed -e "s/^/$SOURCENAME: /"
   fi
 
   #Build the source and install it, unless the argument passed to the build script is 'download-only'
@@ -97,7 +97,7 @@ function RunDownloadAndOrBuild
   then
 
     #Start the compile or install Process
-    MakeAndInstall
+    MakeAndInstall | sed -e "s/^/$SOURCENAME: /"
   fi
 }
 
