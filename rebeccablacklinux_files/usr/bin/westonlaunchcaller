@@ -56,6 +56,7 @@ fi
 
 #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
 USER=$(id -u)
+export $(exec dbus-launch)
 . /usr/bin/wlruntime_vars
 BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
 EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
