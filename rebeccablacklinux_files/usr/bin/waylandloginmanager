@@ -163,7 +163,7 @@ then
 fi
 
 #Detect presence of the wlm_ui zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
-if [[ ! -z /usr/bin/wlm_zenity ]]
+if [[ -e /usr/bin/wlm_ui ]]
 then
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui zenity"
   TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui vte"
