@@ -18,12 +18,6 @@
 
 #This script calls the program and arguments passed to the arguments of this script, sets runtime vars for Wayland, and executes the program, and arguments. This has additional variables for running Hawaii programs
 . /usr/bin/wlruntime_vars
-export XDG_DATA_HOME=$HOME/.local5
-export XDG_CONFIG_HOME=$HOME/.config5
-export XDG_CACHE_HOME=$HOME/.cache5
-export KDE_SESSION_VERSION=5
-export KDE_FULL_SESSION=true
-export $(exec ck-launch-session dbus-launch)
 export QML2_IMPORT_PATH="$QML2_IMPORT_PATH:/opt/lib/hawaii/qml"
 export QT_PLUGIN_PATH="$QT_PLUGIN_PATH:/opt/lib/hawaii/plugins"
 export QT_QUICK_CONTROLS_STYLE=Aluminium
