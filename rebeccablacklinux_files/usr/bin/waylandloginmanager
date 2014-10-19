@@ -352,6 +352,14 @@ function DialogWait
   done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
 }
 
+#This function takes no arguments and waits for the loginmanagerdisplay to startup
+function DisplayServerWait
+{
+  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay; echo $?) == 1 ]]
+  do
+    sleep 1
+  done
+}
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
@@ -1041,7 +1049,8 @@ function StartAutoLogin
   #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
   then
-    sleep 5
+    #Wait until the loginmanagerdisplay becomes availible
+    DisplayServerWait
     ChooseSessionType
     #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
@@ -1093,6 +1102,8 @@ function UserActionDialog
   #Loop forever
   while [ 1 ]
   do
+    #wait for the loginmanagerdisplay
+    DisplayServerWait
     ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
     if [[ $wlmdebug == 1 ]]
     then
