@@ -57,10 +57,25 @@ export QML_IMPORT_PATH=$QML2_IMPORT_PATH
 #export QT_WAYLAND_RESIZE_AFTER_SWAP=1
 export KDE_DEBUG=1
 export KSCREEN_BACKEND=QScreen
+export KDE_FULL_SESSION=true
+export KDE_SESSION_VERSION=5
+
+#Change dconf settings only if user is first time run to allow more buttons in gtk titlebars 
+if [[ ! -e ~/.config/dconf/user ]]
+then
+  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close
+fi
+
+#Build the KDE configuration database
+if [[ ! -e $HOME/.cache/ksycoca5 ]]
+then
+  kbuildsycoca5
+fi
+
 dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames > /dev/null
 DBusErrorState=$?
 
 if [[ $DBusErrorState == 1 ]]
 then
-  export $(exec ck-launch-session dbus-launch)
+  export $(exec dbus-launch)
 fi
