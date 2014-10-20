@@ -85,6 +85,11 @@ function RunDownloadAndOrBuild
     #If the revisions file exists, then also run the PackagePrepareBuild so that the source trees are exactly the way they where before they where compiled
     if [[ -e /tmp/buildcore_revisions.txt ]]
     then
+      mkdir -p "$SOURCEDIR"
+      cd "$SOURCEDIR"
+      mkdir -p "$SOURCENAME"
+      cd "$SOURCENAME"
+      PackageDownloadSource
       PackagePrepareBuild
     fi
     exit
