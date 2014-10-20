@@ -31,6 +31,7 @@ NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CON
    File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
    File:              ${HOME}/RebeccaBlackLinux_DevDbg_i386.iso or ${HOME}/RebeccaBlackLinux_DevDbg_amd64.iso
    File:              ${HOME}/RebeccaBlackLinux_Revisions_i386.txt or ${HOME}/RebeccaBlackLinux_Revisions_amd64.txt
+   File:              ${HOME}/RebeccaBlackLinux_Source_i386.tar.gz or ${HOME}/RebeccaBlackLinux_Source_amd64.tar.gz
 "
 
 

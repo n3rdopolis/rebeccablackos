@@ -41,6 +41,8 @@ mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
 #copy in the files needed
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/exportsource/
+rsync "$SCRIPTFOLDERPATH"/../* -Cr "$BUILDLOCATION"/build/$BUILDARCH/exportsource
 
 #Support importing the control file to use fixed revisions of the source code
 rm "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/buildcore_revisions.txt
