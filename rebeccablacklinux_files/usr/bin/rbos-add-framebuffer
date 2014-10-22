@@ -18,6 +18,8 @@
 
 #This script configures GRUB to pass a vga= argument to the kernel specified by the user. It tells the user what vga value gives what resolution
 
+DIALOGUSER=daemon
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -34,11 +36,11 @@ then
 fi
 
 #Tell the user what the script does
-dialog  --msgbox "This will assist you in configuring your system, so that a framebuffer is force created upon the next reboot, with the specified resolution." 7 60
+sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, so that a framebuffer is force created upon the next reboot, with the specified resolution." 7 60
 
-RESOLUTION=$(dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default
+RESOLUTION=$(sudo -E -u $DIALOGUSER dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default
 
-Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1024x768 off 795 1280x1024 off 799 1600x1200 off 0 "Disable Framebuffer Boot" off 2 "Leave Unchanged" on --stdout)
+Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1024x768 off 795 1280x1024 off 799 1600x1200 off 0 "Disable Framebuffer Boot" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 if [[ $OKSelected == 0 && $RESOLUTION != 2 ]]
 then
@@ -54,7 +56,7 @@ then
 
   #update the grub configs, and ask the user to restart now or later
   update-grub
-  dialog  --yesno "You will need to restart in order for the changes to apply
+  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
   OKSelected=$?

@@ -207,20 +207,20 @@ then
   if [[ $ISLIVE == 1 ]]
   then
     logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 63 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
   else 
-    openvt -c 63 -s -f -w -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
     openvt -c 63 -s -f -w -- rbos-add-framebuffer
   fi
-  openvt -c 63 -s -f -w -- dialog --msgbox "Can not start Weston.
+  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "Can not start Weston.
 
 Will now reboot." 20 50 --no-cancel
   dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
@@ -248,7 +248,7 @@ then
   #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY63, and restart.
   else
     logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 63 -s -f -w -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
@@ -1023,7 +1023,7 @@ function LoginWestonLauncher
     fi
   done
   logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
-  openvt -c 63 -s -f -w -- dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
+  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 

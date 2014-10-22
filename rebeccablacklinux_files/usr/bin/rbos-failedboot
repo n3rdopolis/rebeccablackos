@@ -18,6 +18,7 @@
 
 #This script presents options when the loginmanagerdisplay crashes too many times
 
+DIALOGUSER=daemon
 
 #Require root privlages
 if [[ $UID != 0 ]]
@@ -35,17 +36,17 @@ fi
 #Ask the user what to do
 while [[ $Option != 3 && $Option != 4 && $Option != 5 ]]
 do
-  Option=$(dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart the system" off 4 "Exit this menu" off 5 "Restart the login manager" off --stdout)
+  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Restart the system" off 4 "Exit this menu" off 5 "Restart the login manager" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
-    dialog --textbox /var/log/loginmanagerdisplay.log 500 500
+    sudo -E -u $DIALOGUSER dialog --textbox /var/log/loginmanagerdisplay.log 500 500
   elif [[ $Option == 1 ]]
   then
     if [[ $ISLIVE != 1 ]]
     then
       rbos-add-framebuffer
     else
-      dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
+      sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
     fi
   elif [[ $Option == 2 ]]
   then
@@ -53,11 +54,11 @@ do
     then
       rbos-force-framebuffer
     else
-      dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
+      sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
     fi
   elif [[ $Option == 3 ]]
   then
-    dialog --msgbox "Will now restart..." 20 50
+    sudo -E -u $DIALOGUSER dialog --msgbox "Will now restart..." 20 50
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     exit
   elif [[ $Option == 4 ]]
@@ -70,6 +71,6 @@ do
   fi
   if [[ $Option != 3 && $Option != 4 && $Option != 5  ]]
   then
-    dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
+    sudo -E -u $DIALOGUSER dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
   fi
 done
