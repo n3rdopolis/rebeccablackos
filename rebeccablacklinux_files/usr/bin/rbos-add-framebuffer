@@ -29,7 +29,7 @@ fi
 
 
 #Find out the current vga= configuration if specified
-CURRENTOPTION=cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | tr [:lower:] [:upper:] | grep VGA | awk -F VGA= '{print $2}' | awk '{print $1}'
+CURRENTOPTION=$(cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | tr [:lower:] [:upper:] | grep VGA | awk -F VGA= '{print $2}' | awk '{print $1}')
 if [[ -z $CURRENTOPTION ]]
 then
   CURRENTOPTION="Not Specified"
