@@ -67,7 +67,7 @@ do
     exit
   elif [[ $Option == 5 ]]
   then
-    systemctl restart wlm
+    systemctl restart waylandloginmanager.service
   fi
   if [[ $Option != 3 && $Option != 4 && $Option != 5  ]]
   then
