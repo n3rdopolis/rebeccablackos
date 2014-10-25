@@ -99,7 +99,7 @@ cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.
 
 #Take a snapshot of the source
 rm "$HOMELOCATION"/RebeccaBlackLinux_Source_$BUILDARCH.tar.gz
-tar -czvf "$HOMELOCATION"/RebeccaBlackLinux_Source_$BUILDARCH.tar.gz -C "$BUILDLOCATION"/build/$BUILDARCH/exportsource/ .
+tar -czvf "$HOMELOCATION"/RebeccaBlackLinux_Source_$BUILDARCH.tar.gz -C "$BUILDLOCATION"/build/$BUILDARCH/exportsource/ . &>/dev/null
 
 
 #If the live cd did not build then tell user  
