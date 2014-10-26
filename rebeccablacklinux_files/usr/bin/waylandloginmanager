@@ -70,7 +70,7 @@ mkdir -p /run/waylandloginmanager
 #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
 SCRIPTPATH=$(readlink -f "$0")
 SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
-LOCKSCRIPT=$(readlink -f "$(strings "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
+LOCKSCRIPT=$(readlink -f "$(strings -a "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
 if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
 then
   rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock"
