@@ -1137,7 +1137,7 @@ function CommandFIFOProxy
   done
 }
 
-#This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the westonlaunchcaller, waylandshutdown, or even some functions within this script.
+#This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the westonlaunchcaller, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {

@@ -99,7 +99,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 echo 'To exit Weston, hit CTRL-ALT-BACKSPACE,'
-echo 'or run waylandshutdown, and select "Log Off" '
+echo 'or run shutdowndialog, and select "Log Off" '
 echo ' '
 echo 'When using Wayland, to run a program under xwayland, run'
 echo '   xwaylandapp programname --args --args2...'
