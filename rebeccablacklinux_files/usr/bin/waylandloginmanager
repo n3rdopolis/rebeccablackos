@@ -1027,7 +1027,7 @@ function LoginWestonLauncher
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
-  openvt -c 63 -s -f -w -- rbos-failedboot
+  openvt -c 63 -s -f -- rbos-failedboot
   exit
 }
 
