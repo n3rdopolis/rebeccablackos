@@ -1078,9 +1078,9 @@ function StartAutoLogin
 function SetupLoggingAndFIFO
 {
   #Create communication fifo.
-  rm -r /run/waylandloginmanager/loginmanager_control
-  rm -r /run/waylandloginmanager/loginmanager_listener
-  rm -r /run/waylandloginmanager/loginmanager_register
+  rm -r /run/waylandloginmanager/loginmanager_control &> /dev/null
+  rm -r /run/waylandloginmanager/loginmanager_listener &> /dev/null
+  rm -r /run/waylandloginmanager/loginmanager_register &> /dev/null
   mkfifo -m 622 /run/waylandloginmanager/loginmanager_control
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_listener
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_register
@@ -1092,7 +1092,7 @@ function SetupLoggingAndFIFO
   touch /var/log/loginmanagerdisplay.log
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandserver.log
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplay.log
-  rm $LOGINMANAGERDISPLAYHOME/waylandserver.log
+  rm $LOGINMANAGERDISPLAYHOME/waylandserver.log &> /dev/null
   ln -s /var/log/waylandserver.log $LOGINMANAGERDISPLAYHOME/waylandserver.log
 }
 
