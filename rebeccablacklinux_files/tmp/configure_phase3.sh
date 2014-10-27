@@ -96,6 +96,10 @@ ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
 
+#Configure gnome-shell to use the unity control panel
+dpkg-divert --local --rename --add /usr/bin/gnome-control-center
+ln -s /usr/bin/unity-control-center /usr/bin/gnome-control-center
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
