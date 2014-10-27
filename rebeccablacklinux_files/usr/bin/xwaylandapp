@@ -18,23 +18,14 @@
 
 #This script is for starting applications with toolkits that support X11 and wayland as xwaylandapps.
 #bring these to the defaults for this X11 
-. /etc/environment
-unset QT_QPA_PLATFORM
+export QT_QPA_PLATFORM=xcb
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 unset GDK_BACKEND
 unset ELM_ENGINE
 unset SDL_VIDEODRIVER
 unset ECORE_EVAS_ENGINE
-unset LD_LIBRARY_PATH
-unset UNDER_WAYLAND
 unset GST_GL_WINDOW
-unset XDG_DATA_DIRS
-unset QTVER
-unset QML2_IMPORT_PATH
-export QT_PLUGIN_PATH=xcb
-unset WESTON_PLUGIN_PATH
 unset CLUTTER_INPUT_BACKEND
-unset QTDIR
 "$@"
 exit $?
