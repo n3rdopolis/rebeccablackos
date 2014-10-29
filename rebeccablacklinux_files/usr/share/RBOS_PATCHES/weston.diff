@@ -33,3 +33,21 @@ index 7264f7e..f689131 100644
 
 
 
+diff --git a/src/compositor.c b/src/compositor.c
+index 4540911..b249459 100644
+--- a/src/compositor.c
++++ b/src/compositor.c
+@@ -4711,13 +4711,6 @@ int main(int argc, char *argv[])
+ 	ec->idle_time = idle_time;
+ 	ec->default_pointer_grab = NULL;
+ 
+-	for (i = 1; i < argc; i++)
+-		weston_log("fatal: unhandled option: %s\n", argv[i]);
+-	if (argc > 1) {
+-		ret = EXIT_FAILURE;
+-		goto out;
+-	}
+-
+ 	weston_compositor_log_capabilities(ec);
+ 
+ 	server_socket = getenv("WAYLAND_SERVER_SOCKET");
