@@ -185,7 +185,7 @@ do
   Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
   Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-  Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" | head -1) 
+  Current Seat: ${DeviceSeatIDs[CurrentDeviceNumber]}" --separator="\n" --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)") 
   #only change the seat id in udev if the user specified to do so
   if [[ -z $NewSeatNumber ]]
   then

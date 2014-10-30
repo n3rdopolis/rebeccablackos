@@ -623,7 +623,6 @@ New Session...
   #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
   ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null )
   CancelOrOK=$?
-  ChangeSession=$(echo "$ChangeSession" | head -1 )
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
@@ -843,7 +842,7 @@ function GetUserCredentials
   #present the list of the users to the system
   LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
   CancelOrOK=$?
-  export LOGINUSER=$(echo "$LOGINUSER" | head -1)
+  export LOGINUSER
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
@@ -948,9 +947,8 @@ function LeavePrompt
     ACTIONSTRING+=$'\n'
     ACTIONSTRING+="Hibernate Computer"
   fi
-  ACTION=$(echo "$ACTIONSTRING" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --hide-column 1 --print-column=1  2>/dev/null | head -1)
+  ACTION=$(echo "$ACTIONSTRING" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --hide-column 1 --print-column=1  2>/dev/null )
   CancelOrOK=$?
-  ACTION=$(echo "$ACTION" | head -1 )
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
@@ -1106,7 +1104,7 @@ function UserActionDialog
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null | head -1; exit ${PIPESTATUS[1]})
+  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
