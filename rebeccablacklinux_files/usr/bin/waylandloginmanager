@@ -110,6 +110,9 @@ fi
 
 #Set up the needed environment variables
 cd /run/waylandloginmanager
+
+#Enable job control in this script
+set -m
 #The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
 export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
 #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
