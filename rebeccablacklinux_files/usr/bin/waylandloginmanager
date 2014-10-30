@@ -1133,7 +1133,16 @@ function ReadCommandFIFO
   #loop 'forever'
   while [ 1 ]
   do
-    if [[ $(jobs -p -r | grep -ec "^LastUserActionPID$\|^$LastSwitchPID\|^$LastLogonPID$\|^$LastLeavePID$\|^$LastInfoPID$") == 0 ]]
+    UIJobCount=0
+    while read JOB
+    do
+      if [[ $JOB == $LastUserActionPID || $JOB == $LastSwitchPID || $JOB == $LastLogonPID || $JOB == $LastLeavePID || $JOB == $LastInfoPID ]]
+      then
+	((UIJobCount++))
+      fi
+    done < <(jobs -p -r)
+
+    if [[ $UIJobCount == 0 ]]
     then
       UserActionDialog &
       LastUserActionPID=$!
