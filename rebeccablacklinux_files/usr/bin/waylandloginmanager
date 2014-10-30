@@ -495,7 +495,7 @@ function ChooseSessionType
   then 
     if [[ $PROMPTED == 1 ]]
     then
-      $ZENITYCMD --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
+      $ZENITYCMD --width=500 --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
     else
       logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
     fi
@@ -959,7 +959,7 @@ function LeavePrompt
   fi
 
   #Prompt the user if they are sure they want to execute the selected action
-  $ZENITYCMD --title="Leave..." --question --text="Are you sure you want to $ACTION" 2>/dev/null
+  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to $ACTION" 2>/dev/null
   CONFIRM=$?
   if [[ $CONFIRM != 0 ]]
   then

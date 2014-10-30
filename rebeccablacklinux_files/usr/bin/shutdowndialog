@@ -75,7 +75,7 @@ then
 fi
 
 #Prompt the user if they are sure they want to execute the selected action
-zenity --title="Leave..." --question --text="Are you sure you want to $ACTION"
+zenity --width=450 --title="Leave..." --question --text="Are you sure you want to $ACTION"
 CONFIRM=$?
 if [[ $CONFIRM == 0 ]]
 then
