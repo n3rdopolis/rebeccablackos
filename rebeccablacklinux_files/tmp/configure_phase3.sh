@@ -48,9 +48,6 @@ cd $OLDPWD
 #copy all files
 rsync /usr/import/* -a /
 
-#delete the import folder
-rm -r /usr/import
-
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -99,6 +96,9 @@ glib-compile-schemas /opt/share/glib-2.0/schemas
 #Configure gnome-shell to use the unity control panel
 dpkg-divert --local --rename --add /usr/bin/gnome-control-center
 ln -s /usr/bin/unity-control-center /usr/bin/gnome-control-center
+
+#delete the import folder
+rm -r /usr/import
 
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
