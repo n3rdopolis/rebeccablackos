@@ -351,7 +351,7 @@ function DialogWait
     percent=$(( $countseconds * 100 / $waitseconds ))
     echo $percent
     ((countseconds++))
-    read -t 1
+    sleep 1
   done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
 }
 
@@ -360,7 +360,7 @@ function DisplayServerWait
 {
   while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay &>/dev/null; echo $?) == 1 ]]
   do
-    read -t 1
+    sleep 1
   done
 }
 
@@ -648,7 +648,7 @@ New Session...
       then
 	#change to tty63, and then the destination TTY of the session ID as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63 &
-	read -t .1
+	sleep .1
 	chvt $ChangeSessionTTY &
 	#hand over the logind session ID to allow desktop permissions to work.
 	loginctl activate $ChangeSessionID
@@ -719,7 +719,7 @@ function StartUserSession
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   #change to tty63, before starting the session, as switching directly between two Weston session doesn't work.
   chvt 63 &
-  read -t .1
+  sleep .1
   Create_XDG_RUNTIME_DIR $LOGINUSER
   #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
   if [[ $westonresult == 255 ]]
@@ -731,7 +731,7 @@ function StartUserSession
     logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
     openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
   fi
-  read -t 5
+  sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
   WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
   #Find the logind session id, by trying to find out what session is lead by the $WESTONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
@@ -781,7 +781,7 @@ function AuthenticateUser
 	    send $TryPassword\r
 	    sleep 30
 	    exit" |expect &
-      read -t 3
+      sleep 3
     fi
     #Remove the password from the environment
     unset TryPassword
@@ -1022,7 +1022,7 @@ function LoginWestonLauncher
 	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       fi
     fi
-    read -t 5
+    sleep 5
   done
   logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
   openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
@@ -1115,7 +1115,7 @@ ZENITYSTATUS=$?
   then
     echo -e "\n$USERACTION" > /run/waylandloginmanager/loginmanager_control
   else
-    read -t .1
+    sleep .1
   fi
 }
 
@@ -1126,7 +1126,7 @@ function CommandFIFOProxy
   while [ 1 ]
   do
     sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch$|^Change$|^Login$|^Leave$|^RegisterSession$|^Info$|^Debug$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
-    read -t .1
+    sleep .1
   done
 }
 
@@ -1158,7 +1158,7 @@ function ReadCommandFIFO
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63 &
-	read -t .1
+	sleep .1
 	chvt $HostVT &
       fi
       ActiveSessionPID=0
@@ -1177,7 +1177,7 @@ function ReadCommandFIFO
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63 &
-	read -t .1
+	sleep .1
 	chvt $HostVT &
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
@@ -1195,7 +1195,7 @@ function ReadCommandFIFO
       then
 	#change to tty63, and then the destination TTY of the loginmanagerdisplay as a workaround, as switching directly between two Weston session doesn't work.
 	chvt 63 &
-	read -t .1
+	sleep .1
 	chvt $HostVT &
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
@@ -1259,7 +1259,7 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    read -t .05
+    sleep .05
   done
 }
 
