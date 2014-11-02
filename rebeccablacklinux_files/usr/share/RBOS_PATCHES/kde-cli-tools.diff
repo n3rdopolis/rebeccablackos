@@ -24,7 +24,7 @@ index cc9cef1..34ecedb 100644
 +    else if ( command == "appmenu" )
 +    {
 +      QList<QUrl> list;
-+      KOpenWithDialog dlg(list, il8n("Select an Application to run..."), QString(), 0);
++      KOpenWithDialog dlg(list, i18n("Select an Application to run..."), QString(), 0);
 +      if (dlg.exec()) {
 +          KRun::run(*dlg.service(), list, 0);
 +      }
