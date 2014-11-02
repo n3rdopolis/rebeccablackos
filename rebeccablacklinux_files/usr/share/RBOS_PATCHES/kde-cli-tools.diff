@@ -1,8 +1,8 @@
 diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
-index cc9cef1..fff43a7 100644
+index cc9cef1..34ecedb 100644
 --- a/kioclient/kioclient.cpp
 +++ b/kioclient/kioclient.cpp
-@@ -29,7 +29,8 @@
+@@ -29,11 +29,13 @@
  #include <KAboutData>
  #include <KLocalizedString>
  #include <KMimeTypeTrader>
@@ -12,16 +12,19 @@ index cc9cef1..fff43a7 100644
  #include <QDBusConnection>
  #include <QCommandLineParser>
  #include <QFileDialog>
+ #include <iostream>
 +#include <QWidget>
-
-@@ -340,6 +341,14 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+ 
+ bool ClientApp::m_ok = true;
+ static bool s_interactive = true;
+@@ -340,6 +342,14 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
      }
 +    else if ( command == "appmenu" )
 +    {
 +      QList<QUrl> list;
-+      KOpenWithDialog dlg(list, i18n("Select an Application to run..."), QString(), 0);
++      KOpenWithDialog dlg(list, il8n("Select an Application to run..."), QString(), 0);
 +      if (dlg.exec()) {
 +          KRun::run(*dlg.service(), list, 0);
 +      }
