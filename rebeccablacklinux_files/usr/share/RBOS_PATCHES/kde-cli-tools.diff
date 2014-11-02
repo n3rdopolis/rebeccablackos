@@ -12,6 +12,8 @@ index cc9cef1..fff43a7 100644
  #include <QDBusConnection>
  #include <QCommandLineParser>
  #include <QFileDialog>
++#include <QWidget>
+
 @@ -340,6 +341,14 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
@@ -19,7 +21,7 @@ index cc9cef1..fff43a7 100644
 +    else if ( command == "appmenu" )
 +    {
 +      QList<QUrl> list;
-+      KOpenWithDialog dlg(list);
++      KOpenWithDialog dlg(list, i18n("Select an Application"), QString(), 0);
 +      if (dlg.exec()) {
 +          KRun::run(*dlg.service(), list, 0);
 +      }
