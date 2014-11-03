@@ -1,13 +1,16 @@
 diff --git a/src/server/display.cpp b/src/server/display.cpp
-index fe71df5..44007db 100644
+index fe71df5..ddc99ca 100644
 --- a/src/server/display.cpp
 +++ b/src/server/display.cpp
-@@ -45,7 +45,7 @@ public:
+@@ -45,7 +45,10 @@ public:
  
      wl_display *display = nullptr;
      wl_event_loop *loop = nullptr;
 -    QString socketName = QStringLiteral("wayland-0");
 +    QString socketName = QStringLiteral(getenv("WAYLAND_DISPLAY"));
++    if (socketName.isEmpty()) {
++        socketName = QStringLiteral("wayland-0");
++    }
      bool running = false;
      QList<OutputInterface*> outputs;
  
