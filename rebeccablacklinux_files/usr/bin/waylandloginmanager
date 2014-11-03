@@ -998,7 +998,7 @@ function LeavePrompt
 }
 
 
-#This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 5 seconds, then try to call it back up
+#This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 1 second, then try to call it back up
 function LoginWestonLauncher
 {
   Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
@@ -1022,7 +1022,7 @@ function LoginWestonLauncher
 	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       fi
     fi
-    sleep 5
+    sleep 1
   done
   logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
   openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
