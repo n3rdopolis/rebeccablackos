@@ -7,7 +7,7 @@ index fe71df5..ddc99ca 100644
      wl_display *display = nullptr;
      wl_event_loop *loop = nullptr;
 -    QString socketName = QStringLiteral("wayland-0");
-+    QString socketName = QStringLiteral(getenv("WAYLAND_DISPLAY"));
++    QString socketName = QString::fromUtf8(getenv("WAYLAND_DISPLAY"));
 +    if (socketName.isEmpty()) {
 +        socketName = QStringLiteral("wayland-0");
 +    }
