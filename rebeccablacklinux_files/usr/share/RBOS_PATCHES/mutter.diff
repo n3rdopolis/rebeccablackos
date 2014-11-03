@@ -1,13 +1,16 @@
 diff --git a/src/wayland/meta-wayland.c b/src/wayland/meta-wayland.c
-index ff9709a..af2f572 100644
+index 5d2c526..57a4f88 100644
 --- a/src/wayland/meta-wayland.c
 +++ b/src/wayland/meta-wayland.c
-@@ -429,7 +429,7 @@ meta_wayland_init (void)
+@@ -307,9 +307,9 @@ meta_wayland_init (void)
+   meta_wayland_shell_init (compositor);
    meta_wayland_seat_init (compositor);
  
-   /* FIXME: find the first free name instead */
--  compositor->display_name = g_strdup ("wayland-0");
+-  compositor->display_name = wl_display_add_socket_auto (compositor->wayland_display);
 +  compositor->display_name = g_strdup (getenv("WAYLAND_DISPLAY"));
-   if (wl_display_add_socket (compositor->wayland_display, compositor->display_name))
-     g_error ("Failed to create socket");
+   if (compositor->display_name == NULL)
+-    g_error ("Failed to create socket");
++    compositor->display_name = g_strdup ("wayland-0");
  
+   if (!meta_xwayland_start (&compositor->xwayland_manager, compositor->wayland_display))
+     g_error ("Failed to start X Wayland");
