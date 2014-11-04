@@ -3,11 +3,12 @@ Enabled=0
 Type=WSession
 Name=KDE Plasma
 CompositorExec=/opt/bin/kwin_wayland
-CompositorSupportsKMS=1
+CompositorSupportsWL=1
+CompositorSupportsKMS=0
 CompositorSupportsFB=0
 CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=--x-server=xwayland
+AdditionalArguments=-x xwayland --display=:99
 
