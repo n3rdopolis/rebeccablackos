@@ -152,7 +152,6 @@ RevertFile /usr/sbin/invoke-rc.d
 #delete larger binary files that are for development, and are not needed on the smaller iso
 rm /opt/bin/Xorg
 rm /opt/bin/Xnest
-rm /opt/bin/Xvfb
 rm /opt/bin/rcc
 rm /opt/bin/moc
 rm /opt/bin/qdbusxml2cpp
