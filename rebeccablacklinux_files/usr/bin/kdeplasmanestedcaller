@@ -19,4 +19,4 @@
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
 export KWIN_COMPOSE=Q
-kwin -x xwayland --display=:99
+kwin -x xvfb --display=:99
