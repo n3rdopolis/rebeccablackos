@@ -1,5 +1,5 @@
 diff --git a/hw/vfb/InitOutput.c b/hw/vfb/InitOutput.c
-index 97eccfd..672842f 100644
+index 97eccfd..bfca068 100644
 --- a/hw/vfb/InitOutput.c
 +++ b/hw/vfb/InitOutput.c
 @@ -66,6 +66,7 @@ from The Open Group.
@@ -10,11 +10,13 @@ index 97eccfd..672842f 100644
  
  #define VFB_DEFAULT_WIDTH      1280
  #define VFB_DEFAULT_HEIGHT     1024
-@@ -785,6 +786,147 @@ vfbCloseScreen(ScreenPtr pScreen)
+@@ -785,6 +786,125 @@ vfbCloseScreen(ScreenPtr pScreen)
  }
  
  static Bool
-+vfbRROutputValidateMode(ScreenPtr pScreen, RROutputPtr output, RRModePtr mode)
++vfbRROutputValidateMode(ScreenPtr           pScreen,
++                        RROutputPtr         output,
++                        RRModePtr           mode)
 +{
 +    rrScrPriv(pScreen);
 +
@@ -28,66 +30,40 @@ index 97eccfd..672842f 100644
 +}
 +
 +static Bool
-+vfbRRScreenSetSize(ScreenPtr pScreen, CARD16 width, CARD16 height,
-+                   CARD32 mmWidth, CARD32 mmHeight)
++vfbRRScreenSetSize(ScreenPtr  pScreen,
++                   CARD16     width,
++                   CARD16     height,
++                   CARD32     mmWidth,
++                   CARD32     mmHeight)
 +{
-+    WindowPtr root = pScreen->root;
-+    WindowPtr layer;
-+    WindowPtr child;
-+    BoxRec box;
++    // Prevent screen updates while we change things around
++    SetRootClip(pScreen, FALSE);
 +
 +    pScreen->width = width;
 +    pScreen->height = height;
 +    pScreen->mmWidth = mmWidth;
 +    pScreen->mmHeight = mmHeight;
 +
-+    // Resize the root window & adjust its clipping
-+    box.x1 = 0;
-+    box.y1 = 0;
-+    box.x2 = pScreen->width;
-+    box.y2 = pScreen->height;
-+    REGION_INIT(pScreen, &root->winSize, &box, 1);
-+    REGION_INIT(pScreen, &root->borderSize, &box, 1);
-+    REGION_RESET(pScreen, &root->borderClip, &box);
-+    root->drawable.width = pScreen->width;
-+    root->drawable.height = pScreen->height;
-+    REGION_BREAK(pScreen, &root->clipList);
++    // Restore the ability to update screen, now with new dimensions
++    SetRootClip(pScreen, TRUE);
 +
-+    // Update the clipping regions of all windows
-+    for (child = root->firstChild; child; child = child->nextSib)
-+        (*pScreen->MarkOverlappedWindows)(child, child, &layer);
-+
-+    if (root->firstChild)
-+        (*pScreen->MarkOverlappedWindows)(root->firstChild,
-+                                          root->firstChild,
-+                                          NULL);
-+    else
-+        (*pScreen->MarkWindow)(root);
-+
-+    (*pScreen->ValidateTree)(root, NullWindow, VTOther);
-+    (*pScreen->HandleExposures)(root);
-+
-+    // Reposition top-level windows to fit new root size
-+    // XXX I assume this is what it does, but I'm not sure
-+    ResizeChildrenWinSize(root, 0, 0, 0, 0);
-+
-+    // Check the pointer position
-+    WindowsRestructured();
-+
-+    RRScreenSizeNotify(pScreen);
++    RRScreenSizeNotify (pScreen);
 +    RRTellChanged(pScreen);
-+
-+    // Flush resulting events, etc to clients
-+    FlushAllOutput();
 +
 +    return TRUE;
 +}
 +
 +static Bool
-+vfbRRCrtcSet(ScreenPtr pScreen, RRCrtcPtr crtc, RRModePtr mode, int x, int y,
-+             Rotation rotation, int numOutput, RROutputPtr *outputs)
++vfbRRCrtcSet(ScreenPtr	pScreen,
++             RRCrtcPtr	crtc,
++             RRModePtr	mode,
++             int	x,
++             int	y,
++             Rotation	rotation,
++             int	numOutput,
++             RROutputPtr *outputs)
 +{
-+    return RRCrtcNotify(crtc, mode, x, y, rotation, NULL, numOutput, outputs);
++  return RRCrtcNotify(crtc, mode, x, y, rotation, NULL, numOutput, outputs);
 +}
 +
 +static Bool
@@ -101,55 +77,57 @@ index 97eccfd..672842f 100644
 +{
 +    rrScrPrivPtr pScrPriv;
 +#if RANDR_12_INTERFACE
-+    RRModePtr mode;
-+    RRCrtcPtr crtc;
-+    RROutputPtr output;
++    RRModePtr	mode;
++    RRCrtcPtr	crtc;
++    RROutputPtr	output;
 +    xRRModeInfo modeInfo;
-+    char name[64];
++    char	name[64];
 +#endif
 +
-+    if (!RRScreenInit(pScreen))
-+        return FALSE;
++    if (!RRScreenInit (pScreen))
++	return FALSE;
 +    pScrPriv = rrGetScrPriv(pScreen);
 +    pScrPriv->rrGetInfo = vfbRRGetInfo;
 +#if RANDR_12_INTERFACE
 +    pScrPriv->rrCrtcSet = vfbRRCrtcSet;
 +    pScrPriv->rrScreenSetSize = vfbRRScreenSetSize;
 +    pScrPriv->rrOutputSetProperty = NULL;
-+# if RANDR_13_INTERFACE
++#if RANDR_13_INTERFACE
 +    pScrPriv->rrOutputGetProperty = NULL;
-+# endif
++#endif
 +    pScrPriv->rrOutputValidateMode = vfbRROutputValidateMode;
 +    pScrPriv->rrModeDestroy = NULL;
 +
-+    RRScreenSetSizeRange(pScreen, 1, 1, pScreen->width, pScreen->height);
++    RRScreenSetSizeRange (pScreen,
++			  1, 1,
++			  pScreen->width, pScreen->height);
 +
-+    sprintf(name, "%dx%d", pScreen->width, pScreen->height);
-+    memset(&modeInfo, '\0', sizeof(modeInfo));
++    sprintf (name, "%dx%d", pScreen->width, pScreen->height);
++    memset (&modeInfo, '\0', sizeof (modeInfo));
 +    modeInfo.width = pScreen->width;
 +    modeInfo.height = pScreen->height;
-+    modeInfo.nameLength = strlen(name);
++    modeInfo.nameLength = strlen (name);
 +
-+    mode = RRModeGet(&modeInfo, name);
++    mode = RRModeGet (&modeInfo, name);
 +    if (!mode)
-+        return FALSE;
++	return FALSE;
 +
-+    crtc = RRCrtcCreate(pScreen, NULL);
++    crtc = RRCrtcCreate (pScreen, NULL);
 +    if (!crtc)
-+        return FALSE;
++	return FALSE;
 +
-+    output = RROutputCreate(pScreen, "screen", 6, NULL);
++    output = RROutputCreate (pScreen, "screen", 6, NULL);
 +    if (!output)
-+        return FALSE;
-+    if (!RROutputSetClones(output, NULL, 0))
-+        return FALSE;
-+    if (!RROutputSetModes(output, &mode, 1, 0))
-+        return FALSE;
-+    if (!RROutputSetCrtcs(output, &crtc, 1))
-+        return FALSE;
-+    if (!RROutputSetConnection(output, RR_Connected))
-+        return FALSE;
-+    RRCrtcNotify(crtc, mode, 0, 0, RR_Rotate_0, NULL, 1, &output);
++	return FALSE;
++    if (!RROutputSetClones (output, NULL, 0))
++	return FALSE;
++    if (!RROutputSetModes (output, &mode, 1, 0))
++	return FALSE;
++    if (!RROutputSetCrtcs (output, &crtc, 1))
++	return FALSE;
++    if (!RROutputSetConnection (output, RR_Connected))
++	return FALSE;
++    RRCrtcNotify (crtc, mode, 0, 0, RR_Rotate_0, NULL, 1, &output);
 +#endif
 +    return TRUE;
 +}
@@ -158,12 +136,12 @@ index 97eccfd..672842f 100644
  vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
  {
      vfbScreenInfoPtr pvfb = &vfbScreens[pScreen->myNum];
-@@ -860,6 +1002,9 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
+@@ -860,6 +980,9 @@ vfbScreenInit(ScreenPtr pScreen, int argc, char **argv)
      if (!ret)
          return FALSE;
  
 +    if (!vfbRandRInit(pScreen))
-+        return FALSE;
++	return FALSE;
 +
      pScreen->InstallColormap = vfbInstallColormap;
      pScreen->UninstallColormap = vfbUninstallColormap;
