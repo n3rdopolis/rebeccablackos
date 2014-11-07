@@ -20,4 +20,4 @@
 . /usr/bin/wlruntime_vars
 export KWIN_COMPOSE=Q
 export WAYLAND_DISPLAY=wayland-$RANDOM
-kwin -x xvfb --display=:99
+kwin_wayland -x xvfb --display=:99
