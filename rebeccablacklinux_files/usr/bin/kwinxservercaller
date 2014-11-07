@@ -18,4 +18,4 @@
 
 #This script is for calling kdeplasma nested under a Wayland session.
 mkdir -p ~/.cache/kdeplasma
-/opt/bin/Xorg -dpi 96 -noreset -nolisten tcp +extension GLX +extension RANDR +extension RENDER -logfile ${HOME}/.cache/kdeplasma -config /etc/kwin_wayland/xorg.conf "$@"
+/opt/bin/Xorg -dpi 96 -noreset -nolisten tcp +extension GLX +extension RANDR +extension RENDER -logfile ${HOME}/.cache/kdeplasma/xorg.log -config /etc/kwin_wayland/xorg.conf $@
