@@ -90,6 +90,9 @@ fi
 rm /opt/bin/weston
 ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
 
+#link the kwin xvfb helper to /opt/bin/xvfb
+ln -s /usr/bin/kwinxservercaller /opt/bin/Xvfb
+
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
 
