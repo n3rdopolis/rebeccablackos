@@ -70,9 +70,9 @@ systemctl disable lightdm.service
 systemctl disable gdm.service
 
 #Make all systemd units nonexecutable
-find /etc/systemd/system /lib/systemd/system -type f | while read FILE
+find /etc/systemd/system /lib/systemd/system /lib/udev/rules.d -type f | while read FILE
 do
-  chmod -X "$FILE"
+  chmod 644 "$FILE"
 done
 
 #Add groups for systemd
