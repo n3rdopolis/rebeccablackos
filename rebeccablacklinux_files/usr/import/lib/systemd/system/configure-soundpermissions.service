@@ -7,7 +7,7 @@
 
 [Unit]
 Description=Give the plugdev group permissions to use sound devices
-After=local-fs.target
+After=udev-finish.service
 
 [Service]
 Type=oneshot
