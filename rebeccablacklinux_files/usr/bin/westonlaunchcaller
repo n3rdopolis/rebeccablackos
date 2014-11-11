@@ -34,36 +34,11 @@ function SwitchBackExit
   exit
 }
 
-#Function to terminate the host server if the guest server dies, so the user isn't left with a blank screen. First argument is the PID of the guest server, second argument is the pid of the host server that gets terminated when the guest PID dies
-function TerminateHostOnGuestTermination
+#Function that takes the argument of an environment file, and handles the definitions
+function ReadEnvironmentFile
 {
-  ServerStatus=0
-  while [[ $? == 0 ]]
-  do
-    sleep 5
-    ps -p $1 > /dev/null
-  done
-  kill -15 $2
-}
-
-#if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
-if [[ $1 == "--version" ]]
-then
-  echo "waylandloginmanager weston-launch addon"
-  exit 255
-fi
-
-
-#set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
-USER=$(id -u)
-export $(exec dbus-launch)
-. /usr/bin/wlruntime_vars
-BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
-EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
-if [[ -e $EnvironmentFile ]]
-then
   #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' $EnvironmentFile | awk -F \# '{print $1}')
+  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}')
   while read LINE
   do
     #environment files are specified as action=var=data
@@ -93,6 +68,42 @@ then
 
     fi
   done < <(echo "$EnvironmentFileData")
+}
+
+#Function to terminate the host server if the guest server dies, so the user isn't left with a blank screen. First argument is the PID of the guest server, second argument is the pid of the host server that gets terminated when the guest PID dies
+function TerminateHostOnGuestTermination
+{
+  ServerStatus=0
+  while [[ $? == 0 ]]
+  do
+    sleep 5
+    ps -p $1 > /dev/null
+  done
+  kill -15 $2
+}
+
+#if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
+if [[ $1 == "--version" ]]
+then
+  echo "waylandloginmanager weston-launch addon"
+  exit 255
+fi
+
+
+#set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
+USER=$(id -u)
+export $(exec dbus-launch)
+. /usr/bin/wlruntime_vars
+BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
+EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
+if [[ -e /usr/share/wsessions.d/default.environment ]]
+then
+  ReadEnvironmentFile /usr/share/wsessions.d/default.environment
+fi
+
+if [[ -e $EnvironmentFile ]]
+then
+  ReadEnvironmentFile "$EnvironmentFile"
 fi
 
 #set all arguments into an array
