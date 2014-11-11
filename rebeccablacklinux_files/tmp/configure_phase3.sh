@@ -97,6 +97,9 @@ glib-compile-schemas /opt/share/glib-2.0/schemas
 dpkg-divert --local --rename --add /usr/bin/gnome-control-center
 ln -s /usr/bin/unity-control-center /usr/bin/gnome-control-center
 
+#copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
+rsync /usr/import/* -a /
+
 #delete the import folder
 rm -r /usr/import
 

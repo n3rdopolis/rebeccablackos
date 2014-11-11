@@ -83,7 +83,6 @@ function PackagePostInstall()
 mkdir -p /var/log/journal
 touch /var/log/journal/.checkinstall
 sed -i 's/systemd-journal/sudo/g' /usr/lib/tmpfiles.d/systemd.conf
-cp /usr/import/lib/udev/rules.d/70-uaccess.rules /lib/udev/rules.d/70-uaccess.rules
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
