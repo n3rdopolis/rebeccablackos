@@ -135,7 +135,7 @@ then
 	HostBackendArgument="--backend=drm-backend.so"
 	if [[ $IsFallbackSession == 1 ]]
 	then
-	  HostBackendArgument+=" --use-pixman"
+	  export EGL_SOFTWARE=1
 	fi
       fi
       weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &

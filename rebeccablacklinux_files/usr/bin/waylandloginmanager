@@ -137,6 +137,7 @@ export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/wes
 #WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export WLM_PATH=$PATH
+export EGL_SOFTWARE=1
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
 #default the number of sessions registered to be 0 if unset
@@ -184,7 +185,7 @@ then
   logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
   SupportedBackends+=(KMS)
   DefaultBackendType=KMS
-  WESTONBACKEND="drm-backend.so --use-pixman"
+  WESTONBACKEND=drm-backend.so
   HardwareSupported=1
 fi
 if [[ $(ls  /dev/fb* ) ]]

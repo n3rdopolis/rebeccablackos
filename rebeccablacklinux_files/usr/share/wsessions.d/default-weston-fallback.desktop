@@ -8,7 +8,7 @@ CompositorSupportsFB=0
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
-SessionArgument=--modules=desktop-shell.so,xwayland.so,cms-colord.so --use-pixman
+SessionArgument=--modules=desktop-shell.so,xwayland.so,cms-colord.so
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
 NeedsFile=/opt/bin/weston
