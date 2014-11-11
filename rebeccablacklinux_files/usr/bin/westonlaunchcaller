@@ -137,6 +137,12 @@ then
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run." |& tee -a $HOME/waylandserver.log
     SwitchBackExit
   else 
+    #Switch to EGL_SOFTWARE for fallback sessions
+    if [[ $IsFallbackSession == 1 ]]
+    then
+      export EGL_SOFTWARE=1
+    fi
+
     if [[ $BackendType == WL ]]
     then
       if [[ $DefaultBackendType == FB ]]
@@ -144,10 +150,6 @@ then
 	HostBackendArgument="--backend=fbdev-backend.so"
       else
 	HostBackendArgument="--backend=drm-backend.so"
-	if [[ $IsFallbackSession == 1 ]]
-	then
-	  export EGL_SOFTWARE=1
-	fi
       fi
       weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
       HostServerPID=$!
