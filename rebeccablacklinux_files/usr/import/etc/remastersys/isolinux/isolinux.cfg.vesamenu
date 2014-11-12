@@ -23,7 +23,7 @@ MENU SEPARATOR
 label liveforcesw
   menu label Startup forcing software rendering
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet wlmforceswrender --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforceswrender --
 TEXT HELP
 Start and force software rendering.
 
@@ -36,7 +36,7 @@ ENDTEXT
 label livefbdefault
   menu label Startup forcing to a default sized framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet wlmforcefbdev --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev --
 TEXT HELP
 Start with a default framebuffer size specified by the drivers, and force 
 all sessions to use the framebuffer backend instead of kernel mode setting
@@ -146,15 +146,13 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-
-label memtest
-  menu label memtest - Run memtest
-  kernel /install/memtest
-  append -
-
 label hd
   menu label hd - boot the first hard disk
   kernel chain.c32
   append hd0
 
 
+label memtest
+  menu label memtest - Run memtest
+  kernel /install/memtest
+  append -
