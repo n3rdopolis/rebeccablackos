@@ -137,8 +137,8 @@ then
     echo "Unapproved Wayland Server $Server attempted to Execute. Server binary path will need to be added to /etc/waylandservers in order to run." |& tee -a $HOME/waylandserver.log
     SwitchBackExit
   else 
-    #Switch to EGL_SOFTWARE for fallback sessions
-    if [[ $IsFallbackSession == 1 ]]
+    #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
+    if [[ $(cat /proc/cmdline | grep -c wlmforceswrender ) != 0 ]]
     then
       export EGL_SOFTWARE=1
     fi

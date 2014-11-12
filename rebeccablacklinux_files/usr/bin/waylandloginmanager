@@ -137,7 +137,11 @@ export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/wes
 #WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export WLM_PATH=$PATH
-export EGL_SOFTWARE=1
+#if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
+if [[ $(cat /proc/cmdline | grep -c wlmforceswrender ) != 0 ]]
+then
+  export EGL_SOFTWARE=1
+fi
 #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
 LastTTY=7
 #default the number of sessions registered to be 0 if unset
