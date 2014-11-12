@@ -97,6 +97,8 @@ the options are: set=varname=vardata		(set a variable to be something)
 If it ends with @BACKEND, then the variable action is only performed, if the BackendType is BACKEND. Otherwise if it is unspecified, it is performed on ALL backends.
   in Line 2 of the example the variable E_WL_FORCE to be kms (export E_WL_FORCE=kms) only if the BackendType is KMS.
   in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is. 
+
+default.environment is handled by all sessions first, before the specified environment file, in the case of a need of making an environment variable avaible to all sessions.
   
 
 Section 3----------------------------------------------
