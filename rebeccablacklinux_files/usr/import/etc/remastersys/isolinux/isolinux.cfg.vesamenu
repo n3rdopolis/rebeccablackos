@@ -20,6 +20,19 @@ ENDTEXT
 
 MENU SEPARATOR
 
+label liveforcesw
+  menu label Startup forcing software rendering
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet nosplash wlmforceswrender --
+TEXT HELP
+Start and force software rendering.
+
+This is for systems that support kernel mode setting, but have
+problems using hardware rendering. 
+Live user name is 'beccaholic' with no password
+ENDTEXT
+
+
 label livefbdefault
   menu label Startup forcing to a default sized framebuffer
   kernel /casper/vmlinuz
