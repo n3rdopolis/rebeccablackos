@@ -48,8 +48,15 @@ Otherwise, leave this dialog open" &
 DIALOGPID=$!
 
 ServerID=wayland-$RANDOM
+if [[ $1 != share ]]
+then
 weston-display-server --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key &
 WESTONPID=$!
+else
+weston-display-server --socket=$ServerID  --backend=rdp-backend.so --shell=fullscreen-shell.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key &
+WESTONPID=$!
+fi
+
 
 #Wait until the zenity form dies, or until the remote enabled weston dies
 while [ 1 ]
