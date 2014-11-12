@@ -36,6 +36,13 @@ TODO:
 PROBLEMS:
       The distribution is now using systemd v212 as its init system, replacing Ubuntu's upstart/systemd v204 hybrid. As the first tier packages are still built around the assumption that upstart is the default init system, there might be breakerage.
 
+BOOT OPTIONS:
+      The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
+            wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
+            wlmforceswrender: Force all user sessions, and the Login Manager's display to be started with the environment variable EGL_SOFTWARE=1
+            wlmdebug: Force more sysrq trigger options to be availible, then the more secure default. Allow the option for a graphical login terminal to be started on the wayland login manager's display. This option is not settable from rbos-failedboot as it's for more advanced users
+
+
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
           svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
