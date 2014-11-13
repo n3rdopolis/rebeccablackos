@@ -20,12 +20,17 @@
 
 cd ~
 mkdir weston-rdp
-cd weston-rdp
 #Only generate the key if it doesn't exist
 if [[ ! -e rdpkey.rdp ]]
 then
+  cd weston-rdp
   winpr-makecert -rdp > rdpkey.rdp
+  cp $HOSTNAME.crt rdpcrt.crt
+  cp $HOSTNAME.key rdpcrtkey.key
+  cd $OLDPWD
 fi
+
+
 zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
 
 *Please note that the RDP session will NOT be password protected." 
@@ -48,7 +53,7 @@ Otherwise, leave this dialog open" &
 DIALOGPID=$!
 
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=$HOSTNAME.crt --rdp-tls-key=$HOSTNAME.key &
+weston-display-server --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=rdpcrt.crt --rdp-tls-key=rdpcrtkey.key &
 WESTONPID=$!
 
 #Wait until the zenity form dies, or until the remote enabled weston dies
