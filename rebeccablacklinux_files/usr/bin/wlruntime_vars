@@ -73,10 +73,10 @@ then
 fi
 
 #Build RDP keys for weston-share
-mkdir ~/weston-rdp
 #Only generate the key if it doesn't exist
 if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
 then
+  mkdir ~/weston-rdp
   cd ~/weston-rdp
   winpr-makecert -rdp > rdpkey.rdp
   cp $HOSTNAME.crt rdpcrt.crt
