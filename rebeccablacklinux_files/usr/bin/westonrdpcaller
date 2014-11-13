@@ -19,17 +19,6 @@
 #This script calls a Weston server with the RDP backend
 
 cd ~
-mkdir weston-rdp
-#Only generate the key if it doesn't exist
-if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
-then
-  cd weston-rdp
-  winpr-makecert -rdp > rdpkey.rdp
-  cp $HOSTNAME.crt rdpcrt.crt
-  cp $HOSTNAME.key rdpcrtkey.key
-  cd $OLDPWD
-fi
-
 
 zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
 

@@ -72,6 +72,18 @@ then
   kbuildsycoca5
 fi
 
+#Build RDP keys for weston-share
+mkdir ~/weston-rdp
+#Only generate the key if it doesn't exist
+if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
+then
+  cd ~/weston-rdp
+  winpr-makecert -rdp > rdpkey.rdp
+  cp $HOSTNAME.crt rdpcrt.crt
+  cp $HOSTNAME.key rdpcrtkey.key
+  cd $OLDPWD
+fi
+
 dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames > /dev/null
 DBusErrorState=$?
 
