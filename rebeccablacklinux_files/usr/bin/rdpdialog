@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script displays when a weston session is being shared wint RDP.
+#This script displays when a weston session is being shared with RDP.
 
 zenity --forms --text="This current session is now being shared with RDP.
 
@@ -29,4 +29,8 @@ or the IP addresses:
 $(hostname -I | sed 's/ /\n/g')
 to connect to the session
 
-If using freerdp, you might need to pass the option /cert-ignore"
+If using freerdp, you might need to pass the option /cert-ignore
+
+Close this dialog to terminate the Weston RDP server.
+
+Otherwise, leave this dialog open"

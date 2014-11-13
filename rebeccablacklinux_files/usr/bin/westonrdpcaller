@@ -25,22 +25,7 @@ zenity --forms --text="A new Weston server supporting RDP connections will start
 *Please note that the RDP session will NOT be password protected." 
 
 
-zenity --forms --text="The Weston RDP Server session is now running
-
-The RDP session is running as the current user $USER
-Using an RDP client, you can connect to:
-
-hostname: $(hostname)
-
-or the IP addresses:
-$(hostname -I | sed 's/ /\n/g')
-to connect to the session
-
-If using freerdp, you might need to pass the option /cert-ignore
-
-Close this dialog to terminate the Weston RDP server.
-
-Otherwise, leave this dialog open" &
+rdpdialog &
 DIALOGPID=$!
 
 ServerID=wayland-$RANDOM
