@@ -21,7 +21,7 @@
 cd ~
 mkdir weston-rdp
 #Only generate the key if it doesn't exist
-if [[ ! -e rdpkey.rdp ]]
+if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
 then
   cd weston-rdp
   winpr-makecert -rdp > rdpkey.rdp
