@@ -53,7 +53,7 @@ Otherwise, leave this dialog open" &
 DIALOGPID=$!
 
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=~/weston-rdp/rdpcrt.crt --rdp-tls-key=~/weston-rdp/rdpcrtkey.key &
+weston-display-server --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=weston-rdp/rdpcrt.crt --rdp-tls-key=weston-rdp/rdpcrtkey.key &
 WESTONPID=$!
 
 #Wait until the zenity form dies, or until the remote enabled weston dies
