@@ -174,7 +174,7 @@ rm -rf /opt/include
 
 #Reduce binary sizes
 echo "Reducing binary file sizes"
-find /opt/bin /opt/lib /opt/sbin | while read FILE
+find /opt/bin /opt/lib /opt/sbin /opt/games | while read FILE
 do
   strip $FILE 2>/dev/null
 done
