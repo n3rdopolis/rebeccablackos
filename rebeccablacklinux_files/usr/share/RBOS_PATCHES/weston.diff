@@ -32,3 +32,15 @@ index 7264f7e..f689131 100644
 
 
 
+diff --git a/src/compositor-drm.c b/src/compositor-drm.c
+index 07b83a7..ab09c6c 100644
+--- a/src/compositor-drm.c
++++ b/src/compositor-drm.c
+@@ -1616,6 +1616,7 @@ drm_output_init_egl(struct drm_output *output, struct drm_compositor *ec)
+ 		weston_log("cursor buffers unavailable, using gl cursors\n");
+ 		ec->cursors_are_broken = 1;
+ 	}
++	ec->cursors_are_broken = 1;
+ 
+ 	return 0;
+ }
