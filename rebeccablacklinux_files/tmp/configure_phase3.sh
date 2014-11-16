@@ -96,6 +96,7 @@ glib-compile-schemas /opt/share/glib-2.0/schemas
 #Configure gnome-shell to use the unity control panel
 dpkg-divert --local --rename --add /usr/bin/gnome-control-center
 ln -s /usr/bin/unity-control-center /usr/bin/gnome-control-center
+sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-control-center.desktop > /opt/share/applications/gnome-control-center.desktop
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /usr/import/* -a /
