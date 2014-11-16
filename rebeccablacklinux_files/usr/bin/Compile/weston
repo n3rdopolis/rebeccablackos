@@ -92,8 +92,8 @@ cp -rn /usr/share/icons/whiteglass/cursors/* /usr/share/icons/oxy-white/cursors
 cp /usr/share/icons/oxy-white/cursors/dnd-none /usr/share/icons/oxy-white/cursors/grabbing
  
 
-#set weston-launch binary as setuid
-chmod +s $INSTALLDIR/bin/weston-launch
+#unset weston-launch's setuid bit
+chmod -s $INSTALLDIR/bin/weston-launch
 
 #change the weston executable to one that first sets variables, then calls weston-launch for running weston in a TTY AS THE USER
 mv $INSTALLDIR/bin/weston $INSTALLDIR/bin/weston-display-server
