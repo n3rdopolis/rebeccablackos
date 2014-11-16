@@ -2,14 +2,14 @@
 Enabled=1
 Type=WSession
 Name=Wayland Gnome Shell
-CompositorExec=/opt/bin/gnome-shell
+CompositorExec=/opt/bin/gnome-session
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=--wayland --display-server
+AdditionalArguments=--session=gnome-wayland
 NeedsFile=/opt/bin/gnome-shell
 EnvironmentFile=/usr/share/wsessions.d/gnome-shell-wayland.environment
 
