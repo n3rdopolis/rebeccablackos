@@ -1,29 +1,17 @@
-diff --git a/src/compositor-drm.c b/src/compositor-drm.c
-index 07b83a7..ab09c6c 100644
---- a/src/compositor-drm.c
-+++ b/src/compositor-drm.c
-@@ -1616,6 +1616,7 @@ drm_output_init_egl(struct drm_output *output, struct drm_compositor *ec)
- 		weston_log("cursor buffers unavailable, using gl cursors\n");
- 		ec->cursors_are_broken = 1;
- 	}
-+	ec->cursors_are_broken = 1;
- 
- 	return 0;
- }
 diff --git a/src/weston-launch.c b/src/weston-launch.c
-index 10c66de..73128fc 100644
+index 7264f7e..f689131 100644
 --- a/src/weston-launch.c
 +++ b/src/weston-launch.c
-@@ -148,7 +148,7 @@ weston_launch_allowed(struct weston_launch *wl)
+@@ -116,7 +116,7 @@ weston_launch_allowed(struct weston_launch *wl)
  	if (getuid() == 0)
- 		return true;
+ 		return 1;
  
 -	gr = getgrnam("weston-launch");
 +	gr = getgrnam("plugdev");
  	if (gr) {
  		groups = read_groups();
  		if (groups) {
-@@ -589,7 +589,7 @@ setup_session(struct weston_launch *wl)
+@@ -514,7 +514,7 @@ setup_session(struct weston_launch *wl)
  	}
  
  	term = getenv("TERM");
@@ -32,18 +20,7 @@ index 10c66de..73128fc 100644
  	if (term)
  		setenv("TERM", term, 1);
  	setenv("USER", wl->pw->pw_name, 1);
-@@ -633,8 +633,8 @@ launch_compositor(struct weston_launch *wl, int argc, char *argv[])
- 	if (geteuid() == 0)
- 		drop_privileges(wl);
- 
--	setenv_fd("WESTON_TTY_FD", wl->tty);
--	setenv_fd("WESTON_LAUNCHER_SOCK", wl->sock[1]);
-+	//setenv_fd("WESTON_TTY_FD", wl->tty);
-+	//setenv_fd("WESTON_LAUNCHER_SOCK", wl->sock[1]);
- 
- 	unsetenv("DISPLAY");
- 
-@@ -720,7 +720,7 @@ main(int argc, char *argv[])
+@@ -646,7 +646,7 @@ main(int argc, char *argv[])
  #else
  		      " - enable systemd session support for weston-launch.\n"
  #endif
@@ -52,55 +29,6 @@ index 10c66de..73128fc 100644
  
  	if (setup_tty(&wl, tty) < 0)
  		exit(EXIT_FAILURE);
-@@ -740,6 +740,8 @@ main(int argc, char *argv[])
- 		exit(EXIT_FAILURE);
- 	}
- 
-+	close(wl.tty);
-+	close(wl.sock[1]);
- 	if (wl.child == 0)
- 		launch_compositor(&wl, argc - optind, argv + optind);
- 
-@@ -748,21 +750,23 @@ main(int argc, char *argv[])
- 		close(wl.tty);
- 
- 	while (1) {
--		struct pollfd fds[2];
--		int n;
--
--		fds[0].fd = wl.sock[0];
--		fds[0].events = POLLIN;
--		fds[1].fd = wl.signalfd;
--		fds[1].events = POLLIN;
--
--		n = poll(fds, 2, -1);
--		if (n < 0)
--			error(0, errno, "poll failed");
--		if (fds[0].revents & POLLIN)
--			handle_socket_msg(&wl);
--		if (fds[1].revents)
--			handle_signal(&wl);
-+//		struct pollfd fds[2];
-+//		int n;
-+
-+//		fds[0].fd = wl.sock[0];
-+//		fds[0].events = POLLIN;
-+//		fds[1].fd = wl.signalfd;
-+//		fds[1].events = POLLIN;
-+
-+//		n = poll(fds, 2, -1);
-+//		if (n < 0)
-+//			error(0, errno, "poll failed");
-+//		if (fds[0].revents & POLLIN)
-+//			handle_socket_msg(&wl);
-+//		if (fds[1].revents)
-+//			handle_signal(&wl);
-+	  handle_signal(&wl);
-+	  sleep(1);
- 	}
- 
- 	return 0;
-
 
 
 
