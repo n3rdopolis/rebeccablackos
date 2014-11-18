@@ -150,9 +150,3 @@ label hd
   menu label hd - boot the first hard disk
   kernel chain.c32
   append hd0
-
-
-label memtest
-  menu label memtest - Run memtest
-  kernel /install/memtest
-  append -
