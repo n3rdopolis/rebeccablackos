@@ -730,7 +730,9 @@ function StartUserSession
   if [[ $westonresult == 255 ]]
   then
     export WAYLAND_DISPLAY=$WAYLAND_GUEST
-    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
+    #The ARGUMENTSTRING eventually gets passed to weston-launch. Replace all spaces with an escape value that gets handled by westonlaunchcaller, as getty only supports 1 argument to pass to the process it is calling
+    ARGUMENTSTRING=$(echo "--user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"" | sed 's/ /\x20/g')
+    openvt -f -s -c $WESTONTTY -- getty -8 38400 tty$WESTONTTY -n -a $LOGINUSER -l /opt/bin/weston-launch -o "$ARGUMENTSTRING"
   #if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
   else
     logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
