@@ -1024,7 +1024,7 @@ function LoginWestonLauncher
       then
 	#The ARGUMENTSTRING eventually gets passed to weston-launch. Replace all spaces with an escape value that gets handled by westonlaunchcaller, as getty only supports 1 argument to pass to the process it is calling
 	ARGUMENTSTRING=$(echo "--tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log" | sed 's/ /\x20/g')
-	openvt -w -f -s -c $HostVT -- openvt -f -s -c $HostVT -- getty -8 38400 tty$HostVT -n -a $LOGINMANAGERDISPLAYUSER -l /opt/bin/weston-launch -o "$ARGUMENTSTRING" 
+	openvt -w -f -s -c $HostVT -- getty -8 38400 tty$HostVT -n -a $LOGINMANAGERDISPLAYUSER -l /opt/bin/weston-launch -o "$ARGUMENTSTRING" 
       else
 	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
