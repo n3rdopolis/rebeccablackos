@@ -730,9 +730,7 @@ function StartUserSession
   if [[ $westonresult == 255 ]]
   then
     export WAYLAND_DISPLAY=$WAYLAND_GUEST
-    #The ARGUMENTSTRING eventually gets passed to weston-launch. Replace all spaces with an escape value that gets handled by westonlaunchcaller, as getty only supports 1 argument to pass to the process it is calling
-    ARGUMENTSTRING=$(echo "--user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"" | sed 's/ /\x20/g')
-    openvt -f -s -c $WESTONTTY -- getty -8 38400 tty$WESTONTTY -n -a $LOGINUSER -l /opt/bin/weston-launch -o "$ARGUMENTSTRING"
+    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
   #if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
   else
     logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
@@ -1022,9 +1020,7 @@ function LoginWestonLauncher
       #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
       if [[ $westonresult == 255 ]]
       then
-	#The ARGUMENTSTRING eventually gets passed to weston-launch. Replace all spaces with an escape value that gets handled by westonlaunchcaller, as getty only supports 1 argument to pass to the process it is calling
-	ARGUMENTSTRING=$(echo "--tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log" | sed 's/ /\x20/g')
-	openvt -w -f -s -c $HostVT -- getty -8 38400 tty$HostVT -n -a $LOGINMANAGERDISPLAYUSER -l /opt/bin/weston-launch -o "$ARGUMENTSTRING" 
+	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       else
 	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
