@@ -27,13 +27,6 @@
 #Enable job control in this script
 set -m
 
-#if called with --version as the first argument, exit with 255. This is used by the waylandloginmanager to test if this script is redirecting Weston.
-if [[ $1 == "--version" ]]
-then
-  echo "waylandloginmanager weston-launch addon"
-  exit 255
-fi
-
 #Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure
 function SwitchBackExit
 {
