@@ -156,10 +156,12 @@ then
 fi
 #Array that stores all backend types that is supported by the hardware
 SupportedBackends=()
-
-#The Wayland backend is supported by default
-SupportedBackends+=(WL)
-
+#determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+westonresult=$(weston --version &>/dev/null; echo $?) 
+if [[ $westonresult == 255 ]]
+then
+  SupportedBackends+=(WL)
+fi
 
 #Determine if this is running on a live instance, if the root filesystem is overlayfs.
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
@@ -244,7 +246,10 @@ then
     setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     SupportedBackends=()
-    SupportedBackends+=(WL)
+    if [[ $westonresult == 255 ]]
+    then
+      SupportedBackends+=(WL)
+    fi
     SupportedBackends+=(FB)
     DefaultBackendType=FB
     WESTONBACKEND=fbdev-backend.so
@@ -712,14 +717,27 @@ function StartUserSession
   export DefaultBackendType=${BackendData[1]}
   export IsFallbackSession=${BackendData[2]}
 
+  #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+  westonresult=$(weston --version &>/dev/null; echo $?) 
+
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   #change to tty63, before starting the session, as switching directly between two Weston session doesn't work.
   chvt 63 &
   sleep .1
   Create_XDG_RUNTIME_DIR $LOGINUSER
-  export WAYLAND_DISPLAY=$WAYLAND_GUEST
-  openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER -l --session-command "$(echo "westonlaunchcaller $CompositorExec @@ $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
+  #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
+  if [[ $westonresult == 255 ]]
+  then
+    export WAYLAND_DISPLAY=$WAYLAND_GUEST
+    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
+    #openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER -l --session-command "$(echo "westonlaunchcaller $CompositorExec @@ $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
+
+  #if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
+  else
+    logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
+    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
+  fi
   sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
   WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -999,8 +1017,17 @@ function LoginWestonLauncher
       (( StartTimes++ ))
       chvt 63 &
       #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+      westonresult=$(weston --version &>/dev/null; echo $?) 
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-      openvt -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER -l --session-command westonlaunchcaller $DEFAULTWAYLANDSERVER @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
+      #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
+      if [[ $westonresult == 255 ]]
+      then
+	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
+      else
+	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
+	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
+	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
+      fi
     fi
     sleep 1
   done
