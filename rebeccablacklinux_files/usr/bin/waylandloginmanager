@@ -64,205 +64,209 @@
       #Login : Starts the login process (see documentation for function GetUserCredentials)
       #RegisterSession : Tells the waylandloginmanager to read from the loginmanager_register FIFO. When this is called the process must be attempting to write to the loginmanager_register already. If there is nothing being written in the short .01 second timeout, it is ignored. (see documentation for function RegisterSession)
 
-#Create the waylandloginmanager folder in /run for FIFOs and lockfiles
-mkdir -p /run/waylandloginmanager
+#Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
+function PrepareLoginManager
+{
+  #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
+  mkdir -p /run/waylandloginmanager
 
-#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
-SCRIPTPATH=$(readlink -f "$0")
-SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
-LOCKSCRIPT=$(readlink -f "$(strings -a "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
-if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
-then
-  rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock"
-  ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
-else
-  logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
-  exit
-fi
-#second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
-#this ensures that the linked /proc/pid/cmdline is this pid
-LOCKPROCPATH=$(dirname $(readlink "/run/waylandloginmanager/$SCRIPTNAME.lock" ))
-THISPROCPATH=/proc/$$
-if [[ $LOCKPROCPATH != $THISPROCPATH ]]
-then
-  logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
-  exit
-fi
-
-#Require root privlages
-if [[ $UID != 0 ]]
-then
-  echo "Must be run as root."
-  exit
-fi
-
-#prevent the WaylandLoginManager from being killed with CTRL+C
-trap '' 2
-
-#Attempt to import fast user switching data from a crashed WaylandLoginManager
-if [[ -e /run/waylandloginmanager/sessiondata ]]
-then
-  . /run/waylandloginmanager/sessiondata
-else
-  touch /run/waylandloginmanager/sessiondata
-  chmod 700 /run/waylandloginmanager/sessiondata
-fi
-
-#Set up the needed environment variables
-cd /run/waylandloginmanager
-
-#Enable job control in this script
-set -m
-#The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
-export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
-#User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
-export LOGINMANAGERDISPLAYUSER=daemon
-#User that the su test in AuthenticateUser user runs as
-export PROBETESTUSER=daemon
-#User that reads from the loginmanager_control FIFO, and filters the command sent to it to loginmanager_listener
-export FIFOREADERUSER=daemon
-#Get the UID of the $LOGINMANAGERDISPLAYUSER
-export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
-#Set the default path for the weston-display-server
-export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
-#Set Wayland/runtime vars
-export PATH=/opt/bin:$PATH
-export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-export GDK_BACKEND=wayland
-export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
-export WAYLAND_DISPLAY=loginmanagerdisplay
-#Specify where wsession files are found
-export WSESSIONSPATH="/usr/share/wsessions.d"
-export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
-#WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
-export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-export WLM_PATH=$PATH
-#if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
-if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
-then
-  export EGL_SOFTWARE=1
-fi
-#set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
-LastTTY=7
-#default the number of sessions registered to be 0 if unset
-if [[ -z $AllSessions ]]
-then
-  AllSessions=0
-fi
-#default ActiveSessionPID if unset, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
-if [[ -z $ActiveSessionPID ]]
-then
-  ActiveSessionPID=0
-fi
-#Array that stores all backend types that is supported by the hardware
-SupportedBackends=()
-#determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
-westonresult=$(weston --version &>/dev/null; echo $?) 
-if [[ $westonresult == 255 ]]
-then
-  SupportedBackends+=(WL)
-fi
-
-#Determine if this is running on a live instance, if the root filesystem is overlayfs.
-FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE == overlayfs ]]
-then
-  ISLIVE=1
-fi
-
-#Detect presence of the wlm_ui zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
-if [[ -e /usr/bin/wlm_ui ]]
-then
-  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui zenity"
-  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui vte"
-else
-  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER zenity"
-  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER vte"
-fi
-
-#Tell the plymouth splash to hide as the loginmanager is starting.
-plymouth hide-splash
-
-#Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-if [[ $(ls  /dev/dri/card* ) ]]
-then 
-  logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
-  SupportedBackends+=(KMS)
-  DefaultBackendType=KMS
-  WESTONBACKEND=drm-backend.so
-  HardwareSupported=1
-fi
-if [[ $(ls  /dev/fb* ) ]]
-then
-  logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
-  # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-  setfacl -m "g:plugdev:rwx" /dev/fb*
-  setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
-  # ENDTODO
-  SupportedBackends+=(FB)
-  #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
-  if [[ $HardwareSupported != 1 ]]
+  #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
+  SCRIPTPATH=$(readlink -f "$0")
+  SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
+  LOCKSCRIPT=$(readlink -f "$(strings -a "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
+  if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
   then
-    DefaultBackendType=FB
-    WESTONBACKEND=fbdev-backend.so
+    rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock"
+    ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
+  else
+    logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
+    exit
   fi
-  HardwareSupported=1
-fi
-#if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY63, and restart.
-#Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
-if [[ $HardwareSupported != 1 ]]
-then
-  if [[ $ISLIVE == 1 ]]
+  #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
+  #this ensures that the linked /proc/pid/cmdline is this pid
+  LOCKPROCPATH=$(dirname $(readlink "/run/waylandloginmanager/$SCRIPTNAME.lock" ))
+  THISPROCPATH=/proc/$$
+  if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
-    logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
-
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
-
-You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
-  else 
-    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
-
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
-
-Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
-    openvt -c 63 -s -f -w -- rbos-add-framebuffer
+    logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
+    exit
   fi
-  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "Can not start Weston.
 
-Will now reboot." 20 50 --no-cancel
-  dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
-  exit
-fi
-
-#if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-if [[ $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) != 0 ]]
-then
-  logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
-  if [[ $(ls /dev/fb* ) ]]
+  #Require root privlages
+  if [[ $UID != 0 ]]
   then
+    echo "Must be run as root."
+    exit
+  fi
+
+  #prevent the WaylandLoginManager from being killed with CTRL+C
+  trap '' 2
+
+  #Attempt to import fast user switching data from a crashed WaylandLoginManager
+  if [[ -e /run/waylandloginmanager/sessiondata ]]
+  then
+    . /run/waylandloginmanager/sessiondata
+  else
+    touch /run/waylandloginmanager/sessiondata
+    chmod 700 /run/waylandloginmanager/sessiondata
+  fi
+
+  #Set up the needed environment variables
+  cd /run/waylandloginmanager
+
+  #Enable job control in this script
+  set -m
+  #The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
+  export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
+  #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
+  export LOGINMANAGERDISPLAYUSER=daemon
+  #User that the su test in AuthenticateUser user runs as
+  export PROBETESTUSER=daemon
+  #User that reads from the loginmanager_control FIFO, and filters the command sent to it to loginmanager_listener
+  export FIFOREADERUSER=daemon
+  #Get the UID of the $LOGINMANAGERDISPLAYUSER
+  export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
+  #Set the default path for the weston-display-server
+  export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
+  #Set Wayland/runtime vars
+  export PATH=/opt/bin:$PATH
+  export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
+  export GDK_BACKEND=wayland
+  export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
+  export WAYLAND_DISPLAY=loginmanagerdisplay
+  #Specify where wsession files are found
+  export WSESSIONSPATH="/usr/share/wsessions.d"
+  export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
+  #WLM_LD_LIBRARY_PATH is exported so that wlm_ui can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
+  export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
+  export WLM_PATH=$PATH
+  #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
+  then
+    export EGL_SOFTWARE=1
+  fi
+  #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
+  LastTTY=7
+  #default the number of sessions registered to be 0 if unset
+  if [[ -z $AllSessions ]]
+  then
+    AllSessions=0
+  fi
+  #default ActiveSessionPID if unset, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
+  if [[ -z $ActiveSessionPID ]]
+  then
+    ActiveSessionPID=0
+  fi
+  #Array that stores all backend types that is supported by the hardware
+  SupportedBackends=()
+  #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
+  westonresult=$(weston --version &>/dev/null; echo $?) 
+  if [[ $westonresult == 255 ]]
+  then
+    SupportedBackends+=(WL)
+  fi
+
+  #Determine if this is running on a live instance, if the root filesystem is overlayfs.
+  FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+  if [[ $FSTYPE == overlayfs ]]
+  then
+    ISLIVE=1
+  fi
+
+  #Detect presence of the wlm_ui zenity launcher, if it exists set the command to call zenity as one that starts it as the $LOGINMANAGERDISPLAYUSER. If it doesn't exist, default to zenity, and log this event.
+  if [[ -e /usr/bin/wlm_ui ]]
+  then
+    ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui zenity"
+    TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER wlm_ui vte"
+  else
+    ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER zenity"
+    TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER vte"
+  fi
+
+  #Tell the plymouth splash to hide as the loginmanager is starting.
+  plymouth hide-splash
+
+  #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
+  if [[ $(ls  /dev/dri/card* ) ]]
+  then 
+    logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
+    SupportedBackends+=(KMS)
+    DefaultBackendType=KMS
+    WESTONBACKEND=drm-backend.so
+    HardwareSupported=1
+  fi
+  if [[ $(ls  /dev/fb* ) ]]
+  then
+    logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
     setfacl -m "g:plugdev:rwx" /dev/fb*
     setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
-    SupportedBackends=()
-    if [[ $westonresult == 255 ]]
-    then
-      SupportedBackends+=(WL)
-    fi
     SupportedBackends+=(FB)
-    DefaultBackendType=FB
-    WESTONBACKEND=fbdev-backend.so
-  #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY63, and restart.
-  else
-    logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+    #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
+    if [[ $HardwareSupported != 1 ]]
+    then
+      DefaultBackendType=FB
+      WESTONBACKEND=fbdev-backend.so
+    fi
+    HardwareSupported=1
+  fi
+  #if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY63, and restart.
+  #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
+  if [[ $HardwareSupported != 1 ]]
+  then
+    if [[ $ISLIVE == 1 ]]
+    then
+      logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
+
+You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
+    else 
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
+
+Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
+      openvt -c 63 -s -f -w -- rbos-add-framebuffer
+    fi
+    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "Can not start Weston.
+
+Will now reboot." 20 50 --no-cancel
+    dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+    exit
+  fi
+
+  #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) != 0 ]]
+  then
+    logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
+    if [[ $(ls /dev/fb* ) ]]
+    then
+      # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
+      setfacl -m "g:plugdev:rwx" /dev/fb*
+      setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+      # ENDTODO
+      SupportedBackends=()
+      if [[ $westonresult == 255 ]]
+      then
+	SupportedBackends+=(WL)
+      fi
+      SupportedBackends+=(FB)
+      DefaultBackendType=FB
+      WESTONBACKEND=fbdev-backend.so
+    #if there is no Framebuffer, since it was manually specified, tell the user with a text mode dialog on TTY63, and restart.
+    else
+      logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will now reboot" 20 50 --no-cancel
-    dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+      dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+    fi
   fi
-fi
 
+}
 
 #This function creates an XDG_RUNTIME_DIR for the user, specified in the first argument
 function Create_XDG_RUNTIME_DIR
@@ -1011,7 +1015,7 @@ function LeavePrompt
 
 
 #This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 1 second, then try to call it back up
-function LoginWestonLauncher
+function StartLoginManagerDisplay
 {
   Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
   for (( StartTimes = 0 ; StartTimes < 5 ;))
@@ -1307,8 +1311,11 @@ then
   wlmdebuginsecure=1
 fi
 
+#Prepare the loginmanager
+PrepareLoginManager
+
 #Start the main loginmanagerdisplay Weston server
-LoginWestonLauncher &
+StartLoginManagerDisplay &
 
 #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
 StartAutoLogin &
