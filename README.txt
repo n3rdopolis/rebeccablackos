@@ -41,6 +41,7 @@ BOOT OPTIONS:
             wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
             wlmforceswrender: Force all user sessions, and the Login Manager's display to be started with the environment variable EGL_SOFTWARE=1
             wlmdebug: Force more sysrq trigger options to be availible, then the more secure default. Allow the option for a graphical login terminal to be started on the wayland login manager's display. This option is not settable from rbos-failedboot as it's for more advanced users
+	    wlmdebuginsecure: This option is the same as wlmdebug, except the diagostic terminal is a root terminal, instead of a login terminal
 
 
 BUILDING: 

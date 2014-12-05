@@ -138,7 +138,7 @@ export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/wes
 export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
 export WLM_PATH=$PATH
 #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
-if [[ $(cat /proc/cmdline | grep -c wlmforceswrender ) != 0 ]]
+if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
 then
   export EGL_SOFTWARE=1
 fi
@@ -236,7 +236,7 @@ Will now reboot." 20 50 --no-cancel
 fi
 
 #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-if [[ $(cat /proc/cmdline | grep -c wlmforcefbdev ) != 0 ]]
+if [[ $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) != 0 ]]
 then
   logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   if [[ $(ls /dev/fb* ) ]]
@@ -547,17 +547,22 @@ function ChooseSessionType
 }
 
 
-#This function displays a diagnostic login terminal, and temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system
+#This function displays a diagnostic terminal. depending on if the more secure debug option was passed, wlmdebug it, temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system, and opens the login terminal window running as a service user. If the more insecure wlmdebuginsecure option was passed, then it starts the terminal as root, with a root terminal.
 function DiagnosticTerminal 
 {
-  mkdir -p /var/tmp/waylandloginmanager/logincmd
-  chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
-  chmod 700 /var/tmp/waylandloginmanager/logincmd
-  cp /bin/login /var/tmp/waylandloginmanager/logincmd
-  chmod +s /var/tmp/waylandloginmanager/logincmd/login
-  $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login"
-  wait -n $TERMINALJOB
-  rm /var/tmp/waylandloginmanager/logincmd/login
+  if [[ $wlmdebuginsecure == 1 ]]
+  then
+    vte -g 80x25
+  else
+    mkdir -p /var/tmp/waylandloginmanager/logincmd
+    chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
+    chmod 700 /var/tmp/waylandloginmanager/logincmd
+    cp /bin/login /var/tmp/waylandloginmanager/logincmd
+    chmod +s /var/tmp/waylandloginmanager/logincmd/login
+    $TERMINALCMD -g 80x25 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login"
+    wait -n $TERMINALJOB
+    rm /var/tmp/waylandloginmanager/logincmd/login
+  fi
 }
 
 #This function is called when the loginmanager_control recives the Info command. It brings up a help dialog for the user, about the waylandloginmanager and the system.
@@ -1285,12 +1290,21 @@ then
   exit
 fi
 
-#Enable full alt+sysrq,and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
-if [[ $(cat /proc/cmdline | grep -c wlmdebug ) != 0 || $ISLIVE == 1 ]]
+#Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
+if [[ $(cat /proc/cmdline | grep -c "\bwlmdebug\b" ) != 0 || $ISLIVE == 1 ]]
 then
   echo 1 > /proc/sys/kernel/sysrq
   logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
   wlmdebug=1
+fi
+
+#Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument,
+if [[ $(cat /proc/cmdline | grep -c "\bwlmdebuginsecure\b" ) != 0 ]]
+then
+  echo 1 > /proc/sys/kernel/sysrq
+  logger -t waylandloginmanager "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+  wlmdebug=1
+  wlmdebuginsecure=1
 fi
 
 #Start the main loginmanagerdisplay Weston server
