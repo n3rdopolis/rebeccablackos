@@ -62,6 +62,8 @@
       #Login : Starts the login process (see documentation for function GetUserCredentials)
       #RegisterSession : Tells the waylandloginmanager to read from the loginmanager_register FIFO. When this is called the process must be attempting to write to the loginmanager_register already. If there is nothing being written in the short .01 second timeout, it is ignored. (see documentation for function RegisterSession)
 
+#These functions are for the user session part of the waylandloginmanager
+
 #Function that is run to start user sessions while running as the user (when started with the --usersession argument)
 function UserSessionWorker
 {
@@ -188,6 +190,8 @@ function SwitchBackExit
   echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
   exit
 }
+
+#All functions below this point are for the main operation of the waylandloginmanager
 
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
 function PrepareLoginManager
@@ -1430,6 +1434,9 @@ then
 fi
 
 
+#If the waylandloginmanager is started with no arguments assume default operation. 
+#If it is started with --uihost, then all arguments after that are treated as a command, but to set LD_LIBRARY_PATH.
+#If it is started with --usersession, then perform operations to start the user session, running as the user
 if [[ $1 == "" ]]
 then
   #Prepare the loginmanager
