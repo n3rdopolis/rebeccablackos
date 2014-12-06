@@ -388,6 +388,37 @@ Will now reboot" 20 50 --no-cancel
     fi
   fi
 
+  #Get the TTY that will hold the Wayland server that displays the login screen.
+  OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay)
+  if [[ ! -z $OLDPID ]]
+  then
+    HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
+  else
+    HostVT=$(GetNextTTY)
+  fi
+  LastTTY=$HostVT
+  if [[ $HostVT -eq -1 ]]
+  then
+    logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
+    exit
+  fi
+
+  #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmdebug\b" ) != 0 || $ISLIVE == 1 ]]
+  then
+    echo 1 > /proc/sys/kernel/sysrq
+    logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+    wlmdebug=1
+  fi
+
+  #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument,
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmdebuginsecure\b" ) != 0 ]]
+  then
+    echo 1 > /proc/sys/kernel/sysrq
+    logger -t waylandloginmanager "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+    wlmdebug=1
+    wlmdebuginsecure=1
+  fi
 }
 
 #This function creates an XDG_RUNTIME_DIR for the user, specified in the first argument
@@ -1400,38 +1431,6 @@ function ReadCommandFIFO
     sleep .05
   done
 }
-
-#Get the TTY that will hold the Wayland server that displays the login screen.
-OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay)
-if [[ ! -z $OLDPID ]]
-then
-  HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
-else
-  HostVT=$(GetNextTTY)
-fi
-LastTTY=$HostVT
-if [[ $HostVT -eq -1 ]]
-then
-  logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
-  exit
-fi
-
-#Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
-if [[ $(cat /proc/cmdline | grep -c "\bwlmdebug\b" ) != 0 || $ISLIVE == 1 ]]
-then
-  echo 1 > /proc/sys/kernel/sysrq
-  logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
-  wlmdebug=1
-fi
-
-#Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument,
-if [[ $(cat /proc/cmdline | grep -c "\bwlmdebuginsecure\b" ) != 0 ]]
-then
-  echo 1 > /proc/sys/kernel/sysrq
-  logger -t waylandloginmanager "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
-  wlmdebug=1
-  wlmdebuginsecure=1
-fi
 
 
 #If the waylandloginmanager is started with no arguments assume default operation. 
