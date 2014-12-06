@@ -862,13 +862,12 @@ function StartUserSession
   then
     export WAYLAND_DISPLAY=$WAYLAND_GUEST
     openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
-    #openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER -l --session-command "$(echo "westonlaunchcaller $CompositorExec @@ $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
-
   #if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
   else
     logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
     openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
   fi
+  #openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER -l --session-command "$(echo "$0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
   sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
   WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -1159,6 +1158,7 @@ function StartLoginManagerDisplay
 	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
 	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
       fi
+      #openvt -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER -l --session-command $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
     fi
     sleep 1
   done
