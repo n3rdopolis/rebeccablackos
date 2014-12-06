@@ -62,6 +62,133 @@
       #Login : Starts the login process (see documentation for function GetUserCredentials)
       #RegisterSession : Tells the waylandloginmanager to read from the loginmanager_register FIFO. When this is called the process must be attempting to write to the loginmanager_register already. If there is nothing being written in the short .01 second timeout, it is ignored. (see documentation for function RegisterSession)
 
+#Function that is run to start user sessions while running as the user (when started with the --usersession argument)
+function UserSessionWorker
+{
+  #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
+  USER=$(id -u)
+  export $(exec dbus-launch)
+  . /usr/bin/wlruntime_vars
+  BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
+  EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
+  if [[ -e /usr/share/wsessions.d/default.environment ]]
+  then
+    ReadEnvironmentFile /usr/share/wsessions.d/default.environment
+  fi
+
+  if [[ -e $EnvironmentFile ]]
+  then
+    ReadEnvironmentFile "$EnvironmentFile"
+  fi
+
+  #set all arguments into an array
+  ArgumentString=$(echo -en "$@")
+  echo "Started with the arguments: $ArgumentString" |& tee -a $HOME/waylandserver.log
+  eval set -- $ArgumentString |& tee -a $HOME/waylandserver.log
+  ArgArray=($@)
+  unset IFS
+
+  #Clean up trailing white space from the end of all arguments
+  for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
+  do
+    ArgArray[$element]=$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
+  done
+
+  #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
+  if [[ $(cat /proc/cmdline | grep -c wlmforceswrender ) != 0 ]]
+  then
+    export EGL_SOFTWARE=1
+  fi
+
+
+  if [[ $BackendType == WL ]]
+  then
+    if [[ $DefaultBackendType == FB ]]
+    then
+      HostBackendArgument="--backend=fbdev-backend.so"
+    else
+      HostBackendArgument="--backend=drm-backend.so"
+    fi
+    weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
+    HostServerPID=$!
+    export WAYLAND_DISPLAY=$WAYLAND_HOST
+    WaitTimes=0
+    #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
+    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<15 ]]
+    do
+      sleep 1
+      ((WaitTimes++))
+    done
+    #If the socket doesn't exist, then the server failed to start, and switch back
+    if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+    then
+      SwitchBackExit
+    fi
+  else
+    export WAYLAND_DISPLAY=$WAYLAND_GUEST
+    unset WAYLAND_HOST
+  fi
+  STARTTIME=$(date +%s)
+  #Execute the Wayland server, and log it to ~/waylandserver.log
+  ${ArgArray[@]} |& tee -a $HOME/waylandserver.log &
+  GuestServerPID=$!
+  if [[ $BackendType == WL ]]
+  then
+    TerminateHostOnGuestTermination $GuestServerPID $HostServerPID &
+  fi
+  fg 1
+  ENDTIME=$(date +%s)
+  RUNTIME=$((ENDTIME-STARTTIME))
+  #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
+  if [[ $RUNTIME < 45 ]]
+  then
+    SwitchBackExit
+  fi
+}
+
+#Function that takes the argument of an environment file, and handles the definitions (for --usersession)
+function ReadEnvironmentFile
+{
+  #parse the session event file if specified, and it exists
+  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}')
+  while read LINE
+  do
+    #environment files are specified as action=var=data
+    #Examples
+    #set=varname=data sets variable called varname, with the content of data.
+    #unset=varname unsets a variable called varname
+    #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
+    VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
+    VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
+    VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
+    VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
+
+    #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
+    if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
+    then
+      #if it is set, then set the variable
+      if [[ $VARACTION == "set" ]]
+      then
+	export $VARNAME=$VARDATA
+      fi
+
+      #if it is unset, then unset the variable
+      if [[ $VARACTION == "unset" ]]
+      then
+	unset $VARNAME
+      fi
+
+    fi
+  done < <(echo "$EnvironmentFileData")
+}
+
+#Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure (for --usersession)
+function SwitchBackExit
+{
+  echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+  exit
+}
+
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
 function PrepareLoginManager
 {
@@ -1329,9 +1456,10 @@ then
   export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
   export PATH=$WLM_PATH
   "$@"
-elif [[ ]]
+elif [[ $1 == "--usersession" ]]
 then
-  :
+  shift
+  UserSessionWorker
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit
