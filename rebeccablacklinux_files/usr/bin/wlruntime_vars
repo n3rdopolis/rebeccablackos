@@ -56,13 +56,13 @@ export KDE_SESSION_VERSION=5
 #Change dconf settings only if user is first time run to allow more buttons in gtk titlebars 
 if [[ ! -e ~/.config/dconf/user ]]
 then
-  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close
+  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close &>/dev/null
 fi
 
 #Build the KDE configuration database
 if [[ ! -e $HOME/.cache/ksycoca5 ]]
 then
-  kbuildsycoca5
+  kbuildsycoca5 &>/dev/null
 fi
 
 #Build RDP keys for weston-share
@@ -71,7 +71,7 @@ if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
 then
   mkdir ~/weston-rdp
   cd ~/weston-rdp
-  winpr-makecert -rdp > rdpkey.rdp
+  winpr-makecert -rdp > rdpkey.rdp 2>/dev/null 
   cp $HOSTNAME.crt rdpcrt.crt
   cp $HOSTNAME.key rdpcrtkey.key
   cd $OLDPWD
