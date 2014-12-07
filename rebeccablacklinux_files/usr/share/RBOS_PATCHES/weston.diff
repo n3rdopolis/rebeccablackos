@@ -53,3 +53,98 @@ index 07b83a7..ab09c6c 100644
 
 
 
+diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
+index 76d3df0..811daac 100644
+--- a/src/compositor-fbdev.c
++++ b/src/compositor-fbdev.c
+@@ -809,6 +809,7 @@ fbdev_compositor_destroy(struct weston_compositor *base)
+ static void
+ session_notify(struct wl_listener *listener, void *data)
+ {
++	weston_log("Notify\n");
+ 	struct fbdev_compositor *compositor = data;
+ 	struct weston_output *output;
+ 
+diff --git a/src/logind-util.c b/src/logind-util.c
+index 6a1b498..d3464cb 100644
+--- a/src/logind-util.c
++++ b/src/logind-util.c
+@@ -259,6 +259,7 @@ weston_logind_restore(struct weston_logind *wl)
+ 	ioctl(wl->vt, KDSKBMODE, wl->kb_mode);
+ 	mode.mode = VT_AUTO;
+ 	ioctl(wl->vt, VT_SETMODE, &mode);
++	weston_log("Logind Restore\n");
+ }
+ 
+ WL_EXPORT int
+@@ -269,7 +270,7 @@ weston_logind_activate_vt(struct weston_logind *wl, int vt)
+ 	r = ioctl(wl->vt, VT_ACTIVATE, vt);
+ 	if (r < 0)
+ 		return -1;
+-
++	weston_log("Activate vt\n");
+ 	return 0;
+ }
+ 
+@@ -489,9 +490,10 @@ device_paused(struct weston_logind *wl, DBusMessage *m)
+ 
+ 	if (!strcmp(type, "pause"))
+ 		weston_logind_pause_device_complete(wl, major, minor);
+-
++	weston_log("Paused device\n");
+ 	if (major == DRM_MAJOR)
+ 		weston_logind_set_active(wl, false);
++		weston_log("Device Paused inctive\n");
+ }
+ 
+ static void
+@@ -515,9 +517,10 @@ device_resumed(struct weston_logind *wl, DBusMessage *m)
+ 	 * devices it's a new open-file. As we reopen evdev devices, anyway,
+ 	 * there is no need for us to handle this event for evdev. For DRM, we
+ 	 * notify the compositor to wake up. */
+-
++	weston_log("Device Resumed\n");
+ 	if (major == DRM_MAJOR)
+ 		weston_logind_set_active(wl, true);
++		weston_log("Device Resumed Active\n");
+ }
+ 
+ static DBusHandlerResult
+@@ -620,6 +623,7 @@ weston_logind_destroy_dbus(struct weston_logind *wl)
+ static int
+ weston_logind_take_control(struct weston_logind *wl)
+ {
++	weston_log("Take Control\n");
+ 	DBusError err;
+ 	DBusMessage *m, *reply;
+ 	dbus_bool_t force;
+@@ -679,11 +683,13 @@ weston_logind_release_control(struct weston_logind *wl)
+ 		dbus_connection_send(wl->dbus, m, NULL);
+ 		dbus_message_unref(m);
+ 	}
++	 weston_log("Release Control\n");
+ }
+ 
+ static int
+ signal_event(int fd, uint32_t mask, void *data)
+ {
++	weston_log("Signal Event\n");
+ 	struct weston_logind *wl = data;
+ 	struct signalfd_siginfo sig;
+ 
+@@ -695,9 +701,15 @@ signal_event(int fd, uint32_t mask, void *data)
+ 	switch (sig.ssi_signo) {
+ 	case SIGUSR1:
+ 		ioctl(wl->vt, VT_RELDISP, 1);
++		weston_log("Signal1\n");
++		wl_signal_emit(&wl->compositor->session_signal,
++		       wl->compositor);
+ 		break;
+ 	case SIGUSR2:
+ 		ioctl(wl->vt, VT_RELDISP, VT_ACKACQ);
++		weston_log("Signal2\n");
++		wl_signal_emit(&wl->compositor->session_signal,
++		       wl->compositor);
+ 		break;
+ 	}
+ 
