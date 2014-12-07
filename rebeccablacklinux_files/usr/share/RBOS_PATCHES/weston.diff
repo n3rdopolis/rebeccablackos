@@ -66,7 +66,7 @@ index 76d3df0..811daac 100644
  	struct weston_output *output;
  
 diff --git a/src/logind-util.c b/src/logind-util.c
-index 6a1b498..d3464cb 100644
+index 6a1b498..32422db 100644
 --- a/src/logind-util.c
 +++ b/src/logind-util.c
 @@ -259,6 +259,7 @@ weston_logind_restore(struct weston_logind *wl)
@@ -132,17 +132,19 @@ index 6a1b498..d3464cb 100644
  	struct weston_logind *wl = data;
  	struct signalfd_siginfo sig;
  
-@@ -695,9 +701,15 @@ signal_event(int fd, uint32_t mask, void *data)
+@@ -695,9 +701,17 @@ signal_event(int fd, uint32_t mask, void *data)
  	switch (sig.ssi_signo) {
  	case SIGUSR1:
  		ioctl(wl->vt, VT_RELDISP, 1);
 +		weston_log("Signal1\n");
++		compositor->session_signal=0;
 +		wl_signal_emit(&wl->compositor->session_signal,
 +		       wl->compositor);
  		break;
  	case SIGUSR2:
  		ioctl(wl->vt, VT_RELDISP, VT_ACKACQ);
 +		weston_log("Signal2\n");
++		compositor->session_signal=1;
 +		wl_signal_emit(&wl->compositor->session_signal,
 +		       wl->compositor);
  		break;
