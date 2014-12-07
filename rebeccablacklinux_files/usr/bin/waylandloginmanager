@@ -285,12 +285,12 @@ function PrepareLoginManager
   #default the number of sessions registered to be 0 if unset
   if [[ -z $AllSessions ]]
   then
-    AllSessions=0
+    export AllSessions=0
   fi
   #default ActiveSessionPID if unset, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
   if [[ -z $ActiveSessionPID ]]
   then
-    ActiveSessionPID=0
+    export ActiveSessionPID=0
   fi
   #Array that stores all backend types that is supported by the hardware
   SupportedBackends=()
