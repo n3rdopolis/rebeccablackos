@@ -96,8 +96,8 @@ function UserSessionWorker
     ArgArray[$element]=$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
   done
 
-  #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
-  if [[ $(cat /proc/cmdline | grep -c wlmforceswrender ) != 0 ]]
+  #if the user booted with wlmforceswrender, force software rendering to be enabled
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
     export EGL_SOFTWARE=1
   fi
