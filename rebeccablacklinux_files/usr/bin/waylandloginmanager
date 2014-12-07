@@ -1273,13 +1273,12 @@ function UserActionDialog
   #wait for the loginmanagerdisplay
   DisplayServerWait
   ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
-  if [[ $wlmdebug == 1 && $wlmdebuginsecure == 0 ]]
-  then
-    ActionMenu+="\nDebug\nTerminal Login..."
-  fi
-  if [[ $wlmdebug == 1 && $wlmdebuginsecure == 1 ]]
+  if [[ $wlmdebuginsecure == 1 ]]
   then
     ActionMenu+="\nDebug\nRoot Terminal..."
+  elif [[ $wlmdebug == 1 ]]
+  then
+    ActionMenu+="\nDebug\nTerminal Login..."
   fi
   USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
