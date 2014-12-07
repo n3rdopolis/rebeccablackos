@@ -19,4 +19,4 @@
 #This script is for calling a weston server nested. This adds any arguments passed to it to weston, sets up the environment, and creates a random display ID for it to use
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
-weston-display-server --socket=$ServerID  "$@" 
+weston --socket=$ServerID  "$@" 

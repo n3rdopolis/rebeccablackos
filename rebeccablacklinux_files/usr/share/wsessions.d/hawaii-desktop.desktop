@@ -2,7 +2,7 @@
 Enabled=1
 Type=WSession
 Name=Hawaii Desktop Shell
-CompositorExec=/opt/bin/weston-display-server
+CompositorExec=/opt/bin/weston
 CompositorSupportsKMS=1
 CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so
@@ -11,4 +11,4 @@ CompositorDisplayArgument=--socket=
 SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=/opt/lib/weston/hawaii-desktop.so
 AdditionalArguments=--log=$HOME/weston.log
 NeedsFile=/opt/lib/weston/hawaii-desktop.so
-NeedsFile=/opt/bin/weston-display-server
+NeedsFile=/opt/bin/weston
