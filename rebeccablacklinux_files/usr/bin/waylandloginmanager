@@ -23,14 +23,6 @@
 #It depends on zenity and expect
 
 #as well as:
-#/opt/bin/weston-display-server
-  #which is moved from /opt/bin/weston . /opt/bin/weston needs to be redirected to /opt/bin/weston-display-server because of weston-launch which is described later
-#/opt/bin/weston-launch
-  #Needs to be patched to NOT drop the environment variables, and patched to give access to users of the plugdev group, instead of the weston-launch group.
-#/usr/bin/westonlaunchcaller 
-  #Should be symlinked to /opt/bin/weston . This is needed to replace some functionality for weston-launch. it allows weston-launch to handle the execution of custom Wayland servers specified in /etc/waylandservers . It handles the resetting of environment variables, and it sends commands back to the waylandloginmanager FIFO to notify it of failure, to switch back to the loginmanager display tty.
-  #/usr/bin/westonlaunchcaller makes it so that if the second argument passed to weston-launch (past the -- separator), the first argument is treated as the custom server, and then it must be in /etc/waylandservers
-  #it also handles the environment file, which is documented within /usr/share/wsession/aboutwsessions.txt
 #/etc/waylandloginmanager.conf
   #Otherwise it uses /etc/lightdm/lightdm.conf . the only supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
 #/usr/libexec/wayland_login_helpers/*
@@ -67,6 +59,9 @@
 #Function that is run to start user sessions while running as the user (when started with the --usersession argument)
 function UserSessionWorker
 {
+  #Enable job control
+  set -m
+
   #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
   USER=$(id -u)
   export $(exec dbus-launch)
@@ -111,7 +106,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston-display-server --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -255,8 +250,8 @@ function PrepareLoginManager
   export FIFOREADERUSER=daemon
   #Get the UID of the $LOGINMANAGERDISPLAYUSER
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
-  #Set the default path for the weston-display-server
-  export DEFAULTWAYLANDSERVER=/opt/bin/weston-display-server
+  #Set the default path for weston
+  export DEFAULTWAYLANDSERVER=/opt/bin/weston
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
@@ -288,12 +283,7 @@ function PrepareLoginManager
   fi
   #Array that stores all backend types that is supported by the hardware
   SupportedBackends=()
-  #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
-  westonresult=$(weston --version &>/dev/null; echo $?) 
-  if [[ $westonresult == 255 ]]
-  then
-    SupportedBackends+=(WL)
-  fi
+  SupportedBackends+=(WL)
 
   #Determine if this is running on a live instance, if the root filesystem is overlayfs.
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
@@ -371,10 +361,7 @@ Will now reboot." 20 50 --no-cancel
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
       # ENDTODO
       SupportedBackends=()
-      if [[ $westonresult == 255 ]]
-      then
-	SupportedBackends+=(WL)
-      fi
+      SupportedBackends+=(WL)
       SupportedBackends+=(FB)
       DefaultBackendType=FB
       WESTONBACKEND=fbdev-backend.so
@@ -589,12 +576,6 @@ function ChooseSessionType
 	((NotFoundCount++))
       fi
     done < <(echo "$NeedsFile")
-
-    ServerApprovedCount=$(cat /etc/waylandservers | grep -c "^$CompositorExec$")
-    if [[ $ServerApprovedCount == 0 ]]
-    then 
-      logger -t waylandloginmanager "Warning: $CompositorExec specified in $SESSIONFILE is not in /etc/waylandservers , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
-    fi
 
     if [[ $Enabled != 1 ]]
     then
@@ -830,7 +811,7 @@ New Session...
 
 #Function that starts the user sessions, which is called by AuthenticateUser, if the authentication is successful. It takes the 3 arguments, TTY number, user to start the session for, and the multiline string, WSESSIONDATA, which contains specific data about how to start paticular sessions
 function StartUserSession 
-{
+{ 
   #ensure the loginmanager_control fd doesn't get leaked
   exec 1000>&-
 
@@ -861,8 +842,8 @@ function StartUserSession
   #line 2 is the argument to start with a paticular backend
   #line 3 is the argument to start the Wayland server with a specific WAYLAND_DISPLAY
   #line 4 is any other arguments needed
-  #line 5 specifies the environment file which is process by westonlaunchcaller, which is documented at the top of the script, and in westonlaunchcaller.
-  #line 6 specifies the backend data, which tells westonlaunchcaller what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
+  #line 5 specifies the environment file which is processed by the user session, which is documented at the top of the script.
+  #line 6 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
   #line 7 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
   CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
@@ -879,8 +860,6 @@ function StartUserSession
   export DefaultBackendType=${BackendData[1]}
   export IsFallbackSession=${BackendData[2]}
 
-  #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
-  westonresult=$(weston --version &>/dev/null; echo $?) 
 
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
@@ -888,17 +867,7 @@ function StartUserSession
   chvt 63 &
   sleep .1
   Create_XDG_RUNTIME_DIR $LOGINUSER
-  #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
-  if [[ $westonresult == 255 ]]
-  then
-    export WAYLAND_DISPLAY=$WAYLAND_GUEST
-    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$CompositorExec" @@ "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
-  #if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
-  else
-    logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-    openvt -f -s -c $WESTONTTY -- weston-launch --user=$LOGINUSER --tty=/dev/tty$WESTONTTY -- "$BackendArguments"  "$SessionArgument" "$AdditionalArguments" "$CompositorDisplayArgument"
-  fi
-  #openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER -l --session-command "$(echo "$0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
+  openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER --session-command "$(echo "$0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
   sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
   WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -1177,19 +1146,8 @@ function StartLoginManagerDisplay
     then 
       (( StartTimes++ ))
       chvt 63 &
-      #determine if weston is the normal weston, or if weston has been replaced by the westonlaunchcaller
-      westonresult=$(weston --version &>/dev/null; echo $?) 
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-      #if the westonlaunchcaller is replacing weston, then call it with the arguments to specify the server to use, which is specified with $DEFAULTWAYLANDSERVER
-      if [[ $westonresult == 255 ]]
-      then
-	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- "$DEFAULTWAYLANDSERVER" @@ --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
-      else
-	#if the westonlaunchcaller does NOT exist, then call weston-launch as normal, and log the event.
-	logger -t waylandloginmanager "WARNING: the weston executable has not been replaced with westonlaunchcaller. Execution of custom Wayland servers will not work." -s  >>/var/log/waylandloginmanager 2>&1
-	openvt -w -f -s -c $HostVT -- weston-launch --tty=/dev/tty$HostVT --user=$LOGINMANAGERDISPLAYUSER -- --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
-      fi
-      #openvt -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER -l --session-command $0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log
+      openvt -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log"
     fi
     sleep 1
   done
@@ -1259,12 +1217,8 @@ function SetupLoggingAndFIFO
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
   #Prepare logging for the loginmanagerdisplay
-  touch /var/log/waylandserver.log
   touch /var/log/loginmanagerdisplay.log
-  chown $LOGINMANAGERDISPLAYUSER /var/log/waylandserver.log
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplay.log
-  rm $LOGINMANAGERDISPLAYHOME/waylandserver.log &> /dev/null
-  ln -s /var/log/waylandserver.log $LOGINMANAGERDISPLAYHOME/waylandserver.log
 }
 
 #This function displays a dialog containing actions for the Wayland Login Manager for the user, Shutdown, Switch User, login, and show a help dialog. It's optional, for in the case Weston isn't configured
@@ -1302,7 +1256,7 @@ function CommandFIFOProxy
   done
 }
 
-#This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the westonlaunchcaller, shutdowndialog, or even some functions within this script.
+#This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
@@ -1464,6 +1418,7 @@ then
   shift 
   export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
   export PATH=$WLM_PATH
+  export HOME=$LOGINMANAGERDISPLAYHOME
   "$@"
 elif [[ $1 == "--usersession" ]]
 then
