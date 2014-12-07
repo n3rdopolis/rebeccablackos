@@ -20,7 +20,7 @@ Name:
 The Name key is the name of the wsession, in user friendly string. See line 3 in the example
 
 CompositorExec:
-The path to the Wayland server binary. it must be permitted in /etc/waylandservers as well. see line 4 in the example, as well as the documentation for /etc/waylandservers in Section 3
+The path to the Wayland server binary.
 
 
 CompositorSupports(BACKEND):
@@ -99,20 +99,3 @@ If it ends with @BACKEND, then the variable action is only performed, if the Bac
   in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is. 
 
 default.environment is handled by all sessions first, before the specified environment file, in the case of a need of making an environment variable avaible to all sessions.
-  
-
-Section 3----------------------------------------------
-/etc/waylandservers
-
-This is a simple file with each permitted server added on it's own line.
-It doesn't need any other data, or headers, just that the path to the executable matches CompositorExec
-
-westonlaunchcaller will only execute the servers in this file for security
-
-No variables are supported. It must be a fixed path
-
-for example
-----------------------------------------------
-1.|	/opt/bin/weston-display-server
-2.|	/opt/bin/enlightenment_start
-----------------------------------------------
