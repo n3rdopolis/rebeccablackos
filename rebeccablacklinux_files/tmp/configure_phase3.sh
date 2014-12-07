@@ -86,8 +86,8 @@ then
   ln -s /sbin/init /lib/systemd/systemd
 fi
 
-#Change the default shell for the daemon user
-chsh -s /bin/bash daemon
+#Create the user for the waylandloginmanager
+adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system waylandloginmanager
 
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
