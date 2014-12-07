@@ -136,9 +136,8 @@ function UserSessionWorker
   GuestServerPID=$!
   if [[ $BackendType == WL ]]
   then
-    TerminateHostOnGuestTermination $GuestServerPID $HostServerPID &
+    TerminateHostOnGuestTermination $GuestServerPID $HostServerPID
   fi
-  fg 1
   ENDTIME=$(date +%s)
   RUNTIME=$((ENDTIME-STARTTIME))
   #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
@@ -228,6 +227,7 @@ function PrepareLoginManager
     exit
   fi
 
+  #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
   if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
   then
     logger -t waylandloginmanager "Error: The user waylandloginmanager does NOT exist. Creating the user account..." -s  >>/var/log/waylandloginmanager 2>&1
