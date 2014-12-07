@@ -18,21 +18,14 @@
 
 #This script sets variables for running programs as Wayland programs
 
-#If running under loginmanagerdisplay, then use the configuration for the loginmanagerdisplay
-if [[ ! -z $LOGINMANAGERDISPLAYHOME ]]
-then
-  export HOME=$LOGINMANAGERDISPLAYHOME
-else
-  unset HOME
-  export HOME=$(echo ~)
-fi
-
 #Set XDG_RUNTIME_DIR if it doesn't exist
 if [[ -z $XDG_RUNTIME_DIR ]]
 then
     export XDG_RUNTIME_DIR=/run/user/$UID
 fi
 
+unset HOME
+export HOME=$(echo ~)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export XDG_DATA_DIRS=/opt/share:/usr/share:$XDG_DATA_DIRS
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS:/etc/xdg
