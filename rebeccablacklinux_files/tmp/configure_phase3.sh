@@ -86,9 +86,8 @@ then
   ln -s /sbin/init /lib/systemd/systemd
 fi
 
-#Turn the westonlaunchcaller in weston into a symlink
-rm /opt/bin/weston
-ln -s /usr/bin/westonlaunchcaller /opt/bin/weston
+#Change the default shell for the daemon user
+chsh -s /bin/bash daemon
 
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
