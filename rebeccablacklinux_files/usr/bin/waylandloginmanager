@@ -82,7 +82,7 @@ function UserSessionWorker
   ArgumentString=$(echo -en "$@")
   echo "Started with the arguments: $ArgumentString" |& tee -a $HOME/waylandserver.log
   eval set -- $ArgumentString |& tee -a $HOME/waylandserver.log
-  ArgArray=($@)
+  ArgArray=($ArgumentString)
   unset IFS
 
   #Clean up trailing white space from the end of all arguments
@@ -1423,7 +1423,7 @@ then
 elif [[ $1 == "--usersession" ]]
 then
   shift
-  UserSessionWorker
+  UserSessionWorker "$@"
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit
