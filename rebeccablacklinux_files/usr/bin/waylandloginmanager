@@ -23,6 +23,11 @@
 #It depends on zenity and expect
 
 #as well as:
+#At least systemd v216 as it has all the required bug fixes to support multiple display servers started using logind
+#/etc/pam.d/runuser
+  #Must have the line:
+  #session		optional	pam_systemd.so
+  #to enable runuser to have the ability to start logind sessions
 #/etc/waylandloginmanager.conf
   #Otherwise it uses /etc/lightdm/lightdm.conf . the only supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
 #/usr/libexec/wayland_login_helpers/*
