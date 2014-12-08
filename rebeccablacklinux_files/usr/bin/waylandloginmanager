@@ -126,8 +126,9 @@ function UserSessionWorker
     then
       SwitchBackExit
     fi
+  else
+    WAYLAND_DISPLAY=$WAYLAND_GUEST
   fi
-  export WAYLAND_DISPLAY=$WAYLAND_GUEST
   unset WAYLAND_HOST
   unset WAYLAND_GUEST
   STARTTIME=$(date +%s)
