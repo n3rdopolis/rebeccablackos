@@ -87,7 +87,7 @@ then
 fi
 
 #Create the user for the waylandloginmanager
-adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system waylandloginmanager
+adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
 
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 

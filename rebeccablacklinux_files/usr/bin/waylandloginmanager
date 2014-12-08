@@ -231,7 +231,7 @@ function PrepareLoginManager
   if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
   then
     logger -t waylandloginmanager "Error: The user waylandloginmanager does NOT exist. Creating the user account..." -s  >>/var/log/waylandloginmanager 2>&1
-    adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system waylandloginmanager
+    adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
   fi
 
   #prevent the WaylandLoginManager from being killed with CTRL+C
