@@ -44,6 +44,7 @@
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
   #/var/log/loginmanagerdisplay.log : This is the log file for the Weston server that is the loginmanagerdisplay
   #~/waylandserver.log : This is where all wayland servers get logged as the run as the user.
+  #~/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
   #/run/waylandloginmanager/sessiondata: Stores data for user switching so that the session list can be reloaded if waylandloginmanager restarts. As it's stored in /run which is a tmpfs, there should be no risk of one from a previous boot giving it false data
@@ -137,18 +138,14 @@ function UserSessionWorker
   ${ArgArray[@]} |& tee -a $HOME/waylandserver.log &
   GuestServerPID=$!
 
-  #If the backend is WL, then wait for the guest server to terminate so that the host server can be terminated, otherwise bring the non-wl server into the foreground to keep the script alive.
+  
+  #Terminate the host server after the guest terminates
   if [[ $BackendType == WL ]]
   then
-    ServerStatus=0
-    while [[ $ServerStatus == 0 ]]
-    do
-      sleep 5
-      ps --no-header -p $GuestServerPID &> /dev/null
-      ServerStatus=$?
-    done
+    fg 2
+    echo "The guest session has ended. Terminating the host..." |& tee -a $HOME/waylandhost.log
     kill -15 $HostServerPID
-    sleep 5
+    sleep 3
     kill -9 $HostServerPID
   else
     fg 1
