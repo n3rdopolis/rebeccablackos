@@ -135,9 +135,20 @@ function UserSessionWorker
   #Execute the Wayland server, and log it to ~/waylandserver.log
   ${ArgArray[@]} |& tee -a $HOME/waylandserver.log &
   GuestServerPID=$!
+
+  #If the backend is WL, then wait for the guest server to terminate so that the host server can be terminated, otherwise bring the non-wl server into the foreground to keep the script alive.
   if [[ $BackendType == WL ]]
   then
-    TerminateHostOnGuestTermination $GuestServerPID $HostServerPID
+    ServerStatus=0
+    while [[ $ServerStatus == 0 ]]
+    do
+      sleep 5
+      ps -p --no-header $GuestServerPID &> /dev/null
+      ServerStatus=$?
+    done
+    kill -15 $HostServerPID
+  else
+    fg 1
   fi
   ENDTIME=$(date +%s)
   RUNTIME=$((ENDTIME-STARTTIME))
