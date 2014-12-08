@@ -124,7 +124,8 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      SwitchBackExit
+      echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+      exit
     fi
   else
     WAYLAND_DISPLAY=$WAYLAND_GUEST
@@ -147,6 +148,8 @@ function UserSessionWorker
       ServerStatus=$?
     done
     kill -15 $HostServerPID
+    sleep 5
+    kill -9 $HostServerPID
   else
     fg 1
   fi
@@ -155,7 +158,8 @@ function UserSessionWorker
   #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
   if [[ $RUNTIME < 45 ]]
   then
-    SwitchBackExit
+    echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+    exit
   fi
 }
 
@@ -193,13 +197,6 @@ function ReadEnvironmentFile
 
     fi
   done < <(echo "$EnvironmentFileData")
-}
-
-#Exit function. Sends the "change" command to the waylandloginmanager FIFO in case of failure (for --usersession)
-function SwitchBackExit
-{
-  echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
-  exit
 }
 
 #All functions below this point are for the main operation of the waylandloginmanager
