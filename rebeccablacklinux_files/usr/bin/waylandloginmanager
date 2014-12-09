@@ -43,7 +43,7 @@
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
   #/var/log/loginmanagerdisplay.log : This is the log file for the Weston server that is the loginmanagerdisplay
-  #~/waylandserver.log : This is where all wayland servers get logged as the run as the user.
+  #~/waylandsession.log : This is where all wayland servers get logged as the run as the user.
   #~/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
@@ -86,8 +86,8 @@ function UserSessionWorker
 
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  echo "Started with the arguments: $ArgumentString" |& tee -a $HOME/waylandserver.log
-  eval set -- $ArgumentString |& tee -a $HOME/waylandserver.log
+  echo "Started with the arguments: $ArgumentString" |& tee -a $HOME/waylandsession.log
+  eval set -- $ArgumentString |& tee -a $HOME/waylandsession.log
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -112,7 +112,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &> tee -a $HOME/waylandsession.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -134,8 +134,8 @@ function UserSessionWorker
   unset WAYLAND_HOST
   unset WAYLAND_GUEST
   STARTTIME=$(date +%s)
-  #Execute the Wayland server, and log it to ~/waylandserver.log
-  ${ArgArray[@]} |& tee -a $HOME/waylandserver.log &
+  #Execute the Wayland server, and log it to ~/waylandsession.log
+  ${ArgArray[@]} &> tee -a $HOME/waylandsession.log &
   GuestServerPID=$!
 
   
@@ -143,7 +143,7 @@ function UserSessionWorker
   if [[ $BackendType == WL ]]
   then
     fg 2
-    echo "The guest session has ended. Terminating the host..." |& tee -a $HOME/waylandhost.log
+    echo "The guest session has ended. Terminating the host..." &> tee -a $HOME/waylandhost.log
     kill -15 $HostServerPID
     sleep 3
     kill -9 $HostServerPID
