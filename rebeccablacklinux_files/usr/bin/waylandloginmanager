@@ -130,9 +130,9 @@ function UserSessionWorker
     fi
   else
     WAYLAND_DISPLAY=$WAYLAND_GUEST
+    unset WAYLAND_HOST
+    unset WAYLAND_GUEST
   fi
-  unset WAYLAND_HOST
-  unset WAYLAND_GUEST
   STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to ~/waylandsession.log
   ${ArgArray[@]} &> tee -a $HOME/waylandsession.log &
