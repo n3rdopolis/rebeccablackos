@@ -26,8 +26,14 @@ then
 fi
 
 echo "This updater script downloads the latest changes from the SVN, and replaces any local files, with the files from the SVN. There might be changes that assume a full rebuild of the entire system, and there might be incompatible changes"
-echo "Running this script is usually for development, and testing. Are you sure you want to continue? (y/n)"
+echo "Running this script is usually for development, and testing. Please do not run on a production system. Are you sure you want to continue? (y/n)"
 read answer
+if [[ -z $1 ]]
+then
+  VERSION=HEAD
+else
+  VERSION=$1
+fi
 
 
 if [[ $answer == Y* || $answer == y* ]]
@@ -37,7 +43,7 @@ then
   apt-get update
   apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
   #download off the SVN
-  svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos
+  svn co https://rebeccablackos.svn.sourceforge.net/svnroot/rebeccablackos -r $VERSION
   #make the files owned by root, and executable
   chmod +x -R /usr/share/rebeccablackos/
   chown  root  /usr/share/rebeccablackos/
