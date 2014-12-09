@@ -121,7 +121,7 @@ do
     rm /tmp/FAILEDINSTALLS.txt.bak
     if [[ $METHOD == "REMOVE" ]]
     then
-      grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDREMOVES.txt > /tmp/FAILEDREMOVES.txt.bak
+      grep -v "$PACKAGE::" /tmp/FAILEDREMOVES.txt > /tmp/FAILEDREMOVES.txt.bak
       cat /tmp/FAILEDREMOVES.txt.bak > /tmp/FAILEDREMOVES.txt
       rm /tmp/FAILEDREMOVES.txt.bak
     fi
