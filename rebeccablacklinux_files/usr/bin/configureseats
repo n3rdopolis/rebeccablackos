@@ -206,7 +206,7 @@ kill -9 $MainFormPID
 #tell the user that Weston is going to 'flicker' as the tty is switched in and out so that Weston is forced to see the new Udev config
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-The display will flicker for about 3 seconds, while the display server is forced to pick up the changes." --title="Multipointer Configuration"
+Press OK to apply the changes." --title="Multipointer Configuration"
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
@@ -217,9 +217,14 @@ do
   udevadm trigger --sysname-match=$(basename ${DevicePaths[$CurrentDeviceNumber]})
 done
 
+#If the Wayland server is hosted 
+if [[ ! -z $WAYLAND_HOST ]]
+then
+  WAYLAND_SERVER=$WAYLAND_HOST
+else
+  WAYLAND_SERVER=$WAYLAND_DISPLAY
+fi
 
-#Change in and out of the vts so that the display server gets the change
-chvt 63
-
-sleep 3
-chvt $CurrentTTY
+#Force the server to pickup the changes
+fuser -k -SIGUSR1 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+fuser -k -SIGUSR2 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
