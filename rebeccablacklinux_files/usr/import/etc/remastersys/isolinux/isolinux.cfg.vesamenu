@@ -145,8 +145,3 @@ On some systems with kernel mode setting, the framebuffer is virtual,
 and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
-
-label hd
-  menu label hd - boot the first hard disk
-  kernel chain.c32
-  append hd0
