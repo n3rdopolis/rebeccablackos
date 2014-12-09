@@ -86,8 +86,8 @@ function UserSessionWorker
 
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  echo "Started with the arguments: $ArgumentString" |& tee -a $HOME/waylandsession.log
-  eval set -- $ArgumentString |& tee -a $HOME/waylandsession.log
+  echo "Started with the arguments: $ArgumentString" > -a $HOME/waylandsession.log
+  eval set -- $ArgumentString > tee -a $HOME/waylandsession.log
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -112,7 +112,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &> tee -a $HOME/waylandsession.log &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &> $HOME/waylandsession.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -125,6 +125,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
+      echo "The host server failed to start. Will not start the guest server for this session. Please see ~/waylandsession.log" &> $HOME/waylandsession.log
       echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
       exit
     fi
@@ -135,7 +136,7 @@ function UserSessionWorker
   fi
   STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to ~/waylandsession.log
-  ${ArgArray[@]} &> tee -a $HOME/waylandsession.log &
+  ${ArgArray[@]} &> $HOME/waylandsession.log &
   GuestServerPID=$!
 
   
