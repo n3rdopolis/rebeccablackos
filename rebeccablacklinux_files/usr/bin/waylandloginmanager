@@ -329,8 +329,8 @@ function PrepareLoginManager
   then
     logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-    #setfacl -m "g:plugdev:rwx" /dev/fb*
-    #setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+    setfacl -m "g:plugdev:rwx" /dev/fb*
+    setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     SupportedBackends+=(FB)
     #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
@@ -375,7 +375,7 @@ Will now reboot." 20 50 --no-cancel
     if [[ $(ls /dev/fb* ) ]]
     then
       # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-      #setfacl -m "g:plugdev:rwx" /dev/fb*
+      setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
       # ENDTODO
       SupportedBackends=()
