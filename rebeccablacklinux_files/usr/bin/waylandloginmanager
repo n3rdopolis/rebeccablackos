@@ -1254,6 +1254,11 @@ ZENITYSTATUS=$?
   else
     sleep .1
   fi
+  #if zenity segfaults, then something is wrong. wait longer
+  if [[ $ZENITYSTATUS == 139 ]]
+  then
+    sleep 30
+  fi
 }
 
 
