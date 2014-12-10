@@ -86,8 +86,8 @@ function UserSessionWorker
 
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  echo "Started with the arguments: $ArgumentString" > $HOME/waylandsession.log
-  eval set -- $ArgumentString > $HOME/waylandsession.log
+  echo "Started with the arguments: $ArgumentString" >> -a $HOME/waylandsession.log
+  eval set -- $ArgumentString >> tee -a $HOME/waylandsession.log
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -112,7 +112,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &> $HOME/waylandsession.log &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &>> $HOME/waylandsession.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -125,7 +125,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      echo "The host server failed to start. Will not start the guest server for this session. Please see ~/waylandsession.log" &> $HOME/waylandsession.log
+      echo "The host server failed to start. Will not start the guest server for this session. Please see ~/waylandsession.log" &>> $HOME/waylandsession.log
       echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
       exit
     fi
@@ -136,7 +136,7 @@ function UserSessionWorker
   fi
   STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to ~/waylandsession.log
-  ${ArgArray[@]} &> $HOME/waylandsession.log &
+  ${ArgArray[@]} &>> $HOME/waylandsession.log &
   GuestServerPID=$!
 
   
@@ -144,7 +144,7 @@ function UserSessionWorker
   if [[ $BackendType == WL ]]
   then
     fg 2
-    echo "The guest session has ended. Terminating the host..." &> $HOME/waylandhost.log
+    echo "The guest session has ended. Terminating the host..." &>> tee -a $HOME/waylandhost.log
     kill -15 $HostServerPID
     sleep 3
     kill -9 $HostServerPID
@@ -329,8 +329,8 @@ function PrepareLoginManager
   then
     logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-    setfacl -m "g:plugdev:rwx" /dev/fb*
-    setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+    #setfacl -m "g:plugdev:rwx" /dev/fb*
+    #setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     # ENDTODO
     SupportedBackends+=(FB)
     #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
@@ -375,7 +375,7 @@ Will now reboot." 20 50 --no-cancel
     if [[ $(ls /dev/fb* ) ]]
     then
       # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-      setfacl -m "g:plugdev:rwx" /dev/fb*
+      #setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
       # ENDTODO
       SupportedBackends=()
