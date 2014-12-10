@@ -71,7 +71,7 @@ function UserSessionWorker
   #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
   USER=$(id -u)
   export $(exec dbus-launch)
-  . /usr/bin/wlruntime_vars
+  . /usr/bin/wlruntime_vars &> /dev/null
   BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
   EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
   if [[ -e /usr/share/wsessions.d/default.environment ]]
@@ -145,9 +145,9 @@ function UserSessionWorker
   then
     fg 2
     echo "The guest session has ended. Terminating the host..." &>> tee -a $HOME/waylandhost.log
-    kill -15 $HostServerPID
+    kill -15 $HostServerPID &> /dev/null
     sleep 3
-    kill -9 $HostServerPID
+    kill -9 $HostServerPID &> /dev/null
   else
     fg 1
   fi
