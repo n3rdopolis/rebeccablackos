@@ -130,7 +130,7 @@ function UserSessionWorker
       exit
     fi
   else
-    WAYLAND_DISPLAY=$WAYLAND_GUEST
+    export WAYLAND_DISPLAY=$WAYLAND_GUEST
     unset WAYLAND_HOST
     unset WAYLAND_GUEST
   fi
