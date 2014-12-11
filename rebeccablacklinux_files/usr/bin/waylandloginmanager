@@ -22,6 +22,11 @@
 
 #It depends on zenity and expect
 
+#It depends on a small patch in weston for a workaround for bug https://bugs.freedesktop.org/show_bug.cgi?id=73782 on framebuffer devices, and the line
+#SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
+#in a udev rules file.
+#or pass wlmglobalfbpermissions to the kernel
+
 #as well as:
 #At least systemd v216 as it has all the required bug fixes to support multiple display servers started using logind
 #/etc/pam.d/runuser
@@ -328,10 +333,11 @@ function PrepareLoginManager
   if [[ $(ls  /dev/fb* ) ]]
   then
     logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
-    # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-    setfacl -m "g:plugdev:rwx" /dev/fb*
-    setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
-    # ENDTODO
+    if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
+    then
+      setfacl -m "g:plugdev:rwx" /dev/fb*
+      setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+    fi
     SupportedBackends+=(FB)
     #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
     if [[ $HardwareSupported != 1 ]]
@@ -374,10 +380,11 @@ Will now reboot." 20 50 --no-cancel
     logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     if [[ $(ls /dev/fb* ) ]]
     then
-      # TODO: REMOVE WHEN https://bugs.freedesktop.org/show_bug.cgi?id=73782 IS RESOLVED
-      setfacl -m "g:plugdev:rwx" /dev/fb*
-      setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
-      # ENDTODO
+      if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
+      then
+	setfacl -m "g:plugdev:rwx" /dev/fb*
+	setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
+      fi
       SupportedBackends=()
       SupportedBackends+=(WL)
       SupportedBackends+=(FB)
