@@ -93,7 +93,7 @@ index 138aaab..20ea164 100644
 -		goto err;
 +		fb_fd = fbdev_frame_buffer_open(output, output->device,
 +	                                &new_screen_info);
-+		usleep(100);
++		usleep(100000);
  	}
  
  	/* Check whether the frame buffer details have changed since we were
