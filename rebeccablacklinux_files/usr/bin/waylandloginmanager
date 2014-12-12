@@ -293,6 +293,7 @@ function PrepareLoginManager
     export EGL_SOFTWARE=1
   fi
   #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
+  HostVT=0
   LastTTY=7
   #default the number of sessions registered to be 0 if unset
   if [[ -z $AllSessions ]]
@@ -449,6 +450,7 @@ function Create_XDG_RUNTIME_DIR
 function GetNextTTY
 {
   TTYNotInUse=0
+  LastTTY=$HostVT
   #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
   while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
   do
