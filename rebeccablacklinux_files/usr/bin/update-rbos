@@ -68,44 +68,6 @@ then
   install_menu_items 
 
 
-  #If the user opted to build, install all packages specified by INSTALLS.txt, and run compile_all
-  if [[ $1 == build ]]
-  then 
-    #LIST OF PACKAGES TO GET INSTALLED
-    INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')"
- 
-    #DOWNLOAD THE PACKAGES SPECIFIED
-    echo "$INSTALLS" | while read PACKAGEINSTRUCTION
-    do
-      PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
-      METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
-
-      if [[ $METHOD == "PART" ]]
-      then
-	apt-get --no-install-recommends install $PACKAGE -y --force-yes
-      elif [[ $METHOD == "FULL" ]]
-      then
-	apt-get install $PACKAGE -y --force-yes
-      elif [[ $METHOD == "BUILDDEP" ]]
-      then
-	apt-get build-dep $PACKAGE -y --force-yes
-      else
-	echo "Invalid Install Operation"
-      fi
-
-    done
-
-    #delete the downloaded file cache
-    apt-get clean
-
-    #set default cursor theme
-    update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-
-    compile_all build-only
-  else
-    echo "not building source because this script wasn't called with the option 'build'"
-  fi
-
   #Get the user that called the script, and update the users profile from /etc/skel
   su $SUDO_USER -c update-rbos-user
 fi
