@@ -975,14 +975,14 @@ function GetUserCredentials
     UserData=($USER)
     #The passwd gecos feild is formated with username,buildingnumber,phonenumber,otherdata. only get the username subfeild.
     UserDisplayName=$(echo ${UserData[0]} | awk -F , '{print $1}')
-    #The display in the zenity dialog should be "Firstname Lastname    (loginname)"
-    UserDisplayName="$UserDisplayName   (${UserData[1]})" 
-    UserName=${UserData[1]}
     #If the user has no display name, then set it to be the users login name
     if [[ -z $UserDisplayName ]]
     then
       UserDisplayName=$UserName
     fi
+    #The display in the zenity dialog should be "Firstname Lastname    (loginname)"
+    UserDisplayName="$UserDisplayName   (${UserData[1]})" 
+    UserName=${UserData[1]}
     unset IFS
     #add the data to the USERLISTSTRING that gets sent into zenity. Line 1 is the display name, line 2 is the user login name, and then line 3 is the display name of the next user...
     USERLISTSTRING+="$UserDisplayName"
