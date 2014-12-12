@@ -928,21 +928,10 @@ function AuthenticateUser
 	catch wait result
 	exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect
   PasswordResult=$?
-  #If the password is correct try to mount the users possible ecryptfs encrpted home folder with an emedded expect script.
+  unset TryPassword
   if [[ 0 == $PasswordResult ]]
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
-    if [[ -e $USERHOME/.ecryptfs ]]
-    then
-      echo "spawn login $LOGINUSER
-	    expect Password 
-	    send $TryPassword\r
-	    sleep 30
-	    exit" |expect &
-      sleep 3
-    fi
-    #Remove the password from the environment
-    unset TryPassword
     #if the password and username is correct, start the session
     logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
     DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
@@ -950,8 +939,6 @@ function AuthenticateUser
     #report success
     return 0
   else
-      #Remove the password from the environment
-      unset TryPassword
       #report failure
       return 1
   fi
