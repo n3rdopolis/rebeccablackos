@@ -292,9 +292,8 @@ function PrepareLoginManager
   then
     export EGL_SOFTWARE=1
   fi
-  #set LastTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
-  HostVT=0
-  LastTTY=7
+  #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
+  MinimumTTY=7
   #default the number of sessions registered to be 0 if unset
   if [[ -z $AllSessions ]]
   then
@@ -409,7 +408,7 @@ Will now reboot" 20 50 --no-cancel
   else
     HostVT=$(GetNextTTY)
   fi
-  LastTTY=$HostVT
+  MinimumTTY=$HostVT
   if [[ $HostVT -eq -1 ]]
   then
     logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
@@ -445,17 +444,17 @@ function Create_XDG_RUNTIME_DIR
   chmod 700 /run/user/$USERUID
 }
 
-#This function is used by the WaylandLoginManager to find the next availible tty, starting from LastTTY+1
+#This function is used by the WaylandLoginManager to find the next availible tty, starting from CalcTTY+1
 #it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
 {
   TTYNotInUse=0
-  LastTTY=$HostVT
+  CalcTTY=$MinimumTTY
   #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
-  while [[ $TTYNotInUse -ne 1 && $LastTTY -lt 62 ]]
+  while [[ $TTYNotInUse -ne 1 && $CalcTTY -lt 62 ]]
   do
-    ((LastTTY++))
-    fuser -s /dev/tty$LastTTY
+    ((CalcTTY++))
+    fuser -s /dev/tty$CalcTTY
     TTYNotInUse=$?
   done
 
@@ -463,7 +462,7 @@ function GetNextTTY
   then
     AvailibleTTY=-1
   else
-    AvailibleTTY=$LastTTY
+    AvailibleTTY=$CalcTTY
   fi
 
   echo $AvailibleTTY
