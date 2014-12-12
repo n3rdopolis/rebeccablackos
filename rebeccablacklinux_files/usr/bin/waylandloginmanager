@@ -335,6 +335,7 @@ function PrepareLoginManager
     logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
     then
+      logger -t waylandloginmanager "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" -s  >>/var/log/waylandloginmanager 2>&1
       setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     fi
@@ -382,6 +383,7 @@ Will now reboot." 20 50 --no-cancel
     then
       if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
       then
+	logger -t waylandloginmanager "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" -s  >>/var/log/waylandloginmanager 2>&1
 	setfacl -m "g:plugdev:rwx" /dev/fb*
 	setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
       fi
