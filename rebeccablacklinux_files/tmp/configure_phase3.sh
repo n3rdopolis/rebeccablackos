@@ -76,7 +76,6 @@ systemctl enable make-machine-id.service
 systemctl enable mount-run-shm.service
 systemctl enable configure-resolvconf.service
 systemctl enable unset-grub-fail.service
-systemctl enable waylandloginmanager.service
 systemctl disable friendly-recovery.service
 systemctl disable lightdm.service
 systemctl disable gdm.service
