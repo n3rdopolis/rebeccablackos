@@ -53,7 +53,7 @@ rm control.tar.gz
 rm data.tar.gz
 chmod +x config
 chmod +x postinst
-fakeroot tar czf control.tar.gz control config templates postinst
+tar czf control.tar.gz control config templates postinst
 tar czf data.tar.gz -T /dev/null
 ar q waylandloginmanager.deb debian-binary
 ar q waylandloginmanager.deb control.tar.gz
