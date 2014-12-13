@@ -45,6 +45,22 @@ checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
+#Create a virtual configuration package for the waylandloginmanager
+export DEBIAN_FRONTEND=noninteractive
+cd /tmp/wlm-virtualpackage
+rm waylandloginmanager.deb
+rm control.tar.gz
+rm data.tar.gz
+chmod +x config
+chmod +x postinst
+fakeroot tar czf control.tar.gz control config templates postinst
+tar czf data.tar.gz -T /dev/null
+ar q waylandloginmanager.deb debian-binary
+ar q waylandloginmanager.deb control.tar.gz
+ar q waylandloginmanager.deb data.tar.gz
+dpkg -i waylandloginmanager.deb
+cd $OLDPWD
+
 #copy all files
 rsync /usr/import/* -a /
 
