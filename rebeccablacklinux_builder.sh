@@ -197,10 +197,10 @@ then
     REBUILT="to rebuild from scratch"
   fi
   "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase0.sh
+  UnmountAll
 fi
 
 #run the build scripts
-UnmountAll
 "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase1.sh 
 UnmountAll
 "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase2.sh  
