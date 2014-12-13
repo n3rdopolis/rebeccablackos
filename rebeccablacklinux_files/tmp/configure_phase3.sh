@@ -48,9 +48,6 @@ cd $OLDPWD
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
 cd /tmp/wlm-virtualpackage
-rm waylandloginmanager.deb
-rm control.tar.gz
-rm data.tar.gz
 chmod +x config
 chmod +x postinst
 tar czf control.tar.gz control config templates postinst
