@@ -64,6 +64,9 @@ rsync /usr/import/* -a /
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Set the cursor theme
+update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+
 #disable systemd networkd, and enable NetworkManager
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
