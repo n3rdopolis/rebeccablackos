@@ -35,6 +35,9 @@ function RedirectFile {
 }
 
 
+#Redirect some files that get changed
+dpkg-divert --local --rename --add /lib/plymouth/ubuntu_logo.png
+
 #Copy the import files into the system, and create menu items while creating a deb with checkinstall.
 cd /tmp
 mkdir debian
