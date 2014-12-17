@@ -70,6 +70,9 @@ compile_all build-only
 #Set the cursor theme
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
+#Set the plymouth themes
+update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
+
 #disable systemd networkd, and enable NetworkManager
 systemctl disable systemd-networkd.service
 systemctl enable NetworkManager.service
