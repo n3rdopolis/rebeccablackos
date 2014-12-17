@@ -25,35 +25,17 @@ cp -a /usr/import/usr/bin/* /usr/bin
 mkdir -p /usr/libexec
 cp -a /usr/import/usr/libexec/* /usr/libexec
 
-mkdir -p /usr/share/RBOS_MENU
-cp -a /usr/import/usr/share/RBOS_MENU/* /usr/share/RBOS_MENU
-
-mkdir -p /usr/share/RBOS_PATCHES
-cp -a /usr/import/usr/share/RBOS_PATCHES/* /usr/share/RBOS_PATCHES
-
-mkdir -p /usr/share/icons
-cp -a /usr/import/usr/share/icons/* /usr/share/icons
-
-mkdir -p /usr/share/xsessions
-cp -a /usr/import/usr/share/xsessions/* /usr/share/xsessions
-
-mkdir -p /usr/share/wallpapers/RebeccaBlackOS/
-cp -a /usr/import/usr/share/wallpapers/RebeccaBlackOS/* /usr/share/wallpapers/RebeccaBlackOS
+mkdir -p /usr/share/
+cp -a /usr/import/usr/share/* /usr/share
 
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/* /etc/skel
-
-mkdir -p /root
-cp -a /usr/import/root/* /etc/skel/root
 
 mkdir -p /lib
 cp -a /usr/import/lib/* /lib
 
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
-
-mkdir -p /etc/dbus-1
-cp -a /usr/import/etc/dbus-1/* /etc/dbus-1
 
 #install the menu items for the wayland applications
 install_menu_items
