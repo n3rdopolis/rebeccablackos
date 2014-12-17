@@ -263,8 +263,8 @@ function PrepareLoginManager
 
   #Enable job control in this script
   set -m
-  #The LOGINMANAGERDISPLAYHOME variable controls where the home directory for the user that calls the loginmanagerdisplay the weston.ini that has the fifo command helpers needs to be in $LOGINMANAGERDISPLAYHOME/.config/
-  export LOGINMANAGERDISPLAYHOME=/etc/loginmanagerdisplay/
+
+  export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
   #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
   export LOGINMANAGERDISPLAYUSER=waylandloginmanager
   #User that the su test in AuthenticateUser user runs as
@@ -1211,7 +1211,6 @@ function StartAutoLogin
 }
 
 #This function is part of the startup for the waylandloginmanager. it creates the FIFO files, giving ONLY write access to loginmanager_control for ALL users, and only write access to loginmanager_register is given to root. Any other permissions, including read is denied.
-#This also creates a symlink in $LOGINMANAGERDISPLAYHOME, that points to a log file in /run/waylandloginmanager, which gives permissions to the $LOGINMANAGERDISPLAYUSER, so that the log isn't placed in /etc
 function SetupLoggingAndFIFO
 {
   #Create communication fifo.
@@ -1422,7 +1421,6 @@ then
   shift 
   export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
   export PATH=$WLM_PATH
-  export HOME=$LOGINMANAGERDISPLAYHOME
   "$@"
 elif [[ $1 == "--usersession" ]]
 then
