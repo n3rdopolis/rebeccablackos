@@ -18,5 +18,5 @@
 
 #secondary scriot that calls westoncaller with arguments to run it as a xwaylandapp instead of running it as a wayland program
 export $(exec ck-launch-session dbus-launch)
-westoncaller --backend=x11-backend.so --modules=xwayland.so,desktop-shell.so
+westoncaller --backend=x11-backend.so --modules=xwayland.so
 

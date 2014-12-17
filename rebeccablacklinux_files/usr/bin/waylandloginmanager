@@ -677,7 +677,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--backend=drm-backend.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--modules=desktop-shell.so,xwayland.so,cms-colord.so"
+      WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
@@ -695,7 +695,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--backend=fbdev-backend.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--modules=desktop-shell.so,xwayland.so,cms-colord.so"
+      WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
@@ -1155,7 +1155,7 @@ function StartLoginManagerDisplay
     then 
       (( StartTimes++ ))
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-      openvt -w -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --modules=desktop-shell.so --log=/var/log/loginmanagerdisplay.log"
+      openvt -w -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log"
     fi
     sleep 1
   done

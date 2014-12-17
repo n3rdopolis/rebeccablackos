@@ -65,7 +65,7 @@ An example:
 08.|    CompositorKMSArguments=--backend=drm-backend.so
 09.|    CompositorFBArguments=--backend=fbdev-backend.so
 10.|    CompositorDisplayArgument=--socket=
-11.|    SessionArgument=--modules=desktop-shell.so,xwayland.so,cms-colord.so
+11.|    SessionArgument=--modules=xwayland.so,cms-colord.so
 12.|    AdditionalArguments=--log=$HOME/weston.log
 13.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
 14.|    NeedsFile=/opt/bin/weston
