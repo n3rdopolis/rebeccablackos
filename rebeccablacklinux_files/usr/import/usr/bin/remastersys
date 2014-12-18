@@ -26,66 +26,6 @@ if [ "$(whoami)" != "root" ]; then
     exit 1
 fi
 
-#create remastersys-firstboot script if it doesn't exist and populate with at least removal of the ubiquity*.desktop file from users Desktop and fix for recovery mode
-fbtest=`grep "REM302" /etc/init.d/remastersys-firstboot`
-
-if [ "$fbtest" = "" ]; then
-    cat > /etc/init.d/remastersys-firstboot <<FOO
-#! /bin/sh
-### BEGIN INIT INFO
-# Provides:          remastersys-firstboot
-# Required-Start:    \$remote_fs \$syslog \$all
-# Required-Stop:
-# Default-Start:     2 3 4 5
-# Default-Stop:      0 1 6
-# Short-Description: Run firstboot items for remastersys after a remastered system has been installed
-### END INIT INFO
-
-PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin:/usr/local/sbin
-
-. /lib/init/vars.sh
-. /lib/lsb/init-functions
-
-do_start() {
-        #REM302
-        if [ "\`cat /proc/cmdline | grep casper\`" = "" ]; then
-            [ "\$VERBOSE" != no ] && log_begin_msg "Running remastersys-firstboot"
-            (sleep 60 && update-rc.d -f remastersys-firstboot remove) &
-            sed -i -e 's/root:x:/root:!:/g' /etc/shadow
-            rm -rf /home/*/Desktop/ubiquity*.desktop
-            #Place your custom commands below this line
-
-            #Place your custom commands above this line
-            ES=\$?
-            [ "\$VERBOSE" != no ] && log_end_msg \$ES
-            return \$ES
-        fi
-
-        
-
-
-} 
-
-case "\$1" in
-    start)
-        do_start
-        ;;
-    restart|reload|force-reload)
-        echo "Error: argument '\$1' not supported" >&2
-        exit 3
-        ;;
-    stop)
-        ;;
-    *)
-        echo "Usage: \$0 start|stop" >&2
-        exit 3
-        ;;
-esac
-
-FOO
-
-fi
-
 
 # load the remastersys.conf file 
 . /etc/remastersys.conf
