@@ -74,6 +74,7 @@ compile_all build-only
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
 #Set the plymouth themes
+update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
 update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
 update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
 
