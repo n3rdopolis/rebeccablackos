@@ -1,0 +1,46 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script calls a Weston server with the RDP backend
+
+cd ~
+
+zenity --forms --text="A new Weston server supporting RDP connections will start the background. 
+
+*Please note that the RDP session will NOT be password protected." 
+
+
+rdpdialog &
+DIALOGPID=$!
+
+ServerID=wayland-$RANDOM
+weston --socket=$ServerID --modules=xwayland.so --backend=rdp-backend.so --rdp-tls-cert=weston-rdp/rdpcrt.crt --rdp-tls-key=weston-rdp/rdpcrtkey.key &
+WESTONPID=$!
+
+#Wait until the zenity form dies, or until the remote enabled weston dies
+while [ 1 ]
+do
+  #If either the weston server dies, or the dialog dies, terminate both, and exit
+  if [[ ! -e /proc/$DIALOGPID || ! -e /proc/$WESTONPID ]]
+  then
+    kill -9 $WESTONPID
+    kill -9 $DIALOGPID
+    exit
+  fi
+sleep 1
+done

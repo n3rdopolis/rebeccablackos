@@ -1,0 +1,101 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script assists programs running as other users to use a WAYLAND_DISPLAY. This is a workaround for https://bugs.freedesktop.org/show_bug.cgi?id=84817
+
+FIRSTARGUMENT=$1
+
+
+
+
+if [[ -z "$FIRSTARGUMENT" ]]
+then
+  echo "wlsuhelper:
+If programs are having problems running under a shared WAYLAND_DISPLAY as the user it was shared to, wlsuhelper will apply some workarounds
+
+wlsuhelper usage:
+XDG_RUNTIME_DIR must be set to the user's XDG_RUNTIME_DIR path that is sharing the server
+WAYLAND_DISPLAY must be set to the name of the users shared Wayland server
+
+wlsuhelper is to be called running as the guest user the server was shared to.
+Under the main session it can be run as
+su username -c wlsuhelper programname --args --args 2
+or
+sudo -E -u username wlsuhelper programname --args --args2
+
+If you are already running a shell as the guest user the server was shared to you can run
+wlsuhelper programname --args --args2"
+
+else
+
+  if [[ -z "$WAYLAND_DISPLAY" ]]
+  then
+    echo "WAYLAND_DISPLAY not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ -z "$XDG_RUNTIME_DIR" ]]
+  then
+    echo "XDG_RUNTIME_DIR not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+  then
+    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running, or permissions error. Please ensure the server is running, and this user has permissions to it with wlhost."
+    ((ErrorCount++))
+  fi
+
+  if [[ ! -z $ErrorCount ]]
+  then
+    exit 1
+  fi
+
+  #Determine an XDG_RUNTIME_DIR . If the standard one fails, the user won't have permissions, and needs to fallback to /run/shm/UID
+  NewRuntimeDir=/run/user/$UID
+  if [[ ! -d $NewRuntimeDir ]]
+  then
+    mkdir /run/shm/$UID
+    chmod 700 /run/shm/$UID
+    NewRuntimeDir=/run/shm/$UID
+  fi
+  OLD_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+  export XDG_RUNTIME_DIR=$NewRuntimeDir
+
+
+  #Try to determine a name to create the wayland symlink without conflict of file name
+  HostUserUID=$(stat -c '%u' .)
+  NewServerName=$HostUserUID-$WAYLAND_DISPLAY
+  if [[ -e $NewServerName ]]
+  then
+    while [[ -e $XDG_RUNTIME_DIR/$NewServerName-$ServerID ]]
+    do
+      ((ServerID++))
+    done
+    NewServerName=$NewServerName-$ServerID
+  fi
+  OLD_WAYLAND_DISPLAY=$WAYLAND_DISPLAY
+  export WAYLAND_DISPLAY=$NewServerName
+
+  #Link the Wayland socket file
+  ln -s $OLD_XDG_RUNTIME_DIR/$OLD_WAYLAND_DISPLAY $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+
+  #Execute the program
+  "$@"
+  exit $?
+fi

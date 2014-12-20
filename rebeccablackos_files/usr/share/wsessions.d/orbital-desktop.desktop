@@ -1,0 +1,16 @@
+[Desktop Entry]
+Enabled=0
+Type=WSession
+Name=Orbital Shell
+CompositorExec=/opt/bin/weston
+CompositorSupportsKMS=1
+CompositorSupportsFB=1
+CompositorKMSArguments=--backend=drm-backend.so
+CompositorFBArguments=--backend=fbdev-backend.so
+CompositorDisplayArgument=--socket=
+SessionArgument=--modules=xwayland.so,cms-colord.so --shell=/opt/lib/nuclear-shell/nuclear-desktop-shell.so --nuclear-client=/opt/libexec/startorbital
+AdditionalArguments=--log=$HOME/weston.log
+NeedsFile=/opt/lib/nuclear-shell/nuclear-desktop-shell.so
+NeedsFile=/opt/bin/weston
+NeedsFile=/opt/libexec/startorbital
+

@@ -1,0 +1,20 @@
+diff --git a/src/wayland/meta-wayland.c b/src/wayland/meta-wayland.c
+index 5d2c526..e5d58bb 100644
+--- a/src/wayland/meta-wayland.c
++++ b/src/wayland/meta-wayland.c
+@@ -307,10 +307,14 @@ meta_wayland_init (void)
+   meta_wayland_shell_init (compositor);
+   meta_wayland_seat_init (compositor);
+ 
+-  compositor->display_name = wl_display_add_socket_auto (compositor->wayland_display);
++  compositor->display_name = g_strdup (getenv("WAYLAND_DISPLAY"));
++  if (compositor->display_name != NULL)
++    wl_display_add_socket (compositor->wayland_display, compositor->display_name);
++
+   if (compositor->display_name == NULL)
+     g_error ("Failed to create socket");
+ 
++
+   if (!meta_xwayland_start (&compositor->xwayland_manager, compositor->wayland_display))
+     g_error ("Failed to start X Wayland");
+ 

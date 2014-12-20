@@ -1,0 +1,218 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script is for allowing programs running as other users to run on a Wayland display
+
+FIRSTARGUMENT=$1
+SECONDARGUMENT=$2
+
+
+if [[ ! -z "$FIRSTARGUMENT" ]]
+then
+  if [[ -z "$WAYLAND_DISPLAY" ]]
+  then
+    echo "WAYLAND_DISPLAY not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ -z "$XDG_RUNTIME_DIR" ]]
+  then
+    echo "XDG_RUNTIME_DIR not set"
+    ((ErrorCount++))
+  fi
+
+  if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+  then
+    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running"
+    ((ErrorCount++))
+  fi
+
+  if [[ ! -z $ErrorCount ]]
+  then
+    exit 1
+  fi
+fi
+
+if [[ -z "$FIRSTARGUMENT" ]]
+then
+echo "wlhost:
+Grant and remove permissions from users to the current Wayland server
+
+wlhost usage:
+wlhost + username 
+    Give the user username permission to the current WAYLAND_DISPLAY
+wlhost - username
+    Remove permissions from the user to the current WAYLAND_DISPLAY
+wlhost @
+    Give all users permissions to the Wayland server
+wlhost 0
+    Reset permissions to the Wayland server
+wlhost ++
+    Share the WAYLAND_DISPLAY publicly in /run/shm/waylandservers prefixed with the current users's UID
+    for example if the user with the UID 1000 was running a WAYLAND_DISPLAY of wayland-0,
+    it will be created as 1000-wayland-0 . In order to use it, you will need to export XDG_RUNTIME_DIR
+    to /run/shm/waylandservers , and WAYLAND_DISPLAY as 1000-wayland-0
+    NOTE: This does not set additional permissions.
+wlhost --
+    Unshare the WAYLAND_DISPLAY.
+wlhost ?
+    List all users that are have access to the WAYLAND_DISPLAY
+wlhost ? username
+    States if the user username has access to the WAYLAND_DISPLAY , and returns 0 if they do, and 1 if they don't.
+
+Sharing a WAYLAND_DISPLAY also gives the user execute permissions to the XDG_RUNTIME_DIR to the specified user
+which allows the user to access files in the XDG_RUNTIME_DIR only if they know the file name."
+
+#Add the selected users permissions to the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "+" ]]
+then
+  if [[ -z "$SECONDARGUMENT" ]]
+  then
+    "Must specify a user to give permissions to."
+    exit 1
+  fi
+  setfacl -m u:$SECONDARGUMENT:x $XDG_RUNTIME_DIR 2>/dev/null
+  ((ErrorCount+=$?))
+  setfacl -m u:$SECONDARGUMENT:rwx $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  if [[ $ErrorCount == 0 ]]
+  then
+    echo "Gave user $SECONDARGUMENT access to $WAYLAND_DISPLAY"
+    exit 0
+  else
+    echo "Failed to give user $SECONDARGUMENT access to $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
+#Remove the selected users permissions to the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "-" ]]
+then
+  if [[ -z "$SECONDARGUMENT" ]]
+  then
+    echo "Must specify a user to remove permissions from."
+    exit 1
+  fi
+  setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+  #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+  if [[ $ACCESS_COUNT == 0 ]]
+  then
+    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
+    ((ErrorCount+=$?))
+  fi
+  if [[ $ErrorCount == 0 ]]
+  then
+    echo "Removed user $SECONDARGUMENT access from $WAYLAND_DISPLAY"
+    exit 0
+  else
+    echo "Failed to remove user $SECONDARGUMENT access from $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
+#Give all users permissions to the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "@" ]]
+then
+  chmod 777 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  chmod 711 $XDG_RUNTIME_DIR
+  ((ErrorCount+=$?))
+  if [[ $ErrorCount == 0 ]]
+  then
+    echo "Gave all users permissions to Wayland display: $WAYLAND_DISPLAY "
+    exit 0
+  else
+    echo "Failed to give all users permissions to Wayland display: $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
+#Reset the permissions to the WAYLAND_DISPLAY to the default
+elif [[ "$FIRSTARGUMENT" == "0" ]]
+then
+  setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  chmod 700 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  ((ErrorCount+=$?))
+  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
+  ACCESS_COUNT+=$(($(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "#|^$" | grep "mask::"|grep -c "x$")))
+  #If no users have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+  if [[ $ACCESS_COUNT == 0 ]]
+  then
+    chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
+    ((ErrorCount+=$?))
+  fi
+
+  if [[ $ErrorCount == 0 ]]
+  then
+    echo "Reset $WAYLAND_DISPLAY permissions"
+    exit 0
+  else
+    echo "Failed reset $WAYLAND_DISPLAY permissions"
+    exit 1
+  fi
+
+#Share the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "++" ]]
+then
+  mkdir /run/shm/waylandservers
+  ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
+  if [[ $? == 0 ]]
+  then
+    echo "Wayland display: $WAYLAND_DISPLAY shared. Insure permissions are set, and from the target user export XDG_RUNTIME_DIR=/run/shm/waylandservers, and export WAYLAND_DISPLAY=$UID-$WAYLAND_DISPLAY"
+    exit 0
+  else
+    echo "Failed to share Wayland display: $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
+#Unshare the WAYLAND_DISPLAY
+elif [[ "$FIRSTARGUMENT" == "--" ]]
+then
+  unlink /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
+  if [[ $? == 0 ]]
+  then
+    echo "Wayland display: $WAYLAND_DISPLAY unshared"
+    exit 0
+  else
+    echo "Failed to unshare Wayland display: $WAYLAND_DISPLAY"
+    exit 1
+  fi
+
+#Query the WAYLAND_DISPLAY permissions
+elif [[ "$FIRSTARGUMENT" == "?" ]]
+then
+  if [[ -z "$SECONDARGUMENT" ]]
+  then
+    ACCESSUSERS=$(getfacl $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}')
+    echo "These users have access to $WAYLAND_DISPLAY"
+    echo "$ACCESSUSERS"
+    exit
+  else
+    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT$ )
+    if [[ $ACCESS_COUNT == 0 ]]
+    then
+      echo "$SECONDARGUMENT does not have additional access to $WAYLAND_DISPLAY"
+      exit 1
+    else 
+      echo "$SECONDARGUMENT does have additional access to $WAYLAND_DISPLAY"
+      exit 0
+    fi
+  fi
+else 
+  echo "wlhost: please run with no arguments for help output"
+fi

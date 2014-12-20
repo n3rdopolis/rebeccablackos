@@ -1,0 +1,16 @@
+[Desktop Entry]
+Enabled=0
+Type=WSession
+Name=KDE Plasma Fallback
+CompositorExec=/opt/bin/kwin_wayland
+CompositorSupportsWL=1
+CompositorSupportsKMS=0
+CompositorSupportsFB=0
+CompositorKMSArguments=
+CompositorFBArguments=
+CompositorDisplayArgument=
+SessionArgument=
+AdditionalArguments=-x xvfb --display=:99
+EnvironmentFile=/usr/share/wsessions.d/kdeplasma-fallback.environment
+
+

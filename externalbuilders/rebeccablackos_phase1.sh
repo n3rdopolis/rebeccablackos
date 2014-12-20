@@ -40,7 +40,7 @@ mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
 
 #copy in the files needed
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata/
-rsync "$SCRIPTFOLDERPATH"/../rebeccablacklinux_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
+rsync "$SCRIPTFOLDERPATH"/../rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/$BUILDARCH/importdata/
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/exportsource/
 rsync "$SCRIPTFOLDERPATH"/../* -Cr "$BUILDLOCATION"/build/$BUILDARCH/exportsource
 

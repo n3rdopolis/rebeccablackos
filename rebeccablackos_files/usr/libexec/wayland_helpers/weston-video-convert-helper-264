@@ -1,0 +1,40 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Decode weston h264 captures
+
+
+NewFileName=weston-264
+FileNumber=1
+if [[ -e ~/weston-screenshots/"$NewFileName".mp4 ]]
+then
+  while [[ -e ~/weston-screenshots/$NewFileName-$FileNumber.mp4 ]]
+  do
+    ((FileNumber++))
+  done
+  NewFileName=$NewFileName-$FileNumber.mp4
+else 
+  NewFileName=weston-264.mp4
+fi
+
+
+cp ~/wayland-screenshot.png ~/weston-screenshots/$NewFileName
+if [[ -e ~/capture.h264 ]]
+then
+  gst-launch filesrc location=~/capture.h264 ! h264parse ! mp4mux ! filesink location=~/weston-screenshots/$NewFileName
+fi

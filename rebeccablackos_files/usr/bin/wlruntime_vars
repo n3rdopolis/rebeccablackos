@@ -1,0 +1,86 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script sets variables for running programs as Wayland programs
+
+#Set XDG_RUNTIME_DIR if it doesn't exist
+if [[ -z $XDG_RUNTIME_DIR ]]
+then
+    export XDG_RUNTIME_DIR=/run/user/$UID
+fi
+
+unset HOME
+export HOME=$(echo ~)
+export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+export XDG_DATA_DIRS=/opt/share:/usr/share:$XDG_DATA_DIRS
+export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS:/etc/xdg
+export PATH=/opt/bin:/opt/games:$PATH
+export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib:/usr/lib
+export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
+export GDK_BACKEND=wayland
+export CLUTTER_BACKEND=wayland
+export COGL_RENDERER=egl_wayland 
+export QTVER=qt5
+export QTDIR=/opt
+export PKG_CONFIG_PATH=/opt/lib/pkgconfig/:$PKG_CONFIG_PATH
+export QT_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/plugins:/opt/lib/plugins/:/opt/lib/hawaii/plugins
+export QT_QPA_PLATFORM=wayland-egl
+export ELM_DISPLAY=wl
+export ELM_ACCEL=none
+export ECORE_EVAS_ENGINE=wayland_shm
+export SDL_VIDEODRIVER=wayland
+export GST_GL_WINDOW=wayland
+export QML2_IMPORT_PATH=/opt/lib/$DEB_HOST_MULTIARCH/qml:/opt/lib/hawaii/qml
+export QML_IMPORT_PATH=$QML2_IMPORT_PATH
+#export QT_WAYLAND_RESIZE_AFTER_SWAP=1
+export KDE_DEBUG=1
+export KSCREEN_BACKEND=QScreen
+export KDE_FULL_SESSION=true
+export KDE_SESSION_VERSION=5
+
+#Change dconf settings only if user is first time run to allow more buttons in gtk titlebars 
+if [[ ! -e ~/.config/dconf/user ]]
+then
+  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close &>/dev/null
+fi
+
+#Build the KDE configuration database
+if [[ ! -e $HOME/.cache/ksycoca5 ]]
+then
+  kbuildsycoca5 &>/dev/null
+fi
+
+#Build RDP keys for weston-share
+#Only generate the key if it doesn't exist
+if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
+then
+  mkdir ~/weston-rdp
+  cd ~/weston-rdp
+  winpr-makecert -rdp > rdpkey.rdp 2>/dev/null 
+  cp $HOSTNAME.crt rdpcrt.crt
+  cp $HOSTNAME.key rdpcrtkey.key
+  cd $OLDPWD
+fi
+
+dbus-send --session --dest=org.freedesktop.DBus --type=method_call --print-reply /org/freedesktop/DBus org.freedesktop.DBus.ListNames > /dev/null
+DBusErrorState=$?
+
+if [[ $DBusErrorState == 1 ]]
+then
+  export $(exec dbus-launch)
+fi
