@@ -1,7 +1,7 @@
 #! /usr/bin/sudo /bin/bash
 #    Copyright (c) 2012, 2013, 2014 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
 #
-#    This file is part of RebeccaBlackLinux.
+#    This file is part of RebeccaBlackOS.
 #
 #    This program is free software: you can redistribute it and/or modify
 #    it under the terms of the GNU General Public License as published by
