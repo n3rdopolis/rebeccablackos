@@ -196,16 +196,16 @@ then
     touch "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
     REBUILT="to rebuild from scratch"
   fi
-  "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase0.sh
+  "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
   UnmountAll
 fi
 
 #run the build scripts
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase1.sh 
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
 UnmountAll
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase2.sh  
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh  
 UnmountAll
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablacklinux_phase3.sh 
+"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 
 UnmountAll
 
 
