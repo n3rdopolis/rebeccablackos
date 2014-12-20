@@ -159,11 +159,11 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
+  zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackOS you can call test Wayland by running westoncaller from the shell.
 
   The password for the test user is no password. Just hit enter if you actually need it."
 else
-  echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackLinux you can call test Wayland by running westoncaller from the shell.
+  echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackOS you can call test Wayland by running westoncaller from the shell.
 
 The password for the test user is no password. Just hit enter if you actually need it.
 

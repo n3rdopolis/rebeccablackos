@@ -28,10 +28,10 @@ echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
-   File:              ${HOME}/RebeccaBlackLinux_i386.iso or ${HOME}/RebeccaBlackLinux_amd64.iso
-   File:              ${HOME}/RebeccaBlackLinux_DevDbg_i386.iso or ${HOME}/RebeccaBlackLinux_DevDbg_amd64.iso
-   File:              ${HOME}/RebeccaBlackLinux_Revisions_i386.txt or ${HOME}/RebeccaBlackLinux_Revisions_amd64.txt
-   File:              ${HOME}/RebeccaBlackLinux_Source_i386.tar.gz or ${HOME}/RebeccaBlackLinux_Source_amd64.tar.gz
+   File:              ${HOME}/RebeccaBlackOS_i386.iso or ${HOME}/RebeccaBlackOS_amd64.iso
+   File:              ${HOME}/RebeccaBlackOS_DevDbg_i386.iso or ${HOME}/RebeccaBlackOS_DevDbg_amd64.iso
+   File:              ${HOME}/RebeccaBlackOS_Revisions_i386.txt or ${HOME}/RebeccaBlackOS_Revisions_amd64.txt
+   File:              ${HOME}/RebeccaBlackOS_Source_i386.tar.gz or ${HOME}/RebeccaBlackOS_Source_amd64.tar.gz
 "
 
 
@@ -49,7 +49,7 @@ else
   export BUILDARCH=i386
 fi
 
-echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
+echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
 echo "Most users can ignore this message. Press Enter to continue..."
 read a
 

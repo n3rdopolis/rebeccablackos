@@ -95,11 +95,11 @@ cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/logs/"* ""$BUILDLOCAT
 rm ""$BUILDLOCATION"/logs/latest"
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE $BUILDARCH" ""$BUILDLOCATION"/logs/latest"
 cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE $BUILDARCH" 
-cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackLinux_Revisions_$BUILDARCH.txt"
+cp -a ""$BUILDLOCATION"/build/$BUILDARCH/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt"
 
 #Take a snapshot of the source
-rm "$HOMELOCATION"/RebeccaBlackLinux_Source_$BUILDARCH.tar.gz
-tar -czvf "$HOMELOCATION"/RebeccaBlackLinux_Source_$BUILDARCH.tar.gz -C "$BUILDLOCATION"/build/$BUILDARCH/exportsource/ . &>/dev/null
+rm "$HOMELOCATION"/RebeccaBlackOS_Source_$BUILDARCH.tar.gz
+tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_$BUILDARCH.tar.gz -C "$BUILDLOCATION"/build/$BUILDARCH/exportsource/ . &>/dev/null
 
 
 #If the live cd did not build then tell user  
@@ -107,20 +107,20 @@ if [[ ! -f "$BUILDLOCATION"/build/$BUILDARCH/workdir/home/remastersys/remastersy
 then  
   ISOFAILED=1
 else
-    mv "$BUILDLOCATION"/build/$BUILDARCH/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackLinux_DevDbg_$BUILDARCH.iso
+    mv "$BUILDLOCATION"/build/$BUILDARCH/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_$BUILDARCH.iso
 fi 
 if [[ ! -f "$BUILDLOCATION"/build/$BUILDARCH/workdir/home/remastersys/remastersys/custom.iso ]]
 then  
   ISOFAILED=1
 else
-    mv "$BUILDLOCATION"/build/$BUILDARCH/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackLinux_$BUILDARCH.iso
+    mv "$BUILDLOCATION"/build/$BUILDARCH/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_$BUILDARCH.iso
 fi 
 
 
 #allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt "$HOMELOCATION"/RebeccaBlackLinux_*.tar.gz
-chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt "$HOMELOCATION"/RebeccaBlackLinux_*.tar.gz
-chmod 777 "$HOMELOCATION"/RebeccaBlackLinux*.iso "$HOMELOCATION"/RebeccaBlackLinux_*.txt "$HOMELOCATION"/RebeccaBlackLinux_*.tar.gz
+chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
+chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
+chmod 777 "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
 
 #If the live cd did  build then tell user   
 if [[ $ISOFAILED != 1  ]];
