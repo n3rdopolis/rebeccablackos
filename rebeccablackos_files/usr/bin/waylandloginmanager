@@ -105,7 +105,8 @@ function UserSessionWorker
   #if the user booted with wlmforceswrender, force software rendering to be enabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
-    export EGL_SOFTWARE=1
+    export EGL_SOFTWARE=true
+    export EGL_DRIVER=egl_gallium
   fi
 
 
