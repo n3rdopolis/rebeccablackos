@@ -16,6 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
@@ -100,16 +107,11 @@ do
   chmod 644 "$FILE"
 done
 
-#Add groups for systemd
-addgroup --system systemd-journal 
-addgroup --system lock 
-
 #Change the default init system to systemd if it exists
 if [[ -e /lib/systemd/systemd ]]
 then
-  mv /sbin/init /sbin/init.upstart
-  mv /lib/systemd/systemd /sbin/init
-  ln -s /sbin/init /lib/systemd/systemd
+  dpkg-divert --local --rename --add /sbin/init
+  ln /lib/systemd/systemd /sbin/init
 fi
 
 #Create the user for the waylandloginmanager

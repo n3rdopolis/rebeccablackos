@@ -16,6 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1

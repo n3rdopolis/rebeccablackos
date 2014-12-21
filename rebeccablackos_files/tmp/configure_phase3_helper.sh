@@ -16,6 +16,13 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
 #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
 
 #Copy select files into place, that are suitable for distribution.
