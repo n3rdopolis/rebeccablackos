@@ -33,9 +33,6 @@ How to use Wayland:
 TODO:
       Need Creative Commons compatible images that can actually be put into a Open Source CD.
 
-PROBLEMS:
-      The distribution is now using systemd v216 as its init system, replacing Ubuntu's upstart/systemd v208 hybrid. As the first tier packages are still built around the assumption that upstart is the default init system, there might be breakerage.
-
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
             wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
