@@ -159,6 +159,14 @@ then
   touch "$BUILDLOCATION"/DontRestartArchives$BUILDARCH
 fi
 
+#Delete downloaded source based on a control file
+if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload$BUILDARCH ]]
+then
+  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
+  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
+  touch "$BUILDLOCATION"/DontRestartSourceDownload$BUILDARCH
+fi
+
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
 if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH ]]
 then
