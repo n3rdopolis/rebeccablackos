@@ -33,6 +33,9 @@ How to use Wayland:
 TODO:
       Need Creative Commons compatible images that can actually be put into a Open Source CD.
 
+PROBLEMS:
+      Due to egl_gallium being dropped in the recent version of Mesa( https://www.libreoffice.org/bugzilla/show_bug.cgi?id=86701 ), software rendering with egl Wayland cleints no longer works, so Mesa is frozen at 10.3. 
+
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
             wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
