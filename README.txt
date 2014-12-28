@@ -55,6 +55,7 @@ BUILDING:
      CONTROL FILES (relative to ~/RBOS_Build_Files):
         DontDownloadDebootstrapScript: Delete this file to force the downloaded debootstrap in RBOS_Build_Files to run again at the next build
         DontRestartArchives(architechture): Delete this file to force all the downloaded packages to be downloaded again for the respective architechture.
+	DontRestartSourceDownload(architechture): Delete this file to force all the downloaded source repositories to be downloaded again for the respective architechture.
         DontRestartPhase1(architechture): Delete this file to force Phase1 to debootstrap again for the respective architechture. This only hosts the smaller chroot system that downloads everything
         DontRestartPhase2(architechture): Delete this file to force Phase2 to debootstrap again for the respective architechture. This is the chroot that gets copied to Phase3, and is on the output ISO files.
         DontRestartBuildoutput(architechture): Delete this file to force all deb packages to rebuild for the respective architechture. This will increase the build time.
