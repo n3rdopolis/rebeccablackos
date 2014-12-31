@@ -141,7 +141,7 @@ function UserSessionWorker
   fi
   STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to ~/waylandsession.log
-  ${ArgArray[@]} &>> $HOME/waylandsession.log &
+  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/waylandsession.log &
   GuestServerPID=$!
 
   
