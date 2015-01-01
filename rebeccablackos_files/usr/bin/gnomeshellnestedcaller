@@ -18,6 +18,7 @@
 
 #This script is for calling enlightenment nested under a Wayland session.
 . /usr/bin/wlruntime_vars
+export XDG_CURRENT_DESKTOP=GNOME
 unset GDK_BACKEND
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
