@@ -953,6 +953,10 @@ function GetUserCredentials
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
   UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
+  if [[ $ISLIVE == 1 ]]
+  then
+    UID_MIN=999
+  fi
   UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
   USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
   #sort the list
