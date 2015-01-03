@@ -955,7 +955,7 @@ function GetUserCredentials
   UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
   if [[ $ISLIVE == 1 ]]
   then
-    UID_MIN=999
+    UIDMIN=999
   fi
   UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
   USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
