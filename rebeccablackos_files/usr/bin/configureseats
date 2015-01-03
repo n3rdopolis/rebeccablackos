@@ -142,6 +142,8 @@ done
 #Show a guide for the users on what devices they have attached to their system, and what will be configured
 zenity --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager.
 
+Multiseat is not supported by all Wayland servers.
+
 You will be able to select what seat devices belong to. 
 The devices are remembered by the device's name (usually containing the make and model), 
 and the port it's plugged into, so in order for the configuration to work each time you plug your devices, 
@@ -226,5 +228,12 @@ else
 fi
 
 #Force the server to pickup the changes
-fuser -k -SIGUSR1 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
-fuser -k -SIGUSR2 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+if [[ $SessionName =~ "Default Weston Desktop Shell" ]]
+then
+  fuser -k -SIGUSR1 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+  fuser -k -SIGUSR2 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+else
+  chvt 63
+  sleep .1
+  chvt $CurrentTTY
+fi
