@@ -317,7 +317,9 @@ update-rc.d remastersys-firstboot defaults
     if [ ! -f /etc/remastersys/customisolinux/isolinux.cfg ]; then
         log_msg "Creating isolinux setup for the live system"
         ISOLINUXFILE=$(find /usr -name 'isolinux.bin' | head -1)
+	EFILINUXFILE=$(find /usr -name 'efilinux.efi' | head -1)
         cp $ISOLINUXFILE $WORKDIR/ISOTMP/isolinux/
+	cp $EFILINUXFILE $WORKDIR/ISOTMP/isolinux/
         cp /usr/lib/syslinux/modules/bios/*.c32 $WORKDIR/ISOTMP/isolinux/ 
         # setup isolinux for the livecd
         VERSION=`lsb_release -r | awk '{print $2}' | awk -F "." '{print $1}'`
