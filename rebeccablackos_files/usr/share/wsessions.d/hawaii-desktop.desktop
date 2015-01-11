@@ -1,14 +1,15 @@
 [Desktop Entry]
 Enabled=1
 Type=WSession
-Name=Hawaii Desktop Shell
-CompositorExec=/opt/bin/weston
-CompositorSupportsKMS=1
-CompositorSupportsFB=1
-CompositorKMSArguments=--backend=drm-backend.so
-CompositorFBArguments=--backend=fbdev-backend.so
+Name=Hawaii Desktop
+CompositorExec=/opt/bin/greenisland
+CompositorSupportsWL=1
+CompositorSupportsKMS=0
+CompositorSupportsFB=0
+CompositorWLArguments=-platform wayland
+CompositorKMSArguments=
+CompositorFBArguments=
 CompositorDisplayArgument=--socket=
-SessionArgument=--modules=hawaii-desktop.so,xwayland.so,cms-colord.so --shell=/opt/lib/weston/hawaii-desktop.so
-AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=/opt/lib/weston/hawaii-desktop.so
-NeedsFile=/opt/bin/weston
+SessionArgument=
+AdditionalArguments=-platformtheme hawaii
+NeedsFile=/opt/bin/greenisland
