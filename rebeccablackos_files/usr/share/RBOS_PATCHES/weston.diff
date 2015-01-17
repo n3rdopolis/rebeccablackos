@@ -17,34 +17,6 @@ index 07b83a7..ab09c6c 100644
 
 
 
-
-
-diff --git a/src/logind-util.c b/src/logind-util.c
-index 6a1b498..4308bb6 100644
---- a/src/logind-util.c
-+++ b/src/logind-util.c
-@@ -695,9 +695,15 @@ signal_event(int fd, uint32_t mask, void *data)
- 	switch (sig.ssi_signo) {
- 	case SIGUSR1:
- 		ioctl(wl->vt, VT_RELDISP, 1);
-+		wl->compositor->session_active=0;
-+		wl_signal_emit(&wl->compositor->session_signal,
-+		       wl->compositor);
- 		break;
- 	case SIGUSR2:
- 		ioctl(wl->vt, VT_RELDISP, VT_ACKACQ);
-+		wl->compositor->session_active=1;
-+		wl_signal_emit(&wl->compositor->session_signal,
-+		       wl->compositor);
- 		break;
- 	}
- 
-
-
-
-
-
-
 diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
 index 138aaab..7ebbe92 100644
 --- a/src/compositor-fbdev.c
