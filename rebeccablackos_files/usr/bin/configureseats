@@ -230,8 +230,8 @@ fi
 #Force the server to pickup the changes
 if [[ $SessionName =~ "Default Weston Desktop Shell" ]]
 then
-  fuser -k -SIGUSR1 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
-  fuser -k -SIGUSR2 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+  fuser -k -34 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
+  fuser -k -35 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
 else
   chvt 63
   sleep .1
