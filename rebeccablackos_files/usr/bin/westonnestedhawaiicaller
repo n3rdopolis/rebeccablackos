@@ -25,6 +25,7 @@ set -m
 export $(exec ck-launch-session dbus-launch)
 weston --no-config --shell=fullscreen-shell.so --socket=$HostID -- backend=wayland-backend.so &
 HostServerPID=$!
+export WAYLAND_DISPLAY=$ServerID
 hawaii -platformtheme Hawaii -p org.hawaii.desktop -platform wayland --socket=$ServerID &
 GuestServerPID=$!
 fg 2
