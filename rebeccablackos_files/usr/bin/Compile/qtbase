@@ -64,7 +64,7 @@ function PackageCompileSource()
 {
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -release -dbus -no-gtkstyle -system-sqlite -openssl-linked -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples
+../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -release -dbus -no-gtkstyle -system-sqlite -openssl-linked -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput
 make
 }
 
