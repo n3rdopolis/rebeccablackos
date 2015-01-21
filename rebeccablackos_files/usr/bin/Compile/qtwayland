@@ -23,13 +23,13 @@
 SOURCENAME=qtwayland
 
 #The URL of the Source code repo
-SOURCEURL=git://gitorious.org/qt/qtwayland.git
+SOURCEURL=https://github.com/maui-packages/qtwayland
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=dev
+SOURCEREVISION=output55
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,10 +50,7 @@ REBUILDNEWREVISION=1
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/15/102815/1 && git checkout FETCH_HEAD
-git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/81/90881/14 && git checkout FETCH_HEAD
-git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/16/102816/1 && git checkout FETCH_HEAD
-git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/17/102817/1 && git checkout FETCH_HEAD
+:
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
