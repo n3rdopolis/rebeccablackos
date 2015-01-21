@@ -310,7 +310,7 @@ function PrepareLoginManager
 
   #Determine if this is running on a live instance, if the root filesystem is overlayfs.
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-  if [[ $FSTYPE == overlayfs ]]
+  if [[ $FSTYPE =~ overlay ]]
   then
     ISLIVE=1
   fi
