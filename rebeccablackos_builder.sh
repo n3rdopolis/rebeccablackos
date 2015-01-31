@@ -112,6 +112,9 @@ umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/sys
 #unmount the chrooted devfs from the outside 
 umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev
 
+#unmount the chrooted /run/shm from the outside 
+umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/run/shm
+
 #unmount the external archive folder
 umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
 umount -lf "$BUILDLOCATION"/build/$BUILDARCH/phase_1/var/cache/apt/archives
