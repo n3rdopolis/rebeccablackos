@@ -51,6 +51,8 @@ mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/phase_2 "$BUILDLOCATION"/build/$
 mount --rbind /dev "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev/
 mount --rbind /proc "$BUILDLOCATION"/build/$BUILDARCH/workdir/proc/
 mount --rbind /sys "$BUILDLOCATION"/build/$BUILDARCH/workdir/sys/
+mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/workdir/run/shm
+mount --rbind /run "$BUILDLOCATION"/build/$BUILDARCH/workdir/run/shm
 
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
