@@ -312,11 +312,11 @@ then
   echo "
 echo \"
 Weston Session commands:
-westonnestedcaller
-westonnestedhawaiicaller
-westonnestedorbitalcaller
-enlightenmentnestedcaller
-gnomeshellnestedcaller
+nested-defaultweston-caller
+nested-hawaii-caller
+nested-orbital-caller
+nested-enlightenment-caller
+nested-gnomeshell-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
