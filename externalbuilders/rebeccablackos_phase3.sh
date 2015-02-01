@@ -18,6 +18,8 @@
 echo "PHASE 3"  
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+
 
 HOMELOCATION=~
 unset HOME
@@ -43,10 +45,18 @@ mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/vartmp
 #Clean up Phase 3 data.
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3/*
 
-#Copy phase3 from phase2, and bind mount phase3 at the workdir
-echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
-cp --reflink=auto -a "$BUILDLOCATION"/build/$BUILDARCH/phase_2/. "$BUILDLOCATION"/build/$BUILDARCH/phase_3
-mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/phase_3 "$BUILDLOCATION"/build/$BUILDARCH/workdir
+
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  #Copy phase3 from phase2, and bind mount phase3 at the workdir
+  echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
+  cp --reflink=auto -a "$BUILDLOCATION"/build/$BUILDARCH/phase_2/. "$BUILDLOCATION"/build/$BUILDARCH/phase_3
+  mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/phase_3 "$BUILDLOCATION"/build/$BUILDARCH/workdir
+else
+  #Union mount phase2 and phase3
+  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/unionwork
+  mount -t overlayfs overlayfs -o lowerdir="$BUILDLOCATION"/build/$BUILDARCH/phase_2,upperdir="$BUILDLOCATION"/build/$BUILDARCH/phase_3,workdir="$BUILDLOCATION"/build/$BUILDARCH/unionwork "$BUILDLOCATION"/build/$BUILDARCH/workdir
+fi
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev/
