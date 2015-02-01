@@ -2,14 +2,14 @@
 Enabled=1
 Type=WSession
 Name=Hawaii Desktop
-CompositorExec=/opt/bin/hawaii
+CompositorExec=/opt/bin/hawaii-session
 CompositorSupportsWL=1
 CompositorSupportsKMS=0
 CompositorSupportsFB=0
-CompositorWLArguments=-platform wayland
+CompositorWLArguments=-m wayland
 CompositorKMSArguments=
 CompositorFBArguments=
-CompositorDisplayArgument=--socket=
+CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=-platformtheme Hawaii -p org.hawaii.desktop
+AdditionalArguments=
 NeedsFile=/opt/bin/hawaii
