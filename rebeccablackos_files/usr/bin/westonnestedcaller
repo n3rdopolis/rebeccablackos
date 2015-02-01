@@ -16,6 +16,9 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script uses westoncaller to set up a nested session with xwayland, and the default shell
+#This script sets up a nested session with xwayland, and the default desktop shell
 export $(exec ck-launch-session dbus-launch)
-westoncaller --modules=xwayland.so "$@"
+. /usr/bin/wlruntime_vars
+ServerID=wayland-$RANDOM
+export QT_WAYLAND_FORCE_DPI=100
+weston --socket=$ServerID --modules=xwayland.so "$@"

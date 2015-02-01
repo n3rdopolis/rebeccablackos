@@ -18,17 +18,5 @@
 
 #This script sets up a nested Hawaii session
 . /usr/bin/wlruntime_vars
-RANDOMNUMBER=$RANDOM
-HostID=wlhost-$RANDOMNUMBER
-ServerID=wayland-$RANDOMNUMBER
-set -m
-export $(exec ck-launch-session dbus-launch)
-weston --no-config --shell=fullscreen-shell.so --socket=$HostID --backend=wayland-backend.so &
-HostServerPID=$!
-export WAYLAND_DISPLAY=$HostID
-hawaii -platformtheme Hawaii -p org.hawaii.desktop -platform wayland --socket=$ServerID &
-GuestServerPID=$!
-fg 2
-kill -15 $HostServerPID &> /dev/null
-sleep 3
-kill -9 $HostServerPID &> /dev/null
+export QT_WAYLAND_FORCE_DPI=100
+hawaii-session -m nested
