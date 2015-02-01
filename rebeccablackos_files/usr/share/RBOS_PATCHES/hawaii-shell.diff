@@ -22,7 +22,7 @@ index 2b45e15..e2329cb 100644
      }
  
 diff --git a/session/processcontroller.cpp b/session/processcontroller.cpp
-index 748da6c..32c5e2d 100644
+index 748da6c..7009bff 100644
 --- a/session/processcontroller.cpp
 +++ b/session/processcontroller.cpp
 @@ -50,6 +50,8 @@ ProcessController::ProcessController(const QString &mode, QObject *parent)
@@ -34,16 +34,19 @@ index 748da6c..32c5e2d 100644
  }
  
  QString ProcessController::modeName() const
-@@ -123,6 +125,8 @@ void ProcessController::prepare()
+@@ -122,7 +124,10 @@ void ProcessController::prepare()
+ {
      // Wayland sockets
      QString random = randomString();
-     m_compositorSocket = QStringLiteral(HAWAII_SOCKET) + random;
+-    m_compositorSocket = QStringLiteral(HAWAII_SOCKET) + random;
 +    if (m_mode == WaylandMode)
 +      m_compositorSocket = getenv("WAYLAND_GUEST");
++    if (m_compositorSocket == NULL)
++      m_compositorSocket = QStringLiteral(HAWAII_SOCKET) + random;
      m_fullScreenShellSocket = QStringLiteral(FULLSCREEN_SHELL_SOCKET) + random;
  
      // Setup and print summary
-@@ -172,7 +176,7 @@ void ProcessController::setupCompositor()
+@@ -172,7 +177,7 @@ void ProcessController::setupCompositor()
      m_compositor->setArguments(QStringList()
                                 << QStringLiteral("-p")
                                 << QStringLiteral("org.hawaii.desktop"));
@@ -52,7 +55,7 @@ index 748da6c..32c5e2d 100644
          m_compositor->setArguments(m_compositor->arguments()
                                     << QStringLiteral("-platform")
                                     << QStringLiteral("wayland")
-@@ -224,6 +228,8 @@ void ProcessController::printSummary()
+@@ -224,6 +229,8 @@ void ProcessController::printSummary()
          qCDebug(PROCESS_CONTROLLER) << "Weston socket:" << m_fullScreenShellSocket;
          qCDebug(PROCESS_CONTROLLER) << "Compositor socket:" << m_compositorSocket;
          break;
