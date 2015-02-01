@@ -159,11 +159,11 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  zenity --info --text "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackOS you can call test Wayland by running westoncaller from the shell.
+  zenity --info --text "This will call a chroot shell from an iso.
 
   The password for the test user is no password. Just hit enter if you actually need it."
 else
-  echo "This will call a chroot shell from an iso. If you use an iso from RebeccaBlackOS you can call test Wayland by running westoncaller from the shell.
+  echo "This will call a chroot shell from an iso.
 
 The password for the test user is no password. Just hit enter if you actually need it.
 
@@ -276,7 +276,7 @@ then
   zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image"
 else
   echo "
-Type exit to go back to your system. If you want to test wayland, run the command: westoncaller"
+Type exit to go back to your system"
 fi
 
 #Only configure the systemd if the online file doesn't exist so it is only configured once
