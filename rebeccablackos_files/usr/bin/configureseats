@@ -208,7 +208,7 @@ kill -9 $MainFormPID
 #tell the user that Weston is going to 'flicker' as the tty is switched in and out so that Weston is forced to see the new Udev config
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-Press OK to apply the changes." --title="Multipointer Configuration"
+Press OK to apply the changes. The screen may flicker for less than a second." --title="Multipointer Configuration"
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
@@ -228,12 +228,6 @@ else
 fi
 
 #Force the server to pickup the changes
-if [[ $SessionName =~ "Default Weston Desktop Shell" ]]
-then
-  fuser -k -34 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
-  fuser -k -35 $XDG_RUNTIME_DIR/$WAYLAND_SERVER
-else
-  chvt 63
-  sleep .1
-  chvt $CurrentTTY
-fi
+chvt 63
+sleep .1
+chvt $CurrentTTY
