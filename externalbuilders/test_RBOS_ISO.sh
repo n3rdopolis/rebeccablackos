@@ -20,6 +20,7 @@
 
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 unset SUDO_USER
@@ -197,12 +198,18 @@ fi
 #install needed tools to allow testing on a read only iso
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
+  if [[ $HASOVERLAYFS == 0 ]]
+  then
+    $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
+  fi
   $TERMCOMMAND $INSTALLCOMMAND squashfs-tools
   $TERMCOMMAND $INSTALLCOMMAND dialog
   $TERMCOMMAND $INSTALLCOMMAND zenity
 else
-  $INSTALLCOMMAND unionfs-fuse
+  if [[ $HASOVERLAYFS == 0 ]]
+  then
+    $INSTALLCOMMAND unionfs-fuse
+  fi
   $INSTALLCOMMAND squashfs-tools
   $INSTALLCOMMAND dialog
   $INSTALLCOMMAND zenity
@@ -256,14 +263,21 @@ fi
 mount -o loop "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/squashfsmount
 
 #Create the union between squashfs and the overlay
-unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
+else
+  mkdir -p "$MOUNTHOME"/liveisotest/unionwork
+  mount -t overlayfs overlayfs -o lowerdir="$MOUNTHOME"/liveisotest/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/overlay,workdir="$MOUNTHOME"/liveisotest/unionwork "$MOUNTHOME"/liveisotest/unionmountpoint
+fi
 
 #bind mount in the critical filesystems
 mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
 mount --rbind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
 mount --rbind /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
 mount --rbind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
-
+mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
+mount --rbind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 #allow all local connections to the xserver
 xhost +LOCAL:
 
