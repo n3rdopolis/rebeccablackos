@@ -60,6 +60,8 @@
 
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
+mkdir -p "$SOURCEDIR"/buildhome/config
+export HOME="$SOURCEDIR"/buildhome/config
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
@@ -75,7 +77,8 @@ function RunDownloadAndOrBuild
   fi
 
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
-
+  export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
+  export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
@@ -142,6 +145,7 @@ function CleanupGIT()
 #Function to download git repos
 function DownloadGIT()
 {
+  git config --global core.askpass /bin/true
   OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
