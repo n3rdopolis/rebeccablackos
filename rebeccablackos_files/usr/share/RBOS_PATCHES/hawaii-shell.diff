@@ -22,10 +22,10 @@ index 2b45e15..e2329cb 100644
      }
  
 diff --git a/session/processcontroller.cpp b/session/processcontroller.cpp
-index 748da6c..7009bff 100644
+index 5cc2bf2..bd5d9b2 100644
 --- a/session/processcontroller.cpp
 +++ b/session/processcontroller.cpp
-@@ -50,6 +50,8 @@ ProcessController::ProcessController(const QString &mode, QObject *parent)
+@@ -52,6 +52,8 @@ ProcessController::ProcessController(const QString &mode, QObject *parent)
          m_mode = HwComposerMode;
      else if (mode == QStringLiteral("nested"))
          m_mode = NestedMode;
@@ -34,7 +34,7 @@ index 748da6c..7009bff 100644
  }
  
  QString ProcessController::modeName() const
-@@ -122,7 +124,10 @@ void ProcessController::prepare()
+@@ -124,7 +126,10 @@ void ProcessController::prepare()
  {
      // Wayland sockets
      QString random = randomString();
@@ -46,16 +46,16 @@ index 748da6c..7009bff 100644
      m_fullScreenShellSocket = QStringLiteral(FULLSCREEN_SHELL_SOCKET) + random;
  
      // Setup and print summary
-@@ -172,7 +177,7 @@ void ProcessController::setupCompositor()
+@@ -174,7 +179,7 @@ void ProcessController::setupCompositor()
      m_compositor->setArguments(QStringList()
                                 << QStringLiteral("-p")
                                 << QStringLiteral("org.hawaii.desktop"));
 -    if (m_mode == NestedMode) {
 +    if (m_mode == NestedMode || m_mode == WaylandMode) {
          m_compositor->setArguments(m_compositor->arguments()
-                                    << QStringLiteral("-platform")
-                                    << QStringLiteral("wayland")
-@@ -224,6 +229,8 @@ void ProcessController::printSummary()
+                                    << QStringLiteral("--socket=") + m_compositorSocket);
+     } else if (m_mode == EglFSMode || m_mode == HwComposerMode) {
+@@ -225,6 +230,8 @@ void ProcessController::printSummary()
          qCDebug(PROCESS_CONTROLLER) << "Weston socket:" << m_fullScreenShellSocket;
          qCDebug(PROCESS_CONTROLLER) << "Compositor socket:" << m_compositorSocket;
          break;
@@ -65,7 +65,7 @@ index 748da6c..7009bff 100644
          break;
      }
 diff --git a/session/processcontroller.h b/session/processcontroller.h
-index 6501ce6..092652b 100644
+index 46be07a..89a164b 100644
 --- a/session/processcontroller.h
 +++ b/session/processcontroller.h
 @@ -43,7 +43,8 @@ public:
@@ -79,7 +79,7 @@ index 6501ce6..092652b 100644
  
      ProcessController(const QString &mode, QObject *parent = Q_NULLPTR);
 diff --git a/session/processlauncher.cpp b/session/processlauncher.cpp
-index 455e4f4..942f2ab 100644
+index 902d51c..3b459e4 100644
 --- a/session/processlauncher.cpp
 +++ b/session/processlauncher.cpp
 @@ -127,7 +127,7 @@ bool ProcessLauncher::launchEntry(XdgDesktopFile *entry)
