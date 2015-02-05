@@ -227,6 +227,7 @@ rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3/*
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
 rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
+rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild/buildhome/
 "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 UnmountAll
 
