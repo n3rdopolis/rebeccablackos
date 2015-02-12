@@ -554,8 +554,9 @@ function MakeAndInstall()
       #.spec file seem to cause problems with checkinstall
       rm *.spec
 
-      #remove any old deb files for this package
-      rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
+      #remove any old deb files for this package from the local source dir, and backup the old version.
+      mkdir "/$SOURCEDIR/buildoutput/versionbackup"
+      mv "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb "/$SOURCEDIR/buildoutput/versionbackup"
       rm *.deb
 
       #create the new deb
