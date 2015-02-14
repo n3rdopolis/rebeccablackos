@@ -21,6 +21,14 @@
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  fi
+fi
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 unset SUDO_USER
