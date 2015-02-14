@@ -320,11 +320,11 @@ then
   echo "
 echo \"
 Weston Session commands:
-nested-defaultweston-caller
-nested-hawaii-caller
-nested-orbital-caller
-nested-enlightenment-caller
-nested-gnomeshell-caller
+dbus-launch nested-defaultweston-caller
+dbus-launch nested-hawaii-caller
+dbus-launch nested-orbital-caller
+dbus-launch nested-enlightenment-caller
+dbus-launch nested-gnomeshell-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
