@@ -179,7 +179,7 @@ function DownloadGIT()
   git rebase
   git config user.email rbos@rbos
   git submodule sync --recursive
-  git submodule deinit
+  git submodule deinit .
   git submodule init
   git submodule update --recursive --force
   git pull -f
