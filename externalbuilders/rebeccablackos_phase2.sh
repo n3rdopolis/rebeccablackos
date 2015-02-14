@@ -65,9 +65,10 @@ cp -a "$BUILDLOCATION"/build/$BUILDARCH/phase_1/var/cache/apt/*.bin "$BUILDLOCAT
 cp -a "$BUILDLOCATION"/build/$BUILDARCH/phase_1/var/lib/apt/lists "$BUILDLOCATION"/build/$BUILDARCH/phase_2/var/lib/apt
 
 #Configure the Live system########################################
-if [[ $BUILDARCH == i386 ]]
+TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/getconf LONG_BIT)
+if [[ $TARGETBITSIZE == 32 ]]
 then
   linux32 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 else
-  chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
+  linux64 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase2.sh
 fi

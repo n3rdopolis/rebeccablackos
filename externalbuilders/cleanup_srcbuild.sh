@@ -55,9 +55,10 @@ mount --rbind "$BUILDLOCATION"/build/$BUILDARCH/srcbuild "$BUILDLOCATION"/build/
 
 
 #Call compile_all to cleanup srcbuild########################################
-if [[ $BUILDARCH == i386 ]]
+TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/getconf LONG_BIT)
+if [[ $TARGETBITSIZE == 32 ]]
 then
   linux32 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/compile_all clean
 else
-  chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/compile_all clean
+  linux64 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/compile_all clean
 fi

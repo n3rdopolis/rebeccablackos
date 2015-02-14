@@ -23,31 +23,34 @@ SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 export BUILDLOCATION=~/RBOS_Build_Files
 mkdir -p "$BUILDLOCATION"
 
+echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
+read archselect
+if [[ $archselect == 2 ]]
+then
+  export BUILDARCH=amd64
+elif [[ $archselect == 3 ]]
+then
+  echo "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
+  read BUILDARCH
+  export BUILDARCH
+else
+  export BUILDARCH=i386
+fi
+
 #####Tell User what script does
 echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
-   File:              ${HOME}/RebeccaBlackOS_i386.iso or ${HOME}/RebeccaBlackOS_amd64.iso
-   File:              ${HOME}/RebeccaBlackOS_DevDbg_i386.iso or ${HOME}/RebeccaBlackOS_DevDbg_amd64.iso
-   File:              ${HOME}/RebeccaBlackOS_Revisions_i386.txt or ${HOME}/RebeccaBlackOS_Revisions_amd64.txt
-   File:              ${HOME}/RebeccaBlackOS_Source_i386.tar.gz or ${HOME}/RebeccaBlackOS_Source_amd64.tar.gz
+   File:              ${HOME}/RebeccaBlackOS_$BUILDARCH.iso
+   File:              ${HOME}/RebeccaBlackOS_DevDbg_$BUILDARCH.iso
+   File:              ${HOME}/RebeccaBlackOS_Revisions_$BUILDARCH.txt
+   File:              ${HOME}/RebeccaBlackOS_Source_$BUILDARCH.tar.gz
 "
-
-
-
-
 
 echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PGDOWN (OR THE SCROLL WHEEL OR SCROLL BAR IF AVALIBLE) AND THEN PRESS ENTER TO CONTINUE..."
 
-echo "Select Arch. Enter 1 for i386, 2 for amd64. Default=i386."
-read archselect
-if [[ $archselect == 2 ]]
-then
-  export BUILDARCH=amd64
-else
-  export BUILDARCH=i386
-fi
+
 
 echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
 echo "Most users can ignore this message. Press Enter to continue..."
