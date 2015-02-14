@@ -28,18 +28,25 @@ echo "Build script for RebeccaBlackOS. The build process requires no user intera
 
 "
 
-echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
-read archselect
-if [[ $archselect == 2 ]]
+export BUILDARCH=$(echo $1| awk -F = '{print $2}')
+if [[ -z $BUILDARCH ]]
 then
-  export BUILDARCH=amd64
-elif [[ $archselect == 3 ]]
-then
-  echo "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
-  read BUILDARCH
-  export BUILDARCH
-else
-  export BUILDARCH=i386
+  echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
+  echo "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
+  read archselect
+  if [[ $archselect == 2 ]]
+  then
+    export BUILDARCH=amd64
+  elif [[ $archselect == 3 ]]
+  then
+    echo "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
+    read BUILDARCH
+    export BUILDARCH
+  else
+    export BUILDARCH=i386
+  fi
+else 
+  SKIPPROMPT=1
 fi
 
 #####Tell User what script does
@@ -58,9 +65,16 @@ echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PG
 
 
 echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
-echo "Most users can ignore this message. Press Enter to continue..."
-read a
 
+
+if [[ $SKIPPROMPT != 1 ]]
+then
+  echo "Most users can ignore this message. Press Enter to continue..."
+  read wait
+else
+  echo "Most users can ignore this message. The build process will start in 5 seconds"
+  sleep 5
+fi
 STARTTIME=$(date +%s)
 
 #prepare debootstrap
