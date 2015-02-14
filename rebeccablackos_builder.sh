@@ -22,6 +22,11 @@ SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 export BUILDLOCATION=~/RBOS_Build_Files
 mkdir -p "$BUILDLOCATION"
+echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
+
+
+
+"
 
 echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
 read archselect
