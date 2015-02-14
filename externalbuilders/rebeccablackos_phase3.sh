@@ -62,7 +62,7 @@ then
 else
   #Union mount phase2 and phase3
   mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/unionwork
-  mount -t overlayfs overlayfs -o lowerdir="$BUILDLOCATION"/build/$BUILDARCH/phase_2,upperdir="$BUILDLOCATION"/build/$BUILDARCH/phase_3,workdir="$BUILDLOCATION"/build/$BUILDARCH/unionwork "$BUILDLOCATION"/build/$BUILDARCH/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/$BUILDARCH/phase_2,upperdir="$BUILDLOCATION"/build/$BUILDARCH/phase_3,workdir="$BUILDLOCATION"/build/$BUILDARCH/unionwork "$BUILDLOCATION"/build/$BUILDARCH/workdir
 fi
 
 #mounting critical fses on chrooted fs with bind 

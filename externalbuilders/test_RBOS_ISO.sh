@@ -276,7 +276,7 @@ then
   unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
 else
   mkdir -p "$MOUNTHOME"/liveisotest/unionwork
-  mount -t overlayfs overlayfs -o lowerdir="$MOUNTHOME"/liveisotest/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/overlay,workdir="$MOUNTHOME"/liveisotest/unionwork "$MOUNTHOME"/liveisotest/unionmountpoint
+  mount -t overlay overlay -o lowerdir="$MOUNTHOME"/liveisotest/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/overlay,workdir="$MOUNTHOME"/liveisotest/unionwork "$MOUNTHOME"/liveisotest/unionmountpoint
 fi
 
 #bind mount in the critical filesystems
