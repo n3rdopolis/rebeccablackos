@@ -59,6 +59,7 @@ TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/getcon
 if [[ $TARGETBITSIZE == 32 ]]
 then
   linux32 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/compile_all clean
-else
+elif [[ $TARGETBITSIZE == 64 ]]
+then
   linux64 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /usr/bin/compile_all clean
 fi
