@@ -101,6 +101,8 @@ then
 elif [[ $TARGETBITSIZE == 64 ]]
 then
   linux64 chroot "$BUILDLOCATION"/build/$BUILDARCH/workdir /tmp/configure_phase3.sh
+else
+  echo "chroot execution failed. Please ensure your processor can handle the $BUILDARCH architecture, or that the target system isn't corrupt."
 fi
 
 
