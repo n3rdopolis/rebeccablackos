@@ -1,0 +1,12 @@
+diff --git a/lib/konq/src/konq_historyentry.h b/lib/konq/src/konq_historyentry.h
+index de34d6b..9fd7fd1 100644
+--- a/lib/konq/src/konq_historyentry.h
++++ b/lib/konq/src/konq_historyentry.h
+@@ -21,6 +21,7 @@
+ #ifndef KONQ_HISTORYENTRY_H
+ #define KONQ_HISTORYENTRY_H
+ 
++#include <QDataStream>
+ #include <QDateTime>
+ #include <QMetaType>
+ #include <QUrl>
