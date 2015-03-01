@@ -49,6 +49,12 @@ else
   SKIPPROMPT=1
 fi
 
+#Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
+if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt ]]
+then
+  touch "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt
+fi
+
 #####Tell User what script does
 echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
@@ -64,7 +70,12 @@ echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PG
 
 
 
-echo "If you want to build revisions specified in a list file from a previous build, copy the file to "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
+echo "If you want to build revisions specified in a list file from a previous build, overwrite "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt with the requested revisions file generated from a previous build, or a downloaded instance. 
+
+Although the files have the CPU architecture as the suffix in the file name, there is nothing CPU dependant in them, and the suffix only exists to identify them. 
+For example RebeccaBlackOS_Revisions_amd64.txt can be used in "$BUILDLOCATION"/RebeccaBlackOS_Revisions_i386.txt 
+
+Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
 
 
 if [[ $SKIPPROMPT != 1 ]]

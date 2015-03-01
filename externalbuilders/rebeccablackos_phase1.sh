@@ -49,10 +49,11 @@ rm "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/buildcore_revisions.txt
 rm "$BUILDLOCATION"/build/$BUILDARCH/phase_1/tmp/buildcore_revisions.txt
 rm "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/buildcore_revisions.txt
 rm "$BUILDLOCATION"/build/$BUILDARCH/phase_3/tmp/buildcore_revisions.txt
-if [[ -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt ]]
+if [ -s "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt ]
 then
   cp "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt "$BUILDLOCATION"/build/$BUILDARCH/importdata/tmp/buildcore_revisions.txt
   rm "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt
+  touch "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt
 fi
 
 #delete old logs
