@@ -29,7 +29,7 @@ echo "Build script for RebeccaBlackOS. The build process requires no user intera
 "
 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
-if [[ -z $BUILDARCH ]]
+if [[ -z "$BUILDARCH" ]]
 then
   echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
   echo "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
@@ -50,9 +50,9 @@ else
 fi
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
-if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt ]]
+if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt ]]
 then
-  touch "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt
+  touch "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt
 fi
 
 #####Tell User what script does
@@ -60,17 +60,17 @@ echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
-   File:              ${HOME}/RebeccaBlackOS_$BUILDARCH.iso
-   File:              ${HOME}/RebeccaBlackOS_DevDbg_$BUILDARCH.iso
-   File:              ${HOME}/RebeccaBlackOS_Revisions_$BUILDARCH.txt
-   File:              ${HOME}/RebeccaBlackOS_Source_$BUILDARCH.tar.gz
+   File:              ${HOME}/RebeccaBlackOS_"$BUILDARCH".iso
+   File:              ${HOME}/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
+   File:              ${HOME}/RebeccaBlackOS_Revisions_"$BUILDARCH".txt
+   File:              ${HOME}/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
 "
 
 echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PGDOWN (OR THE SCROLL WHEEL OR SCROLL BAR IF AVALIBLE) AND THEN PRESS ENTER TO CONTINUE..."
 
 
 
-echo "If you want to build revisions specified in a list file from a previous build, overwrite "$BUILDLOCATION"/RebeccaBlackOS_Revisions_$BUILDARCH.txt with the requested revisions file generated from a previous build, or a downloaded instance. 
+echo "If you want to build revisions specified in a list file from a previous build, overwrite "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt with the requested revisions file generated from a previous build, or a downloaded instance. 
 
 Although the files have the CPU architecture as the suffix in the file name, there is nothing CPU dependant in them, and the suffix only exists to identify them. 
 For example RebeccaBlackOS_Revisions_amd64.txt can be used in "$BUILDLOCATION"/RebeccaBlackOS_Revisions_i386.txt 
@@ -137,40 +137,40 @@ REBUILT="to update"
 function UnmountAll()
 {
 #unmount the chrooted procfs from the outside 
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/proc
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/sys
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/dev
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 
 #unmount the chrooted /run/shm from the outside 
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/run/shm
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #unmount the external archive folder
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/cache/apt/archives
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/phase_1/var/cache/apt/archives
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/phase_2/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
 
 #unmount the debs data
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild/buildoutput
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 
 #unmount the source download folder
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/srcbuild
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 
 #unmount the cache /var/tmp folder
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/var/tmp
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 
 #unmount the cache /var/tmp folder
-umount -lf "$BUILDLOCATION"/build/$BUILDARCH/workdir/home/remastersys
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 
 #unmount the FS at the workdir and phase 2
-umount -lfd "$BUILDLOCATION"/build/$BUILDARCH/workdir
-umount -lfd "$BUILDLOCATION"/build/$BUILDARCH/phase_2
+umount -lfd "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+umount -lfd "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
 
 #Terminate processess using files in the build folder for the architecture
-lsof -t +D "$BUILDLOCATION"/build/$BUILDARCH |while read PID 
+lsof -t +D "$BUILDLOCATION"/build/"$BUILDARCH" |while read PID 
 do 
 kill -9 $PID
 done
@@ -180,64 +180,64 @@ done
 UnmountAll
 
 #Delete buildoutput based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
-  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
-  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
-  touch "$BUILDLOCATION"/DontRestartBuildoutput$BUILDARCH
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+  touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
 fi
 
 #Delete archives based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartArchives$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
 then
-  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/archives
-  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/archives
-  touch "$BUILDLOCATION"/DontRestartArchives$BUILDARCH
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+  touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
 fi
 
 #Delete downloaded source based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
 then
-  rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
-  mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
-  touch "$BUILDLOCATION"/DontRestartSourceDownload$BUILDARCH
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+  touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
 fi
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
-if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH || ! -f "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH ]]
+if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
 then
   #if set to rebuild phase 1
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
   then
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_1/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
   fi
 
   #if set to rebuild phase 2
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
   then
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_2/*
-    mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp
-    touch "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
+    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.bak
   fi
 
-  if [ ! -f "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH ]
+  if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
   then
     #clean up old files
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_1
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_2
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/workdir
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/buildoutput
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/archives
-    rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild
-    rm "$BUILDLOCATION"/DontRestartPhase1$BUILDARCH
-    rm "$BUILDLOCATION"/DontRestartPhase2$BUILDARCH
-    touch "$BUILDLOCATION"/DontStartFromScratch$BUILDARCH
-    mkdir -p "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp
-    touch "$BUILDLOCATION"/build/$BUILDARCH/phase_2/tmp/INSTALLS.txt.bak
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+    rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+    touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
+    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.bak
     REBUILT="to rebuild from scratch"
   fi
   "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
@@ -256,11 +256,11 @@ UnmountAll
 echo "CLEANUP PHASE 3"  
 
 #Clean up Phase 3 data.
-rm -rf "$BUILDLOCATION"/build/$BUILDARCH/phase_3/*
-rm -rf "$BUILDLOCATION"/build/$BUILDARCH/vartmp
-rm -rf "$BUILDLOCATION"/build/$BUILDARCH/remastersys
-rm -rf "$BUILDLOCATION"/build/$BUILDARCH/importdata
-rm -rf "$BUILDLOCATION"/build/$BUILDARCH/srcbuild/buildhome/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 UnmountAll
 
