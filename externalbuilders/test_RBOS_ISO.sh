@@ -133,6 +133,7 @@ then
     setfacl -x u:999999999 /dev/dri/card*
 
     #unmount the filesystems used by the CD
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
