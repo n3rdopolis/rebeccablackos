@@ -177,6 +177,7 @@ function DownloadGIT()
   git rebase
   git pull -f
   git rebase
+  git checkout -f $SOURCEREVISION 
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule deinit .
