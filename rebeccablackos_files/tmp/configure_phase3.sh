@@ -74,14 +74,6 @@ cd $OLDPWD
 #copy all files
 rsync /usr/import/* -a /
 
-#Document if the ISO was built with a buildcore_revisions.txt file, and if so, save it in /usr/share/doc
-if [[ -e /tmp/buildcore_revisions.txt ]]
-then
-  cp /tmp/buildcore_revisions.txt /usr/share/doc/buildcore_revisions.txt
-else
-  echo "Not build with a custom revision file." > /buildcore_revisions.txt
-fi
-
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
