@@ -78,6 +78,18 @@ function RunDownloadAndOrBuild
 
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  SOURCENAMECHARS="${#SOURCENAME}"
+  iterator=0
+  SAFESOURCENAME=$(for (( iterator=0; iterator < $SOURCENAMECHARS ; iterator++ ))
+  do
+    CHAR=$(echo -n ${SOURCENAME:$iterator:1})
+    if [[ $CHAR == [a-Z0-9] ]]
+    then
+      echo -n $CHAR
+    else
+      printf '0x%d' "'$CHAR"
+    fi
+  done)
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
   #If the argument passed is cleanup, then cleanup the source only
@@ -128,7 +140,7 @@ function GetVersionGIT()
   unset IFS
   SUBMODULEREVISIONS=$(declare -p SUBMODULEREVISIONS_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; $SUBMODULEREVISIONS ; SUBMODULEREVISIONS=(\\\${SUBMODULEREVISIONS_EXPORT[*]}) ; }"
-  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup GIT repos
@@ -221,7 +233,7 @@ function GetVersionSVN()
   SOURCEREVISION_EXPORT=$(svnversion .)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup SVN repos
@@ -262,7 +274,7 @@ function GetVersionBZR()
   SOURCEREVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -304,7 +316,7 @@ function GetVersionHG()
   SOURCEREVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup BZR repos
@@ -347,7 +359,7 @@ function GetVersionARCHIVE()
   SOURCEREVISION_EXPORT=$(echo "Non-versioned File Archive")
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ;}"
-  REVISIONSTRING="eval \"OverrideRevisions_${SOURCENAME}() $FUNCTIONSTRING\""
+  REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
 #Function to cleanup archives
@@ -379,7 +391,7 @@ function DownloadSource()
   if [[ -e /tmp/buildcore_revisions.txt ]]
   then
     . /tmp/buildcore_revisions.txt
-    OverrideRevisions_$SOURCENAME
+    OverrideRevisions_$SAFESOURCENAME
   fi
   mkdir -p "$SOURCEDIR"
   cd "$SOURCEDIR"
