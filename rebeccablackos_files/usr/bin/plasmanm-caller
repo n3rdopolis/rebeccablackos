@@ -18,5 +18,5 @@
 
 #This is a caller helper file used to call the KDE network plasmoid. kded5 currently crashes on Wayland
 #The network editor can still use Wayland, but without kded5 it keeps attempting to call it.
-kded5 -platform xcb
+kded5 -platform xcb &
 /opt/bin/plasmawindowed org.kde.plasma.networkmanagement
