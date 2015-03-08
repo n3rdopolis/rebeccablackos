@@ -568,8 +568,9 @@ function MakeAndInstall()
       rm *.spec
 
       #remove any old deb files for this package from the local source dir, and backup the old version.
-      mkdir "/$SOURCEDIR/buildoutput/versionbackup"
-      mv "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb "/$SOURCEDIR/buildoutput/versionbackup"
+      #mkdir "/$SOURCEDIR/buildoutput/versionbackup"
+      #mv "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb "/$SOURCEDIR/buildoutput/versionbackup"
+      rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-rbos_*.deb
       rm *.deb
 
       #create the new deb
