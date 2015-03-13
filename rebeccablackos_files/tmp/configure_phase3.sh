@@ -89,12 +89,6 @@ update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinf
 systemctl disable lightdm.service
 systemctl disable gdm.service
 
-#Make all systemd units nonexecutable
-find /lib/udev/rules.d -type f | while read FILE
-do
-  chmod 644 "$FILE"
-done
-
 #Create the user for the waylandloginmanager
 adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
 
