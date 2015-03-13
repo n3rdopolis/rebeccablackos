@@ -85,34 +85,15 @@ update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /
 update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
 update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
 
-#disable systemd networkd, and enable NetworkManager
-systemctl disable systemd-networkd.service
-systemctl enable NetworkManager.service
-
 #Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
-systemctl disable sandbox.service
-systemctl enable make-mtab-symlink.service
-systemctl enable make-fs-private.service
-systemctl enable make-machine-id.service
-systemctl enable mount-run-shm.service
-systemctl enable configure-resolvconf.service
-systemctl enable unset-grub-fail.service
-systemctl disable friendly-recovery.service
 systemctl disable lightdm.service
 systemctl disable gdm.service
 
 #Make all systemd units nonexecutable
-find /etc/systemd/system /lib/systemd/system /lib/udev/rules.d -type f | while read FILE
+find /lib/udev/rules.d -type f | while read FILE
 do
   chmod 644 "$FILE"
 done
-
-#Change the default init system to systemd if it exists
-if [[ -e /lib/systemd/systemd ]]
-then
-  dpkg-divert --local --rename --add /sbin/init
-  ln /lib/systemd/systemd /sbin/init
-fi
 
 #Create the user for the waylandloginmanager
 adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
