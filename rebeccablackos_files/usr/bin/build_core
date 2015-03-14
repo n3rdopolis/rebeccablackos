@@ -60,7 +60,6 @@
 
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
-mkdir -p "$SOURCEDIR"/buildhome/config
 export HOME="$SOURCEDIR"/buildhome/config
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
@@ -75,7 +74,7 @@ function RunDownloadAndOrBuild
     echo "Must be run as root."
     exit
   fi
-
+  mkdir -p "$SOURCEDIR"/buildhome/config
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
   SOURCENAMECHARS="${#SOURCENAME}"
