@@ -19,5 +19,4 @@
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
 export KWIN_COMPOSE=Q
-#export WAYLAND_DISPLAY=wayland-$RANDOM
-kwin_wayland -x xvfb
+kwin_wayland --xserver --socket=$(wayland-$RANDOM)

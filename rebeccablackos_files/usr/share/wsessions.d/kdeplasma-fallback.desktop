@@ -8,9 +8,9 @@ CompositorSupportsKMS=0
 CompositorSupportsFB=0
 CompositorKMSArguments=
 CompositorFBArguments=
-CompositorDisplayArgument=
+CompositorDisplayArgument=--socket=
 SessionArgument=
-AdditionalArguments=-x xvfb --display=:99
+AdditionalArguments=--xserver
 EnvironmentFile=/usr/share/wsessions.d/kdeplasma-fallback.environment
 
 
