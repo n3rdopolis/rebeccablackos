@@ -22,30 +22,52 @@ MENUPATH=/usr/share/RBOS_MENU
 #for each desktop file
 while read DESKTOPFILE
 do
+  echo "DesktopFile: $MENUPATH$DESKTOPFILE"
+
+
   #Reset variables as it's cumulative for each file
   unset DIRECTORYFILELIST
   unset FOLDERPATH
+  NOTFOUNDCOUNT=0
 
-  #Get the folder the desktop file is in
-  FOLDERPATH=$(dirname $DESKTOPFILE)
-  #Until empty
-  while [[ $FOLDERPATH != / ]]
+  #Get the files defined on the exec line, (all files start with /) and ensure they exist
+  ExecFileList=($(awk -F Exec= '{print $2}' "$MENUPATH/$DESKTOPFILE" |grep -v ^$))
+  ExecFiles=${#ExecFileList[@]}
+  iterator=0
+  for (( iterator=0; iterator < $ExecFiles ; iterator++ ))
   do
-    FOLDERNAME=$(basename $FOLDERPATH)
-    DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/rbos-/g' | sed 's/$/.directory/g')
-    #list the chain of .directory files
-    DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
-    FOLDERPATH=$(dirname $FOLDERPATH)
-
+    ExecFile=${ExecFileList[$iterator]}
+    if [[ ! -e "$ExecFile" && $ExecFile == /* ]]
+    then
+      echo "$ExecFile not found"
+      ((NOTFOUNDCOUNT++))
+    fi
   done
-  #Install the menu items with the structure
-  xdg-desktop-menu install $DIRECTORYFILELIST $MENUPATH/$DESKTOPFILE
 
-  echo DesktopFile: $MENUPATH$DESKTOPFILE
-  echo FolderPath:  $FOLDERPATH
-  echo FolderName:  $FOLDERNAME
-  echo DirFileName: $DIRECTORYFILENAME
-  echo DirFilePath: $DIRECTORYFILELIST
+  #If all files exist, install the menu item
+  if [[ $NOTFOUNDCOUNT == 0 ]]
+  then
+    #Get the folder the desktop file is in
+    FOLDERPATH=$(dirname $DESKTOPFILE)
+    #Until empty
+    while [[ $FOLDERPATH != / ]]
+    do
+      FOLDERNAME=$(basename $FOLDERPATH)
+      DIRECTORYFILENAME=$(echo $FOLDERNAME | sed 's/^/rbos-/g' | sed 's/$/.directory/g')
+      #list the chain of .directory files
+      DIRECTORYFILELIST="$(echo -e "$DIRECTORYFILELIST \n $MENUPATH$FOLDERPATH/$DIRECTORYFILENAME" | tac )"
+      FOLDERPATH=$(dirname $FOLDERPATH)
 
+    done
+    #Install the menu items with the structure
+    xdg-desktop-menu install $DIRECTORYFILELIST $MENUPATH/$DESKTOPFILE
+
+    echo "   FolderPath:  $FOLDERPATH"
+    echo "   FolderName:  $FOLDERNAME"
+    echo "   DirFileName: $DIRECTORYFILENAME"
+    echo "   DirFilePath: $DIRECTORYFILELIST"
+  else
+    echo "Files not found that are defined in the desktop file. Menu item not installed"
+  fi
 #find desktop files in the menupath
 done < <(find $MENUPATH | grep "\.desktop$" | awk -F "$MENUPATH" '{print $2}')
