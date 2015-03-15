@@ -55,7 +55,6 @@ touch debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
 checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="expect,whois,dlocate,zenity,xterm,vpx-tools,screen" /tmp/configure_phase3_helper.sh
-cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
 #Create a virtual configuration package for the waylandloginmanager
@@ -78,7 +77,10 @@ rsync /usr/import/* -a /
 compile_all build-only
 
 #Create a package with all the menu items.
+cd /tmp
 checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-menuitems --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+cp *.deb "/srcbuild/buildoutput/"
+cd $OLDPWD
 
 #Set the cursor theme
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
