@@ -43,6 +43,3 @@ cp -a /usr/import/lib/* /lib
 
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
-
-#install the menu items for the wayland applications
-install_menu_items

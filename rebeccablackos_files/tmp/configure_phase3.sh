@@ -77,6 +77,9 @@ rsync /usr/import/* -a /
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Create a package with all the menu items.
+checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-menuitems --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+
 #Set the cursor theme
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
