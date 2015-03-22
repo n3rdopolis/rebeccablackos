@@ -43,7 +43,7 @@ then
   apt-get update
   apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
   #download off the SVN
-  svn co svn://svn.code.sf.net/p/rebeccablackos/code/ -r $VERSION
+  svn co svn://svn.code.sf.net/p/rebeccablackos/code/ -r $VERSION /usr/share/rebeccablackos
   #make the files owned by root, and executable
   chmod +x -R /usr/share/rebeccablackos/
   chown  root  /usr/share/rebeccablackos/
