@@ -19,6 +19,6 @@
 #This script sets up a nested Orbital session
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
-export $(exec ck-launch-session dbus-launch)
+export $(exec dbus-launch)
 export QT_WAYLAND_FORCE_DPI=100
 weston --socket=$ServerID --modules=xwayland.so  --shell=/opt/lib/weston/maynard.so

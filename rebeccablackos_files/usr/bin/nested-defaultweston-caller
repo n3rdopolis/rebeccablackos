@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script sets up a nested session with xwayland, and the default desktop shell
-export $(exec ck-launch-session dbus-launch)
+export $(exec dbus-launch)
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
 export QT_WAYLAND_FORCE_DPI=100
