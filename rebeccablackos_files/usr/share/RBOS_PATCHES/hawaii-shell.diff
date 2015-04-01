@@ -1,93 +1,25 @@
-diff --git a/session/main.cpp b/session/main.cpp
-index 280da61..88f8d9c 100644
---- a/session/main.cpp
-+++ b/session/main.cpp
-@@ -57,7 +57,7 @@ int main(int argc, char *argv[])
- 
-     // Mode
-     QCommandLineOption modeOption(QStringList() << QStringLiteral("m") << QStringLiteral("mode"),
--                                  TR("Specify session mode (possible values: eglfs, hwcomposer, nested)."), TR("mode"));
-+                                  TR("Specify session mode (possible values: eglfs, hwcomposer, nested, wayland)."), TR("mode"));
-     parser.addOption(modeOption);
- 
-     // Logout
-@@ -83,7 +83,8 @@ int main(int argc, char *argv[])
-         const QString mode = parser.value(modeOption);
-         if (mode != QStringLiteral("eglfs") &&
-                 mode != QStringLiteral("hwcomposer") &&
--                mode != QStringLiteral("nested"))
-+                mode != QStringLiteral("nested") &&
-+                mode != QStringLiteral("wayland"))
-             qFatal("Invalid mode \"%s\"!", qPrintable(mode));
+diff --git a/session/compositorlauncher.cpp b/session/compositorlauncher.cpp
+index b19f480..66eae0a 100644
+--- a/session/compositorlauncher.cpp
++++ b/session/compositorlauncher.cpp
+@@ -103,6 +103,10 @@ void CompositorLauncher::start()
+         m_compositor->setSocketName(m_socketName);
      }
  
-diff --git a/session/processcontroller.cpp b/session/processcontroller.cpp
-index d5f05dd..9aa6f3b 100644
---- a/session/processcontroller.cpp
-+++ b/session/processcontroller.cpp
-@@ -53,6 +53,8 @@ ProcessController::ProcessController(const QString &mode, QObject *parent)
-         m_mode = HwComposerMode;
-     else if (mode == QStringLiteral("nested"))
-         m_mode = NestedMode;
-+    else if (mode == QStringLiteral("wayland"))
-+        m_mode = WaylandMode;
- }
++   if (m_mode == WaylandMode) {
++	m_socketName = getenv("WAYLAND_GUEST");
++        m_compositor->setSocketName(m_socketName);
++   }
+     // Summary
+     printSummary();
  
- QString ProcessController::modeName() const
-@@ -125,7 +127,10 @@ void ProcessController::prepare()
- {
-     // Wayland sockets
-     QString random = randomString();
--    m_compositorSocket = QStringLiteral(HAWAII_SOCKET) + random;
-+    if (m_mode == WaylandMode)
-+      m_compositorSocket = getenv("WAYLAND_GUEST");
-+    if (m_compositorSocket == NULL)
-+      m_compositorSocket = QStringLiteral(HAWAII_SOCKET) + random;
-     m_fullScreenShellSocket = QStringLiteral(FULLSCREEN_SHELL_SOCKET) + random;
- 
-     // Setup and print summary
-@@ -172,7 +177,7 @@ void ProcessController::setupCompositor()
-     m_compositor = new QProcess(this);
-     m_compositor->setProcessChannelMode(QProcess::ForwardedChannels);
-     m_compositor->setProgram(QStringLiteral(INSTALL_BINDIR "/hawaii"));
--    if (m_mode == NestedMode) {
-+    if (m_mode == NestedMode || m_mode == WaylandMode) {
-         m_compositor->setArguments(m_compositor->arguments()
-                                    << QStringLiteral("--socket=") + m_compositorSocket);
-     } else if (m_mode == EglFSMode || m_mode == HwComposerMode) {
-@@ -228,6 +233,8 @@ void ProcessController::printSummary()
-         qCDebug(PROCESS_CONTROLLER) << "Weston socket:" << m_fullScreenShellSocket;
-         qCDebug(PROCESS_CONTROLLER) << "Compositor socket:" << m_compositorSocket;
+@@ -249,6 +253,9 @@ QStringList CompositorLauncher::compositorArgs() const
+     case NestedMode:
+         args << QStringLiteral("--socket=%1").arg(m_compositor->socketName());
          break;
 +    case WaylandMode:
-+	qCDebug(PROCESS_CONTROLLER) << "Compositor socket:" << m_compositorSocket;
++        args << QStringLiteral("--socket=%1").arg(m_compositor->socketName());
++        break;
      default:
          break;
      }
-diff --git a/session/processcontroller.h b/session/processcontroller.h
-index 46be07a..89a164b 100644
---- a/session/processcontroller.h
-+++ b/session/processcontroller.h
-@@ -43,7 +43,8 @@ public:
-     enum Mode {
-         EglFSMode = 0,
-         HwComposerMode,
--        NestedMode
-+        NestedMode,
-+        WaylandMode
-     };
- 
-     ProcessController(const QString &mode, QObject *parent = Q_NULLPTR);
-diff --git a/session/processlauncher.cpp b/session/processlauncher.cpp
-index 6346d2c..7b4c5e0 100644
---- a/session/processlauncher.cpp
-+++ b/session/processlauncher.cpp
-@@ -144,7 +144,7 @@ bool ProcessLauncher::launchEntry(XdgDesktopFile *entry)
- 
-     // Set WAYLAND_DISPLAY only when nested, otherwise we don't need to do
-     // it because applications can detect the socket themselves
--    if (m_sessionManager->processController()->mode() == ProcessController::NestedMode)
-+    if (m_sessionManager->processController()->mode() == ProcessController::NestedMode || m_sessionManager->processController()->mode() == ProcessController::WaylandMode)
-         env.insert(QStringLiteral("WAYLAND_DISPLAY"), m_sessionManager->processController()->compositorSocket());
- 
-     QProcess *process = new QProcess(this);

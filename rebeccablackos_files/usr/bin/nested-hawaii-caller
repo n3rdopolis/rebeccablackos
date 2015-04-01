@@ -19,4 +19,5 @@
 #This script sets up a nested Hawaii session
 . /usr/bin/wlruntime_vars
 export QT_WAYLAND_FORCE_DPI=100
+export WAYLAND_GUEST=wayland-$RANDOM
 hawaii-session -m nested
