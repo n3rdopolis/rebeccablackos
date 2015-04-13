@@ -6,9 +6,11 @@ CompositorExec=/opt/bin/kwin_wayland
 CompositorSupportsWL=1
 CompositorSupportsKMS=0
 CompositorSupportsFB=0
+CompositorWLArguments=--windowed
 CompositorKMSArguments=
-CompositorFBArguments=
+CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
-AdditionalArguments=--xserver
+AdditionalArguments=--xwayland
+EnvironmentFile=/usr/share/wsessions.d/kdeplasma.environment
 
