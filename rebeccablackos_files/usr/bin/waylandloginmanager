@@ -183,6 +183,12 @@ function ReadEnvironmentFile
     VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
     VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
 
+    #Only expand some variables
+    if [[ $VARDATA == "\$WAYLAND_DISPLAY" ]]
+    then
+      VARDATA=$WAYLAND_DISPLAY
+    fi
+
     #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
     if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
     then
