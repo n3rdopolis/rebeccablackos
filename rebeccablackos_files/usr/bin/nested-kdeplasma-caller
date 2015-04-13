@@ -32,7 +32,7 @@ weston --no-config --shell=fullscreen-shell.so --socket=$HostID --backend=waylan
 HostServerPID=$!
 export WAYLAND_DISPLAY=$HostID
 export WAYLAND_SOCKET=$HostID
-kwin_wayland --xwayland  --windowed --socket=$SERVERID &
+kwin_wayland --xwayland  --windowed --socket=$ServerID &
 GuestServerPID=$!
 fg 2
 kill -15 $HostServerPID &> /dev/null
