@@ -51,7 +51,7 @@ REBUILDNEWREVISION=1
 function PackageDownloadSource
 {
 export GIT_SSL_NO_VERIFY=1
-git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/16/102816/4 && git checkout FETCH_HEAD
+git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/16/102816/5 && git checkout FETCH_HEAD
 patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
 }
 
