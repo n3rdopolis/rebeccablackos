@@ -78,6 +78,7 @@ compile_all build-only
 
 #Create a package with all the menu items.
 cd /tmp
+rm "/srcbuild/buildoutput/"rbos-menuitems*.deb
 checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-menuitems --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
