@@ -70,7 +70,11 @@ echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PG
 
 
 
-echo "If you want to build revisions specified in a list file from a previous build, overwrite "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt with the requested revisions file generated from a previous build, or a downloaded instance. 
+echo "If you want to build revisions specified in a list file from a previous build, overwrite 
+
+     "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt 
+
+with the requested revisions file generated from a previous build, or a downloaded instance. 
 
 Although the files have the CPU architecture as the suffix in the file name, there is nothing CPU dependant in them, and the suffix only exists to identify them. 
 For example RebeccaBlackOS_Revisions_amd64.txt can be used in "$BUILDLOCATION"/RebeccaBlackOS_Revisions_i386.txt 
