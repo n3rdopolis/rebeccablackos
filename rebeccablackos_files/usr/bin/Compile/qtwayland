@@ -52,7 +52,6 @@ function PackageDownloadSource
 {
 export GIT_SSL_NO_VERIFY=1
 git fetch https://codereview.qt-project.org/qt/qtwayland refs/changes/16/102816/5 && git checkout FETCH_HEAD
-patch -p1 < /usr/share/RBOS_PATCHES/qtwayland.diff
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
