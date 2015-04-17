@@ -1,0 +1,307 @@
+diff --git a/applets/pager/plugin/pager.cpp b/applets/pager/plugin/pager.cpp
+index 22c6ca2..2ddbc5c 100644
+--- a/applets/pager/plugin/pager.cpp
++++ b/applets/pager/plugin/pager.cpp
+@@ -72,9 +72,12 @@ Pager::Pager(QObject *parent)
+       , m_isX11(QX11Info::isPlatformX11())
+ #endif
+ {
+-    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
+-    m_rows = info.desktopLayoutColumnsRows().height();
+-
++#if HAVE_X11
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
++      m_rows = info.desktopLayoutColumnsRows().height();
++    }
++#endif
+     // initialize with a decent default
+     m_desktopCount = qMax(1, KWindowSystem::numberOfDesktops());
+ 
+@@ -352,9 +355,12 @@ void Pager::updateSizes()
+ 
+ void Pager::recalculateWindowRects()
+ {
+-    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
+-    m_rows = info.desktopLayoutColumnsRows().height();
+-
++#if HAVE_X11
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
++      m_rows = info.desktopLayoutColumnsRows().height();
++    }
++#endif
+     if (!m_validSizes) {
+         recalculateGridSizes(m_rows);
+         updateSizes();
+@@ -364,57 +370,59 @@ void Pager::recalculateWindowRects()
+     m_pagerModel->clearWindowRects();
+ 
+ #if HAVE_X11
+-    foreach (WId window, windows) {
+-        KWindowInfo info = KWindowSystem::windowInfo(window, NET::WMGeometry | NET::WMFrameExtents |
+-                                                             NET::WMWindowType | NET::WMDesktop |
+-                                                             NET::WMState | NET::XAWMState | NET::WMVisibleName);
+-        NET::WindowType type = info.windowType(NET::NormalMask | NET::DialogMask | NET::OverrideMask |
+-                                               NET::UtilityMask | NET::DesktopMask | NET::DockMask |
+-                                               NET::TopMenuMask | NET::SplashMask | NET::ToolbarMask |
+-                                               NET::MenuMask);
+-
+-        // the reason we don't check for -1 or Net::Unknown here is that legitimate windows, such
+-        // as some java application windows, may not have a type set for them.
+-        // apparently sane defaults on properties is beyond the wisdom of x11.
+-        if (type == NET::Desktop || type == NET::Dock || type == NET::TopMenu ||
+-            type == NET::Splash || type == NET::Menu || type == NET::Toolbar ||
+-            info.hasState(NET::SkipPager) || info.isMinimized()) {
+-            continue;
+-        }
+-
+-        //check activity
+-        NETWinInfo netInfo(QX11Info::connection(), window, QX11Info::appRootWindow(), 0, NET::WM2Activities);
+-        QString result(netInfo.activities());
+-        if (!result.isEmpty() && result != "00000000-0000-0000-0000-000000000000") {
+-            QStringList activities = result.split(',');
+-            if (!activities.contains(m_currentActivity)) {
+-                continue;
+-            }
+-        }
+-
+-        for (int i = 0; i < m_desktopCount; i++) {
+-            if (!info.isOnDesktop(i+1)) {
+-                continue;
+-            }
+-
+-            QRectF windowRect = info.frameGeometry();
+-
+-            if (KWindowSystem::mapViewport()) {
+-                windowRect = fixViewportPosition(windowRect.toRect());
+-            }
+-
+-            windowRect = QRectF(windowRect.x() * m_widthScaleFactor,
+-                                windowRect.y() * m_heightScaleFactor,
+-                                windowRect.width() * m_widthScaleFactor,
+-                                windowRect.height() * m_heightScaleFactor).toRect();
+-
+-            bool active = (window == KWindowSystem::activeWindow());
+-            int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
+-            int windowRectSize = qMin(windowRect.width(), windowRect.height());
+-            windowIconSize = qMax(windowIconSize, windowRectSize / 2);
+-            QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
+-            m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
+-        }
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      foreach (WId window, windows) {
++	  KWindowInfo info = KWindowSystem::windowInfo(window, NET::WMGeometry | NET::WMFrameExtents |
++							      NET::WMWindowType | NET::WMDesktop |
++							      NET::WMState | NET::XAWMState | NET::WMVisibleName);
++	  NET::WindowType type = info.windowType(NET::NormalMask | NET::DialogMask | NET::OverrideMask |
++						NET::UtilityMask | NET::DesktopMask | NET::DockMask |
++						NET::TopMenuMask | NET::SplashMask | NET::ToolbarMask |
++						NET::MenuMask);
++
++	  // the reason we don't check for -1 or Net::Unknown here is that legitimate windows, such
++	  // as some java application windows, may not have a type set for them.
++	  // apparently sane defaults on properties is beyond the wisdom of x11.
++	  if (type == NET::Desktop || type == NET::Dock || type == NET::TopMenu ||
++	      type == NET::Splash || type == NET::Menu || type == NET::Toolbar ||
++	      info.hasState(NET::SkipPager) || info.isMinimized()) {
++	      continue;
++	  }
++
++	  //check activity
++	  NETWinInfo netInfo(QX11Info::connection(), window, QX11Info::appRootWindow(), 0, NET::WM2Activities);
++	  QString result(netInfo.activities());
++	  if (!result.isEmpty() && result != "00000000-0000-0000-0000-000000000000") {
++	      QStringList activities = result.split(',');
++	      if (!activities.contains(m_currentActivity)) {
++		  continue;
++	      }
++	  }
++
++	  for (int i = 0; i < m_desktopCount; i++) {
++	      if (!info.isOnDesktop(i+1)) {
++		  continue;
++	      }
++
++	      QRectF windowRect = info.frameGeometry();
++
++	      if (KWindowSystem::mapViewport()) {
++		  windowRect = fixViewportPosition(windowRect.toRect());
++	      }
++
++	      windowRect = QRectF(windowRect.x() * m_widthScaleFactor,
++				  windowRect.y() * m_heightScaleFactor,
++				  windowRect.width() * m_widthScaleFactor,
++				  windowRect.height() * m_heightScaleFactor).toRect();
++
++	      bool active = (window == KWindowSystem::activeWindow());
++	      int windowIconSize = KIconLoader::global()->currentSize(KIconLoader::Small);
++	      int windowRectSize = qMin(windowRect.width(), windowRect.height());
++	      windowIconSize = qMax(windowIconSize, windowRectSize / 2);
++	      QPixmap icon = KWindowSystem::icon(info.win(), windowIconSize, windowIconSize, true);
++	      m_pagerModel->appendWindowRect(i, window, windowRect, active, icon, info.visibleName());
++	  }
++      }
+     }
+ #endif
+ }
+@@ -441,18 +449,21 @@ void Pager::numberOfDesktopsChanged(int num)
+     if (num < 1) {
+         return; // refuse to update to zero desktops
+     }
+-
+-    NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
+-    m_rows = info.desktopLayoutColumnsRows().height();
+-
+-    if (num != m_desktopCount) {
+-        m_desktopCount = num;
+-        emit desktopCountChanged();
++#if HAVE_X11
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      NETRootInfo info(QX11Info::connection(), NET::NumberOfDesktops | NET::DesktopNames, NET::WM2DesktopLayout);
++      m_rows = info.desktopLayoutColumnsRows().height();
++
++      if (num != m_desktopCount) {
++	  m_desktopCount = num;
++	  emit desktopCountChanged();
++      }
++
++      m_pagerModel->clearDesktopRects();
++      recalculateGridSizes(m_rows);
++      recalculateWindowRects();
+     }
+-
+-    m_pagerModel->clearDesktopRects();
+-    recalculateGridSizes(m_rows);
+-    recalculateWindowRects();
++#endif
+ }
+ 
+ void Pager::desktopNamesChanged()
+@@ -496,45 +507,47 @@ void Pager::startTimerFast()
+ void Pager::moveWindow(int window, double x, double y, int targetDesktop, int sourceDesktop)
+ {
+ #if HAVE_X11
+-    if (!m_isX11) {
+-        return;
+-    }
+-    WId windowId = (WId) window;
+-
+-    QPointF dest = QPointF(x, y) - m_pagerModel->desktopRectAt(targetDesktop).topLeft();
+-
+-    dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
+-
+-    // don't move windows to negative positions
+-    dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
+-
+-    // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
+-    NETRootInfo info(QX11Info::connection(), 0);
+-    int flags = (0x20 << 12) | (0x03 << 8) | 1; // from tool, x/y, northwest gravity
+-
+-    if (!KWindowSystem::mapViewport()) {
+-        KWindowInfo windowInfo = KWindowSystem::windowInfo(windowId, NET::WMDesktop | NET::WMState);
+-
+-        if (!windowInfo.onAllDesktops()) {
+-            KWindowSystem::setOnDesktop(windowId, targetDesktop+1);
+-        }
+-
+-        // only move the window if it is not full screen and if it is kept within the same desktop
+-        // moving when dropping between desktop is too annoying due to the small drop area.
+-        if (!(windowInfo.state() & NET::FullScreen) &&
+-            (targetDesktop == sourceDesktop || windowInfo.onAllDesktops())) {
+-            QPoint d = dest.toPoint();
+-            info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
+-        }
+-    } else {
+-        // setOnDesktop() with viewports is also moving a window, and since it takes a moment
+-        // for the WM to do the move, there's a race condition with figuring out how much to move,
+-        // so do it only as one move
+-        dest += KWindowSystem::desktopToViewport(targetDesktop+1, false);
+-        QPoint d = KWindowSystem::constrainViewportRelativePosition(dest.toPoint());
+-        info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      if (!m_isX11) {
++	  return;
++      }
++      WId windowId = (WId) window;
++
++      QPointF dest = QPointF(x, y) - m_pagerModel->desktopRectAt(targetDesktop).topLeft();
++
++      dest = QPointF(dest.x()/m_widthScaleFactor, dest.y()/m_heightScaleFactor);
++
++      // don't move windows to negative positions
++      dest = QPointF(qMax(dest.x(), qreal(0.0)), qMax(dest.y(), qreal(0.0)));
++
++      // use _NET_MOVERESIZE_WINDOW rather than plain move, so that the WM knows this is a pager request
++      NETRootInfo info(QX11Info::connection(), 0);
++      int flags = (0x20 << 12) | (0x03 << 8) | 1; // from tool, x/y, northwest gravity
++
++      if (!KWindowSystem::mapViewport()) {
++	  KWindowInfo windowInfo = KWindowSystem::windowInfo(windowId, NET::WMDesktop | NET::WMState);
++
++	  if (!windowInfo.onAllDesktops()) {
++	      KWindowSystem::setOnDesktop(windowId, targetDesktop+1);
++	  }
++
++	  // only move the window if it is not full screen and if it is kept within the same desktop
++	  // moving when dropping between desktop is too annoying due to the small drop area.
++	  if (!(windowInfo.state() & NET::FullScreen) &&
++	      (targetDesktop == sourceDesktop || windowInfo.onAllDesktops())) {
++	      QPoint d = dest.toPoint();
++	      info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
++	  }
++      } else {
++	  // setOnDesktop() with viewports is also moving a window, and since it takes a moment
++	  // for the WM to do the move, there's a race condition with figuring out how much to move,
++	  // so do it only as one move
++	  dest += KWindowSystem::desktopToViewport(targetDesktop+1, false);
++	  QPoint d = KWindowSystem::constrainViewportRelativePosition(dest.toPoint());
++	  info.moveResizeWindowRequest(windowId, flags, d.x(), d.y(), 0, 0);
++      }
++      m_timer->start();
+     }
+-    m_timer->start();
+ #else
+     Q_UNUSED(window)
+     Q_UNUSED(x)
+@@ -547,22 +560,24 @@ void Pager::moveWindow(int window, double x, double y, int targetDesktop, int so
+ void Pager::changeDesktop(int newDesktop)
+ {
+ #if HAVE_X11
+-    if (!m_isX11) {
+-        return;
+-    }
+-    if (m_currentDesktop == newDesktop+1) {
+-        // toogle the desktop or the dashboard
+-        if (m_currentDesktopSelected == ShowDesktop) {
+-            NETRootInfo info(QX11Info::connection(), 0);
+-            m_desktopDown = !m_desktopDown;
+-            info.setShowingDesktop(m_desktopDown);
+-        } else if (m_currentDesktopSelected == ShowDashboard) {
+-            QDBusInterface plasmaApp("org.kde.plasma-desktop", "/App");
+-            plasmaApp.call("toggleDashboard");
+-        }
+-    } else {
+-        KWindowSystem::setCurrentDesktop(newDesktop + 1);
+-        setCurrentDesktop(newDesktop + 1);
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      if (!m_isX11) {
++	  return;
++      }
++      if (m_currentDesktop == newDesktop+1) {
++	  // toogle the desktop or the dashboard
++	  if (m_currentDesktopSelected == ShowDesktop) {
++	      NETRootInfo info(QX11Info::connection(), 0);
++	      m_desktopDown = !m_desktopDown;
++	      info.setShowingDesktop(m_desktopDown);
++	  } else if (m_currentDesktopSelected == ShowDashboard) {
++	      QDBusInterface plasmaApp("org.kde.plasma-desktop", "/App");
++	      plasmaApp.call("toggleDashboard");
++	  }
++      } else {
++	  KWindowSystem::setCurrentDesktop(newDesktop + 1);
++	  setCurrentDesktop(newDesktop + 1);
++      }
+     }
+ #else
+     Q_UNUSED(newDesktop)

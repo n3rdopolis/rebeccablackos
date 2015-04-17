@@ -1,0 +1,47 @@
+diff --git a/src/kidletime.cpp b/src/kidletime.cpp
+index f38ae46..16eced2 100644
+--- a/src/kidletime.cpp
++++ b/src/kidletime.cpp
+@@ -187,17 +187,21 @@ void KIdleTimePrivate::loadSystem()
+ 
+ #if HAVE_XSYNC
+ #if HAVE_XSCREENSAVER
+-    if (XSyncBasedPoller::instance()->isAvailable()) {
+-        poller = XSyncBasedPoller::instance();
+-    } else {
+-        poller = new XScreensaverBasedPoller();
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      if (XSyncBasedPoller::instance()->isAvailable()) {
++	  poller = XSyncBasedPoller::instance();
++      } else {
++	  poller = new XScreensaverBasedPoller();
++      }
+     }
+ #else
+     poller = XSyncBasedPoller::instance();
+ #endif
+ #else
+ #if HAVE_XSCREENSAVER
+-    poller = new XScreensaverBasedPoller();
++    if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++      poller = new XScreensaverBasedPoller();
++    }
+ #endif
+ #endif
+ 
+@@ -222,11 +226,13 @@ void KIdleTimePrivate::unloadCurrentSystem()
+     if (!poller.isNull()) {
+         poller.data()->unloadPoller();
+ #if HAVE_XSYNC
+-        if (qobject_cast<XSyncBasedPoller *>(poller.data()) == 0) {
++	if (QGuiApplication::platformName() == QStringLiteral("xcb")) {
++	  if (qobject_cast<XSyncBasedPoller *>(poller.data()) == 0) {
+ #endif
+             poller.data()->deleteLater();
+ #if HAVE_XSYNC
+-        }
++	    }
++	  }
+ #endif
+     }
+ }
