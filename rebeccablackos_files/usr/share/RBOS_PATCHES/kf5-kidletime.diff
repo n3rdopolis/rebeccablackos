@@ -35,7 +35,7 @@ index d3f0cfd..4a1fafe 100644
 +/* Define if you have X11 */
 +#cmakedefine01 HAVE_X11
 diff --git a/src/kidletime.cpp b/src/kidletime.cpp
-index f38ae46..8241851 100644
+index f38ae46..5b0d0f8 100644
 --- a/src/kidletime.cpp
 +++ b/src/kidletime.cpp
 @@ -40,6 +40,9 @@
@@ -48,59 +48,42 @@ index f38ae46..8241851 100644
  
  class KIdleTimeHelper
  {
-@@ -85,6 +88,11 @@ public:
- KIdleTime::KIdleTime()
-     : QObject(0)
-     , d_ptr(new KIdleTimePrivate())
-+#if HAVE_X11
-+    , m_isX11(QX11Info::isPlatformX11())
-+#else
-+    , m_isX11(false)
-+#endif
- {
-     Q_ASSERT(!s_globalKIdleTime()->q);
-     s_globalKIdleTime()->q = this;
-@@ -187,17 +195,29 @@ void KIdleTimePrivate::loadSystem()
+@@ -187,17 +190,23 @@ void KIdleTimePrivate::loadSystem()
  
  #if HAVE_XSYNC
  #if HAVE_XSCREENSAVER
 -    if (XSyncBasedPoller::instance()->isAvailable()) {
 -        poller = XSyncBasedPoller::instance();
-+    if (m_isX11) {
+-    } else {
+-        poller = new XScreensaverBasedPoller();
++    if (QX11Info::isPlatformX11()) {
 +      if (XSyncBasedPoller::instance()->isAvailable()) {
 +	  poller = XSyncBasedPoller::instance();
 +      } else {
 +	  poller = new XScreensaverBasedPoller();
 +      }
-     } else {
--        poller = new XScreensaverBasedPoller();
-+      poller = new AbstractSystemPoller();
      }
  #else
 -    poller = XSyncBasedPoller::instance();
-+    if (m_isX11) {
++    if (QX11Info::isPlatformX11()) {
 +      poller = XSyncBasedPoller::instance();
-+    } else {
-+      poller = new AbstractSystemPoller();
 +    }
  #endif
  #else
  #if HAVE_XSCREENSAVER
 -    poller = new XScreensaverBasedPoller();
-+    if (m_isX11) {
++    if (QX11Info::isPlatformX11()) {
 +      poller = new XScreensaverBasedPoller();
-+    } else {
-+      poller = new AbstractSystemPoller();
 +    }
  #endif
  #endif
  
-@@ -222,11 +242,13 @@ void KIdleTimePrivate::unloadCurrentSystem()
+@@ -222,11 +231,13 @@ void KIdleTimePrivate::unloadCurrentSystem()
      if (!poller.isNull()) {
          poller.data()->unloadPoller();
  #if HAVE_XSYNC
 -        if (qobject_cast<XSyncBasedPoller *>(poller.data()) == 0) {
-+	if (m_isX11) {
++	if (QX11Info::isPlatformX11()) {
 +	  if (qobject_cast<XSyncBasedPoller *>(poller.data()) == 0) {
  #endif
              poller.data()->deleteLater();
@@ -111,16 +94,3 @@ index f38ae46..8241851 100644
  #endif
      }
  }
-diff --git a/src/kidletime.h b/src/kidletime.h
-index 0369f29..fcdf79e 100644
---- a/src/kidletime.h
-+++ b/src/kidletime.h
-@@ -189,7 +189,7 @@ private:
- 
-     Q_PRIVATE_SLOT(d_func(), void _k_resumingFromIdle())
-     Q_PRIVATE_SLOT(d_func(), void _k_timeoutReached(int))
--
-+    bool m_isX11;
- };
- 
- #endif /* KIDLETIME_H */
