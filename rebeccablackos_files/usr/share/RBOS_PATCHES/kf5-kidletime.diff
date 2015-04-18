@@ -35,7 +35,7 @@ index d3f0cfd..4a1fafe 100644
 +/* Define if you have X11 */
 +#cmakedefine01 HAVE_X11
 diff --git a/src/kidletime.cpp b/src/kidletime.cpp
-index f38ae46..5b0d0f8 100644
+index f38ae46..92314fc 100644
 --- a/src/kidletime.cpp
 +++ b/src/kidletime.cpp
 @@ -40,6 +40,9 @@
@@ -48,25 +48,28 @@ index f38ae46..5b0d0f8 100644
  
  class KIdleTimeHelper
  {
-@@ -187,17 +190,23 @@ void KIdleTimePrivate::loadSystem()
+@@ -187,17 +190,29 @@ void KIdleTimePrivate::loadSystem()
  
  #if HAVE_XSYNC
  #if HAVE_XSCREENSAVER
 -    if (XSyncBasedPoller::instance()->isAvailable()) {
 -        poller = XSyncBasedPoller::instance();
--    } else {
--        poller = new XScreensaverBasedPoller();
 +    if (QX11Info::isPlatformX11()) {
 +      if (XSyncBasedPoller::instance()->isAvailable()) {
 +	  poller = XSyncBasedPoller::instance();
 +      } else {
-+	  poller = new XScreensaverBasedPoller();
++	  poller = 0;
 +      }
+     } else {
+-        poller = new XScreensaverBasedPoller();
++      poller = 0;
      }
  #else
 -    poller = XSyncBasedPoller::instance();
 +    if (QX11Info::isPlatformX11()) {
 +      poller = XSyncBasedPoller::instance();
++    } else {
++      poller = 0;
 +    }
  #endif
  #else
@@ -74,11 +77,13 @@ index f38ae46..5b0d0f8 100644
 -    poller = new XScreensaverBasedPoller();
 +    if (QX11Info::isPlatformX11()) {
 +      poller = new XScreensaverBasedPoller();
++    } else {
++     poller = new WidgetBasedPoller();
 +    }
  #endif
  #endif
  
-@@ -222,11 +231,13 @@ void KIdleTimePrivate::unloadCurrentSystem()
+@@ -222,11 +237,13 @@ void KIdleTimePrivate::unloadCurrentSystem()
      if (!poller.isNull()) {
          poller.data()->unloadPoller();
  #if HAVE_XSYNC
