@@ -73,6 +73,9 @@ function UserSessionWorker
   #Enable job control
   set -m
 
+  #prevent from being killed with CTRL+C
+  trap '' 2
+
   #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
   USER=$(id -u)
   export $(exec dbus-launch)
