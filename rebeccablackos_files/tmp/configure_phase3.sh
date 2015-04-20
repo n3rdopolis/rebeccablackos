@@ -83,6 +83,11 @@ checkinstall -y -D --nodoc --dpkgflags=--force-overwrite --install=yes --backup=
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
+#Disable some KDE services for now from loading in kded5, as they make X calls and crash it
+sed -i 's/X-KDE-Kded-autoload=true/X-KDE-Kded-autoload=false/g' /opt/share/kservices5/kded/keyboard.desktop
+sed -i 's/X-KDE-Kded-autoload=true/X-KDE-Kded-autoload=false/g' /opt/share/kservices5/kded/khotkeys.desktop
+sed -i 's/X-KDE-Kded-autoload=true/X-KDE-Kded-autoload=false/g' /opt/share/kservices5/kded/powerdevil.desktop
+
 #Set the cursor theme
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
