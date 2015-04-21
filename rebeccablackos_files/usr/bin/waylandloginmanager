@@ -641,8 +641,8 @@ function ChooseSessionType
       echo "$CompositorExec"
       echo "$BackendArguments"
       echo "$SessionArgument"
-      echo "$AdditionalArguments"
       echo "$CompositorDisplayArgument"
+      echo "$AdditionalArguments"
       echo "$EnvironmentFile"
       echo ""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"
       echo "$SessionName"
@@ -685,9 +685,9 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--log=\$HOME/weston.log"
-      WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -703,9 +703,9 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--log=\$HOME/weston.log"
-      WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--log=\$HOME/weston.log"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
