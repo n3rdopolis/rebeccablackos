@@ -62,12 +62,6 @@ then
   gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close &>/dev/null
 fi
 
-#Build the KDE configuration database
-if [[ ! -e $HOME/.cache/ksycoca5 ]]
-then
-  kbuildsycoca5 &>/dev/null
-fi
-
 #Build RDP keys for weston-share
 #Only generate the key if it doesn't exist
 if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
