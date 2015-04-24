@@ -1,15 +1,14 @@
 [Desktop Entry]
 Enabled=1
 Type=WSession
-Name=SWC Session
-CompositorExec=/opt/bin/swc-launch
+Name=Orbment
+CompositorExec=/opt/bin/orbment
+CompositorSupportsWL=0
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
+CompositorWLArguments=
 CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=-- /usr/bin/swc-wmcaller
-NeedsFile=/opt/bin/swc-wm
-EnvironmentFile=
-
+AdditionalArguments=

@@ -254,10 +254,8 @@ gst-plugins-ugly
 gst-plugins-gl
 gst-libav
 glmark
-wld
-dmenu
-st
-swc
+bemenu
+orbment
 " | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
