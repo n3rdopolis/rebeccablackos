@@ -552,7 +552,7 @@ function DisplayServerWait
 function ChooseSessionType
 {
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
-  export SESSIONID=$AllSessions
+  export SESSIONID=${AllSessions}000
   export WAYLAND_HOST=wlhost-$SESSIONID
   export WAYLAND_GUEST=wayland-$SESSIONID
 
