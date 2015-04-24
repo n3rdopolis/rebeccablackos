@@ -11,6 +11,6 @@ CompositorKMSArguments=--drm --libinput
 CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
-AdditionalArguments=--xwayland
+AdditionalArguments=--xwayland /usr/bin/xwaylandapp
 EnvironmentFile=/usr/share/wsessions.d/kdeplasma.environment
 

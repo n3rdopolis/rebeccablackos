@@ -21,14 +21,14 @@
 export KWIN_COMPOSE=Q
 export KWIN_USE_BUFFER_AGE=0
 SERVERID=wayland-$RANDOM
-
+export APPMENU_DO_LOOP=1
 
 RANDOMNUMBER=$RANDOM
 HostID=wlhost-$RANDOMNUMBER
 ServerID=wayland-$RANDOMNUMBER
 set -m
 export $(exec ck-launch-session dbus-launch)
-weston --no-config --shell=fullscreen-shell.so --socket=$HostID --backend=wayland-backend.so &
+weston --no-config --shell=fullscreen-shell.so --socket=$HostID --backend=wayland-backend.so /usr/bin/xwaylandapp &
 HostServerPID=$!
 export WAYLAND_DISPLAY=$HostID
 export WAYLAND_SOCKET=$HostID

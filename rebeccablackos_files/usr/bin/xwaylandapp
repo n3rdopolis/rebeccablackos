@@ -27,5 +27,23 @@ unset SDL_VIDEODRIVER
 unset ECORE_EVAS_ENGINE
 unset GST_GL_WINDOW
 unset CLUTTER_INPUT_BACKEND
-"$@"
-exit $?
+
+#If no application specified, show a menu
+if [[ ! -z $1 ]]
+then
+  "$@"
+  exit $?
+else
+  #If APPMENU_DO_LOOP is specified, then the appmenu is launched after every application it launches
+  if [[ $APPMENU_DO_LOOP == 1 ]]
+  then
+    unset APPMENU_DO_LOOP
+    while [ 1 ]
+    do
+      kioclient5 appmenu
+      sleep 1
+    done
+  else
+    kioclient5 appmenu
+  fi
+fi
