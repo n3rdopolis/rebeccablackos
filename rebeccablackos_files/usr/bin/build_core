@@ -192,7 +192,7 @@ function DownloadGIT()
   git config user.email rbos@rbos
   git submodule sync --recursive
   git submodule deinit .
-  git submodule update --recursive --force
+  git submodule update --recursive --force --init
   git pull -f
 
   #Get the number of revisions specified.
