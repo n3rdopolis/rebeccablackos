@@ -24,7 +24,7 @@ The path to the Wayland server binary.
 
 
 CompositorSupports(BACKEND):
-Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 06 and 06 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 would be changed to CompositorSupportsFB=0
+Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 06, 07, and 08 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
   Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manger.
@@ -37,14 +37,14 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
   If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
 
 Compositor(BACKEND)Arguments:
-If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 08 and 09 on the example below. *These are optional*
+If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 09 and 10 on the example below. *These are optional*
 
 CompositorDisplayArgument:
 This specifies how the compositor is specified what to use for WAYLAND_DISPLAY in weston it is --socket= . waylandloginmanager then automatically appends the session ID after it, so it doesn't need any variables. it only appends it if CompositorDisplayArgument is specified
 
   Not all servers need this so this is optional. some servers have WAYLAND_DISPLAY specified based on what it's exported as, which waylandloginmanager supports
 
-  See line 10 in the example
+  See line 11 in the example
 
 SessionArgument:
 if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or hawaii shell module opposed to the weston-desktop-shell. See line 11 in the example
@@ -54,11 +54,11 @@ IsFallbackSession:
 This specifies if the current session is a fallback session, so that the session can be handled in a paticular way, for example sessions that use a fullscreen-shell enabled Weston, but to have the host weston server run using the pixman renderer.
 
 AdditionalArguments:
-Any other arguments that should be passed to the server, but are more generic, for example in line 12 in the example, it specifies where weston should log. See line 12 in the example.
+Any other arguments that should be passed to the server, but are more generic, for example in line 13 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
 
-NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 13 and 14 in the example
+NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 14 and 15 in the example
 
-EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 15 in the example
+EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 16 in the example
 ----------------------------------------------
 
 An example:
