@@ -24,9 +24,17 @@ The path to the Wayland server binary.
 
 
 CompositorSupports(BACKEND):
-Currently there are two case sensitive backend types KMS (Kernel Mode Setting) and FB (framebuffer), so the two lines are CompositorSupportsKMS and CompositorSupportsFB, as shown on lines 06 and 06 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 would be changed to CompositorSupportsFB=0
+Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 06 and 06 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 would be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
+  Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manger.
+
+  Currently, the backend selection preference is to check KMS, then WL, then lastly FB.
+
+  If for example a session only supports FB backends, and the hardware supports FB and KMS, the session will be opened using the FB backend.
+  If for example a session supports KMS and FB, and the hardware only supports FB backends, then the session will be opened with the FB backend.
+  If for example a session only supports KMS, but the hardware only supports FB, then the session will not be available for selection.
+  If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
 
 Compositor(BACKEND)Arguments:
 If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 08 and 09 on the example below. *These are optional*
@@ -62,14 +70,15 @@ An example:
 05.|    CompositorExec=/opt/bin/weston
 06.|    CompositorSupportsKMS=1
 07.|    CompositorSupportsFB=1
-08.|    CompositorKMSArguments=--backend=drm-backend.so
-09.|    CompositorFBArguments=--backend=fbdev-backend.so
-10.|    CompositorDisplayArgument=--socket=
-11.|    SessionArgument=--modules=xwayland.so,cms-colord.so
-12.|    AdditionalArguments=--log=$HOME/weston.log
-13.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
-14.|    NeedsFile=/opt/bin/weston
-15.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+08.|    CompositorSupportsWL=0
+09.|    CompositorKMSArguments=--backend=drm-backend.so
+10.|    CompositorFBArguments=--backend=fbdev-backend.so
+11.|    CompositorDisplayArgument=--socket=
+12.|    SessionArgument=--modules=xwayland.so,cms-colord.so
+13.|    AdditionalArguments=--log=$HOME/weston.log
+14.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
+15.|    NeedsFile=/opt/bin/weston
+16.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
 ----------------------------------------------
 
 
@@ -79,7 +88,7 @@ Section 2:----------------------------------------------
 The environment file can be placed anywhere, as long as it is specified by the EnvironmentFile value in the wsession file. While the first line must be [EnvironmentFile], an example looks like this 
 The environment file is not executable, but *parsed* and variables are not expanded, and has limited support for conditionals based on the backend type. See line 1 in the example
 
-Currently there are two case sensitive backend types KMS (Kernel Mode Setting) and FB (framebuffer)
+Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted) and FB (framebuffer)
 
 ----------------------------------------------
 1.|    [EnvironmentFile]
