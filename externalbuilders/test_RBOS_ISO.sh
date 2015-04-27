@@ -326,6 +326,7 @@ nested-hawaii-caller
 nested-orbital-caller
 nested-enlightenment-caller
 nested-gnomeshell-caller
+nested-kdeplasma-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
