@@ -1,7 +1,7 @@
 [Unit]
 Description=The Wayland Login Manager for RebeccaBlackOS
 After=
-
+Conflicts=plymouth-quit.service
 
 [Service]
 ExecStart=/usr/bin/waylandloginmanager
