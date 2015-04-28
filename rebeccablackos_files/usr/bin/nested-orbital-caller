@@ -21,4 +21,4 @@
 ServerID=wayland-$RANDOM
 export $(exec dbus-launch)
 export QT_WAYLAND_FORCE_DPI=100
-weston --socket=$ServerID --modules=xwayland.so  --shell=/opt/lib/nuclear-shell/nuclear-desktop-shell.so --nuclear-client=/opt/libexec/startorbital
+orbital --socket $ServerID

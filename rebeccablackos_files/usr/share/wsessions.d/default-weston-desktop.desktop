@@ -10,5 +10,4 @@ CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=xwayland.so,screen-share.so
 AdditionalArguments=--log=$HOME/weston.log
-NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
 NeedsFile=/opt/bin/weston
