@@ -21,7 +21,6 @@
 export KWIN_COMPOSE=Q
 export KWIN_USE_BUFFER_AGE=0
 SERVERID=wayland-$RANDOM
-export APPMENU_DO_LOOP=1
 
 RANDOMNUMBER=$RANDOM
 HostID=wlhost-$RANDOMNUMBER
@@ -32,7 +31,7 @@ weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
 HostServerPID=$!
 export WAYLAND_DISPLAY=$HostID
 export WAYLAND_SOCKET=$HostID
-kwin_wayland --xwayland  --windowed --socket=$ServerID /usr/bin/xwaylandapp &
+kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/startkde &
 GuestServerPID=$!
 fg 2
 kill -15 $HostServerPID &> /dev/null
