@@ -20,4 +20,4 @@
 export $(exec dbus-launch)
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
-papyros-shell -platform wayland
+greenisland-launcher --fullscreen-shell -s io.papyros.shell
