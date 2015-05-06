@@ -26,7 +26,6 @@ RANDOMNUMBER=$RANDOM
 HostID=wlhost-$RANDOMNUMBER
 ServerID=wayland-$RANDOMNUMBER
 set -m
-export $(exec ck-launch-session dbus-launch)
 weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
 HostServerPID=$!
 export WAYLAND_DISPLAY=$HostID

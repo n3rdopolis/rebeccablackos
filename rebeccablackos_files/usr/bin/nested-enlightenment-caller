@@ -20,5 +20,4 @@
 . /usr/bin/wlruntime_vars
 export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
-export $(exec dbus-launch)
 enlightenment_start

@@ -19,6 +19,5 @@
 #This script sets up a nested Orbital session
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
-export $(exec dbus-launch)
 export QT_WAYLAND_FORCE_DPI=100
 orbital --socket $ServerID
