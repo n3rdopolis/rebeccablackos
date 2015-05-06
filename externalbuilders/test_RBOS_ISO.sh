@@ -31,10 +31,9 @@ then
 fi
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
-unset SUDO_USER
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
-if [[ $UID != 0 ]]
+if [[ $UID != 0 || -z $SUDO_USER ]]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -45,7 +44,7 @@ then
     then
       gksudo $0 "$MOUNTISO"
     else
-      zenity --info --text "This Needs to be run as root"
+      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login"
     fi
   else
     sudo $0 "$MOUNTISO"
@@ -127,10 +126,10 @@ then
   then
     echo "Cleaning up..."
     #set the xserver security back to what it should be
-    xhost -LOCAL:
+    #xhost -LOCAL:
 
     #don't allow access to the card for the testuser
-    setfacl -x u:999999999 /dev/dri/card*
+    #setfacl -x u:$SUDO_UID /dev/dri/card*
 
     #unmount the filesystems used by the CD
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
@@ -171,11 +170,11 @@ if [[ $XALIVE == 0 ]]
 then
   zenity --info --text "This will call a chroot shell from an iso.
 
-  The password for the test user is no password. Just hit enter if you actually need it."
+  The password for the test user is the same password as the sudo users. Just hit enter if you actually need it."
 else
   echo "This will call a chroot shell from an iso.
 
-The password for the test user is no password. Just hit enter if you actually need it.
+The password for the test user is the same password as the sudo users. Just hit enter if you actually need it.
 
 Press enter"
   read a
@@ -288,10 +287,10 @@ mount --rbind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 mount --rbind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 #allow all local connections to the xserver
-xhost +LOCAL:
+#xhost +LOCAL:
 
 #allow testuser to access the system
-setfacl -m u:999999999:rwx /dev/dri/card*
+#setfacl -m u:$SUDO_UID:rwx /dev/dri/card*
 
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
@@ -306,14 +305,14 @@ fi
 if [[ ! -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
 then
   #Configure test system
-  mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
-  chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
-  chown 999999999 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/999999999
+  mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  chown $SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
   rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
   cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g 999999999 livetest
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p "\$1\$LmxKgiWh\$XJQxuFvmcfFoFpPTVlboC1" -s /bin/bash -G admin,plugdev -u 999999999 livetest 
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev -u $SUDO_UID livetest 
   mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
