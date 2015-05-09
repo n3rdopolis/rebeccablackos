@@ -170,11 +170,11 @@ if [[ $XALIVE == 0 ]]
 then
   zenity --info --text "This will call a chroot shell from an iso.
 
-  The password for the test user is the same password as the sudo users. Just hit enter if you actually need it."
+  The password for the test user is the same password as the sudo users."
 else
   echo "This will call a chroot shell from an iso.
 
-The password for the test user is the same password as the sudo users. Just hit enter if you actually need it.
+The password for the test user is the same password as the sudo users.
 
 Press enter"
   read a
