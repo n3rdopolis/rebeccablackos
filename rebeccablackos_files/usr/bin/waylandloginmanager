@@ -105,7 +105,7 @@ function UserSessionWorker
   #if the user booted with wlmforceswrender, force software rendering to be enabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
-    export EGL_SOFTWARE=1
+    export LIBGL_ALWAYS_SOFTWARE=1
   fi
 
 
@@ -296,7 +296,7 @@ function PrepareLoginManager
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
-    export EGL_SOFTWARE=1
+    export LIBGL_ALWAYS_SOFTWARE=1
   fi
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
