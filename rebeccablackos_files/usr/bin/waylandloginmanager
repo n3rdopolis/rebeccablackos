@@ -111,7 +111,7 @@ function UserSessionWorker
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
   then
-    vblank_mode=0
+    export vblank_mode=0
   fi
 
   if [[ $BackendType == WL ]]
@@ -306,7 +306,7 @@ function PrepareLoginManager
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
   then
-    vblank_mode=0
+    export vblank_mode=0
   fi
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
