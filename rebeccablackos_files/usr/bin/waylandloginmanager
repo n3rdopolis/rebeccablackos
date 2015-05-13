@@ -108,6 +108,11 @@ function UserSessionWorker
     export LIBGL_ALWAYS_SOFTWARE=1
   fi
 
+  #if the user booted with wlmforcevblankoff, force vblank to be disabled
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
+  then
+    vblank_mode=0
+  fi
 
   if [[ $BackendType == WL ]]
   then
@@ -297,6 +302,11 @@ function PrepareLoginManager
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
+  fi
+  #if the user booted with wlmforcevblankoff, force vblank to be disabled
+  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
+  then
+    vblank_mode=0
   fi
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
