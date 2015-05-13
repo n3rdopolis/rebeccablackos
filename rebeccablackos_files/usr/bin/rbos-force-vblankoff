@@ -41,7 +41,7 @@ sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring you
 
 #Ask the user what to do
 FORCEVB=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force/unforce vblank?
-Current Option: $CURRENTOPTION" 20 60 20 1 "Force vblank on" off 0 "Unforce vblank, and use default" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
+Current Option: $CURRENTOPTION" 20 60 20 1 "Force vblank to be off" off 0 "Unforce vblank, and use default" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 
 #If the user hit OK, and didn't select "leave unchanged"

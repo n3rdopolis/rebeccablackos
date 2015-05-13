@@ -85,8 +85,8 @@ do
   then
     systemctl restart waylandloginmanager.service
   fi
-  if [[ $Option != 3 && $Option != 4 && $Option != 5  ]]
+  if [[ $Option != 5 && $Option != 6 && $Option != 7  ]]
   then
-    sudo -E -u $DIALOGUSER dialog --no-ok --no-cancel --pause "Wait..." 8 14 3
+    sudo -E -u $DIALOGUSER dialog --no-ok --no-cancel --pause "Wait..." 8 14 1
   fi
 done
