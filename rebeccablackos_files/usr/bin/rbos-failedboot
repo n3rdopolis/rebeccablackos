@@ -28,15 +28,15 @@ then
 fi
 
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE == overlayfs ]]
+if [[ $FSTYPE =~ overlay ]]
 then
   ISLIVE=1
 fi
 
 #Ask the user what to do
-while [[ $Option != 4 && $Option != 5 && $Option != 6 ]]
+while [[ $Option != 5 && $Option != 6 && $Option != 7 ]]
 do
-  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Force or unforce software rendering" off 4 "Restart the system" off 5 "Exit this menu" off 6 "Restart the login manager" off --stdout 2>/dev/tty)
+  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Force or unforce software rendering" off 4 "Force or unforce disabling vblank" off 5 "Restart the system" off 6 "Exit this menu" off 7 "Restart the login manager" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
     sudo -E -u $DIALOGUSER dialog --textbox /var/log/loginmanagerdisplay.log 500 500
@@ -66,14 +66,22 @@ do
     fi
   elif [[ $Option == 4 ]]
   then
+    if [[ $ISLIVE != 1 ]]
+    then
+      rbos-force-vblankoff
+    else
+      sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
+    fi
+  elif [[ $Option == 5 ]]
+  then
     sudo -E -u $DIALOGUSER dialog --msgbox "Will now restart..." 20 50
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     exit
-  elif [[ $Option == 5 ]]
+  elif [[ $Option == 6 ]]
   then
     chvt 1
     exit
-  elif [[ $Option == 6 ]]
+  elif [[ $Option == 7 ]]
   then
     systemctl restart waylandloginmanager.service
   fi

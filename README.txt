@@ -44,6 +44,11 @@ BOOT OPTIONS:
             wlmdebug: Force more sysrq trigger options to be availible, then the more secure default. Allow the option for a graphical login terminal to be started on the wayland login manager's display. This option is not settable from rbos-failedboot as it's for more advanced users
 	    wlmdebuginsecure: This option is the same as wlmdebug, except the diagostic terminal is a root terminal, instead of a login terminal
 
+      When installed, and you are unable to use a UI, you can use the commands:
+	    rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
+	    rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
+	    rbos-force-vblankoff: Wizard for setting wlmforcevblankoff option to the kernel commandline with grub
+
 
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
