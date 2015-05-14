@@ -313,8 +313,6 @@ function PrepareLoginManager
   then
     export vblank_mode=0
   fi
-  #Disable hardware cursors in Weston
-  export WESTON_FORCE_SW_CURSORS=1
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
   #default the number of sessions registered to be 0 if unset
