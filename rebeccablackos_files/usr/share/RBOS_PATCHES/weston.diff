@@ -1,42 +1,60 @@
+diff --git a/man/weston.man b/man/weston.man
+index c5dc2f2..fd12938 100644
+--- a/man/weston.man
++++ b/man/weston.man
+@@ -267,6 +267,10 @@ This allows launching Weston as a nested server.
+ For Wayland clients, holds the file descriptor of an open local socket
+ to a Wayland server.
+ .TP
++.B WESTON_FORCE_SW_CURSORS
++Set this variable to force Weston to use software cursors when under the 
++compositor-drm backend
++.TP
+ .B WESTON_CONFIG_FILE
+ Weston sets this variable to the absolute path of the configuration file
+ it loads, or to the empty string if no file is used. Programs that use
 diff --git a/src/compositor-drm.c b/src/compositor-drm.c
-index 07b83a7..ab09c6c 100644
+index 0cdb8f4..4e5e2fc 100644
 --- a/src/compositor-drm.c
 +++ b/src/compositor-drm.c
-@@ -1616,6 +1616,7 @@ drm_output_init_egl(struct drm_output *output, struct drm_compositor *ec)
+@@ -1641,7 +1641,10 @@ drm_output_init_egl(struct drm_output *output, struct drm_compositor *ec)
  		weston_log("cursor buffers unavailable, using gl cursors\n");
  		ec->cursors_are_broken = 1;
  	}
-+	ec->cursors_are_broken = 1;
- 
+-
++	if (getenv("WESTON_FORCE_SW_CURSORS"))
++	{
++		ec->cursors_are_broken = 1;
++	}
  	return 0;
  }
-
-
-
-
-
-
-
+ 
 diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
-index 138aaab..7ebbe92 100644
+index 7c505ce..42d2881 100644
 --- a/src/compositor-fbdev.c
 +++ b/src/compositor-fbdev.c
-@@ -726,11 +726,14 @@ fbdev_output_reenable(struct fbdev_compositor *compositor,
+@@ -663,13 +663,23 @@ fbdev_output_reenable(struct fbdev_compositor *compositor,
+ 	struct fbdev_output *output = to_fbdev_output(base);
+ 	struct fbdev_screeninfo new_screen_info;
+ 	int fb_fd;
++	int retries;
+ 	const char *device;
+ 
  	weston_log("Re-enabling fbdev output.\n");
  
  	/* Create the frame buffer. */
 -	fb_fd = fbdev_frame_buffer_open(output, output->device,
 +	fb_fd = -1;
-+	while (fb_fd < 0) {
++	retries = 0;
++	while (fb_fd < 0 && retries < 3) {
 +		usleep(10000);
 +		fb_fd = fbdev_frame_buffer_open(output, output->device,
  	                                &new_screen_info);
--	if (fb_fd < 0) {
--		weston_log("Creating frame buffer failed.\n");
--		goto err;
 +		if (fb_fd < 0) {
-+		  weston_log("Creating frame buffer failed.\n");
++		  weston_log("Creating frame buffer failed. Retrying...\n");
 +		}
- 	}
- 
- 	/* Check whether the frame buffer details have changed since we were
++		retries++;
++	}
+ 	if (fb_fd < 0) {
+ 		weston_log("Creating frame buffer failed.\n");
+ 		goto err;
