@@ -28,33 +28,3 @@ index 0cdb8f4..4e5e2fc 100644
 +	}
  	return 0;
  }
- 
-diff --git a/src/compositor-fbdev.c b/src/compositor-fbdev.c
-index 7c505ce..42d2881 100644
---- a/src/compositor-fbdev.c
-+++ b/src/compositor-fbdev.c
-@@ -663,13 +663,23 @@ fbdev_output_reenable(struct fbdev_compositor *compositor,
- 	struct fbdev_output *output = to_fbdev_output(base);
- 	struct fbdev_screeninfo new_screen_info;
- 	int fb_fd;
-+	int retries;
- 	const char *device;
- 
- 	weston_log("Re-enabling fbdev output.\n");
- 
- 	/* Create the frame buffer. */
--	fb_fd = fbdev_frame_buffer_open(output, output->device,
-+	fb_fd = -1;
-+	retries = 0;
-+	while (fb_fd < 0 && retries < 3) {
-+		usleep(10000);
-+		fb_fd = fbdev_frame_buffer_open(output, output->device,
- 	                                &new_screen_info);
-+		if (fb_fd < 0) {
-+		  weston_log("Creating frame buffer failed. Retrying...\n");
-+		}
-+		retries++;
-+	}
- 	if (fb_fd < 0) {
- 		weston_log("Creating frame buffer failed.\n");
- 		goto err;
