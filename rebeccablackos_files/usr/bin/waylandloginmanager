@@ -108,9 +108,6 @@ function UserSessionWorker
     export LIBGL_ALWAYS_SOFTWARE=1
   fi
 
-  #Disable hardware cursors in Weston
-  export WESTON_FORCE_SW_CURSORS=1
-
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
   then
@@ -301,8 +298,6 @@ function PrepareLoginManager
   #WLM_LD_LIBRARY_PATH is exported so that it can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
   export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
   export WLM_PATH=$PATH
-  #Disable hardware cursors in Weston
-  export WESTON_FORCE_SW_CURSORS=1
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
