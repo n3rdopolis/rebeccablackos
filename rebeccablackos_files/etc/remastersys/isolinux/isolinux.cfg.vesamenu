@@ -23,9 +23,9 @@ MENU SEPARATOR
 label liveforcesw
   menu label Startup forcing software rendering
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforceswrender wlmforcevblankoff --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforceswrender --
 TEXT HELP
-Start and force software rendering, and disable vblank.
+Start and force software rendering.
 
 This is for systems that support kernel mode setting, but have
 problems using hardware rendering. 
@@ -36,7 +36,7 @@ ENDTEXT
 label livefbdefault
   menu label Startup forcing to a default sized framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev wlmforcevblankoff --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet splash wlmforcefbdev --
 TEXT HELP
 Start with a default framebuffer size specified by the drivers, and force 
 all sessions to use the framebuffer backend instead of kernel mode setting
@@ -50,7 +50,7 @@ ENDTEXT
 label livefb786
   menu label Startup with attempting a 640x480(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=786 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=786 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -64,7 +64,7 @@ ENDTEXT
 label livefb789
   menu label Startup with attempting a 800x600(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=789 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=789 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -78,7 +78,7 @@ ENDTEXT
 label livefb792
   menu label Startup with attempting a 1024x768(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=792 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=792 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -93,7 +93,7 @@ ENDTEXT
 label livefb795
   menu label Startup with attempting a 1280x1024(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=795 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=795 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -107,7 +107,7 @@ ENDTEXT
 label livefb838
   menu label Startup with attempting a 1400x1050(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=838 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=838 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
@@ -121,7 +121,7 @@ ENDTEXT
 label livefb867
   menu label Startup with attempting a 1400x900(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=867 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=867 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
@@ -135,7 +135,7 @@ ENDTEXT
 label livefb799
   menu label Startup with attempting a 1600x1200(x24) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet wlmforcevblankoff vga=799 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev nosplash noprompt quiet vga=799 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
