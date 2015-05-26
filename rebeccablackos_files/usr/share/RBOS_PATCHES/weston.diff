@@ -1,5 +1,5 @@
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 777a50a..d620daf 100644
+index 777a50a..41f4b30 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -94,6 +94,7 @@ struct background {
@@ -21,10 +21,10 @@ index 777a50a..d620daf 100644
 +	weston_config_section_get_uint(s, "background-bpp",
 +					 &background->bpp, 16);
 +	/* TODO After Weston 1.8, change default to 32 bit bpp on the wallpaper*/
-+	if (background->low_bpp != 32) {
++	if (background->bpp != 32) {
 +	  window_set_preferred_format(background->window,
 +				      WINDOW_PREFERRED_FORMAT_RGB565);
-+	} elseif (background->low_bpp != 16 && background->low_bpp != 32 ) {
++	} elseif (background->bpp != 16 && background->bpp != 32 ) {
 +	  weston_log("invalid background bpp specified in ini file\n");
 +	}
 +
