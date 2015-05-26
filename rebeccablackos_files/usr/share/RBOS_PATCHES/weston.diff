@@ -1,5 +1,5 @@
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index 777a50a..41f4b30 100644
+index 777a50a..b966c2a 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -94,6 +94,7 @@ struct background {
@@ -24,7 +24,7 @@ index 777a50a..41f4b30 100644
 +	if (background->bpp != 32) {
 +	  window_set_preferred_format(background->window,
 +				      WINDOW_PREFERRED_FORMAT_RGB565);
-+	} elseif (background->bpp != 16 && background->bpp != 32 ) {
++	} elif (background->bpp != 16 && background->bpp != 32 ) {
 +	  weston_log("invalid background bpp specified in ini file\n");
 +	}
 +
