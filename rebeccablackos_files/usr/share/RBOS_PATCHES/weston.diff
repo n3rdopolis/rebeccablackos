@@ -24,7 +24,7 @@ index 777a50a..b966c2a 100644
 +	if (background->bpp != 32) {
 +	  window_set_preferred_format(background->window,
 +				      WINDOW_PREFERRED_FORMAT_RGB565);
-+	} elif (background->bpp != 16 && background->bpp != 32 ) {
++	} else if (background->bpp != 16 && background->bpp != 32 ) {
 +	  weston_log("invalid background bpp specified in ini file\n");
 +	}
 +
