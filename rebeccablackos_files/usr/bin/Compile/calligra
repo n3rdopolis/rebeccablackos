@@ -57,8 +57,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/calligra.diff
-sed -i 's/add_subdirectory(gemini)/#add_subdirectory(gemini)/g' CMakeLists.txt
-sed -i 's/add_subdirectory(karbon)/#add_subdirectory(karbon)/g' CMakeLists.txt
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -67,7 +65,7 @@ function PackageCompileSource()
 rm CMakeCache.txt
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=Release
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=Release -DBUILD_krita=OFF -DBUILD_karbon=OFF -DBUILD_gemini=OFF
 make
 }
 
