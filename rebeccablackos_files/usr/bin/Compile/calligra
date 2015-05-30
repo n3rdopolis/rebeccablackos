@@ -56,7 +56,9 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/weston.diff
+patch -f -p1 < /usr/share/RBOS_PATCHES/calligra.diff
+sed -i 's/add_subdirectory(gemini)/#add_subdirectory(gemini)/g' CMakeLists.txt
+sed -i 's/add_subdirectory(karbon)/#add_subdirectory(karbon)/g' CMakeLists.txt
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
