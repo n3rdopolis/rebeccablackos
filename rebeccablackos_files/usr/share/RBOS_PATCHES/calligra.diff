@@ -1,0 +1,75 @@
+diff --git a/filters/words/mobi/MobiFile.cpp b/filters/words/mobi/MobiFile.cpp
+index 00922b0..ad675a5 100644
+--- a/filters/words/mobi/MobiFile.cpp
++++ b/filters/words/mobi/MobiFile.cpp
+@@ -21,6 +21,7 @@
+ #include "MobiHeaderGenerator.h"
+ 
+ #include <QFile>
++#include <QDataStream>
+ #include <kdebug.h>
+ 
+ MobiFile::MobiFile()
+diff --git a/libs/flake/KoGridData.h b/libs/flake/KoGridData.h
+index 19acb74..1436967 100644
+--- a/libs/flake/KoGridData.h
++++ b/libs/flake/KoGridData.h
+@@ -24,6 +24,7 @@
+ #include "flake_export.h"
+ #include <KoXmlReaderForward.h>
+ #include <QColor>
++#include <QWidget>
+ 
+ class QPainter;
+ class QRectF;
+diff --git a/libs/flake/KoPathPoint.cpp b/libs/flake/KoPathPoint.cpp
+index 5ae4554..c560fb0 100644
+--- a/libs/flake/KoPathPoint.cpp
++++ b/libs/flake/KoPathPoint.cpp
+@@ -28,12 +28,12 @@
+ 
+ #include <math.h>
+ 
+-#ifndef QT_NO_DEBUG
++//#ifndef QT_NO_DEBUG
+ #include <qnumeric.h> // for qIsNaN
+ static bool qIsNaNPoint(const QPointF &p) {
+     return qIsNaN(p.x()) || qIsNaN(p.y());
+ }
+-#endif
++//#endif
+ 
+ class KoPathPoint::Private
+ {
+diff --git a/libs/flake/KoPathShape.cpp b/libs/flake/KoPathShape.cpp
+index b3d1d22..0a0a4d3 100644
+--- a/libs/flake/KoPathShape.cpp
++++ b/libs/flake/KoPathShape.cpp
+@@ -51,12 +51,12 @@
+ #include <kdebug.h>
+ #include <QPainter>
+ 
+-#ifndef QT_NO_DEBUG
++//#ifndef QT_NO_DEBUG
+ #include <qnumeric.h> // for qIsNaN
+ static bool qIsNaNPoint(const QPointF &p) {
+     return qIsNaN(p.x()) || qIsNaN(p.y());
+ }
+-#endif
++//#endif
+ 
+ static const qreal DefaultMarkerWidth = 3.0;
+ 
+diff --git a/libs/widgetutils/KoProperties.cpp b/libs/widgetutils/KoProperties.cpp
+index 24e0219..7f80373 100644
+--- a/libs/widgetutils/KoProperties.cpp
++++ b/libs/widgetutils/KoProperties.cpp
+@@ -21,6 +21,8 @@
+ #include "KoProperties.h"
+ 
+ #include <QDomDocument>
++#include <QIODevice>
++#include <QDataStream>
+ 
+ class KoProperties::Private
+ {
