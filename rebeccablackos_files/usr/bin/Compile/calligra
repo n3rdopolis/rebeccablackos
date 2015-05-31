@@ -57,7 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/calligra.diff
-sed -i '/calligra_drop_products_on_old_flag(words  PART_WORDS APP_WORDS)/a calligra_drop_products_on_old_flag(gemini APP_GEMINI)' CMakeLists.txt
+sed -i '/calligra_drop_products_on_old_flag(words/a calligra_drop_products_on_old_flag(gemini APP_GEMINI)' CMakeLists.txt
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
