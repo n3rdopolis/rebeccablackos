@@ -112,7 +112,7 @@ sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-background-panel.
 
 #ubiquity workaround. GTK in /usr tries to connect to a display server that isn't Wayland, or X11
 dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
-echo -e "#! /bin/bash\nwlsudo ubiquity" > /usr/bin/ubiquity
+echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
 chmod +x /usr/bin/ubiquity
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
