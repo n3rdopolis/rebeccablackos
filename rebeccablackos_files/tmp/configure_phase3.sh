@@ -110,7 +110,7 @@ glib-compile-schemas /opt/share/glib-2.0/schemas
 sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-control-center.desktop > /opt/share/applications/gnome-control-center.desktop
 sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-background-panel.desktop > /opt/share/applications/gnome-background-panel.desktop
 
-#ubiquity workaround. GTK in /usr tries to connect to a display server that isn't Wayland, or X11
+#ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
 dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
 echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
 chmod +x /usr/bin/ubiquity
