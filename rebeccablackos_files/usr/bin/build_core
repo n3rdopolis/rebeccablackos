@@ -185,8 +185,8 @@ function DownloadGIT()
   done
   git checkout -f $SOURCEREVISION 
   git reset --hard
-  rm -rf .git/rebase-apply/
-  rm -rf .git/modules/*/rebase-apply/
+  rm -rf .git/rebase-*/
+  rm -rf .git/modules/*/rebase-*/
   git rebase
   git pull -f
   git rebase
