@@ -187,9 +187,9 @@ function DownloadGIT()
   git reset --hard
   rm -rf .git/rebase-*/
   rm -rf .git/modules/*/rebase-*/
-  git rebase
+  git rebase -s ours
   git pull -f
-  git rebase
+  git rebase -s ours
   git checkout -f $SOURCEREVISION 
   git config user.email rbos@rbos
   git submodule sync --recursive
@@ -218,7 +218,7 @@ function DownloadGIT()
     
     git rebase
     git pull -f
-    git rebase
+    git rebase -s ours
     git config user.email rbos@rbos
     git submodule sync --recursive
     git submodule init
