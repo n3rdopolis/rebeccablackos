@@ -1,10 +1,10 @@
 diff --git a/session/compositorlauncher.cpp b/session/compositorlauncher.cpp
-index b19f480..66eae0a 100644
+index 3e5197d..14a2c42 100644
 --- a/session/compositorlauncher.cpp
 +++ b/session/compositorlauncher.cpp
-@@ -103,6 +103,10 @@ void CompositorLauncher::start()
-         m_compositor->setSocketName(m_socketName);
-     }
+@@ -123,6 +123,10 @@ void CompositorLauncher::start(bool fromLoginManager)
+     m_compositor->setArguments(compositorArgs());
+     m_compositor->setEnvironment(compositorEnv());
  
 +   if (m_mode == WaylandMode) {
 +	m_socketName = getenv("WAYLAND_GUEST");
@@ -13,7 +13,7 @@ index b19f480..66eae0a 100644
      // Summary
      printSummary();
  
-@@ -249,6 +253,9 @@ QStringList CompositorLauncher::compositorArgs() const
+@@ -283,6 +287,9 @@ QStringList CompositorLauncher::compositorArgs() const
      case NestedMode:
          args << QStringLiteral("--socket=%1").arg(m_compositor->socketName());
          break;
@@ -23,3 +23,30 @@ index b19f480..66eae0a 100644
      default:
          break;
      }
+diff --git a/session/main.cpp b/session/main.cpp
+index dbdcc79..489bcc1 100644
+--- a/session/main.cpp
++++ b/session/main.cpp
+@@ -134,6 +134,8 @@ int main(int argc, char *argv[])
+         launcher->setMode(CompositorLauncher::HwComposerMode);
+     else if (mode == QStringLiteral("nested"))
+         launcher->setMode(CompositorLauncher::NestedMode);
++    else if (mode == QStringLiteral("wayland"))
++        launcher->setMode(CompositorLauncher::WaylandMode);
+     else if (!mode.isEmpty()) {
+         qWarning() << "Invalid mode argument" << mode;
+         return 1;
+diff --git a/session/processcontroller.h b/session/processcontroller.h
+index 46be07a..89a164b 100644
+--- a/session/processcontroller.h
++++ b/session/processcontroller.h
+@@ -43,7 +43,8 @@ public:
+     enum Mode {
+         EglFSMode = 0,
+         HwComposerMode,
+-        NestedMode
++        NestedMode,
++        WaylandMode
+     };
+ 
+     ProcessController(const QString &mode, QObject *parent = Q_NULLPTR);
