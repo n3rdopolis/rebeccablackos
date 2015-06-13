@@ -687,7 +687,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--log=\$HOME/weston.log"
+      WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -705,7 +705,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--log=\$HOME/weston.log"
+      WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'

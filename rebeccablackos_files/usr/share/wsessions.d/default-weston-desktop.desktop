@@ -9,5 +9,5 @@ CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=xwayland.so,screen-share.so
-AdditionalArguments=--log=$HOME/weston.log
+AdditionalArguments=
 NeedsFile=/opt/bin/weston
