@@ -90,12 +90,20 @@ function UserSessionWorker
   fi
 
   #Create a folder for the logs
-  mkdir ~/wlsessionlogs
+  if [[ ! -e ~/wlsessionlogs ]]
+  then
+    mkdir ~/wlsessionlogs
+  fi
 
   #Cleanup old log files
-  find ~/wlsessionlogs/waylandsession* | head -n 5 | while read LOGFILE
+  LOGFILECOUNT=0
+  ls -t ~/wlsessionlogs/waylandsession* | while read LOGFILE
   do
-    rm "$LOGFILE"
+    ((LOGFILECOUNT++))
+    if [[ $LOGFILECOUNT > 4 ]]
+    then
+      rm "$LOGFILE"
+    fi
   done
 
   #set all arguments into an array
