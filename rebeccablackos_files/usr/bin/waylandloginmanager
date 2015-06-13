@@ -48,8 +48,8 @@
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
   #/var/log/loginmanagerdisplay.log : This is the log file for the Weston server that is the loginmanagerdisplay
-  #~/waylandsession.log : This is where all wayland servers get logged as the run as the user.
-  #~/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
+  #~/wlsessionlogs/waylandsession_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
+  #~/wlsessionlogs/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
   #/run/waylandloginmanager/sessiondata: Stores data for user switching so that the session list can be reloaded if waylandloginmanager restarts. As it's stored in /run which is a tmpfs, there should be no risk of one from a previous boot giving it false data
@@ -89,10 +89,20 @@ function UserSessionWorker
     ReadEnvironmentFile "$EnvironmentFile"
   fi
 
+  #Create a folder for the logs
+  mkdir ~/wlsessionlogs
+
+  #Cleanup old log files
+  find ~/wlsessionlogs/waylandsession* | head -n 5 | while read LOGFILE
+  do
+    rm "$LOGFILE"
+  done
+
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  echo "Started with the arguments: $ArgumentString" >> $HOME/waylandsession.log
-  eval set -- $ArgumentString >> $HOME/waylandsession.log
+  DATESTAMP=$(date +%s)
+  echo "Started with the arguments: $ArgumentString" >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
+  eval set -- $ArgumentString >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -122,7 +132,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST --log=$HOME/waylandhost.log $HostBackendArgument &>> $HOME/waylandsession.log &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> $HOME/wlsessionlogs/waylandhost.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -135,7 +145,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      echo "The host server failed to start. Will not start the guest server for this session. Please see ~/waylandsession.log" &>> $HOME/waylandsession.log
+      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
       echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
       exit
     fi
@@ -145,8 +155,8 @@ function UserSessionWorker
     unset WAYLAND_GUEST
   fi
   STARTTIME=$(date +%s)
-  #Execute the Wayland server, and log it to ~/waylandsession.log
-  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/waylandsession.log &
+  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
+  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
 
   
@@ -154,7 +164,7 @@ function UserSessionWorker
   if [[ $BackendType == WL ]]
   then
     fg 2
-    echo "The guest session has ended. Terminating the host..." &>> $HOME/waylandhost.log
+    echo "The guest session has ended. Terminating the host..." &>> $HOME/wlsessionlogs/waylandhost.log
     kill -15 $HostServerPID &> /dev/null
     sleep 3
     kill -9 $HostServerPID &> /dev/null
