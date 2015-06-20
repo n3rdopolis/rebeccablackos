@@ -18,7 +18,7 @@
 # Code cleanup with suggestions and code from Ivailo (a.k.a. SmiL3y) 
 
 #Detect Kernel Version
-KERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3"-"$4}')
+KERNELVERSION=$(basename $(readlink /vmlinuz) | cut -d'-' -f 2-)
 
 # checking to make sure script is running with root privileges
 if [ "$(whoami)" != "root" ]; then
