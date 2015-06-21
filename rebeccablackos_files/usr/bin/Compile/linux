@@ -67,7 +67,6 @@ cp /usr/share/RBOS_PATCHES/linux.config ./.config
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export CFLAGS=-Os
 make 
 }
 
