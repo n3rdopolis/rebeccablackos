@@ -74,7 +74,7 @@ cd $OLDPWD
 rsync /usr/import/* -a /
 
 #temporarily disable kernel build triggers so that they don't get caught by checkinstall
-chmod 744 /etc/kernel/postinst.d/*
+chmod 444 /etc/kernel/postinst.d/*
 
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
