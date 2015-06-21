@@ -75,7 +75,8 @@ function PackageInstallSource()
 {
 KERNELVERSION=$(cat include/config/kernel.release)
 make modules_install
-cp ./vmlinuz /boot/vmlinuz-$KERNELVERSION
+make firmware_install
+installkernel $KERNELVERSION vmlinux System.map /boot
 cp -a ./include /usr/src/linux-headers-$KERNELVERSION
 }
 

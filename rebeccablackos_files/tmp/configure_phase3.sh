@@ -73,8 +73,14 @@ cd $OLDPWD
 #copy all files
 rsync /usr/import/* -a /
 
+#temporarily disable kernel build triggers so that they don't get caught by checkinstall
+chmod 744 /etc/kernel/postinst.d/*
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
+
+#Reenable kernel triggers
+chmod 755 /etc/kernel/postinst.d/*
 
 #Create a package with all the menu items.
 cd /tmp
