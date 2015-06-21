@@ -24,6 +24,7 @@ then
   export INSTALLDIR=/opt
 fi
 
+export TARGETBITSIZE=$(getconf LONG_BIT)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
 export LD_LIBRARY_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH:$INSTALLDIR/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib

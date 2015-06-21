@@ -62,6 +62,15 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cp /usr/share/RBOS_PATCHES/linux.config ./.config
+
+if [[ $TARGETBITSIZE == 32 ]]
+then
+  ARCHCONFIGSTRING="# CONFIG_64BIT is not set\nCONFIG_X86_32=y\n# CONFIG_X86_64 is not set\nCONFIG_OUTPUT_FORMAT=\"elf32-i386\"\nCONFIG_ARCH_DEFCONFIG=\"arch/x86/configs/i386_defconfig\""
+elif [[ $TARGETBITSIZE == 64 ]]
+then
+  ARCHCONFIGSTRING="CONFIG_64BIT=y\n# CONFIG_X86_32 is not set\nCONFIG_X86_64=y\nCONFIG_OUTPUT_FORMAT=\"elf64-x86-64\"\nCONFIG_ARCH_DEFCONFIG=\"arch/x86/configs/x86_64_defconfig\""
+fi
+sed -i "s|@@@ARCH_PLACEHOLD@@@|$ARCHCONFIGSTRING|g" ./.config
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -76,7 +85,7 @@ function PackageInstallSource()
 KERNELVERSION=$(cat include/config/kernel.release)
 make modules_install
 make firmware_install
-installkernel $KERNELVERSION vmlinux System.map /boot
+cp arch/x86/boot/bzImage /boot/vmlinuz-$KERNELVERSION
 cp -a ./include /usr/src/linux-headers-$KERNELVERSION
 }
 
