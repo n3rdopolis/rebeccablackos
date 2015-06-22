@@ -122,8 +122,8 @@ rm -r /usr/import
 #Uninstall the upstream kernel if there is a custom built kernel installed
 if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
 then
-  apt-get remove linux-generic
-  apt-get autoremove
+  apt-get -y --force-yes remove linux-generic
+  apt-get -y --force-yes autoremove
 fi
 
 #save the build date of the CD.
