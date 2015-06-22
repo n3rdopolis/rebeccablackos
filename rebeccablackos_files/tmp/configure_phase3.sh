@@ -128,6 +128,9 @@ then
   done
 fi
 
+#Force initramfs utilites to include the overlay filesystem
+echo overlay >> /etc/initramfs-tools/modules
+
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
