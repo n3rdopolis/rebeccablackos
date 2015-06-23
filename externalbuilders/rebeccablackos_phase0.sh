@@ -57,7 +57,7 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
   echo "Setting up chroot for downloading archives and software..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://ubuntu.osuosl.org/ubuntu/
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/
   touch "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
 fi
 
@@ -66,6 +66,6 @@ if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
 then
   #setup a really basic Ubuntu installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://ubuntu.osuosl.org/ubuntu/
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/
   touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
 fi
