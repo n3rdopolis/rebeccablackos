@@ -20,4 +20,5 @@
 . /usr/bin/wlruntime_vars
 export WAYLAND_DISPLAY=wayland-$RANDOM
 export E_WL_FORCE=x11
+#To debug enlightenment in gdb if needed export E_START=enlightenment_start
 enlightenment_start
