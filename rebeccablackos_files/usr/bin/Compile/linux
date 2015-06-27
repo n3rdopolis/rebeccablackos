@@ -23,13 +23,13 @@
 SOURCENAME=linux
 
 #The URL of the Source code repo
-SOURCEURL=git://people.freedesktop.org/~airlied/linux
+SOURCEURL=https://github.com/torvalds/linux.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=drm-next
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -71,6 +71,7 @@ then
   ARCHCONFIGSTRING="CONFIG_64BIT=y\n# CONFIG_X86_32 is not set\nCONFIG_X86_64=y\nCONFIG_OUTPUT_FORMAT=\"elf64-x86-64\"\nCONFIG_ARCH_DEFCONFIG=\"arch/x86/configs/x86_64_defconfig\""
 fi
 sed -i "s|@@@ARCH_PLACEHOLD@@@|$ARCHCONFIGSTRING|g" ./.config
+make olddefconfig
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
