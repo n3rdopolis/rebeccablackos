@@ -1,13 +1,13 @@
-diff --git a/src/launcher/processcontroller.cpp b/src/launcher/processcontroller.cpp
-index dcccf17..aa65a63 100644
---- a/src/launcher/processcontroller.cpp
-+++ b/src/launcher/processcontroller.cpp
-@@ -138,7 +138,7 @@ void ProcessController::startCompositor()
-                                    << QStringLiteral("--socket=") + m_compositorSocket);
+diff --git a/src/libgreenisland/compositor.cpp b/src/libgreenisland/compositor.cpp
+index 2f6eb39..484f721 100644
+--- a/src/libgreenisland/compositor.cpp
++++ b/src/libgreenisland/compositor.cpp
+@@ -67,7 +67,7 @@ QString Compositor::s_fixedShell;
  
-         env.insert(QStringLiteral("QT_QPA_PLATFORM"), QStringLiteral("wayland"));
--        env.insert(QStringLiteral("WAYLAND_DISPLAY"), m_fullScreenShellSocket);
-+        env.insert(QStringLiteral("WAYLAND_GUEST"), m_fullScreenShellSocket);
-         if (qEnvironmentVariableIsSet("DISPLAY") && !isFullScreenShellEnabled())
-             env.insert(QStringLiteral("QT_XCB_GL_INTEGRATION"), QStringLiteral("xcb_egl"));
-         m_compositor->setProcessEnvironment(env);
+ Compositor::Compositor(QObject *parent)
+     : QObject(parent)
+-    , QWaylandQuickCompositor(0, WindowManagerExtension | TouchExtension | HardwareIntegrationExtension | SubSurfaceExtension)
++    , QWaylandQuickCompositor(getenv("WAYLAND_GUEST"), WindowManagerExtension | TouchExtension | HardwareIntegrationExtension | SubSurfaceExtension)
+     , d_ptr(new CompositorPrivate(this))
+ {
+     Q_D(Compositor);
