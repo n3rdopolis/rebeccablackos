@@ -31,7 +31,7 @@ HostServerPID=$!
 export WAYLAND_DISPLAY=$HostID
 export WAYLAND_SOCKET=$HostID
 unset DISPLAY
-kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/startkde &
+kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/plasmashell &
 GuestServerPID=$!
 fg 2
 kill -15 $HostServerPID &> /dev/null
