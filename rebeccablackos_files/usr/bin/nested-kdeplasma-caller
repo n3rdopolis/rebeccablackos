@@ -18,7 +18,7 @@
 
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
-#export KWIN_COMPOSE=Q
+export KWIN_COMPOSE=Q
 export KWIN_USE_BUFFER_AGE=0
 SERVERID=wayland-$RANDOM
 
