@@ -63,7 +63,7 @@ cp /usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/pkgconfig/tslib-0.0.pc /us
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wl-fb --enable-wl-drm --enable-wl-x11 #--disable-shot --disable-xkbswitch --disable-conf-randr --disable-everything 
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wl-fb --enable-wl-drm --enable-wl-x11 --enable-xwayland --enable-wayland-only #--disable-shot --disable-xkbswitch --disable-conf-randr --disable-everything 
 make -i
 }
 
