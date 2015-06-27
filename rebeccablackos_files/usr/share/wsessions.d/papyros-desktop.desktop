@@ -1,15 +1,15 @@
 [Desktop Entry]
-Enabled=1
+Enabled=1	
 Type=WSession
 Name=Papyros Desktop
-CompositorExec=/opt/bin/papyros-session
+CompositorExec=/opt/bin/greenisland
 CompositorSupportsWL=1
 CompositorSupportsKMS=0
 CompositorSupportsFB=0
 CompositorWLArguments=-platform wayland
 CompositorKMSArguments=
 CompositorFBArguments=
-CompositorDisplayArgument=
-SessionArgument=
+CompositorDisplayArgument=-s 
+SessionArgument=--shell io.papyros.shell
 AdditionalArguments=
-NeedsFile=/opt/bin/papyros-session
+NeedsFile=/opt/bin/greenisland

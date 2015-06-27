@@ -19,4 +19,4 @@
 #This script sets up a nested session with xwayland, and the default desktop shell
 . /usr/bin/wlruntime_vars
 export WAYLAND_GUEST=wayland-$RANDOM
-papyros-session
+greenisland-launcher --fullscreen-shell -s io.papyros.shell
