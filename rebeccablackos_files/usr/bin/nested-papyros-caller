@@ -18,5 +18,5 @@
 
 #This script sets up a nested session with xwayland, and the default desktop shell
 . /usr/bin/wlruntime_vars
-ServerID=wayland-$RANDOM
+export WAYLAND_GUEST=wayland-$RANDOM
 papyros-session
