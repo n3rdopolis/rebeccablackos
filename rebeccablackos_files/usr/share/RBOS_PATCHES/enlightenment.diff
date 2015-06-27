@@ -65,3 +65,16 @@ index c9e24d2..a2bb930 100644
      AC_E_CHECK_PKG(XWAYLAND, [ ecore >= $efl_version eina >= $efl_version xcb xcb-xfixes xcb-composite xcursor ], [HAVE_XWAYLAND_DEPS=true], [HAVE_XWAYLAND_DEPS=false])
      AC_PATH_PROG([XWAYLAND_BIN], [Xwayland], [false])
    else
+diff --git a/src/modules/wl_x11/e_mod_main.c b/src/modules/wl_x11/e_mod_main.c
+index 433601d..df6cb6c 100644
+--- a/src/modules/wl_x11/e_mod_main.c
++++ b/src/modules/wl_x11/e_mod_main.c
+@@ -14,7 +14,7 @@ _cb_delete_request(Ecore_Evas *ee EINA_UNUSED)
+ static Eina_Bool 
+ _cb_keymap_changed(void *data, int type EINA_UNUSED, void *event EINA_UNUSED)
+ {
+-   E_Comp_Data *cdata;
++   E_Comp_Wl_Data *cdata;
+    E_Config_XKB_Layout *ekbd;
+    char *rules = NULL, *model = NULL, *layout = NULL;
+    Ecore_X_Atom xkb = 0;
