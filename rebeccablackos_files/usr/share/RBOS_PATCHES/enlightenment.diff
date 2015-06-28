@@ -1,8 +1,18 @@
 diff --git a/configure.ac b/configure.ac
-index c9e24d2..a2bb930 100644
+index c9e24d2..f3dea0b 100644
 --- a/configure.ac
 +++ b/configure.ac
-@@ -776,15 +776,13 @@ AC_ARG_ENABLE([wayland-egl],
+@@ -555,9 +555,7 @@ e_requires="\
+   $eeze_mount \
+   $udisks_mount \
+   $device_libs"
+-if test "x${e_cv_want_wayland_only}" != "xyes"; then
+   e_requires="$e_requires ecore-x >= $efl_version"
+-fi
+ 
+ PKG_CHECK_MODULES(E, [$e_requires])
+ requirements_e="\
+@@ -776,15 +774,13 @@ AC_ARG_ENABLE([wayland-egl],
  AC_MSG_CHECKING([whether wayland EGL support is enabled])
  AC_MSG_RESULT([${e_cv_want_wayland_egl}])
  
@@ -25,7 +35,7 @@ index c9e24d2..a2bb930 100644
  
  if test "x${have_wayland}" = "xyes"; then
    if test "x${e_cv_want_wayland_egl}" != "xno";then
-@@ -818,10 +816,10 @@ fi
+@@ -818,10 +814,10 @@ fi
  
  define([CHECK_MODULE_WL_X11],
  [
@@ -38,7 +48,7 @@ index c9e24d2..a2bb930 100644
      AC_E_CHECK_PKG(WL_X11, [ ecore-x >= ${efl_version} ], [WL_X11=true], [WL_X11=false])
    else
      WL_X11=false
-@@ -831,7 +829,7 @@ AM_CONDITIONAL([HAVE_WL_X11], [test "x${WL_X11}" = "xtrue"])
+@@ -831,7 +827,7 @@ AM_CONDITIONAL([HAVE_WL_X11], [test "x${WL_X11}" = "xtrue"])
  
  define([CHECK_MODULE_WL_DESKTOP_SHELL],
  [
@@ -47,7 +57,7 @@ index c9e24d2..a2bb930 100644
      AC_E_CHECK_PKG(WL_DESKTOP_SHELL, [ ecore >= $efl_version eina >= $efl_version ], [WL_DESKTOP_SHELL=true], [WL_DESKTOP_SHELL=false])
    else
      WL_DESKTOP_SHELL=false
-@@ -841,7 +839,7 @@ AM_CONDITIONAL([HAVE_WL_DESKTOP_SHELL], [test "x${WL_DESKTOP_SHELL}" = "xtrue"])
+@@ -841,7 +837,7 @@ AM_CONDITIONAL([HAVE_WL_DESKTOP_SHELL], [test "x${WL_DESKTOP_SHELL}" = "xtrue"])
  
  define([CHECK_MODULE_WL_FB],
  [
@@ -56,7 +66,7 @@ index c9e24d2..a2bb930 100644
      AC_E_CHECK_PKG(WL_FB, [ ecore-fb >= $efl_version ecore >= $efl_version eina >= $efl_version ], [WL_FB=true], [WL_FB=false])
    else
      WL_FB=false
-@@ -861,7 +859,7 @@ AM_CONDITIONAL([HAVE_WL_DRM], [test "x${WL_DRM}" = "xtrue"])
+@@ -861,7 +857,7 @@ AM_CONDITIONAL([HAVE_WL_DRM], [test "x${WL_DRM}" = "xtrue"])
  
  define([CHECK_MODULE_XWAYLAND],
  [
