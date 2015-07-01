@@ -56,7 +56,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/calligra.diff
 sed -i '/calligra_drop_products_on_old_flag(words/a calligra_drop_products_on_old_flag(gemini APP_GEMINI)' CMakeLists.txt
 }
 
