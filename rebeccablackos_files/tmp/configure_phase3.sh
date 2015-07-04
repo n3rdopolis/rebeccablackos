@@ -125,11 +125,11 @@ then
   dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -v linux-image-generic | grep -v linux-headers-generic | while read PACKAGE
   do
     apt-get purge $PACKAGE -y --force-yes 
+    #Force initramfs utilites to include the overlay filesystem
+    echo overlay >> /etc/initramfs-tools/modules
   done
 fi
 
-#Force initramfs utilites to include the overlay filesystem
-echo overlay >> /etc/initramfs-tools/modules
 
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
