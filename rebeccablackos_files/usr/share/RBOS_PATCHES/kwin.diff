@@ -1,0 +1,229 @@
+diff --git a/abstract_backend.cpp b/abstract_backend.cpp
+index 28564e3..8600050 100644
+--- a/abstract_backend.cpp
++++ b/abstract_backend.cpp
+@@ -309,4 +309,22 @@ void AbstractBackend::warpPointer(const QPointF &globalPos)
+     Q_UNUSED(globalPos)
+ }
+ 
++void AbstractBackend::addSupportedCompositor(CompositingType type)
++{
++    m_supportedCompositors << type;
++}
++
++bool AbstractBackend::supportsCompositor(CompositingType type) const
++{
++    return m_supportedCompositors.contains(type);
++}
++
++CompositingType AbstractBackend::preferredCompositor() const
++{
++    if (m_supportedCompositors.isEmpty()) {
++        return KWin::NoCompositing;
++    }
++    return m_supportedCompositors.first();
++}
++
+ }
+diff --git a/abstract_backend.h b/abstract_backend.h
+index 4efbac5..96d41e2 100644
+--- a/abstract_backend.h
++++ b/abstract_backend.h
+@@ -20,8 +20,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #ifndef KWIN_ABSTRACT_BACKEND_H
+ #define KWIN_ABSTRACT_BACKEND_H
+ #include <kwin_export.h>
++#include <kwinglobals.h>
+ #include <QImage>
+ #include <QObject>
++#include <QVector>
+ 
+ namespace KWin
+ {
+@@ -71,6 +73,8 @@ public:
+     bool supportsPointerWarping() const {
+         return m_pointerWarping;
+     }
++    bool supportsCompositor(CompositingType type) const;
++    CompositingType preferredCompositor() const;
+ 
+ public Q_SLOTS:
+     void pointerMotion(const QPointF &position, quint32 time);
+@@ -113,6 +117,7 @@ protected:
+     void setSupportsPointerWarping(bool set) {
+         m_pointerWarping = set;
+     }
++    void addSupportedCompositor(CompositingType type);
+ 
+ private:
+     void triggerCursorRepaint();
+@@ -129,6 +134,7 @@ private:
+     QSize m_initialWindowSize;
+     QByteArray m_deviceIdentifier;
+     bool m_pointerWarping = false;
++    QVector<CompositingType> m_supportedCompositors;
+ };
+ 
+ }
+diff --git a/backends/drm/drm_backend.cpp b/backends/drm/drm_backend.cpp
+index c003c9b..01178c6 100644
+--- a/backends/drm/drm_backend.cpp
++++ b/backends/drm/drm_backend.cpp
+@@ -67,6 +67,10 @@ DrmBackend::DrmBackend(QObject *parent)
+     , m_udev(new Udev)
+     , m_udevMonitor(m_udev->monitor())
+ {
++#if HAVE_GBM
++    addSupportedCompositor(KWin::OpenGLCompositing);
++#endif
++    addSupportedCompositor(KWin::QPainterCompositing);
+     handleOutputs();
+     m_cursor[0] = nullptr;
+     m_cursor[1] = nullptr;
+diff --git a/backends/fbdev/fb_backend.cpp b/backends/fbdev/fb_backend.cpp
+index e6f2b58..e5cdb51 100644
+--- a/backends/fbdev/fb_backend.cpp
++++ b/backends/fbdev/fb_backend.cpp
+@@ -38,6 +38,7 @@ namespace KWin
+ FramebufferBackend::FramebufferBackend(QObject *parent)
+     : AbstractBackend(parent)
+ {
++    addSupportedCompositor(QPainterCompositing);
+     setSoftWareCursor(true);
+ }
+ 
+diff --git a/backends/hwcomposer/hwcomposer_backend.cpp b/backends/hwcomposer/hwcomposer_backend.cpp
+index 214aa42..dd2b1c3 100644
+--- a/backends/hwcomposer/hwcomposer_backend.cpp
++++ b/backends/hwcomposer/hwcomposer_backend.cpp
+@@ -45,6 +45,7 @@ namespace KWin
+ HwcomposerBackend::HwcomposerBackend(QObject *parent)
+     : AbstractBackend(parent)
+ {
++    addSupportedCompositor(KWin::OpenGLCompositing);
+     handleOutputs();
+ }
+ 
+diff --git a/backends/wayland/wayland_backend.cpp b/backends/wayland/wayland_backend.cpp
+index 2643848..9efc5cb 100644
+--- a/backends/wayland/wayland_backend.cpp
++++ b/backends/wayland/wayland_backend.cpp
+@@ -366,6 +366,10 @@ WaylandBackend::WaylandBackend(QObject *parent)
+     , m_subCompositor(new SubCompositor(this))
+     , m_cursor(nullptr)
+ {
++#if HAVE_WAYLAND_EGL
++    addSupportedCompositor(OpenGLCompositing);
++#endif
++    addSupportedCompositor(QPainterCompositing);
+     connect(this, &WaylandBackend::outputsChanged, this, &WaylandBackend::screensQueried);
+     connect(this, &WaylandBackend::connectionFailed, this, &WaylandBackend::initFailed);
+ }
+diff --git a/backends/x11/x11windowed_backend.cpp b/backends/x11/x11windowed_backend.cpp
+index 3ba9e5c..d9c8e39 100644
+--- a/backends/x11/x11windowed_backend.cpp
++++ b/backends/x11/x11windowed_backend.cpp
+@@ -49,6 +49,10 @@ X11WindowedBackend::X11WindowedBackend(QObject *parent)
+     : AbstractBackend(parent)
+ {
+     setSupportsPointerWarping(true);
++#if HAVE_X11_XCB
++    addSupportedCompositor(OpenGLCompositing);
++#endif
++    addSupportedCompositor(QPainterCompositing);
+ }
+ 
+ X11WindowedBackend::~X11WindowedBackend()
+diff --git a/compositingprefs.cpp b/compositingprefs.cpp
+index 103123f..7a7803b 100644
+--- a/compositingprefs.cpp
++++ b/compositingprefs.cpp
+@@ -56,17 +56,17 @@ bool CompositingPrefs::openGlIsBroken()
+ 
+ bool CompositingPrefs::compositingPossible()
+ {
++    bool glIsSafe = true;
++    if (kwinApp()->shouldUseWaylandForCompositing()) {
++        // don't do X specific checks if we are not going to use X for compositing
++        return true;
++    }
+     // first off, check whether we figured that we'll crash on detection because of a buggy driver
+     KConfigGroup gl_workaround_group(KSharedConfig::openConfig(), "Compositing");
+     const QString unsafeKey(QStringLiteral("OpenGLIsUnsafe") + (is_multihead ? QString::number(screen_number) : QString()));
+     if (gl_workaround_group.readEntry("Backend", "OpenGL") == QStringLiteral("OpenGL") &&
+         gl_workaround_group.readEntry(unsafeKey, false))
+-        return false;
+-
+-    if (kwinApp()->shouldUseWaylandForCompositing()) {
+-        // don't do X specific checks if we are not going to use X for compositing
+-        return true;
+-    }
++        glIsSafe = false;
+ 
+     if (!Xcb::Extensions::self()->isCompositeAvailable()) {
+         qCDebug(KWIN_CORE) << "No composite extension available";
+@@ -76,14 +76,15 @@ bool CompositingPrefs::compositingPossible()
+         qCDebug(KWIN_CORE) << "No damage extension available";
+         return false;
+     }
+-    if (hasGlx())
++    if (glIsSafe && hasGlx())
+         return true;
+ #ifdef KWIN_HAVE_XRENDER_COMPOSITING
+     if (Xcb::Extensions::self()->isRenderAvailable() && Xcb::Extensions::self()->isFixesAvailable())
+         return true;
+ #endif
+ #ifdef KWIN_HAVE_OPENGLES
+-    return true;
++    if (glIsSafe)
++        return true;
+ #endif
+     qCDebug(KWIN_CORE) << "No OpenGL or XRender/XFixes support";
+     return false;
+diff --git a/options.cpp b/options.cpp
+index 39efd9d..0f7d411 100644
+--- a/options.cpp
++++ b/options.cpp
+@@ -33,6 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ #include "settings.h"
+ #include "xcbutils.h"
+ #include <kwinglplatform.h>
++#if HAVE_WAYLAND
++#include "abstract_backend.h"
++#include "wayland_server.h"
++#endif
+ 
+ #endif //KCMRULES
+ 
+@@ -927,6 +931,17 @@ bool Options::loadCompositingConfig (bool force)
+             break;
+         }
+     }
++#if HAVE_WAYLAND
++    // sanity check the configured backend
++    if (waylandServer()) {
++        if (!waylandServer()->backend()->supportsCompositor(compositingMode)) {
++            qCWarning(KWIN_CORE) << "Selected compositor not supported by Wayland backend, falling back to backend default";
++            compositingMode = waylandServer()->backend()->preferredCompositor();
++            qunsetenv("KWIN_COMPOSE");
++        }
++    }
++#endif
++
+     setCompositingMode(compositingMode);
+ 
+     if (m_compositingMode == NoCompositing) {
+diff --git a/plugins/kglobalaccel/kglobalaccel_plugin.cpp b/plugins/kglobalaccel/kglobalaccel_plugin.cpp
+index 7aa9c0f..4ff3d3f 100644
+--- a/plugins/kglobalaccel/kglobalaccel_plugin.cpp
++++ b/plugins/kglobalaccel/kglobalaccel_plugin.cpp
+@@ -40,7 +40,8 @@ void KGlobalAccelImpl::setEnabled(bool enabled)
+ {
+     static KWin::InputRedirection *s_input = KWin::InputRedirection::self();
+     if (!s_input) {
+-        qFatal("This plugin is intended to be used with KWin and this is not KWin, exiting now");
++        qWarning("This plugin is intended to be used with KWin and this is not KWin, exiting now");
++        return;
+     }
+     s_input->registerGlobalAccel(enabled ? this : nullptr);
+ }
