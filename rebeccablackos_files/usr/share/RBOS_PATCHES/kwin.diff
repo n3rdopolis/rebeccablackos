@@ -213,17 +213,3 @@ index 39efd9d..0f7d411 100644
      setCompositingMode(compositingMode);
  
      if (m_compositingMode == NoCompositing) {
-diff --git a/plugins/kglobalaccel/kglobalaccel_plugin.cpp b/plugins/kglobalaccel/kglobalaccel_plugin.cpp
-index 7aa9c0f..4ff3d3f 100644
---- a/plugins/kglobalaccel/kglobalaccel_plugin.cpp
-+++ b/plugins/kglobalaccel/kglobalaccel_plugin.cpp
-@@ -40,7 +40,8 @@ void KGlobalAccelImpl::setEnabled(bool enabled)
- {
-     static KWin::InputRedirection *s_input = KWin::InputRedirection::self();
-     if (!s_input) {
--        qFatal("This plugin is intended to be used with KWin and this is not KWin, exiting now");
-+        qWarning("This plugin is intended to be used with KWin and this is not KWin, exiting now");
-+        return;
-     }
-     s_input->registerGlobalAccel(enabled ? this : nullptr);
- }
