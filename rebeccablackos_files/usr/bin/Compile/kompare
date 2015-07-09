@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qtbase
+SOURCENAME=kompare
 
 #The URL of the Source code repo
-SOURCEURL=git://code.qt.io/qt/qtbase
+SOURCEURL=git://anongit.kde.org/kompare
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.5
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -53,6 +53,7 @@ function PackageDownloadSource
 :
 }
 
+
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
@@ -62,9 +63,10 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+rm CMakeCache.txt
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -release -dbus -no-gtkstyle -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 make
 }
 
@@ -78,17 +80,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly
-qmake
-make
-cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
-
-cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix
-qmake
-make
-cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
-
-
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
