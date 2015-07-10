@@ -33,6 +33,7 @@ export DEBIAN_FRONTEND=noninteractive
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #update the apt cache
+rm -rf /var/lib/apt/lists/*
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages

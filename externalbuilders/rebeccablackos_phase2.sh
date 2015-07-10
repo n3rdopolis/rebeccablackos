@@ -38,7 +38,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 
 #delete old logs
-rm -r "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/usr/share/logs/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/usr/share/logs/*
 
 #copy the installs data copied in phase 1 into phase 2 
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt 
@@ -59,6 +59,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 
 #Bring in needed files.
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt/lists/*
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/*     "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/apt/sources.list 
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt
