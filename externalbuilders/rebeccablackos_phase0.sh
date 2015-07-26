@@ -58,7 +58,11 @@ if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
   echo "Setting up chroot for downloading archives and software..."
   "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/
-  touch "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+  debootstrapresult=$?
+  if [[ $debootstrapresult == 0 ]]
+  then
+    touch "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+  fi
 fi
 
 #if set to rebuild phase 1
@@ -67,5 +71,9 @@ then
   #setup a really basic Ubuntu installation for the live cd
   echo "Setting up chroot for the Live CD..."
   "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/
-  touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+  debootstrapresult=$?
+  if [[ $debootstrapresult == 0 ]]
+  then
+    touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+  fi
 fi
