@@ -24,8 +24,7 @@ argument=$1
 export MAKEDEBS=1
 
 #build these packages in this order. # symbol is a comment
-echo "
-#linux
+COMPILELIST+="#linux
 wayland
 drm
 macros
@@ -256,7 +255,9 @@ gst-libav
 glmark
 bemenu
 orbment
-" | awk -F "#" '{print $1}' | while read BUILDNAME
+"
+
+echo "$COMPILELIST" | awk -F "#" '{print $1}' | while read BUILDNAME
 do
 
   #compile_all is running to download the source
