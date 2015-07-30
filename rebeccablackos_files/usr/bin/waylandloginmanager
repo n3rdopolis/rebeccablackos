@@ -194,6 +194,7 @@ function ReadEnvironmentFile
 {
   #parse the session event file if specified, and it exists
   EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}')
+  EnvironmentFileData+=$'\n'
   while read LINE
   do
     #environment files are specified as action=var=data
@@ -985,6 +986,7 @@ function GetUserCredentials
   USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
   #sort the list
   USERLIST=$(echo "$USERLIST" | sort |uniq)
+  USERLIST+=$'\n'
   #go through each line of users found, to handle the display of the real name (passwd gecos feild)
   while read USER
   do

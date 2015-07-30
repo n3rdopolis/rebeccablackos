@@ -54,12 +54,24 @@ mkdir /usr/share/logs/package_operations/Downloads
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 #Process the install list into INSTALLS.txt
-sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt > /tmp/INSTALLS.txt
+INSTALLS_LIST=$(sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt | sed 's/::/@/g')
+INSTALLS_LIST+=$'\n'
+echo "$INSTALLS_LIST" | while read LINE
+do
+  IFS=@
+  LINE=($LINE)
+  unset IFS
+  if [[ ${LINE[0]} ]]
+  then
+    echo "${LINE[0]}::${LINE[1]}" > /tmp/INSTALLS.txt
+  fi
+done
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 touch /tmp/FAILEDDOWNLOADS.txt
 INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
 INSTALLS+="$(echo; diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | cut -c 2- )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
+INSTALLS+=$'\n'
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION

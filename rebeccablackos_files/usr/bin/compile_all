@@ -256,6 +256,7 @@ glmark
 bemenu
 orbment
 "
+COMPILELIST+=$'\n'
 
 echo "$COMPILELIST" | awk -F "#" '{print $1}' | while read BUILDNAME
 do

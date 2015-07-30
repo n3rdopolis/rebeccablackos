@@ -79,7 +79,7 @@ $(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | g
 INSTALLS+="
 $(diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt | grep "^ " | cut -c 2- )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
-
+INSTALLS+=$'\n'
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
