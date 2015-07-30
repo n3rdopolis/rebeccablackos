@@ -21,7 +21,13 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 export BUILDLOCATION=~/RBOS_Build_Files
+
+#make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
+
+#switch to that folder
+cd "$BUILDLOCATION"
+
 echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
 
 

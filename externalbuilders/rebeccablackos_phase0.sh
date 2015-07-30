@@ -27,11 +27,6 @@ then
   exit
 fi
 
-#make a folder containing the live cd tools in the users local folder
-mkdir -p "$BUILDLOCATION"
-
-#switch to that folder
-cd "$BUILDLOCATION"
 
 #create a folder for the media mountpoints in the media folder
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"

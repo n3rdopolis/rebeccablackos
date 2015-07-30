@@ -86,10 +86,14 @@ then
 else
   OLDPWD=$PWD
   cd "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
-  find | while read FILE 
-  do
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
-  done
+  RESULT=$?
+    if [[ $RESULT == 0 ]]
+    then
+      find | while read FILE 
+      do
+	rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
+      done
+  fi
   cd $OLDPWD
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
