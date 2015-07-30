@@ -18,6 +18,14 @@
 echo "PHASE 1"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  fi
+fi
 
 unset HOME
 
@@ -67,8 +75,27 @@ chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
-#bind mount phase1 to the workdir. 
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  #bind mount phase1 to the workdir. 
+  mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
+  #copy the files to where they belong
+  rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
+else
+  OLDPWD=$PWD
+  cd "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+  find | while read FILE 
+  do
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
+  done
+  cd $OLDPWD
+  #Union mount importdata and phase1
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+fi
+
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev/
@@ -84,8 +111,6 @@ mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/buil
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 
-#copy the files to where they belong
-rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 
 
 #Configure the Live system########################################
