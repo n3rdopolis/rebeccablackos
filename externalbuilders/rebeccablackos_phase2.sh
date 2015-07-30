@@ -41,7 +41,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/usr/share/logs/*
 
 #copy the installs data copied in phase 1 into phase 2 
-cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt 
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt 
 
 
 #bind mount phase2 at the workdir

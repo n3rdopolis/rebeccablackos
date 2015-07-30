@@ -53,7 +53,8 @@ mkdir /usr/share/logs/package_operations/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
-sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
+#Process the install list into INSTALLS.txt
+sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt > /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 touch /tmp/FAILEDDOWNLOADS.txt
 INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"

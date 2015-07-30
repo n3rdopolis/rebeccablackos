@@ -70,7 +70,6 @@ mkdir -p /usr/share/logs/package_operations/Installs
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
-sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
 touch /tmp/FAILEDINSTALLS.txt
 diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep -v ::REMOVE | grep ^- | grep -v "\---" | cut -c 2- | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
