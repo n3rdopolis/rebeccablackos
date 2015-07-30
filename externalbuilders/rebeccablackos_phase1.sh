@@ -93,7 +93,7 @@ else
       do
 	rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
       done
-  fi
+    fi
   cd $OLDPWD
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
