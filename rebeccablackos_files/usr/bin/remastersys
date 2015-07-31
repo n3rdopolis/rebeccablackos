@@ -357,6 +357,7 @@ FOO
     cp $WORKDIR/ISOTMP/casper/filesystem.manifest $WORKDIR/ISOTMP/casper/filesystem.manifest-desktop
     # Suggested by lkjoel from Ubuntu Forums - Joel Leclerc to remove the frontend so the Install menu item is not on the installed system
     sed -i '/ubiquity-frontend/d' $WORKDIR/ISOTMP/casper/filesystem.manifest-desktop
+    sed -i '/calamares-rbos/d' $WORKDIR/ISOTMP/casper/filesystem.manifest-desktop
 
     sleep 1
 

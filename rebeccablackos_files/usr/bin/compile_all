@@ -23,7 +23,17 @@ argument=$1
 
 export MAKEDEBS=1
 
+
 #build these packages in this order. # symbol is a comment
+if [[ ! -e /usr/lib/casper ]]
+then
+  COMPILELIST+="casper"
+  COMPILELIST+=$'\n'
+fi
+
+
+COMPILELIST+="calamares"
+COMPILELIST+=$'\n'
 COMPILELIST+="#linux
 wayland
 drm
