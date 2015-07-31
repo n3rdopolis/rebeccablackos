@@ -59,11 +59,24 @@ INSTALLS_LIST+=$'\n'
 echo "$INSTALLS_LIST" | while read LINE
 do
   IFS=@
+  #Get all the major elements of the line
   LINE=($LINE)
   unset IFS
-  if [[ ${LINE[0]} ]]
+  UntrueConditionals=0
+  CONDITIONAL_STATEMENTS=${LINE[3]}
+
+  #Get all the conditionals in the third collumn of INSTALLS_LIST.txt. If there are none, all are assumed true. They are seperated by commas,
+  IFS=,
+  CONDITIONAL_STATEMENTS=($CONDITIONAL_STATEMENTS)
+  unset IFS
+
+  #conditionals. == for is, and != for is not. 
+  #supported variables are $DEBIAN_DISTRO and $DEBIAN_ARCH and $PROCESSOR_ARCH
+
+  #If all conditionals are true
+  if [[ $UntrueConditionals == 0 ]]
   then
-    echo "${LINE[0]}::${LINE[1]}" > /tmp/INSTALLS.txt
+    echo "${LINE[0]}::${LINE[1]}" >> /tmp/INSTALLS.txt
   fi
 done
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
