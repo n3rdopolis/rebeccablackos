@@ -31,9 +31,6 @@ then
   COMPILELIST+=$'\n'
 fi
 
-
-COMPILELIST+="calamares"
-COMPILELIST+=$'\n'
 COMPILELIST+="#linux
 wayland
 drm
@@ -266,6 +263,10 @@ glmark
 bemenu
 orbment
 "
+COMPILELIST+=$'\n'
+
+
+COMPILELIST+="calamares"
 COMPILELIST+=$'\n'
 
 echo "$COMPILELIST" | awk -F "#" '{print $1}' | while read BUILDNAME
