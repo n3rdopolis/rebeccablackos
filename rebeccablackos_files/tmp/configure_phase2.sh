@@ -155,7 +155,10 @@ done
 apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Installs/dist-upgrade.log
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge.log
+apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_autoremove.log
+
+#prevent packages removed from the repositories upstream to not make it in the ISOS
+aptitude purge ?obsolete -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
