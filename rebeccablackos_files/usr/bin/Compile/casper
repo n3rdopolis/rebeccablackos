@@ -73,7 +73,18 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install
+cat debian/*.install |while read LINE
+do 
+echo "DOING $LINE"
+  FILECOPY=($LINE)
+  Iterator=0
+  DEST="/${FILECOPY[${#FILECOPY[@]} -1]}"
+  for (( Iterator = 0; Iterator < (( ${#FILECOPY[@]} -1 )); Iterator++ ))
+  do
+    SRC="./${FILECOPY[$Iterator]}"
+    cp "$SRC" "$DEST"
+  done
+done
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
