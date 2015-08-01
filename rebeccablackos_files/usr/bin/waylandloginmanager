@@ -575,11 +575,13 @@ function ChooseSessionType
   export WAYLAND_HOST=wlhost-$SESSIONID
   export WAYLAND_GUEST=wayland-$SESSIONID
 
+  unset WSESSIONLIST
+  FirstRunRan=0
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
   #ONLY the session lines should be set through stdio in the while loop. This string is sent to a zenity dialog.
-  WSESSIONLIST=$(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort | while read SESSIONFILE
+  while read SESSIONFILE
   do
     IsExecutable=$(find $SESSIONFILE |wc -l)
     if [[ $IsExecutable == 0 ]]
@@ -626,7 +628,7 @@ function ChooseSessionType
       if [[ ! -e $FILE && -n $FILE ]]
       then
 	logger -t waylandloginmanager "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
-	((NotFoundCount++))
+	#((NotFoundCount++))
       fi
     done < <(echo "$NeedsFile")
 
@@ -657,16 +659,21 @@ function ChooseSessionType
     #This is sent through stdio which is added to teh WSESSIONLIST variable
     if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
     then
-      echo "$CompositorExec"
-      echo "$BackendArguments"
-      echo "$SessionArgument"
-      echo "$CompositorDisplayArgument"
-      echo "$AdditionalArguments"
-      echo "$EnvironmentFile"
-      echo ""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"
-      echo "$SessionName"
+      if [[ $FirstRunRan == 0 ]]
+      then
+	FirstRunRan=0
+	WSESSIONLIST+=$'\n'
+      fi
+      WSESSIONLIST+="$CompositorExec"$'\n'
+      WSESSIONLIST+="$BackendArguments"$'\n'
+      WSESSIONLIST+="$SessionArgument"$'\n'
+      WSESSIONLIST+="$CompositorDisplayArgument"$'\n'
+      WSESSIONLIST+="$AdditionalArguments"$'\n'
+      WSESSIONLIST+="$EnvironmentFile"$'\n'
+      WSESSIONLIST+=""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"$'\n'
+      WSESSIONLIST+="$SessionName"
     fi
-  done)
+  done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
 
 
   #If wesessions where found above then show a zenity dialog. If there where none, use a default session.
