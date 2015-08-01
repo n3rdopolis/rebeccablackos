@@ -14,9 +14,11 @@
 #
 #However all variable are expanded.
 #
-#conditionals are optional. if not passed, then it's assumed true
+#conditionals are optional. if there isn't any conditionals, then it's assumed true for the operation to be run against the package
 #There must be a space between the == and !=
 #for example linux-image-686-pae::PART::DEBIAN_ARCH == i386, DEBIAN_DISTRO != ubuntu
+#
+#conditionals are seperated by commas, and are ANDed only
 #######
 apt-rdepends::PART
 ragel::PART
