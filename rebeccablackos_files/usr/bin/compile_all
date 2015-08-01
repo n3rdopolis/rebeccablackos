@@ -31,6 +31,12 @@ then
   COMPILELIST+=$'\n'
 fi
 
+if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
+then
+  COMPILELIST+="lupin"
+  COMPILELIST+=$'\n'
+fi
+
 COMPILELIST+="#linux
 wayland
 drm
