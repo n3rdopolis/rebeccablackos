@@ -1,3 +1,23 @@
+#File Format is packagename::ACTION::CONDITIONAL
+#######
+#package name is the installable name of the package
+#variables in package names are expanded. For example linux-image-$DEBIAN_ARCH
+#######
+#Action is the installation method
+#PART is for partial install, where recommended packages are NOT installed
+#FULL is for install with recommended packages
+#BUILDDEP installs the build dependancies of a package
+#REMOVE removes a package, although it is recommended to not install a package, and not remove it
+#######
+#conditionals. == for is, and != for is not. 
+#Usable variables are $DEBIAN_DISTRO and $DEBIAN_ARCH
+#
+#However all variable are expanded.
+#
+#conditionals are optional. if not passed, then it's assumed true
+#There must be a space between the == and !=
+#for example linux-image-686-pae::PART::DEBIAN_ARCH == i386, DEBIAN_DISTRO != ubuntu
+#######
 apt-rdepends::PART
 ragel::PART
 check::FULL

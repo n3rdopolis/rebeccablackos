@@ -53,17 +53,22 @@ mkdir /usr/share/logs/package_operations/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
+
+#Set some variables
+export DEBIAN_ARCH=$(dpkg --print-architecture)
+export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
+
 #Process the install list into INSTALLS.txt
-INSTALLS_LIST=$(sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt | sed 's/::/@/g')
+INSTALLS_LIST=$(sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt )
 INSTALLS_LIST+=$'\n'
-echo "$INSTALLS_LIST" | while read LINE
+echo "$INSTALLS_LIST" | sed 's/::/@/g' | perl -pe 's/\$(\w+)/$ENV{$1}/g' | while read LINE
 do
   IFS=@
   #Get all the major elements of the line
   LINE=($LINE)
   unset IFS
   UntrueConditionals=0
-  CONDITIONAL_STATEMENTS=${LINE[3]}
+  CONDITIONAL_STATEMENTS=${LINE[2]}
 
   #Get all the conditionals in the third collumn of INSTALLS_LIST.txt. If there are none, all are assumed true. They are seperated by commas,
   IFS=,
@@ -71,14 +76,30 @@ do
   unset IFS
 
   #conditionals. == for is, and != for is not. 
-  #supported variables are $DEBIAN_DISTRO and $DEBIAN_ARCH and $PROCESSOR_ARCH
+  #Usable variables are $DEBIAN_DISTRO and $DEBIAN_ARCH
+  for (( Iterator = 0; Iterator < ${#CONDITIONAL_STATEMENTS[@]}; Iterator++ ))
+  do
+    CONDITIONAL=(${CONDITIONAL_STATEMENTS[$Iterator]})
+    OPERAND=${CONDITIONAL[1]}
+
+    if [[ $OPERAND == "==" && ${CONDITIONAL[0]} != ${CONDITIONAL[2]} ]]
+    then
+      ((UntrueConditionals++))
+    fi
+
+    if [[ $OPERAND == "!=" && ${CONDITIONAL[0]} == ${CONDITIONAL[2]} ]]
+    then
+      ((UntrueConditionals++))
+    fi
+  done
 
   #If all conditionals are true
   if [[ $UntrueConditionals == 0 ]]
   then
-    echo "${LINE[0]}::${LINE[1]}" >> /tmp/INSTALLS.txt
+   echo "${LINE[0]}::${LINE[1]}" >> /tmp/INSTALLS.txt
   fi
 done
+
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 touch /tmp/FAILEDDOWNLOADS.txt
 INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
