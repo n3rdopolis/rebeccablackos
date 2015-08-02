@@ -1191,7 +1191,12 @@ function StartLoginManagerDisplay
     then 
       (( StartTimes++ ))
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
-      openvt -w -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log"
+      if [[ -x "$DEFAULTWAYLANDSERVER" ]]
+      then
+        openvt -w -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log"
+      else
+        echo "$DEFAULTWAYLANDSERVER is not executable, or does not exist" #>> /var/log/loginmanagerdisplay.log
+      fi
     fi
     sleep 1
   done
