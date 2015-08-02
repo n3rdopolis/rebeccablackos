@@ -52,6 +52,7 @@ rm -r /usr/share/logs/package_operations/Downloads
 mkdir /usr/share/logs/package_operations/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
+rm /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 
 #Set some variables
@@ -100,6 +101,7 @@ do
   fi
 done
 
+sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 touch /tmp/FAILEDDOWNLOADS.txt
 INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
