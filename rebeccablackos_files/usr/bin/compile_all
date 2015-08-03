@@ -37,7 +37,7 @@ then
   COMPILELIST+=$'\n'
 fi
 
-if [[ ! -e /usr/lib/ubiquity/ ]]
+if [[ ! -e /usr/share/ubiquity/apt-setup ]]
 then
   COMPILELIST+="ubiquity"
   COMPILELIST+=$'\n'
