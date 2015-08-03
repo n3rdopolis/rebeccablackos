@@ -576,7 +576,7 @@ function ChooseSessionType
   export WAYLAND_GUEST=wayland-$SESSIONID
 
   unset WSESSIONLIST
-  FirstRunRan=0
+  FirstRunNotRan=0
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
@@ -659,10 +659,11 @@ function ChooseSessionType
     #This is sent through stdio which is added to teh WSESSIONLIST variable
     if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
     then
-      if [[ $FirstRunRan == 0 ]]
+      if [[ $FirstRunNotRan == 0 ]]
       then
-	FirstRunRan=0
-	WSESSIONLIST+=$'\n'
+        FirstRunNotRan=1
+      else
+        WSESSIONLIST+=$'\n'
       fi
       WSESSIONLIST+="$CompositorExec"$'\n'
       WSESSIONLIST+="$BackendArguments"$'\n'
