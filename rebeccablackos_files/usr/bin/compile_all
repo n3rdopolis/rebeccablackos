@@ -37,6 +37,11 @@ then
   COMPILELIST+=$'\n'
 fi
 
+if [[ ! -e /usr/lib/ubiquity/ ]]
+then
+  COMPILELIST+="ubiquity"
+  COMPILELIST+=$'\n'
+fi
 COMPILELIST+="#linux
 wayland
 drm
