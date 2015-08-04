@@ -63,8 +63,8 @@ function PackagePrepareBuild()
 {
 cp -a /usr/share/RBOS_PATCHES/calamares/* .
 sed -i 's/pkexec/wlsudo/g' calamares.desktop
-KERNELVERSION=$(basename $(readlink /vmlinuz) | cut -d'-' -f 2-)
-sed -i "s/@KERNELVERSION@/$KERNELVERSION/g" src/modules/initcpio/initcpio.conf
+sed -i '/initramfs/c\- initramfs' settings.conf 
+sed -i '/initcpio/d' settings.conf
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
