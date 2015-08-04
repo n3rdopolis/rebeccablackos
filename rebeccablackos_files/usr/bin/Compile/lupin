@@ -82,7 +82,7 @@ echo "DOING $LINE"
   for (( Iterator = 0; Iterator < (( ${#FILECOPY[@]} -1 )); Iterator++ ))
   do
     SRC="./${FILECOPY[$Iterator]}"
-    mkdir -p "$(dirname "$SRC")"
+    mkdir -p "$DEST"
     cp -a "$SRC" "$DEST"
   done
 done
