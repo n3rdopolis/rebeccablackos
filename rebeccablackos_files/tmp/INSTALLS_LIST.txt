@@ -16,7 +16,7 @@
 #
 #conditionals are optional. if there isn't any conditionals, then it's assumed true for the operation to be run against the package
 #There must be a space between the == and !=
-#for example linux-image-686-pae::PART::DEBIAN_ARCH == i386, DEBIAN_DISTRO != ubuntu
+#for example linux-image-686-pae::PART::$DEBIAN_ARCH == i386, $DEBIAN_DISTRO != ubuntu
 #
 #conditionals are seperated by commas, and are ANDed only
 #######
@@ -24,7 +24,7 @@ apt-rdepends::PART
 ragel::PART
 check::FULL
 bash-completion::FULL
-ubuntu-standard::FULL::DEBIAN_DISTRO == Ubuntu
+ubuntu-standard::FULL::$DEBIAN_DISTRO == Ubuntu
 seahorse::PART
 alacarte::PART
 nautilus::PART
@@ -51,15 +51,15 @@ libsystemd-journal-dev::PART
 libsystemd-login-dev::PART
 veromix::FULL
 plymouth-theme-spinfinity::FULL
-plymouth-theme-kubuntu-text::FULL::DEBIAN_DISTRO == Ubuntu
+plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
-ubuntu-minimal::FULL::DEBIAN_DISTRO == Ubuntu
+ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
 xserver-xorg::FULL
 lsb-desktop::FULL
 xterm::FULL
 network-manager::FULL
 modemmanager-dev::PART
-lupin-casper::PART::DEBIAN_DISTRO == Ubuntu
+lupin-casper::PART::$DEBIAN_DISTRO == Ubuntu
 libmysqlclient15-dev::PART
 libsqlite3-dev::PART
 libxapian-dev::PART
@@ -366,9 +366,9 @@ dpkg-repack::FULL
 libido3-0.1-0::PART
 libido3-0.1-dev::PART
 libnss3-1d::PART
-ubiquity-frontend-gtk::FULL::DEBIAN_DISTRO == Ubuntu
-ubiquity-casper::FULL::DEBIAN_DISTRO == Ubuntu
-ubuntu-standard::FULL::DEBIAN_DISTRO == Ubuntu
+ubiquity-frontend-gtk::FULL::$DEBIAN_DISTRO == Ubuntu
+ubiquity-casper::FULL::$DEBIAN_DISTRO == Ubuntu
+ubuntu-standard::FULL::$DEBIAN_DISTRO == Ubuntu
 libparted0-dev::FULL
 libparted2::FULL
 libyaml-cpp-dev::PART
