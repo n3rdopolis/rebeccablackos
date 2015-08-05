@@ -119,7 +119,7 @@ rm -r /usr/import
 #Uninstall the upstream kernel if there is a custom built kernel installed
 if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
 then
-  dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -v linux-image-generic | grep -v linux-headers-generic | while read PACKAGE
+  dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
   do
     apt-get purge $PACKAGE -y --force-yes 
     #Force initramfs utilites to include the overlay filesystem
