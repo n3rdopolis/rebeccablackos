@@ -67,6 +67,7 @@ sed -i 's/usr/opt/g' calamares.desktop
 sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
 sed -i '/initramfs/c\- initramfs' settings.conf 
 sed -i '/initcpio/d' settings.conf
+sed -i '/localecfg/d' settings.conf
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
