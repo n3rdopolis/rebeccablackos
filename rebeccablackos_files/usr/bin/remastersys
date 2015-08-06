@@ -249,42 +249,25 @@ update-rc.d remastersys-firstboot defaults
         done
 
         log_msg "Cleaning up passwd, group, shadow and gshadow files for the live system"
-        grep '^[^:]*:[^:]*:[0-9]:' /etc/passwd > $WORKDIR/dummysys/etc/passwd
-        grep '^[^:]*:[^:]*:[0-9][0-9]:' /etc/passwd >> $WORKDIR/dummysys/etc/passwd
-        grep '^[^:]*:[^:]*:[0-9][0-9][0-9]:' /etc/passwd >> $WORKDIR/dummysys/etc/passwd
-        grep '^[^:]*:[^:]*:[3-9][0-9][0-9][0-9][0-9]:' /etc/passwd >> $WORKDIR/dummysys/etc/passwd
+        sort /etc/passwd -t: -n -k3 > $WORKDIR/dummysys/etc/passwd
+        sort /etc/group -t: -n -k3 > $WORKDIR/dummysys/etc/group
 
-        grep '^[^:]*:[^:]*:[0-9]:' /etc/group > $WORKDIR/dummysys/etc/group
-        grep '^[^:]*:[^:]*:[0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/group
-        grep '^[^:]*:[^:]*:[0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/group
-        grep '^[^:]*:[^:]*:[3-9][0-9][0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/group
+        pwconv -R $WORKDIR/dummysys
+        grpconv -R $WORKDIR/dummysys
 
-        grep '^[^:]*:[^:]*:[0-9]:' /etc/group > $WORKDIR/dummysys/etc/shadow
-        grep '^[^:]*:[^:]*:[0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/shadow
-        grep '^[^:]*:[^:]*:[0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/shadow
-        grep '^[^:]*:[^:]*:[3-9][0-9][0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/shadow
 
-        grep '^[^:]*:[^:]*:[0-9]:' /etc/group > $WORKDIR/dummysys/etc/gshadow
-        grep '^[^:]*:[^:]*:[0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/gshadow
-        grep '^[^:]*:[^:]*:[0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/gshadow
-        grep '^[^:]*:[^:]*:[3-9][0-9][0-9][0-9][0-9]:' /etc/group >> $WORKDIR/dummysys/etc/gshadow
-
-        grep '^[^:]*:[^:]*:[5-9][0-9][0-9]:' /etc/passwd | awk -F ":" '{print $1}'> $WORKDIR/tmpusers1
-        grep '^[^:]*:[^:]*:[1-9][0-9][0-9][0-9]:' /etc/passwd | awk -F ":" '{print $1}'> $WORKDIR/tmpusers2
-        grep '^[^:]*:[^:]*:[1-2][0-9][0-9][0-9][0-9]:' /etc/passwd | awk -F ":" '{print $1}'> $WORKDIR/tmpusers3
-
-        cat $WORKDIR/tmpusers1 $WORKDIR/tmpusers2 $WORKDIR/tmpusers3 > $WORKDIR/tmpusers
-        rm -f $WORKDIR/tmpusers[0-9] &> /dev/null
+        #cat $WORKDIR/tmpusers1 $WORKDIR/tmpusers2 $WORKDIR/tmpusers3 > $WORKDIR/tmpusers
+        #rm -f $WORKDIR/tmpusers[0-9] &> /dev/null
 
         #cp /etc/shadow $WORKDIR/dummysys/etc/shadow
         #cp /etc/gshadow $WORKDIR/dummysys/etc/gshadow
 
-        cat $WORKDIR/tmpusers | while read LINE ;do
+        #cat $WORKDIR/tmpusers | while read LINE ;do
 
-            echo $LINE | xargs -i sed -e 's/,{}$//g' $WORKDIR/dummysys/etc/group > $WORKDIR/dummysys/etc/group.new1
-            echo $LINE | xargs -i sed -e 's/,{},/,/g' $WORKDIR/dummysys/etc/group.new1 > $WORKDIR/dummysys/etc/group.new2
-            echo $LINE | xargs -i sed -e 's/:{}$/:/g' $WORKDIR/dummysys/etc/group.new2 > $WORKDIR/dummysys/etc/group.new3
-            echo $LINE | xargs -i sed -e 's/:{},/:/g' $WORKDIR/dummysys/etc/group.new3 > $WORKDIR/dummysys/etc/group
+            #echo $LINE | xargs -i sed -e 's/,{}$//g' $WORKDIR/dummysys/etc/group > $WORKDIR/dummysys/etc/group.new1
+            #echo $LINE | xargs -i sed -e 's/,{},/,/g' $WORKDIR/dummysys/etc/group.new1 > $WORKDIR/dummysys/etc/group.new2
+            #echo $LINE | xargs -i sed -e 's/:{}$/:/g' $WORKDIR/dummysys/etc/group.new2 > $WORKDIR/dummysys/etc/group.new3
+            #echo $LINE | xargs -i sed -e 's/:{},/:/g' $WORKDIR/dummysys/etc/group.new3 > $WORKDIR/dummysys/etc/group
 
             # /etc/shadow and /etc/gshadow needed for rescue mode boot root access - removed due to user creation issues for live boot
 
@@ -298,9 +281,9 @@ update-rc.d remastersys-firstboot defaults
             #echo $LINE | xargs -i sed -e 's/:{}$/:/g' $WORKDIR/dummysys/etc/gshadow.new3 > $WORKDIR/dummysys/etc/gshadow.new4
             #echo $LINE | xargs -i sed -e 's/:{},/:/g' $WORKDIR/dummysys/etc/gshadow.new4 > $WORKDIR/dummysys/etc/gshadow
 
-            rm -f $WORKDIR/dummysys/etc/group.new* &> /dev/null
+            #rm -f $WORKDIR/dummysys/etc/group.new* &> /dev/null
 
-        done
+        #done
 
     fi
 
