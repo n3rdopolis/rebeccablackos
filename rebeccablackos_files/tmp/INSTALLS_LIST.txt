@@ -66,7 +66,9 @@ libxapian-dev::PART
 libleveldb1::PART
 libleveldb-dev::PART
 language-pack-en::FULL
-linux-generic::FULL
+linux-generic::FULL::$DEBIAN_DISTRO == Ubuntu
+linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
+linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 thermald::FULL
 llvm-3.4::PART
 llvm-3.4-dev::PART
@@ -334,6 +336,7 @@ libqimageblitz-dev::PART
 zenity::PART
 command-not-found::FULL
 sudo::FULL
+locales::FULL
 lshw:FULL
 ltrace::FULL
 strace::FULL
