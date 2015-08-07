@@ -62,6 +62,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/ubiquity-kdeui.desktop@/opt/share/applications/calamares.desktop@g' scripts/casper-bottom/25adduser
+patch -p0 < /usr/share/RBOS_PATCHES/casper.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
