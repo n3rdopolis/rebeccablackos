@@ -1,8 +1,8 @@
 diff --git a/src/modules/displaymanager/main.py b/src/modules/displaymanager/main.py
-index b5a9dbb..fe6bc1d 100644
+index b5a9dbb..0192bdd 100644
 --- a/src/modules/displaymanager/main.py
 +++ b/src/modules/displaymanager/main.py
-@@ -88,130 +88,16 @@ def set_autologin(username, displaymanagers, default_desktop_environment, root_m
+@@ -88,197 +88,22 @@ def set_autologin(username, displaymanagers, default_desktop_environment, root_m
      if username is None:
          do_autologin = False
  
@@ -79,11 +79,7 @@ index b5a9dbb..fe6bc1d 100644
 +        # Systems with waylandloginmanager as Desktop Manager
 +        waylandloginmanager_conf_path = os.path.join(root_mount_point, "etc/waylandloginmanager.conf")
          text = []
-+        os.mknod(waylandloginmanager_conf_path)
-+        if os.path.exists(waylandloginmanager_conf_path):
-+            with open(waylandloginmanager_conf_path, 'r') as waylandloginmanager_conf:
-+                text = waylandloginmanager_conf.readlines()
- 
+-
 -        if os.path.exists(kdm_conf_path):
 -            with open(kdm_conf_path, 'r') as kdm_conf:
 -                text = kdm_conf.readlines()
@@ -100,7 +96,16 @@ index b5a9dbb..fe6bc1d 100644
 -                        line = "AutoLoginUser={!s}\n".format(username)
 -
 -                    kdm_conf.write(line)
--        else:
++        os.mknod(waylandloginmanager_conf_path)
++        if os.path.exists(waylandloginmanager_conf_path):
++          with open(waylandloginmanager_conf_path, 'w') as waylandloginmanager_conf:
++             if do_autologin:
++                  line = "autologin-user={!s}\n".format(username)
++             else:
++                  line = "#autologin-user=\n"
++
++             waylandloginmanager_conf.write(line)
+         else:
 -            return "Cannot write KDM configuration file", "KDM config file {!s} does not exist".format(kdm_conf_path)
 -
 -    if "lxdm" in displaymanagers:
@@ -137,14 +142,15 @@ index b5a9dbb..fe6bc1d 100644
 -                text = lightdm_conf.readlines()
 -
 -            with open(lightdm_conf_path, 'w') as lightdm_conf:
-+            with open(waylandloginmanager_conf_path, 'w') as waylandloginmanager_conf:
-                 for line in text:
-                     if 'autologin-user=' in line:
-                         if do_autologin:
-@@ -221,64 +107,8 @@ def set_autologin(username, displaymanagers, default_desktop_environment, root_m
- 
-                     lightdm_conf.write(line)
-         else:
+-                for line in text:
+-                    if 'autologin-user=' in line:
+-                        if do_autologin:
+-                            line = "autologin-user={!s}\n".format(username)
+-                        else:
+-                            line = "#autologin-user=\n"
+-
+-                    lightdm_conf.write(line)
+-        else:
 -            return "Cannot write LightDM configuration file", "LightDM config file {!s} does not exist".format(lightdm_conf_path)
 -
 -    if "slim" in displaymanagers:
@@ -163,15 +169,15 @@ index b5a9dbb..fe6bc1d 100644
 -                            line = 'auto_login yes\n'
 -                        else:
 -                            line = 'auto_login no\n'
--
++            return "Cannot write waylandloginmanager configuration file", "waylandloginmanager config file {!s} does not exist".format(waylandloginmanager_conf_path)
+ 
 -                    if do_autologin and 'default_user' in line:
 -                        line = "default_user {!s}\n".format(username)
 -
 -                    slim_conf.write(line)
 -        else:
 -            return "Cannot write SLIM configuration file", "SLIM config file {!s} does not exist".format(slim_conf_path)
-+            return "Cannot write waylandloginmanager configuration file", "waylandloginmanager config file {!s} does not exist".format(waylandloginmanager_conf_path)
- 
+-
 -    if "sddm" in displaymanagers:
 -        # Systems with Sddm as Desktop Manager
 -        sddm_conf_path = os.path.join(root_mount_point, "etc/sddm.conf")
@@ -207,7 +213,7 @@ index b5a9dbb..fe6bc1d 100644
  
      return None
  
-@@ -316,117 +146,13 @@ def run():
+@@ -316,117 +141,13 @@ def run():
      else:
          enable_basic_setup = False
  
