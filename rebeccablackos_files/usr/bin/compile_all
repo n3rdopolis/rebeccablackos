@@ -271,9 +271,11 @@ orbment
 "
 COMPILELIST+=$'\n'
 
-
-COMPILELIST+="calamares"
-COMPILELIST+=$'\n'
+if [[ ! -e /usr/bin/ubiquity ]]
+then
+  COMPILELIST+="calamares"
+  COMPILELIST+=$'\n'
+fi
 
 echo "$COMPILELIST" | awk -F "#" '{print $1}' | while read BUILDNAME
 do
