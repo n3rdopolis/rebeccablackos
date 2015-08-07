@@ -1,3 +1,6 @@
+LICENSE:
+  The build script are all under GPL v2, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/
+
 OVERVIEW:
   Use the latest ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
