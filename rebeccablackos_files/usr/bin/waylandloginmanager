@@ -1219,9 +1219,9 @@ function StartAutoLogin
   #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
   if [[ -e /etc/waylandloginmanager.conf ]]
   then
-    AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | awk -F "#" '{print $1}' | grep autologin-user= | awk -F = '{print $2}' | head -1 )
   else
-    AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | awk -F "#" '{print $1}' | grep autologin-user= | awk -F = '{print $2}' | head -1 )
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
 
