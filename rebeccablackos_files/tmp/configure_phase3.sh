@@ -106,9 +106,12 @@ sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-control-center.de
 sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-background-panel.desktop > /opt/share/applications/gnome-background-panel.desktop
 
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
-dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
-echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
-chmod +x /usr/bin/ubiquity
+if [[ -e /usr/bin/ubiquity ]]
+then
+  dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
+  echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
+  chmod +x /usr/bin/ubiquity
+fi
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /usr/import/* -a /
