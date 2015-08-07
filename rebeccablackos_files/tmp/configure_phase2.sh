@@ -50,7 +50,7 @@ RedirectFile /usr/sbin/invoke-rc.d
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
 #perl outputs complaints if a locale isn't generated
-sudo locale-gen en_US.UTF-8
+locale-gen en_US.UTF-8
 
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
