@@ -72,10 +72,9 @@ linux-generic::FULL::$DEBIAN_DISTRO == Ubuntu
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 thermald::FULL
-llvm-3.4::PART
-llvm-3.4-dev::PART
+llvm-3.4::PART::$DEBIAN_DISTRO == Ubuntu
+llvm-3.4-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libelf-dev::PART
-valgrind::FULL
 valac::PART
 checkinstall::FULL
 libxkbcommon-dev::PART
@@ -139,13 +138,6 @@ libgstreamer1.0-0::PART
 libgstreamer1.0-dev::PART
 libgstreamer-plugins-good1.0-dev::PART
 libgstreamer-plugins-good1.0-0::PART
-libgstreamer-plugins-base0.10-0::PART
-libgstreamer-plugins-base0.10-dev::PART
-gstreamer0.10-plugins-bad::FULL
-gstreamer0.10-plugins-ugly::FULL
-gstreamer0.10-plugins-good::FULL
-libqtgstreamer-0.10-0::PART
-libqtgstreamer-dev::PART
 libalsaplayer0::PART
 libalsaplayer-dev::PART
 libavutil-dev::PART
@@ -192,7 +184,6 @@ libtiff-dev::PART
 libvpx-dev::PART
 libgbm-dev::PART
 libxcb-glx0-dev::PART 
-libgl1-mesa-dri-dbg::PART
 libboost-system-dev::PART
 xcursor-themes::PART
 xfonts-utils::PART
@@ -298,10 +289,6 @@ libswscale2::FULL
 libswscale-dev::FULL
 libspectre1::PART
 libspectre-dev::PART
-libvlc5::PART
-libvlc-dev::PART
-libvlccore-dev::PART
-vlc-plugin-pulse::FULL
 luajit::PART
 libluajit-5.1-dev::PART
 libraw-dev::PART
