@@ -23,10 +23,6 @@ then
   exit
 fi
 
-#perl outputs complaints if a locale isn't generated
-locale-gen en_US.UTF-8
-localedef -i en_US -f UTF-8 en_US.UTF-8
-
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
@@ -39,6 +35,10 @@ apt-get update
 
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
+
+#perl outputs complaints if a locale isn't generated
+locale-gen en_US.UTF-8
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #update the dselect database
 yes Y | dselect update

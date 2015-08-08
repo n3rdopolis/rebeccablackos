@@ -49,15 +49,15 @@ RedirectFile /usr/sbin/invoke-rc.d
 #Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
-#perl outputs complaints if a locale isn't generated
-locale-gen en_US.UTF-8
-localedef -i en_US -f UTF-8 en_US.UTF-8
-
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
+
+#perl outputs complaints if a locale isn't generated
+locale-gen en_US.UTF-8
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
