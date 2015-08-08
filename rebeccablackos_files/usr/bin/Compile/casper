@@ -62,6 +62,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/ubiquity-kdeui.desktop@/opt/share/applications/calamares.desktop@g' scripts/casper-bottom/25adduser
+sed -i 's/overlayfs/overlay/g' hooks/casper
+sed -i '/aufs/d' hooks/casper
 patch -p0 < /usr/share/RBOS_PATCHES/casper.diff
 }
 
