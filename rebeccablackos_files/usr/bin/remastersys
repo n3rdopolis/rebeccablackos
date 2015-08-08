@@ -326,7 +326,7 @@ update-rc.d remastersys-firstboot defaults
     fi
 
     log_msg "Checking the ARCH of the system and setting the README.diskdefines file"
-    ARCH=`archdetect | awk -F "/" '{print $1}'`
+    ARCH=$(dpkg --print-architecture)
 
     cat > $WORKDIR/ISOTMP/README.diskdefines <<FOO
 #define DISKNAME  $LIVECDLABEL
