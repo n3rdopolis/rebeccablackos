@@ -53,6 +53,7 @@ veromix::FULL
 plymouth-theme-spinfinity::FULL
 plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART::$DEBIAN_DISTRO == Ubuntu
+plymouth-themes::PART::$DEBIAN_DISTRO == Debian
 plymouth-dev::PART::$DEBIAN_DISTRO == Debian
 ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
 xserver-xorg::FULL
