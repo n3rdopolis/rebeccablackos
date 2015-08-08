@@ -25,6 +25,7 @@ fi
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive

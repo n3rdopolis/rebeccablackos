@@ -51,6 +51,7 @@ echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
+localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
