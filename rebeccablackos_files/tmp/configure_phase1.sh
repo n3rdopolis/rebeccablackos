@@ -120,19 +120,19 @@ do
   then
     echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   #builddep
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Downloading build dependancies for $PACKAGE"                              2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
     apt-get build-dep $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log 
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
   Result=1

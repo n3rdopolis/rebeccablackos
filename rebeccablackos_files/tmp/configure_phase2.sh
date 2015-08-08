@@ -93,25 +93,25 @@ do
   then
     echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   #This is for full installs
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   #this is for build dependancies
   elif [[ $METHOD == "BUILDDEP" ]]
   then
     echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
     echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    Result=${PIPESTATUS[1]}
+    Result=${PIPESTATUS[0]}
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=1
