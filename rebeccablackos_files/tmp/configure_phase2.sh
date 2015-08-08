@@ -57,7 +57,7 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
+apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive

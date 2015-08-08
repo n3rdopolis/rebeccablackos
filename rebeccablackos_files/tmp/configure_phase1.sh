@@ -38,7 +38,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect -y --force-yes 
+apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
 
 #update the dselect database
 yes Y | dselect update
