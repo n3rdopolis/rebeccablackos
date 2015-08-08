@@ -43,8 +43,14 @@ function RedirectFile {
 
 
 #Redirect some files that get changed
-dpkg-divert --local --rename --add /lib/plymouth/ubuntu_logo.png
-
+export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
+if [[ $DEBIAN_DISTRO == Ubuntu ]]
+then
+  dpkg-divert --local --rename --add /lib/plymouth/ubuntu_logo.png
+elif [[ $DEBIAN_DISTRO == Debian ]]
+then
+  dpkg-divert --local --rename --add /usr/share/plymouth/debian-logo.png
+fi
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
 
