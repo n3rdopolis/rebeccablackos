@@ -17,8 +17,14 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script calls the program and arguments passed to the arguments of this script, sets runtime vars for Wayland, and executes the program, and arguments
-. /usr/bin/wlruntime_vars
-
+if [[ ! -e $WLSUDO ]]
+then
+  . /usr/bin/wlruntime_vars
+else
+  export PATH=/opt/bin:/opt/games:/usr/games:$PATH
+  export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
+  unset WLSUDO
+fi
 #If no application specified, show a menu
 if [[ ! -z $1 ]]
 then
