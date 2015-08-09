@@ -38,7 +38,7 @@ TODO:
       Need Creative Commons compatible images that can actually be put into a Open Source CD.
 
 PROBLEMS:
-      A few files outside of /opt get written that may conflict with the files provided by main Ubuntu archives. The number of files that get overwritten is small, and mostly just header files. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to enable dpkg overwrites.
+      A few files outside of /opt get written that may conflict with the files provided by main Debian archives. The number of files that get overwritten is small, and mostly just header files. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to enable dpkg overwrites.
 
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
