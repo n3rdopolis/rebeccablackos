@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script calls the program and arguments passed to the arguments of this script, sets runtime vars for Wayland, and executes the program, and arguments
-if [[ ! -e $WLSUDO ]]
+if [[ -z $WLSUDO ]]
 then
   . /usr/bin/wlruntime_vars
 else
