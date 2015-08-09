@@ -106,9 +106,9 @@ then
   update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
 elif [[ $DEBIAN_DISTRO == Debian ]]
 then
-  update-alternatives --install /usr/share/plymouth/themes/text.plymouth text.plymouth /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
-  update-alternatives --set text.plymouth /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
-  update-alternatives --set default.plymouth /usr/share/plymouth/themes/spinfinity/spinfinity.plymouth
+  /usr/sbin/plymouth-set-default-theme spinfinity
+  dpkg-divert --local --rename --add /usr/share/plymouth/themes/text.plymouth
+  ln -s /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth /usr/share/plymouth/themes/text.plymouth
 fi
 
 #Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
