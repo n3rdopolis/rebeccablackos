@@ -98,9 +98,17 @@ cd $OLDPWD
 update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
 #Set the plymouth themes
-update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
-update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
-update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
+if [[ $DEBIAN_DISTRO == Ubuntu ]]
+then
+  update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
+  update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
+  update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
+elif [[ $DEBIAN_DISTRO == Debian ]]
+then
+  update-alternatives --install /usr/share/plymouth/themes/text.plymouth text.plymouth /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
+  update-alternatives --set text.plymouth /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
+  update-alternatives --set default.plymouth /usr/share/plymouth/themes/spinfinity/spinfinity.plymouth
+fi
 
 #Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
 systemctl disable lightdm.service
