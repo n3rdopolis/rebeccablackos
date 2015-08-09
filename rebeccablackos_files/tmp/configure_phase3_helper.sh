@@ -47,6 +47,6 @@ cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
-  cp /lib/plymouth/ubuntu_logo.png /usr/share/plymouth/debian-logo.png
+  cp /usr/import/lib/plymouth/ubuntu_logo.png /usr/share/plymouth/debian-logo.png
   cp -a /lib/plymouth/themes/rebeccablackos-text/ /usr/share/plymouth/themes
 fi

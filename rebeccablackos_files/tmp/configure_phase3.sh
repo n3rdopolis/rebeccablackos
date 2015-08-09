@@ -60,6 +60,7 @@ fi
 mkdir /etc/lightdm/
 
 #Copy the import files into the system, and create menu items while creating a deb with checkinstall.
+cp /usr/import/tmp/* /tmp
 cd /tmp
 mkdir debian
 touch debian/control
