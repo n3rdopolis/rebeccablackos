@@ -51,6 +51,11 @@ elif [[ $DEBIAN_DISTRO == Debian ]]
 then
   dpkg-divert --local --rename --add /usr/share/plymouth/debian-logo.png
 fi
+
+if [[ $DEBIAN_DISTRO == Debian ]]
+then
+  echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
+fi
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
 
