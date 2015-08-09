@@ -49,4 +49,5 @@ if [[ $DEBIAN_DISTRO == Debian ]]
 then
   cp /usr/import/lib/plymouth/ubuntu_logo.png /usr/share/plymouth/debian-logo.png
   cp -a /lib/plymouth/themes/rebeccablackos-text/ /usr/share/plymouth/themes
+  sed -i '/ubuntu-//g'   /usr/share/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
 fi
