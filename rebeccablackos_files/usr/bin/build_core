@@ -474,6 +474,8 @@ function MakeAndInstall()
   mkdir -p "$INSTALLDIR/share/aclocal"
   mkdir -p "$INSTALLDIR/lib/$DEB_HOST_MULTIARCH"
   mkdir -p "$INSTALLDIR/libexec"
+  mkdir -p "$INSTALLDIR/doc"
+  mkdir -p "$INSTALLDIR/include"
 
   #Log the source version
   GetSourceVersion > "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion" 2>&1
