@@ -394,7 +394,8 @@ live-image-standard::PART
 gnome-icon-theme-symbolic::PART
 adwaita-icon-theme-full::PART
 oxygen-icon-theme::PART
-oxygen-cursor-theme::PART
+oxygen-cursor-theme::PART::$DEBIAN_DISTRO == Ubuntu
+oxygencursors::PART::$DEBIAN_DISTRO == Debian
 ttf-oxygen-font-family::PART
 light-themes::PART
 libsdl-ttf2.0-0::PART
