@@ -1,6 +1,26 @@
-default vesamenu.c32
+UI vesamenu.c32
+DEFAULT live
 prompt 0
 timeout 300
+SAY RebeccaBlackOS Boot Menu:____________________________________________
+SAY The live users's name is 'beccaholic' with no password
+SAY The following options for boot: are availible to be used:
+SAY If no options are passed in 30 seconds, then it defaults to live
+SAY _____________________________________________________________________
+SAY __|live|____________________________________Start the system normally 
+SAY _____________________________________________________________________
+SAY __|liveforcesw|___________________Force software rendering to be used
+SAY __|livefbdefault|_______________Attempt to use the framebuffer device
+SAY _____________________________________________________________________
+SAY __|livefb786|_______________Attempt to use a 640x480(x24) framebuffer
+SAY __|livefb789|_______________Attempt to use a 800x600(x24) framebuffer
+SAY __|livefb789|_______________Attempt to use a 800x600(x24) framebuffer
+SAY __|livefb792|______________Attempt to use a 1024x768(x24) framebuffer
+SAY _____________________________________________________________________
+SAY __|livefb795|_____________Attempt to use a 1280x1024(x24) framebuffer
+SAY __|livefb838|_____________Attempt to use a 1400x1050(x24) framebuffer
+SAY __|livefb867|______________Attempt to use a 1400x900(x24) framebuffer
+SAY __|livefb799|_____________Attempt to use a 1600x1200(x24) framebuffer
 
 menu title __LIVECDLABEL__
 menu background splash.png
