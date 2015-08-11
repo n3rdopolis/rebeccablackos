@@ -85,6 +85,16 @@ cd $OLDPWD
 #copy all files
 rsync /usr/import/* -a /
 
+#workaround for Debian not including legacy systemd files
+export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+echo -e "daemon\nid128\njournal\nlogin" | while read LIBRARY
+do
+  if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
+  then
+    ln -s /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
+  fi
+done
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
