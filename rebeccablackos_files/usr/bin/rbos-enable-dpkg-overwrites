@@ -51,7 +51,7 @@ if [[ $OKSelected == 0 && $FORCEOW != 2 ]]
 then
   if [[ $FORCEOW == 1 ]]
   then
-    echo "force-overwrites" > /etc/dpkg/dpkg.cfg.d/02rbos-overwrite
+    echo "force-overwrite" > /etc/dpkg/dpkg.cfg.d/02rbos-overwrite
   elif [[ $FORCEOW == 0 ]]
    then
     rm /etc/dpkg/dpkg.cfg.d/02rbos-overwrites
