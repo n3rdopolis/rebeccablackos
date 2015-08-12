@@ -210,7 +210,7 @@ libxcb-shm0-dev::PART
 libxcb-icccm4::PART
 libxcb-icccm4-dev::PART
 libxcb-sync1::PART
-libxcb-sync1-dev::PART 
+libxcb-sync-dev::PART 
 libxcb-xfixes0-dev::PART
 libxss1::PART
 libxss-dev::PART
@@ -347,10 +347,10 @@ ftp::FULL
 dnsutils::FULL
 user-setup::FULL
 bind9-host::FULL
-kpartx::FULL::$DEBIAN_DISTRO == Ubuntu
-kpartx-boot::FULL
+kpartx::FULL
+kpartx-boot::FULL::$DEBIAN_DISTRO == Ubuntu
 pppconfig::FULL
-ppoecfg::FULL
+ppoeconf::FULL
 ufw::FULL
 usbutils::FULL
 powermgmt-base::FULL
