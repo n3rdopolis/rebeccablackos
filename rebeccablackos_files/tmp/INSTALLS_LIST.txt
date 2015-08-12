@@ -30,9 +30,8 @@ alacarte::PART
 nautilus::PART
 gucharmap::PART
 gnome-font-viewer::PART
-gnome-control-center::PART
-unity-control-center::PART
-libpam-xdg-support::FULL
+gnome-control-center::PART::$DEBIAN_DISTRO == Ubuntu
+libpam-xdg-support::FULL::$DEBIAN_DISTRO == Ubuntu
 libpam-dev::PART
 libacl1::PART
 libacl1-dev::PART
@@ -40,17 +39,17 @@ libattr1::PART
 libattr1-dev::PART
 libcryptsetup4::PART
 libcryptsetup-dev::PART
-policykit-desktop-privileges::PART
+policykit-desktop-privileges::PART::$DEBIAN_DISTRO == Ubuntu
 libpolkit-agent-1-dev::PART
 libpolkit-backend-1-dev::PART
 libpolkit-gobject-1-dev::PART
 libpolkit-qt-1-dev::PART
 libsystemd-daemon-dev::PART
-libsystemd-id128-dev::PART
-libsystemd-journal-dev::PART
+libsystemd-id128-dev::PART::$DEBIAN_DISTRO == Ubuntu
+libsystemd-journal-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libsystemd-login-dev::PART
 veromix::FULL
-plymouth-theme-spinfinity::FULL
+plymouth-theme-spinfinity::FULL::$DEBIAN_DISTRO == Ubuntu
 plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART::$DEBIAN_DISTRO == Ubuntu
 plymouth-themes::PART::$DEBIAN_DISTRO == Debian
@@ -70,7 +69,7 @@ libsqlite3-dev::PART
 libxapian-dev::PART
 libleveldb1::PART
 libleveldb-dev::PART
-language-pack-en::FULL
+language-pack-en::FULL::$DEBIAN_DISTRO == Ubuntu
 linux-generic::FULL::$DEBIAN_DISTRO == Ubuntu
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
@@ -127,7 +126,8 @@ libxcb-cursor0::PART
 libxcb-cursor-dev::PART
 xcb-proto::PART
 libbullet-dev::PART
-libbullet2.80::PART
+libbulletcollision2.83::PART
+libbulletdynamics2.83::PART
 libgstreamer0.10::PART
 libgstreamer0.10-dev::PART
 libvlc5::PART
@@ -145,8 +145,8 @@ libxcb-render-util0::PART
 libxcb-render-util0-dev::PART
 libgstreamer1.0-0::PART
 libgstreamer1.0-dev::PART
-libgstreamer-plugins-good1.0-dev::PART
-libgstreamer-plugins-good1.0-0::PART
+libgstreamer-plugins-good1.0-dev::PART::$DEBIAN_DISTRO == Ubuntu
+libgstreamer-plugins-good1.0-0::PART::$DEBIAN_DISTRO == Ubuntu
 libalsaplayer0::PART
 libalsaplayer-dev::PART
 libavutil-dev::PART
@@ -177,14 +177,12 @@ python-libxml2::PART
 python-dbus::PART
 libdconf1::PART
 libdconf-dev::PART
-libdconf-qt0::PART
-libdconf-qt-dev::PART
 libdconf-dbus-1-0::PART
 libdconf-dbus-1-dev::PART
 cython::PART
 libjpeg-dev::PART
 libgif-dev::PART
-libmng2::PART
+libmng1::PART
 libmng-dev::PART
 libmozjs-24-0::PART
 libmozjs-24-bin::PART
@@ -211,12 +209,12 @@ libxcb-shm0::PART
 libxcb-shm0-dev::PART
 libxcb-icccm4::PART
 libxcb-icccm4-dev::PART
-libxcb-sync0::PART
-libxcb-sync0-dev::PART 
+libxcb-sync1::PART
+libxcb-sync1-dev::PART 
 libxcb-xfixes0-dev::PART
 libxss1::PART
 libxss-dev::PART
-libfreerdp1::PART
+libfreerdp1::PART::$DEBIAN_DISTRO == Ubuntu
 libfreerdp-plugins-standard::PART
 libfreerdp-dev::PART
 libgtk-3-dev::PART
@@ -240,10 +238,10 @@ libgoa-1.0-common::PART
 libgoa-1.0-dev::PART
 libgoa-backend-1.0-1::PART
 libgoa-backend-1.0-dev::PART
-libaccounts-glib0::PART
-libaccounts-glib-dev::PART
-libsignon-glib1::PART
-libsignon-glib-dev::PART
+libaccounts-glib0::PART::$DEBIAN_DISTRO == Ubuntu
+libaccounts-glib-dev::PART::$DEBIAN_DISTRO == Ubuntu
+libsignon-glib1::PART::$DEBIAN_DISTRO == Ubuntu
+libsignon-glib-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libdb-dev::PART
 liblmdb0::PART
 liblmdb-dev::PART
@@ -286,15 +284,15 @@ libxcb-image0::PART
 subversion::PART
 subversion-tools::PART
 mercurial::PART
-libass4::FULL  
+libass5::FULL  
 libass-dev::FULL
-libavutil51::FULL
+libavutil54::FULL
 libavutil-dev::FULL
-libavcodec53::FULL
+libavcodec56::FULL
 libavcodec-dev::FULL
-libavformat53::FULL
+libavformat56::FULL
 libavformat-dev::FULL
-libswscale2::FULL
+libswscale3::FULL
 libswscale-dev::FULL
 libspectre1::PART
 libspectre-dev::PART
@@ -310,10 +308,9 @@ libraptor-dev::PART
 libegl1-mesa::PART
 libcanberra-dev::PART
 vpx-tools::PART
-libwebp2::PART
+libwebp5::PART
 libwebp-dev::PART
-libclutter-gst-1.0-0::PART
-libclutter-gst-dev::PART
+libclutter-gst-2.0-0::PART
 libclutter-gst-2.0-dev::FULL
 libupower-glib-dev::PART
 libusb-dev::PART
@@ -321,7 +318,6 @@ libusbmuxd-dev::PART
 libplist-dev::PART
 libimobiledevice-dev::PART
 gstreamer1.0-clutter::PART
-libclutter-gst-2.0-0::PART
 libgstreamer-plugins-base1.0-0::PART
 libmx-1.0-2::PART
 libsoup2.4-dev::PART
@@ -346,15 +342,15 @@ lshw::FULL
 ltrace::FULL
 strace::FULL
 tcpdump::FULL
-hdparam::FULL
+hdparm::FULL
 ftp::FULL
 dnsutils::FULL
 user-setup::FULL
 bind9-host::FULL
-kpartx::FULL
+kpartx::FULL::$DEBIAN_DISTRO == Ubuntu
 kpartx-boot::FULL
 pppconfig::FULL
-ppoeconfig::FULL
+ppoecfg::FULL
 ufw::FULL
 usbutils::FULL
 powermgmt-base::FULL
@@ -362,9 +358,8 @@ rdate::FULL
 info::FULL
 libvte-common::PART
 libvte-dev::PART
-watershed::FULL
 apt-clone::FULL
-archdetect-deb::FULL
+archdetect-deb::FULL::$DEBIAN_DISTRO == Ubuntu
 lvm2::FULL
 samba-common::FULL
 cifs-utils::FULL
@@ -388,39 +383,37 @@ libatasmart4::PART
 libatasmart-dev::PART
 memtest86+::PART
 dialog::PART
-mkisofs::PART
 genisoimage::PART
 squashfs-tools::PART
 libcap-dev::PART
-xresprobe::PART
 discover::PART
 syslinux::PART
 syslinux-common::PART
 syslinux-utils::PART
 syslinux-efi::PART
 isolinux::PART
-efilinux::PART
+efilinux::PART::$DEBIAN_DISTRO == Ubuntu
 live-image-standard::PART
 gnome-icon-theme-symbolic::PART
-adwaita-icon-theme-full::PART
+adwaita-icon-theme-full::PART::$DEBIAN_DISTRO == Ubuntu
+gnome-themes-standard::FULL::$DEBIAN_DISTRO == Debian
 oxygen-icon-theme::PART
 oxygen-cursor-theme::PART::$DEBIAN_DISTRO == Ubuntu
 oxygencursors::PART::$DEBIAN_DISTRO == Debian
 ttf-oxygen-font-family::PART
-light-themes::PART
+light-themes::PART::$DEBIAN_DISTRO == Ubuntu
 libsdl-ttf2.0-0::PART
 libsdl-ttf2.0-dev::PART
 libphysfs1::PART
 libphysfs-dev::PART
-libts-dev::PART
 libopenal1::PART
 libopenal-dev::PART
-light-themes::BUILDDEP
+light-themes::BUILDDEP::$DEBIAN_DISTRO == Ubuntu
 libgtk-3-0::BUILDDEP
 libgtk2.0-0::BUILDDEP
 libclutter-1.0-0::BUILDDEP
 mesa::BUILDDEP
 tinc::BUILDDEP
 gnome-shell::BUILDDEP
-systemd-services::BUILDDEP
+systemd-services::BUILDDEP::$DEBIAN_DISTRO == Ubuntu
 supertux::BUILDDEP
