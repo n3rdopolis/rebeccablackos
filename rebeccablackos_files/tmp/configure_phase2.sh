@@ -115,6 +115,7 @@ do
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=1
+    METHOD="INVALID OPERATION SPECIFIED"
   fi
 
   #if the install resut for the current package failed, then log it. If it worked, then remove it from the list of unfinished installs
