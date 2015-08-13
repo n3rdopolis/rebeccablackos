@@ -96,7 +96,7 @@ do
   done
 
   #If all conditionals are true
-  if [[ $UntrueConditionals == 0 ]]
+  if [[ $UntrueConditionals == 0 && ! -z "${LINE[0]}" && ! -z "${LINE[1]}" ]]
   then
    echo "${LINE[0]}::${LINE[1]}" >> /tmp/INSTALLS.txt
   fi
