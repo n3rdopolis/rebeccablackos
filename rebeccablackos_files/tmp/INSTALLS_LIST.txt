@@ -396,6 +396,7 @@ syslinux-utils::PART
 syslinux-efi::PART
 isolinux::PART
 efilinux::PART::$DEBIAN_DISTRO == Ubuntu
+grub2-common::FULL
 live-image-standard::PART
 gnome-icon-theme-symbolic::PART
 adwaita-icon-theme-full::PART::$DEBIAN_DISTRO == Ubuntu
