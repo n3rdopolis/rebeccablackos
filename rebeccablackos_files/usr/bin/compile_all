@@ -33,7 +33,7 @@ fi
 
 if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
 then
-  dpkg-divert --local --rename --add /usr/sbin/grub-install
+  dpkg-divert --add --rename --divert /usr/sbin/grub-install.real /usr/sbin/grub-install
   COMPILELIST+="lupin"
   COMPILELIST+=$'\n'
 fi
