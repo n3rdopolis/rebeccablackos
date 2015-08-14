@@ -40,7 +40,7 @@ TODO:
 PROBLEMS:
       A few files outside of /opt get written that may conflict with the files provided by main Debian archives. The number of files that get overwritten is small, and mostly just header files. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to enable dpkg overwrites.
 
-      When virtualized, under QEMU, be sure to use either KVM32 or KVM64 as the 'emulated' processor. The way LLVM 3.5 detects the processor capabilities seems to be throwing itself off, and causes failures. Selecting an emulated processor that reports CPU capabilities that it doesn't have. This affects even the upstream install of Mesa, and not just the newer one provided in /opt.
+      When virtualized, under QEMU, be sure to use either KVM32 or KVM64 as the 'emulated' processor. It appears to be caused by specifying an emulated processor that reports capabilities that the host processor doesn't have, and causes failures. Selecting an emulated processor that reports CPU capabilities that it doesn't have. This affects even the upstream install of Mesa, and not just the newer one provided in /opt.
 
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
