@@ -263,8 +263,8 @@ x11proto-record-dev::PART
 x11proto-resource-dev::PART
 x11proto-print-dev::PART
 libxkbfile-dev::PART
-libxp6::PART
-libxp-dev::PART
+libxp6::PART::$DEBIAN_DISTRO == Ubuntu
+libxp-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libxfont-dev::PART
 libxext-dev::PART
 xserver-xorg-dev::PART
