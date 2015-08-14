@@ -181,27 +181,34 @@ RedirectFile /usr/sbin/grub-probe
 RedirectFile /sbin/initctl
 RedirectFile /usr/sbin/invoke-rc.d
 
-#This will remove my abilities to build packages from the ISO, but should make it a bit smaller
+#Create a log folder for the remove operations
+mkdir /tmp/logs/package_operations/Removes
+
+#This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee /tmp/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/devpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/archdevpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/dbgpackages.log
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/archdpgpackages.log
 
-REMOVEDEVPGKS="texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr mercurial checkinstall texinfo autoconf"
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/removes.txt
+#Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
+REMOVEDEVPGKS=(texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind cmake-rbos smbclient freepats libc6-dbg doxygen git subversion bzr mercurial checkinstall texinfo autoconf)
+for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
+do
+  REMOVEPACKAGENAME=${REMOVEDEVPGKS[$Iterator]}
+  apt-get purge $REMOVEPACKAGENAME -y --force-yes | tee -a /tmp/logs/package_operations/Removes/$REMOVEPACKAGENAME.log
+done
 
-
-apt-get autoremove -y --force-yes >> /tmp/logs/package_operations/removes.txt
+apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/autoremoves.log
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
