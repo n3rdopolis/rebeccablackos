@@ -73,7 +73,7 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cat debian/*.install |while read LINE
+cat debian/*.install |grep -v grub-install/grub-install | while read LINE
 do 
 echo "DOING $LINE"
   FILECOPY=($LINE)
@@ -86,6 +86,7 @@ echo "DOING $LINE"
     cp -a "$SRC" "$DEST"
   done
 done
+cp grub-install/grub-install /usr/sbin/grub-install.lupin
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 

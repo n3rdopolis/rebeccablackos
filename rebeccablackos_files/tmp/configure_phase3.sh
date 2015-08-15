@@ -95,6 +95,14 @@ do
   fi
 done
 
+#Redirect grub-install if lupin isn't 1st tier
+if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
+then
+  dpkg-divert --add --rename --divert /usr/sbin/grub-install.real /usr/sbin/grub-install
+  echo 'if [[ -x /usr/sbin/grub-install.lupin ]]; then /usr/sbin/grub-install.lupin "$@"; else /usr/sbin/grub-install.real "$@"; fi' > /usr/sbin/grub-install
+  chmod +x /usr/sbin/grub-install.lupin
+fi
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
