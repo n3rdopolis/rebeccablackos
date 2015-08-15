@@ -112,6 +112,14 @@ do
     echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
+    if [[ $Result != 0 ]]
+    then
+      dpkg -l $PACKAGE &> /dev/null
+      if [[ $? != 0 ]]
+      then
+         Result=0
+      fi
+    fi
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=1
