@@ -99,7 +99,7 @@ done
 if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
 then
   dpkg-divert --add --rename --divert /usr/sbin/grub-install.real /usr/sbin/grub-install
-  echo 'if [[ -x /usr/sbin/grub-install.lupin ]]; then /usr/sbin/grub-install.lupin "$@"; else /usr/sbin/grub-install.real "$@"; fi' > /usr/sbin/grub-install
+  echo 'if [[ -x /usr/sbin/grub-install.lupin ]]; then /usr/sbin/grub-install.lupin "$@"; else /usr/sbin/grub-install.real "$@"; fi; exit $?' > /usr/sbin/grub-install
   chmod +x /usr/sbin/grub-install.lupin
 fi
 
