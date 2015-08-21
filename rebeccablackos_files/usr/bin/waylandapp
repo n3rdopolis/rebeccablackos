@@ -24,6 +24,10 @@ else
   export PATH=/opt/bin:/opt/games:/usr/games:$PATH
   export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
   unset WLSUDO
+  unset WLSUDO_CMD
+  unset ASKPASS
+  unset HOME
+  export HOME=$(echo ~root)
 fi
 #If no application specified, show a menu
 if [[ ! -z $1 ]]

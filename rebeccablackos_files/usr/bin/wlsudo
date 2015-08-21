@@ -19,28 +19,20 @@
 #This script uses zenity to act as a graphical sudo prompt in Wayland. It also preserves Wayland variables
 
 #Set to root's $HOME instead of the users, so that applications don't create root owned files in the users directory. This is the same behaviour as kdesudo
-unset HOME
-export HOME=$(echo ~root)
+
 export WLSUDO=1
+export SUDO_ASKPASS="$0"
 
-#Test if sudo needs a password by attempting to execute /bin/true
-echo "" | sudo -p "" -S -b true >/dev/null 2>&1 
-result=${PIPESTATUS[1]}
 
-#if sudo needs a password, ask for the password
-if [[ $result == 1 ]]
+if [[ -z $WLSUDO_CMD ]]
 then
+  export WLSUDO_CMD="$@"
+  sudo -A -E waylandapp dbus-launch --exit-with-session "$@"
+else
   zenity --forms --text="The following command will be executed as root
 
-$*
+$WLSUDO_CMD
 
-Please enter password for $LOGNAME to continue:" --title=wlsudo --add-password="" 2>/dev/null | sudo  -p "" -S -b -E waylandapp dbus-launch --exit-with-session "$@" 
-  result=${PIPESTATUS[1]}
-  if [[ $result == 1 ]]
-  then
-    zenity --info --title=wlsudo --text="Invalid Password, or command not found." >/dev/null 2>&1
-    exit $result
-  fi
-else
-  sudo -p "" -S -b -E waylandapp dbus-launch --exit-with-session "$@"
+Please enter password for $LOGNAME to continue:" --title=wlsudo --add-password=""
+  exit $?
 fi
