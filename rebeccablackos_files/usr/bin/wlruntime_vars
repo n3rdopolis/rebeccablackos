@@ -75,7 +75,7 @@ if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
 then
   mkdir ~/weston-rdp
   cd ~/weston-rdp
-  winpr-makecert -rdp > rdpkey.rdp 2>/dev/null 
+  winpr-makecert -n $HOSTNAME -rdp > rdpkey.rdp 2>/dev/null 
   cp $HOSTNAME.crt rdpcrt.crt
   cp $HOSTNAME.key rdpcrtkey.key
   cd $OLDPWD
