@@ -194,7 +194,7 @@ function DownloadGIT()
   git checkout -f $SOURCEREVISION 
   git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
   git submodule sync --recursive
-  git submodule deinit .
+  git submodule deinit -f .
   git submodule update --recursive --force --init
   git pull -f
 
