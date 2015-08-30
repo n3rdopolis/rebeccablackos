@@ -168,8 +168,12 @@ apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_ope
 apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_autoremove.log
 
 #prevent packages removed from the repositories upstream to not make it in the ISOS
-aptitude purge ?obsolete -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
-
+if [[ -f /var/cache/apt/pkgcache.bin ]]
+then
+  aptitude purge ?obsolete -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
+else
+  echo	"Not purging older packages, because apt-get update failed"	2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
+fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
