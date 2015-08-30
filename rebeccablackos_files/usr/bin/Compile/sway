@@ -62,6 +62,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/sway.diff
+sed -i 's/urxvt/weston-terminal/g' config
+sed -i 's/dmenu_run/bemenu-run/g' config
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
