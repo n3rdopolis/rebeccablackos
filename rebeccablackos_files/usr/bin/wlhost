@@ -55,13 +55,13 @@ Grant and remove permissions from users to the current Wayland server
 
 wlhost usage:
 wlhost + username 
-    Give the user username permission to the current WAYLAND_DISPLAY
+    Give the user username permission to the current WAYLAND_DISPLAY, and DISPLAY
 wlhost - username
-    Remove permissions from the user to the current WAYLAND_DISPLAY
+    Remove permissions from the user to the current WAYLAND_DISPLAY, and DISPLAY
 wlhost @
-    Give all users permissions to the Wayland server
+    Give all users permissions to the WAYLAND_DISPLAY
 wlhost 0
-    Reset permissions to the Wayland server
+    Reset permissions to the WAYLAND_DISPLAY
 wlhost ++
     Share the WAYLAND_DISPLAY publicly in /run/shm/waylandservers prefixed with the current users's UID
     for example if the user with the UID 1000 was running a WAYLAND_DISPLAY of wayland-0,
@@ -93,6 +93,11 @@ then
   if [[ $ErrorCount == 0 ]]
   then
     echo "Gave user $SECONDARGUMENT access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    xhost +SI:localuser:$SECONDARGUMENT
+    if [[ $? == 0 ]]
+    then
+      echo "Gave user $SECONDARGUMENT access to $DISPLAY"
+    fi
     exit 0
   else
     echo "Failed to give user $SECONDARGUMENT access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
@@ -119,6 +124,12 @@ then
   if [[ $ErrorCount == 0 ]]
   then
     echo "Removed user $SECONDARGUMENT access from $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    xhost -SI:localuser:$SECONDARGUMENT
+    if [[ $? == 0 ]]
+    then
+      echo "Removed user $SECONDARGUMENT access to $DISPLAY"
+    fi
+    exit
     exit 0
   else
     echo "Failed to remove user $SECONDARGUMENT access from $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
