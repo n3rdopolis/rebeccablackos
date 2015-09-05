@@ -312,7 +312,8 @@ then
   cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev -u $SUDO_UID livetest 
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r sudo
+  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev,sudo -u $SUDO_UID livetest 
   mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
