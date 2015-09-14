@@ -24,6 +24,13 @@ then
   export INSTALLDIR=/opt
 fi
 
+export CC=gcc-4.8
+export LD=gcc-4.8
+export CXX=g++-4.8
+export CXXLD=g++-4.8
+export CPP=cpp-4.8
+export CPPLD=cpp-4.8
+
 export TARGETBITSIZE=$(getconf LONG_BIT)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
