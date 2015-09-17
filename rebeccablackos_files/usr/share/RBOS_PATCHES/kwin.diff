@@ -26,7 +26,7 @@ index a8b7881..2a70447 100644
 +
  }
 diff --git a/abstract_backend.h b/abstract_backend.h
-index a6586d9..3a47346 100644
+index ceda6b8..507018c 100644
 --- a/abstract_backend.h
 +++ b/abstract_backend.h
 @@ -20,10 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -42,36 +42,36 @@ index a6586d9..3a47346 100644
  
  namespace KWin
  {
-@@ -86,6 +88,8 @@ public:
-     bool supportsPointerWarping() const {
-         return m_pointerWarping;
+@@ -89,6 +91,8 @@ public:
+     bool areOutputsEnabled() const {
+         return m_outputsEnabled;
      }
 +    bool supportsCompositor(CompositingType type) const;
 +    CompositingType preferredCompositor() const;
  
  public Q_SLOTS:
      void pointerMotion(const QPointF &position, quint32 time);
-@@ -128,6 +132,7 @@ protected:
-     void setSupportsPointerWarping(bool set) {
-         m_pointerWarping = set;
+@@ -134,6 +138,7 @@ protected:
+     void setOutputsEnabled(bool enabled) {
+         m_outputsEnabled = enabled;
      }
 +    void addSupportedCompositor(CompositingType type);
  
  private:
      void triggerCursorRepaint();
-@@ -144,6 +149,7 @@ private:
-     QSize m_initialWindowSize;
+@@ -151,6 +156,7 @@ private:
      QByteArray m_deviceIdentifier;
      bool m_pointerWarping = false;
+     bool m_outputsEnabled = true;
 +    QVector<CompositingType> m_supportedCompositors;
  };
  
  }
 diff --git a/backends/drm/drm_backend.cpp b/backends/drm/drm_backend.cpp
-index b9525b4..cd770f7 100644
+index ebc2f37..12fe003 100644
 --- a/backends/drm/drm_backend.cpp
 +++ b/backends/drm/drm_backend.cpp
-@@ -67,6 +67,10 @@ DrmBackend::DrmBackend(QObject *parent)
+@@ -68,6 +68,10 @@ DrmBackend::DrmBackend(QObject *parent)
      , m_udev(new Udev)
      , m_udevMonitor(m_udev->monitor())
  {
@@ -137,7 +137,7 @@ index 74df134..073a049 100644
  
  X11WindowedBackend::~X11WindowedBackend()
 diff --git a/composite.cpp b/composite.cpp
-index 4b81c97..19f070c 100644
+index e1f1856..68903b3 100644
 --- a/composite.cpp
 +++ b/composite.cpp
 @@ -251,9 +251,9 @@ void Compositor::slotCompositingOptionsInitialized()
@@ -316,7 +316,7 @@ index 6dee53b..01131aa 100644
              // Software emulation does not provide GLSL
              m_limitedGLSL = m_supportsGLSL = false;
 diff --git a/options.cpp b/options.cpp
-index 64269d6..4e285a8 100644
+index 00b1b85..e6ce13e 100644
 --- a/options.cpp
 +++ b/options.cpp
 @@ -33,6 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -330,7 +330,7 @@ index 64269d6..4e285a8 100644
  
  #endif //KCMRULES
  
-@@ -922,6 +926,17 @@ bool Options::loadCompositingConfig (bool force)
+@@ -938,6 +942,17 @@ bool Options::loadCompositingConfig (bool force)
              break;
          }
      }
@@ -349,7 +349,7 @@ index 64269d6..4e285a8 100644
  
      if (m_compositingMode == NoCompositing) {
 diff --git a/scene_opengl.cpp b/scene_opengl.cpp
-index b1ace1c..49d4de8 100644
+index 8b3be71..db0814d 100644
 --- a/scene_opengl.cpp
 +++ b/scene_opengl.cpp
 @@ -570,11 +570,15 @@ SceneOpenGL *SceneOpenGL::createScene(QObject *parent)
