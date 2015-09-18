@@ -10,3 +10,39 @@ index afad812..25d73bc 100644
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
  add_definitions("-Wall -Wextra -Wno-unused-parameter")
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMake)
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index afad812..25d73bc 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.5)
+ project(sway C)
+ set(CMAKE_C_FLAGS "-g")
+ set(CMAKE_C_STANDARD 99)
++set(CMAKE_C_EXTENSIONS OFF)
+ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
+ add_definitions("-Wall -Wextra -Wno-unused-parameter")
+ set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMake)
+diff --git a/sway/commands.c b/sway/commands.c
+index e79746a..d7e716b 100644
+--- a/sway/commands.c
++++ b/sway/commands.c
+@@ -6,6 +6,7 @@
+ #include <errno.h>
+ #include <string.h>
+ #include <unistd.h>
++#include <sys/types.h>
+ #include <ctype.h>
+ #include "stringop.h"
+ #include "layout.h"
+diff --git a/sway/main.c b/sway/main.c
+index e03588e..97243f9 100644
+--- a/sway/main.c
++++ b/sway/main.c
+@@ -3,6 +3,7 @@
+ #include <stdbool.h>
+ #include <wlc/wlc.h>
+ #include <sys/wait.h>
++#include <sys/types.h>
+ #include <signal.h>
+ #include <getopt.h>
+ #include "layout.h"
