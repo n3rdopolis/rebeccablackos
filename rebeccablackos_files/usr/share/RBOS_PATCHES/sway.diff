@@ -1,24 +1,12 @@
 diff --git a/CMakeLists.txt b/CMakeLists.txt
-index 1365a9a..7facb44 100644
+index afad812..25d73bc 100644
 --- a/CMakeLists.txt
 +++ b/CMakeLists.txt
-@@ -1,10 +1,18 @@
--cmake_minimum_required(VERSION 2.8.5)
-+cmake_minimum_required(VERSION 3.1)
+@@ -2,6 +2,7 @@ cmake_minimum_required(VERSION 2.8.5)
  project(sway C)
  set(CMAKE_C_FLAGS "-g")
+ set(CMAKE_C_STANDARD 99)
++set(CMAKE_C_EXTENSIONS OFF)
  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "bin/")
  add_definitions("-Wall -Wextra -Wno-unused-parameter")
  set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} ${PROJECT_SOURCE_DIR}/CMake)
- 
-+# -std=c99 -fpic -fpie -D_DEFAULT_SOURCE
-+set(CMAKE_C_STANDARD 99)
-+set(CMAKE_C_STANDARD_REQUIRED ON)
-+set(CMAKE_C_EXTENSIONS OFF)
-+set(CMAKE_POSITION_INDEPENDENT_CODE ON)
-+add_definitions(-D_DEFAULT_SOURCE)
-+
-+
- find_package(XKBCommon REQUIRED)
- find_package(WLC REQUIRED)
- find_package(A2X REQUIRED)
