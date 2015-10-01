@@ -90,6 +90,8 @@ then
   then
     ecryptfs-umount-private
     echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+    loginctl terminate-session $XDG_SESSION_ID
+    sleep 3
     disown
     nohup fuser -k -15 "/dev/tty$(loginctl show-session $XDG_SESSION_ID| grep VTNr| awk -F = '{print $2}')" >/dev/null 2>&1 &
     RESULT=$?
