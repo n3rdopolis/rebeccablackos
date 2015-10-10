@@ -109,6 +109,35 @@ then
   fi
 fi
 
+#function to find all mountpoints in a subdirectory, and mount them in a new target
+function bindmount_recurse()
+{
+    if [[ -z $1 || -z $2 ]]
+    then
+        echo "Source and target must be specified"
+        return
+    fi
+    findmnt -R $1 -Uln -o target | while read mountpoint
+    do
+        mkdir -p "$2/$mountpoint" 2>/dev/null
+        mount --bind "$mountpoint" "$2/$mountpoint"
+    done
+}
+
+#function to find all mountpoints in a subdirectory, and unmount them 
+function umount_recurse()
+{
+    if [[ -z $1 ]]
+    then
+        echo "Unmount location must be specified"
+        return
+    fi
+    findmnt -R $1 -Uln -o target | tac |while read mountpoint
+    do
+        umount -lf "$mountpoint"
+    done
+}
+
 function mountisoexit() 
 {
 if [[ -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
@@ -133,9 +162,9 @@ then
 
     #unmount the filesystems used by the CD
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 
     fuser -kmM   "$MOUNTHOME"/liveisotest/unionmountpoint 2> /dev/null
@@ -280,12 +309,12 @@ else
 fi
 
 #bind mount in the critical filesystems
-mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-mount --rbind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
-mount --rbind /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
-mount --rbind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
+bindmount_recurse /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+bindmount_recurse /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+bindmount_recurse /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+mount --bind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-mount --rbind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
+mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 #allow all local connections to the xserver
 #xhost +LOCAL:
 

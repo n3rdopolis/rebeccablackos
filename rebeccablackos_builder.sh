@@ -31,7 +31,6 @@ cd "$BUILDLOCATION"
 echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
 
 
-
 "
 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
@@ -143,17 +142,31 @@ echo "Setting up live system..."
 
 REBUILT="to update"
 
+#function to find all mountpoints in a subdirectory, and unmount them 
+function umount_recurse()
+{
+    if [[ -z $1 ]]
+    then
+        echo "Unmount location must be specified"
+        return
+    fi
+    findmnt -R $1 -Uln -o target | tac |while read mountpoint
+    do
+        umount -lf "$mountpoint"
+    done
+}
+
 #This function unmounts all known mountpoints created by all of the scripts in externalbuilders
 function UnmountAll()
 {
 #unmount the chrooted procfs from the outside 
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 
 #unmount the chrooted sysfs from the outside
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
+umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 
 #unmount the chrooted devfs from the outside 
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 
 #unmount the chrooted /run/shm from the outside 
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm

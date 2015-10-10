@@ -45,18 +45,33 @@ cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt "$BUILDLOCATION"
 
 
 #bind mount phase2 at the workdir
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+
+#function to find all mountpoints in a subdirectory, and mount them in a new target
+function bindmount_recurse()
+{
+    if [[ -z $1 || -z $2 ]]
+    then
+        echo "Source and target must be specified"
+        return
+    fi
+    findmnt -R $1 -Uln -o target | while read mountpoint
+    do
+        mkdir -p "$2/$mountpoint" 2>/dev/null
+        mount --bind "$mountpoint" "$2/$mountpoint"
+    done
+}
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev/
-mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/
-mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys/
+bindmount_recurse /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+bindmount_recurse /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+bindmount_recurse /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
-mount --rbind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
+mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 
 #Bring in needed files.
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt/lists/*

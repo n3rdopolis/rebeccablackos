@@ -79,7 +79,7 @@ chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #bind mount phase1 to the workdir. 
-  mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
   #copy the files to where they belong
   rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
@@ -100,20 +100,34 @@ else
   mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
+#function to find all mountpoints in a subdirectory, and mount them in a new target
+function bindmount_recurse()
+{
+    if [[ -z $1 || -z $2 ]]
+    then
+        echo "Source and target must be specified"
+        return
+    fi
+    findmnt -R $1 -Uln -o target | while read mountpoint
+    do
+        mkdir -p "$2/$mountpoint" 2>/dev/null
+        mount --bind "$mountpoint" "$2/$mountpoint"
+    done
+}
 
 #mounting critical fses on chrooted fs with bind 
-mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev/
-mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/
-mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys/
+bindmount_recurse /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+bindmount_recurse /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+bindmount_recurse /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
-mount --rbind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
+mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 
 
 
