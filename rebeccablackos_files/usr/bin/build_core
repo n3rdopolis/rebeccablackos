@@ -400,6 +400,7 @@ function DownloadSource()
     chown nobody /tmp/buildcore_secure_$FOLDERDATE
     rm -rf /tmp/buildcore_secure_$FOLDERDATE/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
+    chmod 755 /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
     $SUDOEXE -u nobody PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt; OverrideRevisions_$SAFESOURCENAME; declare -p SOURCEREVISION; declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     chmod +x /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     . /tmp/buildcore_secure_$FOLDERDATE/revisiondata
