@@ -393,12 +393,15 @@ function DownloadSource()
   if [[ -e /tmp/buildcore_revisions.txt ]]
   then
     BASHEXE=$(which bash)
+    SUDOEXE=$(which sudo)
     FOLDERDATE=$(date +%s)
     mkdir /tmp/buildcore_secure_$FOLDERDATE
     chmod 700 /tmp/buildcore_secure_$FOLDERDATE
+    chown nobody /tmp/buildcore_secure_$FOLDERDATE
     rm -rf /tmp/buildcore_secure_$FOLDERDATE/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
-    PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt; OverrideRevisions_$SAFESOURCENAME; declare -p SOURCEREVISION; declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
+    chown nobody /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
+    $SUDOEXE -u nobody PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt; OverrideRevisions_$SAFESOURCENAME; declare -p SOURCEREVISION; declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     chmod +x /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     . /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     rm -rf /tmp/buildcore_secure_$FOLDERDATE
