@@ -390,6 +390,9 @@ function DownloadARCHIVE()
 function DownloadSource()
 {
   #If /tmp/buildcore_revisions.txt exists, then import it.
+  #Copy the /tmp/buildcore_revisions.txt script into its own folder, and set that folder as the path for a restricted shell, running as nonroot
+  #For that restricted shell, call the function for setting the SOURCEREVISION and SUBMODULEREVISIONS for the current sourcce name
+  #Export the declare commands to a new script, and then source it in, to protect against rouge revision scripts
   if [[ -e /tmp/buildcore_revisions.txt ]]
   then
     BASHEXE=$(which bash)
