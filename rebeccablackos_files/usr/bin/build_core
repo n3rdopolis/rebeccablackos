@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#It depends on git, bzr, hg, svn, checkinstall, and dlocate
+#It depends on git, bzr, hg, svn, checkinstall, acl, and dlocate
 
 #This script is called by all of the scripts in /usr/bin/Compile. It contains many functions so that it doesn't have to be duplicated throughout the multiple scripts. It handles downloading the source specified by the scripts, and running the build and install functions. It also passes the install process through checkinstall to create deb files out of the scripts if the environment variable is 1.
 #
@@ -78,6 +78,7 @@ function RunDownloadAndOrBuild
   mkdir -p "$SOURCEDIR"/buildhome/config
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  mkdir -p "/$SOURCEDIR/buildoutput/acl_control"
   SOURCENAMECHARS="${#SOURCENAME}"
   iterator=0
   export SAFESOURCENAME=$(for (( iterator=0; iterator < $SOURCENAMECHARS ; iterator++ ))
@@ -92,6 +93,22 @@ function RunDownloadAndOrBuild
   done)
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
+  
+  #Set ACL permissions to allow a non root user account manage the source repos
+  setfacl -dm nobody:rwx /"$SOURCEDIR"
+  setfacl -m  nobody:rwx /"$SOURCEDIR"
+  if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && ! -d /"$SOURCEDIR"/"$SOURCENAME" ]]
+  then
+    touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
+  fi
+  if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && -d /"$SOURCEDIR"/"$SOURCENAME" ]]
+  then
+    echo "Setting permissions to allow non root user 'nobody' to access $SOURCENAME"
+    setfacl -dRm nobody:rwx /"$SOURCEDIR"/"$SOURCENAME"
+    setfacl -Rm nobody:rwx /"$SOURCEDIR"/"$SOURCENAME"
+    touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
+  fi
+  
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
