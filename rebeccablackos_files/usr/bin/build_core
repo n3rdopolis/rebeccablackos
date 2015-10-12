@@ -107,8 +107,13 @@ function RunDownloadAndOrBuild
   then
     echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
     setfacl -dRm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
+    ACLResult=$?
     setfacl -Rm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
-    touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
+    ACLResult=$(( ACLResult + $? ))
+    if [[ $ACLResult == 0 ]]
+    then
+        touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
+    fi
   fi
   
   #If the argument passed is cleanup, then cleanup the source only
@@ -181,7 +186,7 @@ function DownloadGIT()
     fi
   fi
 
-  git clone $SOURCEURL $SOURCENAME
+  $NONROOTCOMMAND git clone $SOURCEURL $SOURCENAME
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   if [[ -z $SOURCEREVISION ]]
@@ -193,19 +198,19 @@ function DownloadGIT()
   do
     rm "$LOCKFILE"
   done
-  git checkout -f $SOURCEREVISION 
-  git reset --hard
+  $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
+  $NONROOTCOMMAND git reset --hard
   rm -rf .git/rebase-*/
   rm -rf .git/modules/*/rebase-*/
-  git rebase -s ours
-  git pull -f
-  git rebase -s ours
-  git checkout -f $SOURCEREVISION 
+  $NONROOTCOMMAND git rebase -s ours
+  $NONROOTCOMMAND git pull -f
+  $NONROOTCOMMAND git rebase -s ours
+  $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
   git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
-  git submodule sync --recursive
-  git submodule deinit -f .
-  git submodule update --recursive --force --init
-  git pull -f
+  $NONROOTCOMMAND git submodule sync --recursive
+  $NONROOTCOMMAND git submodule deinit -f .
+  $NONROOTCOMMAND git submodule update --recursive --force --init
+  $NONROOTCOMMAND git pull -f
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
@@ -223,17 +228,17 @@ function DownloadGIT()
     then
       MODULEREVISION=$(git rev-parse --abbrev-ref HEAD)
     fi
-    git checkout -f $MODULEREVISION 
-    git reset --hard
+    $NONROOTCOMMAND git checkout -f $MODULEREVISION 
+    $NONROOTCOMMAND git reset --hard
     
-    git rebase
-    git pull -f
-    git rebase -s ours
+    $NONROOTCOMMAND git rebase
+    $NONROOTCOMMAND git pull -f
+    $NONROOTCOMMAND git rebase -s ours
     git config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
-    git submodule sync --recursive
-    git submodule init
-    git submodule update --recursive --force
-    git pull -f
+    $NONROOTCOMMAND git submodule sync --recursive
+    $NONROOTCOMMAND git submodule init
+    $NONROOTCOMMAND git submodule update --recursive --force
+    $NONROOTCOMMAND git pull -f
   done
 
 }
@@ -272,10 +277,10 @@ function DownloadSVN()
 
   fi
 
-  svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
+  $NONROOTCOMMAND svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  svn update --non-interactive -r $SOURCEREVISION
+  $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION
 }
 
 
@@ -314,11 +319,11 @@ function DownloadBZR()
 
   fi
 
-  bzr branch "$SOURCEURL" "$SOURCENAME"
+  $NONROOTCOMMAND bzr branch "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  bzr pull
-  bzr update -r $SOURCEREVISION
+  $NONROOTCOMMAND bzr pull
+  $NONROOTCOMMAND bzr update -r $SOURCEREVISION
 }
 
 #function to get the version of HG repos
@@ -356,11 +361,11 @@ function DownloadHG()
 
   fi
 
-  hg clone "$SOURCEURL" "$SOURCENAME"
+  $NONROOTCOMMAND hg clone "$SOURCEURL" "$SOURCENAME"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  hg pull
-  hg update -C -r $SOURCEREVISION
+  $NONROOTCOMMAND hg pull
+  $NONROOTCOMMAND hg update -C -r $SOURCEREVISION
 }
 
 
@@ -390,9 +395,9 @@ function DownloadARCHIVE()
   then
     mkdir -p "$SOURCENAME"
     cd "$SOURCENAME"
-    wget $SOURCEURL -O SOURCEFILE
+    $NONROOTCOMMAND wget $SOURCEURL -O SOURCEFILE
   fi
-  tar xaf SOURCEFILE -C .
+  $NONROOTCOMMAND tar xaf SOURCEFILE -C .
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
@@ -446,13 +451,15 @@ function DownloadSource()
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    STARTTIME=\$(date +%s)
-    PackageDownloadSource   2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource\"
-    ENDTIME=\$(date +%s)
-    echo \" PackageDownloadSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource\"
+    cd "/$SOURCEDIR/$SOURCENAME"
+    PackageDownloadSource
+    
 " > packagedownloadscript
     chmod +x ./packagedownloadscript
-    ./packagedownloadscript
+    STARTTIME=$(date +%s)
+    $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    ENDTIME=$(date +%s)
+    echo " PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
     rm ./packagedownloadscript
   fi
 }
