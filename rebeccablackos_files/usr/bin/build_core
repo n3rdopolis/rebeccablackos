@@ -459,7 +459,7 @@ function DownloadSource()
     STARTTIME=$(date +%s)
     $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
     ENDTIME=$(date +%s)
-    echo " PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
     rm ./packagedownloadscript
   fi
 }
