@@ -63,6 +63,7 @@ export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 export HOME="$SOURCEDIR"/buildhome/config
 export PACKAGESUFFIX=rbos
+export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
@@ -116,16 +117,6 @@ function RunDownloadAndOrBuild
     mkdir -p "$SOURCEDIR"
     cd "$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
-    #If the revisions file exists, then also run the PackagePrepareBuild so that the source trees are exactly the way they where before they where compiled
-    if [[ -e /tmp/buildcore_revisions.txt ]]
-    then
-      mkdir -p "$SOURCEDIR"
-      cd "$SOURCEDIR"
-      mkdir -p "$SOURCENAME"
-      cd "$SOURCENAME"
-      PackageDownloadSource
-      PackagePrepareBuild
-    fi
     exit
   fi
 
@@ -449,10 +440,20 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
 
-    STARTTIME=$(date +%s)
-    cd "$SOURCENAME"
-    PackageDownloadSource   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
-    ENDTIME=$(date +%s) 2>&1 | tee -a  "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    echo "#! /bin/bash
+    $(declare -f PackageDownloadSource)
+    export SOURCEDIR=$SOURCEDIR
+    export SOURCENAME=$SOURCENAME
+    export INSTALLDIR=$INSTALLDIR
+
+    STARTTIME=\$(date +%s)
+    PackageDownloadSource   2>&1 | tee \"/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource\"
+    ENDTIME=\$(date +%s)
+    echo \" PackageDownloadSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource\"
+" > packagedownloadscript
+    chmod +x ./packagedownloadscript
+    ./packagedownloadscript
+    rm ./packagedownloadscript
   fi
 }
 
