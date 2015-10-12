@@ -58,6 +58,7 @@
 
 #buildcore also uses /tmp/buildcore_revisions.txt, when it is formatted from the list of all built revisions exported by the project. If it exists, the revision specified by the build script is overidden, and the exact commit is used instead
 
+export NONROOTUSER=nobody
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 export HOME="$SOURCEDIR"/buildhome/config
@@ -95,17 +96,17 @@ function RunDownloadAndOrBuild
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
   
   #Set ACL permissions to allow a non root user account manage the source repos
-  setfacl -dm nobody:rwx /"$SOURCEDIR"
-  setfacl -m  nobody:rwx /"$SOURCEDIR"
+  setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
+  setfacl -m  $NONROOTUSER:rwx /"$SOURCEDIR"
   if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && ! -d /"$SOURCEDIR"/"$SOURCENAME" ]]
   then
     touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
   fi
   if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && -d /"$SOURCEDIR"/"$SOURCENAME" ]]
   then
-    echo "Setting permissions to allow non root user 'nobody' to access $SOURCENAME"
-    setfacl -dRm nobody:rwx /"$SOURCEDIR"/"$SOURCENAME"
-    setfacl -Rm nobody:rwx /"$SOURCEDIR"/"$SOURCENAME"
+    echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
+    setfacl -dRm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
+    setfacl -Rm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
     touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
   fi
   
@@ -416,11 +417,11 @@ function DownloadSource()
     FOLDERDATE=$(date +%s)
     mkdir /tmp/buildcore_secure_$FOLDERDATE
     chmod 700 /tmp/buildcore_secure_$FOLDERDATE
-    chown nobody /tmp/buildcore_secure_$FOLDERDATE
+    chown $NONROOTUSER /tmp/buildcore_secure_$FOLDERDATE
     rm -rf /tmp/buildcore_secure_$FOLDERDATE/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
     chmod 755 /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
-    sudo -u nobody PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt; OverrideRevisions_$SAFESOURCENAME; declare -p SOURCEREVISION; declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
+    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt; OverrideRevisions_$SAFESOURCENAME; declare -p SOURCEREVISION; declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     chmod +x /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     . /tmp/buildcore_secure_$FOLDERDATE/revisiondata
     rm -rf /tmp/buildcore_secure_$FOLDERDATE
