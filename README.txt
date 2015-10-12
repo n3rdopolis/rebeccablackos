@@ -73,3 +73,4 @@ BUILDING:
         DontRestartBuildoutput(architechture): Delete this file to force all deb packages to rebuild for the respective architechture. This will increase the build time.
         DontStartFromScratch(architechture): Delete this file to force delete everything included downloaded repositories for the respective architechture, and cause it to start from scratch.
         build/(architechture)/buildoutput/control/(packagename): Delete these files to specify a specific package to rebuild.
+        build/(architechture)/buildoutput/acl_control/(packagename): Delete these files to force build_core to allow a non root service user to have permissions to the source files, so git/svn/etc doesn't need to run as root.
