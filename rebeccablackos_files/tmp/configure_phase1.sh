@@ -34,7 +34,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
+apt-get install aptitude git bzr subversion mercurial wget dselect locales acl sudo -y --force-yes 
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
