@@ -20,19 +20,21 @@
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 
-#It depends on zenity and expect
+#It depends on zenity kbd, weston, and expect
+#It also requires logger to log to syslog, but won't fail without it
 
 #It depends on a small patch in weston for a workaround for bug https://bugs.freedesktop.org/show_bug.cgi?id=73782 on framebuffer devices, and the line
 #SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
 #in a udev rules file.
 #or pass wlmglobalfbpermissions to the kernel
 
+#It also requires /etc/pam.d/waylandloginmanager
+
+#It needs a user account called waylandloginmanager
+
 #as well as:
-#At least systemd v216 as it has all the required bug fixes to support multiple display servers started using logind
-#/etc/pam.d/runuser
-  #      Must have the line:
-  #      session		optional	pam_systemd.so
-  #      to enable runuser to have the ability to start logind sessions
+#At least systemd v227 as it has all the ability to launch Wayland sessions with systemd-run
+
 #/etc/waylandloginmanager.conf
   #Otherwise it uses /etc/lightdm/lightdm.conf . the only supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
 #/usr/libexec/wayland_login_helpers/*
@@ -239,7 +241,7 @@ function PrepareLoginManager
 {
   #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
   mkdir -p /run/waylandloginmanager
-
+  
   #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
   SCRIPTPATH=$(readlink -f "$0")
   SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
@@ -268,12 +270,43 @@ function PrepareLoginManager
     echo "Must be run as root."
     exit
   fi
-
-  #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
-  if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
+  
+  #Configure missing things if they are missing. This can be turned on or off
+  AutoConfig=1
+  if [[ $AutoConfig == 1 ]]
   then
-    logger -t waylandloginmanager "Error: The user waylandloginmanager does NOT exist. Creating the user account..." -s  >>/var/log/waylandloginmanager 2>&1
-    adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
+
+    #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
+    if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
+    then
+      logger -t waylandloginmanager "Error: The user waylandloginmanager does NOT exist. Creating the user account..." -s  >>/var/log/waylandloginmanager 2>&1
+      adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
+    fi
+
+    #Create needed PAM file
+    if [[ ! -e /etc/pam.d/waylandloginmanager ]]
+    then
+        echo "#%PAM-1.0
+auth            sufficient      pam_rootok.so
+session         optional        pam_keyinit.so revoke
+session         required        pam_limits.so
+session         required        pam_unix.so
+session         optional        pam_systemd.so
+session         optional        pam_ecryptfs.so unwrap
+" > /etc/pam.d/waylandloginmanager
+    fi
+    
+    if [[ ! -e /lib/udev/rules.d/70-uaccess-fbdev.rules ]]
+    then
+      echo "ACTION=="remove", GOTO="uaccess_fbdev_end"
+ENV{MAJOR}=="", GOTO="uaccess_fbdev_end"
+
+
+# Framebuffer devices
+SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
+
+LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
+
   fi
 
   #prevent the WaylandLoginManager from being killed with CTRL+C
@@ -303,14 +336,14 @@ function PrepareLoginManager
   export FIFOREADERUSER=waylandloginmanager
   #Get the UID of the $LOGINMANAGERDISPLAYUSER
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
-  #Set the default path for weston
-  export DEFAULTWAYLANDSERVER=/opt/bin/weston
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
   export WAYLAND_DISPLAY=loginmanagerdisplay
+  #Set the default path for weston
+  export DEFAULTWAYLANDSERVER=$(which weston)
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
@@ -922,7 +955,8 @@ function StartUserSession
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   Create_XDG_RUNTIME_DIR $LOGINUSER
-  openvt -f -s -c $WESTONTTY -- runuser $LOGINUSER --session-command "$(echo "$0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument" | sed 's/\"/\\"/g' )"
+  chvt $WESTONTTY
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$WESTONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument
   sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
   WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
@@ -1187,14 +1221,17 @@ function StartLoginManagerDisplay
   Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
   for (( StartTimes = 0 ; StartTimes < 5 ;))
   do
+    systemctl is-active wlm-loginmanagerdisplay.service
+    LOGINMANAGERDISPLAYSTATUS=$?
     #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
-    if [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay &>/dev/null; echo $?) == 1 ]]
+    if [[ $LOGINMANAGERDISPLAYSTATUS != 0 ]]
     then 
       (( StartTimes++ ))
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
-        openvt -w -f -s -c $HostVT -- runuser $LOGINMANAGERDISPLAYUSER --session-command "$0 --uihost $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log"
+        chvt $HostVT
+        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log
       else
         echo "$DEFAULTWAYLANDSERVER is not executable, or does not exist" #>> /var/log/loginmanagerdisplay.log
       fi
