@@ -89,7 +89,7 @@ else
   RESULT=$?
     if [[ $RESULT == 0 ]]
     then
-      find | while read FILE 
+      find | grep -v ^./etc | while read FILE 
       do
 	rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
       done
