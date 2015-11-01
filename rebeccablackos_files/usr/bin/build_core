@@ -363,9 +363,9 @@ function DownloadHG()
 
   
   $NONROOTCOMMAND hg clone "$SOURCEURL" "$SOURCENAME"
-  chown $NONROOTUSER .hg/hgrc
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
+  chown $NONROOTUSER .hg/hgrc
   $NONROOTCOMMAND hg pull
   $NONROOTCOMMAND hg update -C -r $SOURCEREVISION
 }
