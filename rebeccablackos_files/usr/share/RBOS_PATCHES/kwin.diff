@@ -95,10 +95,10 @@ index e6f2b58..e5cdb51 100644
  }
  
 diff --git a/backends/hwcomposer/hwcomposer_backend.cpp b/backends/hwcomposer/hwcomposer_backend.cpp
-index 214aa42..dd2b1c3 100644
+index fa6fbb1..612035d 100644
 --- a/backends/hwcomposer/hwcomposer_backend.cpp
 +++ b/backends/hwcomposer/hwcomposer_backend.cpp
-@@ -45,6 +45,7 @@ namespace KWin
+@@ -42,6 +42,7 @@ namespace KWin
  HwcomposerBackend::HwcomposerBackend(QObject *parent)
      : AbstractBackend(parent)
  {
@@ -122,10 +122,10 @@ index d7c6ea2..8792802 100644
      connect(this, &WaylandBackend::connectionFailed, this, &WaylandBackend::initFailed);
  }
 diff --git a/backends/x11/x11windowed_backend.cpp b/backends/x11/x11windowed_backend.cpp
-index 74df134..073a049 100644
+index 1db28ae..769b489 100644
 --- a/backends/x11/x11windowed_backend.cpp
 +++ b/backends/x11/x11windowed_backend.cpp
-@@ -43,6 +43,10 @@ X11WindowedBackend::X11WindowedBackend(QObject *parent)
+@@ -48,6 +48,10 @@ X11WindowedBackend::X11WindowedBackend(QObject *parent)
      : AbstractBackend(parent)
  {
      setSupportsPointerWarping(true);
@@ -137,10 +137,10 @@ index 74df134..073a049 100644
  
  X11WindowedBackend::~X11WindowedBackend()
 diff --git a/composite.cpp b/composite.cpp
-index e1f1856..68903b3 100644
+index 70f2e13..b449372 100644
 --- a/composite.cpp
 +++ b/composite.cpp
-@@ -251,9 +251,9 @@ void Compositor::slotCompositingOptionsInitialized()
+@@ -250,9 +250,9 @@ void Compositor::slotCompositingOptionsInitialized()
              cm_selection->release();
          }
          if (kwinApp()->requiresCompositing()) {
@@ -153,7 +153,7 @@ index e1f1856..68903b3 100644
          }
          return;
      }
-@@ -268,8 +268,8 @@ void Compositor::slotCompositingOptionsInitialized()
+@@ -267,8 +267,8 @@ void Compositor::slotCompositingOptionsInitialized()
          }
          if (kwinApp()->requiresCompositing()) {
              qCCritical(KWIN_CORE) << "The used windowing system requires compositing";
@@ -164,7 +164,7 @@ index e1f1856..68903b3 100644
          }
          return;
      }
-@@ -461,6 +461,17 @@ void Compositor::fallbackToXRenderCompositing()
+@@ -460,6 +460,17 @@ void Compositor::fallbackToXRenderCompositing()
      setup();
  }
  
@@ -195,10 +195,10 @@ index fc0ddd5..a961dc0 100644
      void delayedCheckUnredirect();
      void slotConfigChanged();
 diff --git a/compositingprefs.cpp b/compositingprefs.cpp
-index 103123f..7a7803b 100644
+index bb83d45..bbe8a87 100644
 --- a/compositingprefs.cpp
 +++ b/compositingprefs.cpp
-@@ -56,17 +56,17 @@ bool CompositingPrefs::openGlIsBroken()
+@@ -57,17 +57,17 @@ bool CompositingPrefs::openGlIsBroken()
  
  bool CompositingPrefs::compositingPossible()
  {
@@ -222,26 +222,8 @@ index 103123f..7a7803b 100644
  
      if (!Xcb::Extensions::self()->isCompositeAvailable()) {
          qCDebug(KWIN_CORE) << "No composite extension available";
-@@ -76,14 +76,15 @@ bool CompositingPrefs::compositingPossible()
-         qCDebug(KWIN_CORE) << "No damage extension available";
-         return false;
-     }
--    if (hasGlx())
-+    if (glIsSafe && hasGlx())
-         return true;
- #ifdef KWIN_HAVE_XRENDER_COMPOSITING
-     if (Xcb::Extensions::self()->isRenderAvailable() && Xcb::Extensions::self()->isFixesAvailable())
-         return true;
- #endif
- #ifdef KWIN_HAVE_OPENGLES
--    return true;
-+    if (glIsSafe)
-+        return true;
- #endif
-     qCDebug(KWIN_CORE) << "No OpenGL or XRender/XFixes support";
-     return false;
 diff --git a/libkwineffects/kwinglplatform.cpp b/libkwineffects/kwinglplatform.cpp
-index 6dee53b..01131aa 100644
+index 1d8bb4f..e3debd4 100644
 --- a/libkwineffects/kwinglplatform.cpp
 +++ b/libkwineffects/kwinglplatform.cpp
 @@ -37,7 +37,15 @@ namespace KWin
@@ -270,7 +252,7 @@ index 6dee53b..01131aa 100644
        m_mesaVersion(0),
        m_galliumVersion(0),
        m_looseBinding(false),
-@@ -765,11 +773,11 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
+@@ -769,11 +777,11 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
          }
  
          if (m_chipClass < R300) {
@@ -286,7 +268,7 @@ index 6dee53b..01131aa 100644
          } else {
              m_recommendedCompositor = OpenGL2Compositing;
          }
-@@ -790,7 +798,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
+@@ -794,7 +802,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
          }
  
          if (m_chipClass < NV40) {
@@ -295,7 +277,7 @@ index 6dee53b..01131aa 100644
          } else {
              m_recommendedCompositor = OpenGL2Compositing;
          }
-@@ -808,7 +816,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
+@@ -812,7 +820,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
          m_looseBinding = false;
  
          if (m_chipClass < I915) {
@@ -304,7 +286,7 @@ index 6dee53b..01131aa 100644
          } else {
              m_recommendedCompositor = OpenGL2Compositing;
          }
-@@ -822,8 +830,8 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
+@@ -826,8 +834,8 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
      }
  
      if (isSoftwareEmulation()) {
@@ -316,21 +298,10 @@ index 6dee53b..01131aa 100644
              // Software emulation does not provide GLSL
              m_limitedGLSL = m_supportsGLSL = false;
 diff --git a/options.cpp b/options.cpp
-index 00b1b85..e6ce13e 100644
+index b73e792..0494bc4 100644
 --- a/options.cpp
 +++ b/options.cpp
-@@ -33,6 +33,10 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
- #include "settings.h"
- #include "xcbutils.h"
- #include <kwinglplatform.h>
-+#if HAVE_WAYLAND
-+#include "abstract_backend.h"
-+#include "wayland_server.h"
-+#endif
- 
- #endif //KCMRULES
- 
-@@ -938,6 +942,17 @@ bool Options::loadCompositingConfig (bool force)
+@@ -946,6 +946,17 @@ bool Options::loadCompositingConfig (bool force)
              break;
          }
      }
@@ -349,10 +320,10 @@ index 00b1b85..e6ce13e 100644
  
      if (m_compositingMode == NoCompositing) {
 diff --git a/scene_opengl.cpp b/scene_opengl.cpp
-index 8b3be71..db0814d 100644
+index e0efcac..327c9f8 100644
 --- a/scene_opengl.cpp
 +++ b/scene_opengl.cpp
-@@ -570,11 +570,15 @@ SceneOpenGL *SceneOpenGL::createScene(QObject *parent)
+@@ -579,11 +579,15 @@ SceneOpenGL *SceneOpenGL::createScene(QObject *parent)
          }
      }
      if (!scene) {
