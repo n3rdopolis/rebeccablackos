@@ -355,7 +355,11 @@ busybox::PART
 ecryptfs-utils::PART
 kbd::PART
 uuid-runtime::FULL
-debian-edu-config::FULL::$DEBIAN_DISTRO == Debian
+uuid::PART
+lsof::PART
+lockfile-progs::PART
+gconf2::PART
+ssl-cert::PART
 locales::FULL
 lshw::FULL
 ltrace::FULL
