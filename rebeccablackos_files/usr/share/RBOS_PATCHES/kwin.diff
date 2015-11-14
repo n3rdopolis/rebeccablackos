@@ -1,146 +1,28 @@
-diff --git a/abstract_backend.cpp b/abstract_backend.cpp
-index a8b7881..2a70447 100644
---- a/abstract_backend.cpp
-+++ b/abstract_backend.cpp
-@@ -330,4 +330,22 @@ EGLContext AbstractBackend::sceneEglContext() const
-     return EGL_NO_CONTEXT;
- }
- 
-+void AbstractBackend::addSupportedCompositor(CompositingType type)
-+{
-+    m_supportedCompositors << type;
-+}
-+
-+bool AbstractBackend::supportsCompositor(CompositingType type) const
-+{
-+    return m_supportedCompositors.contains(type);
-+}
-+
-+CompositingType AbstractBackend::preferredCompositor() const
-+{
-+    if (m_supportedCompositors.isEmpty()) {
-+        return KWin::NoCompositing;
-+    }
-+    return m_supportedCompositors.first();
-+}
-+
- }
-diff --git a/abstract_backend.h b/abstract_backend.h
-index ceda6b8..507018c 100644
---- a/abstract_backend.h
-+++ b/abstract_backend.h
-@@ -20,10 +20,12 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
- #ifndef KWIN_ABSTRACT_BACKEND_H
- #define KWIN_ABSTRACT_BACKEND_H
- #include <kwin_export.h>
-+#include <kwinglobals.h>
- #include <epoxy/egl.h>
- #include <fixx11h.h>
- #include <QImage>
- #include <QObject>
-+#include <QVector>
- 
- namespace KWin
- {
-@@ -89,6 +91,8 @@ public:
-     bool areOutputsEnabled() const {
-         return m_outputsEnabled;
-     }
-+    bool supportsCompositor(CompositingType type) const;
-+    CompositingType preferredCompositor() const;
- 
- public Q_SLOTS:
-     void pointerMotion(const QPointF &position, quint32 time);
-@@ -134,6 +138,7 @@ protected:
-     void setOutputsEnabled(bool enabled) {
-         m_outputsEnabled = enabled;
-     }
-+    void addSupportedCompositor(CompositingType type);
- 
- private:
-     void triggerCursorRepaint();
-@@ -151,6 +156,7 @@ private:
-     QByteArray m_deviceIdentifier;
-     bool m_pointerWarping = false;
-     bool m_outputsEnabled = true;
-+    QVector<CompositingType> m_supportedCompositors;
- };
- 
- }
-diff --git a/backends/drm/drm_backend.cpp b/backends/drm/drm_backend.cpp
-index ebc2f37..12fe003 100644
---- a/backends/drm/drm_backend.cpp
-+++ b/backends/drm/drm_backend.cpp
-@@ -68,6 +68,10 @@ DrmBackend::DrmBackend(QObject *parent)
-     , m_udev(new Udev)
-     , m_udevMonitor(m_udev->monitor())
- {
-+#if HAVE_GBM
-+    addSupportedCompositor(KWin::OpenGLCompositing);
-+#endif
-+    addSupportedCompositor(KWin::QPainterCompositing);
-     handleOutputs();
-     m_cursor[0] = nullptr;
-     m_cursor[1] = nullptr;
-diff --git a/backends/fbdev/fb_backend.cpp b/backends/fbdev/fb_backend.cpp
-index e6f2b58..e5cdb51 100644
---- a/backends/fbdev/fb_backend.cpp
-+++ b/backends/fbdev/fb_backend.cpp
-@@ -38,6 +38,7 @@ namespace KWin
- FramebufferBackend::FramebufferBackend(QObject *parent)
-     : AbstractBackend(parent)
- {
-+    addSupportedCompositor(QPainterCompositing);
-     setSoftWareCursor(true);
- }
- 
-diff --git a/backends/hwcomposer/hwcomposer_backend.cpp b/backends/hwcomposer/hwcomposer_backend.cpp
-index fa6fbb1..612035d 100644
---- a/backends/hwcomposer/hwcomposer_backend.cpp
-+++ b/backends/hwcomposer/hwcomposer_backend.cpp
-@@ -42,6 +42,7 @@ namespace KWin
- HwcomposerBackend::HwcomposerBackend(QObject *parent)
-     : AbstractBackend(parent)
- {
-+    addSupportedCompositor(KWin::OpenGLCompositing);
-     handleOutputs();
- }
- 
-diff --git a/backends/wayland/wayland_backend.cpp b/backends/wayland/wayland_backend.cpp
-index d7c6ea2..8792802 100644
---- a/backends/wayland/wayland_backend.cpp
-+++ b/backends/wayland/wayland_backend.cpp
-@@ -352,6 +352,10 @@ WaylandBackend::WaylandBackend(QObject *parent)
-     , m_subCompositor(new SubCompositor(this))
-     , m_cursor(nullptr)
- {
-+#if HAVE_WAYLAND_EGL
-+    addSupportedCompositor(OpenGLCompositing);
-+#endif
-+    addSupportedCompositor(QPainterCompositing);
-     connect(this, &WaylandBackend::outputsChanged, this, &WaylandBackend::screensQueried);
-     connect(this, &WaylandBackend::connectionFailed, this, &WaylandBackend::initFailed);
- }
-diff --git a/backends/x11/x11windowed_backend.cpp b/backends/x11/x11windowed_backend.cpp
-index 1db28ae..769b489 100644
---- a/backends/x11/x11windowed_backend.cpp
-+++ b/backends/x11/x11windowed_backend.cpp
-@@ -48,6 +48,10 @@ X11WindowedBackend::X11WindowedBackend(QObject *parent)
-     : AbstractBackend(parent)
- {
-     setSupportsPointerWarping(true);
-+#if HAVE_X11_XCB
-+    addSupportedCompositor(OpenGLCompositing);
-+#endif
-+    addSupportedCompositor(QPainterCompositing);
- }
- 
- X11WindowedBackend::~X11WindowedBackend()
 diff --git a/composite.cpp b/composite.cpp
-index 70f2e13..b449372 100644
+index c921c87..e1ca12d 100644
 --- a/composite.cpp
 +++ b/composite.cpp
-@@ -250,9 +250,9 @@ void Compositor::slotCompositingOptionsInitialized()
+@@ -240,9 +240,16 @@ void Compositor::slotCompositingOptionsInitialized()
+     }
+ #ifdef KWIN_HAVE_XRENDER_COMPOSITING
+     case XRenderCompositing:
+-        qCDebug(KWIN_CORE) << "Initializing XRender compositing";
+-        m_scene = SceneXrender::createScene(this);
+-        break;
++        if (! kwinApp()->shouldUseWaylandForCompositing())
++        {
++            qCDebug(KWIN_CORE) << "Initializing XRender compositing";
++            m_scene = SceneXrender::createScene(this);
++            break;
++        } else {
++           qCDebug(KWIN_CORE) << "Initializing QPainter compositing";
++           m_scene = SceneQPainter::createScene(this);
++           break;
++        }
+ #endif
+     case QPainterCompositing:
+         qCDebug(KWIN_CORE) << "Initializing QPainter compositing";
+@@ -272,9 +279,9 @@ void Compositor::slotCompositingOptionsInitialized()
              cm_selection->release();
          }
          if (kwinApp()->requiresCompositing()) {
@@ -153,192 +35,32 @@ index 70f2e13..b449372 100644
          }
          return;
      }
-@@ -267,8 +267,8 @@ void Compositor::slotCompositingOptionsInitialized()
-         }
-         if (kwinApp()->requiresCompositing()) {
-             qCCritical(KWIN_CORE) << "The used windowing system requires compositing";
--            qCCritical(KWIN_CORE) << "We are going to quit KWin now as it is broken";
--            qApp->quit();
-+            //qCCritical(KWIN_CORE) << "We are going to quit KWin now as it is broken";
-+            //qApp->quit();
-         }
-         return;
-     }
-@@ -460,6 +460,17 @@ void Compositor::fallbackToXRenderCompositing()
-     setup();
- }
- 
-+// OpenGL self-check failed, fallback to QPainter
-+void Compositor::fallbackToQPainterCompositing()
-+{
-+    finish();
-+    KConfigGroup config(KSharedConfig::openConfig(), "Compositing");
-+    config.writeEntry("Backend", "QPainter");
-+    config.sync();
-+    options->setCompositingMode(QPainterCompositing);
-+    setup();
-+}
-+
- void Compositor::slotConfigChanged()
- {
-     if (!m_suspended) {
-diff --git a/composite.h b/composite.h
-index fc0ddd5..a961dc0 100644
---- a/composite.h
-+++ b/composite.h
-@@ -203,6 +203,7 @@ private Q_SLOTS:
-      **/
-     void restart();
-     void fallbackToXRenderCompositing();
-+    void fallbackToQPainterCompositing();
-     void performCompositing();
-     void delayedCheckUnredirect();
-     void slotConfigChanged();
 diff --git a/compositingprefs.cpp b/compositingprefs.cpp
-index bb83d45..bbe8a87 100644
+index dccb81c..7d7dd80 100644
 --- a/compositingprefs.cpp
 +++ b/compositingprefs.cpp
-@@ -57,17 +57,17 @@ bool CompositingPrefs::openGlIsBroken()
+@@ -57,6 +57,12 @@ bool CompositingPrefs::openGlIsBroken()
  
  bool CompositingPrefs::compositingPossible()
  {
-+    bool glIsSafe = true;
++
 +    if (kwinApp()->shouldUseWaylandForCompositing()) {
 +        // don't do X specific checks if we are not going to use X for compositing
 +        return true;
 +    }
++
      // first off, check whether we figured that we'll crash on detection because of a buggy driver
      KConfigGroup gl_workaround_group(KSharedConfig::openConfig(), "Compositing");
-     const QString unsafeKey(QStringLiteral("OpenGLIsUnsafe") + (is_multihead ? QString::number(screen_number) : QString()));
-     if (gl_workaround_group.readEntry("Backend", "OpenGL") == QStringLiteral("OpenGL") &&
+     const QString unsafeKey(QLatin1String("OpenGLIsUnsafe") + (is_multihead ? QString::number(screen_number) : QString()));
+@@ -64,11 +70,6 @@ bool CompositingPrefs::compositingPossible()
          gl_workaround_group.readEntry(unsafeKey, false))
--        return false;
--
+         return false;
+ 
 -    if (kwinApp()->shouldUseWaylandForCompositing()) {
 -        // don't do X specific checks if we are not going to use X for compositing
 -        return true;
 -    }
-+        glIsSafe = false;
- 
+-
      if (!Xcb::Extensions::self()->isCompositeAvailable()) {
          qCDebug(KWIN_CORE) << "No composite extension available";
-diff --git a/libkwineffects/kwinglplatform.cpp b/libkwineffects/kwinglplatform.cpp
-index 1d8bb4f..e3debd4 100644
---- a/libkwineffects/kwinglplatform.cpp
-+++ b/libkwineffects/kwinglplatform.cpp
-@@ -37,7 +37,15 @@ namespace KWin
- {
- 
- GLPlatform *GLPlatform::s_platform = 0;
--
-+static CompositingType getFallbackCompositor()
-+{
-+    if (QX11Info::isPlatformX11())
-+    {
-+        return XRenderCompositing;
-+    } else {
-+        return QPainterCompositing;
-+    }
-+}
- static qint64 parseVersionString(const QByteArray &version)
- {
-     // Skip any leading non digit
-@@ -502,7 +510,7 @@ QString GLPlatform::chipClassToString(ChipClass chipClass)
- GLPlatform::GLPlatform()
-     : m_driver(Driver_Unknown),
-       m_chipClass(UnknownChipClass),
--      m_recommendedCompositor(XRenderCompositing),
-+      m_recommendedCompositor(getFallbackCompositor()),
-       m_mesaVersion(0),
-       m_galliumVersion(0),
-       m_looseBinding(false),
-@@ -769,11 +777,11 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
-         }
- 
-         if (m_chipClass < R300) {
--            // fallback to XRender for R100 and R200
--            m_recommendedCompositor = XRenderCompositing;
-+            // fallback for R100 and R200
-+            m_recommendedCompositor = getFallbackCompositor();
-         } else if (m_chipClass < R600) {
--            // XRender due to NPOT limitations not supported by KWin's shaders
--            m_recommendedCompositor = XRenderCompositing;
-+            // fallback due to NPOT limitations not supported by KWin's shaders
-+            m_recommendedCompositor = getFallbackCompositor();
-         } else {
-             m_recommendedCompositor = OpenGL2Compositing;
-         }
-@@ -794,7 +802,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
-         }
- 
-         if (m_chipClass < NV40) {
--            m_recommendedCompositor = XRenderCompositing;
-+            m_recommendedCompositor = getFallbackCompositor();
-         } else {
-             m_recommendedCompositor = OpenGL2Compositing;
-         }
-@@ -812,7 +820,7 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
-         m_looseBinding = false;
- 
-         if (m_chipClass < I915) {
--            m_recommendedCompositor = XRenderCompositing;
-+            m_recommendedCompositor = getFallbackCompositor();
-         } else {
-             m_recommendedCompositor = OpenGL2Compositing;
-         }
-@@ -826,8 +834,8 @@ void GLPlatform::detect(OpenGLPlatformInterface platformInterface)
-     }
- 
-     if (isSoftwareEmulation()) {
--        // we recommend XRender
--        m_recommendedCompositor = XRenderCompositing;
-+        // we recommend to fallback
-+        m_recommendedCompositor = getFallbackCompositor();
-         if (m_driver < Driver_Llvmpipe) {
-             // Software emulation does not provide GLSL
-             m_limitedGLSL = m_supportsGLSL = false;
-diff --git a/options.cpp b/options.cpp
-index b73e792..0494bc4 100644
---- a/options.cpp
-+++ b/options.cpp
-@@ -946,6 +946,17 @@ bool Options::loadCompositingConfig (bool force)
-             break;
-         }
-     }
-+#if HAVE_WAYLAND
-+    // sanity check the configured backend
-+    if (waylandServer()) {
-+        if (!waylandServer()->backend()->supportsCompositor(compositingMode)) {
-+            qCWarning(KWIN_CORE) << "Selected compositor not supported by Wayland backend, falling back to backend default";
-+            compositingMode = waylandServer()->backend()->preferredCompositor();
-+            qunsetenv("KWIN_COMPOSE");
-+        }
-+    }
-+#endif
-+
-     setCompositingMode(compositingMode);
- 
-     if (m_compositingMode == NoCompositing) {
-diff --git a/scene_opengl.cpp b/scene_opengl.cpp
-index e0efcac..327c9f8 100644
---- a/scene_opengl.cpp
-+++ b/scene_opengl.cpp
-@@ -579,11 +579,15 @@ SceneOpenGL *SceneOpenGL::createScene(QObject *parent)
-         }
-     }
-     if (!scene) {
--        if (GLPlatform::instance()->recommendedCompositor() == XRenderCompositing) {
--            qCCritical(KWIN_CORE) << "OpenGL driver recommends XRender based compositing. Falling back to XRender.";
-+        if (GLPlatform::instance()->recommendedCompositor() == XRenderCompositing || GLPlatform::instance()->recommendedCompositor() == QPainterCompositing) {
-+            qCCritical(KWIN_CORE) << "OpenGL driver recommends compositing fallback. Falling back";
-             qCCritical(KWIN_CORE) << "To overwrite the detection use the environment variable KWIN_COMPOSE";
-             qCCritical(KWIN_CORE) << "For more information see http://community.kde.org/KWin/Environment_Variables#KWIN_COMPOSE";
--            QTimer::singleShot(0, Compositor::self(), SLOT(fallbackToXRenderCompositing()));
-+	    if (QX11Info::isPlatformX11()) {
-+                QTimer::singleShot(0, Compositor::self(), SLOT(fallbackToXRenderCompositing()));
-+	    } else {
-+                QTimer::singleShot(0, Compositor::self(), SLOT(fallbackToQPainterCompositing()));
-+	    }
-         }
-         delete backend;
-     }
+         return false;
