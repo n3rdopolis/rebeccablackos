@@ -64,3 +64,4 @@ index dccb81c..7d7dd80 100644
      if (!Xcb::Extensions::self()->isCompositeAvailable()) {
          qCDebug(KWIN_CORE) << "No composite extension available";
          return false;
+
