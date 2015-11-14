@@ -911,7 +911,7 @@ function StartUserSession
   while read var
   do 
     unset "$var"
-  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$" ) 
+  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" ) 
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONARGS=$(echo "$3" | sed 's/$/ /g')
