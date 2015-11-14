@@ -51,7 +51,6 @@ libsystemd-journal-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libsystemd-login-dev::PART
 libarchive13::PART
 libarchive-dev::PART
-veromix::FULL
 plymouth-theme-spinfinity::FULL::$DEBIAN_DISTRO == Ubuntu
 plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
@@ -61,7 +60,6 @@ ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
 xserver-xorg::FULL
 pulseaudio::FULL
 libasound2-plugins::FULL
-lsb-desktop::FULL
 xterm::FULL
 network-manager::FULL
 modemmanager-dev::PART
@@ -69,7 +67,8 @@ libnm-dev::PART
 libmm14::PART
 libmm-dev::PART
 lupin-casper::PART::$DEBIAN_DISTRO == Ubuntu
-libmysqlclient15-dev::PART
+libmysqlclient18::PART
+libmysqlclient-dev::PART
 libsqlite3-dev::PART
 libxapian-dev::PART
 libleveldb1::PART
@@ -135,8 +134,8 @@ libxcb-xprint0::PART
 libxcb-xprint0-dev::PART
 xcb-proto::PART
 libbullet-dev::PART
-libbulletcollision2.83::PART
-libbulletdynamics2.83::PART
+libbulletcollision2.83v5::PART
+libbulletdynamics2.83v5::PART
 libgstreamer0.10::PART
 libgstreamer0.10-dev::PART
 libvlc5::PART
@@ -305,13 +304,13 @@ subversion-tools::PART
 mercurial::PART
 libass5::FULL  
 libass-dev::FULL
-libavutil54::FULL
+libavutil-ffmpeg54::FULL
 libavutil-dev::FULL
-libavcodec56::FULL
+libavcodec-ffmpeg56::FULL
 libavcodec-dev::FULL
-libavformat56::FULL
+libavformat-ffmpeg56::FULL
 libavformat-dev::FULL
-libswscale3::FULL
+libswscale-ffmpeg3::FULL
 libswscale-dev::FULL
 libspectre1::PART
 libspectre-dev::PART
@@ -352,7 +351,6 @@ sudo::FULL
 eject::FULL
 busybox-static::PART
 busybox::PART
-ecryptfs-utils::PART
 kbd::PART
 uuid-runtime::FULL
 uuid::PART
@@ -398,7 +396,7 @@ ubuntu-standard::FULL::$DEBIAN_DISTRO == Ubuntu
 libparted0-dev::FULL
 libparted2::FULL
 libyaml-cpp-dev::PART
-libyaml-cpp0.3::PART
+libyaml-cpp0.5v5::PART
 python3-dev::FULL
 libboost-python-dev::PART
 libboost-python1.55::PART
