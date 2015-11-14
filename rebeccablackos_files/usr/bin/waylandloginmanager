@@ -1393,7 +1393,6 @@ function ReadCommandFIFO
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
-	kill -15 -$LastUserActionPID
 	SwitchUserDialog &
 	LastSwitchPID=$!
       else
@@ -1411,7 +1410,6 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastLogonPID$) == 0  ]]
       then
-	kill -15 -$LastUserActionPID
 	GetUserCredentials &
 	LastLogonPID=$!
       else
@@ -1422,7 +1420,6 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastLeavePID$) == 0  ]]
       then
-	kill -15 -$LastUserActionPID
 	LeavePrompt &
 	LastLeavePID=$!
       else
@@ -1437,7 +1434,6 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastInfoPID$) == 0  ]]
       then
-	kill -15 -$LastUserActionPID
 	ShowInfo &
 	LastInfoPID=$!
       else
