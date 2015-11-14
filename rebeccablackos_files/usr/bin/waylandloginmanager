@@ -570,6 +570,7 @@ function RegisterSession
     declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
     declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
     declare -p ActiveSessionPID  >> /run/waylandloginmanager/sessiondata 
+    sed 's/declare/declare -g/g'
   else
     logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
   fi
