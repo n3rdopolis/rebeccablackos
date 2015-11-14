@@ -119,7 +119,7 @@ function UserSessionWorker
   #Clean up trailing white space from the end of all arguments
   for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
   do
-    ArgArray[$element]=$(echo "${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
+    ArgArray[$element]=$(echo " ${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
   done
 
   #if the user booted with wlmforceswrender, force software rendering to be enabled
