@@ -1221,7 +1221,7 @@ function StartLoginManagerDisplay
   Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
   for (( StartTimes = 0 ; StartTimes < 5 ;))
   do
-    systemctl is-active wlm-loginmanagerdisplay.service
+    systemctl is-active wlm-loginmanagerdisplay.service &>/dev/null
     LOGINMANAGERDISPLAYSTATUS=$?
     #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
     if [[ $LOGINMANAGERDISPLAYSTATUS != 0 ]]
