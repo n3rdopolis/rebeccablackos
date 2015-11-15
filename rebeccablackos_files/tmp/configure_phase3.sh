@@ -127,6 +127,9 @@ then
   /usr/sbin/plymouth-set-default-theme spinfinity
 fi
 
+echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
+echo -e "RebeccaBlackOS \n" > /etc/issue.net
+
 #Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
 systemctl disable lightdm.service
 systemctl disable gdm.service
