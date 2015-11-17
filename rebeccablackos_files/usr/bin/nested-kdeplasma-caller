@@ -18,22 +18,19 @@
 
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
-#export KWIN_COMPOSE=Q
-#export KWIN_USE_BUFFER_AGE=0
-SERVERID=wayland-$RANDOM
+#SERVERID=wayland-$RANDOM
 
-RANDOMNUMBER=$RANDOM
-HostID=wlhost-$RANDOMNUMBER
-ServerID=wayland-$RANDOMNUMBER
-set -m
-weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
-HostServerPID=$!
-export WAYLAND_DISPLAY=$HostID
-#export WAYLAND_SOCKET=$HostID
-unset DISPLAY
-kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/kded5 /opt/bin/plasmashell /opt/bin/krunner &
-GuestServerPID=$!
-fg 2
-kill -15 $HostServerPID &> /dev/null
-sleep 3
-kill -9 $HostServerPID &> /dev/null
+#RANDOMNUMBER=$RANDOM
+#HostID=wlhost-$RANDOMNUMBER
+#ServerID=wayland-$RANDOMNUMBER
+#set -m
+#weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
+#HostServerPID=$!
+#export WAYLAND_DISPLAY=$HostID
+#unset DISPLAY
+kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/kded5 /opt/bin/plasmashell /opt/bin/krunner #&
+#GuestServerPID=$!
+#fg 2
+#kill -15 $HostServerPID &> /dev/null
+#sleep 3
+#kill -9 $HostServerPID &> /dev/null
