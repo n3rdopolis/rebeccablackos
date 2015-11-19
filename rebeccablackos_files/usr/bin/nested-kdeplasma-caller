@@ -27,7 +27,7 @@ SERVERID=wayland-$RANDOM
 #weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
 #HostServerPID=$!
 #export WAYLAND_DISPLAY=$HostID
-#unset DISPLAY
+unset DISPLAY
 kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/kded5 /opt/bin/plasmashell /opt/bin/krunner #&
 #GuestServerPID=$!
 #fg 2
