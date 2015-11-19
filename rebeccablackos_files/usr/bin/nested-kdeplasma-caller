@@ -18,11 +18,10 @@
 
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
-SERVERID=wayland-$RANDOM
 
-#RANDOMNUMBER=$RANDOM
+RANDOMNUMBER=$RANDOM
 #HostID=wlhost-$RANDOMNUMBER
-#ServerID=wayland-$RANDOMNUMBER
+ServerID=wayland-$RANDOMNUMBER
 #set -m
 #weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
 #HostServerPID=$!
