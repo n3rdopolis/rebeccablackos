@@ -427,8 +427,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
       logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
-Will now reboot" 20 50 --no-cancel
-      dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+      openvt -c 63 -s -f -- rbos-failedboot
       exit
     fi
   fi
