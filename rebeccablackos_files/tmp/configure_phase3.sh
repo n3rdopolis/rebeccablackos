@@ -127,8 +127,12 @@ then
   /usr/sbin/plymouth-set-default-theme spinfinity
 fi
 
+#configure /etc/issue
 echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
 echo -e "RebeccaBlackOS \n" > /etc/issue.net
+
+#configure grub color
+echo "set color_normal=black/black" > /boot/grub/custom.cfg
 
 #Enable and disable services to enable Ubuntu specific functionality, and for the waylandloginmanager
 systemctl disable lightdm.service
