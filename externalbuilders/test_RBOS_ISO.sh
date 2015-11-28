@@ -309,9 +309,9 @@ else
 fi
 
 #bind mount in the critical filesystems
-bindmount_recurse /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-bindmount_recurse /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
-bindmount_recurse /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+bindmount_recurse /dev "$MOUNTHOME"/liveisotest/unionmountpoint
+bindmount_recurse /proc "$MOUNTHOME"/liveisotest/unionmountpoint
+bindmount_recurse /sys "$MOUNTHOME"/liveisotest/unionmountpoint
 mount --bind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
