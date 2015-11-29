@@ -34,9 +34,7 @@ unset BatteryString
 while read Battery
 do
   MaxPower=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_full)
-  echo $MaxPower
   CurrentState=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_now)
-  echo $CurrentState
   BatteryCapacity=$((CurrentState * 100 / MaxPower ))
   ((BatteryCount++))
   BatteryString+="Battery $BatteryCount: $BatteryCapacity%"
