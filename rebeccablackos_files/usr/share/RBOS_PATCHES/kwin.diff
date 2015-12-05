@@ -65,3 +65,20 @@ index dccb81c..7d7dd80 100644
          qCDebug(KWIN_CORE) << "No composite extension available";
          return false;
 
+
+
+
+
+diff --git a/backends/fbdev/scene_qpainter_fb_backend.cpp b/backends/fbdev/scene_qpainter_fb_backend.cpp
+index 7399bad..d84913b 100644
+--- a/backends/fbdev/scene_qpainter_fb_backend.cpp
++++ b/backends/fbdev/scene_qpainter_fb_backend.cpp
+@@ -64,7 +64,7 @@ QImage *FramebufferQPainterBackend::buffer()
+ 
+ bool FramebufferQPainterBackend::needsFullRepaint() const
+ {
+-    return false;
++    return true;
+ }
+ 
+ void FramebufferQPainterBackend::prepareRenderingFrame()
