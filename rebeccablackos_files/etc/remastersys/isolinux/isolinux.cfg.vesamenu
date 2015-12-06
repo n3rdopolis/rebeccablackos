@@ -12,16 +12,17 @@ SAY _____________________________________________________________________
 SAY __|liveforcesw|___________________Force software rendering to be used
 SAY __|livefbdefault|_______________Attempt to use the framebuffer device
 SAY _____________________________________________________________________
-SAY __|livefb786|_______________Attempt to use a 640x480(x24) framebuffer
-SAY __|livefb789|_______________Attempt to use a 800x600(x24) framebuffer
-SAY __|livefb789|_______________Attempt to use a 800x600(x24) framebuffer
-SAY __|livefb792|______________Attempt to use a 1024x768(x24) framebuffer
+SAY __|livefb342|_______________Attempt to use a 640x480(x32) framebuffer
+SAY __|livefb343|_______________Attempt to use a 800x600(x32) framebuffer
+SAY __|livefb344|______________Attempt to use a 1024x768(x32) framebuffer
+SAY __|livefb345|_____________Attempt to use a 1280x1024(x32) framebuffer
 SAY _____________________________________________________________________
-SAY __|livefb795|_____________Attempt to use a 1280x1024(x24) framebuffer
-SAY __|livefb838|_____________Attempt to use a 1400x1050(x24) framebuffer
-SAY __|livefb867|______________Attempt to use a 1400x900(x24) framebuffer
-SAY __|livefb799|_____________Attempt to use a 1600x1200(x24) framebuffer
 
+SAY __|livefb37A|______________Attempt to use a 1280x800(x32) framebuffer
+SAY __|livefb380|______________Attempt to use a 1400x900(x32) framebuffer
+SAY __|livefb347|_____________Attempt to use a 1600x1200(x32) framebuffer
+SAY __|livefb392|_____________Attempt to use a 1920x1080(x32) framebuffer
+SAY __|livefb38C|_____________Attempt to use a 2560x1600(x32) framebuffer
 menu title __LIVECDLABEL__
 menu background splash.png
 menu color title 1;37;44 #c0ffffff #00000000 std
@@ -67,10 +68,10 @@ have problems when kernel mode setting is used directly.
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb786
-  menu label Startup with attempting a 640x480(x24) framebuffer
+label livefb342
+  menu label Startup with attempting a 640x480(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=786 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x342 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -81,10 +82,10 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb789
-  menu label Startup with attempting a 800x600(x24) framebuffer
+label livefb343
+  menu label Startup with attempting a 800x600(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=789 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x343 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -95,10 +96,10 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb792
-  menu label Startup with attempting a 1024x768(x24) framebuffer
+label livefb344
+  menu label Startup with attempting a 1024x768(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=792 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x344 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -110,10 +111,10 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 
-label livefb795
-  menu label Startup with attempting a 1280x1024(x24) framebuffer
+label livefb345
+  menu label Startup with attempting a 1280x1024(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=795 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x345 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer.
@@ -124,10 +125,10 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb838
-  menu label Startup with attempting a 1400x1050(x24) framebuffer
+label livefb37A
+  menu label Startup with attempting a 1280x800(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=838 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x37A --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
@@ -138,10 +139,10 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb867
-  menu label Startup with attempting a 1400x900(x24) framebuffer
+label livefb380
+  menu label Startup with attempting a 1400x900(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=867 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x380 --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 
@@ -152,10 +153,38 @@ and the framebuffer size specified will be the size of your screen
 Live user name is 'beccaholic' with no password
 ENDTEXT
 
-label livefb799
-  menu label Startup with attempting a 1600x1200(x24) framebuffer
+label livefb347
+  menu label Startup with attempting a 1600x1200(x32) framebuffer
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=799 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x347 --
+TEXT HELP
+Start with a fallback framebuffer, for hardware devices 
+that don't have drivers that most Wayland servers prefer. 
+**This resolution may not be supported by all hardware**
+
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+Live user name is 'beccaholic' with no password
+ENDTEXT
+
+label livefb392
+  menu label Startup with attempting a 1920x1080(x32) framebuffer
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x392 --
+TEXT HELP
+Start with a fallback framebuffer, for hardware devices 
+that don't have drivers that most Wayland servers prefer. 
+**This resolution may not be supported by all hardware**
+
+On some systems with kernel mode setting, the framebuffer is virtual, 
+and the framebuffer size specified will be the size of your screen
+Live user name is 'beccaholic' with no password
+ENDTEXT
+
+label livefb38C
+  menu label Startup with attempting a 2560x1600(x32) framebuffer
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x38C --
 TEXT HELP
 Start with a fallback framebuffer, for hardware devices 
 that don't have drivers that most Wayland servers prefer. 

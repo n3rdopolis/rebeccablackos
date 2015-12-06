@@ -40,7 +40,7 @@ sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring you
 
 RESOLUTION=$(sudo -E -u $DIALOGUSER dialog --radiolist "Select Framebuffer resolution, if your video card driver doesn't create a framebuffer device by default
 
-Current option is $CURRENTOPTION" 20 60 20 786 640x480 off 789 800x600 off 792 1024x768 off 795 1280x1024 off 799 1600x1200 off 0 "Disable Framebuffer Boot" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
+Current option is $CURRENTOPTION" 21 60 20 0x341 640x480 off 0x343 800x600 off 0x344 1024x768 off 0x345 1280x1024 off 0x37A 1280x800 off 0x380 1400x900 off 0x347 1600x1200 off 0x392 1920x1080 off 0x38C 2560x1600 off 0 "Don't Specify Framebuffer Size" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 if [[ $OKSelected == 0 && $RESOLUTION != 2 ]]
 then
