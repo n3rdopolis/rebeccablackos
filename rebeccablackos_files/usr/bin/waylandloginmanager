@@ -78,6 +78,7 @@ function UserSessionWorker
   #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
   USER=$(id -u)
   export $(exec dbus-launch)
+  export XDG_SESSION_TYPE=wayland
   . /usr/bin/wlruntime_vars &> /dev/null
   BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
   EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
@@ -396,11 +397,12 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     DefaultBackendType=KMS
     WESTONBACKEND=drm-backend.so
     HardwareSupported=1
+  else
+    logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   fi
   SupportedBackends+=(WL)
   if [[ $(ls  /dev/fb* ) ]]
   then
-    logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
     then
       logger -t waylandloginmanager "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" -s  >>/var/log/waylandloginmanager 2>&1
@@ -415,6 +417,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
       WESTONBACKEND=fbdev-backend.so
     fi
     HardwareSupported=1
+  else
+    logger -t waylandloginmanager "No framebuffer support found" -s  >>/var/log/waylandloginmanager 2>&1
   fi
 
 
