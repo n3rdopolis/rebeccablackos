@@ -61,6 +61,7 @@ pulseaudio::FULL
 libasound2-plugins::FULL
 xterm::FULL
 network-manager::FULL
+network-manager-dev::PART
 modemmanager-dev::PART
 libnm-dev::PART
 libmm14::PART
@@ -227,6 +228,9 @@ libxcb-sync-dev::PART
 libxcb-xfixes0-dev::PART
 libxss1::PART
 libxss-dev::PART
+colord::PART
+libcolord2::PART
+libcolord-dev::PART
 libfreerdp1::PART::$DEBIAN_DISTRO == Ubuntu
 libfreerdp-plugins-standard::PART
 libfreerdp-dev::PART
@@ -352,6 +356,8 @@ libusb-dev::PART
 libusbmuxd-dev::PART
 libplist-dev::PART
 libimobiledevice-dev::PART
+libassimp3v5::PART
+libassimp-dev::PART
 gstreamer1.0-clutter::PART
 libgstreamer-plugins-base1.0-0::PART
 libmx-1.0-2::PART
