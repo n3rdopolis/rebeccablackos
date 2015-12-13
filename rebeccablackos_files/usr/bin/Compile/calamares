@@ -51,14 +51,14 @@ REBUILDNEWREVISION=0
 # EXTERNALBUILDHOME : For out of tree builds 
 # INTERNALBUILDHOME : For in tree builds
 
-#This gets called by DownloadSource in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
+#This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
 :
 }
 
 
-#This is called by PrepareBuild in /usr/bin/build_core. If there are no other commeands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
+#This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
 cp -a /usr/share/RBOS_PATCHES/calamares/* .
@@ -73,15 +73,16 @@ sed -i '/owncloud/d' settings.conf
 sed -ie "s/- services/- services\n\ \ - packages/g" settings.conf
 git checkout a2a6d2f2439f400cfa149ff0b36e2e68b2cb171e src/modules/displaymanager/main.py
 patch -p1 < /usr/share/RBOS_PATCHES/calamares.diff
+
+mkdir build
+cd build
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DWITH_PARTITIONMANAGER=1
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-rm CMakeCache.txt
-mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DWITH_PARTITIONMANAGER=1
 make 
 }
 
