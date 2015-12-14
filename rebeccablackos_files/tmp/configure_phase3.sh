@@ -76,10 +76,10 @@ chmod +x config
 chmod +x postinst
 tar czf control.tar.gz control config templates postinst
 tar czf data.tar.gz -T /dev/null
-ar q waylandloginmanager.deb debian-binary
-ar q waylandloginmanager.deb control.tar.gz
-ar q waylandloginmanager.deb data.tar.gz
-dpkg -i waylandloginmanager.deb
+ar q waylandloginmanager-rbos.deb debian-binary
+ar q waylandloginmanager-rbos.deb control.tar.gz
+ar q waylandloginmanager-rbos.deb data.tar.gz
+dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
 #copy all files
@@ -108,8 +108,8 @@ compile_all build-only
 
 #Create a package with all the menu items.
 cd /tmp
-rm "/srcbuild/buildoutput/"rbos-menuitems*.deb
-checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-menuitems --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
+checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 cp *.deb "/srcbuild/buildoutput/"
 cd $OLDPWD
 
