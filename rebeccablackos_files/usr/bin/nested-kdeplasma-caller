@@ -20,16 +20,6 @@
 . /usr/bin/wlruntime_vars
 
 RANDOMNUMBER=$RANDOM
-#HostID=wlhost-$RANDOMNUMBER
 ServerID=wayland-$RANDOMNUMBER
-#set -m
-#weston --no-config --shell=fullscreen-shell.so --socket=$HostID &
-#HostServerPID=$!
-#export WAYLAND_DISPLAY=$HostID
 unset DISPLAY
-kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/bin/kded5 /opt/bin/plasmashell /opt/bin/krunner #&
-#GuestServerPID=$!
-#fg 2
-#kill -15 $HostServerPID &> /dev/null
-#sleep 3
-#kill -9 $HostServerPID &> /dev/null
+kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/libexec/startplasma #&
