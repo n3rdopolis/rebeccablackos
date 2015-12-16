@@ -80,7 +80,7 @@ make install
 function PackagePostInstall()
 {
 mkdir -p $INSTALLDIR/libexec/
-ls -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma $INSTALLDIR/libexec/startplasma
+ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma $INSTALLDIR/libexec/startplasma
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
