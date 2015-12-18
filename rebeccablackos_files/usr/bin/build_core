@@ -119,7 +119,6 @@ function RunDownloadAndOrBuild
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
-    mkdir -p "$SOURCEDIR"
     cd "$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
