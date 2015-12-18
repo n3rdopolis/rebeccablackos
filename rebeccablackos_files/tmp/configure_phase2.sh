@@ -46,8 +46,10 @@ RedirectFile /usr/sbin/grub-probe
 RedirectFile /sbin/initctl
 RedirectFile /usr/sbin/invoke-rc.d
 
-#Create dpkg config file to speed up install operations for the ISO build. It gets removed once done. 
+#Configure dpkg
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
+echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
+echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
@@ -179,8 +181,10 @@ RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
 RevertFile /usr/sbin/invoke-rc.d
 
-#delete the dpkg config file that speeds up the installs, so the user doesn't get it.
+#set dpkg to defaults
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
+rm /etc/dpkg/dpkg.cfg.d/force-confold
+rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #Capture the packages that are installed and not installed.
 dpkg --get-selections > /tmp/INSTALLSSTATUS.txt

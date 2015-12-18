@@ -196,6 +196,11 @@ RedirectFile /usr/sbin/grub-probe
 RedirectFile /sbin/initctl
 RedirectFile /usr/sbin/invoke-rc.d
 
+#Configure dpkg
+echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
+echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
+echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
+
 #Create a log folder for the remove operations
 mkdir /tmp/logs/package_operations/Removes
 
@@ -229,6 +234,11 @@ apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/
 RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
 RevertFile /usr/sbin/invoke-rc.d
+
+#set dpkg to defaults
+rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
+rm /etc/dpkg/dpkg.cfg.d/force-confold
+rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #delete larger binary files that are for development, and are not needed on the smaller iso
 rm /opt/bin/Xorg
