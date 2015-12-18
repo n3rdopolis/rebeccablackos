@@ -68,6 +68,13 @@ export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
 
+function SetACLPermissions
+{
+  echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
+  setfacl -dRm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
+  setfacl -Rm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
+}
+
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
 function RunDownloadAndOrBuild 
 {
@@ -80,7 +87,6 @@ function RunDownloadAndOrBuild
   mkdir -p "$SOURCEDIR"/buildhome/config
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
-  mkdir -p "/$SOURCEDIR/buildoutput/acl_control"
   SOURCENAMECHARS="${#SOURCENAME}"
   iterator=0
   export SAFESOURCENAME=$(for (( iterator=0; iterator < $SOURCENAMECHARS ; iterator++ ))
@@ -98,27 +104,11 @@ function RunDownloadAndOrBuild
   
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
-  setfacl -m  $NONROOTUSER:rwx /"$SOURCEDIR"
-  if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && ! -d /"$SOURCEDIR"/"$SOURCENAME" ]]
-  then
-    touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
-  fi
-  if [[ ! -e /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME" && -d /"$SOURCEDIR"/"$SOURCENAME" ]]
-  then
-    echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
-    setfacl -dRm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
-    ACLResult=$?
-    setfacl -Rm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
-    ACLResult=$(( ACLResult + $? ))
-    if [[ $ACLResult == 0 ]]
-    then
-        touch /"$SOURCEDIR"/buildoutput/acl_control/"$SOURCENAME"
-    fi
-  fi
   
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
+    SetACLPermissions
     cd "$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
@@ -404,6 +394,7 @@ function DownloadARCHIVE()
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
+  SetACLPermissions
   #If /tmp/buildcore_revisions.txt exists, then import it.
   #Copy the /tmp/buildcore_revisions.txt script into its own folder, and set that folder as the path for a restricted shell, running as nonroot
   #For that restricted shell, call the function for setting the SOURCEREVISION and SUBMODULEREVISIONS for the current sourcce name
