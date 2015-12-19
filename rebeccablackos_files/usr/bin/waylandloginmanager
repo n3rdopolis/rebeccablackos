@@ -288,11 +288,14 @@ function PrepareLoginManager
     if [[ ! -e /etc/pam.d/waylandloginmanager ]]
     then
         echo "#%PAM-1.0
+session [success=ok ignore=ignore module_unknown=ignore default=bad] pam_selinux.so close
+auth            optional        pam_group.so
 auth            sufficient      pam_rootok.so
 session         optional        pam_keyinit.so revoke
 session         required        pam_limits.so
 session         required        pam_unix.so
-session         optional        pam_systemd.so
+session         required        pam_loginuid.so
+session         optional        pam_systemd.so type=wayland
 session         optional        pam_ecryptfs.so unwrap
 " > /etc/pam.d/waylandloginmanager
     fi
