@@ -923,7 +923,7 @@ function StartUserSession
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONARGS=$(echo "$3" | sed 's/$/ /g')
-  WESTONTTY=$1
+  USERSESSIONTTY=$1
   LOGINUSER=$2
   IFS=$'\n'
   WSESSIONDATA=($WSESSIONARGS)
@@ -961,19 +961,19 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $WESTONTTY" -s  >>/var/log/waylandloginmanager 2>&1
+  logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   Create_XDG_RUNTIME_DIR $LOGINUSER
-  chvt $WESTONTTY &
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$WESTONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument
+  chvt $USERSESSIONTTY &
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument
   sleep 5
-  #Get the PID that was called, by seing which process is the 'leader pid' of the $WESTONTTY tty that the server was started. This is needed to know what TTY to switch to.
-  WESTONPID=$(ps --tty /dev/tty$WESTONTTY | sed -n 2p | awk '{print $1}')
-  #Find the logind session id, by trying to find out what session is lead by the $WESTONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
+  #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
+  USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
+  #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
   SESSIONS=$(loginctl  list-sessions |grep "        c" |awk '{print $1}')
   while read SESSION
   do
     SessionPid=$(loginctl show-session $SESSION -p Leader |awk -F = '{print $2}')
-    if [[ $SessionPid == $WESTONPID ]]
+    if [[ $SessionPid == $USERSESSIONPID ]]
     then
       LOGINDSESSION=$SESSION
       break
@@ -984,7 +984,7 @@ function StartUserSession
   loginctl activate $LOGINDSESSION
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  echo "$WESTONTTY@$WESTONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
+  echo "$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
   echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
 }
 
