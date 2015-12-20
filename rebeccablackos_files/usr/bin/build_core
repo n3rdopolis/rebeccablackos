@@ -71,8 +71,7 @@ export ACTION=$1
 function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
-  setfacl -dRm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
-  setfacl -Rm $NONROOTUSER:rwx /"$SOURCEDIR"/"$SOURCENAME"
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME"
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
@@ -101,10 +100,13 @@ function RunDownloadAndOrBuild
   done)
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
-  
+
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
-  
+  setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"
+  setfacl -dm mask::rwx /"$SOURCEDIR"
+  setfacl -m mask::rwx /"$SOURCEDIR"
+
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
