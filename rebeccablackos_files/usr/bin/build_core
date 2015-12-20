@@ -290,6 +290,7 @@ function CleanupBZR()
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   bzr revert
+  bzr clean-tree --force
   bzr clean-tree --force --detritus
 }
 
