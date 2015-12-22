@@ -396,7 +396,6 @@ function DownloadARCHIVE()
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
-  SetACLPermissions
   #If /tmp/buildcore_revisions.txt exists, then import it.
   #Copy the /tmp/buildcore_revisions.txt script into its own folder, and set that folder as the path for a restricted shell, running as nonroot
   #For that restricted shell, call the function for setting the SOURCEREVISION and SUBMODULEREVISIONS for the current sourcce name
@@ -434,6 +433,7 @@ function DownloadSource()
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
     STARTTIME=$(date +%s)
+    SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE"
     Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
     ENDTIME=$(date +%s)
