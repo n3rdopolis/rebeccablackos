@@ -54,7 +54,6 @@ plymouth-theme-spinfinity::FULL::$DEBIAN_DISTRO == Ubuntu
 plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
 plymouth-themes::PART::$DEBIAN_DISTRO == Debian
-plymouth-dev::PART::$DEBIAN_DISTRO == Debian
 ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
 xserver-xorg::FULL
 pulseaudio::FULL
@@ -71,7 +70,7 @@ libmysqlclient18::PART
 libmysqlclient-dev::PART
 libsqlite3-dev::PART
 libxapian-dev::PART
-libleveldb1::PART
+libleveldb1v5::PART
 libleveldb-dev::PART
 language-pack-en::FULL::$DEBIAN_DISTRO == Ubuntu
 linux-generic::FULL::$DEBIAN_DISTRO == Ubuntu
@@ -137,8 +136,8 @@ libxcb-util0::PART
 libxcb-util0-dev::PART
 xcb-proto::PART
 libbullet-dev::PART
-libbulletcollision2.83v5::PART
-libbulletdynamics2.83v5::PART
+libbulletcollision2.83.6::PART
+libbulletdynamics2.83.6::PART
 libgstreamer0.10::PART
 libgstreamer0.10-dev::PART
 libvlc5::PART
@@ -465,12 +464,3 @@ libphysfs1::PART
 libphysfs-dev::PART
 libopenal1::PART
 libopenal-dev::PART
-light-themes::BUILDDEP::$DEBIAN_DISTRO == Ubuntu
-libgtk-3-0::BUILDDEP
-libgtk2.0-0::BUILDDEP
-libclutter-1.0-0::BUILDDEP
-mesa::BUILDDEP
-tinc::BUILDDEP
-gnome-shell::BUILDDEP
-systemd-services::BUILDDEP::$DEBIAN_DISTRO == Ubuntu
-supertux::BUILDDEP
