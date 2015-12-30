@@ -162,9 +162,13 @@ then
 
     #unmount the filesystems used by the CD
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
     umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
-    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev/pts
+
     umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 
     fuser -kmM   "$MOUNTHOME"/liveisotest/unionmountpoint 2> /dev/null
@@ -309,9 +313,13 @@ else
 fi
 
 #bind mount in the critical filesystems
-bindmount_recurse /dev "$MOUNTHOME"/liveisotest/unionmountpoint
-bindmount_recurse /proc "$MOUNTHOME"/liveisotest/unionmountpoint
 bindmount_recurse /sys "$MOUNTHOME"/liveisotest/unionmountpoint
+
+mount --bind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+
+mount --bind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
+mount --bind /dev/pts "$MOUNTHOME"/liveisotest/unionmountpoint/dev/pts
+
 mount --bind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
 mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
@@ -337,6 +345,7 @@ then
   mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
   chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
   chown $SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  ln -s /proc/mounts "$MOUNTHOME"/liveisotest/unionmountpoint/etc/mtab
   rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
   cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
   chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
