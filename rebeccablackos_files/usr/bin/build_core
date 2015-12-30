@@ -511,7 +511,7 @@ function MakeAndInstall()
   mkdir -p "$INSTALLDIR/include"
 
   #Log the source version
-  GetSourceVersion > "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion" 2>&1
+  GetSourceVersion > "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
 
   #create a variable for the package name that is the source name converted to all lower case.
   PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
