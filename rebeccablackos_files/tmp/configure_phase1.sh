@@ -29,6 +29,9 @@ export DEBIAN_FRONTEND=noninteractive
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
+#Create _apt user that apt drops to to run things as non-root
+adduser --no-create-home --disabled-password --system --force-badname _apt
+
 #update the apt cache
 rm -rf /var/lib/apt/lists/*
 apt-get update
