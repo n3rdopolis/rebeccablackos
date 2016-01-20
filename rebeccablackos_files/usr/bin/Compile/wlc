@@ -90,14 +90,7 @@ then
     IFS=' '
     SOFILE=($(dlocate $SOFILE$))
     unset IFS
-    SONAME=$(readlink ${SOFILE[1]})
-    DIRNAME=$(dirname ${SOFILE[1]})
-    IFS=.
-    SONAME=($SONAME)
-    unset IFS
-    LINKNAME=${SONAME[0]}.so
-    TARGETNAME=${SONAME[0]}.${SONAME[1]}.${SONAME[2]}
-    ln -s $DIRNAME/$TARGETNAME $INSTALLDIR/lib/$LINKNAME
+    cp -a ${SOFILE[1]} $INSTALLDIR/lib/
   done
 fi
 }
