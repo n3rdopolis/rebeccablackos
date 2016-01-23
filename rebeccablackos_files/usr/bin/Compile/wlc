@@ -83,16 +83,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-if [[ -e $INSTALLDIR/lib/libwlc.so ]]
-then
-  strings /opt/lib/libwlc.so |grep so$ |while read SOFILE
-  do
-    IFS=' '
-    SOFILE=($(dlocate $SOFILE$))
-    unset IFS
-    cp -a ${SOFILE[1]} $INSTALLDIR/lib/
-  done
-fi
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
