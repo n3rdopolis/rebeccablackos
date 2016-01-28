@@ -20,5 +20,6 @@
 . /usr/bin/wlruntime_vars
 export QT_WAYLAND_FORCE_DPI=100
 export WAYLAND_GUEST=wayland-$RANDOM
+export GREENISLAND_PLUGINS=plasma.so:xwayland.so
 unset DISPLAY
 hawaii-session -m wayland
