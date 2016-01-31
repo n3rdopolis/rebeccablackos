@@ -614,17 +614,17 @@ iso (){
     echo $DISKINFONAME $DISTRIB_RELEASE - Release $ARCH > $WORKDIR/ISOTMP/.disk/info
     echo $LIVECDURL > $WORKDIR/ISOTMP/.disk/release_notes_url
 
-    # Step 7 - Make the EFI bootloader #i386=IA32, x86_64/amd64=X64 arm=arm arm64=aa64
+    # Step 7 - Make the EFI bootloader #i386=ia32, x86_64/amd64=x64 arm=arm arm64=aa64
     
     cd $WORKDIR/efibuild
     if [[ $ARCH == i386 ]]
     then
-      EFIARCHPREFIX=IA32
+      EFIARCHPREFIX=ia32
       GRUBARCHPREFIX=i386
       BUILDEFI=2
     elif [[ $ARCH == amd64 ]]
     then
-      EFIARCHPREFIX=X64
+      EFIARCHPREFIX=x64
       GRUBARCHPREFIX=x86_64
       BUILDEFI=2
     else
@@ -633,9 +633,9 @@ iso (){
     
     if [[ $BUILDEFI == 1 ]]
     then
-      EFIFILENAME=BOOT$EFIARCHPREFIX.efi
+      EFIFILENAME=boot$EFIARCHPREFIX.efi
 
-      touch ./grub.cfg
+      echo "syslinux_configfile ($root)/isolinux/isolinux.cfg" > ./grub.cfg
       grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
 
       IMAGESIZE=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  ))
@@ -646,9 +646,9 @@ iso (){
       dd if=/dev/zero of=efiboot.img seek=$IMAGESIZE bs=1 count=0
       #Ensure 512 bytes a sector, use FAT12 as that's what other EFI alt boot images appear to be. The bootloader should at most be a few MB, so FAT12 is fine
       mkfs.vfat efiboot.img -v -S 512 -F 12
-      mmd -i efiboot.img ::/EFI
-      mmd -i efiboot.img ::/EFI/BOOT
-      mcopy -i efiboot.img "$EFIFILENAME" ::/EFI/BOOT
+      mmd -i efiboot.img ::/efi
+      mmd -i efiboot.img ::/efi/boot
+      mcopy -i efiboot.img "$EFIFILENAME" ::/efi/boot
 
       mkdir -p $WORKDIR/ISOTMP/boot/EFI/
       cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
@@ -683,7 +683,12 @@ iso (){
     
     # Make the iso hybrid so it can be simply dd copied to a usb flash drive.
     log_msg "Making $CUSTOMISO a hybrid iso"
-    isohybrid $WORKDIR/$CUSTOMISO
+    if [[ $BUILDEFI == 1 && $CREATEISOHASEFI != 0 ]]
+    then
+      isohybrid -u $WORKDIR/$CUSTOMISO
+    else
+      isohybrid $WORKDIR/$CUSTOMISO
+    fi
 
     # create the md5 sum file so the user doesn't have to - this is good so the iso
     # file can later be tested to ensure it hasn't become corrupted

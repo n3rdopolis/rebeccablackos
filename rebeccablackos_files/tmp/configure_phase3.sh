@@ -104,7 +104,7 @@ then
 fi
 
 #run the script that calls all compile scripts in a specified order, in build only mode
-compile_all build-only
+#compile_all build-only
 
 #Create a package with all the menu items.
 cd /tmp
