@@ -180,6 +180,7 @@ update-rc.d remastersys-firstboot defaults
         rm -rf $WORKDIR/dummysys/etc/*
         rm -rf $WORKDIR/dummysys/run/*
         rm -rf $WORKDIR/ISOTMP/{isolinux,grub,.disk}
+        rm -rf $WORKDIR/efibuild
     else
         log_msg "Creating $WORKDIR folder tree"
         mkdir -p $WORKDIR/ISOTMP/{casper,preseed}
@@ -609,7 +610,7 @@ iso (){
     # Step 7 - Make the EFI bootloader #i386=IA32, x86_64/amd64=X64 arm=arm arm64=aa64
     
     # TODO enable by setting BUILDEFI to 1, not 2
-    $WORKDIR/efibuild
+    cd $WORKDIR/efibuild
     if [[ $ARCH == i386 ]]
     then
       EFIARCHPREFIX=IA32
@@ -631,13 +632,17 @@ iso (){
       # TODO Determine config to chainload isolinux hopefully
       grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" #boot/grub/grub.cfg
 
-
-      FSSIZE=$(($(du -b -c $EFIFILENAME | tail -1| cut -f 1)+10000))
-      dd if=/dev/zero of=efiboot.img seek=$FSSIZE bs=1 count=0
-      mkfs.vfat efiboot.img -v -F 12
+      IMAGESIZE=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  ))
+      #Make the number of sectors (with 512b a sector) divisible by 32, by getting the next largest possible size, add a padding of 32*8 sectors, and then get the number of bytes
+      IMAGESIZE=$(( ( ($IMAGESIZE/512) + (32 - ($IMAGESIZE/512) %32 ) + 256 ) * 512 ))
+      
+      
+      dd if=/dev/zero of=efiboot.img seek=$IMAGESIZE bs=1 count=0
+      #Ensure 512 bytes a sector, use FAT12 as that's what other EFI alt boot images appear to be. The bootloader should at most be a few MB, so FAT12 is fine
+      mkfs.vfat efiboot.img -v -S 512 -F 12
       mmd -i efiboot.img ::/EFI
       mmd -i efiboot.img ::/EFI/BOOT
-      mcopy -i efiboot.img $EFIFILENAME ::/EFI/BOOT
+      mcopy -i efiboot.img "$EFIFILENAME" ::/EFI/BOOT
 
       mkdir -p $WORKDIR/ISOTMP/boot/EFI/
       cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
