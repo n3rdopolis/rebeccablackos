@@ -184,6 +184,7 @@ update-rc.d remastersys-firstboot defaults
         log_msg "Creating $WORKDIR folder tree"
         mkdir -p $WORKDIR/ISOTMP/{casper,preseed}
         mkdir -p $WORKDIR/dummysys/{dev,etc,proc,tmp,sys,mnt,media/cdrom,var}
+        mkdir -p $WORKDIR/efibuild
         if [ -d /run ]; then
             mkdir -p $WORKDIR/dummysys/run
         fi
@@ -310,9 +311,7 @@ update-rc.d remastersys-firstboot defaults
     if [ ! -f /etc/remastersys/customisolinux/isolinux.cfg ]; then
         log_msg "Creating isolinux setup for the live system"
         ISOLINUXFILE=$(find /usr -name 'isolinux.bin' | head -1)
-	EFILINUXFILE=$(find /usr -name 'efilinux.efi' | head -1)
         cp $ISOLINUXFILE $WORKDIR/ISOTMP/isolinux/
-	cp $EFILINUXFILE $WORKDIR/ISOTMP/isolinux/
         cp /usr/lib/syslinux/modules/bios/*.c32 $WORKDIR/ISOTMP/isolinux/ 
         # setup isolinux for the livecd
         VERSION=`lsb_release -r | awk '{print $2}' | awk -F "." '{print $1}'`
@@ -607,7 +606,44 @@ iso (){
     echo $DISKINFONAME $DISTRIB_RELEASE - Release $ARCH > $WORKDIR/ISOTMP/.disk/info
     echo $LIVECDURL > $WORKDIR/ISOTMP/.disk/release_notes_url
 
-    # Step 7 - Make md5sum.txt for the files on the livecd - this is used during the
+    # Step 7 - Make the EFI bootloader #i386=IA32, x86_64/amd64=X64 arm=arm arm64=aa64
+    
+    # TODO enable by setting BUILDEFI to 1, not 2
+    $WORKDIR/efibuild
+    if [[ $ARCH == i386 ]]
+    then
+      EFIARCHPREFIX=IA32
+      GRUBARCHPREFIX=i386
+      BUILDEFI=2
+    elif [[ $ARCH == amd64 ]]
+    then
+      EFIARCHPREFIX=X64
+      GRUBARCHPREFIX=x86_64
+      BUILDEFI=2
+    else
+      BUILDEFI=0
+    fi
+    
+    if [[ $BUILDEFI == 1 ]]
+    then
+      EFIFILENAME=BOOT$EFIARCHPREFIX.efi
+
+      # TODO Determine config to chainload isolinux hopefully
+      grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" #boot/grub/grub.cfg
+
+
+      FSSIZE=$(($(du -b -c $EFIFILENAME | tail -1| cut -f 1)+10000))
+      dd if=/dev/zero of=efiboot.img seek=$FSSIZE bs=1 count=0
+      mkfs.vfat efiboot.img -v -F 12
+      mmd -i efiboot.img ::/EFI
+      mmd -i efiboot.img ::/EFI/BOOT
+      mcopy -i efiboot.img $EFIFILENAME ::/EFI/BOOT
+
+      mkdir -p $WORKDIR/ISOTMP/boot/EFI/
+      cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
+    fi
+    
+    # Make md5sum.txt for the files on the livecd - this is used during the
     # checking function of the livecd
     log_msg "Creating md5sum.txt for the livecd/dvd"
     cd $WORKDIR/ISOTMP && find . -type f -print0 | xargs -0 md5sum > md5sum.txt
@@ -623,7 +659,12 @@ iso (){
 
     # Step 8 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR"
-    $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+    if [[ $BUILDEFI == 1 ]]
+    then
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e boot/grub/EFI/efi.img -no-emul-boot -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+    else
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+    fi
     if [ ! -f $WORKDIR/$CUSTOMISO ]; then
         log_msg "The iso was not created. There was a problem. Exiting"
         exit 1
