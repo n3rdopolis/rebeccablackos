@@ -436,8 +436,10 @@ squashfs-tools::PART
 ntfs-3g::PART
 btrfs-tools::PART
 xfsprogs::PART
+dosfstools::PART
 libcap-dev::PART
 discover::PART
+mtools::PART
 syslinux::PART
 syslinux-common::PART
 syslinux-utils::PART
@@ -445,6 +447,7 @@ syslinux-efi::PART
 isolinux::PART
 efilinux::PART::$DEBIAN_DISTRO == Ubuntu
 grub2-common::FULL
+grub-efi::FULL
 grub-pc-bin::FULL
 live-image-standard::PART
 gnome-icon-theme-symbolic::PART
