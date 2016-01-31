@@ -168,4 +168,4 @@ dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
 #run the script that calls all compile scripts in a specified order, in download only mode
-#compile_all download-only
+compile_all download-only
