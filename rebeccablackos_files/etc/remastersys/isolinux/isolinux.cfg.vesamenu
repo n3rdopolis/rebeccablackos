@@ -2,27 +2,27 @@ UI vesamenu.c32
 DEFAULT live
 prompt 0
 timeout 300
-SAY RebeccaBlackOS Boot Menu:____________________________________________
-SAY The live users's name is 'beccaholic' with no password
-SAY The following options for boot: are availible to be used:
-SAY If no options are passed in 30 seconds, then it defaults to live
-SAY _____________________________________________________________________
-SAY __|live|____________________________________Start the system normally 
-SAY _____________________________________________________________________
-SAY __|liveforcesw|___________________Force software rendering to be used
-SAY __|livefbdefault|_______________Attempt to use the framebuffer device
-SAY _____________________________________________________________________
-SAY __|livefb342|_______________Attempt to use a 640x480(x32) framebuffer
-SAY __|livefb343|_______________Attempt to use a 800x600(x32) framebuffer
-SAY __|livefb344|______________Attempt to use a 1024x768(x32) framebuffer
-SAY __|livefb345|_____________Attempt to use a 1280x1024(x32) framebuffer
-SAY _____________________________________________________________________
+# SAY RebeccaBlackOS Boot Menu:____________________________________________
+# SAY The live users's name is 'beccaholic' with no password
+# SAY The following options for boot: are availible to be used:
+# SAY If no options are passed in 30 seconds, then it defaults to live
+# SAY _____________________________________________________________________
+# SAY __|live|____________________________________Start the system normally 
+# SAY _____________________________________________________________________
+# SAY __|liveforcesw|___________________Force software rendering to be used
+# SAY __|livefbdefault|_______________Attempt to use the framebuffer device
+# SAY _____________________________________________________________________
+# SAY __|livefb342|_______________Attempt to use a 640x480(x32) framebuffer
+# SAY __|livefb343|_______________Attempt to use a 800x600(x32) framebuffer
+# SAY __|livefb344|______________Attempt to use a 1024x768(x32) framebuffer
+# SAY __|livefb345|_____________Attempt to use a 1280x1024(x32) framebuffer
+# SAY _____________________________________________________________________
 
-SAY __|livefb37A|______________Attempt to use a 1280x800(x32) framebuffer
-SAY __|livefb380|______________Attempt to use a 1400x900(x32) framebuffer
-SAY __|livefb347|_____________Attempt to use a 1600x1200(x32) framebuffer
-SAY __|livefb392|_____________Attempt to use a 1920x1080(x32) framebuffer
-SAY __|livefb38C|_____________Attempt to use a 2560x1600(x32) framebuffer
+# SAY __|livefb37A|______________Attempt to use a 1280x800(x32) framebuffer
+# SAY __|livefb380|______________Attempt to use a 1400x900(x32) framebuffer
+# SAY __|livefb347|_____________Attempt to use a 1600x1200(x32) framebuffer
+# SAY __|livefb392|_____________Attempt to use a 1920x1080(x32) framebuffer
+# SAY __|livefb38C|_____________Attempt to use a 2560x1600(x32) framebuffer
 menu title __LIVECDLABEL__
 menu background splash.png
 menu color title 1;37;44 #c0ffffff #00000000 std
