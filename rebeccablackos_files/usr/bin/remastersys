@@ -578,6 +578,7 @@ FOO
 iso (){
 
     CREATEISO="`which xorrisofs`"
+    CREATEISOHASEFI=1
     if [ "$CREATEISO" = "" ]; then
         CREATEISO="`which mkisofs`"
         CREATEISOHASEFI=0
@@ -615,27 +616,31 @@ iso (){
     echo $LIVECDURL > $WORKDIR/ISOTMP/.disk/release_notes_url
 
     # Step 7 - Make the EFI bootloader #i386=ia32, x86_64/amd64=x64 arm=arm arm64=aa64
-    
     cd $WORKDIR/efibuild
     if [[ $ARCH == i386 ]]
     then
       EFIARCHPREFIX=ia32
       GRUBARCHPREFIX=i386
-      BUILDEFI=2
+      ARCHHASEFI=1
     elif [[ $ARCH == amd64 ]]
     then
       EFIARCHPREFIX=x64
       GRUBARCHPREFIX=x86_64
-      BUILDEFI=2
+      ARCHHASEFI=1
     else
-      BUILDEFI=0
+      ARCHHASEFI=0
+    fi
+    
+    if [[ $CREATEISOHASEFI == 1 && $ARCHHASEFI == 1 ]]
+    then
+      BUILDEFI=1
     fi
     
     if [[ $BUILDEFI == 1 ]]
     then
       EFIFILENAME=boot$EFIARCHPREFIX.efi
 
-      echo "syslinux_configfile ($root)/isolinux/isolinux.cfg" > ./grub.cfg
+      echo -e "search --set=root --label $LIVECDLABEL\nsyslinux_configfile (\$root)/isolinux/isolinux.cfg" > ./grub.cfg
       grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
 
       IMAGESIZE=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  ))
@@ -670,7 +675,7 @@ iso (){
 
     # Step 8 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR"
-    if [[ $BUILDEFI == 1 && $CREATEISOHASEFI != 0 ]]
+    if [[ $BUILDEFI == 1 ]]
     then
       $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e boot/EFI/grub.efi -no-emul-boot -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
     else
