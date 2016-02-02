@@ -73,6 +73,16 @@ rm -r /usr/share/logs/package_operations/Installs
 #Create folder to hold the install logs
 mkdir -p /usr/share/logs/package_operations/Installs
 
+#Set some variables
+export DEBIAN_ARCH=$(dpkg --print-architecture)
+export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
+
+#Add 64 bit debian packages for grub efi x86
+if [[ $DEBIAN_ARCH == i386 ]]
+then
+dpkg --add-architecture amd64
+fi
+
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
