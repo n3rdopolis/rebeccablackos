@@ -668,6 +668,7 @@ iso (){
 #      echo "terminal_output gfxterm"                                    >> ./grub.cfg
 #      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
 #      echo "set color_normal=white/black"                               >> ./grub.cfg
+#      echo "set gfxpayload=keep"                                        >> ./grub.cfg
       echo "syslinux_configfile (\$root)/isolinux/isolinux.cfg"         >> ./grub.cfg
 
       #Build each supported EFI image
