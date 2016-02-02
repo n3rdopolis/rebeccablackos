@@ -695,6 +695,9 @@ iso (){
       do
         mcopy -i efiboot.img boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi ::/efi/boot
       done
+      
+      mkdir -p $WORKDIR/ISOTMP/boot/EFI/
+      cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
     fi
     
     # Make md5sum.txt for the files on the livecd - this is used during the
@@ -726,7 +729,7 @@ iso (){
     
     # Make the iso hybrid so it can be simply dd copied to a usb flash drive.
     log_msg "Making $CUSTOMISO a hybrid iso"
-    if [[ $BUILDEFI == 1 && $CREATEISOHASEFI != 0 ]]
+    if [[ $BUILDEFI == 1 ]]
     then
       isohybrid -u $WORKDIR/$CUSTOMISO
     else
