@@ -616,30 +616,50 @@ iso (){
     echo $LIVECDURL > $WORKDIR/ISOTMP/.disk/release_notes_url
 
     # Step 7 - Make the EFI bootloader #i386=ia32, x86_64/amd64=x64 arm=arm arm64=aa64
+
+    #Get the current architecture, and set arrays for each architecture the CPU supports. 
+    #(a 32 bit ISO might be started on a 64 bit only EFI, a 64 bit computers have 32 bit only EFIs)
     cd $WORKDIR/efibuild
     if [[ $ARCH == i386 ]]
     then
-      EFIARCHPREFIX=ia32
-      GRUBARCHPREFIX=i386
+      EFIARCHPREFIXES=(ia32 x64)
+      GRUBARCHPREFIXES=(i386 x86_64)
       ARCHHASEFI=1
     elif [[ $ARCH == amd64 ]]
     then
-      EFIARCHPREFIX=x64
-      GRUBARCHPREFIX=x86_64
+      EFIARCHPREFIXES=(ia32 x64)
+      GRUBARCHPREFIXES=(i386 x86_64)
       ARCHHASEFI=1
     else
+      log_msg "The current architecture, $ARCH, either does not support have EFI support, or does not have the prefixes defined in the script"
       ARCHHASEFI=0
     fi
+
+    #determine if the grub files needed for each arch are installed or not
+    INSTALLEDGRUBEFIARCHES=()
+    INSTALLEDEFIARCHPREFIXES=()
+    for (( i=0; i<${#GRUBARCHPREFIXES[@]}; i++ ))
+    do
+        ls /usr/lib/grub/${GRUBARCHPREFIXES[$i]}-efi &>/dev/null
+        if [[ $? == 0 ]]
+        then
+            INSTALLEDGRUBEFIARCHES+=(${GRUBARCHPREFIXES[$i]})
+            INSTALLEDEFIARCHPREFIXES+=(${EFIARCHPREFIXES[$i]})
+        else 
+            echo "EFI Support for ${GRUBARCHPREFIXES[$i]} not installed, skipping"
+        fi
+    done
     
-    if [[ $CREATEISOHASEFI == 1 && $ARCHHASEFI == 1 ]]
+    #If the iso creator supports efi, the cpu architecture supports efi, and there is at least 1 compatible package for grub and EFI, then build EFI
+    if [[ $CREATEISOHASEFI == 1 && $ARCHHASEFI == 1 && ${#INSTALLEDGRUBEFIARCHES[@]} != 0  ]]
     then
       BUILDEFI=1
     fi
     
     if [[ $BUILDEFI == 1 ]]
     then
-      EFIFILENAME=boot$EFIARCHPREFIX.efi
 
+      #Create the config file
       echo "search --set=root --label $LIVECDLABEL"                      > ./grub.cfg
 #      echo "set gfxmode=auto"                                           >> ./grub.cfg
 #      echo "insmod all_video"                                           >> ./grub.cfg
@@ -649,22 +669,31 @@ iso (){
 #      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
 #      echo "set color_normal=white/black"                               >> ./grub.cfg
       echo "syslinux_configfile (\$root)/isolinux/isolinux.cfg"         >> ./grub.cfg
-      grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
 
-      IMAGESIZE=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  ))
+      #Build each supported EFI image
+      IMAGESIZE=0
+      for (( i=0; i<${#INSTALLEDGRUBEFIARCHES[@]}; i++ ))
+      do
+        EFIFILENAME=boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi
+        grub-mkstandalone -o $EFIFILENAME -O ${INSTALLEDGRUBEFIARCHES[$i]}-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
+        (( IMAGESIZE+=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  )) ))
+      done
+
       #Make the number of sectors (with 512b a sector) divisible by 32, by getting the next largest possible size, add a padding of 32*8 sectors, and then get the number of bytes
       IMAGESIZE=$(( ( ($IMAGESIZE/512) + (32 - ($IMAGESIZE/512) %32 ) + 256 ) * 512 ))
       
-      
+      #Create the FAT filesystem
       dd if=/dev/zero of=efiboot.img seek=$IMAGESIZE bs=1 count=0
       #Ensure 512 bytes a sector, use FAT12 as that's what other EFI alt boot images appear to be. The bootloader should at most be a few MB, so FAT12 is fine
       mkfs.vfat efiboot.img -v -S 512 -F 12
       mmd -i efiboot.img ::/efi
       mmd -i efiboot.img ::/efi/boot
-      mcopy -i efiboot.img "$EFIFILENAME" ::/efi/boot
-
-      mkdir -p $WORKDIR/ISOTMP/boot/EFI/
-      cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
+      
+      #Copy all built EFI images to the EFI FAT file system
+      for (( i=0; i<${#INSTALLEDEFIARCHPREFIXES[@]}; i++ ))
+      do
+        mcopy -i efiboot.img boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi ::/efi/boot
+      done
     fi
     
     # Make md5sum.txt for the files on the livecd - this is used during the
