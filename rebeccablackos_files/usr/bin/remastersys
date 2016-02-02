@@ -640,7 +640,16 @@ iso (){
     then
       EFIFILENAME=boot$EFIARCHPREFIX.efi
 
-      echo -e "search --set=root --label $LIVECDLABEL\nsyslinux_configfile (\$root)/isolinux/isolinux.cfg" > ./grub.cfg
+      echo "search --set=root --label $LIVECDLABEL"                      > ./grub.cfg
+      echo "set gfxmode=auto"                                           >> ./grub.cfg
+      echo "insmod efi_gop"                                             >> ./grub.cfg
+      echo "insmod efi_uga"                                             >> ./grub.cfg
+      echo "insmod gfxterm"                                             >> ./grub.cfg
+      echo "insmod png"                                                 >> ./grub.cfg
+      echo "terminal_output gfxterm"                                    >> ./grub.cfg
+      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
+      echo "set color_normal=white/black"                               >> ./grub.cfg
+      echo "syslinux_configfile (\$root)/isolinux/isolinux.cfg"         >> ./grub.cfg
       grub-mkstandalone -o $EFIFILENAME -O $GRUBARCHPREFIX-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
 
       IMAGESIZE=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  ))
