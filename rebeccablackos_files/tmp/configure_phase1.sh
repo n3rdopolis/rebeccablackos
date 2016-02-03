@@ -63,12 +63,6 @@ sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 export DEBIAN_ARCH=$(dpkg --print-architecture)
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
-#Add 64 bit debian packages for grub efi x86
-if [[ $DEBIAN_ARCH == i386 ]]
-then
-dpkg --add-architecture amd64
-fi
-
 #Process the install list into INSTALLS.txt
 INSTALLS_LIST=$(sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt )
 INSTALLS_LIST+=$'\n'
