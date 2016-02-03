@@ -587,7 +587,7 @@ iso (){
     if [ "$CREATEISO" = "" ]; then
         CREATEISO="`which genisoimage`"
         CREATEISOHASEFI=0
-        log_msg "xorrisofs not found. using mkisofs, which may not support EFI on all distribtions"
+        log_msg "xorrisofs not found. using genisoimage, which may not support EFI on all distribtions"
     fi
 
     # check to see if the cd filesystem exists
