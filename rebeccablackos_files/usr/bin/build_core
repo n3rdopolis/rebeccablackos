@@ -338,7 +338,7 @@ function CleanupHG()
 #Function to download hg repos
 function DownloadHG()
 {
-  OLDSOURCEURL=$(cat $SOURCENAME/.hg/hgrc | grep default | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
+  OLDSOURCEURL=$(cat $SOURCENAME/.hg/journal.desc | sed -n '/pull/{n;p}')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
