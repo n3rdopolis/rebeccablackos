@@ -82,8 +82,18 @@ function RunDownloadAndOrBuild
     echo "Must be run as root."
     exit
   fi
+  if [[ -z $SOURCENAME ]]
+  then
+    echo "SOURCENAME Not defined."
+    exit
+  fi
+  
+  rm -rf "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
-  mkdir -p "$HOME"
+
+  mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
   SOURCENAMECHARS="${#SOURCENAME}"
