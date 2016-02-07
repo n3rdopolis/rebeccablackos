@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 patch -f -p0 < /usr/share/RBOS_PATCHES/SDL.diff
 ./autogen.sh 
-./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-shared=no
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
