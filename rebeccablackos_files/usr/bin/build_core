@@ -338,8 +338,8 @@ function CleanupHG()
 #Function to download hg repos
 function DownloadHG()
 {
-  echo -e "[trusted]\nusers = $NONROOTUSER" > "$HOME/.hgrc"
-  OLDSOURCEURL=$(hg paths -R | grep default| awk -F " = " '{print $2}')
+  echo -e "[trusted]\nusers = $NONROOTUSER, root" > "$HOME/.hgrc"
+  OLDSOURCEURL=$(hg paths -R "$SOURCENAME" default)
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
