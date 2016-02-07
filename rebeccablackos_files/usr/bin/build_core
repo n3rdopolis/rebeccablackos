@@ -61,7 +61,6 @@
 export NONROOTUSER=nobody
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
-export HOME="$SOURCEDIR"/buildhome/config
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
 
@@ -83,7 +82,8 @@ function RunDownloadAndOrBuild
     echo "Must be run as root."
     exit
   fi
-  mkdir -p "$SOURCEDIR"/buildhome/config
+  export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+  mkdir -p "$HOME"
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
   SOURCENAMECHARS="${#SOURCENAME}"
@@ -338,7 +338,8 @@ function CleanupHG()
 #Function to download hg repos
 function DownloadHG()
 {
-  OLDSOURCEURL=$(cat $SOURCENAME/.hg/journal.desc | sed -n '/pull/{n;p}')
+  echo -e "[trusted]\nusers = $NONROOTUSER" > "$HOME/.hgrc"
+  OLDSOURCEURL=$(hg paths -R | grep default| awk -F " = " '{print $2}')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
