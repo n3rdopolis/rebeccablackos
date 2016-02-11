@@ -138,7 +138,7 @@ fi
 
 chmod +x "$SCRIPTFOLDERPATH"/externalbuilders/*
 
-echo "Setting up live system..."
+echo "Starting the build process..."
 
 REBUILT="to update"
 
