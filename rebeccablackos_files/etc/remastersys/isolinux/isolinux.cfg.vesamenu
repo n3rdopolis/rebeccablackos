@@ -97,7 +97,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb344
-  menu label Startup with attempting a 1024x768(x32) framebuffer
+  menu label Startup with attempting a 1024x768(x32) framebuffer *
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforcefbdev splash noprompt quiet vga=0x344 --
 TEXT HELP
