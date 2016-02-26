@@ -19,9 +19,9 @@
 #This script is for calling enlightenment nested under a Wayland session.
 . /usr/bin/wlruntime_vars
 export XDG_CURRENT_DESKTOP=GNOME
-export XDG_SESSION_TYPE=x11
+#export XDG_SESSION_TYPE=x11
 unset GDK_BACKEND
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 export WAYLAND_DISPLAY=wayland-$RANDOM
-gnome-shell --wayland --sm-disable
+gnome-shell --wayland --sm-disable --nested
