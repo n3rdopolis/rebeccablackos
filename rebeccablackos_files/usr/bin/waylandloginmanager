@@ -100,7 +100,7 @@ function UserSessionWorker
 
   #Cleanup old log files
   LOGFILECOUNT=0
-  ls -t ~/wlsessionlogs/waylandsession* | while read LOGFILE
+  ls -t ~/wlsessionlogs/waylandsession* 2>/dev/null | while read LOGFILE
   do
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT > 4 ]]
