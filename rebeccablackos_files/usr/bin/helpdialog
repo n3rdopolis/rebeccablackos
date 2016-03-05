@@ -98,3 +98,24 @@ Show Workspaces:	CTRL key + g
 '
 
 fi
+
+
+
+if [[ $SessionName =~ "Hawaii" ]]
+then
+
+  zenity --title="Help" --ellipsize --info --text="
+
+Show Menu:              Super key + space
+Expose:			Super key + s
+Switch Windows:         Super key + Tab
+Show Desktop:           Super key + d
+
+Previous workspace:     Super key + left arrow
+Next workspace:         Super key + right arrow
+
+Lock Screen:            Super key + l
+Logoff Screen:          CTRL + ALT + Delete
+"
+
+fi
