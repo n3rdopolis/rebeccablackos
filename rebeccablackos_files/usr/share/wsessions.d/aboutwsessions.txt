@@ -10,21 +10,24 @@ It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of th
 
 The keys------------------------------
 Enabled:
-A wsession file must also have an key Enabled=1 so that it shows up on the list.
+A wsession file must also have an key Enabled=1 so that it shows up on the list. See line 2 in the example
 It also must have CompositorSupports(BACKEND)=1 for each backend it supports.
 
 Type:
-There must be a key Type=WSession file, so that the .desktop file is known to be a .wsession file. See line 2 in the example
+There must be a key Type=WSession file, so that the .desktop file is known to be a .wsession file. See line 3 in the example
 
 Name:
-The Name key is the name of the wsession, in user friendly string. See line 3 in the example
+The Name key is the name of the wsession, in user friendly string. See line 4 in the example
+
+Comment:
+A short descrition of the wsession, in a user friendly string. See line 5 in the example
 
 CompositorExec:
-The path to the Wayland server binary.
+The path to the Wayland server binary. See line 6 in the example
 
 
 CompositorSupports(BACKEND):
-Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 06, 07, and 08 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
+Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 7, 8, and 9 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
   Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manger.
@@ -37,7 +40,7 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
   If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
 
 Compositor(BACKEND)Arguments:
-If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 09 and 10 on the example below. *These are optional*
+If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 10, 11 and 12 on the example below. *These are optional*
 
 CompositorDisplayArgument:
 This specifies how the compositor is specified what to use for WAYLAND_DISPLAY in weston it is --socket= . waylandloginmanager then automatically appends the session ID after it, so it doesn't need any variables. it only appends it if CompositorDisplayArgument is specified
@@ -47,18 +50,18 @@ This specifies how the compositor is specified what to use for WAYLAND_DISPLAY i
   See line 11 in the example
 
 SessionArgument:
-if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or hawaii shell module opposed to the weston-desktop-shell. See line 11 in the example
+if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or hawaii shell module opposed to the weston-desktop-shell. See line 13 in the example
 
-
-IsFallbackSession:
-This specifies if the current session is a fallback session, so that the session can be handled in a paticular way, for example sessions that use a fullscreen-shell enabled Weston, but to have the host weston server run using the pixman renderer.
 
 AdditionalArguments:
-Any other arguments that should be passed to the server, but are more generic, for example in line 13 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
+Any other arguments that should be passed to the server, but are more generic, for example in line 14 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
 
-NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 14 and 15 in the example
+NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example
 
-EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 16 in the example
+EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example
+
+IsFallbackSession:
+This specifies if the current session is a fallback session, so that the session can be handled in a paticular way. See line 18 in the example
 ----------------------------------------------
 
 An example:
@@ -67,18 +70,20 @@ An example:
 02.|    Enabled=1
 03.|    Type=WSession
 04.|    Name=Default Weston Desktop Shell
-05.|    CompositorExec=/opt/bin/weston
-06.|    CompositorSupportsKMS=1
-07.|    CompositorSupportsFB=1
-08.|    CompositorSupportsWL=0
-09.|    CompositorKMSArguments=--backend=drm-backend.so
-10.|    CompositorFBArguments=--backend=fbdev-backend.so
-11.|    CompositorDisplayArgument=--socket=
-12.|    SessionArgument=--modules=xwayland.so,cms-colord.so
-13.|    AdditionalArguments=--log=$HOME/weston.log
-14.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
-15.|    NeedsFile=/opt/bin/weston
-16.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+05.|    Comment=The Weston Desktop Environment
+06.|    CompositorExec=/opt/bin/weston
+07.|    CompositorSupportsKMS=1
+08.|    CompositorSupportsFB=1
+09.|    CompositorSupportsWL=0
+10.|    CompositorKMSArguments=--backend=drm-backend.so
+11.|    CompositorFBArguments=--backend=fbdev-backend.so
+12.|    CompositorDisplayArgument=--socket=
+13.|    SessionArgument=--modules=xwayland.so,cms-colord.so
+14.|    AdditionalArguments=--log=$HOME/weston.log
+15.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
+16.|    NeedsFile=/opt/bin/weston
+17.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+18.|    IsFallbackSession=0
 ----------------------------------------------
 
 

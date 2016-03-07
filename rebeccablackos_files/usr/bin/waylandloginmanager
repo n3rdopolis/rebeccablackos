@@ -633,6 +633,7 @@ function ChooseSessionType
     #Read all the supported values that are specified in the wsession file
     Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' | cut -d = -f2- | tail -1 )
     SessionName=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- | tail -1 )
+    SessionComment=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Comment" {print $0}' | cut -d = -f2- | tail -1 )
     Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- | tail -1 )
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     for (( element = 0 ; element < ${#SupportedBackends[@]} ; element++ ))
@@ -712,7 +713,8 @@ function ChooseSessionType
       WSESSIONLIST+="$AdditionalArguments"$'\n'
       WSESSIONLIST+="$EnvironmentFile"$'\n'
       WSESSIONLIST+=""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"$'\n'
-      WSESSIONLIST+="$SessionName"
+      WSESSIONLIST+="$SessionName"$'\n'
+      WSESSIONLIST+="$SessionComment"
     fi
   done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
 
@@ -723,7 +725,7 @@ function ChooseSessionType
     PROMPTED=1
     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
-    WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column displayargs --column args --column environment --column backendtype --column name --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" --hide-header 2>/dev/null )
+    WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=550 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column displayargs --column args --column environment --column backendtype --column Name --column Description --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" 2>/dev/null )
     #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
@@ -741,7 +743,7 @@ function ChooseSessionType
     then
       $ZENITYCMD --width=500 --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
     else
-      logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell" -s  >>/var/log/waylandloginmanager 2>&1
     fi
     #There are different commands needed to support different backends
     if [[ $DefaultBackendType == KMS ]]
