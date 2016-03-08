@@ -658,7 +658,7 @@ iso (){
     
     if [[ $BUILDEFI == 1 ]]
     then
-
+      log_msg "Creating GRUB images for EFI boot"
       #Create the config file
       echo "search --set=root --label $LIVECDLABEL"                      > ./grub.cfg
 #      echo "set gfxmode=auto"                                           >> ./grub.cfg
@@ -682,7 +682,8 @@ iso (){
 
       #Make the number of sectors (with 512b a sector) divisible by 32, by getting the next largest possible size, add a padding of 32*8 sectors, and then get the number of bytes
       IMAGESIZE=$(( ( ($IMAGESIZE/512) + (32 - ($IMAGESIZE/512) %32 ) + 256 ) * 512 ))
-      
+
+      log_msg "Creating FAT file system image for EFI boot" 
       #Create the FAT filesystem
       dd if=/dev/zero of=efiboot.img seek=$IMAGESIZE bs=1 count=0
       #Ensure 512 bytes a sector, use FAT12 as that's what other EFI alt boot images appear to be. The bootloader should at most be a few MB, so FAT12 is fine
@@ -700,7 +701,7 @@ iso (){
       cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
     fi
     
-    # Make md5sum.txt for the files on the livecd - this is used during the
+    # Step 8 - Make md5sum.txt for the files on the livecd - this is used during the
     # checking function of the livecd
     log_msg "Creating md5sum.txt for the livecd/dvd"
     cd $WORKDIR/ISOTMP && find . -type f -print0 | xargs -0 md5sum > md5sum.txt
@@ -714,7 +715,7 @@ iso (){
 
     sleep 1
 
-    # Step 8 - Make the ISO file
+    # Step 9 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR"
     if [[ $BUILDEFI == 1 ]]
     then
