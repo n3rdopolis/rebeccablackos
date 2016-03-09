@@ -87,9 +87,6 @@ cp /"$SOURCEDIR"/"$SOURCENAME"/config.h $INSTALLDIR/include/weston
 #turn OFF setuid on weston
 chmod -s $INSTALLDIR/bin/weston
 
-#Apps and weston crash when they can't find the appropriate cursors
-cp -rn /usr/share/icons/whiteglass/cursors/* /usr/share/icons/oxy-white/cursors
-cp /usr/share/icons/oxy-white/cursors/dnd-none /usr/share/icons/oxy-white/cursors/grabbing
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
