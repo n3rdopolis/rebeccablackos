@@ -55,7 +55,7 @@ plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
 plymouth-themes::PART::$DEBIAN_DISTRO == Debian
 ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
-xserver-xorg::FULL
+keyboardconfig::PART
 pulseaudio::FULL
 libasound2-plugins::FULL
 xterm::FULL
@@ -260,7 +260,6 @@ libgnome-desktop-3-12::PART
 libgnome-desktop-3-dev::PART
 libgdm1::PART
 libgdm-dev::PART
-gdm3::PART::$DEBIAN_DISTRO == Debian
 libgoa-1.0-common::PART
 libgoa-1.0-dev::PART
 libgoa-backend-1.0-1::PART
