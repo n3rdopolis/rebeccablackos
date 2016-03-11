@@ -230,12 +230,6 @@ done
 
 apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/autoremoves.log
 
-#Install the reduced packages
-ls /srcbuild/buildoutput/smallpackages | while read DEBFILE
-do
-  dpkg --force-overwrite -i "$DEBFILE"
-done
-
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
