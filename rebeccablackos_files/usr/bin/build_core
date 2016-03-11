@@ -589,9 +589,11 @@ function MakeAndInstall()
     dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | while read FILE
     do
       if [[ -e \"\$FILE\" ]]
-      then
-        touch \"\$FILE\"
-        strip -X \"\$FILE\" 2>/dev/null
+        if [[ \"\$FILE\" == $INSTALLDIR/include/* ]]
+        then
+          touch \"\$FILE\"
+          strip -X \"\$FILE\" 2>/dev/null
+        fi
       fi
     done
     exit 0" > packagereducescript

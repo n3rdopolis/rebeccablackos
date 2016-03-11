@@ -240,33 +240,6 @@ rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 rm /etc/dpkg/dpkg.cfg.d/force-confold
 rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
-#delete larger binary files that are for development, and are not needed on the smaller iso
-rm /opt/bin/Xorg
-rm /opt/bin/Xnest
-rm /opt/bin/rcc
-rm /opt/bin/moc
-rm /opt/bin/qdbusxml2cpp
-rm /opt/bin/qmake
-rm /opt/bin/ctest
-rm /opt/bin/cpack
-rm /opt/bin/ccmake
-rm /opt/bin/cmake
-rm /opt/bin/qdoc
-rm /opt/bin/uic
-rm /opt/bin/qdbuscpp2xml
-rm -r /opt/examples
-rm -r /opt/translations
-
-#Delete all /opt includes
-rm -rf /opt/include
-
-#Reduce binary sizes
-echo "Reducing binary file sizes"
-find /opt/bin /opt/lib /opt/sbin /opt/games | while read FILE
-do
-  strip $FILE 2>/dev/null
-done
-
 #clean more apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
