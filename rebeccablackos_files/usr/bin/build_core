@@ -478,6 +478,7 @@ function GetSourceVersion()
   if [[ $MAKEDEBS == 1 ]]
   then
     mkdir -p "/$SOURCEDIR/buildoutput/versioninfo"
+    mkdir -p "/$SOURCEDIR/buildoutput/smallpackages"
     echo "$REVISIONSTRING" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
     echo 
   fi
@@ -577,10 +578,26 @@ function MakeAndInstall()
     PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     ENDTIME=\$(date +%s)
     echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
+    exit 0
 " > packageinstallscript
 
     #Make the script executable
     chmod +x packageinstallscript
+
+    #Create a script that will be called by checkinstall to build a second deb, with smaller binaries for the smaller ISO
+    echo "#! /bin/bash
+    dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | while read FILE
+    do
+      if [[ -e \"\$FILE\" ]]
+      then
+        touch \"\$FILE\"
+        strip -X \"\$FILE\" 2>/dev/null
+      fi
+    done
+    exit 0" > packagereducescript
+    
+    #Make the script executable
+    chmod +x packagereducescript
 
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
     if [[ $MAKEDEBS == 1 ]]
@@ -621,16 +638,24 @@ function MakeAndInstall()
       #mkdir "/$SOURCEDIR/buildoutput/versionbackup"
       #mv "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/versionbackup"
       rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb
+      rm "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb
       rm *.deb
 
       #create the new deb
       STARTTIME=$(date +%s)
-      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$(date +%s) --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+      PACKAGEDATE=$(date +%s)
+      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
 
-      #copy the resulting deb file into the buildoutput tree.
-      cp *.deb "/$SOURCEDIR/buildoutput/"
+      #move the resulting deb file into the buildoutput tree.
+      mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
+      
+      #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
+      checkinstall -y -D --install=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript
+    
+      #move the resulting deb file into the buildoutput tree.
+      mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
 
       #Create lock file that when removed forces the package to be rebuilt
       touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
