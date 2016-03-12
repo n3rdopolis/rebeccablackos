@@ -544,7 +544,7 @@ function MakeAndInstall()
   done | wc -l)
 
   #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
-  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
     #Call PrepareBuild functions
     PrepareBuild 
