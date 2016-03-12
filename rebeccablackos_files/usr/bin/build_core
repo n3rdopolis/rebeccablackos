@@ -590,7 +590,8 @@ function MakeAndInstall()
     do
       if [[ -e \"\$FILE\" ]]
       then
-        if [[ \"\$FILE\" != $INSTALLDIR/include/* ]]
+        FILETYPE=\$(file -b  \"\$FILE\" 2>/dev/null)
+        [[ \"\$FILE\" != /opt/include/* ]] && [[ \$FILETYPE == \"current ar archive\" && \"\$FILE\" != *.a ]]
         then
           touch \"\$FILE\"
         fi
