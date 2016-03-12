@@ -590,7 +590,7 @@ function MakeAndInstall()
     do
       if [[ -e \"\$FILE\" ]]
       then
-        if [[ \"\$FILE\" == $INSTALLDIR/include/* ]]
+        if [[ \"\$FILE\" != $INSTALLDIR/include/* ]]
         then
           touch \"\$FILE\"
           strip -X \"\$FILE\" 2>/dev/null
