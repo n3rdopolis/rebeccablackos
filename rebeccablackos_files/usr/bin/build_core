@@ -593,7 +593,6 @@ function MakeAndInstall()
         if [[ \"\$FILE\" != $INSTALLDIR/include/* ]]
         then
           touch \"\$FILE\"
-          strip -X \"\$FILE\" 2>/dev/null
         fi
       fi
     done
@@ -656,7 +655,7 @@ function MakeAndInstall()
       
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      checkinstall -y -D --install=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/SmallCheckinstall"
+      checkinstall -y -D --install=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/SmallCheckinstall"
       
