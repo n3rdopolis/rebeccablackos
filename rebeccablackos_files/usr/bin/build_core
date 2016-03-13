@@ -125,6 +125,16 @@ function RunDownloadAndOrBuild
     exit
   fi
 
+  #Install the smaller version of the package
+  if [[ "$ACTION" == installsmallpackage ]]
+  then
+    STARTTIME=$(date +%s)
+    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/SmallDebInstall"
+    ENDTIME=$(date +%s)
+    echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/SmallDebInstall"
+    exit
+  fi
+  
   #Download source, unless the argument passed to the build script is 'build-only'
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then

@@ -230,11 +230,15 @@ done
 
 apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/autoremoves.log
 
+
+#move logs back
+mv /tmp/logs /usr/share
+
 #Install the reduced packages
-ls /srcbuild/buildoutput/smallpackages | while read DEBFILE
-do
-  dpkg --force-overwrite -i /srcbuild/buildoutput/smallpackages/"$DEBFILE"
-done
+compile_all installsmallpackage
+
+#hide buildlogs in tmp from remastersys
+mv /usr/share/logs	/tmp
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
