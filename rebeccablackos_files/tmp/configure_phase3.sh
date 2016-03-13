@@ -233,7 +233,7 @@ apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/
 #Install the reduced packages
 ls /srcbuild/buildoutput/smallpackages | while read DEBFILE
 do
-  dpkg --force-overwrite -i "$DEBFILE"
+  dpkg --force-overwrite -i /srcbuild/buildoutput/smallpackages/"$DEBFILE"
 done
 
 #Reset the utilites back to the way they are supposed to be.
