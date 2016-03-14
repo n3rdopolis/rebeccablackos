@@ -24,6 +24,8 @@ then
   export INSTALLDIR=/opt
 fi
 
+export CFLAGS="-Os" 
+export CXXFLAGS="-Os"
 export TARGETBITSIZE=$(getconf LONG_BIT)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export MAKEFLAGS="-j $(( $(cat /proc/cpuinfo | grep ^"processor" -c) ))"
