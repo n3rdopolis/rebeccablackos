@@ -96,12 +96,13 @@ function RunDownloadAndOrBuild
   mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
   mkdir -p /usr/share/logs/build_core/$SOURCENAME
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
+
+  #create a variable for the package name that is the source name converted to all lower case.
+  export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
+
   SOURCENAMECHARS="${#SOURCENAME}"
   iterator=0
   export SAFESOURCENAME=$(for (( iterator=0; iterator < $SOURCENAMECHARS ; iterator++ ))
-  
-  #create a variable for the package name that is the source name converted to all lower case.
-  export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
   do
     CHAR=$(echo -n ${SOURCENAME:$iterator:1})
     if [[ $CHAR == [a-Z0-9-_] ]]
