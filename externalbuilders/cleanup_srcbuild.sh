@@ -17,6 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
+
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
   HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)

@@ -18,6 +18,7 @@
 echo "PHASE 3"  
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
+
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
