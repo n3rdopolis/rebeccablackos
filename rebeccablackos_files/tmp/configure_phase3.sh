@@ -159,8 +159,8 @@ fi
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /usr/import/* -a /
 
-#delete the import folder
-rm -r /usr/import
+#move the import folder
+mv /usr/import /tmp
 
 #Uninstall the upstream kernel if there is a custom built kernel installed
 if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
@@ -239,6 +239,13 @@ compile_all installsmallpackage
 
 #hide buildlogs in tmp from remastersys
 mv /usr/share/logs	/tmp
+
+#Complie glib schemas
+glib-compile-schemas /opt/share/glib-2.0/schemas 
+
+#copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
+rsync /tmp/import/* -a /
+
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
