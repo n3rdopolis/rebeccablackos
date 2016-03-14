@@ -83,10 +83,9 @@ make
 #Install more includes
 cp /"$SOURCEDIR"/"$SOURCENAME"/include/* $INSTALLDIR/include/SDL2
 #install sdl tests
-find /"$SOURCEDIR"/"$SOURCENAME"/test -executable | while read TEST
-do
-cp "$TEST" /$INSTALLDIR/bin
-done
+cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgl2 $INSTALLDIR/bin
+cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgles $INSTALLDIR/bin
+cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgles2 $INSTALLDIR/bin
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
