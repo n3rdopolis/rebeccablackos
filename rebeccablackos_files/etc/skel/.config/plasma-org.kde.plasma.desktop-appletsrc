@@ -4,11 +4,12 @@ RightButton;NoModifier=org.kde.contextmenu
 wheel:Vertical;NoModifier=org.kde.switchdesktop
 
 [ActionPlugins][1]
-MidButton;NoModifier=org.kde.paste
 RightButton;NoModifier=org.kde.contextmenu
 
-[ActionPlugins][127]
+[ActionPlugins][128]
+MidButton;NoModifier=org.kde.paste
 RightButton;NoModifier=org.kde.contextmenu
+wheel:Vertical;NoModifier=org.kde.switchdesktop
 
 [Containments][1]
 activityId=
@@ -22,6 +23,9 @@ wallpaperplugin=org.kde.image
 [Containments][1][Applets][2]
 immutability=1
 plugin=org.kde.plasma.kickoff
+
+[Containments][1][Applets][2][Configuration][General]
+favorites=preferred://browser,systemsettings.desktop,org.kde.dolphin.desktop,org.kde.kate.desktop
 
 [Containments][1][Applets][2][Configuration][Shortcuts]
 global=Alt+F1
@@ -41,46 +45,18 @@ plugin=org.kde.plasma.taskmanager
 immutability=1
 plugin=org.kde.plasma.systemtray
 
-[Containments][1][Applets][5][Configuration][Containments][8]
-formfactor=2
-location=4
-
-[Containments][1][Applets][5][Configuration][Containments][8][Applets][10]
-immutability=1
-plugin=org.kde.plasma.devicenotifier
-
-[Containments][1][Applets][5][Configuration][Containments][8][Applets][11]
-immutability=1
-plugin=org.kde.plasma.notifications
-
-[Containments][1][Applets][5][Configuration][Containments][8][Applets][12]
-immutability=1
-plugin=org.kde.plasma.battery
-
-[Containments][1][Applets][5][Configuration][Containments][8][Applets][13]
-immutability=1
-plugin=org.kde.plasma.networkmanagement
-
-[Containments][1][Applets][5][Configuration][Containments][8][Applets][9]
-immutability=1
-plugin=org.kde.plasma.clipboard
-
-[Containments][1][Applets][5][Configuration][General]
-extraItems=org.kde.plasma.mediacontroller,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.notifications,org.kde.plasma.battery,org.kde.plasma.networkmanagement
+[Containments][1][Applets][5][Configuration]
+SystrayContainmentId=8
 
 [Containments][1][Applets][6]
 immutability=1
 plugin=org.kde.plasma.digitalclock
 
-[Containments][1][ConfigDialog]
-DialogHeight=78
-DialogWidth=640
-
 [Containments][1][General]
 AppletOrder=2;3;4;5;6
 
-[Containments][8]
-activityId=0745dc1e-8e95-4726-8aaa-0dc823d85edf
+[Containments][7]
+activityId=00000000-0000-0000-0000-000000000000
 formfactor=0
 immutability=1
 lastScreen=0
@@ -88,9 +64,40 @@ location=0
 plugin=org.kde.desktopcontainment
 wallpaperplugin=org.kde.image
 
-[Containments][8][ConfigDialog]
-DialogHeight=648
-DialogWidth=720
+[Containments][7][ConfigDialog]
+DialogHeight=480
+DialogWidth=640
 
-[Containments][8][Wallpaper][org.kde.image][General]
+[Containments][7][Wallpaper][org.kde.image][General]
 Image=file:///usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg
+height=640
+width=1024
+
+[Containments][8]
+activityId=
+formfactor=2
+immutability=1
+lastScreen=-1
+location=4
+plugin=org.kde.plasma.private.systemtray
+wallpaperplugin=org.kde.image
+
+[Containments][8][Applets][10]
+immutability=1
+plugin=org.kde.plasma.clipboard
+
+[Containments][8][Applets][11]
+immutability=1
+plugin=org.kde.plasma.devicenotifier
+
+[Containments][8][Applets][12]
+immutability=1
+plugin=org.kde.plasma.notifications
+
+[Containments][8][Applets][9]
+immutability=1
+plugin=org.kde.plasma.volume
+
+[Containments][8][General]
+extraItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume
+knownItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume
