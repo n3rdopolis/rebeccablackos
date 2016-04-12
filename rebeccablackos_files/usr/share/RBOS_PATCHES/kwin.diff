@@ -1,5 +1,5 @@
 diff --git a/composite.cpp b/composite.cpp
-index c921c87..e1ca12d 100644
+index ef8488f..ad26199 100644
 --- a/composite.cpp
 +++ b/composite.cpp
 @@ -240,9 +240,16 @@ void Compositor::slotCompositingOptionsInitialized()
@@ -36,7 +36,7 @@ index c921c87..e1ca12d 100644
          return;
      }
 diff --git a/compositingprefs.cpp b/compositingprefs.cpp
-index dccb81c..7d7dd80 100644
+index ab7d16f..18b0a69 100644
 --- a/compositingprefs.cpp
 +++ b/compositingprefs.cpp
 @@ -57,6 +57,12 @@ bool CompositingPrefs::openGlIsBroken()
@@ -50,7 +50,7 @@ index dccb81c..7d7dd80 100644
 +    }
 +
      // first off, check whether we figured that we'll crash on detection because of a buggy driver
-     KConfigGroup gl_workaround_group(KSharedConfig::openConfig(), "Compositing");
+     KConfigGroup gl_workaround_group(kwinApp()->config(), "Compositing");
      const QString unsafeKey(QLatin1String("OpenGLIsUnsafe") + (is_multihead ? QString::number(screen_number) : QString()));
 @@ -64,11 +70,6 @@ bool CompositingPrefs::compositingPossible()
          gl_workaround_group.readEntry(unsafeKey, false))
@@ -64,15 +64,10 @@ index dccb81c..7d7dd80 100644
      if (!Xcb::Extensions::self()->isCompositeAvailable()) {
          qCDebug(KWIN_CORE) << "No composite extension available";
          return false;
-
-
-
-
-
-diff --git a/backends/fbdev/scene_qpainter_fb_backend.cpp b/backends/fbdev/scene_qpainter_fb_backend.cpp
+diff --git a/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp b/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
 index 7399bad..d84913b 100644
---- a/backends/fbdev/scene_qpainter_fb_backend.cpp
-+++ b/backends/fbdev/scene_qpainter_fb_backend.cpp
+--- a/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
++++ b/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
 @@ -64,7 +64,7 @@ QImage *FramebufferQPainterBackend::buffer()
  
  bool FramebufferQPainterBackend::needsFullRepaint() const
@@ -82,8 +77,3 @@ index 7399bad..d84913b 100644
  }
  
  void FramebufferQPainterBackend::prepareRenderingFrame()
-
-
-
-
-
