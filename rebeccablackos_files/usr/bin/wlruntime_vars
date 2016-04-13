@@ -57,10 +57,10 @@ export KDE_FULL_SESSION=true
 export KDE_SESSION_VERSION=5
 export KDEHOME="$HOME/.config"
 
-#Change dconf settings only if user is first time run to allow more buttons in gtk titlebars 
+#Set Dconf settings
 if [[ ! -e ~/.config/dconf/user ]]
 then
-  gsettings set org.gnome.desktop.wm.preferences button-layout menu:minimize,maximize,close &>/dev/null
+  dconf load < ~./config/dconfimport.ini
 fi
 
 #Build the KDE configuration database
