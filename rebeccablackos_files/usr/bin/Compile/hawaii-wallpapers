@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=wallpapers
+SOURCENAME=hawaii-wallpapers
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/mauios/wallpapers.git
+SOURCEURL=https://github.com/hawaii-desktop/hawaii-wallpapers.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -71,6 +71,8 @@ function PackageInstallSource()
 {
 mkdir -p $INSTALLDIR/share/backgrounds/hawaii
 cp backgrounds/Also_Calm.png $INSTALLDIR/share/backgrounds/hawaii
+ln -s /usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg $INSTALLDIR/share/backgrounds/hawaii
+ln -s /usr/share/wallpapers/RebeccaBlackOS/Loginsplash.jpg $INSTALLDIR/share/backgrounds/hawaii
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
