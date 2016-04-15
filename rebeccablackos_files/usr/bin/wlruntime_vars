@@ -60,7 +60,7 @@ export KDEHOME="$HOME/.config"
 #Set Dconf settings
 if [[ ! -e ~/.config/dconf/user ]]
 then
-  dconf load < ~./config/dconfimport.ini
+  dconf load < ~/.config/dconfimport.ini
 fi
 
 #Build the KDE configuration database
