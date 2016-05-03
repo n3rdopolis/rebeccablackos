@@ -74,7 +74,7 @@ sed -ie "s/- services/- services\n\ \ - packages/g" settings.conf
 git checkout a2a6d2f2439f400cfa149ff0b36e2e68b2cb171e src/modules/displaymanager/main.py
 patch -p1 < /usr/share/RBOS_PATCHES/calamares.diff
 
-
+sed "s/10'000'000/10000000/g" src/modules/partition/gui/PartitionLabelsView.cpp
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DWITH_PARTITIONMANAGER=1 -DWEBVIEW_FORCE_WEBKIT=1
