@@ -342,6 +342,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
+  export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
   export WAYLAND_DISPLAY=loginmanagerdisplay
@@ -831,7 +832,7 @@ The Login Manager Display is running on tty: $HostVT
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt" 2>/dev/null
+The i icon shows this help prompt"
 
 }
 
