@@ -246,10 +246,10 @@ function PrepareLoginManager
   #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
   SCRIPTPATH=$(readlink -f "$0")
   SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
-  LOCKSCRIPT=$(readlink -f "$(strings -a "/run/waylandloginmanager/$SCRIPTNAME.lock" | sed -n 2p)" )
+  LOCKSCRIPT=$(readlink -f "$(strings -a "/run/waylandloginmanager/$SCRIPTNAME.lock" 2>/dev/null | sed -n 2p)" )
   if [[ "$SCRIPTPATH" != "$LOCKSCRIPT" ]]
   then
-    rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock"
+    rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock" 2>/dev/null
     ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
   else
     logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
@@ -342,7 +342,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
-  export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS
+  export XDG_DATA_DIRS=/opt/share:/usr/share
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
   export WAYLAND_DISPLAY=loginmanagerdisplay
@@ -393,7 +393,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   plymouth hide-splash
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  if [[ $(ls  /dev/dri/card* ) && $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) == 0 ]]
+  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) == 0 ]]
   then 
     logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
     SupportedBackends+=(KMS)
@@ -404,7 +404,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
   fi
   SupportedBackends+=(WL)
-  if [[ $(ls  /dev/fb* ) ]]
+  if [[ $(ls  /dev/fb* 2>/dev/null) ]]
   then
     if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
     then
@@ -468,7 +468,7 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Get the TTY that will hold the Wayland server that displays the login screen.
-  OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay)
+  OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay 2>/dev/null)
   if [[ ! -z $OLDPID ]]
   then
     HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
@@ -966,7 +966,7 @@ function StartUserSession
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   Create_XDG_RUNTIME_DIR $LOGINUSER
   chvt $USERSESSIONTTY &
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   sleep 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
@@ -1241,7 +1241,7 @@ function StartLoginManagerDisplay
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
         chvt $HostVT &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log
+        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
       else
         echo "$DEFAULTWAYLANDSERVER is not executable, or does not exist" #>> /var/log/loginmanagerdisplay.log
       fi
