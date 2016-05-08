@@ -832,7 +832,7 @@ The Login Manager Display is running on tty: $HostVT
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt"
+The i icon shows this help prompt" 2> /var/log/loginmanagerdisplay.log
 
 }
 
@@ -1243,7 +1243,7 @@ function StartLoginManagerDisplay
         chvt $HostVT &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
       else
-        echo "$DEFAULTWAYLANDSERVER is not executable, or does not exist" #>> /var/log/loginmanagerdisplay.log
+        logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     fi
     sleep 1
