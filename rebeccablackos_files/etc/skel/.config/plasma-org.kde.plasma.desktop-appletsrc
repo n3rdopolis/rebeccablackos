@@ -55,8 +55,8 @@ plugin=org.kde.plasma.digitalclock
 [Containments][1][General]
 AppletOrder=2;3;4;5;6
 
-[Containments][7]
-activityId=00000000-0000-0000-0000-000000000000
+[Containments][10]
+activityId=0745dc1e-8e95-4726-8aaa-0dc823d85edf
 formfactor=0
 immutability=1
 lastScreen=0
@@ -64,13 +64,13 @@ location=0
 plugin=org.kde.desktopcontainment
 wallpaperplugin=org.kde.image
 
-[Containments][7][ConfigDialog]
+[Containments][10][ConfigDialog]
 DialogHeight=480
 DialogWidth=640
 
-[Containments][7][Wallpaper][org.kde.image][General]
+[Containments][10][Wallpaper][org.kde.image][General]
 Image=file:///usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg
-height=640
+height=768
 width=1024
 
 [Containments][8]
@@ -88,11 +88,27 @@ plugin=org.kde.plasma.clipboard
 
 [Containments][8][Applets][11]
 immutability=1
-plugin=org.kde.plasma.devicenotifier
+plugin=org.kde.plasma.volume
 
 [Containments][8][Applets][12]
 immutability=1
+plugin=org.kde.plasma.clipboard
+
+[Containments][8][Applets][13]
+immutability=1
+plugin=org.kde.plasma.devicenotifier
+
+[Containments][8][Applets][14]
+immutability=1
 plugin=org.kde.plasma.notifications
+
+[Containments][8][Applets][15]
+immutability=1
+plugin=org.kde.plasma.battery
+
+[Containments][8][Applets][16]
+immutability=1
+plugin=org.kde.plasma.networkmanagement
 
 [Containments][8][Applets][9]
 immutability=1
