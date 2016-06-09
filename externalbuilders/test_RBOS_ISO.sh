@@ -18,6 +18,7 @@
 
 #This is a script for mounting a Ubuntu live CD, and creating a chroot session.
 
+
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
@@ -109,38 +110,9 @@ then
   fi
 fi
 
-#function to find all mountpoints in a subdirectory, and mount them in a new target
-function bindmount_recurse()
-{
-    if [[ -z $1 || -z $2 ]]
-    then
-        echo "Source and target must be specified"
-        return
-    fi
-    findmnt -R $1 -Uln -o target | while read mountpoint
-    do
-        mkdir -p "$2/$mountpoint" 2>/dev/null
-        mount --bind "$mountpoint" "$2/$mountpoint"
-    done
-}
-
-#function to find all mountpoints in a subdirectory, and unmount them 
-function umount_recurse()
-{
-    if [[ -z $1 ]]
-    then
-        echo "Unmount location must be specified"
-        return
-    fi
-    findmnt -R $1 -Uln -o target | tac |while read mountpoint
-    do
-        umount -lf "$mountpoint"
-    done
-}
-
 function mountisoexit() 
 {
-if [[ -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
+if [[ -f "$MOUNTHOME"/liveisotest/online ]]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -159,27 +131,23 @@ then
 
     #don't allow access to the card for the testuser
     #setfacl -x u:$SUDO_UID /dev/dri/card*
+    
+    #Unmount file systems 
 
-    #unmount the filesystems used by the CD
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-    umount_recurse  "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/sys
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/proc
 
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/dev
 
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/dev/pts
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint
+    $NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/isomount
 
-    umount -lf  "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
-
-    fuser -kmM   "$MOUNTHOME"/liveisotest/unionmountpoint 2> /dev/null
-    umount -lfd "$MOUNTHOME"/liveisotest/unionmountpoint
-
-    fuser -kmM   "$MOUNTHOME"/liveisotest/squashfsmount 2> /dev/null
-    umount -lfd "$MOUNTHOME"/liveisotest/squashfsmount
-
-    fuser -kmM  "$MOUNTHOME"/liveisotest/isomount 2> /dev/null
-    umount -lfd "$MOUNTHOME"/liveisotest/isomount
-
+    #Kill the namespace's PID 1
+    kill -9 $ROOTPID
+    rm "$MOUNTHOME"/liveisotest/namespacepid1
+    rm "$MOUNTHOME"/liveisotest/online
 
     if [[ $XALIVE == 0 ]]
     then
@@ -194,8 +162,8 @@ then
       rm -rf "$MOUNTHOME"/liveisotest/overlay
     fi
   fi
-  exit
 fi
+exit
 }
 
 
@@ -219,19 +187,32 @@ fi
 #enter users home directory
 cd "$MOUNTHOME"
 
-mountpoint "$MOUNTHOME"/liveisotest/unionmountpoint
-ismount=$?
+#Get any saved PID from a created namespace, see if the ISO is mounted in the namespace
+ROOTPID=$(cat "$MOUNTHOME"/liveisotest/namespacepid1)
+
+#If the namespace root pid exists, and is stored
+if [[ -e /proc/$ROOTPID && ! -z $ROOTPID ]]
+then
+    #Define the command for entering the namespace now that $ROOTPID is defined
+    NAMESPACE_ENTER="nsenter --mount --target $ROOTPID --pid --target $ROOTPID"
+
+    $NAMESPACE_ENTER mountpoint "$MOUNTHOME"/liveisotest/unionmountpoint
+    ismount=$?
+else
+    ismount=1
+fi
+
 if [ $ismount -eq 0 ]
 then
 
   if [[ $XALIVE == 0 ]]
   then
     zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
-    $TERMCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
-    chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+    $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   fi
   mountisoexit
 fi
@@ -280,12 +261,25 @@ Please specify a path to an ISO as an argument to this script (with quotes aroun
   fi
 fi
 
+#Create the PID and Mount namespaces, pid 1 to sleep forever
+unshare -f --pid --mount --mount-proc sleep infinity &
+UNSHAREPID=$!
+
+#Get the PID of the unshared process, which is pid 1 for the namespace
+ROOTPID=$(pgrep -P $UNSHAREPID)
+echo $ROOTPID > "$MOUNTHOME"/liveisotest/namespacepid1
+
+#Define the command for entering the namespace now that $ROOTPID is defined
+NAMESPACE_ENTER="nsenter --mount --target $ROOTPID --pid --target $ROOTPID"
+
+
+
 #mount the ISO
-mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/isomount
+$NAMESPACE_ENTER mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/isomount
 
 
 #if the iso doesn't have a squashfs image
-if [ ! -f "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs  ]
+if [ $( $NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs )  ]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -295,34 +289,34 @@ then
     read a 
   fi
   #unmount and exit
-  umount "$MOUNTHOME"/liveisotest/isomount
+  $NAMESPACE_ENTER umount "$MOUNTHOME"/liveisotest/isomount
+  killall -9 $ROOT
   exit
 fi
 
 
 #mount the squashfs image
-mount -o loop "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/squashfsmount
+$NAMESPACE_ENTER mount -o loop "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/squashfsmount
 
 #Create the union between squashfs and the overlay
 if [[ $HASOVERLAYFS == 0 ]]
 then
-  unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
+  $NAMESPACE_ENTER unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/overlay=RW:"$MOUNTHOME"/liveisotest/squashfsmount "$MOUNTHOME"/liveisotest/unionmountpoint
 else
   mkdir -p "$MOUNTHOME"/liveisotest/unionwork
-  mount -t overlay overlay -o lowerdir="$MOUNTHOME"/liveisotest/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/overlay,workdir="$MOUNTHOME"/liveisotest/unionwork "$MOUNTHOME"/liveisotest/unionmountpoint
+  $NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/liveisotest/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/overlay,workdir="$MOUNTHOME"/liveisotest/unionwork "$MOUNTHOME"/liveisotest/unionmountpoint
 fi
 
 #bind mount in the critical filesystems
-bindmount_recurse /sys "$MOUNTHOME"/liveisotest/unionmountpoint
+$NAMESPACE_ENTER mount --rbind /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
 
-mount --bind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+$NAMESPACE_ENTER mount --bind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
 
-mount --bind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-mount --bind /dev/pts "$MOUNTHOME"/liveisotest/unionmountpoint/dev/pts
+$NAMESPACE_ENTER mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
 
-mount --bind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
-mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
+$NAMESPACE_ENTER mount --bind /tmp "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
+$NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
+$NAMESPACE_ENTER mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
 #allow all local connections to the xserver
 #xhost +LOCAL:
 
@@ -339,22 +333,24 @@ Type exit to go back to your system"
 fi
 
 #Only configure the systemd if the online file doesn't exist so it is only configured once
-if [[ ! -f "$MOUNTHOME"/liveisotest/unionmountpoint/online ]]
+if [[ ! -f "$MOUNTHOME"/liveisotest/online ]]
 then
+  touch "$MOUNTHOME"/liveisotest/online
+
   #Configure test system
-  mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
-  chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
-  chown $SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
-  ln -s /proc/mounts "$MOUNTHOME"/liveisotest/unionmountpoint/etc/mtab
-  rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
-  cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r sudo
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev,sudo -u $SUDO_UID livetest 
-  mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
+  $NAMESPACE_ENTER mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  $NAMESPACE_ENTER chmod 700 "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  $NAMESPACE_ENTER chown $SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+  $NAMESPACE_ENTER ln -s /proc/mounts "$MOUNTHOME"/liveisotest/unionmountpoint/etc/mtab
+  $NAMESPACE_ENTER rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
+  $NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r sudo
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev,sudo -u $SUDO_UID livetest 
+  $NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
   #give more information in the testuser .bashrc
   echo "
 echo \"
@@ -368,17 +364,16 @@ nested-kdeplasma-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
-Exercise caution. Even some paticular commands run in here can effect your real system.\"" >> "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc
-  echo 'cd $(eval echo ~$LOGNAME)' >> "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc
+Exercise caution. Even some paticular commands run in here can effect your real system.\"" | $NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
+  echo 'cd $(eval echo ~$LOGNAME)' | $NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
 
-  touch "$MOUNTHOME"/liveisotest/unionmountpoint/online
 fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND chroot $NAMESPACE_ENTER "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 else
-  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+  $NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 fi
 
 #go back to the users home folder
