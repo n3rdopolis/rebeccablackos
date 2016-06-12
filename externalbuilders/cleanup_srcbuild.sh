@@ -57,7 +57,7 @@ UNSHAREPID=$!
 ROOTPID=$(pgrep -P $UNSHAREPID)
 
 #Log the PID of the sleep command, so that it can be cleaned up if the script crashes
-echo $ROOTPID >> "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
+echo $ROOTPID > "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
 
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
