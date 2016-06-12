@@ -118,9 +118,9 @@ else
 fi
 
 #mounting critical fses on chrooted fs with bind 
-NAMESPACE_ENTER mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
-NAMESPACE_ENTER mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
-NAMESPACE_ENTER mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+NAMESPACE_ENTER mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+NAMESPACE_ENTER mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+NAMESPACE_ENTER mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 NAMESPACE_ENTER mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
