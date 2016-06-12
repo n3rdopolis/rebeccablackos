@@ -56,6 +56,9 @@ UNSHAREPID=$!
 #Get the PID of the unshared process, which is pid 1 for the namespace
 ROOTPID=$(pgrep -P $UNSHAREPID)
 
+#Log the PID of the sleep command, so that it can be cleaned up if the script crashes
+echo $ROOTPID >> "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
+
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"

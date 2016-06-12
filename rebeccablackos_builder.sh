@@ -54,6 +54,33 @@ else
   SKIPPROMPT=1
 fi
 
+
+#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
+ls $(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile) &> /dev/null
+result=$?
+if [[ $result != 0 || ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile  ]]
+then
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile &> /dev/null
+  "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
+  ln -s /proc/"$$"/cmdline "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
+else
+  echo "Error: Another instance is already running for $BUILDARCH"
+  exit
+fi
+
+#Terminate residual namespace processes
+cat "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist |while read PID
+do
+  PROCCMD=$(ps -p $PID -o cmd --no-headers)
+
+  if [[ "$PROCCMD" == "sleep infinity" ]]
+  then
+    kill -9 $PID
+  fi
+
+done
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist &> /dev/null
+
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
 if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt ]]
 then
@@ -222,6 +249,8 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
