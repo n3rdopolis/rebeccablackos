@@ -20,7 +20,7 @@
 
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
-nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
+  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
 }
 
 MOUNTISO=$(readlink -f $1)
@@ -136,18 +136,6 @@ then
     #don't allow access to the card for the testuser
     #setfacl -x u:$SUDO_UID /dev/dri/card*
     
-    #Unmount file systems 
-
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/sys
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/proc
-
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/dev
-
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/tmp
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint/run/shm
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/unionmountpoint
-    NAMESPACE_ENTER umount -lf "$MOUNTHOME"/liveisotest/isomount
-
     #Kill the namespace's PID 1
     kill -9 $ROOTPID
     rm "$MOUNTHOME"/liveisotest/namespacepid1
@@ -193,7 +181,6 @@ cd "$MOUNTHOME"
 
 #Get any saved PID from a created namespace, see if the ISO is mounted in the namespace
 ROOTPID=$(cat "$MOUNTHOME"/liveisotest/namespacepid1)
-
 #If the namespace root pid exists, and is stored
 if [[ -e /proc/$ROOTPID && ! -z $ROOTPID ]]
 then
@@ -210,7 +197,7 @@ then
   if [[ $XALIVE == 0 ]]
   then
     zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
-    $TERMCOMMAND NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND nsenter --mount --target $ROOTPID --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
@@ -269,7 +256,7 @@ UNSHAREPID=$!
 
 #Get the PID of the unshared process, which is pid 1 for the namespace
 ROOTPID=$(pgrep -P $UNSHAREPID)
-echo $ROOTPID > "$MOUNTHOME"/liveisotest/namespacepid
+echo $ROOTPID > "$MOUNTHOME"/liveisotest/namespacepid1
 
 
 #mount the ISO
@@ -286,8 +273,7 @@ then
     echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
     read a 
   fi
-  #unmount and exit
-  NAMESPACE_ENTER umount "$MOUNTHOME"/liveisotest/isomount
+
   killall -9 $ROOT
   exit
 fi
