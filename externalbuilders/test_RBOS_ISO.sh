@@ -254,8 +254,23 @@ fi
 unshare -f --pid --mount --mount-proc sleep infinity &
 UNSHAREPID=$!
 
-#Get the PID of the unshared process, which is pid 1 for the namespace
-ROOTPID=$(pgrep -P $UNSHAREPID)
+#Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
+#Abort if not started in 1 minute
+for (( element = 0 ; element < 120 ; element++ ))
+do
+  echo $element
+  ROOTPID=$(pgrep -P $UNSHAREPID)
+  if [[ ! -z $ROOTPID ]]
+  then
+    break
+  fi
+  sleep .5
+done
+if [[ ! -z $ROOTPID ]]
+then
+  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+  exit
+fi
 echo $ROOTPID > "$MOUNTHOME"/liveisotest/namespacepid1
 
 
