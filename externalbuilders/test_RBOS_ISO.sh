@@ -264,7 +264,7 @@ NAMESPACE_ENTER mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/isomount
 
 
 #if the iso doesn't have a squashfs image
-if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs )  ]
+if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/isomount/casper/filesystem.squashfs; echo $? ) != 0  ]
 then
   if [[ $XALIVE == 0 ]]
   then
@@ -355,7 +355,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND chroot NAMESPACE_ENTER "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND chroot nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 else
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 fi
