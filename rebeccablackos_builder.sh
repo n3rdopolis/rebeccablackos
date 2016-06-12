@@ -69,16 +69,19 @@ else
 fi
 
 #Terminate residual namespace processes
-PID=$(cat "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist)
-PROCCMD=$(ps -p $PID -o cmd --no-headers)
-
-if [[ "$PROCCMD" == "sleep infinity" ]]
+if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist ]]
 then
-  kill -9 $PID
+  PID=$(cat "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist)
+  PROCCMD=$(ps -p $PID -o cmd --no-headers)
+
+  if [[ "$PROCCMD" == "sleep infinity" ]]
+  then
+    kill -9 $PID
+  fi
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist &> /dev/null
 fi
   
-  
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist &> /dev/null
+
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
 if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt ]]
