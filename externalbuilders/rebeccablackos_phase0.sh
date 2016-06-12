@@ -46,7 +46,6 @@ UNSHAREPID=$!
 #Abort if not started in 1 minute
 for (( element = 0 ; element < 120 ; element++ ))
 do
-  echo $element
   ROOTPID=$(pgrep -P $UNSHAREPID)
   if [[ ! -z $ROOTPID ]]
   then
