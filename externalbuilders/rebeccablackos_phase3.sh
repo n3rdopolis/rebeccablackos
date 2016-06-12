@@ -142,13 +142,13 @@ tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLO
 
 
 #If the live cd did not build then tell user  
-if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ]]
+if [[ $( NAMESPACE_ENTER test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ; echo $? ) != 0 ]]
 then  
   ISOFAILED=1
 else
     NAMESPACE_ENTER mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
 fi 
-if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ]]
+if [[ $( NAMESPACE_ENTER test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ; echo $? ) != 0 ]]
 then  
   ISOFAILED=1
 else
