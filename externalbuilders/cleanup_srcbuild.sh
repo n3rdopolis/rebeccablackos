@@ -49,54 +49,54 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 
+#Create the PID and Mount namespaces, pid 1 to sleep forever
+unshare -f --pid --mount --mount-proc sleep infinity &
+UNSHAREPID=$!
+
+#Get the PID of the unshared process, which is pid 1 for the namespace
+ROOTPID=$(pgrep -P $UNSHAREPID)
+
+#Define the command for entering the namespace now that $ROOTPID is defined
+function NAMESPACE_ENTER {
+  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
+}
+
 #Use phase_1 as the system to cleanup srcbuild
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #bind mount phase1 to the workdir. 
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
   #copy the files to where they belong
-  rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
+  NAMESPACE_ENTER rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 else
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
-#function to find all mountpoints in a subdirectory, and mount them in a new target
-function bindmount_recurse()
-{
-    if [[ -z $1 || -z $2 ]]
-    then
-        echo "Source and target must be specified"
-        return
-    fi
-    findmnt -R $1 -Uln -o target | while read mountpoint
-    do
-        mkdir -p "$2/$mountpoint" 2>/dev/null
-        mount --bind "$mountpoint" "$2/$mountpoint"
-    done
-}
-
 #mounting critical fses on chrooted fs with bind 
-bindmount_recurse /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
-bindmount_recurse /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
-bindmount_recurse /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+NAMESPACE_ENTER mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+NAMESPACE_ENTER mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+NAMESPACE_ENTER mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
 
 #Mount in the folder with previously built debs
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
+NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 
 
 
 #Call compile_all to cleanup srcbuild########################################
-TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
+TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
 if [[ $TARGETBITSIZE == 32 ]]
 then
-  linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
+  NAMESPACE_ENTER linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
 elif [[ $TARGETBITSIZE == 64 ]]
 then
-  linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
+  NAMESPACE_ENTER linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
 else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
+
+#Kill the namespace's PID 1
+kill -9 $ROOTPID

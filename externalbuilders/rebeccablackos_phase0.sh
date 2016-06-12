@@ -38,11 +38,24 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 
+#Create the PID and Mount namespaces, pid 1 to sleep forever
+unshare -f --pid --mount --mount-proc sleep infinity &
+UNSHAREPID=$!
+
+#Get the PID of the unshared process, which is pid 1 for the namespace
+ROOTPID=$(pgrep -P $UNSHAREPID)
+
+#Define the command for entering the namespace now that $ROOTPID is defined
+function NAMESPACE_ENTER {
+  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
+}
+
+
 #Initilize the two systems, Phase1 is the download system, for filling  "$BUILDLOCATION"/build/"$BUILDARCH"/archives and  "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild, and phase2 is the base of the installed system
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
+NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
+NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
 
 #Set the debootstrap dir
 export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
@@ -52,8 +65,8 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
   echo "Setting up chroot for downloading archives and software..."
-  #"$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/ubuntu
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://httpredir.debian.org/debian
+  #NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/ubuntu
+  NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://httpredir.debian.org/debian
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
@@ -66,11 +79,14 @@ if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
 then
   #setup a really basic Ubuntu installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  #"$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/ubuntu
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
+  #NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/ubuntu
+  NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
     touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   fi
 fi
+
+#Kill the namespace's PID 1
+kill -9 $ROOTPID

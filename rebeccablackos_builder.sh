@@ -142,66 +142,6 @@ echo "Starting the build process..."
 
 REBUILT="to update"
 
-#function to find all mountpoints in a subdirectory, and unmount them 
-function umount_recurse()
-{
-    if [[ -z $1 ]]
-    then
-        echo "Unmount location must be specified"
-        return
-    fi
-    findmnt -R $1 -Uln -o target | tac |while read mountpoint
-    do
-        umount -lf "$mountpoint"
-    done
-}
-
-#This function unmounts all known mountpoints created by all of the scripts in externalbuilders
-function UnmountAll()
-{
-#unmount the chrooted procfs from the outside 
-umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
-
-#unmount the chrooted sysfs from the outside
-umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
-
-#unmount the chrooted devfs from the outside 
-umount_recurse "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-
-#unmount the chrooted /run/shm from the outside 
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
-
-#unmount the external archive folder
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
-
-#unmount the debs data
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-
-#unmount the source download folder
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-
-#unmount the cache /var/tmp folder
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-
-#unmount the cache /var/tmp folder
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
-
-#unmount the FS at the workdir and phase 2
-umount -lfd "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-umount -lfd "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
-
-#Terminate processess using files in the build folder for the architecture
-lsof -t +D "$BUILDLOCATION"/build/"$BUILDARCH" |while read PID 
-do 
-kill -9 $PID
-done
-}
-
-
-UnmountAll
-
 #Delete buildoutput based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
@@ -264,16 +204,12 @@ then
     REBUILT="to rebuild from scratch"
   fi
   "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
-  UnmountAll
 fi
 
 #run the build scripts
 "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
-UnmountAll
 "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh  
-UnmountAll
 "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 
-UnmountAll
 
 
 echo "CLEANUP PHASE 3"  
@@ -284,7 +220,6 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
-UnmountAll
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 
 
