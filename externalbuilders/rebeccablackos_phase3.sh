@@ -130,7 +130,7 @@ mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 
 #Export the log files to the location
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/usr/share/logs/"* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
-NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/"* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/." ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
