@@ -265,7 +265,7 @@ do
   fi
   sleep .5
 done
-if [[ ! -z $ROOTPID ]]
+if [[ -z $ROOTPID ]]
 then
   echo "The main namespace process failed to start, in 1 minute. This should not take that long"
   exit
