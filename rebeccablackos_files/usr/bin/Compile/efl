@@ -57,7 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i '/Xprint/d' configure.ac 
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland --enable-egl --with-opengl=es --enable-fb --enable-drm --disable-tslib --enable-drm-hw-accel --enable-systemd --enable-gl-drm
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland --enable-egl --with-opengl=es --enable-fb --enable-drm --disable-tslib --enable-drm-hw-accel --enable-systemd --enable-gl-drm --enable-elput
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
