@@ -68,6 +68,8 @@ function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
 }
 
+#Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
+NAMESPACE_ENTER mount --make-rprivate /
 
 #Initilize the two systems, Phase1 is the download system, for filling  "$BUILDLOCATION"/build/"$BUILDARCH"/archives and  "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild, and phase2 is the base of the installed system
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives

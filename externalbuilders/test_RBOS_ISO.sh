@@ -272,6 +272,8 @@ then
 fi
 echo $ROOTPID > "$MOUNTHOME"/liveisotest/namespacepid1
 
+#Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
+NAMESPACE_ENTER mount --make-rprivate /
 
 #mount the ISO
 NAMESPACE_ENTER mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/isomount

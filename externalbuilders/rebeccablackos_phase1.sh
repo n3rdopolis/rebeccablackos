@@ -76,6 +76,8 @@ function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
 }
 
+#Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
+NAMESPACE_ENTER mount --make-rprivate /
 
 #copy in the files needed
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
