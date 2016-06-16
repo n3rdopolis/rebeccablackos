@@ -30,7 +30,8 @@ cd "$BUILDLOCATION"
 
 echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
 
-
+However, if the script is supsended with CTRL+Z, and then resumed, it may hang sometimes, as the signal to resume may not reach all the processes.
+If this happens, try to suspend and resume it again, to force it to continue.
 "
 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
