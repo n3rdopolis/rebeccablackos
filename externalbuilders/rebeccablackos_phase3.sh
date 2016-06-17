@@ -50,37 +50,8 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 
-#Create the PID and Mount namespaces, pid 1 to sleep forever
-unshare -f --pid --mount --mount-proc sleep infinity &
-UNSHAREPID=$!
-
-#Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
-#Abort if not started in 1 minute
-for (( element = 0 ; element < 120 ; element++ ))
-do
-  ROOTPID=$(pgrep -P $UNSHAREPID)
-  if [[ ! -z $ROOTPID ]]
-  then
-    break
-  fi
-  sleep .5
-done
-if [[ -z $ROOTPID ]]
-then
-  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
-  exit
-fi
-
-#Log the PID of the sleep command, so that it can be cleaned up if the script crashes
-echo $ROOTPID > "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
-
-#Define the command for entering the namespace now that $ROOTPID is defined
-function NAMESPACE_ENTER {
-  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
-}
-
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
-NAMESPACE_ENTER mount --make-rprivate /
+mount --make-rprivate /
 
 #Clean up Phase 3 data.
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
@@ -91,49 +62,49 @@ then
   #Copy phase3 from phase2, and bind mount phase3 at the workdir
   echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
   cp --reflink=auto -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/. "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
-  NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
   #Union mount phase2 and phase3
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_2,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_2,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #mounting critical fses on chrooted fs with bind 
-NAMESPACE_ENTER mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-NAMESPACE_ENTER mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
-NAMESPACE_ENTER mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
-NAMESPACE_ENTER mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
+mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
+mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Mount in the folder with previously built debs
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-NAMESPACE_ENTER mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
-NAMESPACE_ENTER mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
+mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 
 #copy the files to where they belong
-NAMESPACE_ENTER rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
 
 #Handle /usr/import for the creation of the deb file that contains this systems files
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
-NAMESPACE_ENTER rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
-NAMESPACE_ENTER rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import/usr/import
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
+rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import/usr/import
 
 #delete the temp folder
-NAMESPACE_ENTER rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/temp/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/temp/
 
 
 #Configure the Live system########################################
-TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
+TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
 if [[ $TARGETBITSIZE == 32 ]]
 then
-  NAMESPACE_ENTER linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /tmp/configure_phase3.sh
+  linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /tmp/configure_phase3.sh
 elif [[ $TARGETBITSIZE == 64 ]]
 then
-  NAMESPACE_ENTER linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /tmp/configure_phase3.sh
+  linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /tmp/configure_phase3.sh
 else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
@@ -147,11 +118,11 @@ mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 
 #Export the log files to the location
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/usr/share/logs/"* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
-NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/." ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/." ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
-NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
-NAMESPACE_ENTER cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
 
 #Take a snapshot of the source
 rm "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
@@ -159,17 +130,17 @@ tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLO
 
 
 #If the live cd did not build then tell user  
-if [[ $( NAMESPACE_ENTER test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ; echo $? ) != 0 ]]
+if [[ $( test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ; echo $? ) != 0 ]]
 then  
   ISOFAILED=1
 else
-    NAMESPACE_ENTER mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
 fi 
-if [[ $( NAMESPACE_ENTER test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ; echo $? ) != 0 ]]
+if [[ $( test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ; echo $? ) != 0 ]]
 then  
   ISOFAILED=1
 else
-    NAMESPACE_ENTER mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
 fi 
 
 
@@ -185,6 +156,3 @@ then
 else
   echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 fi
-
-#Kill the namespace's PID 1
-kill -9 $ROOTPID

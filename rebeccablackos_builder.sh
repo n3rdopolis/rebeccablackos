@@ -15,7 +15,36 @@
 #
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
+
+#Function to start all arguments as a command in a seperate PID and mount namespace
+function NAMESPACE_EXECUTE {
+  #Create the PID and Mount namespaces to start the command in
+  unshare -f --pid --mount --mount-proc $@ &
+  UNSHAREPID=$!
   
+  #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
+  #Abort if not started in 1 minute
+  for (( element = 0 ; element < 120 ; element++ ))
+  do
+    ROOTPID=$(pgrep -P $UNSHAREPID)
+    if [[ ! -z $ROOTPID ]]
+    then
+      break
+    fi
+    sleep .5
+  done
+  if [[ -z $ROOTPID ]]
+  then
+    echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+    exit
+  fi
+  
+  #Wait for the PID to complete
+  wait $UNSHAREPID
+}
+
 
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
@@ -29,9 +58,6 @@ mkdir -p "$BUILDLOCATION"
 cd "$BUILDLOCATION"
 
 echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
-
-However, if the script is supsended with CTRL+Z, and then resumed, it may hang sometimes, as the signal to resume may not reach all the processes.
-If this happens, try to suspend and resume it again, to force it to continue.
 "
 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
@@ -68,21 +94,6 @@ else
   echo "Error: Another instance is already running for $BUILDARCH"
   exit
 fi
-
-#Terminate residual namespace processes
-if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist ]]
-then
-  PID=$(cat "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist)
-  PROCCMD=$(ps -p $PID -o cmd --no-headers)
-
-  if [[ "$PROCCMD" == "sleep infinity" ]]
-  then
-    kill -9 $PID
-  fi
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist &> /dev/null
-fi
-  
-
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
 if [[ ! -e "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt ]]
@@ -233,13 +244,13 @@ then
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.bak
     REBUILT="to rebuild from scratch"
   fi
-  "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
+  NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
 fi
 
 #run the build scripts
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh  
-"$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 
+NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
+NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh
+NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 
 
 
 echo "CLEANUP PHASE 3"  
@@ -249,7 +260,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
-"$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
+NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 

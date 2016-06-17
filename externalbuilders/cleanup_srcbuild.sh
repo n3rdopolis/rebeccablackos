@@ -49,74 +49,42 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 
-#Create the PID and Mount namespaces, pid 1 to sleep forever
-unshare -f --pid --mount --mount-proc sleep infinity &
-UNSHAREPID=$!
-
-#Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
-#Abort if not started in 1 minute
-for (( element = 0 ; element < 120 ; element++ ))
-do
-  ROOTPID=$(pgrep -P $UNSHAREPID)
-  if [[ ! -z $ROOTPID ]]
-  then
-    break
-  fi
-  sleep .5
-done
-if [[ -z $ROOTPID ]]
-then
-  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
-  exit
-fi
-
-#Log the PID of the sleep command, so that it can be cleaned up if the script crashes
-echo $ROOTPID > "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
-
-#Define the command for entering the namespace now that $ROOTPID is defined
-function NAMESPACE_ENTER {
-  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
-}
-
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
-NAMESPACE_ENTER mount --make-rprivate /
+mount --make-rprivate /
 
 #Use phase_1 as the system to cleanup srcbuild
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #bind mount phase1 to the workdir. 
-  NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
   #copy the files to where they belong
-  NAMESPACE_ENTER rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
+  rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 else
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #mounting critical fses on chrooted fs with bind 
-NAMESPACE_ENTER mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-NAMESPACE_ENTER mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
-NAMESPACE_ENTER mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
+mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 
 #Mount in the folder with previously built debs
-NAMESPACE_ENTER mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 
 
 
 #Call compile_all to cleanup srcbuild########################################
-TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
+TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
 if [[ $TARGETBITSIZE == 32 ]]
 then
-  NAMESPACE_ENTER linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
+  linux32 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
 elif [[ $TARGETBITSIZE == 64 ]]
 then
-  NAMESPACE_ENTER linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
+  linux64 chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/compile_all clean
 else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
-
-#Kill the namespace's PID 1
-kill -9 $ROOTPID

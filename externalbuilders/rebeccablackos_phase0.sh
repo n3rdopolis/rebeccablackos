@@ -38,44 +38,14 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 
-#Create the PID and Mount namespaces, pid 1 to sleep forever
-unshare -f --pid --mount --mount-proc sleep infinity &
-UNSHAREPID=$!
-
-#Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
-#Abort if not started in 1 minute
-for (( element = 0 ; element < 120 ; element++ ))
-do
-  ROOTPID=$(pgrep -P $UNSHAREPID)
-  if [[ ! -z $ROOTPID ]]
-  then
-    break
-  fi
-  sleep .5
-done
-if [[ -z $ROOTPID ]]
-then
-  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
-  exit
-fi
-
-
-#Log the PID of the sleep command, so that it can be cleaned up if the script crashes
-echo $ROOTPID > "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
-
-#Define the command for entering the namespace now that $ROOTPID is defined
-function NAMESPACE_ENTER {
-  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
-}
-
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
-NAMESPACE_ENTER mount --make-rprivate /
+mount --make-rprivate /
 
 #Initilize the two systems, Phase1 is the download system, for filling  "$BUILDLOCATION"/build/"$BUILDARCH"/archives and  "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild, and phase2 is the base of the installed system
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
-NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
-NAMESPACE_ENTER mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
 
 #Set the debootstrap dir
 export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
@@ -85,8 +55,8 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
   echo "Setting up chroot for downloading archives and software..."
-  #NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/ubuntu
-  NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://httpredir.debian.org/debian
+  #"$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://archive.ubuntu.com/ubuntu
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://httpredir.debian.org/debian
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
@@ -99,14 +69,11 @@ if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
 then
   #setup a really basic Ubuntu installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  #NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/ubuntu
-  NAMESPACE_ENTER "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
+  #"$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" vivid "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://archive.ubuntu.com/ubuntu
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
     touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   fi
 fi
-
-#Kill the namespace's PID 1
-kill -9 $ROOTPID
