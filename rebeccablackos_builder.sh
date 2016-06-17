@@ -264,7 +264,6 @@ NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/pidlist
 
 ENDTIME=$(date +%s)
 echo "build finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
