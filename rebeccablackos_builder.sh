@@ -58,6 +58,8 @@ mkdir -p "$BUILDLOCATION"
 cd "$BUILDLOCATION"
 
 echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
+
+
 "
 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')

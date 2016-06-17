@@ -118,7 +118,7 @@ mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 
 #Export the log files to the location
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/usr/share/logs/"* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/." ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/logs/"* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
@@ -130,13 +130,13 @@ tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLO
 
 
 #If the live cd did not build then tell user  
-if [[ $( test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ; echo $? ) != 0 ]]
+if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ]]
 then  
   ISOFAILED=1
 else
     mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
 fi 
-if [[ $( test -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ; echo $? ) != 0 ]]
+if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ]]
 then  
   ISOFAILED=1
 else
