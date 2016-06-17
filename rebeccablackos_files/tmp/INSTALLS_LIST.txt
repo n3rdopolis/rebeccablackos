@@ -55,7 +55,6 @@ plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
 plymouth-themes::PART::$DEBIAN_DISTRO == Debian
 ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
-keyboardconfig::PART
 pulseaudio::FULL
 libasound2-plugins::FULL
 xterm::FULL
@@ -112,7 +111,6 @@ billard-gl::PART
 libavahi-client-dev::PART
 autoconf::PART
 x11proto-kb-dev::PART
-libeigen2-dev::PART
 libeigen3-dev::PART
 libegl1-mesa-dev::PART
 libgles2-mesa-dev::PART
@@ -320,13 +318,13 @@ subversion-tools::PART
 mercurial::PART
 libass5::FULL  
 libass-dev::FULL
-libavutil-ffmpeg55::FULL
+libavutil55::FULL
 libavutil-dev::FULL
-libavcodec-ffmpeg57::FULL
+libavcodec57::FULL
 libavcodec-dev::FULL
-libavformat-ffmpeg57::FULL
+libavformat57::FULL
 libavformat-dev::FULL
-libswscale-ffmpeg4::FULL
+libswscale4::FULL
 libswscale-dev::FULL
 libspectre1::PART
 libspectre-dev::PART
