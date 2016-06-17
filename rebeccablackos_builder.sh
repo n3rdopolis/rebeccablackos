@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+
+#If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
 trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
 
 #Function to start all arguments as a command in a seperate PID and mount namespace
