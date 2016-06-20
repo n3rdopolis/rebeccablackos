@@ -4,6 +4,7 @@ After=
 Conflicts=plymouth-quit-wait.service
 
 [Service]
+#Use TTY63 to support text mode fallback if there is no kernel mode setting or framebuffer support
 ExecStart=/usr/bin/waylandloginmanager
 Restart=always
 IgnoreSIGPIPE=no
