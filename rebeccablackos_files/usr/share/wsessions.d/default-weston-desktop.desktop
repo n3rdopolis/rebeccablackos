@@ -9,6 +9,6 @@ CompositorSupportsFB=1
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorDisplayArgument=--socket=
-SessionArgument=--modules=xwayland.so
+SessionArgument=--modules=xwayland.so,screen-share.so
 AdditionalArguments=
 NeedsFile=/opt/bin/weston
