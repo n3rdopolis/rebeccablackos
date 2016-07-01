@@ -56,7 +56,7 @@ rm -r /usr/share/logs/package_operations/Downloads
 mkdir /usr/share/logs/package_operations/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
-rm /tmp/INSTALLS.txt
+mv /tmp/INSTALLS.txt /tmp/INSTALLS_LIST.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 
 #Set some variables
