@@ -100,9 +100,8 @@ then
   #copy the files to where they belong
   rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 else
-  #Force some files in importdata dir to win
+  #Force /etc/apt/sources.list in the importdata dir to win
   cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/sources.list
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/INSTALLS.txt          "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
   mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
