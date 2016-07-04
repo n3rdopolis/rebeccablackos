@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This file is to build Virtualbox drivers, and install it into Mesa in /opt. It's not supported as it doesn't work. Virtualbox drivers don't support Weston, so only the fbdev-backend can be used
+#This file is to build Virtualbox drivers, and install it into Mesa in /opt.
 
 #Require root privlages
 if [[ $UID != 0 ]]
@@ -25,13 +25,8 @@ then
   exit
 fi
 
-echo "Installing virtualbox additions with this distro is not recommended as they don't appear to support Weston.
-This script is currently unsupported, as the kernel mode setting driver that the virtualbox additions install is NOT compatible with weston. egl fails to initilize, and weston hangs even using pixman.
-
-Virtualbox's framebuffer driver is much more reliable then the Virtualbox Kernel Mode setting drivers, and you are better off using that by configuring with rbos-add-framebuffer
-
-if you still want to install virtualbox addtions andpossibly break weston, remove the exit line from $(readlink -f $0)"
-exit
+#Install kernel headers
+apt-get install linux-headers-$(uname -r)
 
 #Find a virtualbox additions install disk
 VBOXDISK=$(find /dev/disk/by-label/VBOXADDITIONS* | tail -1)
