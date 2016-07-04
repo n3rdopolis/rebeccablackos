@@ -23,7 +23,7 @@ How to use the ISO:
 
   You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script executable, and run the script from a terminal, and pass the path to the ISO file as an argument. You can usually do this by dragging the iso onto the terminal window after the path to the script, and a space. (and selecting paste text if needed)
   
-    It will give you a shell running as a test user account, where you can run the command westonnestedxwaylandcaller. The password for this user account is no password
+    It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system. 
 
     It requires unionfs-fuse,squashfs-tools, dialog and zenity to be installed, all of which the script tries to install automatically by trying to figure out your distro's package manager. It also needs either konsole, gnome-terminal OR xterm. If none of these are installed, it tries to install Xterm. 
  
