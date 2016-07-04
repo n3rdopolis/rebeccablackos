@@ -146,6 +146,7 @@ STARTTIME=$(date +%s)
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
+  rm -rf "$BUILDLOCATION"/debootstrap
   mkdir -p "$BUILDLOCATION"/debootstrap
   FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
 ascii
