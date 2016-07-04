@@ -28,6 +28,12 @@ fi
 #Install kernel headers
 apt-get install linux-headers-$(uname -r)
 
+if [[ ! -e /dev/disk/by-label/VBOXADDITIONS* ]]
+then
+echo "Please add the Virtualbox guest disk to the VM"
+exit
+fi
+
 #Find a virtualbox additions install disk
 VBOXDISK=$(find /dev/disk/by-label/VBOXADDITIONS* | tail -1)
 #Find where a virtualbox additions install disk is mounted
