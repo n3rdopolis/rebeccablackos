@@ -226,7 +226,7 @@ then
   then
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.bak
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
   fi
 
   if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
@@ -246,7 +246,7 @@ then
     rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.bak
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
     REBUILT="to rebuild from scratch"
   fi
   NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
