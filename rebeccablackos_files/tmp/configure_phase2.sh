@@ -54,6 +54,10 @@ echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 #Create _apt user that apt drops to to run things as non-root
 adduser --no-create-home --disabled-password --system --force-badname _apt
 
+#Attempt to repair the dpkg state if it was stopped
+apt-get install -f
+dpkg --configure -a
+
 #Create the correct /etc/resolv.conf symlink
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
