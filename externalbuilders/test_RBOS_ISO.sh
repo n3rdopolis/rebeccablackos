@@ -371,7 +371,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND chroot nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND nsenter --mount --target $ROOTPID --pid --target $ROOTPID chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 else
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 fi
