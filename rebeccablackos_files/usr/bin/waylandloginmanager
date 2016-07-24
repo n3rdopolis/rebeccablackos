@@ -127,6 +127,7 @@ function UserSessionWorker
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
+    export GALLIUM_DRIVER=softpipe
   fi
 
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
@@ -358,6 +359,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
+    export GALLIUM_DRIVER=softpipe
   fi
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
   if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
