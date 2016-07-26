@@ -108,8 +108,9 @@ done
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 touch /tmp/FAILEDDOWNLOADS.txt
-INSTALLS="$(diff -u -N -w1000 /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
-INSTALLS+="$(echo; diff -u10000 -w1000 -N /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt | grep "^ " | cut -c 2- )"
+INSTALLS="$(grep -Fxv /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
+INSTALLS+="
+$(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 INSTALLS+=$'\n'
 
