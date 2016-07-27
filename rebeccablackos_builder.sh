@@ -16,7 +16,12 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-
+#unset most varaibles, except PATH and WAYLAND_HOST and WAYLAND_GUEST
+while read var
+do 
+  unset "$var"
+done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^TERM$" ) 
+  
 #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
 trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
 
