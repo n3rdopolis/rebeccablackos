@@ -105,12 +105,28 @@ do
   fi
 done
 
+#Ensure that the files that are being created exist
+touch /tmp/FAILEDDOWNLOADS.txt
+touch /tmp/INSTALLS.txt
+touch /tmp/INSTALLS.txt.downloadbak
+
+#Cleanup INSTALLS files
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
-touch /tmp/FAILEDDOWNLOADS.txt
-INSTALLS="$(grep -Fxv /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDDOWNLOADS.txt )"
+
+
+#Get list of new packages, compared from the previous run
+INSTALLS="$(grep -Fxv -f /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
+INSTALLS_FAILAPPEND="$INSTALLS"
+
+#Add the FAILEDDOWNLOADS.txt contents to the installs list, insure that the failed package is still set to be installed by INSTALLS_LIST.txt
 INSTALLS+="
 $(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt )"
+
+#log new packages to FAILEDDOWNLOADS.txt, which will then be removed once the download is successful
+echo $INSTALLS_FAILAPPEND >> /tmp/FAILEDDOWNLOADS.txt
+
+#Clear whitespace
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 INSTALLS+=$'\n'
 
