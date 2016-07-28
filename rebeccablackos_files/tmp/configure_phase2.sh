@@ -77,23 +77,35 @@ rm -r /usr/share/logs/package_operations/Installs
 #Create folder to hold the install logs
 mkdir -p /usr/share/logs/package_operations/Installs
 
+#Ensure that the files that are being created exist
+touch /tmp/FAILEDREMOVES.txt
+touch /tmp/FAILEDINSTALLS.txt
+touch /tmp/INSTALLS.txt.installbak
+
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
 sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
-touch /tmp/FAILEDINSTALLS.txt
-diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep -v ::BUILDDEP | grep -v ::REMOVE | grep ^- | grep -v "\---" | cut -c 2- | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
-INSTALLS=$(diff -u -N -w1000 /tmp/FAILEDREMOVES.txt /tmp/INSTALLS.txt | grep ^- | grep -v "\---" | cut -c 2- | awk -F :: '{print $1"::REMOVE"}')
-INSTALLS+="
-$(diff -u -N -w1000 /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | grep ^+ | grep -v +++ | cut -c 2- | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
 
-sort /tmp/INSTALLS.txt        > /tmp/INSTALLS.txt.sorted
-sort /tmp/FAILEDINSTALLS.txt  > /tmp/FAILEDINSTALLS.txt.sorted
+#Get the list of packages to remove, that have been removed from INSTALLS_LIST.txt
+grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak | grep -v ::BUILDDEP | grep -v ::REMOVE | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
+
+#Ensure that all the failed removes that will attempt to be removes again are not actually specified to be installed again in INSTALLS_LIST.txt
+INSTALLS=$(grep -Fxv -f /tmp/INSTALLS.txt /tmp/FAILEDREMOVES.txt | awk -F :: '{print $1"::REMOVE"}')
+
+#Get list of new packages to install, compared from the previous run
+INSTALLS+=$'\n'
+INSTALLS_FAILAPPEND="$(grep -Fxv -f /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+INSTALLS+=$INSTALLS_FAILAPPEND
+
+#Add the FAILEDINSTALLS.txt contents to the installs list, insure that the failed package is still set to be installed by INSTALLS_LIST.txt
 INSTALLS+="
-$(comm -1 -2 /tmp/INSTALLS.txt.sorted /tmp/FAILEDINSTALLS.txt.sorted  )"
-rm /tmp/INSTALLS.txt.sorted
-rm /tmp/FAILEDINSTALLS.txt.sorted
-INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
+$(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt )"
+
+#log new packages to FAILEDINSTALLS.txt, which will then be removed once the download is successful
+echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDINSTALLS.txt
+
+#Add extra newline to INSTALLS list
 INSTALLS+=$'\n'
 
 #DOWNLOAD THE PACKAGES SPECIFIED
