@@ -115,7 +115,7 @@ sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
 
 
-#Get list of new packages, compared from the previous run
+#Get list of new packages to download, compared from the previous run
 INSTALLS="$(grep -Fxv -f /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
 INSTALLS_FAILAPPEND="$INSTALLS"
 
