@@ -150,8 +150,10 @@ STARTTIME=$(date +%s)
 #prepare debootstrap
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
+  echo "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   rm -rf "$BUILDLOCATION"/debootstrap
+  rm "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
   mkdir -p "$BUILDLOCATION"/debootstrap
   FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
 ascii
@@ -196,6 +198,7 @@ REBUILT="to update"
 #Delete buildoutput based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
+  echo "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
   touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
@@ -204,6 +207,7 @@ fi
 #Delete archives based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
 then
+  echo "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
@@ -212,6 +216,7 @@ fi
 #Delete downloaded source based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
 then
+  echo "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
   touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
@@ -223,12 +228,14 @@ then
   #if set to rebuild phase 1
   if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
   then
+    echo "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
   fi
 
   #if set to rebuild phase 2
   if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
   then
+    echo "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
@@ -236,6 +243,7 @@ then
 
   if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
   then
+    echo "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
     #clean up old files
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
