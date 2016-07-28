@@ -124,7 +124,7 @@ INSTALLS+="
 $(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt )"
 
 #log new packages to FAILEDDOWNLOADS.txt, which will then be removed once the download is successful
-echo $INSTALLS_FAILAPPEND >> /tmp/FAILEDDOWNLOADS.txt
+echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDDOWNLOADS.txt
 
 #Clear whitespace
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
