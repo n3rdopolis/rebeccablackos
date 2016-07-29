@@ -95,7 +95,7 @@ INSTALLS=$(grep -Fxv -f /tmp/INSTALLS.txt /tmp/FAILEDREMOVES.txt | awk -F :: '{p
 
 #Get list of new packages to install, compared from the previous run
 INSTALLS+=$'\n'
-INSTALLS_FAILAPPEND="$(grep -Fxv -f /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' | tee -a /tmp/FAILEDINSTALLS.txt )"
+INSTALLS_FAILAPPEND="$(grep -Fxv -f /tmp/INSTALLS.txt.installbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
 INSTALLS+=$INSTALLS_FAILAPPEND
 
 #Add the FAILEDINSTALLS.txt contents to the installs list, insure that the failed package is still set to be installed by INSTALLS_LIST.txt
