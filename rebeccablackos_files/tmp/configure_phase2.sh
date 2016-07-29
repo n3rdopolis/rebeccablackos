@@ -88,7 +88,7 @@ sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
 sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
 
 #Get the list of packages to remove, that have been removed from INSTALLS_LIST.txt
-grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak | grep -v ::BUILDDEP | grep -v ::REMOVE | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
+grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak | grep -v ::REMOVE | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt
 
 #Ensure that all the failed removes that will attempt to be removes again are not actually specified to be installed again in INSTALLS_LIST.txt
 INSTALLS=$(grep -Fxv -f /tmp/INSTALLS.txt /tmp/FAILEDREMOVES.txt | awk -F :: '{print $1"::REMOVE"}')
@@ -125,12 +125,6 @@ do
   then
     echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    Result=${PIPESTATUS[0]}
-  #this is for build dependancies
-  elif [[ $METHOD == "BUILDDEP" ]]
-  then
-    echo "Installing build dependancies for $PACKAGE"                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    apt-get build-dep $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
