@@ -22,6 +22,9 @@ do
   unset "$var"
 done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$" ) 
 export TERM=linux
+PATH=$(getconf PATH):/sbin:/usr/sbin
+export LANG=en_US.UTF-8
+
   
 #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
 trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
