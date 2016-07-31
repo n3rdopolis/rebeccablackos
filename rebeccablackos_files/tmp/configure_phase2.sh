@@ -83,9 +83,9 @@ touch /tmp/FAILEDINSTALLS.txt
 touch /tmp/INSTALLS.txt.installbak
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
-sed -i 's/^ *//;s/ *$//' /tmp/FAILEDREMOVES.txt
-sed -i 's/^ *//;s/ *$//' /tmp/FAILEDINSTALLS.txt
-sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.installbak
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/FAILEDREMOVES.txt
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/FAILEDINSTALLS.txt
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/INSTALLS.txt.installbak
 
 #Get the list of packages to remove, that have been removed from INSTALLS_LIST.txt
 grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak | grep -v ::REMOVE | awk -F "#" '{print $1}' >> /tmp/FAILEDREMOVES.txt

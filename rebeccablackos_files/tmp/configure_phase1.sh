@@ -111,8 +111,9 @@ touch /tmp/INSTALLS.txt
 touch /tmp/INSTALLS.txt.downloadbak
 
 #Cleanup INSTALLS files
-sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt
-sed -i 's/^ *//;s/ *$//' /tmp/INSTALLS.txt.downloadbak
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/FAILEDDOWNLOADS.txt
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/INSTALLS.txt
+sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/INSTALLS.txt.downloadbak
 
 
 #Get list of new packages to download, compared from the previous run
