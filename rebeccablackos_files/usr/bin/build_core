@@ -63,6 +63,7 @@ export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
+export BUILDLOGDIR=/var/log/buildlogs/build_core
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
@@ -94,7 +95,7 @@ function RunDownloadAndOrBuild
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
-  mkdir -p /usr/share/logs/build_core/$SOURCENAME
+  mkdir -p "$BUILDLOGDIR/$SOURCENAME"
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
 
   #create a variable for the package name that is the source name converted to all lower case.
@@ -125,7 +126,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == clean ]]
   then
     cd "$SOURCEDIR"
-    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
   fi
 
@@ -133,9 +134,9 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == installsmallpackage ]]
   then
     STARTTIME=$(date +%s)
-    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/SmallDebInstall"
+    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     ENDTIME=$(date +%s)
-    echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/SmallDebInstall"
+    echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     exit
   fi
   
@@ -457,10 +458,10 @@ function DownloadSource()
   then
     STARTTIME=$(date +%s)
     SetACLPermissions
-    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Cleanup$REPOSITORYTYPE"
-    Download$REPOSITORYTYPE 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
+    Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
     ENDTIME=$(date +%s)
-    echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Download$REPOSITORYTYPE"
+    echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
     echo "#! /bin/bash
     $(declare -f PackageDownloadSource)
@@ -474,9 +475,9 @@ function DownloadSource()
 " > packagedownloadscript
     chmod +x ./packagedownloadscript
     STARTTIME=$(date +%s)
-    $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
     ENDTIME=$(date +%s)
-    echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageDownloadSource"
+    echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
     rm ./packagedownloadscript
   fi
 }
@@ -516,9 +517,9 @@ function PrepareBuild()
   done
 
   STARTTIME=$(date +%s)
-  PackagePrepareBuild 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
+  PackagePrepareBuild 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackagePrepareBuild"
   ENDTIME=$(date +%s)
-  echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackagePrepareBuild"
+  echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackagePrepareBuild"
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
@@ -534,8 +535,15 @@ function MakeAndInstall()
   mkdir -p "$INSTALLDIR/doc"
   mkdir -p "$INSTALLDIR/include"
 
+  
+  #Get all Source 
+  if [[ ! -e /usr/share/build_core_revisions.txt ]]
+  then
+    echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/build_core_revisions.txt
+  fi
+
   #Log the source version
-  GetSourceVersion > "/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion"
+  GetSourceVersion | tee -a /usr/share/build_core_revisions.txt > "$BUILDLOGDIR/$SOURCENAME/GetSourceVersion"
 
   #If the script is set to always rebuild, then detect if the revision info changed.
   if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
@@ -560,9 +568,9 @@ function MakeAndInstall()
 
     #Complile the source
     STARTTIME=$(date +%s)
-    PackageCompileSource 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
+    PackageCompileSource 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackageCompileSource"
     ENDTIME=$(date +%s)
-    echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/PackageCompileSource"
+    echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageCompileSource"
 
     #Empty any possible logs inside the source folder
     rm "/$SOURCEDIR/$SOURCENAME/Logs/"* 
@@ -576,7 +584,8 @@ function MakeAndInstall()
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    touch \"/usr/share/logs/build_core/$SOURCENAME/GetSourceVersion\"
+    mkdir \"/usr/share/buildcore_revisions/\"
+    cp \"$BUILDLOGDIR/$SOURCENAME/GetSourceVersion\" \"/usr/share/buildcore_revisions/$SOURCENAME\"
 
     STARTTIME=\$(date +%s)
     PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
@@ -637,7 +646,7 @@ function MakeAndInstall()
 	then
 	  DEPEND=$(dlocate -S --package-only "$LIBRARY")
 	  echo $DEPEND
-	  echo "$LIBRARY:$DEPEND" >> "/usr/share/logs/build_core/$SOURCENAME/CheckInstallDepends"
+	  echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckInstallDepends"
 	fi
       done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg" | grep -v cmake | grep -v git | grep -v svn | grep -v bzr )
 
@@ -656,18 +665,18 @@ function MakeAndInstall()
       #create the new deb
       STARTTIME=$(date +%s)
       PACKAGEDATE=$(date +%s)
-      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
-      echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/Checkinstall"
+      echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
       #move the resulting deb file into the buildoutput tree.
       mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
       
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      checkinstall -y -D --install=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/SmallCheckinstall"
+      checkinstall -y -D --install=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
-      echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/SmallCheckinstall"
+      echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
       #move the resulting deb file into the buildoutput tree.
       mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
@@ -681,13 +690,13 @@ function MakeAndInstall()
     fi
 
     #Copy the source logs correctly
-    cp "/$SOURCEDIR/$SOURCENAME/Logs/"* /usr/share/logs/build_core/$SOURCENAME/
+    cp "/$SOURCEDIR/$SOURCENAME/Logs/"* "$BUILDLOGDIR/$SOURCENAME/"
 
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
   else
     STARTTIME=$(date +%s)
-    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
+    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/DebInstall"
     ENDTIME=$(date +%s)
-    echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/usr/share/logs/build_core/$SOURCENAME/DebInstall"
+    echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/DebInstall"
   fi
 }

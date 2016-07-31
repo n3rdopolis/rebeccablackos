@@ -179,10 +179,6 @@ fi
 #save the build date of the CD.
 echo "$(date)" > /etc/builddate
 
-#Get all Source 
-echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/build_core_revisions.txt
-cat /usr/share/logs/build_core/*/GetSourceVersion >> /usr/share/build_core_revisions.txt
-
 #start the remastersys job
 remastersys dist
 
