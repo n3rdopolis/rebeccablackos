@@ -23,6 +23,8 @@ then
   exit
 fi
 
+export PACKAGEOPERATIONLOGDIR=/var/logs/buildlogs/package_operations
+
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
@@ -47,13 +49,10 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 yes Y | dselect update
 
 #create folder for install logs
-mkdir -p /usr/share/logs/package_operations
-
-#clean up possible older logs
-rm -r /usr/share/logs/package_operations/Downloads
+mkdir -p "$PACKAGEOPERATIONLOGDIR"
 
 #Create folder to hold the install logs
-mkdir /usr/share/logs/package_operations/Downloads
+mkdir "$PACKAGEOPERATIONLOGDIR"/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 rm /tmp/INSTALLS.txt
@@ -139,17 +138,17 @@ do
   #Partial install
   if [[ $METHOD == "PART" ]]
   then
-    echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
-    echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
-    apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
+    apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   else
-    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Downloads/"$PACKAGE".log
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     Result=1
     METHOD="INVALID OPERATION SPECIFIED"
   fi
@@ -157,7 +156,7 @@ do
   #if the install resut for the current package failed, then log it. If it worked, then remove it from the list of unfinished downloads
   if [[ $Result != 0 ]]
   then
-    echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Downloads/failedpackages.log
+    echo "$PACKAGE failed to $METHOD" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
   else
     echo "$PACKAGE successfully $METHOD"
     grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
@@ -170,12 +169,12 @@ done < <(echo "$INSTALLS")
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates
-apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dist-upgrade.log
+apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dist-upgrade.log
     
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
 dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
 dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-apt-get -d -u dselect-upgrade --no-install-recommends -y --force-yes 	2>&1 |tee -a /usr/share/logs/package_operations/Downloads/dselect-upgrade.log
+apt-get -d -u dselect-upgrade --no-install-recommends -y --force-yes 	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dselect-upgrade.log
 dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 

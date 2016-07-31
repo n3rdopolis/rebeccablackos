@@ -23,6 +23,8 @@ then
   exit
 fi
 
+export PACKAGEOPERATIONLOGDIR=/var/logs/buildlogs/package_operations
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
@@ -181,9 +183,6 @@ echo "$(date)" > /etc/builddate
 echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/build_core_revisions.txt
 cat /usr/share/logs/build_core/*/GetSourceVersion >> /usr/share/build_core_revisions.txt
 
-#hide buildlogs in tmp from remastersys
-mv /usr/share/logs	/tmp
-
 #start the remastersys job
 remastersys dist
 
@@ -202,43 +201,36 @@ echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
 echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #Create a log folder for the remove operations
-mkdir /tmp/logs/package_operations/Removes
+mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
 
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/devpackages.log
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/archdevpackages.log
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdevpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/dbgpackages.log
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/dbgpackages.log
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a /tmp/logs/package_operations/Removes/archdpgpackages.log
+apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=(texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf cpp-5)
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
 do
   REMOVEPACKAGENAME=${REMOVEDEVPGKS[$Iterator]}
-  apt-get purge $REMOVEPACKAGENAME -y --force-yes | tee -a /tmp/logs/package_operations/Removes/$REMOVEPACKAGENAME.log
+  apt-get purge $REMOVEPACKAGENAME -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/$REMOVEPACKAGENAME.log
 done
 
-apt-get autoremove -y --force-yes | tee -a /tmp/logs/package_operations/Removes/autoremoves.log
-
-
-#move logs back
-mv /tmp/logs /usr/share
+apt-get autoremove -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 #Install the reduced packages
 compile_all installsmallpackage
-
-#hide buildlogs in tmp from remastersys
-mv /usr/share/logs	/tmp
 
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
@@ -264,6 +256,3 @@ rm -rf /var/lib/apt/lists/*
 rm -rf /var/lib/dlocate/*
 #start the remastersys job
 remastersys dist
-
-#move logs back
-mv /tmp/logs /usr/share

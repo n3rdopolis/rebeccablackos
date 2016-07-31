@@ -23,6 +23,8 @@ then
   exit
 fi
 
+export PACKAGEOPERATIONLOGDIR=/var/logs/buildlogs/package_operations
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
@@ -71,11 +73,8 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
-#clean up possible older logs
-rm -r /usr/share/logs/package_operations/Installs
-
 #Create folder to hold the install logs
-mkdir -p /usr/share/logs/package_operations/Installs
+mkdir -p "$PACKAGEOPERATIONLOGDIR"/Installs
 
 #Ensure that the files that are being created exist
 touch /tmp/FAILEDREMOVES.txt
@@ -117,20 +116,20 @@ do
   #This is for partial installs
   if [[ $METHOD == "PART" ]]
   then
-    echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #This is for full installs
   elif [[ $METHOD == "FULL" ]]
   then
-    echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
-    echo "Removing $PACKAGE"                                                       	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
-    apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    echo "Removing $PACKAGE"                                                       	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
     if [[ $Result != 0 ]]
     then
@@ -141,7 +140,7 @@ do
       fi
     fi
   else
-    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a /usr/share/logs/package_operations/Installs/"$PACKAGE".log
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=1
     METHOD="INVALID OPERATION SPECIFIED"
   fi
@@ -149,7 +148,7 @@ do
   #if the install resut for the current package failed, then log it. If it worked, then remove it from the list of unfinished installs
   if [[ $Result != 0 ]]
   then
-    echo "$PACKAGE failed to $METHOD" |tee -a /usr/share/logs/package_operations/Installs/failedpackages.log
+    echo "$PACKAGE failed to $METHOD" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
   else
     echo "$PACKAGE successfully $METHOD"
     grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDINSTALLS.txt > /tmp/FAILEDINSTALLS.txt.bak
@@ -182,17 +181,17 @@ do
 done
 
 #install updates
-apt-get dist-upgrade -y --force-yes					2>&1 |tee -a /usr/share/logs/package_operations/Installs/dist-upgrade.log
+apt-get dist-upgrade -y --force-yes					2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_autoremove.log
+apt-get --purge autoremove -y 						2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
 
 #prevent packages removed from the repositories upstream to not make it in the ISOS
 if [[ -f /var/cache/apt/pkgcache.bin ]]
 then
-  aptitude purge ?obsolete -y 						2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
+  aptitude purge ?obsolete -y 						2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 else
-  echo	"Not purging older packages, because apt-get update failed"	2>&1 |tee -a /usr/share/logs/package_operations/Installs/purge_obsolete.log
+  echo	"Not purging older packages, because apt-get update failed"	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
