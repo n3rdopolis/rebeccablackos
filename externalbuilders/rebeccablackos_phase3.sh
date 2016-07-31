@@ -81,12 +81,12 @@ mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
 #copy the files to where they belong
 rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
@@ -120,7 +120,7 @@ ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
 mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 
 #Export the log files to the location
-cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs/* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 

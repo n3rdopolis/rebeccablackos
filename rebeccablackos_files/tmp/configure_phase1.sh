@@ -23,7 +23,7 @@ then
   exit
 fi
 
-export PACKAGEOPERATIONLOGDIR=/var/logs/buildlogs/package_operations
+export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive

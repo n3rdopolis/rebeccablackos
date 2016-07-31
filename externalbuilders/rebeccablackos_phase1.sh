@@ -114,11 +114,11 @@ mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
 
 #Configure the Live system########################################
