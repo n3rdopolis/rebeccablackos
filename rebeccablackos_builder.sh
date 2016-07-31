@@ -199,6 +199,10 @@ echo "Starting the build process..."
 
 REBUILT="to update"
 
+#Delete any stale logs
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+
 #Delete buildoutput based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
@@ -254,6 +258,7 @@ then
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
@@ -284,6 +289,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
 

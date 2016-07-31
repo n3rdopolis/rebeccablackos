@@ -36,12 +36,10 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
-
-#delete old logs
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/usr/share/logs/*
 
 #copy the installs data copied in phase 1 into phase 2 
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt 
@@ -59,7 +57,9 @@ mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
 
 #Bring in needed files.
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt/lists/*

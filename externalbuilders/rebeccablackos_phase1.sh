@@ -46,7 +46,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
-
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
@@ -68,9 +68,6 @@ then
   rm "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt
   touch "$BUILDLOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt
 fi
-
-#delete old logs
-rm -r "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/usr/share/logs/*
 
 #copy the dselect data saved in phase 2 into phase 1
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
@@ -117,10 +114,11 @@ mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 #Mount in the folder with previously built debs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/logs/buildlogs
 
 
 #Configure the Live system########################################
