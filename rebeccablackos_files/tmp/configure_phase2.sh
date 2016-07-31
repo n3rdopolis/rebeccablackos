@@ -104,8 +104,8 @@ $(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDINSTALLS.txt )"
 #log new packages to FAILEDINSTALLS.txt, which will then be removed once the download is successful
 echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDINSTALLS.txt
 
-#Add extra newline to INSTALLS list
-INSTALLS+=$'\n'
+#Clear any empty lines
+INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^::$/d;/^$/d')
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
@@ -163,7 +163,7 @@ do
 
   fi
 
-done < <(echo "$INSTALLS")
+done < <(echo -n "$INSTALLS")
 
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.installbak
 

@@ -128,7 +128,9 @@ echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDDOWNLOADS.txt
 
 #Clear whitespace
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
-INSTALLS+=$'\n'
+
+#Clear any empty lines
+INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^::$/d;/^$/d')
 
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
@@ -163,7 +165,7 @@ do
     cat /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
     rm /tmp/FAILEDDOWNLOADS.txt.bak
   fi
-done < <(echo "$INSTALLS")
+done < <(echo -n "$INSTALLS")
 
 #Save the INSTALLS.txt so that it can be compared with the next run
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
