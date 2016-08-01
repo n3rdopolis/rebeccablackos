@@ -110,7 +110,7 @@ function RunDownloadAndOrBuild
     then
       echo -n $CHAR
     else
-      printf '0x%d' "'$CHAR"
+      printf '\%o' "'$CHAR"
     fi
   done)
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
