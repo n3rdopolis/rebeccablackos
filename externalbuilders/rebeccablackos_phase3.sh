@@ -123,8 +123,8 @@ mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/build_core_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
 
 #Take a snapshot of the source
 rm "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz

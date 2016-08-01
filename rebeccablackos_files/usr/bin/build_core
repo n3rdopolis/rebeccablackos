@@ -537,13 +537,13 @@ function MakeAndInstall()
 
   
   #Get all Source 
-  if [[ ! -e /usr/share/build_core_revisions.txt ]]
+  if [[ ! -e /usr/share/buildcore_revisions.txt ]]
   then
-    echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/build_core_revisions.txt
+    echo "#This script is used to specify the revisions of the repositories which the ISO was built with. See output of the main builder for how to use this file, if you want to build the exact revisions, instead of the latest ones" > /usr/share/buildcore_revisions.txt
   fi
 
   #Log the source version
-  GetSourceVersion | tee -a /usr/share/build_core_revisions.txt > "$BUILDLOGDIR/$SOURCENAME/GetSourceVersion"
+  GetSourceVersion | tee -a /usr/share/buildcore_revisions.txt > "$BUILDLOGDIR/$SOURCENAME/GetSourceVersion"
 
   #If the script is set to always rebuild, then detect if the revision info changed.
   if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
