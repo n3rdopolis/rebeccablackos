@@ -107,6 +107,12 @@ echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDINSTALLS.txt
 #Clear any empty lines
 INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^::$/d;/^$/d')
 
+#Add a newline, only if there is one or more actual lines
+if [[ ! -z $INSTALLS ]]
+then
+INSTALLS+=$'\n'
+fi
+
 #DOWNLOAD THE PACKAGES SPECIFIED
 while read PACKAGEINSTRUCTION
 do
