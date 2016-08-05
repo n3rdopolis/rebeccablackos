@@ -169,7 +169,7 @@ if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
 then
   dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
   do
-    apt-get purge $PACKAGE -y --force-yes 
+    apt-get purge $PACKAGE -y
     #Force initramfs utilites to include the overlay filesystem
     echo overlay >> /etc/initramfs-tools/modules
   done
@@ -202,28 +202,28 @@ mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devpackages.log
+apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdevpackages.log
+apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdevpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/dbgpackages.log
+apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/dbgpackages.log
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v python-dbus-dev | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
+apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=(texlive-base ubuntu-docs gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf cpp-5)
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
 do
   REMOVEPACKAGENAME=${REMOVEDEVPGKS[$Iterator]}
-  apt-get purge $REMOVEPACKAGENAME -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/$REMOVEPACKAGENAME.log
+  apt-get purge $REMOVEPACKAGENAME -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/$REMOVEPACKAGENAME.log
 done
 
-apt-get autoremove -y --force-yes | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
+apt-get autoremove -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 #Install the reduced packages
 compile_all installsmallpackage

@@ -39,7 +39,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect locales acl sudo -y --force-yes 
+apt-get install aptitude git bzr subversion mercurial wget dselect locales acl sudo -y
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
@@ -147,13 +147,13 @@ do
   if [[ $METHOD == "PART" ]]
   then
     echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    apt-get --no-install-recommends install $PACKAGE -d -y --force-yes    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -d -y    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    apt-get install $PACKAGE -d -y --force-yes                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
+    apt-get install $PACKAGE -d -y                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   else
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
@@ -177,12 +177,12 @@ done < <(echo -n "$INSTALLS")
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 
 #Download updates
-apt-get dist-upgrade -d -y --force-yes					2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dist-upgrade.log
+apt-get dist-upgrade -d -y                                              2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dist-upgrade.log
     
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
 dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
 dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-apt-get -d -u dselect-upgrade --no-install-recommends -y --force-yes 	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dselect-upgrade.log
+apt-get -d -u dselect-upgrade --no-install-recommends -y                2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dselect-upgrade.log
 dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 

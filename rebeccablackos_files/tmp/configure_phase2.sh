@@ -64,7 +64,7 @@ dpkg --configure -a
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect locales -y --force-yes 
+apt-get install aptitude git bzr subversion mercurial wget dselect locales -y 
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
@@ -123,19 +123,19 @@ do
   if [[ $METHOD == "PART" ]]
   then
     echo "Installing with partial dependancies for $PACKAGE"                        2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
-    apt-get --no-install-recommends install $PACKAGE -y --force-yes       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get --no-install-recommends install $PACKAGE -y       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #This is for full installs
   elif [[ $METHOD == "FULL" ]]
   then
     echo "Installing with all dependancies for $PACKAGE"                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
-    apt-get install $PACKAGE -y --force-yes                               2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get install $PACKAGE -y                                         2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
     echo "Removing $PACKAGE"                                                       	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
-    apt-get purge $PACKAGE -y --force-yes                                  	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    apt-get purge $PACKAGE -y                                 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
     if [[ $Result != 0 ]]
     then
@@ -183,21 +183,21 @@ fi
 
 dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
 do
-  apt-get purge $PACKAGE -y --force-yes 
+  apt-get purge $PACKAGE -y 
 done
 
 #install updates
-apt-get dist-upgrade -y --force-yes					2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
+apt-get dist-upgrade -y                                                 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove -y 						2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
+apt-get --purge autoremove -y                                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
 
 #prevent packages removed from the repositories upstream to not make it in the ISOS
 if [[ -f /var/cache/apt/pkgcache.bin ]]
 then
-  aptitude purge ?obsolete -y 						2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  aptitude purge ?obsolete -y                                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 else
-  echo	"Not purging older packages, because apt-get update failed"	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  echo	"Not purging older packages, because apt-get update failed"    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
