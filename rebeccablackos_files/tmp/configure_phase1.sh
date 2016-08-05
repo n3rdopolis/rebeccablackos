@@ -135,7 +135,7 @@ INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^::$/d;/^$/d')
 #Add a newline, only if there is one or more actual lines
 if [[ ! -z $INSTALLS ]]
 then
-INSTALLS+=$'\n'
+  INSTALLS+=$'\n'
 fi
 
 #DOWNLOAD THE PACKAGES SPECIFIED
