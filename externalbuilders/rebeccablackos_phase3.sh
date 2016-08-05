@@ -29,7 +29,6 @@ then
   fi
 fi
 
-HOMELOCATION=~
 unset HOME
 
 if [[ -z "$BUILDARCH" || -z $BUILDLOCATION || $UID != 0 ]]
@@ -77,7 +76,7 @@ mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
-#Mount in the folder with previously built debs
+#Bind mount shared directories
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
@@ -112,49 +111,3 @@ else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
 
-
-#Create a date string for unique log folder names
-ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
-
-#Create a folder for the log files with the date string
-mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
-
-#Export the log files to the location
-cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
-rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
-ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
-
-#Take a snapshot of the source
-rm "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
-tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . &>/dev/null
-
-
-#If the live cd did not build then tell user  
-if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom-full.iso ]]
-then  
-  ISOFAILED=1
-else
-    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
-fi 
-if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys/remastersys/custom.iso ]]
-then  
-  ISOFAILED=1
-else
-    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
-fi 
-
-
-#allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-chmod 777 "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-
-#If the live cd did  build then tell user   
-if [[ $ISOFAILED != 1  ]];
-then  
-  echo "Live CD image build was successful."
-else
-  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
-fi

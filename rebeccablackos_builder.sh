@@ -20,12 +20,12 @@
 while read var
 do 
   unset "$var"
-done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$" ) 
+done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" ) 
 export TERM=linux
 PATH=$(getconf PATH):/sbin:/usr/sbin
 export LANG=en_US.UTF-8
+HOMELOCATION=$HOME
 
-  
 #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
 trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
 
@@ -274,24 +274,90 @@ then
   NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
 fi
 
+#Copy all external files before they are used
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+rsync "$SCRIPTFOLDERPATH"/rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
+rsync "$SCRIPTFOLDERPATH"/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
+
+#make the imported files executable 
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+
 #run the build scripts
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 
 
 
-echo "CLEANUP PHASE 3"  
+#Main Build Complete, Extract ISO and logs
 
-#Clean up Phase 3 data.
+
+#Take a snapshot of the source
+rm "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
+tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . &>/dev/null
+
+
+#If the live cd did not build then tell user  
+if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso ]]
+then  
+  ISOFAILED=1
+else
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
+fi 
+if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso ]]
+then  
+  ISOFAILED=1
+else
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
+fi 
+
+
+#allow the user to actually read the iso   
+chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
+chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
+chmod 777 "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
+
+
+echo "Cleaning up non reusable build data..."  
+
+#Clean up.
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/cleanup_srcbuild.sh
+
+
+#Create a date string for unique log folder names
+ENDDATE=$(date +"%Y-%m-%d %H-%M-%S")
+
+#Create a folder for the log files with the date string
+mkdir -p ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+
+#Export the log files to the location
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH""
+rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
+ln -s ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/$ENDDATE "$BUILDARCH"" 
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
+
+
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 
+
+
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
+
+#If the live cd did  build then tell user   
+if [[ $ISOFAILED != 1  ]];
+then  
+  echo "Live CD image build was successful."
+else
+  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Ubuntu, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
+fi
 
 ENDTIME=$(date +%s)
 echo "build of $BUILDARCH finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"

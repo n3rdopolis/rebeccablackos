@@ -51,12 +51,6 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
-#copy in the files needed
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-rsync "$SCRIPTFOLDERPATH"/../rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
-rsync "$SCRIPTFOLDERPATH"/../* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
-
 #Support importing the control file to use fixed revisions of the source code
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/buildcore_revisions.txt
@@ -71,12 +65,6 @@ fi
 
 #copy the dselect data saved in phase 2 into phase 1
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
-
-#make the imported files executable 
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-
 
 if [[ $HASOVERLAYFS == 0 ]]
 then
@@ -111,7 +99,7 @@ mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind /run/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
-#Mount in the folder with previously built debs
+#Bind mount shared directories
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
