@@ -48,6 +48,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
@@ -71,10 +72,10 @@ mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 
-#Mount in the folder with previously built debs
+#Bind mount shared directories
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
 
 #Call compile_all to cleanup srcbuild########################################
