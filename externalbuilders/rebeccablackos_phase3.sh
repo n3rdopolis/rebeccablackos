@@ -53,10 +53,6 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
-#Clean up Phase 3 data.
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
-
-
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #Copy phase3 from phase2, and bind mount phase3 at the workdir

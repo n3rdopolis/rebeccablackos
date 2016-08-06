@@ -199,10 +199,6 @@ echo "Starting the build process..."
 
 REBUILT="to update"
 
-#Delete any stale logs
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-
 #Delete buildoutput based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
@@ -273,6 +269,13 @@ then
   fi
   NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
 fi
+
+#Delete any stale files
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 
 #Copy all external files before they are used
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
@@ -346,7 +349,7 @@ cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
