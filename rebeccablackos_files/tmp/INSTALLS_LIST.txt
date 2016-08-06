@@ -24,14 +24,12 @@ ragel::PART
 check::FULL
 acl::PART
 bash-completion::FULL
-ubuntu-standard::FULL::$DEBIAN_DISTRO == Ubuntu
 seahorse::PART
 alacarte::PART
 nautilus::PART
 gucharmap::PART
 gnome-font-viewer::PART
 gnome-control-center::PART
-libpam-xdg-support::FULL::$DEBIAN_DISTRO == Ubuntu
 libpam-dev::PART
 libacl1::PART
 libacl1-dev::PART
@@ -39,21 +37,15 @@ libattr1::PART
 libattr1-dev::PART
 libcryptsetup4::PART
 libcryptsetup-dev::PART
-policykit-desktop-privileges::PART::$DEBIAN_DISTRO == Ubuntu
 libpolkit-agent-1-dev::PART
 libpolkit-backend-1-dev::PART
 libpolkit-gobject-1-dev::PART
 libpolkit-qt-1-dev::PART
 libsystemd-dev::PART
-libsystemd-id128-dev::PART::$DEBIAN_DISTRO == Ubuntu
-libsystemd-journal-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libarchive13::PART
 libarchive-dev::PART
-plymouth-theme-spinfinity::FULL::$DEBIAN_DISTRO == Ubuntu
-plymouth-theme-kubuntu-text::FULL::$DEBIAN_DISTRO == Ubuntu
 libplymouth-dev::PART
 plymouth-themes::PART::$DEBIAN_DISTRO == Debian
-ubuntu-minimal::FULL::$DEBIAN_DISTRO == Ubuntu
 pulseaudio::FULL
 libasound2-plugins::FULL
 xterm::FULL
@@ -65,15 +57,12 @@ libnm-glib4::PART
 libnm-glib-dev::PART
 libmm14::PART
 libmm-dev::PART
-lupin-casper::PART::$DEBIAN_DISTRO == Ubuntu
 libmysqlclient18::PART
 libmysqlclient-dev::PART
 libsqlite3-dev::PART
 libxapian-dev::PART
 libleveldb1v5::PART
 libleveldb-dev::PART
-language-pack-en::FULL::$DEBIAN_DISTRO == Ubuntu
-linux-generic::FULL::$DEBIAN_DISTRO == Ubuntu
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 thermald::FULL
@@ -150,8 +139,6 @@ libxcb-render-util0::PART
 libxcb-render-util0-dev::PART
 libgstreamer1.0-0::PART
 libgstreamer1.0-dev::PART
-libgstreamer-plugins-good1.0-dev::PART::$DEBIAN_DISTRO == Ubuntu
-libgstreamer-plugins-good1.0-0::PART::$DEBIAN_DISTRO == Ubuntu
 libgstreamer-plugins-bad1.0-0::PART
 libalsaplayer0::PART
 libalsaplayer-dev::PART
@@ -233,7 +220,6 @@ upower::PART
 colord::PART
 libcolord2::PART
 libcolord-dev::PART
-libfreerdp1::PART::$DEBIAN_DISTRO == Ubuntu
 libfreerdp-plugins-standard::PART
 libfreerdp-dev::PART
 libgtk-3-dev::PART
@@ -266,10 +252,6 @@ libgoa-1.0-common::PART
 libgoa-1.0-dev::PART
 libgoa-backend-1.0-1::PART
 libgoa-backend-1.0-dev::PART
-libaccounts-glib0::PART::$DEBIAN_DISTRO == Ubuntu
-libaccounts-glib-dev::PART::$DEBIAN_DISTRO == Ubuntu
-libsignon-glib1::PART::$DEBIAN_DISTRO == Ubuntu
-libsignon-glib-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libdb-dev::PART
 liblmdb0::PART
 liblmdb-dev::PART
@@ -286,8 +268,6 @@ x11proto-record-dev::PART
 x11proto-resource-dev::PART
 x11proto-print-dev::PART
 libxkbfile-dev::PART
-libxp6::PART::$DEBIAN_DISTRO == Ubuntu
-libxp-dev::PART::$DEBIAN_DISTRO == Ubuntu
 libxfont-dev::PART
 libxext-dev::PART
 xserver-xorg-dev::PART
@@ -399,7 +379,6 @@ dnsutils::FULL
 user-setup::FULL
 bind9-host::FULL
 kpartx::FULL
-kpartx-boot::FULL::$DEBIAN_DISTRO == Ubuntu
 pppconfig::FULL
 pppoeconf::FULL
 ufw::FULL
@@ -410,7 +389,6 @@ info::FULL
 libvte-common::PART
 libvte-dev::PART
 apt-clone::FULL
-archdetect-deb::FULL::$DEBIAN_DISTRO == Ubuntu
 lvm2::FULL
 samba-common::FULL
 cifs-utils::FULL
@@ -418,9 +396,6 @@ dmeventd::FULL
 dmraid::FULL
 dpkg-repack::FULL
 libnss3-1d::PART
-ubiquity-frontend-gtk::FULL::$DEBIAN_DISTRO == Ubuntu
-ubiquity-casper::FULL::$DEBIAN_DISTRO == Ubuntu
-ubuntu-standard::FULL::$DEBIAN_DISTRO == Ubuntu
 libparted0-dev::FULL
 libparted2::FULL
 libyaml-cpp-dev::PART
@@ -447,7 +422,6 @@ syslinux-common::PART
 syslinux-utils::PART
 syslinux-efi::PART
 isolinux::PART
-efilinux::PART::$DEBIAN_DISTRO == Ubuntu
 grub2-common::FULL
 grub-efi-ia32-bin::FULL::$DEBIAN_ARCH == i386
 grub-efi-amd64-bin::FULL::$DEBIAN_ARCH == i386
@@ -457,14 +431,11 @@ grub-pc-bin::FULL
 grub-pc::FULL
 live-image-standard::PART
 gnome-icon-theme-symbolic::PART
-adwaita-icon-theme-full::PART::$DEBIAN_DISTRO == Ubuntu
 gnome-themes-standard::FULL::$DEBIAN_DISTRO == Debian
 gnome-settings-daemon::FULL
 oxygen-icon-theme::PART
-oxygen-cursor-theme::PART::$DEBIAN_DISTRO == Ubuntu
 oxygencursors::PART::$DEBIAN_DISTRO == Debian
 fonts-oxygen::PART
-light-themes::PART::$DEBIAN_DISTRO == Ubuntu
 libsdl-ttf2.0-0::PART
 libsdl-ttf2.0-dev::PART
 libphysfs1::PART
