@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#unset most varaibles, except PATH and WAYLAND_HOST and WAYLAND_GUEST
+#unset most varaibles
 while read var
 do 
   unset "$var"
