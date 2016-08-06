@@ -252,10 +252,6 @@ then
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
@@ -276,7 +272,10 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+
 
 #create the folders for the build systems, and for any folder that will be bind mounted in
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
@@ -297,9 +296,7 @@ cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/ex
 chmod +x "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 
 #Copy all external files before they are used
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 rsync "$SCRIPTFOLDERPATH"/rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 rsync "$SCRIPTFOLDERPATH"/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 
 #Support importing the control file to use fixed revisions of the source code
