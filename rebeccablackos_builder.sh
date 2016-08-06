@@ -267,7 +267,7 @@ then
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
     REBUILT="to rebuild from scratch"
   fi
-  NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
+  RUN_PHASE_0=1
 fi
 
 #Delete any stale files
@@ -277,6 +277,21 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
+
+
+#create the folders for the build systems, and for any folder that will be bind mounted in
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+
 
 #Copy all external files before they are used
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
@@ -304,6 +319,10 @@ chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
 #run the build scripts
+if [[ $RUN_PHASE_0 == 1 ]]
+then
+  NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase0.sh
+fi
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase1.sh 
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase2.sh
 NAMESPACE_EXECUTE "$SCRIPTFOLDERPATH"/externalbuilders/rebeccablackos_phase3.sh 

@@ -37,19 +37,6 @@ then
   exit
 fi
 
-#create a folder for the media mountpoints in the media folder
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildoutput
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
