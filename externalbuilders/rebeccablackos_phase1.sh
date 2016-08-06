@@ -51,18 +51,6 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
-#Support importing the control file to use fixed revisions of the source code
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/buildcore_revisions.txt
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/buildcore_revisions.txt
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/tmp/buildcore_revisions.txt
-if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
-then
-  cp "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
-  rm "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
-  touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
-fi
-
 #copy the dselect data saved in phase 2 into phase 1
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
 

@@ -283,6 +283,20 @@ rsync "$SCRIPTFOLDERPATH"/rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/"$BU
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 rsync "$SCRIPTFOLDERPATH"/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 
+#Support importing the control file to use fixed revisions of the source code
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt > /dev/null 2>&1
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/buildcore_revisions.txt > /dev/null 2>&1
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/buildcore_revisions.txt > /dev/null 2>&1
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/tmp/buildcore_revisions.txt > /dev/null 2>&1
+if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/
+  cp "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
+  rm "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
+  touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
+fi
+
+
 #make the imported files executable 
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
