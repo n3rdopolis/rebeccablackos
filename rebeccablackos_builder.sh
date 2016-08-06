@@ -90,6 +90,7 @@ then
   else
     export BUILDARCH=i386
   fi
+  SKIPPROMPT=0
 else 
   SKIPPROMPT=1
 fi
@@ -226,7 +227,8 @@ then
   touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
 fi
 
-#Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets 
+#Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
+RUN_PHASE_0=0
 if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
 then
   #if set to rebuild phase 1
