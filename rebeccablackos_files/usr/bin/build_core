@@ -447,7 +447,7 @@ function DownloadSource()
   #count the number of non-empty debs for this package
   DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -type f -maxdepth 1 | while read DEBFILE
   do
-    dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "GetSourceVersion" 
+    dpkg-deb -c "$DEBFILE" | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" 
   done | wc -l)
 
 
