@@ -663,13 +663,19 @@ function MakeAndInstall()
       #create the new deb
       STARTTIME=$(date +%s)
       PACKAGEDATE=$(date +%s)
-      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
+      checkinstall -y -D --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packageinstallscript 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
       #move the resulting deb file into the buildoutput tree.
       mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
-      
+
+      #Install the newly created deb file
+      STARTTIME=$(date +%s)
+      dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
+      ENDTIME=$(date +%s)
+      echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
+    
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
       checkinstall -y -D --install=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" ./packagereducescript 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
