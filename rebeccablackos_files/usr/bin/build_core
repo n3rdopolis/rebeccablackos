@@ -644,7 +644,7 @@ function MakeAndInstall()
 	then
 	  DEPEND=$(dlocate -S --package-only "$LIBRARY")
 	  echo $DEPEND
-	  echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckInstallDepends"
+	  echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
 	fi
       done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg" | grep -v cmake | grep -v git | grep -v svn | grep -v bzr )
 
