@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This is a script for mounting a Ubuntu live CD, and creating a chroot session.
+#This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
@@ -284,9 +284,9 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/isomount/casper/filesys
 then
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "Invalid CDROM image. Not an Ubuntu based image. Exiting and unmounting the image."
+    zenity --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image."
   else
-    echo "Invalid CDROM image. Not an Ubuntu based image. Press enter."
+    echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
   fi
 
