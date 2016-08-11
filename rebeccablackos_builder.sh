@@ -266,7 +266,7 @@ then
 fi
 
 #Delete any stale files
-echo "Cleaning up any stale remaining files from an incomplete build..."
+echo "Cleaning up any stale remaining files from any incomplete build..."
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
