@@ -508,12 +508,6 @@ function PrepareBuild()
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
 
-  #Delete all .la files as they cause problems
-  find / | grep "\.la$" | while read LAFILE
-  do 
-    rm $LAFILE 2>/dev/null
-  done
-
   STARTTIME=$(date +%s)
   PackagePrepareBuild 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackagePrepareBuild"
   ENDTIME=$(date +%s)
