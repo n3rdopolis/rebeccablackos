@@ -236,10 +236,7 @@ done
 apt-get autoremove -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 #Install the reduced packages
-compile_all installsmallpackage
-
-#Complie glib schemas
-glib-compile-schemas /opt/share/glib-2.0/schemas 
+compile_all installsmallpackage 
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /tmp/import/* -a /
