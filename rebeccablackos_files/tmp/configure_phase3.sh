@@ -105,6 +105,17 @@ then
   chmod +x /usr/sbin/grub-install
 fi
 
+#Fall back to GCC 5 instead of GCC 6
+update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
+update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
+update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
+update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
+update-alternatives --install /usr/bin/cpp cpp-bin /usr/bin/cpp-6 100
+update-alternatives --install /usr/bin/cpp cpp-bin /usr/bin/cpp-5 50
+update-alternatives --set g++ /usr/bin/g++-5
+update-alternatives --set gcc /usr/bin/gcc-5
+update-alternatives --set cpp-bin /usr/bin/cpp-5
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
