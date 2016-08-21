@@ -56,6 +56,8 @@ function NAMESPACE_EXECUTE {
   wait $UNSHAREPID
 }
 
+#Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
+function run_buildprocess {
 
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
@@ -398,3 +400,8 @@ fi
 
 ENDTIME=$(date +%s)
 echo "build of $BUILDARCH finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
+exit
+}
+
+#Start the build process
+run_buildprocess
