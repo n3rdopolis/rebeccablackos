@@ -63,6 +63,7 @@ function PackagePrepareBuild()
 {
 sed -i 's/urxvt/weston-terminal/g' config
 sed -i 's/dmenu_run/bemenu-run/g' config
+sed -i '/Werror/d' CMakeLists.txt
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DSOURCE_WLC=ON
