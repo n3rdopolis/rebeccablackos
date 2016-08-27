@@ -38,6 +38,8 @@ then
 fi
 
 COMPILELIST+="#linux
+cmake
+extra-cmake-modules
 wayland
 wayland-protocols
 drm
@@ -67,8 +69,6 @@ intel-driver
 libinput
 freerdp
 weston
-cmake
-extra-cmake-modules
 qtbase
 qtxmlpatterns
 qtdeclarative
