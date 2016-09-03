@@ -1,0 +1,22 @@
+diff --git a/src/modules/wizard/page_060.c b/src/modules/wizard/page_060.c
+index 84d1402..0b455dd 100644
+--- a/src/modules/wizard/page_060.c
++++ b/src/modules/wizard/page_060.c
+@@ -35,7 +35,7 @@ wizard_page_show(E_Wizard_Page *pg EINA_UNUSED)
+    E_ALIGN(ob, 0, 0.5);
+    elm_box_pack_end(o, ob);
+    elm_object_text_set(ob, _("Whenever a window is clicked"));
+-   elm_radio_state_value_set(ob, 0);
++   elm_radio_state_value_set(ob, 1);
+    elm_radio_value_pointer_set(ob, &focus_mode);
+ 
+    ob = elm_radio_add(o);
+@@ -44,7 +44,7 @@ wizard_page_show(E_Wizard_Page *pg EINA_UNUSED)
+    elm_box_pack_end(o, ob);
+    elm_radio_group_add(ob, rg);
+    elm_object_text_set(ob, _("Whenever the mouse enters a window"));
+-   elm_radio_state_value_set(ob, 1);
++   elm_radio_state_value_set(ob, 0);
+ 
+    e_wizard_page_show(of);
+ //   pg->data = o;
