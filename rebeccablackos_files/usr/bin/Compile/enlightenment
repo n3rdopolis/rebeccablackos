@@ -59,7 +59,6 @@ function PackagePrepareBuild()
 {
 sed -i '/QT_QPA_PLATFORMTHEME/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
-patch -f -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wl-fb --enable-wl-drm --enable-wl-x11 --enable-xwayland --enable-wl-desktop-shell --enable-wayland --with-Xwayland=$INSTALLDIR/bin/Xwayland #--disable-shot --disable-xkbswitch --disable-conf-randr --disable-everything 
 }
 
