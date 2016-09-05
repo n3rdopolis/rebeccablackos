@@ -71,6 +71,7 @@ sed -i '/initcpio/d' settings.conf
 sed -i '/localecfg/d' settings.conf
 sed -i '/owncloud/d' settings.conf
 sed -ie "s/- services/- services\n\ \ - packages/g" settings.conf
+sed -ie "s/  - kdm/  - kdm\n  - waylandloginmanager/g" src/modules/displaymanager/displaymanager.conf
 git checkout a2a6d2f2439f400cfa149ff0b36e2e68b2cb171e src/modules/displaymanager/main.py
 patch -p1 < /usr/share/RBOS_PATCHES/calamares.diff
 
