@@ -1,5 +1,5 @@
 diff --git a/src/modules/displaymanager/main.py b/src/modules/displaymanager/main.py
-index b5a9dbb..0192bdd 100644
+index b5a9dbb..31cf776 100644
 --- a/src/modules/displaymanager/main.py
 +++ b/src/modules/displaymanager/main.py
 @@ -88,197 +88,22 @@ def set_autologin(username, displaymanagers, default_desktop_environment, root_m
@@ -96,16 +96,7 @@ index b5a9dbb..0192bdd 100644
 -                        line = "AutoLoginUser={!s}\n".format(username)
 -
 -                    kdm_conf.write(line)
-+        os.mknod(waylandloginmanager_conf_path)
-+        if os.path.exists(waylandloginmanager_conf_path):
-+          with open(waylandloginmanager_conf_path, 'w') as waylandloginmanager_conf:
-+             if do_autologin:
-+                  line = "autologin-user={!s}\n".format(username)
-+             else:
-+                  line = "#autologin-user=\n"
-+
-+             waylandloginmanager_conf.write(line)
-         else:
+-        else:
 -            return "Cannot write KDM configuration file", "KDM config file {!s} does not exist".format(kdm_conf_path)
 -
 -    if "lxdm" in displaymanagers:
@@ -169,13 +160,21 @@ index b5a9dbb..0192bdd 100644
 -                            line = 'auto_login yes\n'
 -                        else:
 -                            line = 'auto_login no\n'
-+            return "Cannot write waylandloginmanager configuration file", "waylandloginmanager config file {!s} does not exist".format(waylandloginmanager_conf_path)
- 
+-
 -                    if do_autologin and 'default_user' in line:
 -                        line = "default_user {!s}\n".format(username)
 -
 -                    slim_conf.write(line)
--        else:
++        os.mknod(waylandloginmanager_conf_path)
++        if os.path.exists(waylandloginmanager_conf_path):
++          with open(waylandloginmanager_conf_path, 'w') as waylandloginmanager_conf:
++             if do_autologin:
++                  line = "autologin-user={!s}\n".format(username)
++             else:
++                  line = "#autologin-user=\n"
++
++             waylandloginmanager_conf.write(line)
+         else:
 -            return "Cannot write SLIM configuration file", "SLIM config file {!s} does not exist".format(slim_conf_path)
 -
 -    if "sddm" in displaymanagers:
@@ -191,7 +190,8 @@ index b5a9dbb..0192bdd 100644
 -
 -        with open(sddm_conf_path, 'r') as sddm_conf:
 -            text = sddm_conf.readlines()
--
++            return "Cannot write waylandloginmanager configuration file", "waylandloginmanager config file {!s} does not exist".format(waylandloginmanager_conf_path)
+ 
 -        with open(sddm_conf_path, 'w') as sddm_conf:
 -            for line in text:
 -                # User= line, possibly commented out
@@ -213,7 +213,18 @@ index b5a9dbb..0192bdd 100644
  
      return None
  
-@@ -316,117 +141,13 @@ def run():
+@@ -294,8 +119,8 @@ def run():
+     if "displaymanagers" in libcalamares.job.configuration:
+         displaymanagers = libcalamares.job.configuration["displaymanagers"]
+ 
+-    if libcalamares.globalstorage.contains("displaymanagers"):
+-        displaymanagers = libcalamares.globalstorage.value("displaymanagers")
++    if libcalamares.globalstorage.contains("displayManagers"):
++        displaymanagers = libcalamares.globalstorage.value("displayManagers")
+ 
+     if displaymanagers is None:
+         return "No display managers selected for the displaymanager module.", \
+@@ -316,121 +141,19 @@ def run():
      else:
          enable_basic_setup = False
  
@@ -250,7 +261,11 @@ index b5a9dbb..0192bdd 100644
 -            if default_desktop_environment is not None:
 -                os.system("sed -i -e \"s/^.*user-session=.*/user-session={!s}/\" {!s}/etc/lightdm/lightdm.conf".format(
 -                          default_desktop_environment.desktop_file, root_mount_point))
--        else:
++    # setup waylandloginmanager
++    if "waylandloginmanager" in displaymanagers:
++        if have_dm("waylandloginmanager", root_mount_point):
++            libcalamares.utils.debug("Waylandloginmanager found")
+         else:
 -            libcalamares.utils.debug("lightdm selected but not installed")
 -            displaymanagers.remove("lightdm")
 -
@@ -325,11 +340,7 @@ index b5a9dbb..0192bdd 100644
 -                                                    '/var/lib/kdm', '-s', '/bin/false', '-r', '-M', 'kdm'])
 -
 -                libcalamares.utils.chroot_call(['chown', '-R', '135:135', 'var/lib/kdm'])
-+    # setup waylandloginmanager
-+    if "waylandloginmanager" in displaymanagers:
-+        if have_dm("waylandloginmanager", root_mount_point):
-+            libcalamares.utils.debug("Waylandloginmanager found")
-         else:
+-        else:
 -            libcalamares.utils.debug("kdm selected but not installed")
 -            displaymanagers.remove("kdm")
 +            libcalamares.utils.debug("waylandloginmanager selected but not installed")
@@ -337,3 +348,9 @@ index b5a9dbb..0192bdd 100644
  
      if username is not None:
          libcalamares.utils.debug("Setting up autologin for user {!s}.".format(username))
+     else:
+         libcalamares.utils.debug("Unsetting autologin.")
+ 
++    libcalamares.globalstorage.insert("displayManagers", displaymanagers)
++
+     return set_autologin(username, displaymanagers, default_desktop_environment, root_mount_point)
