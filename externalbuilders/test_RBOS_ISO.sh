@@ -152,6 +152,7 @@ then
     if [ $deleteanswer -eq 1 ]
     then 
       rm -rf "$MOUNTHOME"/liveisotest/overlay
+      rm "$MOUNTHOME"/liveisotest/firstrun
     fi
   fi
 fi
@@ -332,10 +333,10 @@ else
 Type exit to go back to your system"
 fi
 
-#Only configure the systemd if the online file doesn't exist so it is only configured once
-if [[ ! -f "$MOUNTHOME"/liveisotest/online ]]
+#Only configure the system once
+if [[ ! -f "$MOUNTHOME"/liveisotest/firstrun ]]
 then
-  touch "$MOUNTHOME"/liveisotest/online
+  touch "$MOUNTHOME"/liveisotest/firstrun
 
   #Configure test system
   NAMESPACE_ENTER mkdir -p  "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
@@ -349,8 +350,6 @@ then
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r sudo
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/sbin/useradd -g livetest -m -p $(cat /etc/shadow|grep ^$SUDO_USER: | awk -F : '{print $2}') -s /bin/bash -G admin,plugdev,sudo -u $SUDO_UID livetest 
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
   #give more information in the testuser .bashrc
   echo "
 echo \"
@@ -367,6 +366,13 @@ If this terminal program that is running in this window supports tabs, any new t
 Exercise caution. Even some paticular commands run in here can effect your real system.\"" | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
   echo 'cd $(eval echo ~$LOGNAME)' | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
 
+  
+if [[ ! -f "$MOUNTHOME"/liveisotest/online ]]
+then
+  touch "$MOUNTHOME"/liveisotest/online
+
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
 fi
 
 if [[ $XALIVE == 0 ]]
