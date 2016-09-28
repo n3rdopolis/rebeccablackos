@@ -63,7 +63,7 @@ function PackagePrepareBuild()
 {
 cp -a /usr/share/RBOS_PATCHES/calamares/* .
 sed -i 's/usr/opt/g' calamares.desktop
-sed -i "s|^Exec=*|Exec=xhost +SI:localuser:root; wlsudo xwaylandapp /opt/bin/calamares\n|g" calamares.desktop
+sed -i "s|^Exec=*|Exec=xhost +SI:localuser:root; wlsudo /opt/bin/calamares\n|g" calamares.desktop
 sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
 sed -i 's/Name=Calamares/Name=Install RebeccaBlackOS/g' calamares.desktop
 sed -i '/initramfs/c\  - initramfs' settings.conf 
