@@ -185,6 +185,10 @@ rsync /usr/import/* -a /
 #move the import folder
 mv /usr/import /tmp
 
+#Add nls modules to the initramfs
+echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
+chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules
+
 #Uninstall the upstream kernel if there is a custom built kernel installed
 if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
 then
