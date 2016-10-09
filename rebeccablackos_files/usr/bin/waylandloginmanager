@@ -552,34 +552,41 @@ function RegisterSession
   IFS='@'
   ArraySessionData=($RegisterData)
   unset IFS
+  RegisterType=${ArraySessionData[0]}
   if [[ ! -z $RegisterData ]]
   then
-    logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
-    #Add the session data to the arrays that store info about the sessions.
-    SessionTTY=${ArraySessionData[0]}
-    SessionPID=${ArraySessionData[1]}
-    SessionUser=${ArraySessionData[2]}
-    SessionID=${ArraySessionData[3]}
-    AllSessionTTYs[$AllSessions]=$SessionTTY
-    AllSessionPIDs[$AllSessions]=$SessionPID
-    AllSessionUsers[$AllSessions]=$SessionUser
-    AllSessionIDs[$AllSessions]=$SessionID
-    #Set the active sesssion PID to the session PID
-    if [[ ! -z $SessionPID ]]
+    if [[ $RegisterType == NEWSESSION ]]
     then
-      ActiveSessionPID=$SessionPID
-    fi
-    #increment the number of running sessions, now that one is added and running successfuly
-    ((AllSessions++))
+      logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
+      #Add the session data to the arrays that store info about the sessions.
+      SessionTTY=${ArraySessionData[1]}
+      SessionPID=${ArraySessionData[2]}
+      SessionUser=${ArraySessionData[3]}
+      SessionID=${ArraySessionData[4]}
+      AllSessionTTYs[$AllSessions]=$SessionTTY
+      AllSessionPIDs[$AllSessions]=$SessionPID
+      AllSessionUsers[$AllSessions]=$SessionUser
+      AllSessionIDs[$AllSessions]=$SessionID
+      #Set the active sesssion PID to the session PID
+      if [[ ! -z $SessionPID ]]
+      then
+        ActiveSessionPID=$SessionPID
+      fi
+      #increment the number of running sessions, now that one is added and running successfuly
+      ((AllSessions++))
 
-    #Export session data so the waylandloginmanager has user switching data in case of a reload
-    declare -p AllSessions        > /run/waylandloginmanager/sessiondata
-    declare -p AllSessionTTYs    >> /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionPIDs    >> /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
-    declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
-    declare -p ActiveSessionPID  >> /run/waylandloginmanager/sessiondata 
-    sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
+      #Export session data so the waylandloginmanager has user switching data in case of a reload
+      declare -p AllSessions        > /run/waylandloginmanager/sessiondata
+      declare -p AllSessionTTYs    >> /run/waylandloginmanager/sessiondata 
+      declare -p AllSessionPIDs    >> /run/waylandloginmanager/sessiondata 
+      declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
+      declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
+      declare -p ActiveSessionPID  >> /run/waylandloginmanager/sessiondata 
+      sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
+    elif [[ $RegisterType == NEWWLMDISPLAY ]]
+    then
+      LOGINMANAGERDISPLAYSESSION=${ArraySessionData[1]}
+    fi
   else
     logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
   fi
@@ -988,7 +995,7 @@ function StartUserSession
   loginctl activate $LOGINDSESSION
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  echo "$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
+  echo "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
   echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
 }
 
@@ -1244,6 +1251,8 @@ function StartLoginManagerDisplay
       then
         chvt $HostVT &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        sleep 3
+        GetLoginManagerDisplaySession
       else
         logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
       fi
@@ -1259,6 +1268,28 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   exit
 }
 
+#This function determines the systemd session of the loginmanagerdisplay
+function GetLoginManagerDisplaySession
+{
+  #Get the pid of loginmanagerdisplay
+  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay.service -p MainPID --value 2>/dev/null)
+  IFS=" "
+  #Get all logind sessions
+  LOGINDSESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
+  unset IFS
+  #Go thorugh each logind session, see the one where the main pid matches the pid of the loginmanagerdisplay
+  for LOGINDSESSION in "${LOGINDSESSIONS[@]}"
+  do
+    LOGINDSESSIONPID=$(loginctl show-session "$LOGINDSESSION" -p Leader --value 2>/dev/null )
+    if [[ $LOGINMANAGERDISPLAYPID == $LOGINDSESSIONPID ]]
+    then
+      LOGINMANAGERDISPLAYSESSION=$LOGINDSESSION
+      break
+    fi
+  done
+  echo "NEWWLMDISPLAY@$LOGINMANAGERDISPLAYSESSION" > /run/waylandloginmanager/loginmanager_register &
+  echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
+}
 
 
 #This determines if the autologin user was specified by ubiquity, and then configures that value to /etc/waylandloginmanager.conf, as in an unsafe shutdown, the lightdm config file has sometimes dropped the autologin user.
@@ -1385,7 +1416,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
-	chvt $HostVT &
+        loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       ActiveSessionPID=0
     fi
@@ -1401,7 +1432,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
-	chvt $HostVT &
+	loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
@@ -1416,7 +1447,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
-	chvt $HostVT &
+	loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
