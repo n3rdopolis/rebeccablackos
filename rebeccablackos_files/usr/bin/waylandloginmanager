@@ -377,6 +377,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   if [[ -z $ActiveSessionPID ]]
   then
     export ActiveSessionPID=0
+    export ActiveSessionID=0
+    export ActiveSessionTTY=0
   fi
   #Array that stores all backend types that is supported by the hardware
   SupportedBackends=()
@@ -571,6 +573,8 @@ function RegisterSession
       if [[ ! -z $SessionPID ]]
       then
         ActiveSessionPID=$SessionPID
+        ActiveSessionID=$SessionID
+        ActiveSessionTTY=$SessionTTY
       fi
       #increment the number of running sessions, now that one is added and running successfuly
       ((AllSessions++))
@@ -582,6 +586,8 @@ function RegisterSession
       declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
       declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
       declare -p ActiveSessionPID  >> /run/waylandloginmanager/sessiondata 
+      declare -p ActiveSessionID   >> /run/waylandloginmanager/sessiondata 
+      declare -p ActiveSessionTTY  >> /run/waylandloginmanager/sessiondata
       sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
     elif [[ $RegisterType == NEWWLMDISPLAY ]]
     then
@@ -907,11 +913,13 @@ New Session...
       #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
-	chvt $ChangeSessionTTY &
-	#hand over the logind session ID to allow desktop permissions to work.
-	loginctl activate $ChangeSessionID
-	#set the active session pid for the script to watch to be the PID of the session
-	ActiveSessionPID=$ChangeSessionPID
+        chvt $ChangeSessionTTY &
+        #hand over the logind session ID to allow desktop permissions to work.
+        loginctl activate $ChangeSessionID
+        #set the active session pid for the script to watch to be the PID of the session
+        ActiveSessionPID=$ChangeSessionPID
+        ActiveSessionID=$ChangeSessionID
+        ActiveSessionTTY=$ChangeSessionTTY
       else
 	$ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
       fi
@@ -1253,6 +1261,7 @@ function StartLoginManagerDisplay
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         sleep 3
         GetLoginManagerDisplaySession
+        loginctl activate $LOGINMANAGERDISPLAYSESSION
       else
         logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
       fi
@@ -1416,9 +1425,13 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+        loginctl terminate-session $ActiveSessionID
+        loginctl kill-session      $ActiveSessionID
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       ActiveSessionPID=0
+      ActiveSessionID=0
+      ActiveSessionTTY=0
     fi
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 20 bytes at a time.
     read -n 20 -t 1 COMMAND <&1000
