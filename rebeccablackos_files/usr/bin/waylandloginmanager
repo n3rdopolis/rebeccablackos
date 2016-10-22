@@ -515,6 +515,20 @@ function Create_XDG_RUNTIME_DIR
   chmod 700 /run/user/$USERUID
 }
 
+#This function sends the KDSETMODE ioctl (0x4B3A) with the parameter KD_TEXT (0x00) to the active TTY, then it sends the VT_SETMODE ioctl (0x5602) with the parameter VT_AUTO (0x00) to the active TTY
+#This forces the TTY to be in a state that allows the kernel to switch the TTY (switching to VT_AUTO), instead of a process (VT_PROCESS), when it's in VT_PROCESS, and the process is defunct, the TTY switch fails.
+function ResetTTYMode
+{
+    python -c "from array import array; \
+from fcntl import ioctl; \
+buf = array('h', [0]); \
+buf[0] = 0; \
+fd = open('/dev/tty0', 'wb'); \
+ioctl(fd, 0x4B3A, 0); \
+ioctl(fd, 0x05602, buf); \
+fd.close"
+}
+
 #This function is used by the WaylandLoginManager to find the next availible tty, starting from CalcTTY+1
 #it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
@@ -913,6 +927,7 @@ New Session...
       #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
+        ResetTTYMode
         chvt $ChangeSessionTTY &
         #hand over the logind session ID to allow desktop permissions to work.
         loginctl activate $ChangeSessionID
@@ -982,6 +997,7 @@ function StartUserSession
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   Create_XDG_RUNTIME_DIR $LOGINUSER
+  ResetTTYMode
   chvt $USERSESSIONTTY &
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   sleep 5
@@ -1257,6 +1273,7 @@ function StartLoginManagerDisplay
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
+        ResetTTYMode
         chvt $HostVT &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         sleep 3
@@ -1427,6 +1444,7 @@ function ReadCommandFIFO
       then
         loginctl terminate-session $ActiveSessionID
         loginctl kill-session      $ActiveSessionID
+        ResetTTYMode
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       ActiveSessionPID=0
@@ -1445,6 +1463,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+	ResetTTYMode
 	loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
@@ -1460,6 +1479,7 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
+	ResetTTYMode
 	loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
