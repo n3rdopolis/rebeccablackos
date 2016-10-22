@@ -50,13 +50,13 @@ BOOT OPTIONS:
             wlmforceswrender: Force all user sessions, and the Login Manager's display to be started with the environment variable LIBGL_ALWAYS_SOFTWARE=1 to force software rendering
             wlmforcevblankoff: Force all user sessions, and the Login Manager's display to be started with the environment variable vblank_mode=0 to disable vblank which might have problems on some hardware.
             wlmdebug: Force more sysrq trigger options to be availible, then the more secure default. Allow the option for a graphical login terminal to be started on the wayland login manager's display. This option is not settable from rbos-failedboot as it's for more advanced users
-	    wlmdebuginsecure: This option is the same as wlmdebug, except the diagostic terminal is a root terminal, instead of a login terminal
+            wlmdebuginsecure: This option is the same as wlmdebug, except the diagostic terminal is a root terminal, instead of a login terminal
 
       When installed, and you are unable to use a UI, you can use the commands:
-	    rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
-	    rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
-	    rbos-force-vblankoff: Wizard for setting wlmforcevblankoff option to the kernel commandline with grub
-	    rbos-install-vbox: This wizard will install Virtualbox drivers for you.
+            rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
+            rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
+            rbos-force-vblankoff: Wizard for setting wlmforcevblankoff option to the kernel commandline with grub
+            rbos-install-vbox: This wizard will install Virtualbox drivers for you.
 
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
@@ -69,7 +69,7 @@ BUILDING:
      CONTROL FILES (relative to ~/RBOS_Build_Files):
         DontDownloadDebootstrapScript: Delete this file to force the downloaded debootstrap in RBOS_Build_Files to run again at the next build
         DontRestartArchives(architechture): Delete this file to force all the downloaded packages to be downloaded again for the respective architechture.
-	DontRestartSourceDownload(architechture): Delete this file to force all the downloaded source repositories to be downloaded again for the respective architechture.
+        DontRestartSourceDownload(architechture): Delete this file to force all the downloaded source repositories to be downloaded again for the respective architechture.
         DontRestartPhase1(architechture): Delete this file to force Phase1 to debootstrap again for the respective architechture. This only hosts the smaller chroot system that downloads everything
         DontRestartPhase2(architechture): Delete this file to force Phase2 to debootstrap again for the respective architechture. This is the chroot that gets copied to Phase3, and is on the output ISO files.
         DontRestartBuildoutput(architechture): Delete this file to force all deb packages to rebuild for the respective architechture. This will increase the build time.

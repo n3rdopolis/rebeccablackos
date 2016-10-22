@@ -103,10 +103,10 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
 5.|    unset=GDK_BACKEND
 ----------------------------------------------
 
-the options are: set=varname=vardata		(set a variable to be something)
-		 unset=varname			(unset a variable)
-		 set=varname=vardata@BACKEND	(set a variable to be something if @BACKEND matches BackendType)
-		 unset=varname@BACKEND		(unset a variable if @BACKEND matches BackendType)
+the options are: set=varname=vardata                (set a variable to be something)
+                 unset=varname                        (unset a variable)
+                 set=varname=vardata@BACKEND        (set a variable to be something if @BACKEND matches BackendType)
+                 unset=varname@BACKEND                (unset a variable if @BACKEND matches BackendType)
 
 If it ends with @BACKEND, then the variable action is only performed, if the BackendType is BACKEND. Otherwise if it is unspecified, it is performed on ALL backends.
   in Line 2 of the example the variable E_WL_FORCE to be kms (export E_WL_FORCE=kms) only if the BackendType is KMS.

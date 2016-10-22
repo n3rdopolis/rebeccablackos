@@ -223,13 +223,13 @@ function ReadEnvironmentFile
       #if it is set, then set the variable
       if [[ $VARACTION == "set" ]]
       then
-	export $VARNAME=$VARDATA
+        export $VARNAME=$VARDATA
       fi
 
       #if it is unset, then unset the variable
       if [[ $VARACTION == "unset" ]]
       then
-	unset $VARNAME
+        unset $VARNAME
       fi
 
     fi
@@ -673,7 +673,7 @@ function ChooseSessionType
       #Once a supported backend is found, then stop.
       if [[ $SupportsBackend == 1 ]]
       then
-	break
+        break
       fi
     done
     IsFallbackSession=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "IsFallbackSession" {print $0}' | cut -d = -f2- | tail -1 )
@@ -698,8 +698,8 @@ function ChooseSessionType
     do
       if [[ ! -e $FILE && -n $FILE ]]
       then
-	logger -t waylandloginmanager "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
-	((NotFoundCount++))
+        logger -t waylandloginmanager "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+        ((NotFoundCount++))
       fi
     done < <(echo "$NeedsFile")
 
@@ -936,7 +936,7 @@ New Session...
         ActiveSessionID=$ChangeSessionID
         ActiveSessionTTY=$ChangeSessionTTY
       else
-	$ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
+        $ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
       fi
     fi
   fi
@@ -1033,11 +1033,11 @@ function AuthenticateUser
   TryPassword=$(cat -)
   #Test the users login with an embedded expect script running as PROBETESTUSER
   echo "log_user 0
-	spawn su $LOGINUSER -c /bin/true
-	expect Password 
-	send $TryPassword\r
-	catch wait result
-	exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect
+        spawn su $LOGINUSER -c /bin/true
+        expect Password 
+        send $TryPassword\r
+        catch wait result
+        exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect
   PasswordResult=$?
   unset TryPassword
   if [[ 0 == $PasswordResult ]]
@@ -1428,7 +1428,7 @@ function ReadCommandFIFO
     do
       if [[ $JOB == $LastUserActionPID || $JOB == $LastSwitchPID || $JOB == $LastLogonPID || $JOB == $LastLeavePID || $JOB == $LastInfoPID ]]
       then
-	((UIJobCount++))
+        ((UIJobCount++))
       fi
     done < <(jobs -p -r)
 
@@ -1463,24 +1463,24 @@ function ReadCommandFIFO
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
-	ResetTTYMode
-	loginctl activate $LOGINMANAGERDISPLAYSESSION
+        ResetTTYMode
+        loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
         kill -15 -$LastUserActionPID &> /dev/null
-	SwitchUserDialog &
-	LastSwitchPID=$!
+        SwitchUserDialog &
+        LastSwitchPID=$!
       else
-	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
       if [[ $(fgconsole) != $HostVT ]]
       then
-	ResetTTYMode
-	loginctl activate $LOGINMANAGERDISPLAYSESSION
+        ResetTTYMode
+        loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
@@ -1488,10 +1488,10 @@ function ReadCommandFIFO
       if [[ $(jobs -p -r | grep -c ^$LastLogonPID$) == 0  ]]
       then
         kill -15 -$LastUserActionPID &> /dev/null
-	GetUserCredentials &
-	LastLogonPID=$!
+        GetUserCredentials &
+        LastLogonPID=$!
       else
-	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
@@ -1499,10 +1499,10 @@ function ReadCommandFIFO
       if [[ $(jobs -p -r | grep -c ^$LastLeavePID$) == 0  ]]
       then
         kill -15 -$LastUserActionPID &> /dev/null
-	LeavePrompt &
-	LastLeavePID=$!
+        LeavePrompt &
+        LastLeavePID=$!
       else
-	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     #if the command is RegisterSession, then attempt to read the loginmanager_register FIFO, and register any data sent to that FIFO.
     elif [[ $COMMAND = "RegisterSession" ]]
@@ -1514,26 +1514,26 @@ function ReadCommandFIFO
       if [[ $(jobs -p -r | grep -c ^$LastInfoPID$) == 0  ]]
       then
         kill -15 -$LastUserActionPID &> /dev/null
-	ShowInfo &
-	LastInfoPID=$!
+        ShowInfo &
+        LastInfoPID=$!
       else
-	logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
     elif [[ $COMMAND == "Debug" ]]
     then
       if [[ $wlmdebug == 1 ]]
       then
-	if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
-	then
-	  DiagnosticTerminal &
-	  LastDebugPID=$!
-	  logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
-	else
-	  logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
-	fi
+        if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
+        then
+          DiagnosticTerminal &
+          LastDebugPID=$!
+          logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+        else
+          logger -t waylandloginmanager "A handler for the command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        fi
       else
-	logger -t waylandloginmanager "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel, or not in Live CD mode." -s  >>/var/log/waylandloginmanager 2>&1
+        logger -t waylandloginmanager "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel, or not in Live CD mode." -s  >>/var/log/waylandloginmanager 2>&1
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]

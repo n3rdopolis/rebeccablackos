@@ -54,7 +54,7 @@ then
     then
       find | grep -v ^./etc | while read FILE 
       do
-	rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
+        rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
       done
     fi
   cd $OLDPWD

@@ -134,7 +134,7 @@ do
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
   elif [[ $METHOD == "REMOVE" ]]
   then
-    echo "Removing $PACKAGE"                                                       	2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
+    echo "Removing $PACKAGE"                                                               2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     apt-get purge $PACKAGE -y                                 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/"$PACKAGE".log
     Result=${PIPESTATUS[0]}
     if [[ $Result != 0 ]]
@@ -197,7 +197,7 @@ if [[ -f /var/cache/apt/pkgcache.bin ]]
 then
   aptitude purge ?obsolete -y                                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 else
-  echo	"Not purging older packages, because apt-get update failed"    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  echo        "Not purging older packages, because apt-get update failed"    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe

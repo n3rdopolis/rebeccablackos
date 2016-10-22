@@ -105,10 +105,10 @@ then
       xterminstall=$?
       if [[ $xterminstall -eq 0 ]]
       then 
-	$INSTALLCOMMAND xterm -y
+        $INSTALLCOMMAND xterm -y
       else
-	zenity --info --text "Can not continue without xterm. Exiting the script."
-	exit
+        zenity --info --text "Can not continue without xterm. Exiting the script."
+        exit
       fi
     fi
   fi
