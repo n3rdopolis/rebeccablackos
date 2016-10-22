@@ -1437,11 +1437,10 @@ function ReadCommandFIFO
     #On each pass, if ActiveSessionPID isn't 0, that indicates a session is running. If one is it checks to see if the ActiveSessionPID, or the pid of the active session is still running. If it is down, then switch back to the TTY of the loginmanagerdisplay, and then reset it to indicate that no session is running
     if [[ $ActiveSessionPID != 0 && ! -e /proc/$ActiveSessionPID/environ ]]
     then
+      loginctl terminate-session $ActiveSessionID
+      ResetTTYMode $ActiveSessionTTY
       if [[ $(fgconsole) != $HostVT ]]
       then
-        loginctl terminate-session $ActiveSessionID
-        loginctl kill-session      $ActiveSessionID
-        ResetTTYMode $ActiveSessionTTY
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       ActiveSessionPID=0
