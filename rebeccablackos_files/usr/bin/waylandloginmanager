@@ -476,6 +476,8 @@ Will now reboot." 20 50 --no-cancel
   if [[ ! -z $OLDPID ]]
   then
     HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
+    #Get the logind session of the weston instance running loginmanagerdisplay
+    GetLoginManagerDisplaySession 0
   else
     HostVT=$(GetNextTTY)
   fi
@@ -1274,7 +1276,8 @@ function StartLoginManagerDisplay
         chvt $HostVT &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         sleep 3
-        GetLoginManagerDisplaySession
+        #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
+        GetLoginManagerDisplaySession 1
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       else
         logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
@@ -1294,6 +1297,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 #This function determines the systemd session of the loginmanagerdisplay
 function GetLoginManagerDisplaySession
 {
+  RegisterLoginManagerDisplay=$1
   #Get the pid of loginmanagerdisplay
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay.service -p MainPID --value 2>/dev/null)
   IFS=" "
@@ -1310,8 +1314,11 @@ function GetLoginManagerDisplaySession
       break
     fi
   done
-  echo "NEWWLMDISPLAY@$LOGINMANAGERDISPLAYSESSION" > /run/waylandloginmanager/loginmanager_register &
-  echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
+  if [[ $RegisterLoginManagerDisplay == 1 ]]
+  then
+    echo "NEWWLMDISPLAY@$LOGINMANAGERDISPLAYSESSION" > /run/waylandloginmanager/loginmanager_register &
+    echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
+  fi
 }
 
 
