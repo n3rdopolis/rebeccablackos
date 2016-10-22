@@ -475,14 +475,14 @@ Will now reboot." 20 50 --no-cancel
   OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay 2>/dev/null)
   if [[ ! -z $OLDPID ]]
   then
-    HostVT=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
+    LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
     #Get the logind session of the weston instance running loginmanagerdisplay
     GetLoginManagerDisplaySession 0
   else
-    HostVT=$(GetNextTTY)
+    LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
   fi
-  MinimumTTY=$HostVT
-  if [[ $HostVT -eq -1 ]]
+  MinimumTTY=$LOGINMANAGERDISPLAYTTY
+  if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
     logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
     exit
@@ -858,7 +858,7 @@ This is the optimal way to run Weston or other Wayland servers."
 
 $BACKENDSTRING
 
-The Login Manager Display is running on tty: $HostVT
+The Login Manager Display is running on tty: $LOGINMANAGERDISPLAYTTY
 
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
@@ -1270,11 +1270,11 @@ function StartLoginManagerDisplay
     if [[ $LOGINMANAGERDISPLAYSTATUS != 0 ]]
     then 
       (( StartTimes++ ))
-      logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $HostVT" -s  >>/var/log/waylandloginmanager 2>&1
+      logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY" -s  >>/var/log/waylandloginmanager 2>&1
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
-        chvt $HostVT &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$HostVT" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        chvt $LOGINMANAGERDISPLAYTTY &
+        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         sleep 3
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
         GetLoginManagerDisplaySession 1
@@ -1446,7 +1446,7 @@ function ReadCommandFIFO
     then
       loginctl terminate-session $ActiveSessionID
       ResetTTYMode $ActiveSessionTTY
-      if [[ $(fgconsole) != $HostVT ]]
+      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
@@ -1464,7 +1464,7 @@ function ReadCommandFIFO
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" ]]
     then
-      if [[ $(fgconsole) != $HostVT ]]
+      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
@@ -1479,7 +1479,7 @@ function ReadCommandFIFO
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
-      if [[ $(fgconsole) != $HostVT ]]
+      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
