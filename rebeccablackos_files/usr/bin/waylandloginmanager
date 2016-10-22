@@ -523,7 +523,7 @@ function ResetTTYMode
 from fcntl import ioctl; \
 buf = array('h', [0]); \
 buf[0] = 0; \
-fd = open('/dev/tty0', 'wb'); \
+fd = open('/dev/tty$1', 'wb'); \
 ioctl(fd, 0x4B3A, 0); \
 ioctl(fd, 0x05602, buf); \
 fd.close"
@@ -1441,7 +1441,7 @@ function ReadCommandFIFO
       then
         loginctl terminate-session $ActiveSessionID
         loginctl kill-session      $ActiveSessionID
-        ResetTTYMode
+        ResetTTYMode $ActiveSessionTTY
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       ActiveSessionPID=0
