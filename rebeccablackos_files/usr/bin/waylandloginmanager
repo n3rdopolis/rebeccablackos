@@ -1289,15 +1289,15 @@ function GetLoginManagerDisplaySession
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay.service -p MainPID --value 2>/dev/null)
   IFS=" "
   #Get all logind sessions
-  LOGINDSESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
+  WLMLOGINDSESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
   unset IFS
   #Go thorugh each logind session, see the one where the main pid matches the pid of the loginmanagerdisplay
-  for LOGINDSESSION in "${LOGINDSESSIONS[@]}"
+  for WLMLOGINDSESSION in "${WLMLOGINDSESSIONS[@]}"
   do
-    LOGINDSESSIONPID=$(loginctl show-session "$LOGINDSESSION" -p Leader --value 2>/dev/null )
-    if [[ $LOGINMANAGERDISPLAYPID == $LOGINDSESSIONPID ]]
+    WLMLOGINDSESSIONPID=$(loginctl show-session "$WLMLOGINDSESSION" -p Leader --value 2>/dev/null )
+    if [[ $WLMLOGINMANAGERDISPLAYPID == $WLMLOGINDSESSIONPID ]]
     then
-      LOGINMANAGERDISPLAYSESSION=$LOGINDSESSION
+      LOGINMANAGERDISPLAYSESSION=$WLMLOGINDSESSION
       break
     fi
   done
