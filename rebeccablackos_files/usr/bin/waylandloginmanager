@@ -373,13 +373,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   then
     export AllSessions=0
   fi
-  #default ActiveSessionPID if unset, which determines the pid for the waylandloginmanager to watch until it stops, to switch back to 0
-  if [[ -z $ActiveSessionPID ]]
-  then
-    export ActiveSessionPID=0
-    export ActiveSessionID=0
-    export ActiveSessionTTY=0
-  fi
+
   #Array that stores all backend types that is supported by the hardware
   SupportedBackends=()
 
@@ -555,11 +549,21 @@ function GetNextTTY
   echo $AvailibleTTY
 }
 
+#Export session data so the waylandloginmanager has user switching data in case of a reload
+function ExportSessionData
+{
+  declare -p AllSessions        > /run/waylandloginmanager/sessiondata
+  declare -p AllSessionTTYs    >> /run/waylandloginmanager/sessiondata 
+  declare -p AllSessionPIDs    >> /run/waylandloginmanager/sessiondata 
+  declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
+  declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
+  sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
+}
+
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
 #Before a process calls RegisterSession to loginmanager_control, the process must also start an attempt to send the data to loginmanager_register, because the timeout period is .01 seconds. If nothing is in loginmanager_register, as if it's not called correctly, or because it's an underprivlaged process that can't write to loginmanager_register, it is ignored.
 #it expects the data to be sent in fields seperated by the @ charachter in this order:
 # TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID
-#It also sets the ActiveSessionPID to be the PID_Of_Session_Process, to watch for when that PID dies, to switch back to the loginmanagerdisplay tty.
 function RegisterSession
 {
   #get the data from loginmanager_register
@@ -581,30 +585,17 @@ function RegisterSession
       SessionPID=${ArraySessionData[2]}
       SessionUser=${ArraySessionData[3]}
       SessionID=${ArraySessionData[4]}
-      AllSessionTTYs[$AllSessions]=$SessionTTY
-      AllSessionPIDs[$AllSessions]=$SessionPID
-      AllSessionUsers[$AllSessions]=$SessionUser
-      AllSessionIDs[$AllSessions]=$SessionID
-      #Set the active sesssion PID to the session PID
-      if [[ ! -z $SessionPID ]]
-      then
-        ActiveSessionPID=$SessionPID
-        ActiveSessionID=$SessionID
-        ActiveSessionTTY=$SessionTTY
-      fi
+      AllSessionTTYs+=($SessionTTY)
+      AllSessionPIDs+=($SessionPID)
+      AllSessionUsers+=($SessionUser)
+      AllSessionIDs+=($SessionID)
+
       #increment the number of running sessions, now that one is added and running successfuly
       ((AllSessions++))
 
-      #Export session data so the waylandloginmanager has user switching data in case of a reload
-      declare -p AllSessions        > /run/waylandloginmanager/sessiondata
-      declare -p AllSessionTTYs    >> /run/waylandloginmanager/sessiondata 
-      declare -p AllSessionPIDs    >> /run/waylandloginmanager/sessiondata 
-      declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
-      declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
-      declare -p ActiveSessionPID  >> /run/waylandloginmanager/sessiondata 
-      declare -p ActiveSessionID   >> /run/waylandloginmanager/sessiondata 
-      declare -p ActiveSessionTTY  >> /run/waylandloginmanager/sessiondata
-      sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
+      #Export the Session data
+      ExportSessionData
+
     elif [[ $RegisterType == NEWWLMDISPLAY ]]
     then
       LOGINMANAGERDISPLAYSESSION=${ArraySessionData[1]}
@@ -932,10 +923,6 @@ New Session...
         chvt $ChangeSessionTTY &
         #hand over the logind session ID to allow desktop permissions to work.
         loginctl activate $ChangeSessionID
-        #set the active session pid for the script to watch to be the PID of the session
-        ActiveSessionPID=$ChangeSessionPID
-        ActiveSessionID=$ChangeSessionID
-        ActiveSessionTTY=$ChangeSessionTTY
       else
         $ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
       fi
@@ -1441,18 +1428,59 @@ function ReadCommandFIFO
       UserActionDialog &
       LastUserActionPID=$!
     fi
-    #On each pass, if ActiveSessionPID isn't 0, that indicates a session is running. If one is it checks to see if the ActiveSessionPID, or the pid of the active session is still running. If it is down, then switch back to the TTY of the loginmanagerdisplay, and then reset it to indicate that no session is running
-    if [[ $ActiveSessionPID != 0 && ! -e /proc/$ActiveSessionPID/environ ]]
-    then
-      ResetTTYMode $ActiveSessionTTY
-      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
+
+    read ActiveSystemTTY < /sys/class/tty/tty0/active
+    ActiveSystemTTY=${ActiveSystemTTY:3}
+
+    #Create temporary arrays
+    NewAllSessionTTYs=()
+    NewAllSessionPIDs=()
+    NewAllSessionUsers=()
+    NewAllSessionIDs=()
+
+    #Go through all sessions, and then rebuild the array to only store running sessions
+    for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
+    do
+      RunningSessionTTY=$AllSessionTTYs[$element]}
+      RunningSessionPID=${AllSessionPIDs[$element]}
+      RunningSessionUser=${AllSessionUsers[$element]}
+      RunningSessionID=${AllSessionIDs[$element]}
+      #If the session is alive, add its data to the new arrays
+      if [[ -e /proc/$RunningSessionPID/environ ]]
       then
+        NewAllSessionTTYs+=($RunningSessionTTY)
+        NewAllSessionPIDs+=($RunningSessionPID)
+        NewAllSessionUsers+=($RunningSessionUser)
+        NewAllSessionIDs+=($RunningSessionID)
+      fi
+
+      #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
+      if [[ ! -e /proc/$RunningSessionPID/environ && $RunningSessionTTY == $ActiveSystemTTY ]] 
+      then
+        if [[ ! -z $RunningSessionTTY ]]
+        then
+          ResetTTYMode $RunningSessionTTY
+        fi
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
-      ActiveSessionPID=0
-      ActiveSessionID=0
-      ActiveSessionTTY=0
-    fi
+    done
+
+    #Set the actual arrays to be the value of the temporary arrays
+    AllSessionTTYs=(${NewAllSessionTTYs[@]})
+    AllSessionPIDs=(${NewAllSessionPIDs[@]})
+    AllSessionUsers=(${NewAllSessionUsers[@]})
+    AllSessionIDs=(${NewAllSessionIDs[@]})
+
+    #Remove the temporary arrays
+    unset NewAllSessionTTYs
+    unset NewAllSessionPIDs
+    unset NewAllSessionUsers
+    unset NewAllSessionIDs
+
+    #Export the Session Data
+    ExportSessionData
+
+
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 20 bytes at a time.
     read -n 20 -t 1 COMMAND <&1000
     if [[ $COMMAND != "" ]]
@@ -1463,7 +1491,7 @@ function ReadCommandFIFO
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" ]]
     then
-      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
+      if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
@@ -1478,7 +1506,7 @@ function ReadCommandFIFO
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
-      if [[ $(fgconsole) != $LOGINMANAGERDISPLAYTTY ]]
+      if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
@@ -1569,7 +1597,7 @@ then
   #Start the filter proxy that will only send valid data to the main command FIFO
   CommandFIFOProxy &
 
-  #Start the login managers FIFO reader, and function that determines if the ActiveSessionPID is still alive, and if it should switch back.
+  #Start the login managers FIFO reader, and function that monitors the running sessions
   ReadCommandFIFO
 elif [[ $1 == "--uihost" ]]
 then
