@@ -1441,7 +1441,7 @@ function ReadCommandFIFO
     #Go through all sessions, and then rebuild the array to only store running sessions
     for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
     do
-      RunningSessionTTY=$AllSessionTTYs[$element]}
+      RunningSessionTTY=${AllSessionTTYs[$element]}
       RunningSessionPID=${AllSessionPIDs[$element]}
       RunningSessionUser=${AllSessionUsers[$element]}
       RunningSessionID=${AllSessionIDs[$element]}
