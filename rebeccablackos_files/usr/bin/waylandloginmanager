@@ -522,7 +522,7 @@ buf[0] = 0; \
 fd = open('/dev/tty$1', 'wb'); \
 ioctl(fd, 0x4B3A, 0); \
 ioctl(fd, 0x05602, buf); \
-fd.close"
+fd.close()"
 }
 
 #This function is used by the WaylandLoginManager to find the next availible tty, starting from CalcTTY+1
