@@ -577,9 +577,9 @@ function RegisterSession
   RegisterType=${ArraySessionData[0]}
   if [[ ! -z $RegisterData ]]
   then
+    logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
     if [[ $RegisterType == NEWSESSION ]]
     then
-      logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
       #Add the session data to the arrays that store info about the sessions.
       SessionTTY=${ArraySessionData[1]}
       SessionPID=${ArraySessionData[2]}
