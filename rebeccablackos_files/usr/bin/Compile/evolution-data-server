@@ -29,7 +29,7 @@ SOURCEURL=git://git.gnome.org/evolution-data-server
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=gnome-3-22
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,15 +57,12 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DWITH_KRB5=OFF -DWITH_OPENLDAP=OFF -DENABLE_GOOGLE_AUTH=OFF -DENABLE_UOA=OFF
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-uoa --disable-google-auth
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
 make 
 }
 
