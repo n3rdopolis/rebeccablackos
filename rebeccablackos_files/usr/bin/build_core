@@ -625,6 +625,17 @@ function MakeAndInstall()
 
       #Update database containing the list of files that belong to packages
       update-dlocatedb
+      
+      #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
+      BUILTSOFILES=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable |grep -e '\.so$' -e '\.so\.' |while read SOFILE
+      do 
+        SOFILE=$(basename "$SOFILE")
+        IFS="."
+        SOFILE=($SOFILE)
+        unset IFS
+        SOFILE=${SOFILE[0]}.${SOFILE[1]}
+        echo $SOFILE
+      done)
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
@@ -632,7 +643,7 @@ function MakeAndInstall()
         DIRECTDEPENDS=$(readelf -d "$FILE" 2>/dev/null | grep NEEDED |sed -e 's/\[//g' -e 's/]//g' |awk '{print $5}')
         DIRECTDEPENDS=$(echo $DIRECTDEPENDS | sed 's/ /\\\|/g')
         ALLDEPENDS=$(ldd "$FILE" 2>/dev/null | grep =\> | awk '{print $3}')
-        echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS"
+        echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS" | grep -v "$BUILTSOFILES"
       done | sort | uniq | grep -v ^$ | while read LIBRARY
       do
         if [[ -e "$LIBRARY" ]]
