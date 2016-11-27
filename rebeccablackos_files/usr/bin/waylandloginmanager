@@ -854,7 +854,7 @@ The Login Manager Display is running on tty: $LOGINMANAGERDISPLAYTTY
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt" 2> /var/log/loginmanagerdisplay.log
+The i icon shows this help prompt" 2>> /var/log/loginmanagerdisplay.log
 
 }
 
@@ -1261,7 +1261,7 @@ function StartLoginManagerDisplay
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
         chvt $LOGINMANAGERDISPLAYTTY &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay  &>> /var/log/loginmanagerdisplay.log
         sleep 3
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
         GetLoginManagerDisplaySession 1
