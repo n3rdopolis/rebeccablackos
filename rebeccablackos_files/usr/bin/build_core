@@ -627,7 +627,7 @@ function MakeAndInstall()
       update-dlocatedb
       
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
-      BUILTSOFILES=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable |grep -e '\.so$' -e '\.so\.' |while read SOFILE
+      BUILTSOFILES=$(find /$SOURCEDIR/$SOURCENAME/ |grep -e '\.so$' -e '\.so\.' |while read SOFILE
       do 
         SOFILE=$(basename "$SOFILE")
         IFS="."
