@@ -75,3 +75,5 @@ BUILDING:
         DontRestartBuildoutput(architechture): Delete this file to force all deb packages to rebuild for the respective architechture. This will increase the build time.
         DontStartFromScratch(architechture): Delete this file to force delete everything included downloaded repositories for the respective architechture, and cause it to start from scratch.
         build/(architechture)/buildoutput/control/(packagename): Delete these files to specify a specific package to rebuild.
+        buildcore_revisions_(architechture).txt: Add a revisions file into this path, to specify paticular packages, as described above
+        RestartPackageList_(architechture).txt: add in the list of packages (as in the files in build/(architechture)/buildoutput/control/ ). One per each line. For batch resetting paticular packages

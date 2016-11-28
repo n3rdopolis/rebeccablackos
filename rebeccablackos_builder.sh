@@ -117,6 +117,11 @@ then
   touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
 fi
 
+#Create the placeholder for the list of packages to delete
+if [[ ! -e "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt ]]
+  touch "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
+fi
+
 #####Tell User what script does
 echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
@@ -138,10 +143,14 @@ echo "If you want to build revisions specified in a list file from a previous bu
 
 with the requested revisions file generated from a previous build, or a downloaded instance. 
 
+You may also specify a list of pacakges in "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt to batch restart, one package per line.
+
 Although the files have the CPU architecture as the suffix in the file name, there is nothing CPU dependant in them, and the suffix only exists to identify them. 
 For example buildcore_revisions_amd64.txt can be used in "$BUILDLOCATION"/buildcore_revisions_i386.txt 
+and
+RestartPackageList_amd64.txt can be used in RestartPackageList_i386.txt
 
-Ensure the file is copied, and not moved, as it is treated as a one time control file, and deleted after the next run."
+Ensure the file(s) are copied, and not moved, as they are treated as a one time control file, and deleted after the next run."
 
 
 if [[ $SKIPPROMPT != 1 ]]
@@ -314,6 +323,22 @@ then
   touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
 fi
 
+#Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt
+cat "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt | while read RESETPACKAGE
+do
+  #Dont allow path tampering, stop at the first / for path.
+  IFS=/
+  RESETPACKAGE=($RESETPACKAGE)
+  unset IFS
+  RESETPACKAGE=${RESETPACKAGE[0]}
+
+  #Delete the file, don't allow path clobbering for the current directory, or parent directory. rm doesnt delete directories by default, but be paranoid anyway
+  if [[ ! -z $RESETPACKAGE  && $RESETPACKAGE != '.' && $RESETPACKAGE != '..' ]]
+  then
+   rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/control/"$RESETPACKAGE"
+  fi
+done
+echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 
 #make the imported files executable 
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
