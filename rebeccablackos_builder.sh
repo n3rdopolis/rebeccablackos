@@ -119,6 +119,7 @@ fi
 
 #Create the placeholder for the list of packages to delete
 if [[ ! -e "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt ]]
+then
   touch "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 fi
 
