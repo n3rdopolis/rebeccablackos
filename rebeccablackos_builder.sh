@@ -144,7 +144,12 @@ echo "If you want to build revisions specified in a list file from a previous bu
 
 with the requested revisions file generated from a previous build, or a downloaded instance. 
 
-You may also specify a list of pacakges in "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt to batch restart, one package per line.
+
+You may also specify a list of pacakges in
+
+     "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt 
+to batch restart, one package per line.
+
 
 Although the files have the CPU architecture as the suffix in the file name, there is nothing CPU dependant in them, and the suffix only exists to identify them. 
 For example buildcore_revisions_amd64.txt can be used in "$BUILDLOCATION"/buildcore_revisions_i386.txt 
