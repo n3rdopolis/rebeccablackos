@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=hawaii-shell
+SOURCENAME=libgnome-keyring
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/hawaii-desktop/hawaii-shell.git
+SOURCEURL=git://git.gnome.org/libgnome-keyring
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -35,7 +35,7 @@ SOURCEREVISION=master
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=1
+REBUILDNEWREVISION=0
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
@@ -57,29 +57,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-mkdir build
-cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DENABLE_MAINLINE_QTXDG=ON -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
-make 
+make
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
 make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+: 
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core

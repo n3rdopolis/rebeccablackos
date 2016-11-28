@@ -55,8 +55,8 @@ modemmanager-dev::PART
 libnm-dev::PART
 libnm-glib4::PART
 libnm-glib-dev::PART
-libnma0::PART
-libnma-dev::PART
+libnm-glib-vpn1::PART
+libnm-glib-vpn-dev::PART
 libmm14::PART
 libmm-dev::PART
 libmm-glib-dev::PART
@@ -146,9 +146,6 @@ libxcb-randr0::PART
 libxcb-randr0-dev::PART
 libxcb-render-util0::PART
 libxcb-render-util0-dev::PART
-libgstreamer1.0-0::PART
-libgstreamer1.0-dev::PART
-libgstreamer-plugins-bad1.0-0::PART
 libalsaplayer0::PART
 libalsaplayer-dev::PART
 libavutil-dev::PART
@@ -190,8 +187,6 @@ libexempi3::PART
 libexempi-dev::PART
 libexif12::PART
 libexif-dev::PART
-librsvg2-bin::PART 
-librsvg2-dev::PART
 libpciaccess-dev::PART 
 libpci-dev::PART
 libpulse-dev::PART
@@ -220,7 +215,6 @@ libboost-filesystem1.61.0::PART
 libboost-python1.61.0::PART
 xcursor-themes::PART
 xfonts-utils::PART
-clutter-1.0-tests::PART
 ncurses-dev::PART
 libmtdev-dev::PART
 libx11-xcb-dev::PART
@@ -257,14 +251,12 @@ libcolord-dev::PART
 argyll::PART
 libfreerdp-plugins-standard::PART
 libfreerdp-dev::PART
-libgio2.0-cil-dev::PART 
+libgio2.0-cil-dev::PART
+libjansson4::PART
+libjansson-dev::PART
 libjson-glib-dev::PART
-libgail-3-dev::PART
 libgcrypt20::PART
 libgcrypt20-dev::PART
-libgail-common::PART
-libgail18::PART
-libgail-dev::PART
 libaccountsservice-dev::PART
 gir1.2-accountsservice-1.0::PART
 gir1.2-telepathylogger-0.2::PART
@@ -338,8 +330,6 @@ libicu-dev::PART
 libraptor-dev::PART
 libegl1-mesa::PART
 libcanberra-dev::PART
-libcanberra-gtk3-0::PART
-libcanberra-gtk3-dev::PART
 libcroco3::PART
 libcroco3-dev::PART
 libical2::PART
@@ -350,8 +340,6 @@ packagekit::PART
 vpx-tools::PART
 libwebp6::PART
 libwebp-dev::PART
-libclutter-gst-3.0-0::PART
-libclutter-gst-3.0-dev::FULL
 libupower-glib-dev::PART
 libusb-dev::PART
 libgusb2::PART
@@ -363,13 +351,6 @@ libplist-dev::PART
 libimobiledevice-dev::PART
 libassimp3v5::PART
 libassimp-dev::PART
-gstreamer1.0-clutter::PART
-libgstreamer-plugins-base1.0-0::PART
-libgstreamer-plugins-base1.0-dev::PART
-libmx-2.0-0::PART
-libmx-bin::PART
-libmx-common::PART
-libmx-dev::PART
 libbsd-dev::PART
 libqimageblitz-dev::PART
 command-not-found::FULL
@@ -445,6 +426,7 @@ dosfstools::PART
 libcap-dev::PART
 discover::PART
 mtools::PART
+psmisc::PART
 syslinux::PART
 syslinux-common::PART
 syslinux-utils::PART
@@ -460,8 +442,6 @@ grub-pc::FULL
 live-image-standard::PART
 gnome-common::PART
 gnome-icon-theme-symbolic::PART
-gnome-themes-standard::FULL::$DEBIAN_DISTRO == Debian
-gnome-settings-daemon::FULL
 oxygen-icon-theme::PART
 oxygencursors::PART::$DEBIAN_DISTRO == Debian
 fonts-oxygen::PART
