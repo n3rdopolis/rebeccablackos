@@ -23,330 +23,336 @@ argument=$1
 
 export MAKEDEBS=1
 
+#Add the package name to COMPILELIST, ensuring the correct handling of newlines
+function AddPackageToList
+{
+  PACKAGENAME=$1
+  if [[ -z $COMPILELIST ]]
+  then
+    COMPILELIST+=$PACKAGENAME
+  else 
+    COMPILELIST+=$'\n'$PACKAGENAME
+  fi
+}
 
 #build these packages in this order. # symbol is a comment
 if [[ ! -e /usr/lib/casper ]]
 then
-  COMPILELIST+="casper"
-  COMPILELIST+=$'\n'
+  AddPackageToList casper
 fi
 
 if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
 then
-  COMPILELIST+="lupin"
-  COMPILELIST+=$'\n'
+  AddPackageToList lupin
 fi
 
-COMPILELIST+="#linux
-cmake
-extra-cmake-modules
-wayland
-wayland-protocols
-drm
-macros
-glproto
-dri2proto
-dri3proto
-libxtrans
-xextproto
-presentproto
-x11proto
-fontsproto
-randrproto
-xshmfence
-xcb-proto
-libxcb
-libxfont
-mesa
-glamor
-libepoxy
-libxkbcommon
-libevdev
-pixman
-cairo
-libva
-intel-driver
-libinput
-freerdp
-weston
-glib
-harfbuzz
-freetype2
-fontconfig
-pango
-gstreamer
-gst-plugins-base
-gst-plugins-bad
-gst-plugins-good
-gst-plugins-ugly
-gst-plugins-gl
-gst-libav
-qtbase
-qtxmlpatterns
-qtdeclarative
-qtmultimedia
-qtsvg
-qtsensors
-qtimageformats
-qtsystems
-qt3d
-qtwebkit
-qtwebsockets
-qtwebchannel
-qtwebengine
-qtscript
-qtquick1
-qtquickcontrols
-qtquickcontrols2
-qttools
-qtx11extras
-qttranslations
-qtgraphicaleffects
-qtwayland
-qca
-otter
-libdbusmenu-qt
-phonon
-phonon-gstreamer
-attica
-polkit-qt-1
-kwayland
-kdeframeworks/kitemmodels
-kdeframeworks/kitemviews
-kdeframeworks/kplotting
-kdeframeworks/threadweaver
-kdeframeworks/kcodecs
-kdeframeworks/kguiaddons
-kdeframeworks/kidletime
-kdeframeworks/kwidgetsaddons
-kdeframeworks/sonnet
-kdeframeworks/kconfig
-kdeframeworks/kwindowsystem
-kdeframeworks/networkmanager-qt
-kdeframeworks/modemmanager-qt
-kdeframeworks/bluez-qt
-kdeframeworks/solid
-kdeframeworks/karchive
-kdeframeworks/syntax-highlighting
-kdeframeworks/kdbusaddons
-kdeframeworks/kcoreaddons
-kdeframeworks/kimageformats
-kdeframeworks/kauth
-kdeframeworks/kcrash
-kdeframeworks/kjobwidgets
-kdeframeworks/ki18n
-kdeframeworks/kdoctools
-kdeframeworks/kjs
-kdeframeworks/kservice
-kdeframeworks/kglobalaccel
-kdeframeworks/kpackage
-kdeframeworks/kpeople
-kdeframeworks/kconfigwidgets
-kdeframeworks/kiconthemes
-kdeframeworks/knotifications
-kdeframeworks/kcompletion
-kdeframeworks/kdnssd
-kdeframeworks/kwallet
-kdeframeworks/kpty
-kdeframeworks/kemoticons
-kdeframeworks/kdesu
-kdeframeworks/ktextwidgets
-kdeframeworks/kxmlgui
-kdeframeworks/kbookmarks
-kdeframeworks/kio
-kdeframeworks/kxmlrpcclient
-kdeframeworks/kdesignerplugin
-kdeframeworks/knewstuff
-kdeframeworks/kparts
-kdeframeworks/kdeclarative
-kdeframeworks/kcmutils
-kdeframeworks/kinit
-kdeframeworks/kded
-kdeframeworks/knotifyconfig
-kdeframeworks/kunitconversion
-kdeframeworks/kjsembed
-kdeframeworks/kross
-kdeframeworks/kmediaplayer
-kdeframeworks/kdewebkit
-kdeframeworks/ktexteditor
-kdeframeworks/kapidox
-kdeframeworks/frameworkintegration
-kdeframeworks/kdelibs4support
-kdeframeworks/khtml
-kwayland-integration
-kwallet-pam
-kwalletmanager
-libkomparediff2
-grantlee
-kdevplatform
-kfilemetadata
-baloo
-baloo-widgets
-kactivities
-kactivities-stats
-kpmcore
-plasma-framework
-kirigami
-krunner
-milou
-khelpcenter
-kde-cli-tools
-kio-extras
-konqueror
-kfind
-kdialog
-keditbookmarks
-dolphin
-libksysguard
-ksysguard
-kdecoration
-kscreenlocker
-oxygen
-breeze
-plasma-integration
-kwin
-libkscreen
-plasma-workspace
-plasma-desktop
-kactivitymanagerd
-khotkeys
-kinfocenter
-kmenuedit
-systemsettings
-kscreen
-powerdevil
-polkit-kde-agent-1
-rekonq
-kmix
-konsole
-kate
-ark
-konversation
-kcalc
-kompare
-dragon
-plasma-sdk
-kdeplasma-addons
-plasma-nm
-plasma-pa
-calligra
-wind
-hawaii-icon-themes
-qtaccountsservice
-libqtxdg
-greenisland
-libhawaii
-fluid
-hawaii-shell
-hawaii-workspace
-hawaii-system-preferences
-xserver
-xhost
-json-glib
-gdk-pixbuf
-librsvg
-yelp-xsl
-yelp-tools
-atk
-at-spi2-core
-at-spi2-atk
-graphene
-gtk
-zenity
-gnome-themes-standard
-dconf
-unico
-vte
-cogl
-clutter
-clutter-gtk
-clutter-gst
-gobject-introspection
-gjs
-libusb
-gsettings-desktop-schemas
-libnotify
-glib-networking
-libsoup
-gcr
-geoclue
-webkitgtk
-librest
-gnome-online-accounts
-geocode-glib
-libgweather
-libgdata
-evolution-data-server
-libpeas
-gtksourceview
-libsecret
-libgtop
-gnome-desktop
-libcanberra
-notification-daemon
-gnome-bluetooth
-gnome-menus
-libgnome-keyring
-network-manager-applet
-mutter
-colord-gtk
-gnome-shell
-gnome-shell-extensions
-gnome-settings-daemon
-gnome-autoar
-pygobject
-libgee
-caribou
-gnome-session
-gdm
-ibus
-seahorse
-alacarte
-nautilus
-gspell
-gedit
-file-roller
-gnome-font-viewer
-grilo
-grilo-plugins
-gnome-control-center
-cairo-dock-core
-cairo-dock-plugins
-orbital
-efl
-enlightenment
-terminology
-etrophy
-e_cho
-elemines
-econcentration
-equate
-ecrire
-ephoto
-SDL
-SDL_image
-SDL_ttf
-glbinding
-supertux
-FreeGLUT
-glfw
-ffmpeg
-mpv
-glmark
-bemenu
-wlc
-orbment
-sway
-"
-COMPILELIST+=$'\n'
+#AddPackageToList linux
+AddPackageToList cmake
+AddPackageToList extra-cmake-modules
+AddPackageToList wayland
+AddPackageToList wayland-protocols
+AddPackageToList drm
+AddPackageToList macros
+AddPackageToList glproto
+AddPackageToList dri2proto
+AddPackageToList dri3proto
+AddPackageToList libxtrans
+AddPackageToList xextproto
+AddPackageToList presentproto
+AddPackageToList x11proto
+AddPackageToList fontsproto
+AddPackageToList randrproto
+AddPackageToList xshmfence
+AddPackageToList xcb-proto
+AddPackageToList libxcb
+AddPackageToList libxfont
+AddPackageToList mesa
+AddPackageToList glamor
+AddPackageToList libepoxy
+AddPackageToList libxkbcommon
+AddPackageToList libevdev
+AddPackageToList pixman
+AddPackageToList cairo
+AddPackageToList libva
+AddPackageToList intel-driver
+AddPackageToList libinput
+AddPackageToList freerdp
+AddPackageToList weston
+AddPackageToList glib
+AddPackageToList harfbuzz
+AddPackageToList freetype2
+AddPackageToList fontconfig
+AddPackageToList pango
+AddPackageToList gstreamer
+AddPackageToList gst-plugins-base
+AddPackageToList gst-plugins-bad
+AddPackageToList gst-plugins-good
+AddPackageToList gst-plugins-ugly
+AddPackageToList gst-plugins-gl
+AddPackageToList gst-libav
+AddPackageToList qtbase
+AddPackageToList qtxmlpatterns
+AddPackageToList qtdeclarative
+AddPackageToList qtmultimedia
+AddPackageToList qtsvg
+AddPackageToList qtsensors
+AddPackageToList qtimageformats
+AddPackageToList qtsystems
+AddPackageToList qt3d
+AddPackageToList qtwebkit
+AddPackageToList qtwebsockets
+AddPackageToList qtwebchannel
+AddPackageToList qtwebengine
+AddPackageToList qtscript
+AddPackageToList qtquick1
+AddPackageToList qtquickcontrols
+AddPackageToList qtquickcontrols2
+AddPackageToList qttools
+AddPackageToList qtx11extras
+AddPackageToList qttranslations
+AddPackageToList qtgraphicaleffects
+AddPackageToList qtwayland
+AddPackageToList qca
+AddPackageToList otter
+AddPackageToList libdbusmenu-qt
+AddPackageToList phonon
+AddPackageToList phonon-gstreamer
+AddPackageToList attica
+AddPackageToList polkit-qt-1
+AddPackageToList kwayland
+AddPackageToList kdeframeworks/kitemmodels
+AddPackageToList kdeframeworks/kitemviews
+AddPackageToList kdeframeworks/kplotting
+AddPackageToList kdeframeworks/threadweaver
+AddPackageToList kdeframeworks/kcodecs
+AddPackageToList kdeframeworks/kguiaddons
+AddPackageToList kdeframeworks/kidletime
+AddPackageToList kdeframeworks/kwidgetsaddons
+AddPackageToList kdeframeworks/sonnet
+AddPackageToList kdeframeworks/kconfig
+AddPackageToList kdeframeworks/kwindowsystem
+AddPackageToList kdeframeworks/networkmanager-qt
+AddPackageToList kdeframeworks/modemmanager-qt
+AddPackageToList kdeframeworks/bluez-qt
+AddPackageToList kdeframeworks/solid
+AddPackageToList kdeframeworks/karchive
+AddPackageToList kdeframeworks/syntax-highlighting
+AddPackageToList kdeframeworks/kdbusaddons
+AddPackageToList kdeframeworks/kcoreaddons
+AddPackageToList kdeframeworks/kimageformats
+AddPackageToList kdeframeworks/kauth
+AddPackageToList kdeframeworks/kcrash
+AddPackageToList kdeframeworks/kjobwidgets
+AddPackageToList kdeframeworks/ki18n
+AddPackageToList kdeframeworks/kdoctools
+AddPackageToList kdeframeworks/kjs
+AddPackageToList kdeframeworks/kservice
+AddPackageToList kdeframeworks/kglobalaccel
+AddPackageToList kdeframeworks/kpackage
+AddPackageToList kdeframeworks/kpeople
+AddPackageToList kdeframeworks/kconfigwidgets
+AddPackageToList kdeframeworks/kiconthemes
+AddPackageToList kdeframeworks/knotifications
+AddPackageToList kdeframeworks/kcompletion
+AddPackageToList kdeframeworks/kdnssd
+AddPackageToList kdeframeworks/kwallet
+AddPackageToList kdeframeworks/kpty
+AddPackageToList kdeframeworks/kemoticons
+AddPackageToList kdeframeworks/kdesu
+AddPackageToList kdeframeworks/ktextwidgets
+AddPackageToList kdeframeworks/kxmlgui
+AddPackageToList kdeframeworks/kbookmarks
+AddPackageToList kdeframeworks/kio
+AddPackageToList kdeframeworks/kxmlrpcclient
+AddPackageToList kdeframeworks/kdesignerplugin
+AddPackageToList kdeframeworks/knewstuff
+AddPackageToList kdeframeworks/kparts
+AddPackageToList kdeframeworks/kdeclarative
+AddPackageToList kdeframeworks/kcmutils
+AddPackageToList kdeframeworks/kinit
+AddPackageToList kdeframeworks/kded
+AddPackageToList kdeframeworks/knotifyconfig
+AddPackageToList kdeframeworks/kunitconversion
+AddPackageToList kdeframeworks/kjsembed
+AddPackageToList kdeframeworks/kross
+AddPackageToList kdeframeworks/kmediaplayer
+AddPackageToList kdeframeworks/kdewebkit
+AddPackageToList kdeframeworks/ktexteditor
+AddPackageToList kdeframeworks/kapidox
+AddPackageToList kdeframeworks/frameworkintegration
+AddPackageToList kdeframeworks/kdelibs4support
+AddPackageToList kdeframeworks/khtml
+AddPackageToList kwayland-integration
+AddPackageToList kwallet-pam
+AddPackageToList kwalletmanager
+AddPackageToList libkomparediff2
+AddPackageToList grantlee
+AddPackageToList kdevplatform
+AddPackageToList kfilemetadata
+AddPackageToList baloo
+AddPackageToList baloo-widgets
+AddPackageToList kactivities
+AddPackageToList kactivities-stats
+AddPackageToList kpmcore
+AddPackageToList plasma-framework
+AddPackageToList kirigami
+AddPackageToList krunner
+AddPackageToList milou
+AddPackageToList khelpcenter
+AddPackageToList kde-cli-tools
+AddPackageToList kio-extras
+AddPackageToList konqueror
+AddPackageToList kfind
+AddPackageToList kdialog
+AddPackageToList keditbookmarks
+AddPackageToList dolphin
+AddPackageToList libksysguard
+AddPackageToList ksysguard
+AddPackageToList kdecoration
+AddPackageToList kscreenlocker
+AddPackageToList oxygen
+AddPackageToList breeze
+AddPackageToList plasma-integration
+AddPackageToList kwin
+AddPackageToList libkscreen
+AddPackageToList plasma-workspace
+AddPackageToList plasma-desktop
+AddPackageToList kactivitymanagerd
+AddPackageToList khotkeys
+AddPackageToList kinfocenter
+AddPackageToList kmenuedit
+AddPackageToList systemsettings
+AddPackageToList kscreen
+AddPackageToList powerdevil
+AddPackageToList polkit-kde-agent-1
+AddPackageToList rekonq
+AddPackageToList kmix
+AddPackageToList konsole
+AddPackageToList kate
+AddPackageToList ark
+AddPackageToList konversation
+AddPackageToList kcalc
+AddPackageToList kompare
+AddPackageToList dragon
+AddPackageToList plasma-sdk
+AddPackageToList kdeplasma-addons
+AddPackageToList plasma-nm
+AddPackageToList plasma-pa
+AddPackageToList calligra
+AddPackageToList wind
+AddPackageToList hawaii-icon-themes
+AddPackageToList qtaccountsservice
+AddPackageToList libqtxdg
+AddPackageToList greenisland
+AddPackageToList libhawaii
+AddPackageToList fluid
+AddPackageToList hawaii-shell
+AddPackageToList hawaii-workspace
+AddPackageToList hawaii-system-preferences
+AddPackageToList xserver
+AddPackageToList xhost
+AddPackageToList json-glib
+AddPackageToList gdk-pixbuf
+AddPackageToList librsvg
+AddPackageToList yelp-xsl
+AddPackageToList yelp-tools
+AddPackageToList atk
+AddPackageToList at-spi2-core
+AddPackageToList at-spi2-atk
+AddPackageToList graphene
+AddPackageToList gtk
+AddPackageToList zenity
+AddPackageToList gnome-themes-standard
+AddPackageToList dconf
+AddPackageToList unico
+AddPackageToList vte
+AddPackageToList cogl
+AddPackageToList clutter
+AddPackageToList clutter-gtk
+AddPackageToList clutter-gst
+AddPackageToList gobject-introspection
+AddPackageToList gjs
+AddPackageToList libusb
+AddPackageToList gsettings-desktop-schemas
+AddPackageToList libnotify
+AddPackageToList glib-networking
+AddPackageToList libsoup
+AddPackageToList gcr
+AddPackageToList geoclue
+AddPackageToList webkitgtk
+AddPackageToList librest
+AddPackageToList gnome-online-accounts
+AddPackageToList geocode-glib
+AddPackageToList libgweather
+AddPackageToList libgdata
+AddPackageToList evolution-data-server
+AddPackageToList libpeas
+AddPackageToList gtksourceview
+AddPackageToList libsecret
+AddPackageToList libgtop
+AddPackageToList gnome-desktop
+AddPackageToList libcanberra
+AddPackageToList notification-daemon
+AddPackageToList gnome-bluetooth
+AddPackageToList gnome-menus
+AddPackageToList libgnome-keyring
+AddPackageToList network-manager-applet
+AddPackageToList mutter
+AddPackageToList colord-gtk
+AddPackageToList gnome-shell
+AddPackageToList gnome-shell-extensions
+AddPackageToList gnome-settings-daemon
+AddPackageToList gnome-autoar
+AddPackageToList pygobject
+AddPackageToList libgee
+AddPackageToList caribou
+AddPackageToList gnome-session
+AddPackageToList gdm
+AddPackageToList ibus
+AddPackageToList seahorse
+AddPackageToList alacarte
+AddPackageToList nautilus
+AddPackageToList gspell
+AddPackageToList gedit
+AddPackageToList file-roller
+AddPackageToList gnome-font-viewer
+AddPackageToList grilo
+AddPackageToList grilo-plugins
+AddPackageToList gnome-control-center
+AddPackageToList cairo-dock-core
+AddPackageToList cairo-dock-plugins
+AddPackageToList orbital
+AddPackageToList efl
+AddPackageToList enlightenment
+AddPackageToList terminology
+AddPackageToList etrophy
+AddPackageToList e_cho
+AddPackageToList elemines
+AddPackageToList econcentration
+AddPackageToList equate
+AddPackageToList ecrire
+AddPackageToList ephoto
+AddPackageToList SDL
+AddPackageToList SDL_image
+AddPackageToList SDL_ttf
+AddPackageToList glbinding
+AddPackageToList supertux
+AddPackageToList FreeGLUT
+AddPackageToList glfw
+AddPackageToList ffmpeg
+AddPackageToList mpv
+AddPackageToList glmark
+AddPackageToList bemenu
+AddPackageToList wlc
+AddPackageToList orbment
+AddPackageToList sway
 
 if [[ ! -e /usr/bin/ubiquity ]]
 then
-  COMPILELIST+="calamares"
-  COMPILELIST+=$'\n'
+  AddPackageToList calamares
 fi
 
-echo "$COMPILELIST" | awk -F "#" '{print $1}' | while read BUILDNAME
+echo "$COMPILELIST" | while read BUILDNAME
 do
 
   #compile_all is running to download the source
