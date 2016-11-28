@@ -148,6 +148,7 @@ with the requested revisions file generated from a previous build, or a download
 You may also specify a list of pacakges in
 
      "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt 
+
 to batch restart, one package per line.
 
 
@@ -341,7 +342,8 @@ do
   #Delete the file, don't allow path clobbering for the current directory, or parent directory. rm doesnt delete directories by default, but be paranoid anyway
   if [[ ! -z $RESETPACKAGE  && $RESETPACKAGE != '.' && $RESETPACKAGE != '..' ]]
   then
-   rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/control/"$RESETPACKAGE"
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/control/"$RESETPACKAGE"
+    echo "       Marked package: $RESETPACKAGE for rebuild."
   fi
 done
 echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
