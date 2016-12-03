@@ -294,6 +294,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
 
 
 #create the folders for the build systems, and for any folder that will be bind mounted in
@@ -309,6 +310,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
 
 #Copy external builders into thier own directory, make them executable
 cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
@@ -435,6 +437,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
 
