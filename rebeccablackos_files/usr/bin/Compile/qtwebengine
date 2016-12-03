@@ -52,12 +52,14 @@ function PackageDownloadSource
 {
 cd src/3rdparty/
 git fetch https://codereview.qt-project.org/qt/qtwebengine-chromium refs/changes/52/178552/2 && git format-patch -1 --stdout FETCH_HEAD > qtchrome.diff
-patch -p1 < qtchrome.diff
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+cd src/3rdparty/
+patch -p1 < qtchrome.diff
+cd ../..
 qmake -r CONFIG+=release WEBENGINE_CONFIG+=use_system_ffmpeg
 }
 
