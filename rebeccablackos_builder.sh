@@ -1,4 +1,4 @@
-#! /usr/bin/sudo /bin/bash
+#! /bin/bash
 #    Copyright (c) 2012, 2013, 2014, 2015, 2016 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
 #
 #    This file is part of RebeccaBlackOS.
@@ -16,18 +16,21 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#unset most varaibles
-while read var
-do 
-  unset "$var"
-done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" ) 
-export TERM=linux
-PATH=$(getconf PATH):/sbin:/usr/sbin
-export LANG=en_US.UTF-8
-HOMELOCATION=$HOME
+function setup_buildprocess
+{
+  #unset most varaibles
+  while read var
+  do 
+    unset "$var"
+  done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" ) 
+  export TERM=linux
+  PATH=$(getconf PATH):/sbin:/usr/sbin
+  export LANG=en_US.UTF-8
+  HOMELOCATION=$HOME
 
-#If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
+  #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
+  trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
+}
 
 #Function to start all arguments as a command in a seperate PID and mount namespace
 function NAMESPACE_EXECUTE {
@@ -176,7 +179,7 @@ if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/Don
 then
   echo "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
-  rm -rf "$BUILDLOCATION"/debootstrap
+  rm -rf "$BUILDLOCATION"/debootstrap/*
   rm "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
   mkdir -p "$BUILDLOCATION"/debootstrap
   FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
@@ -220,7 +223,7 @@ REBUILT="to update"
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
   echo "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
   touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
 fi
@@ -229,7 +232,7 @@ fi
 if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
 then
   echo "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
 fi
@@ -238,7 +241,7 @@ fi
 if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
 then
   echo "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
   touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
 fi
@@ -267,13 +270,13 @@ then
   then
     echo "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
     #clean up old files
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
     rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
@@ -286,15 +289,15 @@ fi
 
 #Delete any stale files
 echo "Cleaning up any stale remaining files from any incomplete build..."
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 
 #create the folders for the build systems, and for any folder that will be bind mounted in
@@ -311,6 +314,71 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+
+#Determine the size of the ram disk, 3GB free, give 1GB for storing logs and base
+FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
+if [[ $FREERAM -gt 3000000 ]]
+then
+  RAMDISK_FOR_BASE=1
+  RAMDISKSIZE=1000000
+fi
+#4G free, give 1GB more for srcbuild overlay. (emptied after each build)
+if [[ $FREERAM -gt 5000000 ]]
+then
+  RAMDISK_FOR_SRCBUILD=1
+  RAMDISKSIZE=2000000
+fi
+#8GB free, give 4GB more for phase_3 overlay
+if [[ $FREERAM -gt 8000000 ]]
+then
+  RAMDISK_FOR_PHASE3=1
+  RAMDISKSIZE=6000000
+fi
+#14GB free, give 6GB more for phase_3 overlay
+if [[ $FREERAM -gt 14000000 ]]
+then
+  RAMDISK_FOR_REMASTERSYS=1
+  RAMDISKSIZE=16000000
+fi
+
+#Mount the ramdisk
+mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+RAMDISK_STATUS=$?
+
+#Create the folders in the ramdisk
+if [[ $RAMDISK_FOR_BASE == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/buildlogs
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/vartmp
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/importdata
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/externalbuilders
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/exportsource
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/importdata "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/externalbuilders "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/exportsource "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
+fi
+
+if [[ $RAMDISK_FOR_SRCBUILD == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay
+fi
+if [[ $RAMDISK_FOR_PHASE3 == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
+fi
+if [[ $RAMDISK_FOR_REMASTERSYS == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/remastersys
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
+fi
+
 
 #Copy external builders into thier own directory, make them executable
 cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
@@ -410,9 +478,9 @@ chmod 777 "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.t
 echo "Cleaning up non reusable build data..."  
 
 #Clean up.
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/*
 POSTCLEANUP_STARTTIME=$(date +%s)
 NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
 POSTCLEANUP_ENDTIME=$(date +%s)
@@ -433,11 +501,11 @@ cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions
 
 #Continue cleaning non reusable files
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 
 
@@ -469,4 +537,11 @@ exit
 }
 
 #Start the build process
-run_buildprocess
+if [[ $BUILDER_IS_UNSHARED != 1 ]]
+then
+  export BUILDER_IS_UNSHARED=1
+  sudo -E unshare -f --mount "$0" "$@"
+else
+  setup_buildprocess
+  run_buildprocess
+fi

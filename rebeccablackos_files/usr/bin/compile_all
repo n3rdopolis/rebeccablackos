@@ -36,6 +36,11 @@ function CompilePackage
   #compile_all is running to build the source
   if [[ "$argument" == build-only ]]
   then
+    #Cleanup any files in the srcbuild_overlay from the last build
+    if [[ $(mountpoint -q /; echo $?) == 0 ]]
+    then
+      rm -rf /tmp/srcbuild_overlay/*
+    fi
     echo "building $BUILDNAME"
     "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
   fi
@@ -59,7 +64,7 @@ function CompilePackage
   then
     "/usr/bin/Compile/$BUILDNAME"
   fi
-
+  
 }
 
 #build these packages in this order. # symbol is a comment
