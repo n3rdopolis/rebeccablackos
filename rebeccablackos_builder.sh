@@ -315,6 +315,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
 #Determine the size of the ram disk, 3GB free, give 1GB for storing logs and base
@@ -369,7 +370,7 @@ then
 fi
 if [[ $RAMDISK_FOR_PHASE3 == 1 && $RAMDISK_STATUS == 0 ]]
 then
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
 fi
