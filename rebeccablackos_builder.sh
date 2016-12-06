@@ -338,22 +338,23 @@ fi
 if [[ $FREERAM -gt 5000000 ]]
 then
   RAMDISK_FOR_SRCBUILD=1
-  RAMDISKSIZE=2000000
+  RAMDISKSIZE=3000000
 fi
 #8GB free, give 4GB more for phase_3 overlay
-if [[ $FREERAM -gt 8000000 ]]
+if [[ $FREERAM -gt 7000000 ]]
 then
   RAMDISK_FOR_PHASE3=1
-  RAMDISKSIZE=6000000
+  RAMDISKSIZE=5000000
 fi
 #14GB free, give 6GB more for phase_3 overlay
-if [[ $FREERAM -gt 14000000 ]]
+if [[ $FREERAM -gt 8000000 ]]
 then
   RAMDISK_FOR_REMASTERSYS=1
-  RAMDISKSIZE=16000000
+  RAMDISKSIZE=10000000
 fi
 
 #Mount the ramdisk
+mount --make-rprivate /
 mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 RAMDISK_STATUS=$?
 
