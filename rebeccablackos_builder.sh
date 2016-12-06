@@ -327,27 +327,27 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
-#Determine the size of the ram disk, 3GB free, give 1GB for storing logs and base
+#Determine the size of the ram disk, 3GB free, give 1GB for storing logs and base, (imported files, vartmp)
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
 if [[ $FREERAM -gt 3000000 ]]
 then
   RAMDISK_FOR_BASE=1
   RAMDISKSIZE=1000000
 fi
-#4G free, give 1GB more for srcbuild overlay. (emptied after each build)
+#5G free, give 2GB more for srcbuild overlay. (emptied after each build)
 if [[ $FREERAM -gt 5000000 ]]
 then
   RAMDISK_FOR_SRCBUILD=1
   RAMDISKSIZE=3000000
 fi
-#8GB free, give 4GB more for phase_3 overlay
+#7GB free, give 2GB more for phase_3 overlay
 if [[ $FREERAM -gt 7000000 ]]
 then
   RAMDISK_FOR_PHASE3=1
   RAMDISKSIZE=5000000
 fi
-#14GB free, give 6GB more for phase_3 overlay
-if [[ $FREERAM -gt 8000000 ]]
+#12GB free, give 6GB more for Remastersys
+if [[ $FREERAM -gt 12000000 ]]
 then
   RAMDISK_FOR_REMASTERSYS=1
   RAMDISKSIZE=10000000
