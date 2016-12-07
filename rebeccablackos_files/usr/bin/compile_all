@@ -21,6 +21,7 @@
 
 argument=$1
 
+CLEANUPOVERLAY=1
 export MAKEDEBS=1
 
 function CompilePackage
@@ -37,12 +38,12 @@ function CompilePackage
   if [[ "$argument" == build-only ]]
   then
     #Cleanup any files in the srcbuild_overlay from the last build
-    if [[ $(mountpoint -q /; echo $?) == 0 ]]
+    echo "building $BUILDNAME"
+    "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
+    if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
     then
       rm -rf /tmp/srcbuild_overlay/*
     fi
-    echo "building $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
   fi
 
   #Install the smaller version of the package
