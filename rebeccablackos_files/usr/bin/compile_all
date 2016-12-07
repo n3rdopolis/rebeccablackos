@@ -43,6 +43,7 @@ function CompilePackage
     if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
     then
       rm -rf /tmp/srcbuild_overlay/*
+      mount -o remount /srcbuild/
     fi
   fi
 
