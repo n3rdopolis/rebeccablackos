@@ -112,6 +112,7 @@ function UserSessionWorker
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
+  export WLM_SESSION_LOG=$HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   echo "Started with the arguments: $ArgumentString" >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   eval set -- $ArgumentString >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   ArgArray=($ArgumentString)
