@@ -543,7 +543,7 @@ fi
 echo -n "Phase 1 build time: $((PHASE1_ENDTIME-PHASE1_STARTTIME)) seconds, "
 echo -n "Phase 2 build time: $((PHASE2_ENDTIME-PHASE2_STARTTIME)) seconds, "
 echo -n "Phase 3 build time: $((PHASE3_ENDTIME-PHASE3_STARTTIME)) seconds, "
-echo    "Post Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
+echo    "Post Cleanup/Export time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
 
 
 exit
