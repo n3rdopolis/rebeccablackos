@@ -322,6 +322,8 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild
@@ -452,7 +454,7 @@ PHASE1_ENDTIME=$(date +%s)
 PHASE2_STARTTIME=$(date +%s)
 NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
-
+sleep 9999999999999999
 PHASE3_STARTTIME=$(date +%s)
 NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase3.sh 
 PHASE3_ENDTIME=$(date +%s)
