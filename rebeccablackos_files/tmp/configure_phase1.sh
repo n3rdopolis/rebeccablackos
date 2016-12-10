@@ -186,5 +186,8 @@ apt-get -d -u dselect-upgrade --no-install-recommends -y                2>&1 |te
 dpkg --clear-selections
 dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 
+#Remove packages that can no longer be downloaded to preserve space
+apt-get autoclean -o APT::Clean-Installed=off
+
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
