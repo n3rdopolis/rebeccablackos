@@ -454,7 +454,6 @@ PHASE1_ENDTIME=$(date +%s)
 PHASE2_STARTTIME=$(date +%s)
 NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
-sleep 9999999999999999
 PHASE3_STARTTIME=$(date +%s)
 NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase3.sh 
 PHASE3_ENDTIME=$(date +%s)
