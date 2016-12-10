@@ -480,13 +480,6 @@ else
     mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
 fi 
 
-
-#allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-chmod 777 "$HOMELOCATION"/RebeccaBlackOS*.iso "$HOMELOCATION"/RebeccaBlackOS_*.txt "$HOMELOCATION"/RebeccaBlackOS_*.tar.gz
-
-
 echo "Cleaning up non reusable build data..."  
 POSTCLEANUP_STARTTIME=$(date +%s)
 #Clean up.
@@ -511,6 +504,12 @@ rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
+
+#allow the user to actually read the iso   
+chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
+chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
+chmod 777 "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
+
 
 #Continue cleaning non reusable files
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
