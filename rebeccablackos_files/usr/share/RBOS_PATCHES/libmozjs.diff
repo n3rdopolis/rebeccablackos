@@ -1,0 +1,224 @@
+diffs from jhbuild
+--- mozjs-31.2.0/config/rules.mk	2014-10-10 14:31:11.000000000 -0400
++++ mozjs-31.2.0/config/rules.mk	2016-12-14 11:04:25.355936652 -0500
+@@ -442,7 +442,7 @@
+ ifdef IS_COMPONENT
+ EXTRA_DSO_LDOPTS	+= -bundle
+ else
+-EXTRA_DSO_LDOPTS	+= -dynamiclib -install_name @executable_path/$(SHARED_LIBRARY) -compatibility_version 1 -current_version 1 -single_module
++EXTRA_DSO_LDOPTS	+= -dynamiclib -install_name $(abspath $(prefix))/lib/$(SHARED_LIBRARY) -compatibility_version 1 -current_version 1 -single_module
+ endif
+ endif
+ endif
+
+--- mozjs-31.2.0/js/public/Utility.h	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/public/Utility.h	2016-12-14 11:07:57.240689094 -0500
+@@ -94,9 +94,18 @@
+             return nullptr; \
+         } \
+     } while (0)
++#  define JS_OOM_POSSIBLY_FAIL_BOOL() \
++    do \
++    { \
++        if (++OOM_counter > OOM_maxAllocations) { \
++            JS_OOM_CALL_BP_FUNC();\
++            return false; \
++        } \
++    } while (0)
+ 
+ # else
+ #  define JS_OOM_POSSIBLY_FAIL() do {} while(0)
++#  define JS_OOM_POSSIBLY_FAIL_BOOL() do {} while(0)
+ # endif /* DEBUG || JS_OOM_BREAKPOINT */
+ 
+ static inline void* js_malloc(size_t bytes)
+
+
+--- mozjs-31.2.0/js/src/builtin/TypedObject.cpp	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/src/builtin/TypedObject.cpp	2016-12-14 11:04:25.355936652 -0500
+@@ -710,12 +710,12 @@
+     contents.append(")");
+     RootedAtom stringRepr(cx, contents.finishAtom());
+     if (!stringRepr)
+-        return nullptr;
++        return false;
+ 
+     // Extract ArrayType.prototype
+     RootedObject arrayTypePrototype(cx, GetPrototype(cx, arrayTypeGlobal));
+     if (!arrayTypePrototype)
+-        return nullptr;
++        return false;
+ 
+     // Create the instance of ArrayType
+     Rooted<UnsizedArrayTypeDescr *> obj(cx);
+@@ -728,7 +728,7 @@
+     if (!JSObject::defineProperty(cx, obj, cx->names().length,
+                                   UndefinedHandleValue, nullptr, nullptr,
+                                   JSPROP_READONLY | JSPROP_PERMANENT))
+-        return nullptr;
++        return false;
+ 
+     args.rval().setObject(*obj);
+     return true;
+@@ -762,7 +762,7 @@
+     if (!size.isValid()) {
+         JS_ReportErrorNumber(cx, js_GetErrorMessage, nullptr,
+                              JSMSG_TYPEDOBJECT_TOO_BIG);
+-        return nullptr;
++        return false;
+     }
+ 
+     // Construct a canonical string `new ArrayType(<elementType>).dimension(N)`:
+@@ -775,7 +775,7 @@
+     contents.append(")");
+     RootedAtom stringRepr(cx, contents.finishAtom());
+     if (!stringRepr)
+-        return nullptr;
++        return false;
+ 
+     // Create the sized type object.
+     Rooted<SizedArrayTypeDescr*> obj(cx);
+@@ -793,7 +793,7 @@
+     if (!JSObject::defineProperty(cx, obj, cx->names().length,
+                                   lengthVal, nullptr, nullptr,
+                                   JSPROP_READONLY | JSPROP_PERMANENT))
+-        return nullptr;
++        return false;
+ 
+     // Add `unsized` property, which is a link from the sized
+     // array to the unsized array.
+@@ -801,7 +801,7 @@
+     if (!JSObject::defineProperty(cx, obj, cx->names().unsized,
+                                   unsizedTypeDescrValue, nullptr, nullptr,
+                                   JSPROP_READONLY | JSPROP_PERMANENT))
+-        return nullptr;
++        return false;
+ 
+     args.rval().setObject(*obj);
+     return true;
+@@ -1253,7 +1253,7 @@
+     Rooted<TypedProto*> proto(cx);
+     proto = NewObjectWithProto<TypedProto>(cx, objProto, nullptr, TenuredObject);
+     if (!proto)
+-        return nullptr;
++        return false;
+     proto->initTypeDescrSlot(*descr);
+     descr->initReservedSlot(JS_DESCR_SLOT_TYPROTO, ObjectValue(*proto));
+ 
+@@ -1358,14 +1358,14 @@
+ #define BINARYDATA_SCALAR_DEFINE(constant_, type_, name_)                       \
+     if (!DefineSimpleTypeDescr<ScalarTypeDescr>(cx, global, module, constant_,      \
+                                             cx->names().name_))                 \
+-        return nullptr;
++        return false;
+     JS_FOR_EACH_SCALAR_TYPE_REPR(BINARYDATA_SCALAR_DEFINE)
+ #undef BINARYDATA_SCALAR_DEFINE
+ 
+ #define BINARYDATA_REFERENCE_DEFINE(constant_, type_, name_)                    \
+     if (!DefineSimpleTypeDescr<ReferenceTypeDescr>(cx, global, module, constant_,   \
+                                                cx->names().name_))              \
+-        return nullptr;
++        return false;
+     JS_FOR_EACH_REFERENCE_TYPE_REPR(BINARYDATA_REFERENCE_DEFINE)
+ #undef BINARYDATA_REFERENCE_DEFINE
+ 
+@@ -1375,14 +1375,14 @@
+     arrayType = DefineMetaTypeDescr<ArrayMetaTypeDescr>(
+         cx, global, module, TypedObjectModuleObject::ArrayTypePrototype);
+     if (!arrayType)
+-        return nullptr;
++        return false;
+ 
+     RootedValue arrayTypeValue(cx, ObjectValue(*arrayType));
+     if (!JSObject::defineProperty(cx, module, cx->names().ArrayType,
+                                   arrayTypeValue,
+                                   nullptr, nullptr,
+                                   JSPROP_READONLY | JSPROP_PERMANENT))
+-        return nullptr;
++        return false;
+ 
+     // StructType.
+ 
+@@ -1390,14 +1390,14 @@
+     structType = DefineMetaTypeDescr<StructMetaTypeDescr>(
+         cx, global, module, TypedObjectModuleObject::StructTypePrototype);
+     if (!structType)
+-        return nullptr;
++        return false;
+ 
+     RootedValue structTypeValue(cx, ObjectValue(*structType));
+     if (!JSObject::defineProperty(cx, module, cx->names().StructType,
+                                   structTypeValue,
+                                   nullptr, nullptr,
+                                   JSPROP_READONLY | JSPROP_PERMANENT))
+-        return nullptr;
++        return false;
+ 
+     // Everything is setup, install module on the global object:
+     RootedValue moduleValue(cx, ObjectValue(*module));
+@@ -1407,7 +1407,7 @@
+                                   nullptr, nullptr,
+                                   0))
+     {
+-        return nullptr;
++        return false;
+     }
+ 
+     return module;
+@@ -2466,7 +2466,7 @@
+         if (length < 0) {
+             JS_ReportErrorNumber(cx, js_GetErrorMessage,
+                                  nullptr, JSMSG_TYPEDOBJECT_BAD_ARGS);
+-            return nullptr;
++            return false;
+         }
+         Rooted<TypedObject*> obj(cx, createZeroed(cx, callee, length));
+         if (!obj)
+
+--- mozjs-31.2.0/js/src/frontend/BytecodeCompiler.cpp	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/src/frontend/BytecodeCompiler.cpp	2016-12-14 11:04:25.355936652 -0500
+@@ -544,7 +544,7 @@
+ 
+     RootedScriptSource sourceObject(cx, CreateScriptSourceObject(cx, options));
+     if (!sourceObject)
+-        return nullptr;
++        return false;
+     ScriptSource *ss = sourceObject->source();
+ 
+     SourceCompressionTask sct(cx);
+
+--- mozjs-31.2.0/js/src/jit/MCallOptimize.cpp	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/src/jit/MCallOptimize.cpp	2016-12-14 11:04:25.355936652 -0500
+@@ -1739,7 +1739,7 @@
+     current->push(store);
+ 
+     if (NeedsPostBarrier(info(), callInfo.getArg(2)))
+-        current->add(MPostWriteBarrier::New(alloc(), callInfo.thisArg(), callInfo.getArg(2)));
++        current->add(MPostWriteBarrier::New(alloc(), callInfo.getArg(0), callInfo.getArg(2)));
+ 
+     return InliningStatus_Inlined;
+ }
+
+--- mozjs-31.2.0/js/src/jsgcinlines.h	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/src/jsgcinlines.h	2016-12-14 11:07:57.240689094 -0500
+@@ -408,7 +408,7 @@
+ static inline bool
+ PossiblyFail()
+ {
+-    JS_OOM_POSSIBLY_FAIL();
++    JS_OOM_POSSIBLY_FAIL_BOOL();
+     return true;
+ }
+ 
+
+--- mozjs-31.2.0/js/src/vm/Debugger.cpp	2014-10-10 14:31:12.000000000 -0400
++++ mozjs-31.2.0/js/src/vm/Debugger.cpp	2016-12-14 11:04:25.359936666 -0500
+@@ -4113,7 +4113,7 @@
+ UpdateFrameIterPc(FrameIter &iter)
+ {
+     if (iter.abstractFramePtr().isRematerializedFrame()) {
+-#ifdef DEBUG
++#if defined(DEBUG) && defined(JS_ION)
+         // Rematerialized frames don't need their pc updated. The reason we
+         // need to update pc is because we might get the same Debugger.Frame
+         // object for multiple re-entries into debugger code from debuggee
