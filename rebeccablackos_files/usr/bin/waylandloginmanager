@@ -985,7 +985,6 @@ function StartUserSession
 
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
-  Create_XDG_RUNTIME_DIR $LOGINUSER
   chvt $USERSESSIONTTY &
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   $SLEEPCMD 5
@@ -1249,13 +1248,18 @@ function LeavePrompt
 #This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 1 second, then try to call it back up
 function StartLoginManagerDisplay
 {
-  Create_XDG_RUNTIME_DIR $LOGINMANAGERDISPLAYUSER
   for (( StartTimes = 0 ; StartTimes < 5 ;))
   do
-    systemctl is-active wlm-loginmanagerdisplay.service &>/dev/null
-    LOGINMANAGERDISPLAYSTATUS=$?
-    #This determines if the loginmanagerdisplay is running, by checking if the socket file is in use by a process or not.
-    if [[ $LOGINMANAGERDISPLAYSTATUS != 0 ]]
+
+    #Detect if the socket for the loginmanagerdisplay exists
+    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay ]]
+    then
+      LOGINMANAGERDISPLAYSTATUS=1
+    else
+      LOGINMANAGERDISPLAYSTATUS=0
+    fi
+
+    if [[ $LOGINMANAGERDISPLAYSTATUS == 0 ]]
     then 
       (( StartTimes++ ))
       logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY" -s  >>/var/log/waylandloginmanager 2>&1
@@ -1431,7 +1435,7 @@ function ReadCommandFIFO
       LastUserActionPID=$!
     fi
 
-    read ActiveSystemTTY < /sys/class/tty/tty0/active
+    read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
     ActiveSystemTTY=${ActiveSystemTTY:3}
 
     #Create temporary arrays
