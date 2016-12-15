@@ -553,12 +553,8 @@ function GetNextTTY
 #Export session data so the waylandloginmanager has user switching data in case of a reload
 function ExportSessionData
 {
-  declare -p AllSessions        > /run/waylandloginmanager/sessiondata
-  declare -p AllSessionTTYs    >> /run/waylandloginmanager/sessiondata 
-  declare -p AllSessionPIDs    >> /run/waylandloginmanager/sessiondata 
-  declare -p AllSessionUsers   >> /run/waylandloginmanager/sessiondata 
-  declare -p AllSessionIDs     >> /run/waylandloginmanager/sessiondata 
-  sed -i 's/declare/declare -g/g' /run/waylandloginmanager/sessiondata
+  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs)
+  echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
