@@ -150,9 +150,9 @@ function UserSessionWorker
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
     #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
-    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<15 ]]
+    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<3 ]]
     do
-      sleep 1
+      $SLEEPCMD 5
       ((WaitTimes++))
     done
     #If the socket doesn't exist, then the server failed to start, and switch back
@@ -179,7 +179,7 @@ function UserSessionWorker
     fg 2
     echo "The guest session has ended. Terminating the host..." &>> $HOME/wlsessionlogs/waylandhost.log
     kill -15 $HostServerPID &> /dev/null
-    sleep 3
+    $SLEEPCMD 3
     kill -9 $HostServerPID &> /dev/null
   else
     fg 1
@@ -617,7 +617,7 @@ function DialogWait
     percent=$(( $countseconds * 100 / $waitseconds ))
     echo $percent
     ((countseconds++))
-    sleep 1
+    $SLEEPCMD 1
   done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
 }
 
@@ -626,7 +626,7 @@ function DisplayServerWait
 {
   while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay &>/dev/null; echo $?) == 1 ]]
   do
-    sleep 1
+    $SLEEPCMD 1
   done
 }
 
@@ -988,7 +988,7 @@ function StartUserSession
   Create_XDG_RUNTIME_DIR $LOGINUSER
   chvt $USERSESSIONTTY &
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
-  sleep 5
+  $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
   #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
@@ -1264,7 +1264,7 @@ function StartLoginManagerDisplay
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
-        sleep 3
+        $SLEEPCMD 3
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
         GetLoginManagerDisplaySession 1
         loginctl activate $LOGINMANAGERDISPLAYSESSION
@@ -1272,7 +1272,7 @@ function StartLoginManagerDisplay
         logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
       fi
     fi
-    sleep 1
+    $SLEEPCMD 5
   done
   logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
   openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
@@ -1389,12 +1389,12 @@ ZENITYSTATUS=$?
   then
     echo -e "\n$USERACTION" > /run/waylandloginmanager/loginmanager_control
   else
-    sleep .1
+    $SLEEPCMD .1
   fi
   #if zenity segfaults, then something is wrong. wait longer
   if [[ $ZENITYSTATUS == 139 ]]
   then
-    sleep 30
+    $SLEEPCMD 30
   fi
 }
 
@@ -1405,7 +1405,7 @@ function CommandFIFOProxy
   while [ 1 ]
   do
     sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch$|^Change$|^Login$|^Leave$|^RegisterSession$|^Info$|^Debug$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
-    sleep .1
+    $SLEEPCMD .1
   done
 }
 
@@ -1573,10 +1573,19 @@ function ReadCommandFIFO
     else
       logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
     fi
-    sleep .05
+    $SLEEPCMD .5
   done
 }
 
+
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
 
 #If the waylandloginmanager is started with no arguments assume default operation. 
 #If it is started with --uihost, then all arguments after that are treated as a command, but to set LD_LIBRARY_PATH.
