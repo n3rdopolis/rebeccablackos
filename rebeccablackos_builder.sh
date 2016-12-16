@@ -75,6 +75,8 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 export BUILDLOCATION=~/RBOS_Build_Files
+export BUILDUNIXNAME=rebeccablackos
+export BUILDFRIENDLYNAME=RebeccaBlackOS
 
 #make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
@@ -82,7 +84,7 @@ mkdir -p "$BUILDLOCATION"
 #switch to that folder
 cd "$BUILDLOCATION"
 
-echo "Build script for RebeccaBlackOS. The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
+echo "Build script for "$BUILDFRIENDLYNAME". The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
 
 
 "
@@ -140,10 +142,10 @@ echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
-   File:              ${HOME}/RebeccaBlackOS_"$BUILDARCH".iso
-   File:              ${HOME}/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
-   File:              ${HOME}/RebeccaBlackOS_Revisions_"$BUILDARCH".txt
-   File:              ${HOME}/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
+   File:              ${HOME}/"$BUILDFRIENDLYNAME"_"$BUILDARCH".iso
+   File:              ${HOME}/"$BUILDFRIENDLYNAME"_DevDbg_"$BUILDARCH".iso
+   File:              ${HOME}/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt
+   File:              ${HOME}/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
 "
 
 echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PGDOWN (OR THE SCROLL WHEEL OR SCROLL BAR IF AVALIBLE) AND THEN PRESS ENTER TO CONTINUE..."
@@ -398,7 +400,7 @@ cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/ex
 chmod +x "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 
 #Copy all external files before they are used
-rsync "$SCRIPTFOLDERPATH"/rebeccablackos_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+rsync "$SCRIPTFOLDERPATH"/"$BUILDUNIXNAME"_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 rsync "$SCRIPTFOLDERPATH"/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 
 #Support importing the control file to use fixed revisions of the source code
@@ -443,27 +445,27 @@ PREPARE_ENDTIME=$(date +%s)
 if [[ $RUN_PHASE_0 == 1 ]]
 then
   PHASE0_STARTTIME=$(date +%s)
-  NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase0.sh
+  NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
   PHASE0_ENDTIME=$(date +%s)
 fi
 
 PHASE1_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase1.sh
+NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
 PHASE1_ENDTIME=$(date +%s)
 
 PHASE2_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase2.sh
+NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
 PHASE3_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/rebeccablackos_phase3.sh 
+NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh 
 PHASE3_ENDTIME=$(date +%s)
 
 #Main Build Complete, Extract ISO and logs
 
 
 #Take a snapshot of the source
-rm "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz
-tar -czvf "$HOMELOCATION"/RebeccaBlackOS_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . &>/dev/null
+rm "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
+tar -czvf "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . &>/dev/null
 
 
 #If the live cd did not build then tell user  
@@ -471,13 +473,13 @@ if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-fu
 then  
   ISOFAILED=1
 else
-    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/RebeccaBlackOS_DevDbg_"$BUILDARCH".iso
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_DevDbg_"$BUILDARCH".iso
 fi 
 if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso ]]
 then  
   ISOFAILED=1
 else
-    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/RebeccaBlackOS_"$BUILDARCH".iso
+    mv "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom.iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_"$BUILDARCH".iso
 fi 
 
 echo "Cleaning up non reusable build data..."  
@@ -503,12 +505,12 @@ cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/"$E
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" 
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/RebeccaBlackOS_Revisions_"$BUILDARCH".txt"
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
 
 #allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
-chgrp $SUDO_USER "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
-chmod 777 "$HOMELOCATION"/RebeccaBlackOS*_"$BUILDARCH".iso "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".txt "$HOMELOCATION"/RebeccaBlackOS_*_"$BUILDARCH".tar.gz
+chown $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+chgrp $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+chmod 777 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
 
 
 #Continue cleaning non reusable files
