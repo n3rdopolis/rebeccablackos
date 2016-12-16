@@ -469,6 +469,7 @@ tar -czvf "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz -C "$B
 
 
 #If the live cd did not build then tell user  
+echo "Moving built ISO files..."
 if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso ]]
 then  
   ISOFAILED=1
