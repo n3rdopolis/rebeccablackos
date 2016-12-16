@@ -1440,6 +1440,7 @@ function ReadCommandFIFO
     NewAllSessionUsers=()
     NewAllSessionIDs=()
 
+    NonRunningSessions=0
     #Go through all sessions, and then rebuild the array to only store running sessions
     for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
     do
@@ -1454,6 +1455,8 @@ function ReadCommandFIFO
         NewAllSessionPIDs+=($RunningSessionPID)
         NewAllSessionUsers+=($RunningSessionUser)
         NewAllSessionIDs+=($RunningSessionID)
+      else
+        ((NonRunningSessions++))
       fi
 
       #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
@@ -1467,20 +1470,24 @@ function ReadCommandFIFO
       fi
     done
 
-    #Set the actual arrays to be the value of the temporary arrays
-    AllSessionTTYs=(${NewAllSessionTTYs[@]})
-    AllSessionPIDs=(${NewAllSessionPIDs[@]})
-    AllSessionUsers=(${NewAllSessionUsers[@]})
-    AllSessionIDs=(${NewAllSessionIDs[@]})
+    #If a session has terminated, update the arrays, export the data
+    if [[ $NonRunningSessions -gt 0 ]]
+    then 
+      #Set the actual arrays to be the value of the temporary arrays
+      AllSessionTTYs=(${NewAllSessionTTYs[@]})
+      AllSessionPIDs=(${NewAllSessionPIDs[@]})
+      AllSessionUsers=(${NewAllSessionUsers[@]})
+      AllSessionIDs=(${NewAllSessionIDs[@]})
 
+      #Export the Session Data
+      ExportSessionData
+    fi
+    
     #Remove the temporary arrays
     unset NewAllSessionTTYs
     unset NewAllSessionPIDs
     unset NewAllSessionUsers
     unset NewAllSessionIDs
-
-    #Export the Session Data
-    ExportSessionData
 
 
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 20 bytes at a time.
