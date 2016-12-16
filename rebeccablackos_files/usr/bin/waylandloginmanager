@@ -1413,6 +1413,7 @@ function CommandFIFOProxy
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
+  SessionCheckLoopCount=0
   #loop 'forever'
   while [ 1 ]
   do
@@ -1431,63 +1432,68 @@ function ReadCommandFIFO
       LastUserActionPID=$!
     fi
 
-    read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
-    ActiveSystemTTY=${ActiveSystemTTY:3}
+    #Check for the status of the registered sessions, a limited number of times
+    ((SessionCheckLoopCount++))
+    if [[ $SessionCheckLoopCount == 10 ]]
+    then
+      SessionCheckLoopCount=0
+      read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+      ActiveSystemTTY=${ActiveSystemTTY:3}
 
-    #Create temporary arrays
-    NewAllSessionTTYs=()
-    NewAllSessionPIDs=()
-    NewAllSessionUsers=()
-    NewAllSessionIDs=()
+      #Create temporary arrays
+      NewAllSessionTTYs=()
+      NewAllSessionPIDs=()
+      NewAllSessionUsers=()
+      NewAllSessionIDs=()
 
-    NonRunningSessions=0
-    #Go through all sessions, and then rebuild the array to only store running sessions
-    for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
-    do
-      RunningSessionTTY=${AllSessionTTYs[$element]}
-      RunningSessionPID=${AllSessionPIDs[$element]}
-      RunningSessionUser=${AllSessionUsers[$element]}
-      RunningSessionID=${AllSessionIDs[$element]}
-      #If the session is alive, add its data to the new arrays
-      if [[ -e /proc/$RunningSessionPID/environ ]]
-      then
-        NewAllSessionTTYs+=($RunningSessionTTY)
-        NewAllSessionPIDs+=($RunningSessionPID)
-        NewAllSessionUsers+=($RunningSessionUser)
-        NewAllSessionIDs+=($RunningSessionID)
-      else
-        ((NonRunningSessions++))
-        #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-        if [[ $RunningSessionTTY == $ActiveSystemTTY ]]
+      NonRunningSessions=0
+      #Go through all sessions, and then rebuild the array to only store running sessions
+      for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
+      do
+        RunningSessionTTY=${AllSessionTTYs[$element]}
+        RunningSessionPID=${AllSessionPIDs[$element]}
+        RunningSessionUser=${AllSessionUsers[$element]}
+        RunningSessionID=${AllSessionIDs[$element]}
+        #If the session is alive, add its data to the new arrays
+        if [[ -e /proc/$RunningSessionPID/environ ]]
         then
-          if [[ ! -z $RunningSessionTTY ]]
+          NewAllSessionTTYs+=($RunningSessionTTY)
+          NewAllSessionPIDs+=($RunningSessionPID)
+          NewAllSessionUsers+=($RunningSessionUser)
+          NewAllSessionIDs+=($RunningSessionID)
+        else
+          ((NonRunningSessions++))
+          #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
+          if [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
-            ResetTTYMode $RunningSessionTTY
+            if [[ ! -z $RunningSessionTTY ]]
+            then
+              ResetTTYMode $RunningSessionTTY
+            fi
+            loginctl activate $LOGINMANAGERDISPLAYSESSION
           fi
-          loginctl activate $LOGINMANAGERDISPLAYSESSION
         fi
+      done
+
+      #If a session has terminated, update the arrays, export the data
+      if [[ $NonRunningSessions -gt 0 ]]
+      then 
+        #Set the actual arrays to be the value of the temporary arrays
+        AllSessionTTYs=(${NewAllSessionTTYs[@]})
+        AllSessionPIDs=(${NewAllSessionPIDs[@]})
+        AllSessionUsers=(${NewAllSessionUsers[@]})
+        AllSessionIDs=(${NewAllSessionIDs[@]})
+
+        #Export the Session Data
+        ExportSessionData
       fi
-    done
-
-    #If a session has terminated, update the arrays, export the data
-    if [[ $NonRunningSessions -gt 0 ]]
-    then 
-      #Set the actual arrays to be the value of the temporary arrays
-      AllSessionTTYs=(${NewAllSessionTTYs[@]})
-      AllSessionPIDs=(${NewAllSessionPIDs[@]})
-      AllSessionUsers=(${NewAllSessionUsers[@]})
-      AllSessionIDs=(${NewAllSessionIDs[@]})
-
-      #Export the Session Data
-      ExportSessionData
-    fi
     
-    #Remove the temporary arrays
-    unset NewAllSessionTTYs
-    unset NewAllSessionPIDs
-    unset NewAllSessionUsers
-    unset NewAllSessionIDs
-
+      #Remove the temporary arrays
+      unset NewAllSessionTTYs
+      unset NewAllSessionPIDs
+      unset NewAllSessionUsers
+      unset NewAllSessionIDs
+    fi
 
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 20 bytes at a time.
     read -n 20 -t 1 COMMAND <&1000
