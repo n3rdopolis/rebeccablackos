@@ -1457,16 +1457,15 @@ function ReadCommandFIFO
         NewAllSessionIDs+=($RunningSessionID)
       else
         ((NonRunningSessions++))
-      fi
-
-      #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-      if [[ ! -e /proc/$RunningSessionPID/environ && $RunningSessionTTY == $ActiveSystemTTY ]] 
-      then
-        if [[ ! -z $RunningSessionTTY ]]
+        #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
+        if [[ $RunningSessionTTY == $ActiveSystemTTY ]]
         then
-          ResetTTYMode $RunningSessionTTY
+          if [[ ! -z $RunningSessionTTY ]]
+          then
+            ResetTTYMode $RunningSessionTTY
+          fi
+          loginctl activate $LOGINMANAGERDISPLAYSESSION
         fi
-        loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
     done
 
