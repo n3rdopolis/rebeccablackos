@@ -1440,7 +1440,7 @@ function ReadCommandFIFO
 
     #Check for the status of the registered sessions, a limited number of times
     ((SessionCheckLoopCount++))
-    if [[ $SessionCheckLoopCount == 10 ]]
+    if [[ $SessionCheckLoopCount == 5 ]]
     then
       SessionCheckLoopCount=0
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
