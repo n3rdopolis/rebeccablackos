@@ -501,16 +501,6 @@ Will now reboot." 20 50 --no-cancel
   fi
 }
 
-#This function creates an XDG_RUNTIME_DIR for the user, specified in the first argument
-function Create_XDG_RUNTIME_DIR
-{
-  USERUID=$(id -u $1)
-  USERGID=$(id -g $1)
-  mkdir -p /run/user/$USERUID
-  chown $USERUID /run/user/$USERUID
-  chgrp $USERGID /run/user/$USERUID
-  chmod 700 /run/user/$USERUID
-}
 
 #This function sends the KDSETMODE ioctl (0x4B3A) with the parameter KD_TEXT (0x00) to the active TTY, then it sends the VT_SETMODE ioctl (0x5602) with the parameter VT_AUTO (0x00) to the active TTY
 #This forces the TTY to be in a state that allows the kernel to switch the TTY (switching to VT_AUTO), instead of a process (VT_PROCESS), when it's in VT_PROCESS, and the process is defunct, the TTY switch fails.
