@@ -124,14 +124,14 @@ function UserSessionWorker
   done
 
   #if the user booted with wlmforceswrender, force software rendering to be enabled
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=softpipe
   fi
 
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline) != 0 ]]
   then
     export vblank_mode=0
   fi
@@ -356,13 +356,13 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
   export WLM_PATH=$PATH
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmforceswrender\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=softpipe
   fi
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcevblankoff\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline) != 0 ]]
   then
     export vblank_mode=0
   fi
@@ -391,7 +391,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   plymouth hide-splash
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) == 0 ]]
+  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
   then 
     logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
     SupportedBackends+=(KMS)
@@ -404,7 +404,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   SupportedBackends+=(WL)
   if [[ $(ls  /dev/fb* 2>/dev/null) ]]
   then
-    if [[ $(cat /proc/cmdline | grep -c "\bwlmglobalfbpermissions\b" ) != 0 ]]
+    if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
     then
       logger -t waylandloginmanager "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" -s  >>/var/log/waylandloginmanager 2>&1
       setfacl -m "g:plugdev:rwx" /dev/fb*
@@ -424,7 +424,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmforcefbdev\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 ]]
   then
     logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
     if [[ $HardwareSupported != 1 ]]
@@ -483,7 +483,7 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmdebug\b" ) != 0 || $ISLIVE == 1 ]]
+  if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 || $ISLIVE == 1 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
     logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
@@ -491,7 +491,7 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument,
-  if [[ $(cat /proc/cmdline | grep -c "\bwlmdebuginsecure\b" ) != 0 ]]
+  if [[ $(grep -c "\bwlmdebuginsecure\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
     logger -t waylandloginmanager "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
@@ -1050,13 +1050,13 @@ function GetUserCredentials
 {
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
-  UIDMIN=$(cat /etc/login.defs | grep -e "^UID_MIN" | awk '{print $2}')
+  UIDMIN=$(grep -e "^UID_MIN" /etc/login.defs| awk '{print $2}')
   if [[ $ISLIVE == 1 ]]
   then
     UIDMIN=999
   fi
-  UIDMAX=$(cat /etc/login.defs | grep -e "^UID_MAX" | awk '{print $2}')
-  USERLIST=$(cat /etc/passwd | awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}')
+  UIDMAX=$(grep -e "^UID_MAX" /etc/login.defs| awk '{print $2}')
+  USERLIST=$(awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}' /etc/passwd)
   #sort the list
   USERLIST=$(echo "$USERLIST" | sort |uniq)
   #go through each line of users found, to handle the display of the real name (passwd gecos feild)
@@ -1323,9 +1323,9 @@ function StartAutoLogin
   #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
   if [[ -e /etc/waylandloginmanager.conf ]]
   then
-    AUTOLOGINUSER=$(cat /etc/waylandloginmanager.conf | awk -F "#" '{print $1}' | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
   else
-    AUTOLOGINUSER=$(cat /etc/lightdm/lightdm.conf | awk -F "#" '{print $1}' | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
 
