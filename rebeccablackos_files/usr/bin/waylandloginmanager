@@ -876,7 +876,7 @@ function SwitchUserDialog
     if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
     then
       SessionList+="$NumberOfSessions
-${AllSessionTTYs[$NumberOfSessions]}
+tty${AllSessionTTYs[$NumberOfSessions]}
 ${AllSessionPIDs[$NumberOfSessions]}
 ${AllSessionUsers[$NumberOfSessions]}
 ${AllSessionIDs[$NumberOfSessions]}
@@ -895,7 +895,7 @@ New Session...
 
   unset ChangeSession
   #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
-  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=3,5 --separator="\n" 2>/dev/null )
+  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=1,3,5 --separator="\n" 2>/dev/null )
   CancelOrOK=$?
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
