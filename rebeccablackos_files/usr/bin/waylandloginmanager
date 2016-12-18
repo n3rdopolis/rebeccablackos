@@ -520,14 +520,30 @@ fd.close()"
 #it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
 {
+  SYSTEMDTTYS=()
+  SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
+  for SESSION in ${SESSIONS[@]}
+  do
+    SYSTEMDTTYS+=($(loginctl show-session $SESSION -p TTY --value))
+  done
+
+  TTYNotInLogind=0
   TTYNotInUse=0
   CalcTTY=$MinimumTTY
   #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
-  while [[ $TTYNotInUse -ne 1 && $CalcTTY -lt 62 ]]
+  while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 62) || $TTYNotInLogind -gt 0 ]]
   do
     ((CalcTTY++))
     fuser -s /dev/tty$CalcTTY
     TTYNotInUse=$?
+    TTYNotInLogind=0
+    for SYSTEMDTTY in ${SYSTEMDTTYS[@]}
+    do
+      if [[ $SYSTEMDTTY == "/dev/tty$CalcTTY" ]]
+      then
+        ((TTYNotInLogind++))
+      fi
+    done
   done
 
   if [[ $TTYNotInUse -ne 1 ]]
