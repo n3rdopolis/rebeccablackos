@@ -77,7 +77,6 @@ function UserSessionWorker
 
   #set up the environment for the user. Determine the user name, set Wayland variables, and if the current session has an environment file then handle it.
   USER=$(id -u)
-  export $(exec dbus-launch)
   export XDG_SESSION_TYPE=wayland
   . /usr/bin/wlruntime_vars &> /dev/null
   BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
