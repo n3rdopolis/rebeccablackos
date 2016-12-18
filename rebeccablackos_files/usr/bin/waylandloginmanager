@@ -1631,7 +1631,7 @@ then
 elif [[ $1 == "--usersession" ]]
 then
   shift
-  UserSessionWorker "$@"
+  UserSessionWorker "$@" &> /dev/null
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit
