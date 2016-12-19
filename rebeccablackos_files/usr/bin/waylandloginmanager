@@ -342,7 +342,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
-  export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/opt/lib:/usr/local/lib:/usr/lib
+  export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null):/opt/lib:/usr/local/lib:/usr/lib
   export XDG_DATA_DIRS=/opt/share:/usr/share
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
