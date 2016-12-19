@@ -191,6 +191,7 @@ function UserSessionWorker
     echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
     exit
   fi
+  exit
 }
 
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
