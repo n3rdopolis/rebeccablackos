@@ -194,6 +194,12 @@ function UserSessionWorker
   exit
 }
 
+function UIHost 
+{
+  "$@"
+  exit
+}
+
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
 function ReadEnvironmentFile
 {
@@ -1633,7 +1639,7 @@ then
   shift 
   export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
   export PATH=$WLM_PATH
-  "$@"
+  UIHost "$@"
 elif [[ $1 == "--usersession" ]]
 then
   shift
