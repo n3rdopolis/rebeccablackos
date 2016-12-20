@@ -355,7 +355,7 @@ then
 echo \"
 Weston Session commands:
 nested-defaultweston-caller
-nested-hawaii-caller
+nested-liri-caller
 nested-orbital-caller
 nested-enlightenment-caller
 nested-gnomeshell-caller

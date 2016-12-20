@@ -1,9 +1,9 @@
 [Desktop Entry]
 Enabled=1
 Type=WSession
-Name=Hawaii Desktop
-Comment=The Hawaii Desktop
-CompositorExec=/opt/bin/hawaii
+Name=Liri Desktop
+Comment=The Liri Desktop
+CompositorExec=/opt/bin/liri-shell
 CompositorSupportsWL=1
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
@@ -13,5 +13,5 @@ CompositorFBArguments=
 CompositorDisplayArgument=--wayland-socket-name 
 SessionArgument=
 AdditionalArguments=
-NeedsFile=/opt/bin/hawaii
-EnvironmentFile=/usr/share/wsessions.d/hawaii-desktop.environment
+NeedsFile=/opt/bin/liri-shell
+EnvironmentFile=/usr/share/wsessions.d/liri-desktop.environment

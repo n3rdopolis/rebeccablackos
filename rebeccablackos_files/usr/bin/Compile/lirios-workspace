@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=hawaii-system-preferences
+SOURCENAME=lirios-workspace
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/hawaii-desktop/hawaii-system-preferences.git
+SOURCEURL=https://github.com/lirios/workspace
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=develop
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
+cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DENABLE_MAINLINE_QTXDG=ON -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -79,7 +79,8 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+rm $INSTALLDIR/etc/xdg/menus/liri-applications.menu
+ln -s $INSTALLDIR/etc/xdg/menus/applications.menu $INSTALLDIR/etc/xdg/menus/liri-applications.menu
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
