@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/greenisland_add_client_protocol/ecm_add_qtwayland_server_protocol/g' helper/CMakeLists.txt
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DENABLE_MAINLINE_QTXDG=ON -DKDE_INSTALL_USE_QT_SYS_PATHS=ON
