@@ -171,6 +171,8 @@ function UserSessionWorker
   dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
 
+  #Execute first run scripts
+  dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
   
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WL ]]

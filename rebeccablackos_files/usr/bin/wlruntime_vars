@@ -58,27 +58,3 @@ export KDE_FULL_SESSION=true
 export KDE_SESSION_VERSION=5
 export KDEHOME="$HOME/.config"
 export QT_WAYLAND_DECORATION=material
-
-#Set Dconf settings
-if [[ ! -e ~/.config/dconf/user ]]
-then
-  dconf load / < ~/.config/dconfimport.ini
-fi
-
-#Build the KDE configuration database
-if [[ ! -e $HOME/.cache/ksycoca5 ]]
-then
-  kbuildsycoca5 &>/dev/null
-fi
-
-#Build RDP keys for weston-share
-#Only generate the key if it doesn't exist
-if [[ ! -e ~/weston-rdp/rdpkey.rdp ]]
-then
-  mkdir ~/weston-rdp
-  cd ~/weston-rdp
-  winpr-makecert -n $HOSTNAME -rdp > rdpkey.rdp 2>/dev/null 
-  cp $HOSTNAME.crt rdpcrt.crt
-  cp $HOSTNAME.key rdpcrtkey.key
-  cd $OLDPWD
-fi
