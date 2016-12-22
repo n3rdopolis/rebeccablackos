@@ -166,14 +166,15 @@ function UserSessionWorker
     unset WAYLAND_HOST
     unset WAYLAND_GUEST
   fi
+
+  #Execute first run scripts
+  dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
+
   STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
 
-  #Execute first run scripts
-  dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
-  
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WL ]]
   then
