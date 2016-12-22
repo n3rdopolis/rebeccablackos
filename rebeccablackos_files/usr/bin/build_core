@@ -63,7 +63,7 @@ export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
-export BUILDLOGDIR=/var/log/buildlogs/build_core
+export BUILDLOGDIR=/buildlogs/build_core
 
 #Control variable used by the build scripts, on if to set the build script as 'build-only' or 'download-only'
 export ACTION=$1
