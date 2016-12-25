@@ -167,10 +167,6 @@ adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --dis
 #Complie glib schemas
 glib-compile-schemas /opt/share/glib-2.0/schemas 
 
-#Configure gnome-control-panel to start with waylandapp for starting as a Wayland client
-sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-control-center.desktop > /opt/share/applications/gnome-control-center.desktop
-sed 's/Exec=/Exec=waylandapp /g' /usr/share/applications/gnome-background-panel.desktop > /opt/share/applications/gnome-background-panel.desktop
-
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
 if [[ -e /usr/bin/ubiquity ]]
 then
