@@ -997,7 +997,7 @@ function StartUserSession
   #Call the server with the arguments specified by the selected session
   logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
   #Reset the contents of the tty
-  deallocvt $USERSESSIONTTY
+  echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
   #Disable cursor blinking on the TTY the display server will be started on
   echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
   chvt $USERSESSIONTTY &
@@ -1264,7 +1264,7 @@ function LeavePrompt
 function StartLoginManagerDisplay
 {
   #Reset the contents of the tty
-  deallocvt $LOGINMANAGERDISPLAYTTY
+  echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
   #Disable cursor blinking on the TTY the display server will be started on
   echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
   for (( StartTimes = 0 ; StartTimes < 5 ;))
