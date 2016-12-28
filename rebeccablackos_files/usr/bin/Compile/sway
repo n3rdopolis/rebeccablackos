@@ -89,9 +89,11 @@ function PackagePostInstall()
 if [[ -e $INSTALLDIR/bin/sway ]]
 then
   mkdir -p /etc/skel/.config/sway
-  sed -i 's/usr/opt/g' config
-  sed -i 's\/opt/share/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg\g' config
-  cp config /etc/skel/.config/sway 
+  cp config $INSTALLDIR/etc/sway /etc/skel/.config/sway 
+  sed -i 's/usr/opt/g' /etc/skel/.config/sway
+  sed -i 's\/opt/share/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg\g' /etc/skel/.config/sway
+  sed -i 's/urxvt/weston-terminal/g' /etc/skel/.config/sway
+  sed -i 's/dmenu_run/bemenu/g' /etc/skel/.config/sway
 fi
 }
 
