@@ -79,8 +79,11 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-rm $INSTALLDIR/etc/xdg/menus/liri-applications.menu
-ln -s $INSTALLDIR/etc/xdg/menus/applications.menu $INSTALLDIR/etc/xdg/menus/liri-applications.menu
+if [[ -f $INSTALLDIR/etc/xdg/menus/liri-applications.menu ]]
+then
+  rm $INSTALLDIR/etc/xdg/menus/liri-applications.menu
+  ln -s $INSTALLDIR/etc/xdg/menus/applications.menu $INSTALLDIR/etc/xdg/menus/liri-applications.menu
+fi
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
