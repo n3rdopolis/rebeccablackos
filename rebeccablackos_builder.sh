@@ -21,7 +21,7 @@ function setup_buildprocess
   #unset most varaibles
   while read var
   do 
-    unset "$var"
+    unset "$var" &> /dev/null
   done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" ) 
   export TERM=linux
   PATH=$(getconf PATH):/sbin:/usr/sbin
