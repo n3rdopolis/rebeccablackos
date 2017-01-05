@@ -21,4 +21,4 @@
 export QT_WAYLAND_FORCE_DPI=100
 export WAYLAND_GUEST=wayland-$RANDOM
 unset DISPLAY
-liri-session
+liri-session -platform wayland
