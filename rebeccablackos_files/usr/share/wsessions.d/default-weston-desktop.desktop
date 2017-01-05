@@ -6,8 +6,10 @@ Comment=The Weston Desktop Environment
 CompositorExec=/opt/bin/weston
 CompositorSupportsKMS=1
 CompositorSupportsFB=1
+CompositorSupportsWL=0
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
+CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=xwayland.so,screen-share.so
 AdditionalArguments=
