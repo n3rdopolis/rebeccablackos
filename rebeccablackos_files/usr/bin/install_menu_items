@@ -19,6 +19,7 @@
 #This script constructs the menu, and adds items to it. Each folder has a rbos-name.directory the 'name' of the folder it's in must match. The .desktop files next to it are in that sublevel. 
 mkdir -p /opt/share/desktop-directories
 mkdir -p /usr/share/desktop-directories
+mkdir -p /etc/xdg/menus/applications-merged
 
 MENUPATH=/usr/share/RBOS_MENU
 #for each desktop file
