@@ -354,3 +354,25 @@ index b5a9dbb..31cf776 100644
 +    libcalamares.globalstorage.insert("displayManagers", displaymanagers)
 +
      return set_autologin(username, displaymanagers, default_desktop_environment, root_mount_point)
+
+
+
+
+
+
+
+
+diff --git a/src/modules/unpackfs/main.py b/src/modules/unpackfs/main.py
+index 34d9829..e1f8bd0 100644
+--- a/src/modules/unpackfs/main.py
++++ b/src/modules/unpackfs/main.py
+@@ -212,7 +212,7 @@ class UnpackOperation:
+         if os.path.isdir(entry.source):
+             subprocess.check_call(["mount", "--bind", entry.source, imgmountdir])
+         else:
+-            subprocess.check_call(["mount", entry.source, imgmountdir, "-t", entry.sourcefs, "-o", "loop"])
++            subprocess.check_call(["mount", entry.source, imgmountdir, "-t", entry.sourcefs, "-o", "loop,ro"])
+ 
+     def unpack_image(self, entry, imgmountdir):
+         """ Unpacks image.
+
