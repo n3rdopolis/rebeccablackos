@@ -64,6 +64,11 @@ function PackagePrepareBuild()
 sed -i 's/urxvt/terminology/g' config
 sed -i 's/dmenu_run/bemenu-run/g' config
 sed -i '/Werror/d' CMakeLists.txt
+sed -i '/Manpage/d' CMakeLists.txt
+sed -i '/add_manpage/d' swaygrab/CMakeLists.txt
+sed -i '/add_manpage/d' swaymsg/CMakeLists.txt
+sed -i '/add_manpage/d' swaylock/CMakeLists.txt
+sed -i '/add_manpage/d' sway/CMakeLists.txt
 mkdir build
 cd build
 cmake .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DSOURCE_WLC=ON
