@@ -291,7 +291,7 @@ then
     read a 
   fi
 
-  killall -9 $ROOT
+  killall -9 $ROOTPID
   exit
 fi
 
