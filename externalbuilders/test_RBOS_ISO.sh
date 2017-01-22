@@ -212,19 +212,41 @@ if [[ $XALIVE == 0 ]]
 then
   if [[ $HASOVERLAYFS == 0 ]]
   then
-    $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
+    if ! type unionfs-fuse &> /dev/null
+    then
+      $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
+    fi
   fi
-  $TERMCOMMAND $INSTALLCOMMAND squashfs-tools
-  $TERMCOMMAND $INSTALLCOMMAND dialog
-  $TERMCOMMAND $INSTALLCOMMAND zenity
+  
+  if ! type dialog &> /dev/null
+  then
+    $TERMCOMMAND $INSTALLCOMMAND dialog
+  fi
+
+
+  if ! type zenity &> /dev/null
+  then
+    $TERMCOMMAND $INSTALLCOMMAND zenity
+  fi
+
 else
   if [[ $HASOVERLAYFS == 0 ]]
   then
-    $INSTALLCOMMAND unionfs-fuse
+    if ! type unionfs-fuse &> /dev/null
+    then
+      $INSTALLCOMMAND unionfs-fuse
+    fi
   fi
-  $INSTALLCOMMAND squashfs-tools
-  $INSTALLCOMMAND dialog
-  $INSTALLCOMMAND zenity
+
+  if ! type dialog &> /dev/null
+  then
+    $INSTALLCOMMAND dialog
+  fi
+
+  if ! type zenity &> /dev/null
+  then
+    $INSTALLCOMMAND zenity
+  fi
 fi
 
 #make the folders for mounting the ISO
@@ -311,7 +333,7 @@ fi
 #bind mount in the critical filesystems
 NAMESPACE_ENTER mount --rbind /sys "$MOUNTHOME"/liveisotest/unionmountpoint/sys
 
-NAMESPACE_ENTER mount --bind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
+NAMESPACE_ENTER mount --rbind /proc "$MOUNTHOME"/liveisotest/unionmountpoint/proc
 
 NAMESPACE_ENTER mount --rbind /dev "$MOUNTHOME"/liveisotest/unionmountpoint/dev
 
