@@ -359,8 +359,13 @@ fi
 
 #Mount the ramdisk
 mount --make-rprivate /
-mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
-RAMDISK_STATUS=$?
+if [[ $RAMDISK_STATUS != 0 ]]
+then
+  mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+  RAMDISK_STATUS=$?
+else 
+  RAMDISK_STATUS=1
+fi
 
 #Create the folders in the ramdisk
 if [[ $RAMDISK_FOR_BASE == 1 && $RAMDISK_STATUS == 0 ]]
