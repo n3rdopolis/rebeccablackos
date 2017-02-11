@@ -405,8 +405,8 @@ cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/ex
 chmod +x "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 
 #Copy all external files before they are used
-rsync "$SCRIPTFOLDERPATH"/"$BUILDUNIXNAME"_files/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-rsync "$SCRIPTFOLDERPATH"/* -Cr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
+rsync "$SCRIPTFOLDERPATH"/"$BUILDUNIXNAME"_files/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+rsync "$SCRIPTFOLDERPATH"/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 
 #Support importing the control file to use fixed revisions of the source code
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt > /dev/null 2>&1
