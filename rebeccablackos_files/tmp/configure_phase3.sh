@@ -176,7 +176,7 @@ then
 fi
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-rsync /usr/import/* -a /
+rsync /usr/import/* -Ka /
 
 #move the import folder
 mv /usr/import /tmp
@@ -250,7 +250,7 @@ apt-get autoremove -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 compile_all installsmallpackage 
 
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-rsync /tmp/import/* -a /
+rsync /tmp/import/* -Ka /
 
 
 #Reset the utilites back to the way they are supposed to be.
