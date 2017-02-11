@@ -85,7 +85,7 @@ dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
 #copy all files
-rsync /usr/import/* -a /
+rsync /usr/import/* -Ka /
 
 #workaround for Debian not including legacy systemd files
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
