@@ -105,17 +105,6 @@ then
   chmod +x /usr/sbin/grub-install
 fi
 
-#Fall back to GCC 5 instead of GCC 6
-update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-6 100
-update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-5 50
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-6 100
-update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-5 50
-update-alternatives --install /usr/bin/cpp cpp-bin /usr/bin/cpp-6 100
-update-alternatives --install /usr/bin/cpp cpp-bin /usr/bin/cpp-5 50
-update-alternatives --set g++ /usr/bin/g++-5
-update-alternatives --set gcc /usr/bin/gcc-5
-update-alternatives --set cpp-bin /usr/bin/cpp-5
-
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -237,7 +226,7 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep
 apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
-REMOVEDEVPGKS=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf cpp-5 gcc-5 g++-5 unicode-data texinfo rustc)
+REMOVEDEVPGKS=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf unicode-data texinfo rustc)
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
 do
   REMOVEPACKAGENAME=${REMOVEDEVPGKS[$Iterator]}
