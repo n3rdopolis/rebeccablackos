@@ -20,7 +20,7 @@
 
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
-  nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
+  nsenter --mount --pid --target $ROOTPID "$@"
 }
 
 MOUNTISO=$(readlink -f $1)
@@ -93,7 +93,7 @@ then
   unset DBUS_SESSION_BUS_ADDRESS
   if [[ -f $(which konsole) ]]
   then
-    TERMCOMMAND="konsole --nofork -e"
+    TERMCOMMAND="konsole --separate -e"
   elif [[ -f $(which gnome-terminal) ]]
   then
     TERMCOMMAND="gnome-terminal -e"
@@ -198,7 +198,7 @@ then
   if [[ $XALIVE == 0 ]]
   then
     zenity --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
-    $TERMCOMMAND nsenter --mount --target $ROOTPID --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
@@ -400,7 +400,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $TERMCOMMAND nsenter --mount --target $ROOTPID --pid --target $ROOTPID chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+  $TERMCOMMAND "nsenter --mount --pid --target $ROOTPID chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest"
 else
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 fi
