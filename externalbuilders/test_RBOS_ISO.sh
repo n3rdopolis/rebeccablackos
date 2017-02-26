@@ -44,12 +44,12 @@ then
   then
     if [[ -f $(which kdesudo) ]]
     then
-      kdesudo $0 "$MOUNTISO"
+      kdesudo $0 "$MOUNTISO" 2>/dev/null
     elif [[ -f $(which gksudo) ]]
     then
-      gksudo $0 "$MOUNTISO"
+      gksudo $0 "$MOUNTISO" 2>/dev/null
     else
-      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login"
+      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login" 2>/dev/null
     fi
   else
     sudo $0 "$MOUNTISO"
@@ -80,7 +80,7 @@ then
 else
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "Cant find a install utility."
+    zenity --info --text "Cant find a install utility." 2>/dev/null
   else
     echo "Cant find a install utility."
   fi
@@ -101,13 +101,13 @@ then
     TERMCOMMAND="xterm -e"
     if [[ ! -f $(which xterm) ]]
     then
-      zenity --question --text "xterm is needed for this script. Install xterm?"  
+      zenity --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null
       xterminstall=$?
       if [[ $xterminstall -eq 0 ]]
       then 
         $INSTALLCOMMAND xterm -y
       else
-        zenity --info --text "Can not continue without xterm. Exiting the script."
+        zenity --info --text "Can not continue without xterm. Exiting the script." 2>/dev/null
         exit
       fi
     fi
@@ -120,7 +120,7 @@ if [[ -f "$MOUNTHOME"/liveisotest/online ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    zenity --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated"
+    zenity --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
   unmountanswer=$?
   else
     dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
@@ -143,7 +143,7 @@ then
 
     if [[ $XALIVE == 0 ]]
     then
-      zenity --question --text "Keep Temporary overlay files?"
+      zenity --question --text "Keep Temporary overlay files?" 2>/dev/null
       deleteanswer=$?
     else
       dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
@@ -164,7 +164,7 @@ if [[ $XALIVE == 0 ]]
 then
   zenity --info --text "This will call a chroot shell from an iso.
 
-  The password for the test user is the same password as the sudo users."
+  The password for the test user is the same password as the sudo users." 2>/dev/null
 else
   echo "This will call a chroot shell from an iso.
 
@@ -197,7 +197,7 @@ then
 
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "A script is running that is already testing an ISO. will now chroot into it"
+    zenity --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
     $TERMCOMMAND nsenter --mount --target $ROOTPID --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
@@ -262,8 +262,8 @@ then
 
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "No ISO specified as an argument. Please select one in the next dialog."
-    MOUNTISO=$(zenity --file-selection)
+    zenity --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+    MOUNTISO=$(zenity --file-selection 2>/dev/null)
   else
     echo "
 
@@ -307,7 +307,7 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/isomount/casper/filesys
 then
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image."
+    zenity --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
@@ -349,7 +349,7 @@ NAMESPACE_ENTER mount --bind /run/shm "$MOUNTHOME"/liveisotest/unionmountpoint/r
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
-  zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image"
+  zenity --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image" 2>/dev/null
 else
   echo "
 Type exit to go back to your system"
