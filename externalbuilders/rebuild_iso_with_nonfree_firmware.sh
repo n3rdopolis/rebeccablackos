@@ -19,7 +19,7 @@
 #This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
 
-trap 'kill -9 $ROOTPID; mv "$MOUNTISO.old" "${MOUNTISO}"; exit' 2
+trap 'kill -9 $ROOTPID; mv "$MOUNTISO.old" "${MOUNTISO}"; kill $ZENITYPID >/dev/null; exit' 2
 
 
 #Define the command for entering the namespace now that $ROOTPID is defined
@@ -221,6 +221,7 @@ then
   fi
 
   killall -9 $ROOTPID
+  mv "$MOUNTISO.old" "${MOUNTISO}"
   exit
 fi
 
@@ -240,6 +241,7 @@ then
     echo "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
   fi
   kill -9 $ROOTPID
+  mv "$MOUNTISO.old" "${MOUNTISO}"
   exit
 fi
 
@@ -278,6 +280,12 @@ else
   fi
 fi
 
+if [[ $XALIVE == 0 ]]
+then
+  zenity --progress --pulsate --auto-kill --text "Building the ISO" &
+  ZENITYPID=$!
+fi
+
 #bind mount in the critical filesystems
 NAMESPACE_ENTER mount --rbind /sys "$MOUNTHOME"/isorebuild/unionmountpoint/sys
 
@@ -298,6 +306,11 @@ NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint remastersys dist
 
 #Move out old ISO
 NAMESPACE_ENTER mv "$MOUNTHOME"/isorebuild/unionmountpoint/home/remastersys/remastersys/custom.iso "$MOUNTISO"
+
+if [[ $XALIVE == 0 ]]
+then
+  kill $ZENITYPID
+fi
 
 #Delete the old ISO
 if [[ -e "$MOUNTISO" ]]
