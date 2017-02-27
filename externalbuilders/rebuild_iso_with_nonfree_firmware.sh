@@ -27,6 +27,7 @@ function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
 }
 
+ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
@@ -58,12 +59,12 @@ then
   then
     if [[ -f $(which kdesudo) ]]
     then
-      kdesudo $0 "$MOUNTISO"
+      kdesudo $0 "$MOUNTISO" 2>/dev/null
     elif [[ -f $(which gksudo) ]]
     then
-      gksudo $0 "$MOUNTISO"
+      gksudo $0 "$MOUNTISO" 2>/dev/null
     else
-      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login"
+      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login" 2>/dev/null
     fi
   else
     sudo $0 "$MOUNTISO"
@@ -94,7 +95,7 @@ then
 else
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "Cant find a install utility."
+    $ZENITYCOMMAND --info --text "Cant find a install utility." 2>/dev/null
   else
     echo "Cant find a install utility."
   fi
@@ -115,13 +116,13 @@ then
     TERMCOMMAND="xterm -e"
     if [[ ! -f $(which xterm) ]]
     then
-      zenity --question --text "xterm is needed for this script. Install xterm?"  
+      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null 
       xterminstall=$?
       if [[ $xterminstall -eq 0 ]]
       then 
         $INSTALLCOMMAND xterm -y
       else
-        zenity --info --text "Can not continue without xterm. Exiting the script."
+        $ZENITYCOMMAND --info --text "Can not continue without xterm. Exiting the script." 2>/dev/null
         exit
       fi
     fi
@@ -130,7 +131,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  zenity --info --text "This will remaster the specified ISO, to install non-free firmware packages"
+  $ZENITYCOMMAND --info --text "This will remaster the specified ISO, to install non-free firmware packages" 2>/dev/null
 else
   echo "This will remaster the specified ISO, to install non-free firmware packages"
   read a
@@ -169,8 +170,8 @@ then
 
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "No ISO specified as an argument. Please select one in the next dialog."
-    MOUNTISO=$(zenity --file-selection)
+    $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+    MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
   else
     echo "
 
@@ -214,7 +215,7 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/isorebuild/isomount/casper/filesyst
 then
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image."
+    $ZENITYCOMMAND --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
@@ -236,7 +237,7 @@ if [[ $REMASTERSYS_STATUS == 0 ]]
 then 
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
+    $ZENITYCOMMAND --info --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
   else
     echo "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
   fi
@@ -282,7 +283,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  zenity --progress --pulsate --auto-kill --text "Building the ISO" &
+  $ZENITYCOMMAND --progress --pulsate  --text "Building the ISO" 2>/dev/null &
   ZENITYPID=$!
 fi
 
@@ -318,7 +319,7 @@ then
   rm "${MOUNTISO}.old"
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "ISO creation successful!"
+    $ZENITYCOMMAND --info --text "ISO creation successful!" 2>/dev/null
   else
     echo "ISO creation successful!"
   fi
@@ -326,7 +327,7 @@ else
   mv "$MOUNTISO.old" "${MOUNTISO}"
   if [[ $XALIVE == 0 ]]
   then
-    zenity --info --text "ISO creation Failed!"
+    $ZENITYCOMMAND --info --text "ISO creation Failed!" 2>/dev/null
   else
     echo "ISO creation Failed!"
   fi
