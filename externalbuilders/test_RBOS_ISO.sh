@@ -199,7 +199,7 @@ then
   if [[ $XALIVE == 0 ]]
   then
     $ZENITYCOMMAND --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
-    $TERMCOMMAND nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+    $TERMCOMMAND "nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest"
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
