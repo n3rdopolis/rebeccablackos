@@ -397,9 +397,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost zenity"
   TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
 
-  #Tell the plymouth splash to hide as the loginmanager is starting.
-  plymouth hide-splash
-
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
   then 
