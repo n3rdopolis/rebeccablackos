@@ -1527,6 +1527,7 @@ function ReadCommandFIFO
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
+        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
@@ -1542,6 +1543,7 @@ function ReadCommandFIFO
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
+        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
