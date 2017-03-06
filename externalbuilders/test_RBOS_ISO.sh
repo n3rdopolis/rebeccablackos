@@ -38,24 +38,45 @@ fi
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 
+#Determine the terminal to use
+if [[ $XALIVE == 0 ]]
+then
+  unset DBUS_SESSION_BUS_ADDRESS
+  if [[ -f $(which konsole) ]]
+  then
+    TERMCOMMAND="konsole --separate -e"
+  elif [[ -f $(which gnome-terminal) ]]
+  then
+    TERMCOMMAND="gnome-terminal -e"
+  else
+    TERMCOMMAND="xterm -e"
+    if [[ ! -f $(which xterm) ]]
+    then
+      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null
+      xterminstall=$?
+      if [[ $xterminstall -eq 0 ]]
+      then
+        $INSTALLCOMMAND xterm -y
+      else
+        $ZENITYCOMMAND --info --text "Can not continue without either xterm, gnome-terminal, or konsole. Exiting the script." 2>/dev/null
+        exit
+      fi
+    fi
+  fi
+fi
+
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    if [[ -f $(which kdesudo) ]]
-    then
-      kdesudo $0 "$MOUNTISO" 2>/dev/null
-    elif [[ -f $(which gksudo) ]]
-    then
-      gksudo $0 "$MOUNTISO" 2>/dev/null
-    else
-      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login" 2>/dev/null
-    fi
+    $TERMCOMMAND "bash -c \"sudo -E "$0" "$MOUNTISO" 2>/dev/null\""
+    exit
   else
-    sudo $0 "$MOUNTISO"
+    sudo -E "$0" "$MOUNTISO"
+    exit
   fi
-  exit
+
 fi
 
 
@@ -86,33 +107,6 @@ else
     echo "Cant find a install utility."
   fi
   exit
-fi
-
-#Determine the terminal to use
-if [[ $XALIVE == 0 ]]
-then
-  unset DBUS_SESSION_BUS_ADDRESS
-  if [[ -f $(which konsole) ]]
-  then
-    TERMCOMMAND="konsole --separate -e"
-  elif [[ -f $(which gnome-terminal) ]]
-  then
-    TERMCOMMAND="gnome-terminal -e"
-  else
-    TERMCOMMAND="xterm -e"
-    if [[ ! -f $(which xterm) ]]
-    then
-      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null
-      xterminstall=$?
-      if [[ $xterminstall -eq 0 ]]
-      then 
-        $INSTALLCOMMAND xterm -y
-      else
-        $ZENITYCOMMAND --info --text "Can not continue without xterm. Exiting the script." 2>/dev/null
-        exit
-      fi
-    fi
-  fi
 fi
 
 function mountisoexit() 
@@ -187,7 +181,7 @@ ROOTPID=$(cat "$MOUNTHOME"/liveisotest/namespacepid1)
 if [[ -e /proc/$ROOTPID && ! -z $ROOTPID ]]
 then
 
-    NAMESPACE_ENTER mountpoint "$MOUNTHOME"/liveisotest/unionmountpoint
+    NAMESPACE_ENTER mountpoint "$MOUNTHOME"/liveisotest/unionmountpoint &> /dev/null
     ismount=$?
 else
     ismount=1
@@ -199,55 +193,35 @@ then
   if [[ $XALIVE == 0 ]]
   then
     $ZENITYCOMMAND --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
-    $TERMCOMMAND "nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest"
   else
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
-    NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   fi
+  tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   mountisoexit
 fi
 
-#install needed tools to allow testing on a read only iso
-if [[ $XALIVE == 0 ]]
+if [[ $HASOVERLAYFS == 0 ]]
 then
-  if [[ $HASOVERLAYFS == 0 ]]
+  if ! type unionfs-fuse &> /dev/null
   then
-    if ! type unionfs-fuse &> /dev/null
-    then
-      $TERMCOMMAND $INSTALLCOMMAND unionfs-fuse
-    fi
+    $INSTALLCOMMAND unionfs-fuse
   fi
-  
-  if ! type dialog &> /dev/null
-  then
-    $TERMCOMMAND $INSTALLCOMMAND dialog
-  fi
+fi
 
+if ! type dialog &> /dev/null
+then
+  $INSTALLCOMMAND dialog
+fi
 
-  if ! type zenity &> /dev/null
-  then
-    $TERMCOMMAND $INSTALLCOMMAND zenity
-  fi
+if ! type zenity &> /dev/null
+then
+  $INSTALLCOMMAND zenity
+fi
 
-else
-  if [[ $HASOVERLAYFS == 0 ]]
-  then
-    if ! type unionfs-fuse &> /dev/null
-    then
-      $INSTALLCOMMAND unionfs-fuse
-    fi
-  fi
-
-  if ! type dialog &> /dev/null
-  then
-    $INSTALLCOMMAND dialog
-  fi
-
-  if ! type zenity &> /dev/null
-  then
-    $INSTALLCOMMAND zenity
-  fi
+if ! type tmux &> /dev/null
+then
+  $INSTALLCOMMAND tmux
 fi
 
 #make the folders for mounting the ISO
@@ -268,8 +242,9 @@ then
   else
     echo "
 
-
-Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)"
+================================
+Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)
+================================"
     exit
   fi
 fi
@@ -399,12 +374,8 @@ then
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
 fi
 
-if [[ $XALIVE == 0 ]]
-then
-  $TERMCOMMAND "nsenter --mount --pid --target $ROOTPID chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest"
-else
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
-fi
+
+tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 
 #go back to the users home folder
 cd "$MOUNTHOME"
