@@ -100,14 +100,35 @@ elif [[ -f $(which urpmi) ]]
 then
   INSTALLCOMMAND="urpmi"
 else
-  if [[ $XALIVE == 0 ]]
-  then
-    $ZENITYCOMMAND --info --text "Cant find a install utility." 2>/dev/null
-  else
-    echo "Cant find a install utility."
-  fi
+  echo "Cant find a install utility."
   exit
 fi
+
+
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  if ! type unionfs-fuse &> /dev/null
+  then
+    $INSTALLCOMMAND unionfs-fuse
+  fi
+fi
+
+if ! type dialog &> /dev/null
+then
+  $INSTALLCOMMAND dialog
+fi
+
+if ! type zenity &> /dev/null
+then
+  $INSTALLCOMMAND zenity
+fi
+
+if ! type tmux &> /dev/null
+then
+  $INSTALLCOMMAND tmux
+fi
+
+
 
 function mountisoexit() 
 {
@@ -199,29 +220,6 @@ then
   fi
   tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   mountisoexit
-fi
-
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  if ! type unionfs-fuse &> /dev/null
-  then
-    $INSTALLCOMMAND unionfs-fuse
-  fi
-fi
-
-if ! type dialog &> /dev/null
-then
-  $INSTALLCOMMAND dialog
-fi
-
-if ! type zenity &> /dev/null
-then
-  $INSTALLCOMMAND zenity
-fi
-
-if ! type tmux &> /dev/null
-then
-  $INSTALLCOMMAND tmux
 fi
 
 #make the folders for mounting the ISO
