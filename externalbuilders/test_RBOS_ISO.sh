@@ -359,7 +359,8 @@ nested-gnomeshell-caller
 nested-kdeplasma-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
-If this terminal program that is running in this window supports tabs, any new tabs will be running as root to your real system.
+Please be aware of which terminal you are typing in, especially with more experimantal/risker commands.
+
 Exercise caution. Even some paticular commands run in here can effect your real system.\"" | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
   echo 'cd $(eval echo ~$LOGNAME)' | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/unionmountpoint/home/livetest/.bashrc > /dev/null
 fi
