@@ -52,24 +52,45 @@ fi
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 
+#Determine the terminal to use
+if [[ $XALIVE == 0 ]]
+then
+  unset DBUS_SESSION_BUS_ADDRESS
+  if [[ -f $(which konsole) ]]
+  then
+    TERMCOMMAND="konsole --separate -e"
+  elif [[ -f $(which gnome-terminal) ]]
+  then
+    TERMCOMMAND="gnome-terminal -e"
+  else
+    TERMCOMMAND="xterm -e"
+    if [[ ! -f $(which xterm) ]]
+    then
+      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null
+      xterminstall=$?
+      if [[ $xterminstall -eq 0 ]]
+      then
+        $INSTALLCOMMAND xterm -y
+      else
+        $ZENITYCOMMAND --info --text "Can not continue without either xterm, gnome-terminal, or konsole. Exiting the script." 2>/dev/null
+        exit
+      fi
+    fi
+  fi
+fi
+
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    if [[ -f $(which kdesudo) ]]
-    then
-      kdesudo $0 "$MOUNTISO" 2>/dev/null
-    elif [[ -f $(which gksudo) ]]
-    then
-      gksudo $0 "$MOUNTISO" 2>/dev/null
-    else
-      zenity --info --text "This Needs to be run as root, via sudo, and not through a root login" 2>/dev/null
-    fi
+    $TERMCOMMAND "bash -c \"sudo -E "$0" "$MOUNTISO" 2>/dev/null\""
+    exit
   else
-    sudo $0 "$MOUNTISO"
+    sudo -E "$0" "$MOUNTISO"
+    exit
   fi
-  exit
+
 fi
 
 
@@ -93,41 +114,15 @@ elif [[ -f $(which urpmi) ]]
 then
   INSTALLCOMMAND="urpmi"
 else
-  if [[ $XALIVE == 0 ]]
-  then
-    $ZENITYCOMMAND --info --text "Cant find a install utility." 2>/dev/null
-  else
-    echo "Cant find a install utility."
-  fi
+  echo "Cant find a install utility."
   exit
 fi
 
-#Determine the terminal to use
-if [[ $XALIVE == 0 ]]
+if ! type zenity &> /dev/null
 then
-  unset DBUS_SESSION_BUS_ADDRESS
-  if [[ -f $(which konsole) ]]
-  then
-    TERMCOMMAND="konsole --nofork -e"
-  elif [[ -f $(which gnome-terminal) ]]
-  then
-    TERMCOMMAND="gnome-terminal -e"
-  else
-    TERMCOMMAND="xterm -e"
-    if [[ ! -f $(which xterm) ]]
-    then
-      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null 
-      xterminstall=$?
-      if [[ $xterminstall -eq 0 ]]
-      then 
-        $INSTALLCOMMAND xterm -y
-      else
-        $ZENITYCOMMAND --info --text "Can not continue without xterm. Exiting the script." 2>/dev/null
-        exit
-      fi
-    fi
-  fi
+  $INSTALLCOMMAND zenity
 fi
+
 
 if [[ $XALIVE == 0 ]]
 then
@@ -137,25 +132,8 @@ else
   read a
 fi
 
-
-
-
 #enter users home directory
 cd "$MOUNTHOME"
-
-#install needed tools
-if [[ $XALIVE == 0 ]]
-then
-  if ! type zenity &> /dev/null
-  then
-    $TERMCOMMAND $INSTALLCOMMAND zenity
-  fi
-else
-  if ! type zenity &> /dev/null
-  then
-    $INSTALLCOMMAND zenity
-  fi
-fi
 
 #make the folders for mounting the ISO
 mkdir -p "$MOUNTHOME"/isorebuild/isomount
@@ -279,11 +257,6 @@ else
   else
     NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/isorebuild/squashfsmount,upperdir="$MOUNTHOME"/isorebuild/overlay,workdir="$MOUNTHOME"/isorebuild/unionwork "$MOUNTHOME"/isorebuild/unionmountpoint
   fi
-fi
-
-if [[ $XALIVE == 0 ]]
-then
-  $($ZENITYCOMMAND --progress --pulsate --auto-close --text "Building the ISO" 2>/dev/null) &
 fi
 
 #bind mount in the critical filesystems
