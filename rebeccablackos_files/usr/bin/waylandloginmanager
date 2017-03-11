@@ -1454,9 +1454,9 @@ function ReadCommandFIFO
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
-    for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
+    for SessionPid in ${#AllSessionPIDs[@]}
     do
-      if [[ ! -e /proc/${AllSessionPIDs[$element]}/environ ]]
+      if [[ ! -e /proc/$SessionPid/environ ]]
       then
          ((NotRunningSessions++))
       fi
