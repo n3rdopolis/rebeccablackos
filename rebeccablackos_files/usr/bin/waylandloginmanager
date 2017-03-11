@@ -158,7 +158,7 @@ function UserSessionWorker
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
       echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-      echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+      SendSelfCommand Change
       exit
     fi
   else
@@ -191,7 +191,7 @@ function UserSessionWorker
   #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
   if [[ $RUNTIME < 45 ]]
   then
-    echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+    SendSelfCommand Change
     exit
   fi
   exit
@@ -253,7 +253,8 @@ function PrepareLoginManager
 {
   #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
   mkdir -p /run/waylandloginmanager
-  
+  touch /run/waylandloginmanager/fifolock
+
   #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
   SCRIPTPATH=$(readlink -f "$0")
   SCRIPTNAME=$(echo "$SCRIPTPATH" | sed 's\/\\g')
@@ -567,6 +568,28 @@ function ExportSessionData
 {
   EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs)
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
+}
+
+#This function sends a command to the waylandloginmanager's own loginmanager_control FIFO. It takes 1 argument, the command to send to the command FIFO
+function SendSelfCommand
+{
+  SENDCOMMAND=$1
+  while [[ -e /run/waylandloginmanager/fifolock ]]
+  do
+    $SLEEPCMD 1
+  done
+  echo -e "\n$SENDCOMMAND" > /run/waylandloginmanager/loginmanager_control
+}
+
+#This function sends registration data to the waylandloginmanager's own loginmanager_register FIFO. It takes 1 argument, the data string to send to the registration FIFO.
+function SendSelfRegisterData
+{
+  SENDDATA=$1
+  while [[ -e /run/waylandloginmanager/fifolock ]]
+  do
+    $SLEEPCMD 1
+  done
+  echo "$SENDDATA" > /run/waylandloginmanager/loginmanager_register &
 }
 
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
@@ -917,7 +940,7 @@ New Session...
   #if the chosen session is -1 then contact the FIFO with a login prompt, otherwise switch to the selected session
   if [[ $ChangeSession == "-1" ]]
   then
-    echo -e "\nLogin" >/run/waylandloginmanager/loginmanager_control
+    SendSelfCommand Login
   else 
     #if a session is selected, then get the PID, TTY, logind session ID with the selected Session ID as the array element number.
     if [[ $ChangeSession ]]
@@ -1018,8 +1041,8 @@ function StartUserSession
   loginctl activate $LOGINDSESSION
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  echo "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION" > /run/waylandloginmanager/loginmanager_register &
-  echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
+  SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION"
+  SendSelfCommand RegisterSession
 }
 
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
@@ -1325,8 +1348,8 @@ function GetLoginManagerDisplaySession
   done
   if [[ $RegisterLoginManagerDisplay == 1 ]]
   then
-    echo "NEWWLMDISPLAY@$LOGINMANAGERDISPLAYSESSION" > /run/waylandloginmanager/loginmanager_register &
-    echo -e "\nRegisterSession" >/run/waylandloginmanager/loginmanager_control
+    SendSelfRegisterData "NEWWLMDISPLAY@$LOGINMANAGERDISPLAYSESSION"
+    SendSelfCommand RegisterSession
   fi
 }
 
@@ -1387,6 +1410,7 @@ function SetupLoggingAndFIFO
   #Prepare logging for the loginmanagerdisplay
   touch /var/log/loginmanagerdisplay.log
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplay.log
+  rm /run/waylandloginmanager/fifolock
 }
 
 #This function displays a dialog containing actions for the Wayland Login Manager for the user, Shutdown, Switch User, login, and show a help dialog. It's optional, for in the case Weston isn't configured
@@ -1407,7 +1431,7 @@ ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
-    echo -e "\n$USERACTION" > /run/waylandloginmanager/loginmanager_control
+    SendSelfCommand $USERACTION
   else
     $SLEEPCMD .1
   fi
@@ -1433,7 +1457,6 @@ function CommandFIFOProxy
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
-  SessionCheckLoopCount=0
   #loop 'forever'
   while [ 1 ]
   do
