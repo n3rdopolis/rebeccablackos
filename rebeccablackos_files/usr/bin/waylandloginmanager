@@ -565,7 +565,7 @@ function GetNextTTY
 #Export session data so the waylandloginmanager has user switching data in case of a reload
 function ExportSessionData
 {
-  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs)
+  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs)
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
