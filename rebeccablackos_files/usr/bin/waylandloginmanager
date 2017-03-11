@@ -1452,11 +1452,19 @@ function ReadCommandFIFO
       LastUserActionPID=$!
     fi
 
-    #Check for the status of the registered sessions, a limited number of times
-    ((SessionCheckLoopCount++))
-    if [[ $SessionCheckLoopCount == 5 ]]
+    #Quickly find if any sessions are not running
+    NotRunningSessions=0
+    for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
+    do
+      if [[ ! -e /proc/${AllSessionPIDs[$element]}/environ ]]
+      then
+         ((NotRunningSessions++))
+      fi
+    done
+
+    #Handle for when a session is detected to not be running
+    if [[ $NotRunningSessions != 0 ]]
     then
-      SessionCheckLoopCount=0
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
 
@@ -1466,7 +1474,6 @@ function ReadCommandFIFO
       NewAllSessionUsers=()
       NewAllSessionIDs=()
 
-      NonRunningSessions=0
       #Go through all sessions, and then rebuild the array to only store running sessions
       for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
       do
@@ -1482,7 +1489,6 @@ function ReadCommandFIFO
           NewAllSessionUsers+=($RunningSessionUser)
           NewAllSessionIDs+=($RunningSessionID)
         else
-          ((NonRunningSessions++))
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
@@ -1495,19 +1501,15 @@ function ReadCommandFIFO
         fi
       done
 
-      #If a session has terminated, update the arrays, export the data
-      if [[ $NonRunningSessions -gt 0 ]]
-      then 
-        #Set the actual arrays to be the value of the temporary arrays
-        AllSessionTTYs=(${NewAllSessionTTYs[@]})
-        AllSessionPIDs=(${NewAllSessionPIDs[@]})
-        AllSessionUsers=(${NewAllSessionUsers[@]})
-        AllSessionIDs=(${NewAllSessionIDs[@]})
+      #Set the actual arrays to be the value of the temporary arrays
+      AllSessionTTYs=(${NewAllSessionTTYs[@]})
+      AllSessionPIDs=(${NewAllSessionPIDs[@]})
+      AllSessionUsers=(${NewAllSessionUsers[@]})
+      AllSessionIDs=(${NewAllSessionIDs[@]})
 
-        #Export the Session Data
-        ExportSessionData
-      fi
-    
+      #Export the Session Data
+      ExportSessionData
+
       #Remove the temporary arrays
       unset NewAllSessionTTYs
       unset NewAllSessionPIDs
