@@ -18,5 +18,5 @@
 
 #This file is called the weston-desktop-shell of the loginmanagerdisplay. It sends the 'Login' command to the WaylandLoginManager's FIFO.
 #This caused the WaylandLoginManager to start a login prompt
-echo -e "\nLogin" > /run/waylandloginmanager/loginmanager_control
+waylandloginmanager --sendcommand Login
 

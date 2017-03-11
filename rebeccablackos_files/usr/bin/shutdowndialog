@@ -83,13 +83,13 @@ then
   #For switch user, send the Switch command to the waylandloginmanager
   if [[ $ACTION == "Switch User" ]]
   then
-    echo -e "\nSwitch" > /run/waylandloginmanager/loginmanager_control
+    waylandloginmanager --sendcommand Switch
     RESULT=$?
   #If the request is logoff, then unmount ecryptfs, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
     ecryptfs-umount-private
-    echo -e "\nChange" > /run/waylandloginmanager/loginmanager_control
+    waylandloginmanager --sendcommand Change
     loginctl terminate-session $XDG_SESSION_ID
     sleep 3
     disown

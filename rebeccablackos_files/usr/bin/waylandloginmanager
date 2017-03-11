@@ -1679,6 +1679,9 @@ elif [[ $1 == "--usersession" ]]
 then
   shift
   UserSessionWorker "$@" &> /dev/null
+elif [[ $1 == "--sendcommand" ]]
+then
+  SendSelfCommand $2
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit
