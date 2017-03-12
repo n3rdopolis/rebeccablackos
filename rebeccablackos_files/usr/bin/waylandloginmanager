@@ -1485,7 +1485,7 @@ function ReadCommandFIFO
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
-    for SessionPid in ${#AllSessionPIDs[@]}
+    for SessionPid in ${AllSessionPIDs[@]}
     do
       if [[ ! -e /proc/$SessionPid/environ ]]
       then
@@ -1507,7 +1507,7 @@ function ReadCommandFIFO
       NewAllSessionIDs=()
 
       #Go through all sessions, and then rebuild the array to only store running sessions
-      for (( element = 0 ; element < ${AllSessionPIDs[@]} ; element++ ))
+      for (( element = 0 ; element < ${#AllSessionPIDs[@]} ; element++ ))
       do
         RunningSessionTTY=${AllSessionTTYs[$element]}
         RunningSessionPID=${AllSessionPIDs[$element]}
