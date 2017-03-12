@@ -623,13 +623,13 @@ function RegisterSession
         AllSessionIDs+=($SessionID)
         #increment the number of running sessions, now that one is added and running successfuly
         ((AllSessions++))
+        #Export the Session data
+        ExportSessionData
       else
         WriteToLog "Session failed to start"
         SessionStartFailed=1
       fi
 
-      #Export the Session data
-      ExportSessionData
 
     elif [[ $RegisterType == NEWWLMDISPLAY ]]
     then
