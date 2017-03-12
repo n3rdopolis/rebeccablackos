@@ -775,16 +775,6 @@ Author: Rico Tzschichholz <ricotz@ubuntu.com>
 Forwarded: no
 Last-Update: 2015-05-04
 
- 
--MOZILLA_VERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir`
--MOZILLA_UAVERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --uaversion`
--MOZILLA_SYMBOLVERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --symbolversion`
-+MOZILLA_VERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir`
-+MOZILLA_UAVERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --uaversion`
-+MOZILLA_SYMBOLVERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --symbolversion`
- 
- cat >> confdefs.pytmp <<EOF
-     (''' MOZILLA_VERSION ''', r''' "$MOZILLA_VERSION" ''')
 --- a/mozjs-38.0.0/js/src/configure.in
 +++ b/mozjs-38.0.0/js/src/configure.in
 @@ -236,9 +236,9 @@
@@ -866,12 +856,6 @@ diff -r 80a9e64d75f5 js/src/Makefile.in
  	cp $^ $@
  
 
- 
- 
- 
-
- 
- 
  Index: b/js/src/Makefile.in
 ===================================================================
 --- a/mozjs-38.0.0/js/src/Makefile.in
@@ -895,4 +879,12 @@ diff -r 80a9e64d75f5 js/src/Makefile.in
  
  fi
  
+-MOZILLA_VERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir`
+-MOZILLA_UAVERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --uaversion`
+-MOZILLA_SYMBOLVERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --symbolversion`
++MOZILLA_VERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir`
++MOZILLA_UAVERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --uaversion`
++MOZILLA_SYMBOLVERSION=`python $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --symbolversion`
  
+ cat >> confdefs.pytmp <<EOF
+     (''' MOZILLA_VERSION ''', r''' "$MOZILLA_VERSION" ''')
