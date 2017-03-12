@@ -240,6 +240,12 @@ function ReadEnvironmentFile
 
 #All functions below this point are for the main operation of the waylandloginmanager
 
+#This function writes to the logs. It takes 1 argument, the string to log.
+function WriteToLog
+{
+  logger -t waylandloginmanager "$1" -s  >>/var/log/waylandloginmanager 2>&1
+}
+
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
 function PrepareLoginManager
 {
@@ -256,7 +262,7 @@ function PrepareLoginManager
     rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock" 2>/dev/null
     ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
   else
-    logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Error: Another instance is already running"
     exit
   fi
   #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
@@ -265,7 +271,7 @@ function PrepareLoginManager
   THISPROCPATH=/proc/$$
   if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
-    logger -t waylandloginmanager "Error: Another instance is already running" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Error: Another instance is already running"
     exit
   fi
 
@@ -284,7 +290,7 @@ function PrepareLoginManager
     #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
     if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
     then
-      logger -t waylandloginmanager "Error: The user waylandloginmanager does NOT exist. Creating the user account..." -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Error: The user waylandloginmanager does NOT exist. Creating the user account..."
       adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
     fi
 
@@ -393,20 +399,20 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
   then 
-    logger -t waylandloginmanager "Kernel mode setting found." -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Kernel mode setting found."
     SupportedBackends+=(KMS)
     DefaultBackendType=KMS
     WESTONBACKEND=drm-backend.so
     HardwareSupported=1
   else
-    logger -t waylandloginmanager "No kernel mode setting found. Using the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
   SupportedBackends+=(WL)
   if [[ $(ls  /dev/fb* 2>/dev/null) ]]
   then
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
     then
-      logger -t waylandloginmanager "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
       setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     fi
@@ -419,17 +425,17 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     fi
     HardwareSupported=1
   else
-    logger -t waylandloginmanager "No framebuffer support found" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "No framebuffer support found"
   fi
 
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
   if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 ]]
   then
-    logger -t waylandloginmanager "Manually override set to use to use the framebuffer" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Manually override set to use to use the framebuffer"
     if [[ $HardwareSupported != 1 ]]
     then
-      logger -t waylandloginmanager "ERROR: No framebuffer device found for wlmforcefbdev override!" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -444,7 +450,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   then
     if [[ $ISLIVE == 1 ]]
     then
-      logger -t waylandloginmanager "ERROR: No supportable hardware found" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "ERROR: No supportable hardware found"
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
@@ -478,7 +484,7 @@ Will now reboot." 20 50 --no-cancel
   MinimumTTY=$LOGINMANAGERDISPLAYTTY
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
-    logger -t waylandloginmanager "ERROR: Not Enough TTYs for login manager display!" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "ERROR: Not Enough TTYs for login manager display!"
     exit
   fi
 
@@ -486,7 +492,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 || $ISLIVE == 1 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
-    logger -t waylandloginmanager "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
     wlmdebug=1
   fi
 
@@ -494,7 +500,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $(grep -c "\bwlmdebuginsecure\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
-    logger -t waylandloginmanager "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay"
     wlmdebug=1
     wlmdebuginsecure=1
   fi
@@ -601,7 +607,7 @@ function RegisterSession
   RegisterType=${ArraySessionData[0]}
   if [[ ! -z $RegisterData ]]
   then
-    logger -t waylandloginmanager "received session data $RegisterData" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "received session data $RegisterData"
     if [[ $RegisterType == NEWSESSION ]]
     then
       #Add the session data to the arrays that store info about the sessions.
@@ -618,7 +624,7 @@ function RegisterSession
         #increment the number of running sessions, now that one is added and running successfuly
         ((AllSessions++))
       else
-        logger -t waylandloginmanager "Session failed to start" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "Session failed to start"
         SessionStartFailed=1
       fi
 
@@ -630,7 +636,7 @@ function RegisterSession
       LOGINMANAGERDISPLAYSESSION=${ArraySessionData[1]}
     fi
   else
-    logger -t waylandloginmanager "register session requested, but no data was availible in the FIFO" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "register session requested, but no data was availible in the FIFO"
   fi
 }
 
@@ -678,7 +684,7 @@ function ChooseSessionType
     IsExecutable=$(find $SESSIONFILE |wc -l)
     if [[ $IsExecutable == 0 ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE is not executable, the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Warning: $SESSIONFILE is not executable, the session will not be availible for selection by the user."
     fi
     #split away all the data from this file, starting at [Desktop Entry]
     DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
@@ -720,24 +726,24 @@ function ChooseSessionType
     do
       if [[ ! -e $FILE && -n $FILE ]]
       then
-        logger -t waylandloginmanager "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user."
         ((NotFoundCount++))
       fi
     done < <(echo "$NeedsFile")
 
     if [[ $Enabled != 1 ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE is disabled, the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Warning: $SESSIONFILE is disabled, the session will not be availible for selection by the user."
     fi
 
     if [[ $SupportsBackend != 1 ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}" , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}" , the session will not be availible for selection by the user."
     fi
 
     if [[ $Type != "WSession" ]]
     then
-      logger -t waylandloginmanager "Warning: $SESSIONFILE does not have a Type of 'WSession' , the session will not be availible for selection by the user." -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Warning: $SESSIONFILE does not have a Type of 'WSession' , the session will not be availible for selection by the user."
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
@@ -795,7 +801,7 @@ function ChooseSessionType
     then
       $ZENITYCMD --width=500 --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
     else
-      logger -t waylandloginmanager "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell"
     fi
     #There are different commands needed to support different backends
     if [[ $DefaultBackendType == KMS ]]
@@ -1012,7 +1018,7 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  logger -t waylandloginmanager "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY" -s  >>/var/log/waylandloginmanager 2>&1
+  WriteToLog "Starting server $CompositorExec with the arguments of $BackendArguments $SessionArgument $AdditionalArguments $CompositorDisplayArgument for user $LOGINUSER on tty $USERSESSIONTTY"
   #Reset the contents of the tty
   echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
   #Disable cursor blinking on the TTY the display server will be started on
@@ -1063,7 +1069,7 @@ function AuthenticateUser
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
     #if the password and username is correct, start the session
-    logger -t waylandloginmanager "Opening a session for $LOGINUSER on TTY $SessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY"
     DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
     #report success
@@ -1161,11 +1167,11 @@ function GetUserCredentials
     if [[ $passwordresult != 0 ]]
     then
       $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
-      logger -t waylandloginmanager "Invalid password for $LOGINUSER, or username invalid" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Invalid password for $LOGINUSER, or username invalid"
     fi
   else
     $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
-    logger -t waylandloginmanager "Not Enough TTYs for user login!" -s  >>/var/log/waylandloginmanager 2>&1
+    WriteToLog "Not Enough TTYs for user login!"
   fi
 }
 
@@ -1298,7 +1304,7 @@ function StartLoginManagerDisplay
     if [[ $LOGINMANAGERDISPLAYSTATUS == 0 ]]
     then 
       (( StartTimes++ ))
-      logger -t waylandloginmanager "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY"
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
@@ -1314,12 +1320,12 @@ function StartLoginManagerDisplay
         GetLoginManagerDisplaySession 1
         loginctl activate $LOGINMANAGERDISPLAYSESSION
       else
-        logger -t waylandloginmanager "$DEFAULTWAYLANDSERVER is not executable, or does not exist" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
       fi
     fi
     $SLEEPCMD 5
   done
-  logger -t waylandloginmanager "ERROR: Maximum restarts of the loginmanagerdisplay has been reached" -s  >>/var/log/waylandloginmanager 2>&1
+  WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached"
   openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -1387,11 +1393,11 @@ function StartAutoLogin
     #if there is a tty for the autologin session, the autologin is configured, start the autologin session
     if [[ $AutoSessionTTY -ne -1 ]]
     then
-      logger -t waylandloginmanager "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
       StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
     else
       $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
-      logger -t waylandloginmanager "Not Enough TTYs for autologin!" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Not Enough TTYs for autologin!"
     fi
   fi 
 }
@@ -1548,7 +1554,7 @@ function ReadCommandFIFO
     read -n 20 -t 1 COMMAND <&1000
     if [[ $COMMAND != "" ]]
     then
-      logger -t waylandloginmanager "received command $COMMAND" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "received command $COMMAND"
     fi
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
@@ -1566,7 +1572,7 @@ function ReadCommandFIFO
         SwitchUserDialog &
         LastSwitchPID=$!
       else
-        logger -t waylandloginmanager "A handler for the Switch command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "A handler for the Switch command is already open"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
@@ -1586,7 +1592,7 @@ function ReadCommandFIFO
         GetUserCredentials &
         LastLogonPID=$!
       else
-        logger -t waylandloginmanager "A handler for the Login command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "A handler for the Login command is already open"
       fi
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
@@ -1597,7 +1603,7 @@ function ReadCommandFIFO
         LeavePrompt &
         LastLeavePID=$!
       else
-        logger -t waylandloginmanager "A handler for the Leave command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "A handler for the Leave command is already open"
       fi
     #if the command is RegisterSession, then attempt to read the loginmanager_register FIFO, and register any data sent to that FIFO.
     elif [[ $COMMAND = "RegisterSession" ]]
@@ -1612,7 +1618,7 @@ function ReadCommandFIFO
         ShowInfo &
         LastInfoPID=$!
       else
-        logger -t waylandloginmanager "A handler for the Info command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "A handler for the Info command is already open"
       fi
     #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
     elif [[ $COMMAND == "Debug" ]]
@@ -1623,12 +1629,12 @@ function ReadCommandFIFO
         then
           DiagnosticTerminal &
           LastDebugPID=$!
-          logger -t waylandloginmanager "Spawned a login terminal window on the loginmanagerdisplay" -s  >>/var/log/waylandloginmanager 2>&1
+          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay"
         else
-          logger -t waylandloginmanager "A handler for the Debug command is already open" -s  >>/var/log/waylandloginmanager 2>&1
+          WriteToLog "A handler for the Debug command is already open"
         fi
       else
-        logger -t waylandloginmanager "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel, or not in Live CD mode." -s  >>/var/log/waylandloginmanager 2>&1
+        WriteToLog "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel, or not in Live CD mode."
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
@@ -1636,7 +1642,7 @@ function ReadCommandFIFO
       :
     #if the command is unknown, then log that.
     else
-      logger -t waylandloginmanager "Invalid command: $COMMAND received" -s  >>/var/log/waylandloginmanager 2>&1
+      WriteToLog "Invalid command: $COMMAND received"
     fi
     $SLEEPCMD .5
   done
