@@ -1465,6 +1465,7 @@ function CommandFIFOProxy
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
+  SessionStartFailed=0
   #loop 'forever'
   while [ 1 ]
   do
@@ -1493,10 +1494,16 @@ function ReadCommandFIFO
       fi
     done
 
-    #Handle for when a session is detected to not be running
-    if [[ $NotRunningSessions != 0 || $SessionStartFailed == 1 ]]
+    #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
+    if [[ $SessionStartFailed == 1 ]]
     then
       SessionStartFailed=0
+      loginctl activate $LOGINMANAGERDISPLAYSESSION
+    fi
+
+    #Handle for when a session is detected to not be running
+    if [[ $NotRunningSessions != 0 ]]
+    then
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
 
@@ -1529,7 +1536,6 @@ function ReadCommandFIFO
               ResetTTYMode $RunningSessionTTY
             fi
             loginctl activate $LOGINMANAGERDISPLAYSESSION
-            chvt $LOGINMANAGERDISPLAYTTY &
           fi
         fi
       done
@@ -1564,7 +1570,6 @@ function ReadCommandFIFO
       then
         loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
-        chvt $LOGINMANAGERDISPLAYTTY &
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
@@ -1581,7 +1586,6 @@ function ReadCommandFIFO
       then
         loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
-        chvt $LOGINMANAGERDISPLAYTTY &
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
