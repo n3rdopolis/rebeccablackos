@@ -955,9 +955,9 @@ New Session...
       #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
-        chvt $ChangeSessionTTY &
+        chvt $ChangeSessionTTY &>/dev/null &
         #hand over the logind session ID to allow desktop permissions to work.
-        loginctl activate $ChangeSessionID
+        loginctl activate $ChangeSessionID &>/dev/null
       else
         $ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
       fi
@@ -1023,7 +1023,7 @@ function StartUserSession
   echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
   #Disable cursor blinking on the TTY the display server will be started on
   echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
-  chvt $USERSESSIONTTY &
+  chvt $USERSESSIONTTY &>/dev/null &
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
@@ -1032,7 +1032,7 @@ function StartUserSession
   SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
   for SESSION in "${SESSIONS[@]}"
   do
-    SessionPid=$(loginctl show-session $SESSION -p Leader --value)
+    SessionPid=$(loginctl show-session $SESSION -p Leader --value 2>/dev/null)
     if [[ $SessionPid == $USERSESSIONPID ]]
     then
       LOGINDSESSION=$SESSION
@@ -1041,7 +1041,7 @@ function StartUserSession
   done < <(echo "$SESSIONS")
 
   #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
-  loginctl activate $LOGINDSESSION
+  loginctl activate $LOGINDSESSION &>/dev/null
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
   SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION"
@@ -1308,7 +1308,7 @@ function StartLoginManagerDisplay
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
-        chvt $LOGINMANAGERDISPLAYTTY &
+        chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
@@ -1318,7 +1318,7 @@ function StartLoginManagerDisplay
         done
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
         GetLoginManagerDisplaySession 1
-        loginctl activate $LOGINMANAGERDISPLAYSESSION
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       else
         WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
       fi
@@ -1498,7 +1498,7 @@ function ReadCommandFIFO
     if [[ $SessionStartFailed == 1 ]]
     then
       SessionStartFailed=0
-      loginctl activate $LOGINMANAGERDISPLAYSESSION
+      loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
     fi
 
     #Handle for when a session is detected to not be running
@@ -1535,7 +1535,7 @@ function ReadCommandFIFO
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            loginctl activate $LOGINMANAGERDISPLAYSESSION
+            loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
           fi
         fi
       done
@@ -1568,8 +1568,8 @@ function ReadCommandFIFO
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
-        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
-        loginctl activate $LOGINMANAGERDISPLAYSESSION
+        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value) &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
@@ -1584,8 +1584,8 @@ function ReadCommandFIFO
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
-        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
-        loginctl activate $LOGINMANAGERDISPLAYSESSION
+        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value) &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
