@@ -851,14 +851,14 @@ function DiagnosticTerminal
 {
   if [[ $wlmdebuginsecure == 1 ]]
   then
-    vte -g 500x300
+    vte -g 500x300 &>/dev/null
   else
     mkdir -p /var/tmp/waylandloginmanager/logincmd
     chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
     chmod 700 /var/tmp/waylandloginmanager/logincmd
     cp /bin/login /var/tmp/waylandloginmanager/logincmd
     chmod +s /var/tmp/waylandloginmanager/logincmd/login
-    $TERMINALCMD -g 500x300 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login"
+    $TERMINALCMD -g 500x300 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &>/dev/null
     wait -n $TERMINALJOB
     rm /var/tmp/waylandloginmanager/logincmd/login
   fi
