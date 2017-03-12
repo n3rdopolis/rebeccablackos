@@ -775,28 +775,6 @@ Author: Rico Tzschichholz <ricotz@ubuntu.com>
 Forwarded: no
 Last-Update: 2015-05-04
 
-Index: b/js/src/Makefile.in
-===================================================================
---- a/mozjs-38.0.0/js/src/Makefile.in
-+++ b/mozjs-38.0.0/js/src/Makefile.in
-@@ -214,10 +214,10 @@
- $(JS_CONFIG_NAME): js-config
-    cp $^ $@
- 
--$(LIBRARY_NAME).pc: js.pc
-+$(JS_LIBRARY_NAME).pc: js.pc
- 	cp $^ $@
- 
--install:: $(LIBRARY_NAME).pc
-+install:: $(JS_LIBRARY_NAME).pc
- 	$(SYSINSTALL) $^ $(DESTDIR)$(libdir)/pkgconfig
- 
- install:: js-config.h
---- a/mozjs-38.0.0/js/src/configure
-+++ b/mozjs-38.0.0/js/src/configure
-@@ -1662,9 +1662,9 @@
- 
- fi
  
 -MOZILLA_VERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir`
 -MOZILLA_UAVERSION=`$PYTHON $srcdir/python/mozbuild/mozbuild/milestone.py --topsrcdir $srcdir --uaversion`
@@ -886,4 +864,35 @@ diff -r 80a9e64d75f5 js/src/Makefile.in
 +
  $(LIBRARY_NAME).pc: js.pc
  	cp $^ $@
+ 
+
+ 
+ 
+ 
+
+ 
+ 
+ Index: b/js/src/Makefile.in
+===================================================================
+--- a/mozjs-38.0.0/js/src/Makefile.in
++++ b/mozjs-38.0.0/js/src/Makefile.in
+@@ -214,10 +214,10 @@
+ $(JS_CONFIG_NAME): js-config
+    cp $^ $@
+ 
+-$(LIBRARY_NAME).pc: js.pc
++$(JS_LIBRARY_NAME).pc: js.pc
+ 	cp $^ $@
+ 
+-install:: $(LIBRARY_NAME).pc
++install:: $(JS_LIBRARY_NAME).pc
+ 	$(SYSINSTALL) $^ $(DESTDIR)$(libdir)/pkgconfig
+ 
+ install:: js-config.h
+--- a/mozjs-38.0.0/js/src/configure
++++ b/mozjs-38.0.0/js/src/configure
+@@ -1662,9 +1662,9 @@
+ 
+ fi
+ 
  
