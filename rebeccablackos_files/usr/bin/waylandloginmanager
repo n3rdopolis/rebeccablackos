@@ -1488,7 +1488,7 @@ function ReadCommandFIFO
     done
 
     #Handle for when a session is detected to not be running
-    if [[ $NotRunningSessions != 0 || SessionStartFailed == 1 ]]
+    if [[ $NotRunningSessions != 0 || $SessionStartFailed == 1 ]]
     then
       SessionStartFailed=0
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
