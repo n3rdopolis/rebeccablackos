@@ -23,7 +23,7 @@
 SOURCENAME=libmozjs
 
 #The URL of the Source code repo
-SOURCEURL=https://people.mozilla.org/~sstangl/mozjs-31.5.0.tar.bz2
+SOURCEURL=https://people.mozilla.org/~sstangl/mozjs-38.2.1.rc0.tar.bz2
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=ARCHIVE
@@ -57,10 +57,10 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p0 < /usr/share/RBOS_PATCHES/libmozjs.diff
+patch -f -p1 < /usr/share/RBOS_PATCHES/libmozjs.diff
 export SHELL=/bin/bash
-#cd mozjs-31.2.0/js/src/
-./mozjs-31.2.0/js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-system-nspr --with-system-zlib --enable-system-ffi --with-system-icu --enable-release --enable-debug-symbols=no --enable-debug=no
+#cd mozjs-38.0.0/js/src/
+./mozjs-38.0.0/js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-system-nspr --with-system-zlib --enable-system-ffi --with-system-icu --enable-release --enable-debug-symbols=no --enable-debug=no
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
