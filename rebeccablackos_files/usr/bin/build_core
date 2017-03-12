@@ -401,7 +401,7 @@ function CleanupARCHIVE()
 {
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  find | grep -v ./SOURCEFILE$ | sort -r | while read FILE
+  find | grep -v ./SOURCEFILE$ | grep -v ./SOURCEURL | sort -r | while read FILE
   do
     rm -rf $FILE
   done
@@ -409,11 +409,24 @@ function CleanupARCHIVE()
 #Function to download archives
 function DownloadARCHIVE()
 {
+  OLDSOURCEURL=$(cat "$SOURCENAME/SOURCEURL")
+  if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
+  then
+    rm "$SOURCENAME/SOURCEFILE"
+
+    if [[ $MAKEDEBS == 1 ]]
+    then
+      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
+      rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
+    fi
+  fi
+
   if [[ ! -f "$SOURCENAME/SOURCEFILE" ]]
   then
     $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-    cd "$SOURCENAME"
-    $NONROOTCOMMAND wget $SOURCEURL -O SOURCEFILE
+    $NONROOTCOMMAND wget "$SOURCEURL" -O $SOURCENAME/SOURCEFILE
+    echo "$SOURCEURL" > $SOURCENAME/SOURCEURL
   fi
   cd "$SOURCENAME"
   $NONROOTCOMMAND tar xaf SOURCEFILE -C .
