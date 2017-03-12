@@ -170,7 +170,6 @@ function UserSessionWorker
   #Execute first run scripts
   dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
 
-  STARTTIME=$(date +%s)
   #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
   dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
@@ -186,14 +185,7 @@ function UserSessionWorker
   else
     fg 1
   fi
-  ENDTIME=$(date +%s)
-  RUNTIME=$((ENDTIME-STARTTIME))
-  #If the server only ran for 5 seconds, assume it crashed, and switch back. This should cover the time it would take until RegisterSession in Waylandloginmanager handles it. If it is longer than 5 seconds, don't switch back as the user could have another session active.
-  if [[ $RUNTIME < 45 ]]
-  then
-    SendSelfCommand Change
-    exit
-  fi
+
   exit
 }
 
@@ -617,13 +609,18 @@ function RegisterSession
       SessionPID=${ArraySessionData[2]}
       SessionUser=${ArraySessionData[3]}
       SessionID=${ArraySessionData[4]}
-      AllSessionTTYs+=($SessionTTY)
-      AllSessionPIDs+=($SessionPID)
-      AllSessionUsers+=($SessionUser)
-      AllSessionIDs+=($SessionID)
-
-      #increment the number of running sessions, now that one is added and running successfuly
-      ((AllSessions++))
+      if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
+      then
+        AllSessionTTYs+=($SessionTTY)
+        AllSessionPIDs+=($SessionPID)
+        AllSessionUsers+=($SessionUser)
+        AllSessionIDs+=($SessionID)
+        #increment the number of running sessions, now that one is added and running successfuly
+        ((AllSessions++))
+      else
+        logger -t waylandloginmanager "Session failed to start" -s  >>/var/log/waylandloginmanager 2>&1
+        SessionStartFailed=1
+      fi
 
       #Export the Session data
       ExportSessionData
@@ -1307,7 +1304,12 @@ function StartLoginManagerDisplay
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &
         systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
-        $SLEEPCMD 3
+        LOGINMANAGERDISPLAYREADY=1
+        while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
+        do
+          LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay.service &> /dev/null; echo $?)
+          $SLEEPCMD 1
+        done
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
         GetLoginManagerDisplaySession 1
         loginctl activate $LOGINMANAGERDISPLAYSESSION
@@ -1486,8 +1488,9 @@ function ReadCommandFIFO
     done
 
     #Handle for when a session is detected to not be running
-    if [[ $NotRunningSessions != 0 ]]
+    if [[ $NotRunningSessions != 0 || SessionStartFailed == 1 ]]
     then
+      SessionStartFailed=0
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
 
@@ -1520,6 +1523,7 @@ function ReadCommandFIFO
               ResetTTYMode $RunningSessionTTY
             fi
             loginctl activate $LOGINMANAGERDISPLAYSESSION
+            chvt $LOGINMANAGERDISPLAYTTY &
           fi
         fi
       done
@@ -1554,6 +1558,7 @@ function ReadCommandFIFO
       then
         loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
+        chvt $LOGINMANAGERDISPLAYTTY &
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
@@ -1570,6 +1575,7 @@ function ReadCommandFIFO
       then
         loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value)
         loginctl activate $LOGINMANAGERDISPLAYSESSION
+        chvt $LOGINMANAGERDISPLAYTTY &
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
