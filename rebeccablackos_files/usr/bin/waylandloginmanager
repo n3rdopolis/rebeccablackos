@@ -628,6 +628,7 @@ function RegisterSession
       else
         WriteToLog "Session failed to start"
         SessionStartFailed=1
+        FailedSessionTTY=$SessionTTY
       fi
 
 
@@ -1497,8 +1498,18 @@ function ReadCommandFIFO
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
     if [[ $SessionStartFailed == 1 ]]
     then
+      read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+      ActiveSystemTTY=${ActiveSystemTTY:3}
       SessionStartFailed=0
-      loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+      if [[ $FailedSessionTTY == $ActiveSystemTTY ]]
+      then
+        if [[ ! -z $FailedSessionTTY ]]
+        then
+          ResetTTYMode $FailedSessionTTY
+        fi
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+      fi
+      unset FailedSessionTTY
     fi
 
     #Handle for when a session is detected to not be running
