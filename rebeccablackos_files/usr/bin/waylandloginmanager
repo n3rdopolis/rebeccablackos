@@ -97,6 +97,9 @@ function UserSessionWorker
     mkdir ~/wlsessionlogs
   fi
 
+  #Create a /tmp/.X11-unix/ folder, don't assume it exists
+  mkdir /tmp/.X11-unix/
+
   #Cleanup old log files
   LOGFILECOUNT=0
   ls -t ~/wlsessionlogs/waylandsession* 2>/dev/null | while read LOGFILE
@@ -1032,7 +1035,7 @@ function StartUserSession
   #Disable cursor blinking on the TTY the display server will be started on
   echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
   chvt $USERSESSIONTTY &>/dev/null &
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
@@ -1317,7 +1320,7 @@ function StartLoginManagerDisplay
       then
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
         do
