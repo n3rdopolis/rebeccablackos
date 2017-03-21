@@ -149,7 +149,6 @@ echo "set color_normal=black/black" > /boot/grub/custom.cfg
 #disable services that conflict with the waylandloginmanager
 systemctl disable lightdm.service
 systemctl disable gdm.service
-systemctl disable getty@tty1.service
 
 #Create the user for the waylandloginmanager
 adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager

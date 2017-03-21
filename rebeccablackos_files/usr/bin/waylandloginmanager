@@ -504,6 +504,8 @@ Will now reboot." 20 50 --no-cancel
     wlmdebug=1
     wlmdebuginsecure=1
   fi
+  
+  ReadyNotifySent=0
 }
 
 
@@ -634,6 +636,11 @@ function RegisterSession
 
     elif [[ $RegisterType == NEWWLMDISPLAY ]]
     then
+      if [[ $ReadyNotifySent == 0 ]]
+      then
+        systemd-notify --ready
+        ReadyNotifySent=1
+      fi
       LOGINMANAGERDISPLAYSESSION=${ArraySessionData[1]}
     fi
   else
