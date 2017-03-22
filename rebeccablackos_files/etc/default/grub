@@ -4,5 +4,5 @@
 #   info -f grub -n 'Simple configuration'
 
 GRUB_DISTRIBUTOR="RebeccaBlackOS"
-GRUB_CMDLINE_LINUX_DEFAULT="quiet splash"
+GRUB_CMDLINE_LINUX_DEFAULT="vt.global_cursor_default=0 quiet splash"
 GRUB_BACKGROUND="/usr/share/wallpapers/RebeccaBlackOS/Bootsplash.png"

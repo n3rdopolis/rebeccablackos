@@ -141,6 +141,7 @@ fi
 
 #configure /etc/issue
 echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
+setterm -cursor on >> /etc/issue
 echo -e "RebeccaBlackOS \n" > /etc/issue.net
 
 #configure grub color
