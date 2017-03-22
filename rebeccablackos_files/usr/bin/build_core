@@ -72,6 +72,7 @@ function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
   setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  setfacl -m $NONROOTUSER:rwx -m mask::rwx -dm $NONROOTUSER:rwx -dm mask::rwx "$SOURCEDIR"/buildhome/cargocache
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
@@ -89,6 +90,7 @@ function RunDownloadAndOrBuild
     exit
   fi
   
+  export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
   rm -rf "$SOURCEDIR"/buildhome/"$SOURCENAME"
   rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
@@ -97,6 +99,7 @@ function RunDownloadAndOrBuild
   mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
   mkdir -p "$BUILDLOGDIR/$SOURCENAME"
   mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  mkdir -p "$SOURCEDIR"/buildhome/cargocache
 
   #create a variable for the package name that is the source name converted to all lower case.
   export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
