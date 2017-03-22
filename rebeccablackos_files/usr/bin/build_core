@@ -71,7 +71,7 @@ export ACTION=$1
 function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
-  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME"
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/"$SOURCENAME"
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
