@@ -503,12 +503,6 @@ function DownloadSource()
     STARTTIME=$(date +%s)
     $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
 
-    #Handle Cargo files for any potential rust programs
-    find | grep /Cargo.toml$ | while read CARGOFILE
-    do
-      cargo fetch --manifest-path $CARGOFILE
-    done
-
     ENDTIME=$(date +%s)
     echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
     rm ./packagedownloadscript
