@@ -89,8 +89,7 @@ function RunDownloadAndOrBuild
     echo "SOURCENAME Not defined."
     exit
   fi
-  
-  export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
+
   rm -rf "$SOURCEDIR"/buildhome/"$SOURCENAME"
   rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
@@ -490,6 +489,13 @@ function DownloadSource()
     export INSTALLDIR=$INSTALLDIR
 
     cd "/$SOURCEDIR/$SOURCENAME"
+    export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
+    #Handle Cargo files for any potential rust programs
+    find | grep /Cargo.toml$ | while read CARGOFILE
+    do
+      cargo fetch --manifest-path \$CARGOFILE
+    done
+
     PackageDownloadSource
     
 " > packagedownloadscript
@@ -498,12 +504,10 @@ function DownloadSource()
     $NONROOTCOMMAND ./packagedownloadscript   2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
 
     #Handle Cargo files for any potential rust programs
-    cd "/$SOURCEDIR/$SOURCENAME"
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
       cargo fetch --manifest-path $CARGOFILE
     done
-    cd "/$SOURCEDIR"
 
     ENDTIME=$(date +%s)
     echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
