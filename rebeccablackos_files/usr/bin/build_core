@@ -90,6 +90,7 @@ function RunDownloadAndOrBuild
     exit
   fi
 
+  export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
   rm -rf "$SOURCEDIR"/buildhome/"$SOURCENAME"
   rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
@@ -489,7 +490,6 @@ function DownloadSource()
     export INSTALLDIR=$INSTALLDIR
 
     cd "/$SOURCEDIR/$SOURCENAME"
-    export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
     #Handle Cargo files for any potential rust programs
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
