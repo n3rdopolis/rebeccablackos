@@ -51,3 +51,11 @@ then
   cp -a /lib/plymouth/themes/rebeccablackos-text/ /usr/share/plymouth/themes
   echo FRAMEBUFFER=y >> /etc/initramfs-tools/conf.d/splash
 fi
+
+#Configure python to use modules in /opt
+echo "/opt/lib/python2.7/site-packages" > "/usr/lib/python2.7/dist-packages/optpkgs.pth"
+PYTHON3DIRS=$(find /usr/lib/python3* -maxdepth 0 -printf "%f\n")
+for PYTHON3DIR in $PYTHON3DIRS
+do
+echo "/opt/lib/$PYTHON3DIR/site-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
+done
