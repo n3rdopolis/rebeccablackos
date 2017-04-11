@@ -632,6 +632,8 @@ function MakeAndInstall()
     echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds with result \$PackageInstallSourceResult\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     if [[ \$PackageInstallSourceResult != 0 ]]
     then
+      mkdir \"/usr/share/buildcore_revisions/buildresults/\"
+      touch $SOURCENAME \"/usr/share/buildcore_revisions/buildresults/$SOURCENAME\"
       echo $SOURCENAME >> \"/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles\"
     fi
     exit 0
