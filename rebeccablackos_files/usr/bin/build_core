@@ -469,15 +469,21 @@ function DownloadSource()
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
   #count the number of non-empty debs for this package
-  DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f | while read DEBFILE
+  DEBFILECONTENTCOUNT=0
+  while read DEBFILE
   do
-    dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" | while read LINE
+    while read LINE
     do
-     #Output the line, and stop the pipe upon the first matched file that determines that the deb is build, 
-     echo $LINE
-     break
-    done
-  done | wc -l)
+     LINEARRAY=($LINE)
+     if [[ ${LINEARRAY[5]} != "./usr/share/buildcore_revisions/buildresults/$SOURCENAME" ]]
+     then
+       ((DEBFILECONTENTCOUNT++))
+     else
+       DEBFILECONTENTCOUNT=0
+       break
+     fi
+    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
+  done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
 
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
@@ -582,16 +588,22 @@ function MakeAndInstall()
     DIFFERENTREVISION=0
   fi
 
-  #Count the number of non-empty debs
-  DEBFILECONTENTCOUNT=$(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f | while read DEBFILE
+  #count the number of non-empty debs for this package
+  DEBFILECONTENTCOUNT=0
+  while read DEBFILE
   do
-    dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" | while read LINE
+    while read LINE
     do
-     #Output the line, and stop the pipe upon the first matched file that determines that the deb is build, 
-     echo $LINE
-     break
-    done
-  done | wc -l)
+     LINEARRAY=($LINE)
+     if [[ ${LINEARRAY[5]} != "./usr/share/buildcore_revisions/buildresults/$SOURCENAME" ]]
+     then
+       ((DEBFILECONTENTCOUNT++))
+     else
+       DEBFILECONTENTCOUNT=0
+       break
+     fi
+    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
+  done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
   #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
