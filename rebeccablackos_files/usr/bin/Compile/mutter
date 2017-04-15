@@ -57,7 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-compile-warnings=yes --with-xwayland-path=$INSTALLDIR/bin/Xwayland --disable-Werror
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-compile-warnings=yes --with-xwayland-path=$INSTALLDIR/bin/Xwayland --disable-Werror --enable-egl-device
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -70,13 +70,12 @@ make
 function PackageInstallSource()
 {
 make install
-ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/mutter/libmutter-cogl-pango.so $INSTALLDIR/lib
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/mutter/libmutter-cogl-pango.so $INSTALLDIR/lib
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
