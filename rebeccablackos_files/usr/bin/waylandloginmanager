@@ -1341,6 +1341,7 @@ function StartLoginManagerDisplay
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
+  systemd-notify --ready
   openvt -c 63 -s -f -- rbos-failedboot
   exit
 }
