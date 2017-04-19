@@ -69,6 +69,9 @@ then
   if [[ $HASOVERLAYFSMODULE == 0 ]]
   then
     HASOVERLAYFS=1
+  else
+    echo "Building without overlayfs is no longer supported"
+    exit 1
   fi
 fi
 SCRIPTFILEPATH=$(readlink -f "$0")
