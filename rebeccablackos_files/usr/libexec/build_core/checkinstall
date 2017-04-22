@@ -501,7 +501,13 @@ function copy_dir_hierarchy {
 # TODO better detection, right now, it tests using the path in a namespace
 function checkcanoverlay
 {
-  unshare -rm mount -t overlay overlay -o lowerdir="$1:$1"  /media/ &>/dev/null
+  #Use a user namespace, only if the user isn't the root user
+  if [[ $UID == 0 ]]
+  then
+    unshare -m mount -t overlay overlay -o lowerdir="$1:$1"  /tmp/ &>/dev/null
+  else
+    unshare -rm mount -t overlay overlay -o lowerdir="$1:$1"  /tmp/ &>/dev/null
+  fi
   overlaytestresult=$?
   if [[ $overlaytestresult == 0 ]]
   then
@@ -1211,7 +1217,7 @@ shift
 ! [ "$TRANSLATE" ] && TRANSLATE=1
 
 # Is overlayfs filesystem translation being used?
-! [ "$OVERLAYFSTRANS" ] && $OVERLAYFSTRANS=1
+! [ "$OVERLAYFSTRANS" ] && OVERLAYFSTRANS=1
 
 # Reset the owner/group of all files to root.root?
 ! [ "$RESET_UIDS" ] && RESET_UIDS=0
@@ -1288,9 +1294,11 @@ then
   then
     echog "Using overlayfs translation"
     USEOVERLAYFS=1
+  else
+    USEOVERLAYFS=0
   fi
 else
-  HASOVERLAYFS=0
+  USEOVERLAYFS=0
   if [[ $UID != 0 ]]
   then
     echog "Support for using overlayfs requires root permissions. Falling back to legacy behaviour."
