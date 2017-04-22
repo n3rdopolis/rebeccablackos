@@ -698,7 +698,7 @@ function createtraslationmounts
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
-          >&2 echog "Failed to union mount $MOUNTDEST"
+          >&2 echo "Failed to union mount $MOUNTDEST"
         fi
       else
         mount --bind $MOUNTDEST "${TMP_DIR}/workdir/$MOUNTDEST"
@@ -706,7 +706,7 @@ function createtraslationmounts
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
-          >&2 echog "Failed to bind in non unioned $MOUNTDEST"
+          >&2 echo "Failed to bind in non unioned $MOUNTDEST"
         fi
       fi
     else
@@ -719,17 +719,17 @@ function createtraslationmounts
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
-          >&2 echog "Failed bind mount real $MOUNTSOURCE to $MOUNTDEST"
+          >&2 echo "Failed bind mount real $MOUNTSOURCE to $MOUNTDEST"
         fi
         mount --bind "${TMP_DIR}/workdir/$MOUNTSOURCE" "${TMP_DIR}/workdir/$MOUNTDEST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
-          >&2 echog "Failed bind mount translation $MOUNTSOURCE to $MOUNTDEST"
+          >&2 echo "Failed bind mount translation $MOUNTSOURCE to $MOUNTDEST"
         fi
       else
-        >&2 echog "$MOUNTSOURCE does not exist"
+        >&2 echo "$MOUNTSOURCE does not exist"
         MOUNTFAILCOUNT+=1
       fi
     fi
@@ -742,7 +742,7 @@ function createtraslationmounts
   MOUNTFAILCOUNT+=$MOUNTRESULT
   if [[ $MOUNTRESULT != 0 ]]
   then
-    >&2 echog "Failed to pivot_root"
+    >&2 echo "Failed to pivot_root"
   fi
 
   if [[ $MOUNTFAILCOUNT == 0 ]]
@@ -1306,7 +1306,7 @@ else
 fi
 #Turn off fstrans if overlayfs supported
 if [[ $USEOVERLAYFS == 1 && $TRANSLATE == 1 ]]
-  then
+then
     echog "Using overlayfstrans over legacy fstrans."
     TRANSLATE=0
 fi
