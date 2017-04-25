@@ -196,16 +196,8 @@ then
   rm -rf "$BUILDLOCATION"/debootstrap/*
   rm "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
   mkdir -p "$BUILDLOCATION"/debootstrap
-  FTPFILELIST=$(ftp -n -v ftp.debian.org << EOT
-ascii
-user anonymous " "
-prompt
-cd debian/pool/main/d/debootstrap/
-ls 
-bye
-EOT)
-  FTPFILE=$(echo "$FTPFILELIST" | awk '{print $9}' | grep tar| tail -1)
-  wget http://ftp.debian.org/debian/pool/main/d/debootstrap/$FTPFILE -O "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
+  DEBOOTSTRAPURL=$(wget  -O -  http://packages.debian.org/source/sid/debootstrap 2>/dev/null|grep .tar.gz | awk -F \" '{print $2}')
+  wget "$DEBOOTSTRAPURL" -O "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
   tar xaf "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz -C "$BUILDLOCATION"/debootstrap --strip 1
   make -C "$BUILDLOCATION"/debootstrap/ devices.tar.gz
 fi
