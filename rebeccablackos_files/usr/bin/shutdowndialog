@@ -106,14 +106,17 @@ then
     RESULT=$?
   elif [[ $ACTION == "Standby" ]]
   then
+    loginctl lock-session
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Suspend boolean:true
     RESULT=$?
   elif [[ $ACTION == "Hybrid Sleep" ]]
   then
+    loginctl lock-session
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.HybridSleep boolean:true
     RESULT=$?
   elif [[ $ACTION == "Hibernate" ]]
   then
+    loginctl lock-session
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Hibernate boolean:true
     RESULT=$?
   else
