@@ -539,6 +539,15 @@ function getmountmap
   else
     CHROOTPATH=/
   fi
+
+  #Overlayfs cant be on the upperdir of overlayfs, if /var/tmp is overlayfs, create ramdisk that will use 50% of memory maximum
+  TRANLFSTYPE=$(df -T "$BASE_TMP_DIR" | tail -1 | awk '{print $2}')
+  if [[ $TRANLFSTYPE == "overlay" ]]
+  then
+    >&2 echog "$BASE_TMP_DIR cannot be an overlayfs."
+    return 1
+  fi
+
   FSES=$(findmnt -vUPno MAJ:MIN,FSROOT,TARGET,ID  | sed -e "s|$CHROOTPATH|/|g" -e "s|//|/|g" -e "s|^MAJ:MIN=|MAJ_MIN=|g" | sort -k4,4n --stable)
 
   IFS=,
@@ -678,7 +687,7 @@ function createtraslationmounts
   then
     >&2 echo "Failed to make all mounts private"
   fi
-  MOUNTS=$(findmnt -lUno TARGET|sort)
+
   #Go through each mount, and create an overlayfs, or bind it in, or create a bind mount, based on an existing bind mount
   IFS=$'\n'
   for MAPPEDMOUNT in $MAPPEDMOUNTS
