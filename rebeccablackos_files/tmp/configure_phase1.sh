@@ -39,7 +39,7 @@ rm -rf /var/lib/apt/lists/*
 apt-get update
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget cargo dselect locales acl sudo -y
+apt-get install aptitude git bzr subversion mercurial wget dselect locales acl sudo -y
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
@@ -47,6 +47,7 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #update the dselect database
 yes Y | dselect update
+
 
 #create folder for install logs
 mkdir -p "$PACKAGEOPERATIONLOGDIR"
