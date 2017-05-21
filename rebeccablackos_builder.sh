@@ -299,7 +299,8 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp/*
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/sourcehome/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/config/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
@@ -539,7 +540,8 @@ umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 #Continue cleaning non reusable files
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/*
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/sourcehome/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/config/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*

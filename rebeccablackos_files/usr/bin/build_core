@@ -78,7 +78,7 @@ export ACTION=$1
 function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
-  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   setfacl -m $NONROOTUSER:rwx -m mask::rwx -dm $NONROOTUSER:rwx -dm mask::rwx "$SOURCEDIR"/buildhome/cargocache
 }
 
@@ -98,14 +98,14 @@ function RunDownloadAndOrBuild
   fi
 
   export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
-  rm -rf "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  rm -rf "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
   mkdir -p "$BUILDLOGDIR/$SOURCENAME"
-  mkdir -p "$SOURCEDIR"/buildhome/"$SOURCENAME"
+  mkdir -p "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   mkdir -p "$SOURCEDIR"/buildhome/cargocache
 
   #create a variable for the package name that is the source name converted to all lower case.
@@ -123,7 +123,7 @@ function RunDownloadAndOrBuild
       printf '_%o' "'$CHAR"
     fi
   done)
-  export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/"$SOURCENAME"
+  export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
 
   #Set ACL permissions to allow a non root user account manage the source repos
@@ -506,7 +506,7 @@ function DownloadSource()
     #Handle Cargo files for any potential rust programs, #TODO Renable when cargo is readded
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
-      : cargo fetch --manifest-path \$CARGOFILE
+      cargo fetch --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource
