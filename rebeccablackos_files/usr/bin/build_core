@@ -506,7 +506,7 @@ function DownloadSource()
     #Handle Cargo files for any potential rust programs, #TODO Renable when cargo is readded
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
-      cargo fetch --manifest-path \$CARGOFILE
+      $CARGO_HOME/cargo fetch --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource
