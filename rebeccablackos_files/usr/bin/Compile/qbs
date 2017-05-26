@@ -74,7 +74,9 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+qbs setup-toolchains --type gcc /usr/bin/g++ gcc
+qbs setup-qt /usr/bin/qmake-qt5 qt5
+qbs config profiles.qt5.baseProfile gcc
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
