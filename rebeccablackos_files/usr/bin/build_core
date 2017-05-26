@@ -485,7 +485,12 @@ function DownloadSource()
     done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
-
+  if [[ $(which cargo &> /dev/null; echo $?) == 0 ]]
+  then
+    CARGOCMD=cargo
+  else
+    CARGOCMD="\$CARGO_HOME/cargo"
+  fi
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
@@ -506,7 +511,7 @@ function DownloadSource()
     #Handle Cargo files for any potential rust programs, #TODO Renable when cargo is readded
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
-      $CARGO_HOME/cargo fetch --manifest-path \$CARGOFILE
+      $CARGOCMD fetch --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource
