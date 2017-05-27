@@ -46,6 +46,7 @@ REBUILDNEWREVISION=0
 #This is an array where the first element specifies a submodule name, and the second element specifies the revision, the third specifies the name of another submodule, the fourth element specifies its revision and so on.
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
+SUBMODULEREVISIONS=(qbs/shared master)
 
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
@@ -65,13 +66,13 @@ qbs resolve profile:qt5
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-qbs -j $BUILD_CPU_COUNT profile:qt5 qbs.installRoot:$INSTALLDIR
+qbs build -j $BUILD_CPU_COUNT --no-install profile:qt5
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-qbs install
+qbs install --no-build -v
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
