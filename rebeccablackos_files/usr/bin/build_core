@@ -702,12 +702,17 @@ function MakeAndInstall()
       done)
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
+      echo "Evaluating dependancies, this might take some time..."
       DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
       do
-        DIRECTDEPENDS=$(readelf -d "$FILE" 2>/dev/null | grep NEEDED |sed -e 's/\[//g' -e 's/]//g' |awk '{print $5}')
-        DIRECTDEPENDS=$(echo $DIRECTDEPENDS | sed 's/ /\\\|/g')
-        ALLDEPENDS=$(ldd "$FILE" 2>/dev/null | grep =\> | awk '{print $3}')
-        echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS" | grep -v "$BUILTSOFILES"
+        FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
+        if [[ $FILETYPE == application ]]
+        then
+          DIRECTDEPENDS=$(readelf -d "$FILE" 2>/dev/null | grep NEEDED |sed -e 's/\[//g' -e 's/]//g' |awk '{print $5}')
+          DIRECTDEPENDS=$(echo $DIRECTDEPENDS | sed 's/ /\\\|/g')
+          ALLDEPENDS=$(ldd "$FILE" 2>/dev/null | grep =\> | awk '{print $3}')
+          echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS" | grep -v "$BUILTSOFILES"
+        fi
       done | sort | uniq | grep -v ^$ | while read LIBRARY
       do
         if [[ -e "$LIBRARY" ]]
