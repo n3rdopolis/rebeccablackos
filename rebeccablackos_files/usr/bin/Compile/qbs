@@ -66,13 +66,13 @@ make
 ./bin/qbs setup-toolchains --type gcc /usr/bin/g++ gcc
 ./bin/qbs setup-qt /opt/bin/qmake qt5
 ./bin/qbs config profiles.qt5.baseProfile gcc
-./bin/qbs resolve profile:qt5
+./bin/qbs resolve profile:qt5 qbs.installRoot:$INSTALLDIR
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-./bin/qbs install --no-build profile:qt5 qbs.installRoot:$INSTALLDIR
+./bin/qbs install -v --no-build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
