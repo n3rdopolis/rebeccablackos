@@ -513,7 +513,7 @@ function DownloadSource()
     export INSTALLDIR=$INSTALLDIR
 
     cd "/$SOURCEDIR/$SOURCENAME"
-    #Handle Cargo files for any potential rust programs, #TODO Renable when cargo is readded
+    #Handle Cargo files for any potential rust programs
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
       $CARGOCMD fetch --manifest-path \$CARGOFILE
