@@ -489,7 +489,12 @@ function DownloadSource()
   then
     CARGOCMD=cargo
   else
-    CARGOCMD="\$CARGO_HOME/cargo"
+    CARGOCMD="$CARGO_HOME/cargo"
+  fi
+  if [[ ! -f "$CARGO_HOME/cargo" ]]
+  then
+    echo "Cargo not found, toml files will not be handles"
+    CARGOCMD=":"
   fi
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
