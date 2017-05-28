@@ -25,6 +25,7 @@ then
 fi
 
 export BUILD_CPU_COUNT=$(cat /proc/cpuinfo | grep ^"processor" -c)
+export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
 export CFLAGS="-Os" 
 export CXXFLAGS="-Os"
 export TARGETBITSIZE=$(getconf LONG_BIT)
