@@ -517,6 +517,7 @@ function DownloadSource()
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
       $CARGOCMD fetch --manifest-path \$CARGOFILE
+      $CARGOCMD update --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource
