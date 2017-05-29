@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/qt-labs/qbs
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=1.8
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -56,24 +56,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-qmake -r
+qmake QBS_INSTALL_PREFIX=$INSTALLDIR -r
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
 make
-./bin/qbs setup-toolchains --type gcc /usr/bin/g++ gcc
-./bin/qbs setup-qt /opt/bin/qmake qt5
-./bin/qbs config profiles.qt5.baseProfile gcc
-./bin/qbs resolve profile:qt5 qbs.buildVariant:release qbs.installRoot:$INSTALLDIR
-./bin/qbs build -j $BUILD_CPU_COUNT --no-install profile:qt5
+#./bin/qbs setup-toolchains --type gcc /usr/bin/g++ gcc
+#./bin/qbs setup-qt /opt/bin/qmake qt5
+#./bin/qbs config profiles.qt5.baseProfile gcc
+#./bin/qbs resolve profile:qt5 qbs.buildVariant:release qbs.installRoot:#$INSTALLDIR
+#./bin/qbs build -j $BUILD_CPU_COUNT --no-install profile:qt5
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-./bin/qbs install -v --no-build
+#./bin/qbs install -v --no-build
+make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
