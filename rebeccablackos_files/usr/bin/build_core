@@ -485,17 +485,6 @@ function DownloadSource()
     done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
-  if [[ $(which cargo &> /dev/null; echo $?) == 0 ]]
-  then
-    CARGOCMD=cargo
-  else
-    CARGOCMD="$CARGO_HOME/cargo"
-  fi
-  if [[ ! -f "$CARGO_HOME/cargo" ]]
-  then
-    echo "Cargo not found, toml files will not be handles"
-    CARGOCMD=":"
-  fi
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
@@ -506,6 +495,24 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
+    #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
+    TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
+    TOMLCOUNT=$(echo -n "$TOMLFILES" | wc -l)
+    if [[ ! -f $CARGO_HOME/cargo && $TOMLCOUNT != 0 ]]
+    then
+      DEBIAN_ARCH=$(dpkg --print-architecture)
+      if [[ $DEBIAN_ARCH == i386 ]]
+      then
+        CARGOFILENAME=cargo-nightly-i686-unknown-linux-gnu
+      fi
+      if [[ $DEBIAN_ARCH == amd64 ]]
+      then
+        CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
+      fi
+      wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz
+      tar -xzf $CARGOFILENAME.tar.gz
+      cp $CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
+    fi
     echo "#! /bin/bash
     $(declare -f PackageDownloadSource)
     export SOURCEDIR=$SOURCEDIR
@@ -516,8 +523,8 @@ function DownloadSource()
     #Handle Cargo files for any potential rust programs
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
-      $CARGOCMD fetch --manifest-path \$CARGOFILE
-      $CARGOCMD update --manifest-path \$CARGOFILE
+      $CARGO_HOME/cargo fetch --manifest-path \$CARGOFILE
+      $CARGO_HOME/cargo update --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource

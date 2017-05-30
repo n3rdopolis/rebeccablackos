@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/rust-lang/cargo
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=0.16.0
+SOURCEREVISION=0.17.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,19 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-DEBIAN_ARCH=$(dpkg --print-architecture)
-if [[ $DEBIAN_ARCH == i386 ]]
-then
-  CARGOFILENAME=cargo-nightly-i686-unknown-linux-gnu
-fi
-if [[ $DEBIAN_ARCH == amd64 ]]
-then
-  CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu  
-fi
-
-wget http://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz
-tar -xzf $CARGOFILENAME.tar.gz
-cp $CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
+:
 }
 
 
