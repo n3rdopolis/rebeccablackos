@@ -23,13 +23,13 @@
 SOURCENAME=rust
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/rust-lang/rust
+SOURCEURL=https://static.rust-lang.org/dist/rust-src-1.17.0.tar.gz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=GIT
+REPOSITORYTYPE=ARCHIVE
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=stable
+SOURCEREVISION=
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -51,6 +51,7 @@ REBUILDNEWREVISION=0
 function PackageDownloadSource
 {
 unset SUDO_USER
+cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
 python src/bootstrap/bootstrap.py
 }
 
@@ -59,6 +60,7 @@ python src/bootstrap/bootstrap.py
 function PackagePrepareBuild()
 {
 unset SUDO_USER
+cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
 LLVMPATH=$(ls  -d /usr/lib/llvm-* |tail -1)
 LLVMVER=$(echo $LLVMPATH | awk -F - '{print $2}')
 cp /usr/share/RBOS_PATCHES/rust.diff rust.diff
@@ -71,6 +73,7 @@ patch -p1 < rust.diff
 function PackageCompileSource()
 {
 unset SUDO_USER
+cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
 ./x.py build
 }
 
@@ -78,6 +81,7 @@ unset SUDO_USER
 function PackageInstallSource()
 {
 unset SUDO_USER
+cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
 ./x.py dist --install
 }
 
