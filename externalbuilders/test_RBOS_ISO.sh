@@ -218,7 +218,20 @@ then
     echo "A script is running that is already testing an ISO. will now chroot into it"
     echo "Type exit to go back to your system."
   fi
-  tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+
+  TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/bin/getconf LONG_BIT)
+  if [[ $TARGETBITSIZE == 32 ]]
+  then
+    BITNESSCOMMAND=linux32
+  elif [[ $TARGETBITSIZE == 64 ]]
+  then
+    BITNESSCOMMAND=linux64
+  else
+    echo "Unknown chroot failure, detecting the target systems bitness"
+    exit
+  fi
+
+  tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
   mountisoexit
 fi
 
@@ -374,7 +387,19 @@ then
 fi
 
 
-tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
+TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/bin/getconf LONG_BIT)
+  if [[ $TARGETBITSIZE == 32 ]]
+  then
+    BITNESSCOMMAND=linux32
+  elif [[ $TARGETBITSIZE == 64 ]]
+  then
+    BITNESSCOMMAND=linux64
+  else
+    echo "Unknown chroot failure, detecting the target systems bitness"
+    exit
+  fi
+
+tmux -S "$MOUNTHOME"/liveisotest/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/unionmountpoint su livetest
 
 #go back to the users home folder
 cd "$MOUNTHOME"
