@@ -32,10 +32,20 @@ function setup_buildprocess
   trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
 }
 
-#Function to start all arguments as a command in a seperate PID and mount namespace
+#Function to start all arguments, past the second one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity)
 function NAMESPACE_EXECUTE {
+  HASNETWORK=$1
+  shift
+
+  if [[ $HASNETWORK == 0 ]]
+  then
+    UNSHAREFLAGS="-f --pid --mount --net --mount-proc"
+  else
+    UNSHAREFLAGE="-f --pid --mount --mount-proc"
+  fi
+
   #Create the PID and Mount namespaces to start the command in
-  unshare -f --pid --mount --mount-proc $@ &
+  unshare $UNSHAREFLAGS $@ &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
@@ -446,19 +456,19 @@ PREPARE_ENDTIME=$(date +%s)
 if [[ $RUN_PHASE_0 == 1 ]]
 then
   PHASE0_STARTTIME=$(date +%s)
-  NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
+  NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
   PHASE0_ENDTIME=$(date +%s)
 fi
 
 PHASE1_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
+NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
 PHASE1_ENDTIME=$(date +%s)
 
 PHASE2_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
 PHASE3_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh 
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh
 PHASE3_ENDTIME=$(date +%s)
 
 #Main Build Complete, Extract ISO and logs
@@ -514,7 +524,7 @@ POSTCLEANUP_STARTTIME=$(date +%s)
 #Clean up.
 if [[ $HASOVERLAYFS == 0 ]]
 then
-  NAMESPACE_EXECUTE "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
+  NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
 fi
 
 #Unmount the ramdisks, and bind mounts
