@@ -39,7 +39,7 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 #Set the debootstrap dir
 export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 
-#setup a really basic Ubuntu installation for downloading 
+#setup a really basic Debian installation for downloading 
 #if set to rebuild phase 1
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
@@ -55,7 +55,7 @@ fi
 #if set to rebuild phase 1
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
 then
-  #setup a really basic Ubuntu installation for the live cd
+  #setup a really basic Debian installation for the live cd
   echo "Setting up chroot for the Live CD..."
   "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
   debootstrapresult=$?
