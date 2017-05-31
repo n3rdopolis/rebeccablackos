@@ -154,7 +154,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then
     #Download the source using specified variables.
-    DownloadSource | sed -e "s/^/$SOURCENAME: /"
+    DownloadSource 2>&1 | sed -e "s/^/$SOURCENAME: /"
   fi
 
   #Build the source and install it, unless the argument passed to the build script is 'download-only'
@@ -163,7 +163,7 @@ function RunDownloadAndOrBuild
     export HOME="$SOURCEDIR"/"$SOURCENAME"/home
     mkdir -p "$SOURCEDIR"/"$SOURCENAME"/home
     #Start the compile or install Process
-    MakeAndInstall | sed -e "s/^/$SOURCENAME: /"
+    MakeAndInstall 2>&1 | sed -e "s/^/$SOURCENAME: /"
   fi
 }
 
