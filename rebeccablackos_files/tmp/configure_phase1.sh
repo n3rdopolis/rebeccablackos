@@ -181,11 +181,14 @@ cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
 apt-get dist-upgrade -d -y                                              2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dist-upgrade.log
     
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
-dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
-dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-apt-get -d -u dselect-upgrade --no-install-recommends -y                2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dselect-upgrade.log
-dpkg --clear-selections
-dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
+if [[ -f /tmp/INSTALLSSTATUS.txt ]]
+then
+  dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
+  dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
+  apt-get -d -u dselect-upgrade --no-install-recommends -y                2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dselect-upgrade.log
+  dpkg --clear-selections
+  dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
+fi
 
 #Remove packages that can no longer be downloaded to preserve space
 apt-get autoclean -o APT::Clean-Installed=off

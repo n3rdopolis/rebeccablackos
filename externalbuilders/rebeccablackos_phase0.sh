@@ -55,6 +55,14 @@ fi
 #if set to rebuild phase 1
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
 then
+  #Force phase1 to rehandle downloads if phase2 is reset
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
+  then
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
+  fi
+
   #setup a really basic Debian installation for the live cd
   echo "Setting up chroot for the Live CD..."
   "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
