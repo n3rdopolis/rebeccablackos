@@ -64,7 +64,7 @@ dpkg --configure -a
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget dselect locales -y 
+apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y 
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
