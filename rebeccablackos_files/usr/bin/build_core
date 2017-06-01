@@ -734,7 +734,7 @@ function MakeAndInstall()
           echo $DEPEND
           echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
-      done | sort | uniq | grep -v "\-dev:" | grep -v "\-dev$" | grep -v "\-dbg" | grep -v cmake | grep -v git | grep -v svn | grep -v bzr )
+      done | sort | uniq | grep -ve "\-dev:" -ve "\-dev$" -ve "\-dbg" -ve cmake -ve git -ve svn -ve bzr )
 
       DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
 
