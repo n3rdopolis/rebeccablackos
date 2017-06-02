@@ -251,6 +251,10 @@ then
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
+
+  #Force phase_1 to rehandle downloads
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
 fi
 
 #Delete downloaded source based on a control file
