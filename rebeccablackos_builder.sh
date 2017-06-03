@@ -418,7 +418,7 @@ FREEDISKSPACE=$(df --output=avail $HOMELOCATION | tail -1)
 #if there is less than the required amount of space, then exit.
 if [[ $FREEDISKSPACE -le $STORAGESIZE_TOTALSIZE ]]
 then
-  echo "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on $HOMELOCATION. Please free up some space."
+  echo "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $HOMELOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
   echo "The script will now abort."
   echo "free space: $FREEDISKSPACE"
   exit 1
