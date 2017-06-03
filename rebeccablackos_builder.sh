@@ -237,18 +237,6 @@ then
   exit 1
 fi
 
-#get the size of the users home file system. 
-FreeSpace=$(df ~ | awk '{print $4}' |  grep -v Av)
-#if there is 25gb or less tell the user and quit. If not continue.
-if [[ $FreeSpace -le 25000000 ]] 
-then
-  echo "You have less then 25gb of free space on the partition that contains your home folder. Please free up some space." 
-  echo "The script will now abort."
-  echo "free space:"
-  df ~ -h | awk '{print $4}' |  grep -v Av
-  exit 1                       
-fi
-
 #Determine how much free disk space is neeed
 ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PADDING))
 
@@ -425,6 +413,17 @@ then
   RAMDISK_STATUS=$?
 else 
   RAMDISK_STATUS=1
+fi
+
+#get the size of the users home file system.
+FREEDISKSPACE=$(df --output=avail $HOMELOCATION | tail -1)
+#if there is less than the required amount of space, then exit.
+if [[ $FREEDISKSPACE -le $STORAGESIZE_TOTALSIZE ]]
+then
+  echo "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on $HOMELOCATION. Please free up some space."
+  echo "The script will now abort."
+  echo "free space: $FREEDISKSPACE"
+  exit 1
 fi
 
 #Create the folders in the ramdisk
