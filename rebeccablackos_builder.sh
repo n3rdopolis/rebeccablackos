@@ -26,7 +26,6 @@ function setup_buildprocess
   export TERM=linux
   PATH=$(getconf PATH):/sbin:/usr/sbin
   export LANG=en_US.UTF-8
-  HOMELOCATION=$HOME
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
   trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
@@ -87,7 +86,9 @@ fi
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-export BUILDLOCATION=~/RBOS_Build_Files
+#Begin config options
+HOMELOCATION=$HOME
+export BUILDLOCATION="$HOMELOCATION"/RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
 export BUILDFRIENDLYNAME=RebeccaBlackOS
 
@@ -109,6 +110,7 @@ STORAGESIZE_PHASE1=2000000
 STORAGESIZE_PHASE2=4000000
 STORAGESIZE_ARCHIVES=1000000
 STORAGESIZE_SRCBUILD=25000000
+#End config options
 
 #make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
@@ -174,10 +176,10 @@ echo "
 NOTE THAT THE FOLDERS LISTED BELOW ARE DELETED OR OVERWRITTEN ALONG WITH THE CONTENTS (file names are case sensitive)
     
    Folder:            $BUILDLOCATION
-   File:              ${HOME}/"$BUILDFRIENDLYNAME"_"$BUILDARCH".iso
-   File:              ${HOME}/"$BUILDFRIENDLYNAME"_DevDbg_"$BUILDARCH".iso
-   File:              ${HOME}/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt
-   File:              ${HOME}/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
+   File:              ${HOMELOCATION}/"$BUILDFRIENDLYNAME"_"$BUILDARCH".iso
+   File:              ${HOMELOCATION}/"$BUILDFRIENDLYNAME"_DevDbg_"$BUILDARCH".iso
+   File:              ${HOMELOCATION}/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt
+   File:              ${HOMELOCATION}/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
 "
 
 echo "PLEASE READ ALL TEXT ABOVE. YOU CAN SCROLL BY USING SHIFT-PGUP or SHIFT-PGDOWN (OR THE SCROLL WHEEL OR SCROLL BAR IF AVALIBLE) AND THEN PRESS ENTER TO CONTINUE..."
