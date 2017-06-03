@@ -91,6 +91,24 @@ export BUILDLOCATION=~/RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
 export BUILDFRIENDLYNAME=RebeccaBlackOS
 
+
+#Values for determining how much free disk/ramdisk space is needed
+STORAGESIZE_TOTALSIZE=0
+STORAGESIZE_PADDING=2000000
+
+STORAGESIZE_TMPBASEBUILD=1000000
+STORAGESIZE_TMPSRCBUILDOVERLAY=2000000
+STORAGESIZE_TMPPHASE3=2000000
+STORAGESIZE_TMPREMASTERSYS=6000000
+
+
+STORAGESIZE_ISOOUT=4000000
+STORAGESIZE_BUILDOUTPUT=2000000
+STORAGESIZE_PHASE1=2000000
+STORAGESIZE_PHASE2=4000000
+STORAGESIZE_ARCHIVES=1000000
+STORAGESIZE_SRCBUILD=25000000
+
 #make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
 
@@ -231,81 +249,16 @@ then
   exit 1                       
 fi
 
+#Determine how much free disk space is neeed
+((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PADDING))
+
+#Determine how much space is in use by the ISOs already, and take that value away from the space allocated towards the output ISO, and append it
+CURRENT_ISOOUT=$(du -c "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso 2>/dev/null | tail -1 | awk '{print $1}')
+((STORAGESIZE_TOTALSIZE+=(STORAGESIZE_ISOOUT-CURRENT_ISOOUT)))
+
 echo "Starting the build process..."
 
 REBUILT="to update"
-
-#Delete buildoutput based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
-then
-  echo "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
-  touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
-fi
-
-#Delete archives based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
-then
-  echo "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
-  touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
-
-  #Force phase_1 to rehandle downloads
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
-fi
-
-#Delete downloaded source based on a control file
-if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
-then
-  echo "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
-  touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
-fi
-
-#Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
-RUN_PHASE_0=0
-if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
-then
-  #if set to rebuild phase 1
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
-  then
-    echo "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
-  fi
-
-  #if set to rebuild phase 2
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
-  then
-    echo "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
-    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
-  fi
-
-  if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
-  then
-    echo "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
-    #clean up old files
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
-    rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
-    rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
-    touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
-    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
-    REBUILT="to rebuild from scratch"
-  fi
-  RUN_PHASE_0=1
-fi
 
 #Delete any stale files
 echo "Cleaning up any stale remaining files from any incomplete build..."
@@ -320,6 +273,86 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
+#Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
+RUN_PHASE_0=0
+if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
+then
+  #If set to clean up all files
+  if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
+  then
+    echo "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
+    #clean up old files
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
+    rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
+    touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
+    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
+    REBUILT="to rebuild from scratch"
+  fi
+
+  #if set to rebuild phase 1
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
+  then
+    echo "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
+  fi
+
+  #if set to rebuild phase 2
+  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
+  then
+    echo "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
+    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+  fi
+  RUN_PHASE_0=1
+fi
+
+#Delete buildoutput based on a control file
+if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
+then
+  echo "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
+  touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_BUILDOUTPUT))
+fi
+
+#Delete archives based on a control file
+if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
+then
+  echo "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
+  touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
+
+  #Force phase_1 to rehandle downloads
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_ARCHIVES))
+fi
+
+#Delete downloaded source based on a control file
+if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
+then
+  echo "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
+  touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_SRCBUILD))
+fi
 
 #create the folders for the build systems, and for any folder that will be bind mounted in
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
@@ -341,30 +374,46 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
-#Determine the size of the ram disk, 3GB free, give 1GB for storing logs and base, (imported files, vartmp)
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
-if [[ $FREERAM -gt 3000000 ]]
+
+#Determine the size of the ram disk, determine if enough free ram for base in ramdisk
+RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD))
+if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
 then
   RAMDISK_FOR_BASE=1
-  RAMDISKSIZE=1000000
+  RAMDISKSIZE=$RAMDISKTESTSIZE
+else
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPBASEBUILD))
 fi
-#5G free, give 2GB more for srcbuild overlay. (emptied after each build)
-if [[ $FREERAM -gt 5000000 ]]
+
+#Determine if enough free RAM for srcbuild_overlay in ramdisk
+RAMDISKSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY))
+if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
 then
   RAMDISK_FOR_SRCBUILD=1
-  RAMDISKSIZE=3000000
+  RAMDISKSIZE=$RAMDISKTESTSIZE
+else
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
 fi
-#7GB free, give 2GB more for phase_3 overlay
-if [[ $FREERAM -gt 7000000 ]]
+
+#Determine if enough free RAM for phase3 in ramdisk
+RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY+STORAGESIZE_TMPPHASE3))
+if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
 then
   RAMDISK_FOR_PHASE3=1
-  RAMDISKSIZE=5000000
+  RAMDISKSIZE=$RAMDISKTESTSIZE
+else
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPPHASE3))
 fi
-#12GB free, give 6GB more for Remastersys
-if [[ $FREERAM -gt 12000000 ]]
+
+#Determine if enough free RAM for Remastersys in ramdisk
+RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY+STORAGESIZE_TMPPHASE3+STORAGESIZE_TMPREMASTERSYS))
+if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
 then
   RAMDISK_FOR_REMASTERSYS=1
-  RAMDISKSIZE=10000000
+  RAMDISKSIZE=$RAMDISKTESTSIZE
+else
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
 fi
 
 #Mount the ramdisk
