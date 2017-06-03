@@ -405,16 +405,6 @@ else
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
 fi
 
-#Mount the ramdisk
-mount --make-rprivate /
-if [[ $RAMDISK_STATUS != 0 ]]
-then
-  mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
-  RAMDISK_STATUS=$?
-else 
-  RAMDISK_STATUS=1
-fi
-
 #get the size of the users home file system.
 FREEDISKSPACE=$(df --output=avail $HOMELOCATION | tail -1)
 #if there is less than the required amount of space, then exit.
@@ -424,6 +414,19 @@ then
   echo "The script will now abort."
   echo "free space: $FREEDISKSPACE"
   exit 1
+else
+  echo -e "\n\nRam disk size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
+  sleep 1
+fi
+
+#Mount the ramdisk
+mount --make-rprivate /
+if [[ $RAMDISK_STATUS != 0 ]]
+then
+  mount -t tmpfs -o size=${RAMDISKSIZE}k tmpfs "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+  RAMDISK_STATUS=$?
+else
+  RAMDISK_STATUS=1
 fi
 
 #Create the folders in the ramdisk
