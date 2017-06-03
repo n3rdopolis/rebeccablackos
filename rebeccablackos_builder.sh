@@ -376,6 +376,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
 
+RAMDISKSIZE=0
 #Determine the size of the ram disk, determine if enough free ram for base in ramdisk
 RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD))
 if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
@@ -387,7 +388,7 @@ else
 fi
 
 #Determine if enough free RAM for srcbuild_overlay in ramdisk
-RAMDISKSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY))
+RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY))
 if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
 then
   RAMDISK_FOR_SRCBUILD=1
