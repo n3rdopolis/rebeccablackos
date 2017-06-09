@@ -654,13 +654,13 @@ echo    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds"
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log ]]
 then
  echo -e "\nPackages that failed to download:"
- cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' ' '
+ cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log ]]
 then
   echo -e "\nPackages that failed to install:"
-  cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' ' '
+  cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles ]]
