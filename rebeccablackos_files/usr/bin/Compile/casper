@@ -87,7 +87,7 @@ echo "DOING $LINE"
   do
     SRC="./${FILECOPY[$Iterator]}"
     mkdir -p "$DEST"
-    cp -a "$SRC" "$DEST"
+    cp --preserve=mode "$SRC" "$DEST"
   done
 done
 }
