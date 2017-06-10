@@ -69,7 +69,7 @@ function CompilePackage
   
 }
 
-#build these packages in this order. # symbol is a comment
+#build these packages in this order.
 if [[ ! -e /usr/lib/casper ]]
 then
   CompilePackage casper
