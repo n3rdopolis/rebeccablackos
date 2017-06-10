@@ -70,6 +70,7 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 
+#If no overlayfs is supported, set up srcbuild as a normal bind mount into the system, if overlayfs is supported, and there is enough ram, use the ramdisk as the upperdir, if not, use a path on the same filesystem as the upperdir
 if [[ $HASOVERLAYFS == 0 ]]
 then
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
