@@ -86,6 +86,7 @@ cd $OLDPWD
 
 #copy all files
 rsync /usr/import/* -Ka /
+chmod 777 /tmp
 
 #workaround for Debian not including legacy systemd files
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
