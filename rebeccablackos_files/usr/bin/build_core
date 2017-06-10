@@ -569,9 +569,9 @@ function PrepareBuild()
   cd "$SOURCENAME"
 
   STARTTIME=$(date +%s)
-  PackagePrepareBuild 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackagePrepareBuild"
+  PackagePrepareBuild 2>&1 | tee "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
   ENDTIME=$(date +%s)
-  echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackagePrepareBuild"
+  echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
@@ -626,17 +626,31 @@ function MakeAndInstall()
   #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
+    #Empty any possible logs inside the source folder
+    rm "/$SOURCEDIR/$SOURCENAME/Logs/"*
+
+    echo "#! /bin/bash
+    mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
+    $(declare -f PrepareBuild)
+    $(declare -f PackagePrepareBuild)
+    $(declare -f PackageCompileSource)
+    export SOURCEDIR=$SOURCEDIR
+    export SOURCENAME=$SOURCENAME
+    export INSTALLDIR=$INSTALLDIR
+
+    cd "/$SOURCEDIR/$SOURCENAME"
     #Call PrepareBuild functions
-    PrepareBuild 
+    PrepareBuild
 
     #Complile the source
-    STARTTIME=$(date +%s)
-    PackageCompileSource 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/PackageCompileSource"
-    ENDTIME=$(date +%s)
-    echo "PackageCompileSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageCompileSource"
+    STARTTIME=\$(date +%s)
+    PackageCompileSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
+    ENDTIME=\$(date +%s)
+    echo "PackageCompileSource finished in '$((ENDTIME-STARTTIME))' seconds" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
+" > packagecompilescript
 
-    #Empty any possible logs inside the source folder
-    rm "/$SOURCEDIR/$SOURCENAME/Logs/"* 
+    chmod +x ./packagecompilescript
+    $NONROOTCOMMAND ./packagecompilescript
 
     #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
     echo "#! /bin/bash
@@ -782,6 +796,8 @@ function MakeAndInstall()
     fi
 
     #Copy the source logs correctly
+    cp  "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild" "$BUILDLOGDIR/$SOURCENAME/"
+    cp  "/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource" "$BUILDLOGDIR/$SOURCENAME/"
     cp  "/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource" "$BUILDLOGDIR/$SOURCENAME/"
     cp  "/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall" "$BUILDLOGDIR/$SOURCENAME/"
     if [[ -e "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" ]]
