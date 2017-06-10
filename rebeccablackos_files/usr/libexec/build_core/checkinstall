@@ -499,7 +499,7 @@ function copy_dir_hierarchy {
 }
 
 # TODO better detection, right now, it tests using the path in a namespace
-function checkcanoverlay
+function checkcanoverlayaslower
 {
   #Use a user namespace, only if the user isn't the root user
   if [[ $UID == 0 ]]
@@ -508,6 +508,27 @@ function checkcanoverlay
   else
     unshare -rm mount -t overlay overlay -o lowerdir="$1:$1"  /tmp/ &>/dev/null
   fi
+  overlaytestresult=$?
+  if [[ $overlaytestresult == 0 ]]
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
+# TODO better detection, right now, it tests using the path in a namespace
+function checkcanoverlayasupper
+{
+  #Use a user namespace, only if the user isn't the root user
+  if [[ $UID != 0 ]]
+  then
+    >&2 echo "Warning: Not running as root, cannot detect if $1 is able to be used as the upperdir of an overlayfs"
+    return 0
+  fi
+  mkdir -p "$1/.ovlprobeworkdir"
+  unshare -m mount -t overlay overlay -o lowerdir=/,upperdir="$1",workdir="$1/.ovlprobeworkdir"  /tmp/ &>/dev/null
+  rmdir "$1/.ovlprobeworkdir"
   overlaytestresult=$?
   if [[ $overlaytestresult == 0 ]]
   then
@@ -540,13 +561,7 @@ function getmountmap
     CHROOTPATH=/
   fi
 
-  #Overlayfs cant be on the upperdir of overlayfs, if /var/tmp is overlayfs, create ramdisk that will use 50% of memory maximum
-  TRANLFSTYPE=$(df -T "$BASE_TMP_DIR" | tail -1 | awk '{print $2}')
-  if [[ $TRANLFSTYPE == "overlay" ]]
-  then
-    >&2 echog "$BASE_TMP_DIR cannot be an overlayfs."
-    return 1
-  fi
+
 
   FSES=$(findmnt -vUPno MAJ:MIN,FSROOT,TARGET,ID  | sed -e "s|$CHROOTPATH|/|g" -e "s|//|/|g" -e "s|^MAJ:MIN=|MAJ_MIN=|g" | sort -k4,4n --stable)
 
@@ -564,7 +579,16 @@ function getmountmap
 
   FILE_IS_BIND_MOUNTED=0
   UNSUPPORTED_LOWERDIR_FS=0
+  UNSUPPORTED_UPPERDIR_FS=0
 
+  #Overlayfs cant be on the upperdir of overlayfs, if /var/tmp is overlayfs, fallback
+  checkcanoverlayasupper "$BASE_TMP_DIR"
+  filesystemcanoverlayasupper=$?
+  if [[ $filesystemcanoverlayasupper != 0 ]]
+  then
+    >&2 echog "$BASE_TMP_DIR is not supported as the upperdir for overlayfs."
+    UNSUPPORTED_UPPERDIR_FS=1
+  fi
 
   unset DONE1FSES
   IFS=$'\n'
@@ -645,9 +669,9 @@ function getmountmap
         if [[ $TARGETEXCLUDED == 0 ]]
         then
           #Detect if the filesystem can support overlayfs
-          checkcanoverlay "$SEARCH2TARGET"
-          filesystemcanoverlay=$?
-          if [[ $filesystemcanoverlay != 0 ]]
+          checkcanoverlayaslower "$SEARCH2TARGET"
+          filesystemcanoverlayaslower=$?
+          if [[ $filesystemcanoverlayaslower != 0 ]]
           then
             >&2 echog "$SEARCH2TARGET is not supported by overlayfs"
             UNSUPPORTED_LOWERDIR_FS=1
@@ -663,7 +687,7 @@ function getmountmap
     fi
   done
 
-  if [[ $UNSUPPORTED_LOWERDIR_FS == 1 || $FILE_IS_BIND_MOUNTED == 1 ]]
+  if [[ $UNSUPPORTED_LOWERDIR_FS == 1 || $UNSUPPORTED_UPPERDIR_FS == 1 || $FILE_IS_BIND_MOUNTED == 1 ]]
   then
     return 1
   else
