@@ -522,8 +522,8 @@ function DownloadSource()
     #Handle Cargo files for any potential rust programs
     find | grep /Cargo.toml$ | while read CARGOFILE
     do
+      $CARGO_HOME/cargo update --aggressive --manifest-path \$CARGOFILE
       $CARGO_HOME/cargo fetch --manifest-path \$CARGOFILE
-      $CARGO_HOME/cargo update --manifest-path \$CARGOFILE
     done
 
     PackageDownloadSource
