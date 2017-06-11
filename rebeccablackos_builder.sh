@@ -655,18 +655,21 @@ if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Download
 then
  echo -e "\nPackages that failed to download:"
  cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
+ echo " "
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log ]]
 then
   echo -e "\nPackages that failed to install:"
   cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
+  echo " "
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles ]]
 then
   echo -e "\nPackages that failed to compile:"
   cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles | tr '\n' ' '
+  echo " "
 fi
 
 exit
