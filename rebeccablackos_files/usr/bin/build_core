@@ -79,7 +79,7 @@ function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
   setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  setfacl -m $NONROOTUSER:rwx -m mask::rwx -dm $NONROOTUSER:rwx -dm mask::rwx "$SOURCEDIR"/buildhome/cargocache
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx "$SOURCEDIR"/buildhome/cargocache
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
@@ -497,8 +497,7 @@ function DownloadSource()
 
     #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
-    TOMLCOUNT=$(echo -n "$TOMLFILES" | wc -l)
-    if [[ ! -f $CARGO_HOME/cargo && $TOMLCOUNT != 0 ]]
+    if [[ ! -f $CARGO_HOME/cargo && ! -z $TOMLFILES ]]
     then
       DEBIAN_ARCH=$(dpkg --print-architecture)
       if [[ $DEBIAN_ARCH == i386 ]]
@@ -509,7 +508,7 @@ function DownloadSource()
       then
         CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
       fi
-      wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz
+      $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz
       tar -xzf $CARGOFILENAME.tar.gz
       cp $CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
     fi
