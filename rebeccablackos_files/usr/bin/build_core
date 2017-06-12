@@ -442,6 +442,19 @@ function DownloadARCHIVE()
   $NONROOTCOMMAND tar xaf SOURCEFILE -C .
 }
 
+#Function to go through all toml files in the PWD, and fetch the dependancies they need
+function DownloadTOMLData()
+{
+
+  #Handle Cargo files for any potential rust programs
+  find | grep /Cargo.toml$ | while read CARGOFILE
+  do
+    echo "Downloading dependancies defined by $CARGOFILE"
+    #$CARGO_HOME/cargo update --aggressive --manifest-path $CARGOFILE
+    $CARGO_HOME/cargo fetch --manifest-path $CARGOFILE
+  done
+}
+
 #Function that calls download functions for GIT repos based on the repository type set by the main script
 function DownloadSource()
 {
@@ -512,20 +525,18 @@ function DownloadSource()
       tar -xzf /srcbuild/buildhome/cargocache/$CARGOFILENAME.tar.gz -C /srcbuild/buildhome/cargocache
       cp /srcbuild/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
     fi
+
+    #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
     echo "#! /bin/bash
     $(declare -f PackageDownloadSource)
+    $(declare -f DownloadTOMLData)
     export SOURCEDIR=$SOURCEDIR
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
     cd "/$SOURCEDIR/$SOURCENAME"
-    #Handle Cargo files for any potential rust programs
-    find | grep /Cargo.toml$ | while read CARGOFILE
-    do
-      #$CARGO_HOME/cargo update --aggressive --manifest-path \$CARGOFILE
-      $CARGO_HOME/cargo fetch --manifest-path \$CARGOFILE
-    done
 
+    DownloadTOMLData
     PackageDownloadSource
     
 " > packagedownloadscript
@@ -631,6 +642,7 @@ function MakeAndInstall()
     #Empty any possible logs inside the source folder
     rm "/$SOURCEDIR/$SOURCENAME/Logs/"*
 
+    #Create a script that will be run as non root, to handle the custom configure and build options
     echo "#! /bin/bash
     mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
     $(declare -f SetBuildVariables)
