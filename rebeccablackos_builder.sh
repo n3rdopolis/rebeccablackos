@@ -422,7 +422,7 @@ then
   echo "free space: $FREEDISKSPACE"
   exit 1
 else
-  echo -e "\n\nRam disk size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
+  echo -e "\n\nRam disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
   sleep 1
 fi
 
