@@ -28,7 +28,7 @@ function setup_buildprocess
   export LANG=en_US.UTF-8
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit 2; fi' 2
 }
 
 #Function to start all arguments, past the second one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity)
@@ -70,7 +70,7 @@ function NAMESPACE_EXECUTE {
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
 function run_buildprocess {
-
+BUILD_RUNNING=0
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
@@ -515,6 +515,7 @@ chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
 PREPARE_ENDTIME=$(date +%s)
 
+BUILD_RUNNING=1
 #run the build scripts
 if [[ $RUN_PHASE_0 == 1 ]]
 then
