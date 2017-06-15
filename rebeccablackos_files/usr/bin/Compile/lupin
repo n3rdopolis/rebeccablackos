@@ -83,7 +83,7 @@ echo "DOING $LINE"
   do
     SRC="./${FILECOPY[$Iterator]}"
     mkdir -p "$DEST"
-    p --preserve=mode,links,timestamps "$SRC" "$DEST"
+    cp -r --preserve=mode,links,timestamps "$SRC" "$DEST"
   done
 done
 cp grub-install/grub-install /usr/sbin/grub-install.lupin
