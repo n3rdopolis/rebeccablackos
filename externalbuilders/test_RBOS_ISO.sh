@@ -368,7 +368,6 @@ nested-defaultweston-caller
 nested-liri-caller
 nested-orbital-caller
 nested-enlightenment-caller
-nested-gnomeshell-caller
 nested-kdeplasma-caller
 
 NOTE: Any commands entered in this tab will effect the mounted system.
@@ -383,7 +382,6 @@ then
   touch "$MOUNTHOME"/liveisotest/online
 
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint upower &
 fi
 
 
