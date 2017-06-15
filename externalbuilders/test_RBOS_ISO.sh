@@ -354,6 +354,7 @@ then
   NAMESPACE_ENTER ln -s /proc/mounts "$MOUNTHOME"/liveisotest/unionmountpoint/etc/mtab
   NAMESPACE_ENTER rm "$MOUNTHOME"/liveisotest/unionmountpoint/etc/resolv.conf
   NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/liveisotest/unionmountpoint/etc
+  NAMESPACE_ENTER cp /var/lib/dbus/machine-id "$MOUNTHOME"/liveisotest/unionmountpoint/var/lib/dbus/
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -g $SUDO_UID livetest
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r admin 
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint groupadd -r sudo
@@ -384,6 +385,8 @@ then
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
 fi
 
+#Foward the users XDG_RUNTIME_DIR for pulseaudio
+NAMESPACE_ENTER mount --rbind /run/user/$SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
 
 TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/bin/getconf LONG_BIT)
   if [[ $TARGETBITSIZE == 32 ]]
