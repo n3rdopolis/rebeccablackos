@@ -362,7 +362,7 @@ then
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/unionmountpoint/var/run/dbus
   #give more information in the testuser .bashrc
   echo "
-(. /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
+(export \$(dbus-launch); . /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
 echo \"
 Weston Session commands:
 nested-defaultweston-caller
