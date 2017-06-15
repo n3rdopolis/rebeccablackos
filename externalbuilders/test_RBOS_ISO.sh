@@ -366,6 +366,7 @@ then
 echo \"
 Weston Session commands:
 nested-defaultweston-caller
+nested-gnomeshell-caller
 nested-liri-caller
 nested-orbital-caller
 nested-enlightenment-caller
@@ -381,12 +382,11 @@ fi
 if [[ ! -f "$MOUNTHOME"/liveisotest/online ]]
 then
   touch "$MOUNTHOME"/liveisotest/online
-
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint dbus-daemon --system --fork
 fi
 
 #Foward the users XDG_RUNTIME_DIR for pulseaudio
 NAMESPACE_ENTER mount --rbind /run/user/$SUDO_UID "$MOUNTHOME"/liveisotest/unionmountpoint/run/user/$SUDO_UID
+NAMESPACE_ENTER mount --rbind /run/dbus "$MOUNTHOME"/liveisotest/unionmountpoint/run/dbus
 
 TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/unionmountpoint /usr/bin/getconf LONG_BIT)
   if [[ $TARGETBITSIZE == 32 ]]
