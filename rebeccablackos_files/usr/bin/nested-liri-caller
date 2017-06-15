@@ -20,5 +20,11 @@
 . /usr/bin/wlruntime_vars
 export QT_WAYLAND_FORCE_DPI=100
 export WAYLAND_GUEST=wayland-$RANDOM
-unset DISPLAY
-liri-session -platform wayland
+
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+  unset DISPLAY
+  liri-session -platform wayland
+else
+  liri-session -platform xcb
+fi
