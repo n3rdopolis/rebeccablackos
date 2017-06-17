@@ -491,15 +491,15 @@ Will now reboot." 20 50 --no-cancel
     exit
   fi
 
-  #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument, or when the system is in Live CD mode.
-  if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 || $ISLIVE == 1 ]]
+  #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
+  if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
     WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
     wlmdebug=1
   fi
 
-  #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument,
+  #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument, this is for testing commands that need to be run within the same context as the waylandloginmanager
   if [[ $(grep -c "\bwlmdebuginsecure\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
