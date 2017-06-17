@@ -76,7 +76,11 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-: 
+glib-mkenums --comments '<!-- @comment@ -->' --fhead "<schemalist>" --vhead "  <@type@ id='org.gnome.gedit.plugins.time.@EnumName@'>" --vprod "    <value nick='@valuenick@' value='@valuenum@'/>" --vtail "  </@type@>" --ftail "</schemalist>" plugins/time/gedit-time-plugin.c > $INSTALLDIR/share/glib-2.0/schemas/org.gnome.gedit.plugins.time.enums.xml
+
+glib-mkenums --comments '<!-- @comment@ -->' --fhead "<schemalist>" --vhead "  <@type@ id='org.gnome.gedit.plugins.filebrowser.@EnumName@'>" --vprod "    <value nick='@valuenick@' value='@valuenum@'/>" --vtail "  </@type@>" --ftail "</schemalist>" plugins/filebrowser/gedit-file-browser-error.h plugins/filebrowser/gedit-file-browser-store.h  plugins/filebrowser/gedit-file-browser-view.h > $INSTALLDIR/share/glib-2.0/schemas/org.gnome.gedit.plugins.filebrowser.enums.xml
+
+glib-mkenums --comments '<!-- @comment@ -->' --fhead "<schemalist>" --vhead "  <@type@ id='org.gnome.gedit.@EnumName@'>" --vprod "    <value nick='@valuenick@' value='@valuenum@'/>" --vtail "  </@type@>" --ftail "</schemalist>" gedit/gedit-notebook.h gedit/gedit-file-chooser-dialog.h gedit/gedit-commands.h gedit/gedit-debug.h gedit/gedit-print-job.h gedit/gedit-open-document-selector-store.h gedit/gedit-tab.h gedit/gedit-app.h gedit/gedit-open-document-selector-helper.h gedit/gedit-window.h > $INSTALLDIR/share/glib-2.0/schemas/org.gnome.gedit.enums.xml 
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
