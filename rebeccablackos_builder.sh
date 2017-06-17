@@ -40,7 +40,7 @@ function NAMESPACE_EXECUTE {
   then
     UNSHAREFLAGS="-f --pid --mount --net --mount-proc"
   else
-    UNSHAREFLAGE="-f --pid --mount --mount-proc"
+    UNSHAREFLAGS="-f --pid --mount --mount-proc"
   fi
 
   #Create the PID and Mount namespaces to start the command in
