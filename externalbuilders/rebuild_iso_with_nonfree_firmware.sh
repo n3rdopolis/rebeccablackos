@@ -187,9 +187,6 @@ else
 fi
 FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
 
-if [[ $XALIVE == 0 ]]
-then
-
 #enter users home directory
 cd "$MOUNTHOME"
 
