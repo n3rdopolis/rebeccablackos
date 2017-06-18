@@ -19,7 +19,7 @@
 #This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
 
-trap 'kill -9 $ROOTPID; mv "$MOUNTISO.old" "${MOUNTISO}"; exit' 2
+trap 'kill -9 $ROOTPID; exit' 2
 
 
 #Define the command for entering the namespace now that $ROOTPID is defined
@@ -29,6 +29,10 @@ function NAMESPACE_ENTER {
 
 ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
 MOUNTISO=$(readlink -f $1)
+MOUNTISOPATH=$(dirname "$MOUNTISO")
+MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
+NEWISO="${MOUNTISOPATH}/${MOUNTISONAME}_nonfree.iso"
+
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
@@ -126,9 +130,15 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info --text "This will remaster the specified ISO, to install non-free firmware packages" 2>/dev/null
+  $ZENITYCOMMAND --info --text "This will remaster the specified ISO, to install non-free firmware packages
+While there is no cost for these packages, these packages are closed source,
+and don't have the same freedoms as the rest of the rest of the packages on these ISOs,
+but may allow more hardware to work." 2>/dev/null
 else
-  echo "This will remaster the specified ISO, to install non-free firmware packages"
+  echo "This will remaster the specified ISO, to install non-free firmware packages
+While there is no cost for these packages, these packages are closed source,
+and don't have the same freedoms as the rest of the rest of the packages on these ISOs
+but may allow more hardware to work."
   read a
 fi
 
@@ -184,8 +194,8 @@ fi
 NAMESPACE_ENTER mount --make-rprivate /
 
 #mount the ISO
-mv "$MOUNTISO" "${MOUNTISO}.old"
-NAMESPACE_ENTER mount -o loop "${MOUNTISO}.old" "$MOUNTHOME"/isorebuild/isomount
+
+NAMESPACE_ENTER mount -o loop "${MOUNTISO}" "$MOUNTHOME"/isorebuild/isomount
 
 
 #if the iso doesn't have a squashfs image
@@ -200,7 +210,6 @@ then
   fi
 
   killall -9 $ROOTPID
-  mv "$MOUNTISO.old" "${MOUNTISO}"
   exit
 fi
 
@@ -220,7 +229,6 @@ then
     echo "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
   fi
   kill -9 $ROOTPID
-  mv "$MOUNTISO.old" "${MOUNTISO}"
   exit
 fi
 
@@ -277,20 +285,18 @@ NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint remastersys dist
 
 #Move out old ISO
-NAMESPACE_ENTER mv "$MOUNTHOME"/isorebuild/unionmountpoint/home/remastersys/remastersys/custom.iso "$MOUNTISO"
+NAMESPACE_ENTER mv "$MOUNTHOME"/isorebuild/unionmountpoint/home/remastersys/remastersys/custom.iso "$NEWISO"
 
 #Delete the old ISO
-if [[ -e "$MOUNTISO" ]]
+if [[ -e "$NEWISO" ]]
 then
-  rm "${MOUNTISO}.old"
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "ISO creation successful!" 2>/dev/null
+    $ZENITYCOMMAND --info --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
   else
-    echo "ISO creation successful!"
+    echo "ISO creation successful! $NEWISO has been created."
   fi
 else 
-  mv "$MOUNTISO.old" "${MOUNTISO}"
   if [[ $XALIVE == 0 ]]
   then
     $ZENITYCOMMAND --info --text "ISO creation Failed!" 2>/dev/null
