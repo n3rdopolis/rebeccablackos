@@ -164,7 +164,7 @@ firmware-zd1211"
 
 FIRMWAREUILIST=""
 
-if [[ $XALIVE == 0 ]]
+if [[ $XALIVE != 0 ]]
 then
   while read FIRMWARE
   do
