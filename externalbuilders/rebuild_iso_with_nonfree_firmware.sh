@@ -147,6 +147,38 @@ but may allow more hardware to work."
   read a
 fi
 
+#TODO BUILD LIST
+FIRMWARELIST="bcm-firmware
+bcm-firmwarelegacy
+"
+
+FIRMWAREUILIST=""
+
+if [[ $XALIVE == 0 ]]
+then
+  while read FIRMWARE
+  do
+    FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
+  done < <(echo "$FIRMWARELIST")
+  FIRMWARESELECT=$(dialog --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
+else
+  while read FIRMWARE
+  do
+    if [[ $FIRMWAREUILIST != "" ]]
+    then
+      FIRMWAREUILIST+=$'\n'$'\n'
+    else
+      FIRMWAREUILIST+=$'\n'
+    fi
+    FIRMWAREUILIST+="$FIRMWARE"
+  done < <(echo "$FIRMWARELIST")
+
+  FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | zenity --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+fi
+
+if [[ $XALIVE == 0 ]]
+then
+
 #enter users home directory
 cd "$MOUNTHOME"
 
