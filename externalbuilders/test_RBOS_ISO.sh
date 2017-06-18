@@ -23,7 +23,13 @@ function NAMESPACE_ENTER {
   nsenter --mount --pid --target $ROOTPID "$@"
 }
 
-ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
+if [[ -f $(which zenity) ]]
+then
+  ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
+else
+  ZENITYCOMMAND=""
+fi
+
 MOUNTISO=$(readlink -f $1)
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
@@ -52,18 +58,17 @@ then
     TERMCOMMAND="xterm -e"
     if [[ ! -f $(which xterm) ]]
     then
-      $ZENITYCOMMAND --question --text "xterm is needed for this script. Install xterm?" 2>/dev/null
-      xterminstall=$?
-      if [[ $xterminstall -eq 0 ]]
-      then
-        $INSTALLCOMMAND xterm -y
-      else
-        $ZENITYCOMMAND --info --text "Can not continue without either xterm, gnome-terminal, or konsole. Exiting the script." 2>/dev/null
-        exit
-      fi
+      TERMCOMMAND=""
     fi
   fi
 fi
+
+#Fallback to terminal mode if zenity or (gnome terminal/konsole/xterm) is not installed
+if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
+then
+  XALIVE=0
+fi
+
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
