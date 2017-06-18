@@ -55,17 +55,18 @@ then
   then
     TERMCOMMAND="gnome-terminal -e"
   else
-    TERMCOMMAND="xterm -e"
-    if [[ ! -f $(which xterm) ]]
+    TERMCOMMAND="x-terminal-emulator -e"
+    if [[ ! -f $(readlink -f $(which x-terminal-emulator ) 2>/dev/null) ]]
     then
       TERMCOMMAND=""
     fi
   fi
 fi
 
-#Fallback to terminal mode if zenity or (gnome terminal/konsole/xterm) is not installed
+#Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
+  echo "Zentiy or Terminal emulator not found, please install Zenity, and a terminal emulator"
   XALIVE=0
 fi
 
