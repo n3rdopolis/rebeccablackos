@@ -147,10 +147,20 @@ but may allow more hardware to work."
   read a
 fi
 
-#TODO BUILD LIST
-FIRMWARELIST="bcm-firmware
-bcm-firmwarelegacy
-"
+FIRMWARELIST="atmel-firmware
+firmware-atheros
+firmware-b43-installer
+firmware-b43legacy-installer
+firmware-brcm80211
+firmware-intelwimax
+firmware-ipw2x00
+firmware-iwlwifi
+firmware-libertas
+firmware-myricom
+firmware-netxen
+firmware-realtek
+firmware-ti-connectivity
+firmware-zd1211"
 
 FIRMWAREUILIST=""
 
@@ -175,6 +185,7 @@ else
 
   FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | zenity --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
 fi
+FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
 
 if [[ $XALIVE == 0 ]]
 then
@@ -338,6 +349,10 @@ NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/isorebuild/unionmountpoint/etc
 NAMESPACE_ENTER sed -i 's/main/main non-free/g' "$MOUNTHOME"/isorebuild/unionmountpoint/etc/apt/sources.list
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get update
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y firmware-misc-nonfree firmware-linux-nonfree
+echo "$FIRMWARESELECT" | while read FIRMWARE
+do
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y $FIRMWARE
+done
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint remastersys dist
 
 #Move out old ISO
