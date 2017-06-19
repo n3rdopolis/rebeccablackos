@@ -209,45 +209,6 @@ fi
 #enter users home directory
 cd "$MOUNTHOME"
 
-#Get any saved PID from a created namespace, see if the ISO is mounted in the namespace
-ROOTPID=$(cat "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/namespacepid1)
-#If the namespace root pid exists, and is stored
-if [[ -e /proc/$ROOTPID && ! -z $ROOTPID ]]
-then
-
-    NAMESPACE_ENTER mountpoint "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint &> /dev/null
-    ismount=$?
-else
-    ismount=1
-fi
-
-if [ $ismount -eq 0 ]
-then
-
-  if [[ $XALIVE == 0 ]]
-  then
-    $ZENITYCOMMAND --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
-  else
-    echo "A script is running that is already testing an ISO. will now chroot into it"
-    echo "Type exit to go back to your system."
-  fi
-
-  TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint /usr/bin/getconf LONG_BIT)
-  if [[ $TARGETBITSIZE == 32 ]]
-  then
-    BITNESSCOMMAND=linux32
-  elif [[ $TARGETBITSIZE == 64 ]]
-  then
-    BITNESSCOMMAND=linux64
-  else
-    echo "Unknown chroot failure, detecting the target systems bitness"
-    exit
-  fi
-
-  tmux -S "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest
-  mountisoexit
-fi
-
 #if there is no iso specified 
 if [ -z "$MOUNTISO" ]
 then 
@@ -286,6 +247,45 @@ fi
 #checksums of the paths are free from unsafe characters
 MOUNTISOPATHHASH=( $(echo -n "$MOUNTISO" | sha1sum ))
 MOUNTISOPATHHASH=isotestdir_${MOUNTISOPATHHASH[0]}
+
+#Get any saved PID from a created namespace, see if the ISO is mounted in the namespace
+ROOTPID=$(cat "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/namespacepid1)
+#If the namespace root pid exists, and is stored
+if [[ -e /proc/$ROOTPID && ! -z $ROOTPID ]]
+then
+
+    NAMESPACE_ENTER mountpoint "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint &> /dev/null
+    ismount=$?
+else
+    ismount=1
+fi
+
+if [ $ismount -eq 0 ]
+then
+
+  if [[ $XALIVE == 0 ]]
+  then
+    $ZENITYCOMMAND --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
+  else
+    echo "A script is running that is already testing an ISO. will now chroot into it"
+    echo "Type exit to go back to your system."
+  fi
+
+  TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint /usr/bin/getconf LONG_BIT)
+  if [[ $TARGETBITSIZE == 32 ]]
+  then
+    BITNESSCOMMAND=linux32
+  elif [[ $TARGETBITSIZE == 64 ]]
+  then
+    BITNESSCOMMAND=linux64
+  else
+    echo "Unknown chroot failure, detecting the target systems bitness"
+    exit
+  fi
+
+  tmux -S "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest
+  mountisoexit
+fi
 
 #make the folders for mounting the ISO
 mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomount
