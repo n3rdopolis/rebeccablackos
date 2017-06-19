@@ -183,7 +183,7 @@ else
     FIRMWAREUILIST+="$FIRMWARE"
   done < <(echo "$FIRMWARELIST")
 
-  FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | zenity --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+  FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
 fi
 FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
 
