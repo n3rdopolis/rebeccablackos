@@ -225,11 +225,8 @@ then
     $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
     MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
   else
-    echo "
-
-
-Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)"
-    exit
+    dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
+    MOUNTISO=$(dialog --fselect "$MOUNTHOME" 60 100 --stdout)
   fi
 fi
 
