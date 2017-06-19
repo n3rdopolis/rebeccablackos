@@ -31,6 +31,12 @@ else
 fi
 
 MOUNTISO=$(readlink -f $1)
+
+#Identify the ISO, create a hash of the path to the ISO, so each ISO that is mounted can have its own path
+#checksums of the paths are free from unsafe characters
+MOUNTISOPATHHASH=( $(echo -n "$MOUNTISO" | sha1sum ))
+MOUNTISOPATHHASH=isotestdir_${MOUNTISOPATHHASH[0]}
+
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
@@ -357,7 +363,7 @@ fi
 #Only configure the system once
 if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun ]]
 then
-  echo "$MOUNTISO" > "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun
+  echo -n "$MOUNTISO" > "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun
 
   #Configure test system
   NAMESPACE_ENTER mkdir -p  "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/user/$SUDO_UID
