@@ -230,7 +230,40 @@ then
 
   if [[ $MOUNTORUSEANSWER == 0 ]]
   then
-    :
+    RUNNINGISOLIST=""
+    while read RUNFILE
+    do
+      if [[ $RUNNINGISOLIST != "" ]]
+      then
+        RUNNINGISOLIST+=$'\n'
+      fi
+      RUNISO=$(cat "$RUNFILE")
+      RUNNINGISOLIST+="$RUNISO"
+    done < <(find "$MOUNTHOME"/liveisotest/isotestdir_*/firstrun)
+    RUNNINGISOUILIST=""
+
+    if [[ $XALIVE == 0 ]]
+    then
+      while read RUNNINGISO
+      do
+        if [[ $RUNNINGISOUILIST != "" ]]
+        then
+          RUNNINGISOUILIST+=$'\n'$'\n'
+        else
+          RUNNINGISOUILIST+=$'\n'
+        fi
+        RUNNINGISOUILIST+="$RUNNINGISO"
+      done < <(echo "$RUNNINGISOLIST")
+      MOUNTISO=$(echo "$RUNNINGISOUILIST" | $ZENITYCOMMAND --list --text="Select Mounted ISO:" --radiolist  --hide-header --column=check --column=ISO --width=400 2>/dev/null)
+
+    else
+      while read RUNNINGISO
+      do
+        RUNNINGISOUILIST+="$RUNNINGISO \"\" 0 "
+      done < <(echo "$RUNNINGISOLIST")
+      MOUNTISO=$(dialog --radiolist "Select Mounted ISO:" 40 100 40 $RUNNINGISOUILIST --stdout)
+
+    fi
   else
     if [[ $XALIVE == 0 ]]
     then
