@@ -266,6 +266,9 @@ Please specify a path to an ISO as an argument to this script (with quotes aroun
   fi
 fi
 
+MOUNTISOPATHHASH=( $(echo -n "$MOUNTISO" | sha1sum ))
+MOUNTISOPATHHASH=${MOUNTISOPATHHASH[0]}
+
 #Create the PID and Mount namespaces, pid 1 to sleep forever
 unshare -f --pid --mount --mount-proc sleep infinity &
 UNSHAREPID=$!
@@ -387,7 +390,7 @@ fi
   
 if [[ ! -f "$MOUNTHOME"/liveisotest/online ]]
 then
-  touch "$MOUNTHOME"/liveisotest/online
+  echo "$MOUNTISO" > "$MOUNTHOME"/liveisotest/online
 fi
 
 #Foward the users XDG_RUNTIME_DIR for pulseaudio
