@@ -72,7 +72,7 @@ fi
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
-  echo "Zentiy or Terminal emulator not found, please install Zenity, and a terminal emulator"
+  echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
   XALIVE=0
 fi
 
@@ -251,18 +251,34 @@ fi
 #if there is no iso specified 
 if [ -z "$MOUNTISO" ]
 then 
+  MOUNTEDSYSTEMCOUNT=$(ls "$MOUNTHOME"/liveisotest/isotestdir_*/firstrun | wc -l)
 
-  if [[ $XALIVE == 0 ]]
+  if [[ $MOUNTEDSYSTEMCOUNT == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
-    MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+    MOUNTORUSEANSWER=1
   else
-    echo "
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --question --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
+      MOUNTORUSEANSWER=$?
+    else
+      dialog --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 20 60
+      MOUNTORUSEANSWER=$?
+    fi
+  fi
 
-================================
-Please specify a path to an ISO as an argument to this script (with quotes around the path if there are spaces in it)
-================================"
-    exit
+  if [[ $MOUNTORUSEANSWER == 0 ]]
+  then
+    :
+  else
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+      MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+    else
+      dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
+      MOUNTISO=$(dialog --fselect "$MOUNTHOME" 60 100 --stdout)
+    fi
   fi
 fi
 
