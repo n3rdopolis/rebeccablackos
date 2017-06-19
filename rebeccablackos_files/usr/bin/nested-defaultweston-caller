@@ -21,4 +21,4 @@
 ServerID=wayland-$RANDOM
 export QT_WAYLAND_FORCE_DPI=100
 export QT_WAYLAND_SHELL_INTEGRATION=xdg-shell-v5
-weston --socket=$ServerID
+weston --socket=$ServerID --xwayland

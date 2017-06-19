@@ -12,6 +12,6 @@ CompositorFBArguments=--backend=fbdev-backend.so
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=screen-share.so
-AdditionalArguments=
+AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston
 EnvironmentFile=/usr/share/wsessions.d/default-weston-desktop.environment
