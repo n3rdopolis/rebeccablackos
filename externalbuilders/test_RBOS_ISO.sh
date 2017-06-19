@@ -175,6 +175,7 @@ then
     then 
       rm -rf "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/overlay
       rm "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun
+      rm -rf "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH
     fi
   fi
 fi
@@ -259,6 +260,8 @@ Please specify a path to an ISO as an argument to this script (with quotes aroun
   fi
 fi
 
+#Identify the ISO, create a hash of the path to the ISO, so each ISO that is mounted can have its own path
+#checksums of the paths are free from unsafe characters
 MOUNTISOPATHHASH=( $(echo -n "$MOUNTISO" | sha1sum ))
 MOUNTISOPATHHASH=isotestdir_${MOUNTISOPATHHASH[0]}
 
@@ -307,6 +310,7 @@ then
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
   fi
+  rm -rf "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH
 
   killall -9 $ROOTPID
   exit
@@ -353,7 +357,7 @@ fi
 #Only configure the system once
 if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun ]]
 then
-  touch "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun
+  echo "$MOUNTISO" > "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/firstrun
 
   #Configure test system
   NAMESPACE_ENTER mkdir -p  "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/user/$SUDO_UID
@@ -389,7 +393,7 @@ fi
   
 if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
-  echo "$MOUNTISO" > "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
+  touch "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
 fi
 
 #Foward the users XDG_RUNTIME_DIR for pulseaudio
