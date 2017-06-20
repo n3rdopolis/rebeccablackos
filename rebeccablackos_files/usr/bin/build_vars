@@ -24,6 +24,7 @@ then
   export INSTALLDIR=/opt
 fi
 
+export DESTDIR=$INSTALLDIR
 export BUILD_CPU_COUNT=$(cat /proc/cpuinfo | grep ^"processor" -c)
 export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
 export CFLAGS="-Os" 

@@ -155,8 +155,11 @@ systemctl disable gdm.service
 #Create the user for the waylandloginmanager
 adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
 
-#Complie glib schemas
+#common postinstall actions
 glib-compile-schemas /opt/share/glib-2.0/schemas 
+update-desktop-database /opt/share/applications
+gtk-query-immodules-3.0 --update-cache
+update-icon-caches /opt/share/icons/*
 
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
 if [[ -e /usr/bin/ubiquity ]]
