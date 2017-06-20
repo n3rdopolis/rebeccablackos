@@ -72,8 +72,11 @@ fi
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
-  echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
-  XALIVE=0
+  if [[ $XALIVE != 0 ]]
+  then
+    echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
+    XALIVE=1
+  fi
 fi
 
 
@@ -271,7 +274,7 @@ then
       MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
     else
       dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
-      MOUNTISO=$(dialog --fselect "$MOUNTHOME" 60 100 --stdout)
+      MOUNTISO=$(dialog --fselect "$MOUNTHOME"/ 20 60 --stdout)
     fi
   fi
 fi
