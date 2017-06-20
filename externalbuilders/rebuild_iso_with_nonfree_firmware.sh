@@ -358,6 +358,7 @@ NAMESPACE_ENTER mv "$MOUNTHOME"/isorebuild/unionmountpoint/home/remastersys/rema
 #Delete the old ISO
 if [[ -e "$NEWISO" ]]
 then
+  chown $SUDO_USER:$SUDO_GID "$NEWISO"
   if [[ $XALIVE == 0 ]]
   then
     $ZENITYCOMMAND --info --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
