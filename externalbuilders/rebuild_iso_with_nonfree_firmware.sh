@@ -34,7 +34,7 @@ else
   ZENITYCOMMAND=""
 fi
 
-MOUNTISO=$(readlink -f $1)
+MOUNTISO=$(readlink -f "$1")
 MOUNTISOPATH=$(dirname "$MOUNTISO")
 MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
 NEWISO="${MOUNTISOPATH}/${MOUNTISONAME}_nonfree.iso"

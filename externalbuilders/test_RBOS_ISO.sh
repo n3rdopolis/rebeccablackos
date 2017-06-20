@@ -30,7 +30,7 @@ else
   ZENITYCOMMAND=""
 fi
 
-MOUNTISO=$(readlink -f $1)
+MOUNTISO=$(readlink -f "$1")
 
 #Identify the ISO, create a hash of the path to the ISO, so each ISO that is mounted can have its own path
 #checksums of the paths are free from unsafe characters
@@ -243,10 +243,10 @@ then
       RUNISO=$(cat "$RUNFILE")
       RUNNINGISOLIST+="$RUNISO"
     done < <(find "$MOUNTHOME"/liveisotest/isotestdir_*/firstrun)
-    RUNNINGISOUILIST=""
 
     if [[ $XALIVE == 0 ]]
     then
+      RUNNINGISOUILIST=""
       while read RUNNINGISO
       do
         if [[ $RUNNINGISOUILIST != "" ]]
@@ -260,11 +260,14 @@ then
       MOUNTISO=$(echo "$RUNNINGISOUILIST" | $ZENITYCOMMAND --list --text="Select Mounted ISO:" --radiolist  --hide-header --column=check --column=ISO --width=400 2>/dev/null)
 
     else
+      RUNNINGISOUILIST=()
       while read RUNNINGISO
       do
-        RUNNINGISOUILIST+="$RUNNINGISO \"\" 0 "
+        RUNNINGISOUILIST+=("$RUNNINGISO")
+        RUNNINGISOUILIST+=(" ")
+        RUNNINGISOUILIST+=(0)
       done < <(echo "$RUNNINGISOLIST")
-      MOUNTISO=$(dialog --radiolist "Select Mounted ISO:" 40 100 40 $RUNNINGISOUILIST --stdout)
+      MOUNTISO=$(dialog --radiolist "Select Mounted ISO:" 40 100 40 "${RUNNINGISOUILIST[@]}" --stdout)
 
     fi
   else
