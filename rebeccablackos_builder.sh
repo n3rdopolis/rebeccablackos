@@ -683,5 +683,5 @@ then
   exec sudo -E unshare --mount "$0" "$@"
 else
   setup_buildprocess
-  run_buildprocess
+  run_buildprocess "$@"
 fi
