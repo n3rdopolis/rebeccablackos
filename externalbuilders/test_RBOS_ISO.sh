@@ -298,9 +298,9 @@ then
 
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "A script is running that is already testing an ISO. will now chroot into it" 2>/dev/null
+    $ZENITYCOMMAND --info --text "Will now bring up a prompt for the existing system." 2>/dev/null
   else
-    echo "A script is running that is already testing an ISO. will now chroot into it"
+    echo "Will now bring up a prompt for the existing system."
     echo "Type exit to go back to your system."
   fi
 
