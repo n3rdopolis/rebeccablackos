@@ -84,7 +84,7 @@ fi
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
-  if [[ $XALIVE != 0 ]]
+  if [[ $XALIVE == 0 ]]
   then
     echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
     XALIVE=1
