@@ -144,7 +144,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == installsmallpackage ]]
   then
     STARTTIME=$(date +%s)
-    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
+    InstallDebFile "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     ENDTIME=$(date +%s)
     echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     exit
@@ -167,7 +167,11 @@ function RunDownloadAndOrBuild
   fi
 }
 
-
+#Function to install build_core built deb files
+function InstallDebFile()
+{
+  dpkg -i --force-overwrite "$1"
+}
 
 #function to get the revison of GIT repos
 function GetVersionGIT()
@@ -767,7 +771,7 @@ function MakeAndInstall()
       do
         if [[ -e "$LIBRARY" ]]
         then
-          DEPEND=$(dlocate -S --package-only "$LIBRARY")
+          DEPEND=$(dlocate -S --package-only "$LIBRARY"$)
           echo $DEPEND
           echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
@@ -797,7 +801,7 @@ function MakeAndInstall()
 
       #Install the newly created deb file
       STARTTIME=$(date +%s)
-      dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
+      InstallDebFile "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
       ENDTIME=$(date +%s)
       echo "BuiltDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
     
@@ -831,7 +835,7 @@ function MakeAndInstall()
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
   else
     STARTTIME=$(date +%s)
-    dpkg -i --force-overwrite "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/DebInstall"
+    InstallDebFile "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/DebInstall"
     ENDTIME=$(date +%s)
     echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/DebInstall"
   fi
