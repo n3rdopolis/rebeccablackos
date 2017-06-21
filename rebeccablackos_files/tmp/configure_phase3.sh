@@ -161,6 +161,7 @@ adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --dis
 (. /usr/bin/build_vars; gtk-query-immodules-3.0 --update-cache)
 (. /usr/bin/build_vars; update-icon-caches /opt/share/icons/*)
 (. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+(. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
 
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
 if [[ -e /usr/bin/ubiquity ]]
