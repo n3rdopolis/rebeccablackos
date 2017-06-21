@@ -501,11 +501,6 @@ function DownloadSource()
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
   if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
-    if [[ $MAKEDEBS == 1 ]]
-    then
-      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME" 2>/dev/null
-    fi
-
     STARTTIME=$(date +%s)
     SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
