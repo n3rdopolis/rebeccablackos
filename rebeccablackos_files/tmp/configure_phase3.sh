@@ -156,11 +156,17 @@ systemctl disable gdm.service
 adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
 
 #common postinstall actions
+echo "Post Install action: glib-compile-schemas"
 (. /usr/bin/build_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
+echo "Post Install action: update-desktop-database"
 (. /usr/bin/build_vars; update-desktop-database /opt/share/applications)
+echo "Post Install action: gtk-query-immodules-3.0"
 (. /usr/bin/build_vars; gtk-query-immodules-3.0 --update-cache)
+echo "Post Install action: update-icon-caches"
 (. /usr/bin/build_vars; update-icon-caches /opt/share/icons/*)
+echo "Post Install action: gio-querymodules"
 (. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+echo "Post Install action: gdk-pixbuf-query-loaders"
 (. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
 
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
