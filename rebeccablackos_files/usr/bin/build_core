@@ -132,8 +132,8 @@ function RunDownloadAndOrBuild
   setfacl -dm mask::rwx /"$SOURCEDIR"
   setfacl -m mask::rwx /"$SOURCEDIR"
 
-  #If the argument passed is cleanup, then cleanup the source only
-  if [[ "$ACTION" == clean ]]
+  #If the argument passed is cleanup, or in download only mode, then cleanup the source
+  if [[ ("$ACTION" == clean || "$ACTION" != build-only) && "$ACTION" != env-only ]]
   then
     cd "$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
