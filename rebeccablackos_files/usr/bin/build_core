@@ -720,7 +720,14 @@ function MakeAndInstall()
         FILETYPE=\$(file -b  \"\$FILE\" 2>/dev/null)
         if [[ \"\$FILE\" != $INSTALLDIR/include/* ]] && ! [[ \"\$FILETYPE\" == \"current ar archive\" && \"\$FILE\" == *.a ]]
         then
-          touch \"\$FILE\"
+          FILELINKPATH=\$(readlink -f \"\$FILE\")
+          if [[ \"\$FILE\" == \"\$FILELINKPATH\" ]]
+          then
+            touch \"\$FILE\"
+          else
+            rm \"\$FILE\"
+            ln -s \"\$FILELINKPATH\" \"\$FILE\"
+          fi
         fi
       fi
     done
