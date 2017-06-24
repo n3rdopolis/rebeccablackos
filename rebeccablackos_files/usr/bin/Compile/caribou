@@ -63,6 +63,7 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+sed -i 's|/usr/bin/python|/usr/bin/python3|g' tools/make_schema.py
 make -i
 }
 
