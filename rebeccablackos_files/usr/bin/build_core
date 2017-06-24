@@ -725,8 +725,9 @@ function MakeAndInstall()
           then
             touch \"\$FILE\"
           else
+            FILELINKDEST=\$(readlink \"\$FILE\")
             rm \"\$FILE\"
-            ln -s \"\$FILELINKPATH\" \"\$FILE\"
+            ln -s \"\$FILELINKDEST\" \"\$FILE\"
           fi
         fi
       fi
