@@ -169,6 +169,19 @@ echo "Post Install action: gio-querymodules"
 echo "Post Install action: gdk-pixbuf-query-loaders"
 (. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
 
+find /opt/share/polkit-1/actions/ | while read FILE;
+do
+  FILENAME=$(basename $FILE)
+  ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
+done
+
+find /opt/share/polkit-1/rules.d | while read FILE;
+do
+  FILENAME=$(basename $FILE)
+  ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
+done
+
+
 #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
 if [[ -e /usr/bin/ubiquity ]]
 then
