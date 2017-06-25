@@ -138,13 +138,6 @@ then
   $INSTALLCOMMAND zenity
 fi
 
-if ! type tmux &> /dev/null
-then
-  $INSTALLCOMMAND tmux
-fi
-
-
-
 function mountisoexit() 
 {
 if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
@@ -322,7 +315,7 @@ then
     exit
   fi
 
-  tmux -S "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest
+  script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
   mountisoexit
 fi
 
@@ -473,7 +466,7 @@ TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHAS
     exit
   fi
 
-tmux -S "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/tmuxsocket new-session nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest
+script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
 
 #go back to the users home folder
 cd "$MOUNTHOME"
