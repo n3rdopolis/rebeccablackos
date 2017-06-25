@@ -18,7 +18,14 @@
 
 #This script is for calling enlightenment nested under a Wayland session. It also brings up a dialog stating usage information about Enlightenment
 . /usr/bin/wlruntime_vars
-export E_WL_FORCE=wl
-unset DISPLAY
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+  export E_WL_FORCE=wl
+  unset DISPLAY
+else
+  export E_WL_FORCE=x11
+fi
+
+
 #To debug enlightenment in gdb if needed export E_START=enlightenment_start
 enlightenment_start
