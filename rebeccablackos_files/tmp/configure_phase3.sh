@@ -109,111 +109,116 @@ fi
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
-#Create a package with all the menu items.
-cd /tmp
-rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
-checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
-cp *.deb "/srcbuild/buildoutput/"
-cd $OLDPWD
+#Actions that are performed after all the packages are compiled
+function PostInstallActions
+{
+  #Create a package with all the menu items.
+  cd /tmp
+  rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
+  checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  cp *.deb "/srcbuild/buildoutput/"
+  cd $OLDPWD
 
-#Set the cursor theme
-update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+  #Set the cursor theme
+  update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
-#Oxygen-Icons moved all the folders for icon sizes into a base folder, create symlinks for the old path
-ln -s /usr/share/icons/oxygen/base/8x8 /usr/share/icons/oxygen/8x8
-ln -s /usr/share/icons/oxygen/base/16x16 /usr/share/icons/oxygen/16x16
-ln -s /usr/share/icons/oxygen/base/22x22 /usr/share/icons/oxygen/22x22
-ln -s /usr/share/icons/oxygen/base/32x32 /usr/share/icons/oxygen/32x32
-ln -s /usr/share/icons/oxygen/base/48x48 /usr/share/icons/oxygen/48x48
-ln -s /usr/share/icons/oxygen/base/64x64 /usr/share/icons/oxygen/64x64
-ln -s /usr/share/icons/oxygen/base/128x128 /usr/share/icons/oxygen/128x128
-ln -s /usr/share/icons/oxygen/base/256x256 /usr/share/icons/oxygen/256x256
+  #Oxygen-Icons moved all the folders for icon sizes into a base folder, create symlinks for the old path
+  ln -s /usr/share/icons/oxygen/base/8x8 /usr/share/icons/oxygen/8x8
+  ln -s /usr/share/icons/oxygen/base/16x16 /usr/share/icons/oxygen/16x16
+  ln -s /usr/share/icons/oxygen/base/22x22 /usr/share/icons/oxygen/22x22
+  ln -s /usr/share/icons/oxygen/base/32x32 /usr/share/icons/oxygen/32x32
+  ln -s /usr/share/icons/oxygen/base/48x48 /usr/share/icons/oxygen/48x48
+  ln -s /usr/share/icons/oxygen/base/64x64 /usr/share/icons/oxygen/64x64
+  ln -s /usr/share/icons/oxygen/base/128x128 /usr/share/icons/oxygen/128x128
+  ln -s /usr/share/icons/oxygen/base/256x256 /usr/share/icons/oxygen/256x256
 
-#Set the plymouth themes
-if [[ $DEBIAN_DISTRO == Ubuntu ]]
-then
-  update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
-  update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
-  update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
-elif [[ $DEBIAN_DISTRO == Debian ]]
-then
-  /usr/sbin/plymouth-set-default-theme spinfinity
-fi
+  #Set the plymouth themes
+  if [[ $DEBIAN_DISTRO == Ubuntu ]]
+  then
+    update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
+    update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
+    update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
+  elif [[ $DEBIAN_DISTRO == Debian ]]
+  then
+    /usr/sbin/plymouth-set-default-theme spinfinity
+  fi
 
-#configure /etc/issue
-echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
-setterm -cursor on >> /etc/issue
-echo -e "RebeccaBlackOS \n" > /etc/issue.net
+  #configure /etc/issue
+  echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
+  setterm -cursor on >> /etc/issue
+  echo -e "RebeccaBlackOS \n" > /etc/issue.net
 
-#configure grub color
-echo "set color_normal=black/black" > /boot/grub/custom.cfg
+  #configure grub color
+  echo "set color_normal=black/black" > /boot/grub/custom.cfg
 
-#disable services that conflict with the waylandloginmanager
-systemctl disable lightdm.service
-systemctl disable gdm.service
+  #disable services that conflict with the waylandloginmanager
+  systemctl disable lightdm.service
+  systemctl disable gdm.service
 
-#Create the user for the waylandloginmanager
-adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
+  #Create the user for the waylandloginmanager
+  adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
 
-#common postinstall actions
-echo "Post Install action: glib-compile-schemas"
-(. /usr/bin/build_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
-echo "Post Install action: update-desktop-database"
-(. /usr/bin/build_vars; update-desktop-database /opt/share/applications)
-echo "Post Install action: gtk-query-immodules-3.0"
-(. /usr/bin/build_vars; gtk-query-immodules-3.0 --update-cache)
-echo "Post Install action: update-icon-caches"
-(. /usr/bin/build_vars; update-icon-caches /opt/share/icons/*)
-echo "Post Install action: gio-querymodules"
-(. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
-echo "Post Install action: gdk-pixbuf-query-loaders"
-(. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
+  #common postinstall actions
+  echo "Post Install action: glib-compile-schemas"
+  (. /usr/bin/build_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
+  echo "Post Install action: update-desktop-database"
+  (. /usr/bin/build_vars; update-desktop-database /opt/share/applications)
+  echo "Post Install action: gtk-query-immodules-3.0"
+  (. /usr/bin/build_vars; gtk-query-immodules-3.0 --update-cache)
+  echo "Post Install action: update-icon-caches"
+  (. /usr/bin/build_vars; update-icon-caches /opt/share/icons/*)
+  echo "Post Install action: gio-querymodules"
+  (. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+  echo "Post Install action: gdk-pixbuf-query-loaders"
+  (. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
 
-find /opt/share/polkit-1/actions/ | while read FILE;
-do
-  FILENAME=$(basename $FILE)
-  ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
-done
-
-find /opt/share/polkit-1/rules.d | while read FILE;
-do
-  FILENAME=$(basename $FILE)
-  ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
-done
-
-
-#ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
-if [[ -e /usr/bin/ubiquity ]]
-then
-  dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
-  echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
-  chmod +x /usr/bin/ubiquity
-fi
-
-#copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-rsync /usr/import/* -Ka /
-
-#move the import folder
-mv /usr/import /tmp
-
-#Add nls modules to the initramfs
-echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
-chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules
-
-#Uninstall the upstream kernel if there is a custom built kernel installed
-if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
-then
-  dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
+  find /opt/share/polkit-1/actions/ | while read FILE;
   do
-    apt-get purge $PACKAGE -y
-    #Force initramfs utilites to include the overlay filesystem
-    echo overlay >> /etc/initramfs-tools/modules
+    FILENAME=$(basename $FILE)
+    ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
   done
-fi
+
+  find /opt/share/polkit-1/rules.d | while read FILE;
+  do
+    FILENAME=$(basename $FILE)
+    ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
+  done
 
 
-#save the build date of the CD.
-echo "$(date)" > /etc/builddate
+  #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
+  if [[ -e /usr/bin/ubiquity ]]
+  then
+    dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
+    echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
+    chmod +x /usr/bin/ubiquity
+  fi
+
+  #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
+  rsync /usr/import/* -Ka /
+
+  #move the import folder
+  mv /usr/import /tmp
+
+  #Add nls modules to the initramfs
+  echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
+  chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules
+
+  #Uninstall the upstream kernel if there is a custom built kernel installed
+  if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
+  then
+    dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
+    do
+      apt-get purge $PACKAGE -y
+      #Force initramfs utilites to include the overlay filesystem
+      echo overlay >> /etc/initramfs-tools/modules
+    done
+  fi
+
+
+  #save the build date of the CD.
+  echo "$(date)" > /etc/builddate
+}
+PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
 
 #start the remastersys job
 remastersys dist
