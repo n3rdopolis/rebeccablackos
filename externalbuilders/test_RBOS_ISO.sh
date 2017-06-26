@@ -189,11 +189,15 @@ if [[ $XALIVE == 0 ]]
 then
   $ZENITYCOMMAND --info --text "This will call a chroot shell from an iso.
 
-  The password for the test user is the same password as the sudo users." 2>/dev/null
+  The password for the test user is the same password as the sudo users.
+
+  The folder "$MOUNTHOME"/liveisotest/shareddir will be mounted in the target as /media/shareddir" 2>/dev/null
 else
   echo "This will call a chroot shell from an iso.
 
 The password for the test user is the same password as the sudo users.
+
+The folder "$MOUNTHOME"/liveisotest/shareddir will be mounted in the target as /media/shareddir
 
 Press enter"
   read a
@@ -320,6 +324,8 @@ then
 fi
 
 #make the folders for mounting the ISO
+mkdir -p "$MOUNTHOME"/liveisotest/shareddir
+chmod 777 "$MOUNTHOME"/liveisotest/shareddir
 mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomount
 mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/squashfsmount
 mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/overlay
@@ -392,7 +398,12 @@ NAMESPACE_ENTER mount --rbind /dev "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/un
 
 NAMESPACE_ENTER mount --bind /tmp "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/tmp
 NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/shm
+
 NAMESPACE_ENTER mount --bind /run/shm "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/shm
+
+NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/media/shareddir
+NAMESPACE_ENTER mount --bind "$MOUNTHOME"/liveisotest/shareddir "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/media/shareddir
+
 #allow all local connections to the xserver
 #xhost +LOCAL:
 
