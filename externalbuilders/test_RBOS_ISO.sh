@@ -299,14 +299,24 @@ fi
 if [ $ismount -eq 0 ]
 then
 
-  if [[ $XALIVE == 0 ]]
+  if [[ -z "$MOUNTISO" ]]
   then
-    $ZENITYCOMMAND --info --text "Will now bring up a prompt for the existing system." 2>/dev/null
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --info --text "Will now bring up a prompt for the existing system." 2>/dev/null
+    else
+      echo "Will now bring up a prompt for the existing system."
+      echo "Type exit to go back to your system."
+    fi
   else
-    echo "Will now bring up a prompt for the existing system."
-    echo "Type exit to go back to your system."
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --info --text "Entering the Target system" 2>/dev/null
+    else
+      echo "Entering the Target system"
+      echo "Type exit to go back to your system."
+    fi
   fi
-
   TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint /usr/bin/getconf LONG_BIT)
   if [[ $TARGETBITSIZE == 32 ]]
   then
@@ -439,11 +449,10 @@ then
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/var/run/dbus
   #give more information in the testuser .bashrc
   echo "
-(export \$(dbus-launch); . /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
+(. /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
 echo \"
 Weston Session commands:
 nested-defaultweston-caller
-nested-gnomeshell-caller
 nested-liri-caller
 nested-orbital-caller
 nested-enlightenment-caller
@@ -459,11 +468,13 @@ fi
 if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
   touch "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
+
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint dbus-daemon --system --fork
 fi
 
 #Foward the users XDG_RUNTIME_DIR for pulseaudio
 NAMESPACE_ENTER mount --rbind /run/user/$SUDO_UID "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/user/$SUDO_UID
-NAMESPACE_ENTER mount --rbind /run/dbus "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/dbus
+#NAMESPACE_ENTER mount --rbind /run/dbus "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/run/dbus
 
 TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint /usr/bin/getconf LONG_BIT)
   if [[ $TARGETBITSIZE == 32 ]]
