@@ -680,7 +680,15 @@ exit
 if [[ $BUILDER_IS_UNSHARED != 1 ]]
 then
   export BUILDER_IS_UNSHARED=1
-  exec sudo -E unshare --mount "$0" "$@"
+  #Test if running under a console
+  tty -s
+  TTYRESULT=$?
+  if [[ $TTYRESULT == 0 ]]
+  then
+    exec sudo -E unshare --mount "$0" "$@"
+  else
+    exec sudo -E unshare --mount script -c "\"$0\" \"$@\"" -q /dev/null
+  fi
 else
   setup_buildprocess
   run_buildprocess "$@"
