@@ -329,7 +329,7 @@ then
     exit
   fi
 
-  script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
+  script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
   mountisoexit
 fi
 
@@ -490,7 +490,7 @@ TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHAS
     exit
   fi
 
-script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
+script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
 
 #go back to the users home folder
 cd "$MOUNTHOME"
