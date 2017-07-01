@@ -680,7 +680,19 @@ exit
 if [[ $BUILDER_IS_UNSHARED != 1 ]]
 then
   export BUILDER_IS_UNSHARED=1
-  exec sudo -E unshare --mount "$0" "$@"
+  tty -s
+  TTYRESULT=$?
+  if [[ $TTYRESULT == 0 ]]
+  then
+    exec sudo -E unshare --mount "$0" "$@"
+  else
+    if [[ $UID != 0 ]]
+    then
+      echo "Needs to be run as root outside of a terminal."
+    else
+      sudo -E python -c 'import pty, sys; pty.spawn(sys.argv[1:])' unshare --mount "$0" "$@"
+    fi
+  fi
 else
   setup_buildprocess
   run_buildprocess "$@"
