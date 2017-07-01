@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/google/shaderc
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=known-good
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,34 +50,14 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-cd third_party
-THIRDPARTYROOT=$PWD
-
-git clone https://github.com/google/googletest.git
-cd googletest
-git pull
-cd $THIRDPARTYROOT
-
-git clone https://github.com/google/glslang.git
-cd glslang
-git pull
-cd $THIRDPARTYROOT
-
-git clone https://github.com/KhronosGroup/SPIRV-Tools.git spirv-tools
-cd spirv-tools
-git pull
-cd $THIRDPARTYROOT
-
-git clone https://github.com/KhronosGroup/SPIRV-Headers.git spirv-tools/external/spirv-headers
-cd spirv-headers
-git pull
-cd $THIRDPARTYROOT
+./update_shaderc_sources.py
 }
 
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+cd src
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR
@@ -86,6 +66,7 @@ cmake -Wno-dev .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=$INSTALLDIR 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+cd src
 cd build
 make
 }
@@ -93,6 +74,7 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+cd src
 cd build
 make install
 }
