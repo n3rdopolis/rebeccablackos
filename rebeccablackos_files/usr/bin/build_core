@@ -747,6 +747,9 @@ function MakeAndInstall()
       mkdir debian
       touch debian/control
 
+      #Set the build variables for ldd
+      SetBuildVariables
+
       #Update database containing the list of files that belong to packages
       update-dlocatedb
       
