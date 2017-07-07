@@ -31,7 +31,7 @@ function CompilePackage
   if [[ "$argument" == download-only ]]
   then
     echo "Downloading/updating $BUILDNAME source"
-    "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 
   fi
 
   #compile_all is running to build the source
@@ -39,7 +39,7 @@ function CompilePackage
   then
     #Cleanup any files in the srcbuild_overlay from the last build
     echo "building $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
     if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
     then
       rm -rf /tmp/srcbuild_overlay/*
@@ -51,20 +51,20 @@ function CompilePackage
   if [[ "$argument" == installsmallpackage ]]
   then
     echo "Attempting to install smaller version of $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
   fi
   
   #compile_all is running to clean the source
   if [[ "$argument" == clean ]]
   then
     echo "Cleaning $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" clean 2>&1
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1
   fi
   
   #compile_all is running to download and build
   if [[ ! -n "$argument" ]]
   then
-    "/usr/bin/Compile/$BUILDNAME"
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME"
   fi
   
 }

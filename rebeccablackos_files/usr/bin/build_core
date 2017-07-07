@@ -58,6 +58,23 @@
 
 #buildcore also uses /tmp/buildcore_revisions.txt, when it is formatted from the list of all built revisions exported by the project. If it exists, the revision specified by the build script is overidden, and the exact commit is used instead
 
+#Allow build core to directly run a specified build descriptor file. They all source build_core, prevent an infinate loop
+if [[ $BUILDCOREDIRECTLYRUN == 1 ]]
+then
+  return 0
+fi
+BUILDCOREDIRECTLYRUN=1
+
+#if the first argument is buildspec, a file is being sourced.
+if [[ $1 == buildspec ]]
+then
+  function RunDownloadAndOrBuild { :; }
+  FILESPEC=1
+  . "$2"
+  shift
+  shift
+fi
+
 export NONROOTUSER=nobody
 export SOURCEDIR=/srcbuild
 export REBUILDNEWREVISION=0
@@ -849,3 +866,9 @@ function MakeAndInstall()
     echo "DebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/DebInstall"
   fi
 }
+
+#Run RunDownloadAndOrBuild directly if a file is specified
+if [[ $FILESPEC == 1 ]]
+then
+  RunDownloadAndOrBuild
+fi
