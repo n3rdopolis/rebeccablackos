@@ -51,13 +51,15 @@ function setup_buildprocess
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit 2; fi' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; kill -9 $TAILPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit 2; fi' 2
 
 }
 
 #Function to start all arguments, past the second one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity)
 function NAMESPACE_EXECUTE {
   HASNETWORK=$1
+  shift
+  LOGFILE="$1"
   shift
 
   if [[ $HASNETWORK == 0 ]]
@@ -68,7 +70,7 @@ function NAMESPACE_EXECUTE {
   fi
 
   #Create the PID and Mount namespaces to start the command in
-  unshare $UNSHAREFLAGS $@ &
+  unshare $UNSHAREFLAGS $@ &> "$LOGFILE" &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
@@ -86,9 +88,16 @@ function NAMESPACE_EXECUTE {
   then
     faillog "The main namespace process failed to start, in 1 minute. This should not take that long"
   fi
-  
+
+  #Watch the logs
+  tail -f -n +1 "$LOGFILE" &
+  TAILPID=$!
+
   #Wait for the PID to complete
   wait $UNSHAREPID
+
+  #Terminate the log output
+  kill -9 $TAILPID
 }
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
@@ -538,28 +547,31 @@ chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
 PREPARE_ENDTIME=$(date +%s)
 
+#Create a log folder for the phase logs
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs
+
 BUILD_RUNNING=1
 #run the build scripts
 if [[ $RUN_PHASE_0 == 1 ]]
 then
   PHASE0_STARTTIME=$(date +%s)
   echolog "Starting phase0 (logged in phase0.log )..."
-  NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh   |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase0.log
+  NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase0.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
   PHASE0_ENDTIME=$(date +%s)
 fi
 
 PHASE1_STARTTIME=$(date +%s)
 echolog "Starting phase1 (logged in phase1.log )..."
-NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase1.log
+NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase1.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
 PHASE1_ENDTIME=$(date +%s)
 
 PHASE2_STARTTIME=$(date +%s)
 echolog "Starting phase2 (logged in phase2.log )..."
-NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase2.log
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase2.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
 PHASE3_STARTTIME=$(date +%s)
 echolog "Starting phase3 (logged in phase3.log )..."
-NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase3.log
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase3.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh
 PHASE3_ENDTIME=$(date +%s)
 
 #Main Build Complete, Extract ISO and logs
@@ -615,7 +627,7 @@ POSTCLEANUP_STARTTIME=$(date +%s)
 #Clean up.
 if [[ $HASOVERLAYFS == 0 ]]
 then
-  NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
+  NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/cleanup_srcbuild.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
 fi
 
 #Unmount the ramdisks, and bind mounts
@@ -703,8 +715,8 @@ then
   echolog " "
 fi
 
-#Write specially logged messages to te mainlog
-echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/mainlog.log
+#Write specially logged messages to the mainlog
+echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/externallogs/mainlog.log
 
 exit
 }
