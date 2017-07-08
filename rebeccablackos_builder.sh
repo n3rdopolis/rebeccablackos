@@ -16,6 +16,34 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This function echo's the specified text, which is also written to a log
+function echolog
+{
+  LOGTEXTADD=$(echo "$@")
+  LOGTEXT+=$LOGTEXTADD
+  if [[ $1 != -n ]]
+  then
+    LOGTEXT+=$'\n'
+  fi
+  echo "$@"
+}
+
+function faillog
+{
+  LOGTEXTADD=$(echo "$@")
+  LOGTEXT+=$LOGTEXTADD
+  if [[ $1 != -n ]]
+  then
+    LOGTEXT+=$'\n'
+  fi
+  echo "$@"
+
+  echo "$LOGTEXT" > "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE".log
+  rm "$BUILDLOCATION"/logs/failedlogs/latest-failedlog.log 2>/dev/null
+  ln -s "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE".log "$BUILDLOCATION"/logs/failedlogs/latest-failedlog.log
+  exit 1
+}
+
 function setup_buildprocess
 {
   #unset most varaibles
@@ -26,9 +54,11 @@ function setup_buildprocess
   export TERM=linux
   PATH=$(getconf PATH):/sbin:/usr/sbin
   export LANG=en_US.UTF-8
+  STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
   trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; exit 2; fi' 2
+
 }
 
 #Function to start all arguments, past the second one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity)
@@ -60,8 +90,7 @@ function NAMESPACE_EXECUTE {
   done
   if [[ -z $ROOTPID ]]
   then
-    echo "The main namespace process failed to start, in 1 minute. This should not take that long"
-    exit
+    faillog "The main namespace process failed to start, in 1 minute. This should not take that long"
   fi
   
   #Wait for the PID to complete
@@ -71,18 +100,7 @@ function NAMESPACE_EXECUTE {
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
 function run_buildprocess {
 BUILD_RUNNING=0
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  else
-    echo "Building without overlayfs is no longer supported"
-    exit 1
-  fi
-fi
+
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
@@ -92,6 +110,20 @@ export BUILDLOCATION="$HOMELOCATION"/RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
 export BUILDFRIENDLYNAME=RebeccaBlackOS
 
+#Create the logs folder for any logs the script may need to write if it aborts early
+mkdir -p "$BUILDLOCATION"/logs/failedlogs
+
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  else
+    faillog "Building without overlayfs is no longer supported"
+  fi
+fi
 
 #Values for determining how much free disk/ramdisk space is needed
 STORAGESIZE_TOTALSIZE=0
@@ -118,7 +150,7 @@ mkdir -p "$BUILDLOCATION"
 #switch to that folder
 cd "$BUILDLOCATION"
 
-echo "Build script for "$BUILDFRIENDLYNAME". The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
+echolog "Build script for "$BUILDFRIENDLYNAME". The build process requires no user interaction, apart from specifing the build architecture, and sending a keystroke to confirm to starting the build process.
 
 
 "
@@ -126,15 +158,15 @@ echo "Build script for "$BUILDFRIENDLYNAME". The build process requires no user 
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
 if [[ -z "$BUILDARCH" ]]
 then
-  echo "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
-  echo "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
+  echolog "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
+  echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
   read archselect
   if [[ $archselect == 2 ]]
   then
     export BUILDARCH=amd64
   elif [[ $archselect == 3 ]]
   then
-    echo "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
+    echolog "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
     read BUILDARCH
     export BUILDARCH
   else
@@ -155,8 +187,7 @@ then
   "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
   ln -s /proc/"$$"/cmdline "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
 else
-  echo "Error: Another instance is already running for $BUILDARCH"
-  exit
+  faillog "Error: Another instance is already running for $BUILDARCH"
 fi
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
@@ -172,7 +203,7 @@ then
 fi
 
 #####Tell User what script does
-echo "
+echolog "
 The following files will be generated by the script. The listed files will be overwritten. (file names and folder names are case sensitive)
     
    Folder:            $BUILDLOCATION
@@ -182,7 +213,7 @@ The following files will be generated by the script. The listed files will be ov
    File:              ${HOMELOCATION}/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
 "
 
-echo "----------------------------------------------------------------------------------------
+echolog "----------------------------------------------------------------------------------------
 
 If you want to build revisions specified in a list file from a previous build, overwrite 
 
@@ -209,10 +240,10 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
 
 if [[ $SKIPPROMPT != 1 ]]
 then
-  echo "Most users can ignore this message. Press Enter to continue..."
+  echolog "Most users can ignore this message. Press Enter to continue..."
   read wait
 else
-  echo "Most users can ignore this message. The build process will start in 5 seconds"
+  echolog "Most users can ignore this message. The build process will start in 5 seconds"
   sleep 5
 fi
 STARTTIME=$(date +%s)
@@ -221,7 +252,7 @@ PREPARE_STARTTIME=$(date +%s)
 #prepare debootstrap
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
-  echo "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
+  echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   rm -rf "$BUILDLOCATION"/debootstrap/*
   rm "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
@@ -235,8 +266,7 @@ fi
 #If debootstrap fails
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap ]]
 then 
-  echo "Download of debootstrap failed, this script needs to be able to download debootstrap from ftp.debian.org in order to be able to continue."
-  exit 1
+  faillog "Download of debootstrap failed, this script needs to be able to download debootstrap from ftp.debian.org in order to be able to continue."
 fi
 
 #Determine how much free disk space is neeed
@@ -246,12 +276,12 @@ fi
 CURRENT_ISOOUT=$(du -c "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso 2>/dev/null | tail -1 | awk '{print $1}')
 ((STORAGESIZE_TOTALSIZE+=(STORAGESIZE_ISOOUT-CURRENT_ISOOUT)))
 
-echo "Starting the build process..."
+echolog "Starting the build process..."
 
 REBUILT="to update"
 
 #Delete any stale files
-echo "Cleaning up any stale remaining files from any incomplete build..."
+echolog "Cleaning up any stale remaining files from any incomplete build..."
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/*
@@ -270,7 +300,7 @@ then
   #If set to clean up all files
   if [ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]
   then
-    echo "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
+    echolog "Control file for all of $BUILDARCH removed, or non existing. Deleting phase_1, phase_2, archives, built deb files, and downloaded sources"
     #clean up old files
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
@@ -293,7 +323,7 @@ then
   #if set to rebuild phase 1
   if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
   then
-    echo "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
+    echolog "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
   fi
@@ -301,7 +331,7 @@ then
   #if set to rebuild phase 2
   if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
   then
-    echo "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
+    echolog "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
@@ -313,7 +343,7 @@ fi
 #Delete buildoutput based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
 then
-  echo "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
+  echolog "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
   touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
@@ -323,7 +353,7 @@ fi
 #Delete archives based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
 then
-  echo "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
+  echolog "Control file for archives removed, or non existing. Deleting downloaded cached .deb files for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
@@ -337,7 +367,7 @@ fi
 #Delete downloaded source based on a control file
 if [[ ! -f "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
 then
-  echo "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
+  echolog "Control file for srcbuild removed, or non existing. Deleting downloaded sources for $BUILDARCH"
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild
   touch "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
@@ -417,12 +447,11 @@ FREEDISKSPACE=$(df --output=avail $HOMELOCATION | tail -1)
 #if there is less than the required amount of space, then exit.
 if [[ $FREEDISKSPACE -le $STORAGESIZE_TOTALSIZE ]]
 then
-  echo "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $HOMELOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
-  echo "The script will now abort."
-  echo "free space: $FREEDISKSPACE"
-  exit 1
+  echolog "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $HOMELOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
+  echolog "The script will now abort."
+  faillog "free space: $FREEDISKSPACE"
 else
-  echo -e "\n\nRam disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
+  echolog -e "\n\nRam disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
   sleep 1
 fi
 
@@ -503,7 +532,7 @@ do
   if [[ ! -z $RESETPACKAGE  && $RESETPACKAGE != '.' && $RESETPACKAGE != '..' ]]
   then
     rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/control/"$RESETPACKAGE"
-    echo "       Marked package: $RESETPACKAGE for rebuild."
+    echolog "       Marked package: $RESETPACKAGE for rebuild."
   fi
 done
 echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
@@ -520,26 +549,30 @@ BUILD_RUNNING=1
 if [[ $RUN_PHASE_0 == 1 ]]
 then
   PHASE0_STARTTIME=$(date +%s)
-  NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
+  echolog "Starting phase0 (logged in phase0.log )..."
+  NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh   |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase0.log
   PHASE0_ENDTIME=$(date +%s)
 fi
 
 PHASE1_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
+echolog "Starting phase1 (logged in phase1.log )..."
+NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase1.log
 PHASE1_ENDTIME=$(date +%s)
 
 PHASE2_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
+echolog "Starting phase2 (logged in phase2.log )..."
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase2.log
 PHASE2_ENDTIME=$(date +%s)
 PHASE3_STARTTIME=$(date +%s)
-NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh
+echolog "Starting phase3 (logged in phase3.log )..."
+NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh     |& tee "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/phase3.log
 PHASE3_ENDTIME=$(date +%s)
 
 #Main Build Complete, Extract ISO and logs
 
 
 #If the live cd did not build then tell user  
-echo "Moving built ISO files..."
+echolog "Moving built ISO files..."
 
 EXPORT_STARTTIME=$(date +%s)
 #Take a snapshot of the source
@@ -583,7 +616,7 @@ chmod 777 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"
 EXPORT_ENDTIME=$(date +%s)
 
 
-echo "Cleaning up non reusable build data..."  
+echolog "Cleaning up non reusable build data..."  
 POSTCLEANUP_STARTTIME=$(date +%s)
 #Clean up.
 if [[ $HASOVERLAYFS == 0 ]]
@@ -629,49 +662,55 @@ POSTCLEANUP_ENDTIME=$(date +%s)
 #If the live cd did  build then tell user   
 if [[ $ISOFAILED != 1  ]];
 then  
-  echo "Live CD image build was successful."
+  echolog "Live CD image build was successful."
 else
-  echo "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Debian, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
+  echolog "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Debian, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
 fi
 
 ENDTIME=$(date +%s)
 
 #Summarize cleanup time
-echo "build of $BUILDARCH finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
+echolog "build of $BUILDARCH finished in $((ENDTIME-STARTTIME)) seconds $REBUILT"
 
-echo -n "Prepare run time: $((PREPARE_ENDTIME-PREPARE_STARTTIME)) seconds, "
+echolog -n "Prepare run time: $((PREPARE_ENDTIME-PREPARE_STARTTIME)) seconds, "
 if [[ $RUN_PHASE_0 == 1 ]]
 then
-  echo -n "Phase 0 build time: $((PHASE0_ENDTIME-PHASE0_STARTTIME)) seconds, " 
+  echolog -n "Phase 0 build time: $((PHASE0_ENDTIME-PHASE0_STARTTIME)) seconds, " 
 fi
-echo -n "Phase 1 build time: $((PHASE1_ENDTIME-PHASE1_STARTTIME)) seconds, "
-echo -n "Phase 2 build time: $((PHASE2_ENDTIME-PHASE2_STARTTIME)) seconds, "
-echo -n "Phase 3 build time: $((PHASE3_ENDTIME-PHASE3_STARTTIME)) seconds, "
-echo -n "Export time: $((EXPORT_ENDTIME-EXPORT_STARTTIME)) seconds, " 
-echo    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
+echolog -n "Phase 1 build time: $((PHASE1_ENDTIME-PHASE1_STARTTIME)) seconds, "
+echolog -n "Phase 2 build time: $((PHASE2_ENDTIME-PHASE2_STARTTIME)) seconds, "
+echolog -n "Phase 3 build time: $((PHASE3_ENDTIME-PHASE3_STARTTIME)) seconds, "
+echolog -n "Export time: $((EXPORT_ENDTIME-EXPORT_STARTTIME)) seconds, " 
+echolog    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
 
 
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log ]]
 then
- echo -e "\nPackages that failed to download:"
- cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
- echo " "
+ echolog -e "\nPackages that failed to download:"
+ LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+ echolog "$LIST"
+ echolog " "
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log ]]
 then
-  echo -e "\nPackages that failed to install:"
-  cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' '|' | sed 's/|/. /g'
-  echo " "
+  echolog -e "\nPackages that failed to install:"
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+  echolog "$LIST"
+  echolog " "
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles ]]
 then
-  echo -e "\nPackages that failed to compile:"
-  cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles | tr '\n' ' '
-  echo " "
+  echolog -e "\nPackages that failed to compile:"
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles | tr '\n' ' ')
+  echolog "$LIST"
+  echolog " "
 fi
+
+#Write specially logged messages to te mainlog
+echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/mainlog.log
 
 exit
 }
