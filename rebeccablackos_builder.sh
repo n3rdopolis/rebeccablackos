@@ -97,6 +97,7 @@ function NAMESPACE_EXECUTE {
   wait $UNSHAREPID
 
   #Terminate the log output
+  disown $TAILPID
   kill -9 $TAILPID
 }
 
