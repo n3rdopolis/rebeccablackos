@@ -456,8 +456,7 @@ then
   echolog "The script will now abort."
   faillog "free space: $FREEDISKSPACE"
 else
-  echolog -e "\n\nRam disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free Space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
-  sleep 1
+  echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
 fi
 
 #Mount the ramdisk
