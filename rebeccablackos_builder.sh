@@ -53,7 +53,7 @@ function setup_buildprocess
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; disown $TAILPID; kill -9 $TAILPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; disown $TAILPID; kill -9 $TAILPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
 }
 
