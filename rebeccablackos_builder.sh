@@ -630,6 +630,7 @@ POSTCLEANUP_STARTTIME=$(date +%s)
 #Clean up.
 if [[ $HASOVERLAYFS == 0 ]]
 then
+  echolog "Starting cleanup_srcbuild..."
   NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/cleanup_srcbuild.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/cleanup_srcbuild.sh
 fi
 
