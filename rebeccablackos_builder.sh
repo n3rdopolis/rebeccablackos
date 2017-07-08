@@ -30,13 +30,7 @@ function echolog
 
 function faillog
 {
-  LOGTEXTADD=$(echo "$@")
-  LOGTEXT+=$LOGTEXTADD
-  if [[ $1 != -n ]]
-  then
-    LOGTEXT+=$'\n'
-  fi
-  echo "$@"
+  echolog "$@"
 
   echo "$LOGTEXT" > "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE".log
   rm "$BUILDLOCATION"/logs/failedlogs/latest-failedlog.log 2>/dev/null
