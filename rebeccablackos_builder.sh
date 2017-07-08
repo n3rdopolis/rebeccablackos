@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This function echo's the specified text, which is also written to a log
+#This function takes the same arguments as echo, behaves like echo, except all the text is saved in a variable to be written to a log later
 function echolog
 {
   LOGTEXTADD=$(echo "$@")
@@ -28,13 +28,15 @@ function echolog
   echo "$@"
 }
 
+#This function takes the same arguments as echo, like echolog, but then writes to a failure log, and exits the script
+#THis is for when the script itself cannot initailize phase0, 1, 2, or 3, not for when an ISO fails to build
 function faillog
 {
   echolog "$@"
 
-  echo "$LOGTEXT" > "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE".log
-  rm "$BUILDLOCATION"/logs/failedlogs/latest-failedlog.log 2>/dev/null
-  ln -s "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE".log "$BUILDLOCATION"/logs/failedlogs/latest-failedlog.log
+  echo "$LOGTEXT" > "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE"_"$BUILDARCH".log
+  rm "$BUILDLOCATION"/logs/failedlogs/latest-failedlog_"$BUILDARCH".log 2>/dev/null
+  ln -s "$BUILDLOCATION"/logs/failedlogs/Failed_"$STARTDATE"_"$BUILDARCH".log "$BUILDLOCATION"/logs/failedlogs/latest-failedlog_"$BUILDARCH".log
   exit 1
 }
 
@@ -55,7 +57,7 @@ function setup_buildprocess
 
 }
 
-#Function to start all arguments, past the second one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity)
+#Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
 function NAMESPACE_EXECUTE {
   HASNETWORK=$1
   shift
@@ -117,18 +119,6 @@ export BUILDFRIENDLYNAME=RebeccaBlackOS
 #Create the logs folder for any logs the script may need to write if it aborts early
 mkdir -p "$BUILDLOCATION"/logs/failedlogs
 
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  else
-    faillog "Building without overlayfs is no longer supported"
-  fi
-fi
-
 #Values for determining how much free disk/ramdisk space is needed
 GIGABYTE=1048576
 STORAGESIZE_TOTALSIZE=0
@@ -182,6 +172,17 @@ else
   SKIPPROMPT=1
 fi
 
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  else
+    faillog "Building without overlayfs is no longer supported"
+  fi
+fi
 
 #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
 ls $(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile) &> /dev/null
@@ -556,23 +557,23 @@ BUILD_RUNNING=1
 if [[ $RUN_PHASE_0 == 1 ]]
 then
   PHASE0_STARTTIME=$(date +%s)
-  echolog "Starting phase0 (logged in phase0.log )..."
+  echolog "Starting phase0..."
   NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase0.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase0.sh
   PHASE0_ENDTIME=$(date +%s)
 fi
 
 PHASE1_STARTTIME=$(date +%s)
-echolog "Starting phase1 (logged in phase1.log )..."
+echolog "Starting phase1..."
 NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase1.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
 PHASE1_ENDTIME=$(date +%s)
 
 PHASE2_STARTTIME=$(date +%s)
-echolog "Starting phase2 (logged in phase2.log )..."
+echolog "Starting phase2..."
 NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase2.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
 
 PHASE3_STARTTIME=$(date +%s)
-echolog "Starting phase3 (logged in phase3.log )..."
+echolog "Starting phase3..."
 NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase3.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh
 PHASE3_ENDTIME=$(date +%s)
 
@@ -611,7 +612,7 @@ mkdir -p ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 
 #Export the log files to the location
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
-rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
+rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH"" 2>/dev/null
 ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
