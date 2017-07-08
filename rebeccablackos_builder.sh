@@ -570,6 +570,7 @@ PHASE2_STARTTIME=$(date +%s)
 echolog "Starting phase2 (logged in phase2.log )..."
 NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase2.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase2.sh
 PHASE2_ENDTIME=$(date +%s)
+
 PHASE3_STARTTIME=$(date +%s)
 echolog "Starting phase3 (logged in phase3.log )..."
 NAMESPACE_EXECUTE 0 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase3.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase3.sh
