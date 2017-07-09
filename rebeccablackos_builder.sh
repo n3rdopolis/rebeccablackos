@@ -53,7 +53,7 @@ function setup_buildprocess
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; disown $TAILPID; kill -9 $TAILPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
 }
 
@@ -71,8 +71,16 @@ function NAMESPACE_EXECUTE {
     UNSHAREFLAGS="-f --pid --mount --mount-proc"
   fi
 
+  #Create a FIFO for the logging
+  if [[ ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile ]]
+  then
+    mkfifo "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile
+  fi
+  tee "$LOGFILE" < "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
+  disown $!
+
   #Create the PID and Mount namespaces to start the command in
-  unshare $UNSHAREFLAGS $@ &> "$LOGFILE" &
+  unshare $UNSHAREFLAGS $@ &> "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
@@ -91,16 +99,8 @@ function NAMESPACE_EXECUTE {
     faillog "The main namespace process failed to start, in 1 minute. This should not take that long"
   fi
 
-  #Watch the logs
-  tail -f -n +1 "$LOGFILE" &
-  TAILPID=$!
-
   #Wait for the PID to complete
   wait $UNSHAREPID
-
-  #Terminate the log output
-  disown $TAILPID
-  kill -9 $TAILPID
 }
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
