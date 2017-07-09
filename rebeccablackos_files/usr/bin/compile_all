@@ -19,6 +19,8 @@
 #This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
 #It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the MAKEDEBS argument.
 
+MAXDOWNLOADINSTANCES=4
+MAXCLEANINSTANCES=5
 argument=$1
 
 CLEANUPOVERLAY=1
@@ -31,7 +33,18 @@ function CompilePackage
   if [[ "$argument" == download-only ]]
   then
     echo "Downloading/updating $BUILDNAME source"
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 
+
+    #Allow more than one downloads running at a time, only downloads and clean can run more than one at a time
+    #Even smalldebinstall cannot, as only one instance of dpkg can run
+    RUNJOBS=($(jobs -rp))
+    RUNJOBSCOUNT=${#RUNJOBS[@]}
+    while [[ $RUNJOBSCOUNT -ge $MAXDOWNLOADINSTANCES ]]
+    do
+      RUNJOBS=($(jobs -rp))
+      RUNJOBSCOUNT=${#RUNJOBS[@]}
+      sleep .1
+    done
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
   fi
 
   #compile_all is running to build the source
@@ -58,7 +71,17 @@ function CompilePackage
   if [[ "$argument" == clean ]]
   then
     echo "Cleaning $BUILDNAME"
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1
+
+    #Allow more than one cleans running at a time
+    RUNJOBS=($(jobs -rp))
+    RUNJOBSCOUNT=${#RUNJOBS[@]}
+    while [[ $RUNJOBSCOUNT -ge $MAXCLEANINSTANCES ]]
+    do
+      RUNJOBS=($(jobs -rp))
+      RUNJOBSCOUNT=${#RUNJOBS[@]}
+      sleep .1
+    done
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
   fi
   
   #compile_all is running to download and build
