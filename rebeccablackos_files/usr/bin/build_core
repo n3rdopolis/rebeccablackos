@@ -485,16 +485,17 @@ function DownloadSource()
   then
     BASHEXE=$(which bash)
     FOLDERDATE=$(date +%s)
-    mkdir /tmp/buildcore_secure_$FOLDERDATE
-    chmod 700 /tmp/buildcore_secure_$FOLDERDATE
-    chown $NONROOTUSER /tmp/buildcore_secure_$FOLDERDATE
-    rm -rf /tmp/buildcore_secure_$FOLDERDATE/*
-    cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
-    chmod 755 /tmp/buildcore_secure_$FOLDERDATE/buildcore_revisions.txt
-    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_$FOLDERDATE $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION; \declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_$FOLDERDATE/revisiondata
-    chmod +x /tmp/buildcore_secure_$FOLDERDATE/revisiondata
-    . /tmp/buildcore_secure_$FOLDERDATE/revisiondata
-    rm -rf /tmp/buildcore_secure_$FOLDERDATE
+    RANDSTR=$RANDOM
+    mkdir /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}
+    chmod 700 /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}
+    chown $NONROOTUSER /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}
+    rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/*
+    cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/buildcore_revisions.txt
+    chmod 755 /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/buildcore_revisions.txt
+    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR} $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION; \declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/revisiondata
+    chmod +x /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/revisiondata
+    . /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}/revisiondata
+    rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${RANDSTR}
   fi
   mkdir -p "$SOURCEDIR"
   cd "$SOURCEDIR"
