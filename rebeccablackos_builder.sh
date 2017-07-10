@@ -80,7 +80,7 @@ function NAMESPACE_EXECUTE {
   disown $!
 
   #Create the PID and Mount namespaces to start the command in
-  unshare $UNSHAREFLAGS $@ &> "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
+  unshare $UNSHAREFLAGS "$@" &> "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
