@@ -71,23 +71,16 @@ function NAMESPACE_EXECUTE {
     UNSHAREFLAGS="-f --pid --mount --mount-proc"
   fi
 
-  #Create a FIFO for the logging
-  if [[ ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile ]]
-  then
-    mkfifo "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile
-  fi
-  tee "$LOGFILE" < "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
-  disown $!
-
   #Create the PID and Mount namespaces to start the command in
-  unshare $UNSHAREFLAGS "$@" &> "$BUILDLOCATION"/build/"$BUILDARCH"/logfifofile &
+  (unshare $UNSHAREFLAGS "$@" |& tee "$LOGFILE") &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
   #Abort if not started in 1 minute
   for (( element = 0 ; element < 120 ; element++ ))
   do
-    ROOTPID=$(pgrep -P $UNSHAREPID)
+    ROOTPID=$(pgrep -oP $UNSHAREPID)
+    ROOTPID=$(pgrep -oP $ROOTPID)
     if [[ ! -z $ROOTPID ]]
     then
       break
