@@ -711,12 +711,12 @@ function MakeAndInstall()
     PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
     PackageInstallSourceResult=\${PIPESTATUS[0]}
     ENDTIME=\$(date +%s)
-    echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
+    echo \"PackageInstallSource finished in \$((ENDTIME-STARTTIME)) seconds with result \$PackageInstallSourceResult\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
 
     STARTTIME=\$(date +%s)
     PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     ENDTIME=\$(date +%s)
-    echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds with result \$PackageInstallSourceResult\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
+    echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     if [[ \$PackageInstallSourceResult != 0 ]]
     then
       mkdir \"/usr/share/buildcore_revisions/buildresults/\"
