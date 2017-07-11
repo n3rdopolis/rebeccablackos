@@ -79,8 +79,8 @@ function NAMESPACE_EXECUTE {
   #Abort if not started in 1 minute
   for (( element = 0 ; element < 120 ; element++ ))
   do
-    ROOTPID=$(pgrep -oP $UNSHAREPID)
-    ROOTPID=$(pgrep -oP $ROOTPID)
+    ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+    ROOTPID=$(pgrep -oP $ROOTPID 2>/dev/null)
     if [[ ! -z $ROOTPID ]]
     then
       break
