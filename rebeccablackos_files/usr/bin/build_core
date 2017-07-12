@@ -531,7 +531,7 @@ function DownloadSource()
     #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
 
     #Ensure only one instace of the cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
-    SLEEPTIME=$(( (RANDOM%4)+1 ))
+    SLEEPTIME=$(( (RANDOM%10)+1 ))
     sleep 0.$SLEEPTIME
     ls $(readlink -f /srcbuild/buildhome/cargocache/lockfile) &> /dev/null
     CARGOLOCKRESULT=$?
