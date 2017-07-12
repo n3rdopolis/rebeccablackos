@@ -43,10 +43,25 @@ function faillog
 function setup_buildprocess
 {
   #unset most varaibles
-  while read var
+  unset VARLIST
+  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" )
+  for var in $VARLIST
   do 
     unset "$var" &> /dev/null
-  done < <(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" ) 
+  done
+
+  #Detect the best Python command to use
+  PYTHONTESTCOMMANDS=(python3 python2 python2.7 python)
+  for PYTHONTESTCOMMAND in ${PYTHONTESTCOMMANDS[@]}
+  do
+    type $PYTHONTESTCOMMAND &> /dev/null
+    if [[ $? == 0 ]]
+    then
+      export PYTHONCOMMAND=$PYTHONTESTCOMMAND
+      break
+    fi
+  done
+
   export TERM=linux
   PATH=$(getconf PATH):/sbin:/usr/sbin
   export LANG=en_US.UTF-8
@@ -72,7 +87,7 @@ function NAMESPACE_EXECUTE {
   fi
 
   #Create the PID and Mount namespaces to start the command in
-  (unshare $UNSHAREFLAGS "$@" 1>&2 |& tee "$LOGFILE") &
+  ($PYTHONCOMMAND -c 'import pty, sys; pty.spawn(sys.argv[1:])' unshare $UNSHAREFLAGS "$@" |& tee "$LOGFILE" ) &
   UNSHAREPID=$!
   
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
@@ -80,6 +95,7 @@ function NAMESPACE_EXECUTE {
   for (( element = 0 ; element < 120 ; element++ ))
   do
     ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+    ROOTPID=$(pgrep -oP $ROOTPID 2>/dev/null)
     ROOTPID=$(pgrep -oP $ROOTPID 2>/dev/null)
     if [[ ! -z $ROOTPID ]]
     then
@@ -722,19 +738,7 @@ exit
 if [[ $BUILDER_IS_UNSHARED != 1 ]]
 then
   export BUILDER_IS_UNSHARED=1
-  tty -s
-  TTYRESULT=$?
-  if [[ $TTYRESULT == 0 ]]
-  then
-    exec sudo -E unshare --mount "$0" "$@"
-  else
-    if [[ $UID != 0 ]]
-    then
-      echo "Needs to be run as root outside of a terminal."
-    else
-      sudo -E python -c 'import pty, sys; pty.spawn(sys.argv[1:])' unshare --mount "$0" "$@"
-    fi
-  fi
+  sudo -E unshare --mount "$0" "$@"
 else
   setup_buildprocess
   run_buildprocess "$@"
