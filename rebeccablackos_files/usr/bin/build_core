@@ -529,9 +529,23 @@ function DownloadSource()
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
     #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
+
+    #Ensure only one instace of the cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
+    SLEEPTIME=$(( (RANDOM%4)+1 ))
+    sleep 0.$SLEEPTIME
+    ls $(readlink -f /srcbuild/buildhome/cargocache/lockfile) &> /dev/null
+    CARGOLOCKRESULT=$?
+    while [[ $CARGOLOCKRESULT == 0 && -e /srcbuild/buildhome/cargocache/lockfile ]]
+    do
+      ls $(readlink -f /srcbuild/buildhome/cargocache/lockfile) &> /dev/null
+      CARGOLOCKRESULT=$?
+      sleep 1
+    done
+
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
     if [[ ! -f $CARGO_HOME/cargo && ! -z $TOMLFILES ]]
     then
+      ln -s /proc/"$$"/cmdline /srcbuild/buildhome/cargocache/lockfile
       DEBIAN_ARCH=$(dpkg --print-architecture)
       if [[ $DEBIAN_ARCH == i386 ]]
       then
@@ -544,6 +558,7 @@ function DownloadSource()
       $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O /srcbuild/buildhome/cargocache/$CARGOFILENAME.tar.gz
       tar -xzf /srcbuild/buildhome/cargocache/$CARGOFILENAME.tar.gz -C /srcbuild/buildhome/cargocache
       cp /srcbuild/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
+      rm /srcbuild/buildhome/cargocache/lockfile
     fi
 
     #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
