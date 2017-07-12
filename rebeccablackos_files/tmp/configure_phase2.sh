@@ -193,9 +193,8 @@ apt-get dist-upgrade -y                                                 2>&1 |te
 apt-get --purge autoremove -y                                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
 
 #prevent packages removed from the repositories upstream to not make it in the ISOS
-OBSOLETEPACKAGECOUNT=$(aptitude search '~o' |wc -l)
-INSTALLPACKAGECOUNT=$(aptitude search '~i' |wc -l)
-if [[ $OBSOLETEPACKAGECOUNT -ge $INSTALLPACKAGECOUNT ]]
+ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
+if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
 then
   aptitude purge ?obsolete -y                                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 else
