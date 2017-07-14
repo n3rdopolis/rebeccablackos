@@ -700,10 +700,20 @@ function ChooseSessionType
     #split away all the data from this file, starting at [Desktop Entry]
     DesktopFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[Desktop Entry\]$/{flag=1}' $SESSIONFILE | awk -F \# '{print $1}')
     #Read all the supported values that are specified in the wsession file
-    Enabled=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Enabled" {print $0}' | cut -d = -f2- | tail -1 )
-    SessionName=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Name" {print $0}' | cut -d = -f2- | tail -1 )
-    SessionComment=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Comment" {print $0}' | cut -d = -f2- | tail -1 )
-    Type=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "Type" {print $0}' | cut -d = -f2- | tail -1 )
+
+    #Append empty values to the bottom of the DesktopFileData, This is so that when parsed for an array, the array elements line up. The FIRST result will be matched by sed,
+    #Only single occuring, non dynamic values (as in NOT the backend type) will be handled by the array, which is most values
+    DesktopFileArrayParseData=$DesktopFileData+$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
+
+    #Create an array with a fixed layout for the values
+    IFS=$'\n'
+    DesktopFileDataArray=($(echo "$DesktopFileArrayParseData" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *Enabled *= */000|/' -e 's/^ *Name *= */001|/' -e 's/^ *Comment *= */002|/' -e 's/^ *Type *= */003|/' -e 's/^ *IsFallbackSession *= */004|/' -e 's/^ *CompositorDisplayArgument *= */005|/' -e 's/^ *SessionArgument *= */006|/' -e 's/^ *AdditionalArguments *= */007|/' -e 's/^ *CompositorExec *= */008|/' -e 's/^ *EnvironmentFile *= */009|/' -e "/^[0-9][0-9][0-9]/!d" | sort -t "|" -k1,1 -u))
+    unset IFS
+
+    Enabled=${DesktopFileDataArray[0]:4}
+    SessionName=${DesktopFileDataArray[1]:4}
+    SessionComment=${DesktopFileDataArray[2]:4}
+    Type=${DesktopFileDataArray[3]:4}
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     for (( element = 0 ; element < ${#SupportedBackends[@]} ; element++ ))
     do
@@ -715,20 +725,23 @@ function ChooseSessionType
         break
       fi
     done
-    IsFallbackSession=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "IsFallbackSession" {print $0}' | cut -d = -f2- | tail -1 )
+    IsFallbackSession=${DesktopFileDataArray[4]:4}
     if [[ -z $IsFallbackSession ]]
     then
       IsFallbackSession=0
     fi
-    CompositorDisplayArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorDisplayArgument" {print $0}' | cut -d = -f2- | tail -1 )
+    CompositorDisplayArgument=${DesktopFileDataArray[5]:4}
+    SessionArgument=${DesktopFileDataArray[6]:4}
+    AdditionalArguments=${DesktopFileDataArray[7]:4}
+    CompositorExec=${DesktopFileDataArray[8]:4}
+    EnvironmentFile=${DesktopFileDataArray[9]:4}
     BackendArguments=$(echo "$DesktopFileData" | awk -v BackendType=$BackendType -F ' *= *' '$1 == "Compositor"BackendType"Arguments" {print $0}' | cut -d = -f2- | tail -1 )
-    SessionArgument=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "SessionArgument" {print $0}' | cut -d = -f2- | tail -1 )
-    AdditionalArguments=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "AdditionalArguments" {print $0}' | cut -d = -f2-| tail -1 )
-    CompositorExec=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "CompositorExec" {print $0}' | cut -d = -f2- | tail -1 )
-    EnvironmentFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "EnvironmentFile" {print $0}' | cut -d = -f2- | tail -1 )
     #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
-    NeedsFile=$(echo "$DesktopFileData" | awk -F ' *= *' '$1 == "NeedsFile" {print $0}' | cut -d = -f2- | perl -pe 's/\$(\w+)/$ENV{$1}/g')
-    NeedsFile+=$'\n'
+    NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *NeedsFile *= */000|/' -e "/[0-9][0-9][0-9]/!d" -e 's/[0-9][0-9][0-9]|//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
+    if [[ ! -z $NeedsFile ]]
+    then
+      NeedsFile+=$'\n'
+    fi
     NeedsFile+=$CompositorExec
 
     #Iterate through all NeedsFile values, to make sure that they exist. if one doesn't exist increment NotFoundCount.
