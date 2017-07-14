@@ -516,7 +516,7 @@ Will now reboot." 20 50 --no-cancel
 #This forces the TTY to be in a state that allows the kernel to switch the TTY (switching to VT_AUTO), instead of a process (VT_PROCESS), when it's in VT_PROCESS, and the process is defunct, the TTY switch fails.
 function ResetTTYMode
 {
-    python -c "from array import array; \
+    python3 -c "from array import array; \
 from fcntl import ioctl; \
 buf = array('h', [0]); \
 buf[0] = 0; \
