@@ -767,7 +767,6 @@ function ChooseSessionType
         unset IFS
         if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
         then
-          echo ${ThisBackendArray[2]}
           BackendArguments=${ThisBackendArray[2]}
         fi
       done
@@ -841,9 +840,28 @@ function ChooseSessionType
   if [[ ! -z $WSESSIONLIST ]]
   then
     PROMPTED=1
+    WSESSIONARRAY=()
+    WSESSIONARRAYELEMENT=0
+    while read LINE
+    do
+      WSESSIONARRAY[$WSESSIONARRAYELEMENT]="$LINE"
+      ((WSESSIONARRAYELEMENT++))
+    done <<< "$WSESSIONLIST"
+    WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/9))
+
+    WSESSIONPICKLIST=""
+    for (( element=0; element<$WSESSIONCOUNT; element++ ))
+    do
+      if [[ ! -z $WSESSIONPICKLIST ]]
+      then
+        WSESSIONPICKLIST+=$'\n'
+      fi
+      WSESSIONPICKLIST+=$element$'\n'${WSESSIONARRAY[$((7+element*9))]}$'\n'${WSESSIONARRAY[$((8+element*9))]}
+    done
     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
-    WSESSIONDATA=$(echo "$WSESSIONLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column compositor --column backend --column session --column displayargs --column args --column environment --column backendtype --column Name --column Description --hide-column=1,2,3,4,5,6,7 --print-column=1,2,3,4,5,6,7,8 --separator="\n" 2>/dev/null )
+    WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column name --column comment --hide-column=1 --print-column=1 --separator="\n" 2>/dev/null )
+    WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*9))]}
     #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
@@ -852,6 +870,7 @@ function ChooseSessionType
     fi
   else 
     unset WSESSIONDATA
+    unset WSESSIONNUMBER
   fi
 
   #If there are wsessions, it does prompt the user, if the user doesn't select one, it tells the user that its falling back to the default. If there are no wsessions, it silently falls back to the default, by adding hardcoded values to the wsessiondata variable.
