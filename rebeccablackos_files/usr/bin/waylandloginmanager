@@ -703,32 +703,32 @@ function ChooseSessionType
 
     #Append empty values to the bottom of the DesktopFileData, This is so that when parsed for an array, the array elements line up. The FIRST result will be matched by sed,
     #Only single occuring, non dynamic values (as in NOT the backend type) will be handled by the array, which is most values
-    DesktopFileArrayParseData=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
+    DesktopFileDataWithPlaceholders=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
 
     #Create an array with a fixed layout for the values.
     IFS=$'\n'
-    DesktopFileDataArray=($(echo "$DesktopFileArrayParseData" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *Enabled *= */000|/' -e 's/^ *Name *= */001|/' -e 's/^ *Comment *= */002|/' -e 's/^ *Type *= */003|/' -e 's/^ *IsFallbackSession *= */004|/' -e 's/^ *CompositorDisplayArgument *= */005|/' -e 's/^ *SessionArgument *= */006|/' -e 's/^ *AdditionalArguments *= */007|/' -e 's/^ *CompositorExec *= */008|/' -e 's/^ *EnvironmentFile *= */009|/' -e "/^[0-9][0-9][0-9]|/!d" | sort -t "|" -k1,1 -u))
+    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *Enabled *= */000|/' -e 's/^ *Name *= */001|/' -e 's/^ *Comment *= */002|/' -e 's/^ *Type *= */003|/' -e 's/^ *IsFallbackSession *= */004|/' -e 's/^ *CompositorDisplayArgument *= */005|/' -e 's/^ *SessionArgument *= */006|/' -e 's/^ *AdditionalArguments *= */007|/' -e 's/^ *CompositorExec *= */008|/' -e 's/^ *EnvironmentFile *= */009|/' -e "/^[0-9][0-9][0-9]|/!d" | sort -t "|" -k1,1 -u))
     unset IFS
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    BackendSupportArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]\|//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000|\1|/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001|\1|/"  -e "/^[0-9][0-9][0-9]\|/!d" | sort -t "|" -u -k2,2 -k1,1))
+    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]\|//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000|\1|/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001|\1|/"  -e "/^[0-9][0-9][0-9]\|/!d" | sort -t "|" -u -k2,2 -k1,1))
     unset IFS
 
-    Enabled=${DesktopFileDataArray[0]:4}
-    SessionName=${DesktopFileDataArray[1]:4}
-    SessionComment=${DesktopFileDataArray[2]:4}
-    Type=${DesktopFileDataArray[3]:4}
+    Enabled=${DesktopFileMainArray[0]:4}
+    SessionName=${DesktopFileMainArray[1]:4}
+    SessionComment=${DesktopFileMainArray[2]:4}
+    Type=${DesktopFileMainArray[3]:4}
 
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     SupportsBackend=0
     for (( element1 = 0 ; element1 < ${#SupportedBackends[@]} ; element1++ ))
     do
       export BackendType=${SupportedBackends[$element1]}
-      for (( element2 = 0 ; element2 < ${#BackendSupportArray[@]} ; element2++ ))
+      for (( element2 = 0 ; element2 < ${#DesktopFileBackendArray[@]} ; element2++ ))
       do
         IFS="|"
-        ThisBackendArray=(${BackendSupportArray[$element2]})
+        ThisBackendArray=(${DesktopFileBackendArray[$element2]})
         unset IFS
         if [[ ${ThisBackendArray[1]} == $BackendType ]]
         then
@@ -747,23 +747,23 @@ function ChooseSessionType
       fi
     done
 
-    IsFallbackSession=${DesktopFileDataArray[4]:4}
+    IsFallbackSession=${DesktopFileMainArray[4]:4}
     if [[ -z $IsFallbackSession ]]
     then
       IsFallbackSession=0
     fi
-    CompositorDisplayArgument=${DesktopFileDataArray[5]:4}
-    SessionArgument=${DesktopFileDataArray[6]:4}
-    AdditionalArguments=${DesktopFileDataArray[7]:4}
-    CompositorExec=${DesktopFileDataArray[8]:4}
-    EnvironmentFile=${DesktopFileDataArray[9]:4}
+    CompositorDisplayArgument=${DesktopFileMainArray[5]:4}
+    SessionArgument=${DesktopFileMainArray[6]:4}
+    AdditionalArguments=${DesktopFileMainArray[7]:4}
+    CompositorExec=${DesktopFileMainArray[8]:4}
+    EnvironmentFile=${DesktopFileMainArray[9]:4}
     unset BackendArguments
     if [[ ! -z $BackendType ]]
     then
-      for (( element = 0 ; element < ${#BackendSupportArray[@]} ; element++ ))
+      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
       do
         IFS="|"
-        ThisBackendArray=(${BackendSupportArray[$element]})
+        ThisBackendArray=(${DesktopFileBackendArray[$element]})
         unset IFS
         if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
         then
