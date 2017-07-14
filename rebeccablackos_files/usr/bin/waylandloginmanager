@@ -703,7 +703,7 @@ function ChooseSessionType
 
     #Append empty values to the bottom of the DesktopFileData, This is so that when parsed for an array, the array elements line up. The FIRST result will be matched by sed,
     #Only single occuring, non dynamic values (as in NOT the backend type) will be handled by the array, which is most values
-    DesktopFileArrayParseData=$DesktopFileData+$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
+    DesktopFileArrayParseData=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
 
     #Create an array with a fixed layout for the values.
     IFS=$'\n'
@@ -712,7 +712,7 @@ function ChooseSessionType
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    BackendSupportArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]\|//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000|\1|/" -e "/^[0-9][0-9][0-9]\|/!d" | sort -t "|" -k2,2 -u ))
+    BackendSupportArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]\|//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000|\1|/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001|\1|/"  -e "/^[0-9][0-9][0-9]\|/!d" | sort -t "|" -u -k2,2 -k1,1))
     unset IFS
 
     Enabled=${DesktopFileDataArray[0]:4}
@@ -728,11 +728,11 @@ function ChooseSessionType
       for (( element2 = 0 ; element2 < ${#BackendSupportArray[@]} ; element2++ ))
       do
         IFS="|"
-        BackendArray=(${BackendSupportArray[$element2]})
+        ThisBackendArray=(${BackendSupportArray[$element2]})
         unset IFS
-        if [[ ${BackendArray[1]} == $BackendType ]]
+        if [[ ${ThisBackendArray[1]} == $BackendType ]]
         then
-          if [[ ${BackendArray[2]} == 1 ]]
+          if [[ ${ThisBackendArray[2]} == 1 && ${ThisBackendArray[0]} == 000 ]]
           then
             SupportsBackend=1
             break
@@ -757,9 +757,20 @@ function ChooseSessionType
     AdditionalArguments=${DesktopFileDataArray[7]:4}
     CompositorExec=${DesktopFileDataArray[8]:4}
     EnvironmentFile=${DesktopFileDataArray[9]:4}
+    unset BackendArguments
     if [[ ! -z $BackendType ]]
     then
-      BackendArguments=$(echo "$DesktopFileData" | sed  "s/^ *Compositor${BackendType}Arguments *= *//g;tx;d;:x" )
+      for (( element = 0 ; element < ${#BackendSupportArray[@]} ; element++ ))
+      do
+        IFS="|"
+        ThisBackendArray=(${BackendSupportArray[$element]})
+        unset IFS
+        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
+        then
+          echo ${ThisBackendArray[2]}
+          BackendArguments=${ThisBackendArray[2]}
+        fi
+      done
     fi
     #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
     NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *NeedsFile *= */000|/' -e "/[0-9][0-9][0-9]/!d" -e 's/[0-9][0-9][0-9]|//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
