@@ -482,6 +482,7 @@ Will now reboot." 20 50 --no-cancel
     LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
     #Get the logind session of the weston instance running loginmanagerdisplay
     GetLoginManagerDisplaySession 0
+    systemd-notify --ready
   else
     LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
   fi
