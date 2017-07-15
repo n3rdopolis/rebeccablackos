@@ -1674,8 +1674,11 @@ function ReadCommandFIFO
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
       then
-        kill -15 -$LastUserActionPID &> /dev/null
-        wait $LastUserActionPID 2>/dev/null
+        if [[ ! -z $LastUserActionPID ]]
+        then
+          kill -15 -$LastUserActionPID &> /dev/null
+          wait $LastUserActionPID 2>/dev/null
+        fi
         SwitchUserDialog &
         LastSwitchPID=$!
       else
@@ -1694,8 +1697,11 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastLogonPID$) == 0  ]]
       then
-        kill -15 -$LastUserActionPID &> /dev/null
-        wait $LastUserActionPID 2>/dev/null
+        if [[ ! -z $LastUserActionPID ]]
+        then
+          kill -15 -$LastUserActionPID &> /dev/null
+          wait $LastUserActionPID 2>/dev/null
+        fi
         GetUserCredentials &
         LastLogonPID=$!
       else
@@ -1706,8 +1712,11 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastLeavePID$) == 0  ]]
       then
-        kill -15 -$LastUserActionPID &> /dev/null
-        wait $LastUserActionPID 2>/dev/null
+        if [[ ! -z $LastUserActionPID ]]
+        then
+          kill -15 -$LastUserActionPID &> /dev/null
+          wait $LastUserActionPID 2>/dev/null
+        fi
         LeavePrompt &
         LastLeavePID=$!
       else
@@ -1722,8 +1731,11 @@ function ReadCommandFIFO
     then
       if [[ $(jobs -p -r | grep -c ^$LastInfoPID$) == 0  ]]
       then
-        kill -15 -$LastUserActionPID &> /dev/null
-        wait $LastUserActionPID 2>/dev/null
+        if [[ ! -z $LastUserActionPID ]]
+        then
+          kill -15 -$LastUserActionPID &> /dev/null
+          wait $LastUserActionPID 2>/dev/null
+        fi
         ShowInfo &
         LastInfoPID=$!
       else
