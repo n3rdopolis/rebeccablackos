@@ -1,5 +1,5 @@
 --- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-15 09:57:21.298676085 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-15 10:00:16.891295627 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-15 10:37:03.810855421 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -131,7 +131,7 @@
 -      SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
 -      SessionList+="${AllSessionIDs[$NumberOfSessions]}"
 -
-+      SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}\t${AllSessionUsers[$NumberOfSessions]}"
++      SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
      fi
      ((NumberOfSessions--))
    done
@@ -170,6 +170,15 @@
        fi
      fi
    fi
+@@ -1160,7 +1144,7 @@
+     export USERHOME=$(eval echo ~$LOGINUSER)
+     #if the password and username is correct, start the session
+     WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY"
+-    DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
++    DialogWait 3 "Login Successful."$'\n'"Attempting to start the selected session..."
+     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
+     #report success
+     return 0
 @@ -1200,28 +1184,33 @@
      then
        UserDisplayName=$UserName
