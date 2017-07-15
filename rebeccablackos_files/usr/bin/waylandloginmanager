@@ -1159,9 +1159,12 @@ function AuthenticateUser
   if [[ 0 == $PasswordResult ]]
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
+    #Prompt for the session type
+    ChooseSessionType
+
     #if the password and username is correct, start the session
     WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY"
-    DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
+    DialogWait 3 "Attempting to start the selected session..."
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
     #report success
     return 0
@@ -1215,8 +1218,6 @@ function GetUserCredentials
   USERLISTSTRING+=$'\n'
   USERLISTSTRING+="-1"
 
-  #Prompt for the session type
-  ChooseSessionType
 
   #present the list of the users to the system
   LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
@@ -1466,6 +1467,7 @@ function StartAutoLogin
     AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
+  touch /run/waylandloginmanager/autologinran
 
   #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
@@ -1792,8 +1794,12 @@ then
   StartLoginManagerDisplay &
 
   #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
-  StartAutoLogin &
-  LastLogonPID=$!
+  #Only do an autologin once per boot, and not per start of the waylandloginmanager
+  if [[ ! -e /run/waylandloginmanager/autologinran ]]
+  then
+    StartAutoLogin &
+    LastLogonPID=$!
+  fi
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO

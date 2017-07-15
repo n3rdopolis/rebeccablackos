@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-15 14:58:21.302012600 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-15 14:57:30.081848868 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-15 16:40:45.507846541 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-15 16:41:07.847973439 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -170,16 +170,7 @@
        fi
      fi
    fi
-@@ -1161,7 +1145,7 @@
-     export USERHOME=$(eval echo ~$LOGINUSER)
-     #if the password and username is correct, start the session
-     WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY"
--    DialogWait 3 "Login Successful.\rAttempting to start the selected session..."
-+    DialogWait 3 "Login Successful."$'\n'"Attempting to start the selected session..."
-     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
-     #report success
-     return 0
-@@ -1201,28 +1185,33 @@
+@@ -1204,26 +1188,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -202,14 +193,11 @@
    USERLISTSTRING+="-1"
 +  USERLISTSTRING+=$'\n'
 +  USERLISTSTRING+="Enter User Name..."
-+
+ 
 +  #Convert the data to an array
 +  IFS=$'\n'
 +  USERLISTSTRING=($USERLISTSTRING)
 +  unset IFS
- 
-   #Prompt for the session type
-   ChooseSessionType
  
    #present the list of the users to the system
 -  LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
@@ -221,7 +209,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1230,9 +1219,9 @@
+@@ -1231,9 +1219,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -233,7 +221,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1243,9 +1232,9 @@
+@@ -1244,9 +1232,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
@@ -245,7 +233,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1257,20 +1246,20 @@
+@@ -1258,20 +1246,20 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
@@ -270,7 +258,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
    if [[ $CanPowerOff == 1 ]]
    then
-@@ -1326,16 +1315,21 @@
+@@ -1327,16 +1315,21 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -295,7 +283,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -1369,7 +1363,7 @@
+@@ -1370,7 +1363,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -304,7 +292,7 @@
    fi
  }
  
-@@ -1473,7 +1467,7 @@
+@@ -1475,7 +1468,7 @@
      #Wait until the loginmanagerdisplay becomes availible
      DisplayServerWait
      ChooseSessionType
@@ -313,7 +301,7 @@
      CancelOrOK=$?
      if [[ $CancelOrOK != 0 ]]
      then
-@@ -1488,7 +1482,7 @@
+@@ -1490,7 +1483,7 @@
        WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
        StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
      else
@@ -322,7 +310,7 @@
        WriteToLog "Not Enough TTYs for autologin!"
      fi
    fi 
-@@ -1518,16 +1512,21 @@
+@@ -1520,16 +1513,21 @@
  {
    #wait for the loginmanagerdisplay
    DisplayServerWait
@@ -349,7 +337,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -1535,8 +1534,8 @@
+@@ -1537,8 +1535,8 @@
    else
      $SLEEPCMD .1
    fi
