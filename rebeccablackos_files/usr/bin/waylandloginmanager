@@ -475,6 +475,7 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Get the TTY that will hold the Wayland server that displays the login screen.
+  ReadyNotifySent=0
   OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay 2>/dev/null)
   if [[ ! -z $OLDPID ]]
   then
@@ -508,7 +509,6 @@ Will now reboot." 20 50 --no-cancel
     wlmdebuginsecure=1
   fi
   
-  ReadyNotifySent=0
 }
 
 
