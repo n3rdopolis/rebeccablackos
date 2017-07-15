@@ -1000,7 +1000,7 @@ function SwitchUserDialog
       SessionList+="$NumberOfSessions"$'\n'
       SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"$'\n'
       SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
-      SessionList+="{AllSessionUsers[$NumberOfSessions]}"$'\n'
+      SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
       SessionList+="${AllSessionIDs[$NumberOfSessions]}"
 
     fi
