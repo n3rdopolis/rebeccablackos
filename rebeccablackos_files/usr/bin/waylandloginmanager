@@ -993,22 +993,31 @@ function SwitchUserDialog
     #determine if the current session is alive, before adding it to the list
     if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
     then
-      SessionList+="$NumberOfSessions
-tty${AllSessionTTYs[$NumberOfSessions]}
-${AllSessionPIDs[$NumberOfSessions]}
-${AllSessionUsers[$NumberOfSessions]}
-${AllSessionIDs[$NumberOfSessions]}
-"
+    if [[ ! -z $SessionList ]]
+      then
+        SessionList+=$'\n'
+      fi
+      SessionList+="$NumberOfSessions"$'\n'
+      SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"$'\n'
+      SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
+      SessionList+="{AllSessionUsers[$NumberOfSessions]}"$'\n'
+      SessionList+="${AllSessionIDs[$NumberOfSessions]}"
+
     fi
     ((NumberOfSessions--))
   done
   #Add a element with a sessionid of -1. When the selected element is -1, it prompts for a user login for a new session, with GetUserCredentials
-  SessionList+="-1
+  if [[ ! -z $SessionList ]]
+  then
+    SessionList+=$'\n'
+  fi
+  SessionList+="-1"$'\n'
+  SessionList+=$'\n'
+  SessionList+=$'\n'
+  SessionList+="New Session..."$'\n'
+  SessionList+=$'\n'
 
 
-New Session...
-
-"
 
 
   unset ChangeSession
