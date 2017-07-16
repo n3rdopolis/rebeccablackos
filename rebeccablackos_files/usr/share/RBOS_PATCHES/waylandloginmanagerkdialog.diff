@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-16 12:37:46.103826363 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-16 12:39:21.268420183 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-16 14:46:25.812700951 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-16 14:48:47.256756295 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -73,10 +73,10 @@
        then
          WSESSIONPICKLIST+=$'\n'
        fi
--      WSESSIONPICKLIST+=$element$"|"${WSESSIONARRAY[$((7+element*9))]}"|"${WSESSIONARRAY[$((8+element*9))]}
-+      WSESSIONPICKLIST+=$element"|"${WSESSIONARRAY[$((7+element*9))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((8+element*9))]}
+-      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((7+element*9))]}"#"${WSESSIONARRAY[$((8+element*9))]}
++      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((7+element*9))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((8+element*9))]}
      done
-     WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "|" -k 2,2 | sed 's/|/\n/g')
+     WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
 +    IFS=$'\n'
 +    WSESSIONPICKLIST=($WSESSIONPICKLIST)
 +    unset IFS
