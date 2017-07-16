@@ -200,7 +200,7 @@ function UIHost
 function ReadEnvironmentFile
 {
   #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}' | sed  -e "s/ *= */\|/g" -re "s/ *@([A-Z]*)$/\|\1/g")
+  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}' | sed  -e "s/ *= */\#/g" -re "s/ *@([A-Z]*)$/\#\1/g")
 
   IFS=$'\n'
   EnvironmentFileData=($EnvironmentFileData)
@@ -213,7 +213,7 @@ function ReadEnvironmentFile
     #set=varname=data sets variable called varname, with the content of data.
     #unset=varname unsets a variable called varname
     #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
-    IFS="|"
+    IFS="#"
     EnvironmentFileLine=($EnvironmentFileLine)
     unset IFS
 
@@ -714,12 +714,12 @@ function ChooseSessionType
 
     #Create an array with a fixed layout for the values.
     IFS=$'\n'
-    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *Enabled *= */000|/' -e 's/^ *Name *= */001|/' -e 's/^ *Comment *= */002|/' -e 's/^ *Type *= */003|/' -e 's/^ *IsFallbackSession *= */004|/' -e 's/^ *CompositorDisplayArgument *= */005|/' -e 's/^ *SessionArgument *= */006|/' -e 's/^ *AdditionalArguments *= */007|/' -e 's/^ *CompositorExec *= */008|/' -e 's/^ *EnvironmentFile *= */009|/' -e "/^[0-9][0-9][0-9]|/!d" | sort -t "|" -k1,1 -u))
+    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *SessionArgument *= */006#/' -e 's/^ *AdditionalArguments *= */007#/' -e 's/^ *CompositorExec *= */008#/' -e 's/^ *EnvironmentFile *= */009#/' -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -k1,1 -u))
     unset IFS
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]\|//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000|\1|/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001|\1|/"  -e "/^[0-9][0-9][0-9]\|/!d" | sort -t "|" -u -k2,2 -k1,1))
+    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
     unset IFS
 
     Enabled=${DesktopFileMainArray[0]:4}
@@ -734,7 +734,7 @@ function ChooseSessionType
       export BackendType=${SupportedBackends[$element1]}
       for (( element2 = 0 ; element2 < ${#DesktopFileBackendArray[@]} ; element2++ ))
       do
-        IFS="|"
+        IFS="#"
         ThisBackendArray=(${DesktopFileBackendArray[$element2]})
         unset IFS
         if [[ ${ThisBackendArray[1]} == $BackendType ]]
@@ -769,7 +769,7 @@ function ChooseSessionType
     then
       for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
       do
-        IFS="|"
+        IFS="#"
         ThisBackendArray=(${DesktopFileBackendArray[$element]})
         unset IFS
         if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
@@ -779,7 +779,7 @@ function ChooseSessionType
       done
     fi
     #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
-    NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]|//g' -e 's/^ *NeedsFile *= */000|/' -e "/[0-9][0-9][0-9]/!d" -e 's/[0-9][0-9][0-9]|//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
+    NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *NeedsFile *= */000#/' -e "/[0-9][0-9][0-9]#/!d" -e 's/[0-9][0-9][0-9]#//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
     if [[ ! -z $NeedsFile ]]
     then
       NeedsFile+=$'\n'
@@ -863,9 +863,9 @@ function ChooseSessionType
       then
         WSESSIONPICKLIST+=$'\n'
       fi
-      WSESSIONPICKLIST+=$element$"|"${WSESSIONARRAY[$((7+element*9))]}"|"${WSESSIONARRAY[$((8+element*9))]}
+      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((7+element*9))]}"#"${WSESSIONARRAY[$((8+element*9))]}
     done
-    WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "|" -k 2,2 | sed 's/|/\n/g')
+    WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
     WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
