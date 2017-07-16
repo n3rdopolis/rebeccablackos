@@ -863,8 +863,9 @@ function ChooseSessionType
       then
         WSESSIONPICKLIST+=$'\n'
       fi
-      WSESSIONPICKLIST+=$element$'\n'${WSESSIONARRAY[$((7+element*9))]}$'\n'${WSESSIONARRAY[$((8+element*9))]}
+      WSESSIONPICKLIST+=$element$"|"${WSESSIONARRAY[$((7+element*9))]}"|"${WSESSIONARRAY[$((8+element*9))]}
     done
+    WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "|" -k 2,2 | sed 's/|/\n/g')
     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
     WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
