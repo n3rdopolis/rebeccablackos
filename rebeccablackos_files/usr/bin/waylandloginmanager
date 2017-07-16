@@ -79,8 +79,7 @@ function UserSessionWorker
   USER=$(id -u)
   export XDG_SESSION_TYPE=wayland
   . /usr/bin/wlruntime_vars &> /dev/null
-  BackendType=$(echo $BackendType | sed 's/^ *//;s/ *$//')
-  EnvironmentFile=$(echo $EnvironmentFile | sed 's/^ *//;s/ *$//')
+
   if [[ -e /usr/share/wsessions.d/default.environment ]]
   then
     ReadEnvironmentFile /usr/share/wsessions.d/default.environment
@@ -114,17 +113,11 @@ function UserSessionWorker
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
-  export WLM_SESSION_LOG=$HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-  echo "Started with the arguments: $ArgumentString" >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-  eval set -- $ArgumentString >> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
+  export WLM_SESSION_LOG="$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+  echo "Started with the arguments: $ArgumentString" >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+  eval set -- $ArgumentString >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
   ArgArray=($ArgumentString)
   unset IFS
-
-  #Clean up trailing white space from the end of all arguments
-  for (( element = 0 ; element < ${#ArgArray[@]} ; element++ ))
-  do
-    ArgArray[$element]=$(echo " ${ArgArray[$element]}" | sed 's/^ *//;s/ *$//')
-  done
 
   #if the user booted with wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 ]]
@@ -147,7 +140,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> $HOME/wlsessionlogs/waylandhost.log &
+    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -160,7 +153,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
+      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
       SendSelfCommand Change
       exit
     fi
@@ -171,17 +164,22 @@ function UserSessionWorker
   fi
 
   #Execute first run scripts
-  dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
+  if [[ ! -e "$HOME"/.config/wlmfirstlogin ]]
+  then
+    dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
+    mkdir -p "$HOME"/.config/
+    touch "$HOME"/.config/wlmfirstlogin
+  fi
 
   #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log &
+  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WL ]]
   then
     fg 2
-    echo "The guest session has ended. Terminating the host..." &>> $HOME/wlsessionlogs/waylandhost.log
+    echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost.log
     kill -15 $HostServerPID &> /dev/null
     $SLEEPCMD 3
     kill -9 $HostServerPID &> /dev/null
@@ -1077,19 +1075,23 @@ function StartUserSession
   done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" ) 
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
-  WSESSIONARGS=$(echo "$3" | sed 's/$/ /g')
+  WSESSIONDATA=()
+  WSESSIONARGUMENTELEMENT=0
+  while read LINE
+  do
+    WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
+    ((WSESSIONARGUMENTELEMENT++))
+  done <<< "$3"
   USERSESSIONTTY=$1
   LOGINUSER=$2
-  IFS=$'\n'
-  WSESSIONDATA=($WSESSIONARGS)
-  unset IFS
+
 
   #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
   export HOME=$(eval echo ~$LOGINUSER)
   export LOGNAME=$LOGINUSER
   export USER=$LOGINUSER
   export USERNAME=$LOGINUSER
-  cd $HOME
+  cd "$HOME"
 
   #The array makes it easy to get the data out of WSESSIONDATA. any variables in the strings are expanded with perl
   #line 1 is the path to the compositor
@@ -1099,14 +1101,14 @@ function StartUserSession
   #line 5 specifies the environment file which is processed by the user session, which is documented at the top of the script.
   #line 6 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
   #line 7 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
-  CompositorExec="$( echo "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  BackendArguments="$( echo "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  SessionArgument="$( echo "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  AdditionalArguments="$( echo "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  CompositorDisplayArgument="$( echo "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  BackendData="$( echo "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export EnvironmentFile="$( echo "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export SessionName="$( echo "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorExec="$( echo -n "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  BackendArguments="$( echo -n "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  SessionArgument="$( echo -n "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  AdditionalArguments="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  BackendData="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  export EnvironmentFile="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  export SessionName="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   IFS=_
   BackendData=($BackendData)
   unset IFS
