@@ -14,4 +14,6 @@ CompositorDisplayArgument=
 SessionArgument=
 AdditionalArguments=
 NeedsFile=/opt/bin/liri-session
-EnvironmentFile=/usr/share/wsessions.d/liri-desktop.environment
+[EnvironmentFile]
+set=LIRI_QPA_INTEGRATION=kms@KMS
+set=QT_WAYLAND_SHELL_INTEGRATION=fullscreen-shell@WL

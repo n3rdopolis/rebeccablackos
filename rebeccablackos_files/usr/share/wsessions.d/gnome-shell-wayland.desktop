@@ -12,5 +12,7 @@ CompositorDisplayArgument=
 SessionArgument=
 AdditionalArguments=--session=gnome -f
 NeedsFile=/opt/bin/gnome-shell
-EnvironmentFile=/usr/share/wsessions.d/gnome-shell-wayland.environment
-
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=GNOME
+unset=COGL_RENDERER
+unset=GDK_BACKEND

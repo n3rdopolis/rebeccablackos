@@ -13,5 +13,7 @@ CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
 AdditionalArguments=--xwayland /opt/libexec/startplasma
-EnvironmentFile=/usr/share/wsessions.d/kdeplasma.environment
+[EnvironmentFile]
+set=KWIN_COMPOSE=Q@FB
+
 

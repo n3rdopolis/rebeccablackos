@@ -12,5 +12,6 @@ CompositorDisplayArgument=
 SessionArgument=
 AdditionalArguments=
 NeedsFile=/opt/bin/enlightenment
-EnvironmentFile=/usr/share/wsessions.d/enlightenment.environment
-
+[EnvironmentFile]
+set=E_WL_FORCE=drm@KMS
+set=E_WL_FORCE=fb@FB

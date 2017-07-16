@@ -11,5 +11,5 @@ CompositorWLArguments=--backend=wayland-backend
 CompositorDisplayArgument=--socket 
 SessionArgument=
 NeedsFile=/opt/bin/orbital
-EnvironmentFile=/usr/share/wsessions.d/orbital-desktop.environment
-
+[EnvironmentFile]
+set=QT_WAYLAND_FORCE_DPI=100

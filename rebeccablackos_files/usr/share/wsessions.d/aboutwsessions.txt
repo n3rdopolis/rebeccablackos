@@ -58,7 +58,7 @@ Any other arguments that should be passed to the server, but are more generic, f
 
 NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example
 
-EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example
+EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
 
 IsFallbackSession:
 This specifies if the current session is a fallback session, so that the session can be handled in a paticular way. See line 18 in the example
@@ -90,7 +90,9 @@ An example:
 
 Section 2:----------------------------------------------
 
-The environment file can be placed anywhere, as long as it is specified by the EnvironmentFile value in the wsession file. While the first line must be [EnvironmentFile], an example looks like this 
+The environment file can be placed anywhere, as long as it is specified by the EnvironmentFile value in the wsession file. An example looks like this
+If EnvironmentFile is not specified within the [Desktop Entry] section of a wsession, that same .desktop file will be the EnvironmentFile, that is, if the [EnvironmentFile] section is defined.
+
 The environment file is not executable, but *parsed* and variables are not expanded, and has limited support for conditionals based on the backend type. See line 1 in the example
 
 Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted) and FB (framebuffer)
@@ -113,3 +115,17 @@ If it ends with @BACKEND, then the variable action is only performed, if the Bac
   in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is. 
 
 default.environment is handled by all sessions first, before the specified environment file, in the case of a need of making an environment variable avaible to all sessions.
+
+
+
+An example of that: (With most abriged as this is documented above)
+----------------------------------------------
+01.|    [Desktop Entry]
+02.|    Enabled=1
+...
+. .{Rest of the entries under [Desktop Entry] within these lines}
+...
+19.|    [EnvironmentFile]
+20.|    set=var=data
+
+The order of the sections do not matter to the waylandloginmanager, but it is best that [Desktop Entry] is the first section defined, as other .desktop file parsers may not be prepared for any other section than [Desktop Entry] to be the first one defined

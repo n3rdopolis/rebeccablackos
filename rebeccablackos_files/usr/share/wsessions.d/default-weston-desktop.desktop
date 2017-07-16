@@ -14,4 +14,5 @@ CompositorDisplayArgument=--socket=
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston
-EnvironmentFile=/usr/share/wsessions.d/default-weston-desktop.environment
+[EnvironmentFile]
+set=QT_WAYLAND_SHELL_INTEGRATION=wl-shell
