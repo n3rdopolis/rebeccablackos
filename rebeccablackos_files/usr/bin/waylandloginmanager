@@ -202,19 +202,27 @@ function UIHost
 function ReadEnvironmentFile
 {
   #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}')
-  EnvironmentFileData+=$'\n'
-  while read LINE
+  EnvironmentFileData=$(awk '/^\[*\]$/{flag=0}flag;/^\[EnvironmentFile\]$/{flag=1}' "$1" | awk -F \# '{print $1}' | sed  -e "s/ *= */\|/g" -re "s/ *@([A-Z]*)$/\|\1/g")
+
+  IFS=$'\n'
+  EnvironmentFileData=($EnvironmentFileData)
+  unset IFS
+
+  for EnvironmentFileLine in ${EnvironmentFileData[@]}
   do
     #environment files are specified as action=var=data
     #Examples
     #set=varname=data sets variable called varname, with the content of data.
     #unset=varname unsets a variable called varname
     #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
-    VARACTION=$(echo $LINE    | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $1}' | sed 's/^ *//;s/ *$//')
-    VARNAME=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $2}' | sed 's/^ *//;s/ *$//')
-    VARDATA=$(echo $LINE      | awk -F ' *@ *' '{print $1}' | awk -F ' *= *' '{print $3}' | sed 's/^ *//;s/ *$//')
-    VARBACKEND=$(echo $LINE   | awk -F ' *@ *' '{print $2}' | sed 's/^ *//;s/ *$//')
+    IFS="|"
+    EnvironmentFileLine=($EnvironmentFileLine)
+    unset IFS
+
+    VARACTION=${EnvironmentFileLine[0]}
+    VARNAME=${EnvironmentFileLine[1]}
+    VARDATA=${EnvironmentFileLine[2]}
+    VARBACKEND=${EnvironmentFileLine[3]}
 
     #Only expand some variables
     if [[ $VARDATA == "\$WAYLAND_DISPLAY" ]]
@@ -238,7 +246,7 @@ function ReadEnvironmentFile
       fi
 
     fi
-  done < <(echo "$EnvironmentFileData")
+  done
 }
 
 #All functions below this point are for the main operation of the waylandloginmanager
