@@ -236,7 +236,6 @@ function ReadEnvironmentFile
       then
         export $VARNAME=$VARDATA
       fi
-
       #if it is unset, then unset the variable
       if [[ $VARACTION == "unset" ]]
       then
@@ -360,7 +359,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
-  export LD_LIBRARY_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null):/usr/local/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH):/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null):/opt/lib:/usr/local/lib:/usr/lib
+  export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+  export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib:/usr/lib
   export XDG_DATA_DIRS=/opt/share:/usr/share
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
@@ -369,7 +369,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export DEFAULTWAYLANDSERVER=$(which weston)
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
-  export WESTON_PLUGIN_PATH=/opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/weston
+  export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
   #WLM_LD_LIBRARY_PATH is exported so that it can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
   export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
   export WLM_PATH=$PATH
