@@ -172,7 +172,7 @@ function UserSessionWorker
   fi
 
   #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-  dbus-launch --exit-with-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log &
+  dbus-run-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log &
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
