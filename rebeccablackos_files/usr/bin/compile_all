@@ -17,14 +17,18 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
-#It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the MAKEDEBS argument.
+#It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the BUILDCOREMAKEDEBS argument.
 
 MAXDOWNLOADINSTANCES=5
 MAXCLEANINSTANCES=5
 argument=$1
 
 CLEANUPOVERLAY=1
-export MAKEDEBS=1
+export BUILDCOREMAKEDEBS=1
+if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 ]]
+then
+  export BUILDCORECLEANOVERLAY=1
+fi
 
 function CompilePackage
 {
@@ -53,9 +57,8 @@ function CompilePackage
     #Cleanup any files in the srcbuild_overlay from the last build
     echo "building $BUILDNAME"
     build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
-    if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
+    if [[ $BUILDCORECLEANOVERLAY == 1 ]]
     then
-      rm -rf /tmp/srcbuild_overlay/*
       mount -o remount /srcbuild/
     fi
   fi

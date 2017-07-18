@@ -17,12 +17,16 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
-#It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the MAKEDEBS argument.
+#It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the BUILDCOREMAKEDEBS argument.
 
 argument=$1
 
 CLEANUPOVERLAY=1
-export MAKEDEBS=1
+export BUILDCOREMAKEDEBS=1
+if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 ]]
+then
+  export BUILDCORECLEANOVERLAY=1
+fi
 
 function CompilePackage
 {
@@ -31,7 +35,18 @@ function CompilePackage
   if [[ "$argument" == download-only ]]
   then
     echo "Downloading/updating $BUILDNAME source"
-    "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 
+
+    #Allow more than one downloads running at a time, only downloads and clean can run more than one at a time
+    #Even smalldebinstall cannot, as only one instance of dpkg can run
+    RUNJOBS=($(jobs -rp))
+    RUNJOBSCOUNT=${#RUNJOBS[@]}
+    while [[ $RUNJOBSCOUNT -ge $MAXDOWNLOADINSTANCES ]]
+    do
+      RUNJOBS=($(jobs -rp))
+      RUNJOBSCOUNT=${#RUNJOBS[@]}
+      sleep .1
+    done
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
   fi
 
   #compile_all is running to build the source
@@ -39,10 +54,9 @@ function CompilePackage
   then
     #Cleanup any files in the srcbuild_overlay from the last build
     echo "building $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
-    if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
+    if [[ $BUILDCORECLEANOVERLAY == 1 ]]
     then
-      rm -rf /tmp/srcbuild_overlay/*
       mount -o remount /srcbuild/
     fi
   fi
@@ -51,20 +65,30 @@ function CompilePackage
   if [[ "$argument" == installsmallpackage ]]
   then
     echo "Attempting to install smaller version of $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
   fi
   
   #compile_all is running to clean the source
   if [[ "$argument" == clean ]]
   then
     echo "Cleaning $BUILDNAME"
-    "/usr/bin/Compile/$BUILDNAME" clean 2>&1
+
+    #Allow more than one cleans running at a time
+    RUNJOBS=($(jobs -rp))
+    RUNJOBSCOUNT=${#RUNJOBS[@]}
+    while [[ $RUNJOBSCOUNT -ge $MAXCLEANINSTANCES ]]
+    do
+      RUNJOBS=($(jobs -rp))
+      RUNJOBSCOUNT=${#RUNJOBS[@]}
+      sleep .1
+    done
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
   fi
   
   #compile_all is running to download and build
   if [[ ! -n "$argument" ]]
   then
-    "/usr/bin/Compile/$BUILDNAME"
+    build_core buildspec "/usr/bin/Compile/$BUILDNAME"
   fi
   
 }

@@ -27,7 +27,7 @@
 #SOURCEREVISION: The revision to use from the source repo. This is ignored if the REPOSITORYTYPE is archive
 #INSTALLDIR: This specifies the location to install the source. This variable must be used or must match when specified to autogen or cmake or the like.
 #        It is used by build_vars to set the needed variables.
-#REBUILDNEWREVISION: This is for MAKEDEBS. Some packages are worth rebuilding even if the deb file for this is already built, as it might be getting features faster, and is a smaller source package.
+#REBUILDNEWREVISION: This is for BUILDCOREMAKEDEBS. Some packages are worth rebuilding even if the deb file for this is already built, as it might be getting features faster, and is a smaller source package.
 
 
 #GIT SUBMODULES
@@ -43,13 +43,13 @@
 #PackageDownloadSource: any additional downloads that are needed that might not be in the source repo. This is called after the routine for downloading the archive type
 #PackagePrepareBuild: Any changes to the source. This is called first during a build.
 #PackageCompileSource: Routine for compiling (but not installing the source). This is called second in a build.
-#PackageInstallSource: Routine for installing the source. The actions here are intercepted by checkinstall if MAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
-#PackagePostInstall: Routines after the source in installed. The actions here are intercepted by checkinstall if MAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
+#PackageInstallSource: Routine for installing the source. The actions here are intercepted by checkinstall if BUILDCOREMAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
+#PackagePostInstall: Routines after the source in installed. The actions here are intercepted by checkinstall if BUILDCOREMAKEDEBS is specified. Changes to the source directory is not included in the Checkinstalled debs.
 
 #Each function is started with the CWD as the source download folder. For example If PackageCompileSource cd's to ./build and make is called, then PackageInstallSource will also need to cd to ./build
 
-#About MAKEDEBS. 
-#MAKEDEBS causes debs to be built in /srcbuild/buildoutput fo the packages it compiles, with checkinstall, which watches the files touched and created by the install functions.
+#About BUILDCOREMAKEDEBS. 
+#BUILDCOREMAKEDEBS causes debs to be built in /srcbuild/buildoutput fo the packages it compiles, with checkinstall, which watches the files touched and created by the install functions.
 #It finds all built libraries and binaries in the source, finds what libraries they all depend on with ldd, and then finds what packages the depends are in, to give a rough dependancy manament for the built debs.
 #When a deb is built, it installs the deb on the next run instead of a compile. UNLESS REBUILDNEWREVISION=1 is set, AND the revision number/ID based on the source revision control software changes.
 #or the control file is deleted, or the deb is nonexistant or empty.
@@ -77,6 +77,7 @@ fi
 
 export NONROOTUSER=nobody
 export SOURCEDIR=/srcbuild
+export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
 export REBUILDNEWREVISION=0
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
@@ -95,8 +96,8 @@ export ACTION=$1
 function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
-  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" "$SOURCEDIR"/buildhome/config/"$SOURCENAME" "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx "$SOURCEDIR"/buildhome/cargocache
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" /"$SOURCEDIR"/buildhome/config/"$SOURCENAME" /"$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
+  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
@@ -115,15 +116,15 @@ function RunDownloadAndOrBuild
   fi
 
   export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
-  rm -rf "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+  rm -rf "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
+  rm -rf "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
-  mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
   mkdir -p "$BUILDLOGDIR/$SOURCENAME"
-  mkdir -p "$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  mkdir -p "$SOURCEDIR"/buildhome/cargocache
+  mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
+  mkdir -p "/$SOURCEDIR"/buildhome/cargocache
 
   #create a variable for the package name that is the source name converted to all lower case.
   export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
@@ -152,7 +153,7 @@ function RunDownloadAndOrBuild
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
-    cd "$SOURCEDIR"
+    cd "/$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
   fi
@@ -205,8 +206,8 @@ function GetVersionGIT()
 #Function to cleanup GIT repos
 function CleanupGIT()
 {
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCENAME"
+  cd "/$SOURCENAME"
   git submodule foreach --recursive git reset --hard 
   git submodule foreach --recursive git clean -fdx
   git clean -fdx
@@ -223,7 +224,7 @@ function DownloadGIT()
   then
     rm -rf "$SOURCENAME"
 
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
       rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
@@ -264,7 +265,7 @@ function DownloadGIT()
     MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
     MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
 
-    cd "$SOURCEDIR"
+    cd "/$SOURCEDIR"
     cd "$SOURCENAME"
 
     $NONROOTCOMMAND mkdir -p $MODULENAME
@@ -313,7 +314,7 @@ function DownloadSVN()
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
       rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
@@ -356,7 +357,7 @@ function DownloadBZR()
   then
     rm -rf "$SOURCENAME"
 
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
       rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
@@ -398,7 +399,7 @@ function DownloadHG()
   then
     rm -rf "$SOURCENAME"
 
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
       rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
@@ -443,7 +444,7 @@ function DownloadARCHIVE()
   then
     rm "$SOURCENAME/SOURCEFILE"
 
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
       rm "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt"
@@ -469,8 +470,8 @@ function DownloadTOMLData()
   find | grep /Cargo.toml$ | while read CARGOFILE
   do
     echo "Downloading dependancies defined by $CARGOFILE"
-    #$CARGO_HOME/cargo update --aggressive --manifest-path $CARGOFILE
-    $CARGO_HOME/cargo fetch --manifest-path $CARGOFILE
+    #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
+    "$CARGO_HOME"/cargo fetch --manifest-path "$CARGOFILE"
   done
 }
 
@@ -496,8 +497,8 @@ function DownloadSource()
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
   fi
-  mkdir -p "$SOURCEDIR"
-  cd "$SOURCEDIR"
+  mkdir -p "/$SOURCEDIR"
+  cd "/$SOURCEDIR"
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
   #count the number of non-empty debs for this package
@@ -518,7 +519,7 @@ function DownloadSource()
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
-  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $BUILDCOREMAKEDEBS != 1 || $REBUILDNEWREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
     STARTTIME=$(date +%s)
     SetACLPermissions
@@ -532,19 +533,19 @@ function DownloadSource()
     #Ensure only one instace of the cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
     SLEEPTIME=$(( (RANDOM%10)+1 ))
     sleep 0.$SLEEPTIME
-    ls $(readlink -f /srcbuild/buildhome/cargocache/lockfile) &> /dev/null
+    ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
     CARGOLOCKRESULT=$?
-    while [[ $CARGOLOCKRESULT == 0 && -e /srcbuild/buildhome/cargocache/lockfile ]]
+    while [[ $CARGOLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/cargocache/lockfile" ]]
     do
-      ls $(readlink -f /srcbuild/buildhome/cargocache/lockfile) &> /dev/null
+      ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
       CARGOLOCKRESULT=$?
       sleep 1
     done
 
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
-    if [[ ! -f $CARGO_HOME/cargo && ! -z $TOMLFILES ]]
+    if [[ ! -f "$CARGO_HOME"/cargo && ! -z $TOMLFILES ]]
     then
-      ln -s /proc/"$$"/cmdline /srcbuild/buildhome/cargocache/lockfile
+      ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/cargocache/lockfile"
       DEBIAN_ARCH=$(dpkg --print-architecture)
       if [[ $DEBIAN_ARCH == i386 ]]
       then
@@ -554,10 +555,10 @@ function DownloadSource()
       then
         CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
       fi
-      $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O /srcbuild/buildhome/cargocache/$CARGOFILENAME.tar.gz
-      tar -xzf /srcbuild/buildhome/cargocache/$CARGOFILENAME.tar.gz -C /srcbuild/buildhome/cargocache
-      cp /srcbuild/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo $CARGO_HOME
-      rm /srcbuild/buildhome/cargocache/lockfile
+      $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz"
+      tar -xzf "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz" -C "/$SOURCEDIR/buildhome/cargocache"
+      cp "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo" "$CARGO_HOME"
+      rm "/$SOURCEDIR/buildhome/cargocache/lockfile"
     fi
 
     #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
@@ -590,7 +591,7 @@ function GetSourceVersion()
   GetVersion$REPOSITORYTYPE
   echo "$REVISIONSTRING"
 
-  if [[ $MAKEDEBS == 1 ]]
+  if [[ $BUILDCOREMAKEDEBS == 1 ]]
   then
     mkdir -p "/$SOURCEDIR/buildoutput/versioninfo"
     mkdir -p "/$SOURCEDIR/buildoutput/smallpackages"
@@ -610,8 +611,8 @@ function SetBuildVariables()
 function PrepareBuild()
 {
   SetBuildVariables
-  mkdir -p "$SOURCEDIR"
-  cd "$SOURCEDIR"
+  mkdir -p "/$SOURCEDIR"
+  cd "/$SOURCEDIR"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
 
@@ -624,8 +625,8 @@ function PrepareBuild()
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
-  mkdir -p "$SOURCEDIR"
-  cd "$SOURCEDIR"
+  mkdir -p "/$SOURCEDIR"
+  cd "/$SOURCEDIR"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   mkdir -p "$INSTALLDIR/share/aclocal"
@@ -645,7 +646,7 @@ function MakeAndInstall()
   GetSourceVersion | tee -a /usr/share/buildcore_revisions.txt > "$BUILDLOGDIR/$SOURCENAME/GetSourceVersion"
 
   #If the script is set to always rebuild, then detect if the revision info changed.
-  if [[ $REBUILDNEWREVISION == 1 && $MAKEDEBS == 1 ]]
+  if [[ $REBUILDNEWREVISION == 1 && $BUILDCOREMAKEDEBS == 1 ]]
   then
     DIFFERENTREVISION="$(diff -q "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old" &>/dev/null ; echo $?)"
     cat "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt" > "/$SOURCEDIR/buildoutput/versioninfo/$SOURCENAME.txt.old"
@@ -671,9 +672,9 @@ function MakeAndInstall()
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
   #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
-  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $MAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
+  if [[ ! $(ls "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! $(ls "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb ) || ! -f "/$SOURCEDIR/buildoutput/control/$SOURCENAME" || $BUILDCOREMAKEDEBS != 1 || $DIFFERENTREVISION != 0 || $DEBFILECONTENTCOUNT == 0 ]]
   then
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME" 2>/dev/null
     fi
@@ -770,7 +771,7 @@ function MakeAndInstall()
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagereducescript"
 
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
-    if [[ $MAKEDEBS == 1 ]]
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       #create directories for output
       mkdir "/$SOURCEDIR/buildoutput/"
@@ -833,7 +834,7 @@ function MakeAndInstall()
       #create the new deb
       STARTTIME=$(date +%s)
       PACKAGEDATE=$(date +%s)
-      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude=/srcbuild,/tmp/srcbuild_overlay,/srcbuild/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
+      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
@@ -848,7 +849,7 @@ function MakeAndInstall()
     
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude=/srcbuild,/tmp/srcbuild_overlay,/srcbuild/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
+      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
@@ -859,7 +860,7 @@ function MakeAndInstall()
       touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
 
     else
-      #call the package install script directly if MAKEDEBS isn't used
+      #call the package install script directly if BUILDCOREMAKEDEBS isn't used
       "/$SOURCEDIR/$SOURCENAME/packageinstallscript"
     fi
 
@@ -871,6 +872,12 @@ function MakeAndInstall()
     if [[ -e "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" ]]
     then
       cat "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" >> "$BUILDLOGDIR/failedcompiles"
+    fi
+
+    #Cleanup the source build overlay if specified
+    if [[ $BUILDCORECLEANOVERLAY == 1 && ! -z "/$SOURCEDIROVERLAYDIR" && -z $SOURCENAME ]]
+    then
+      rm -rf "/$SOURCEDIROVERLAYDIR/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME"
     fi
 
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
