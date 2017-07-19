@@ -199,6 +199,9 @@ function PostInstallActions
   #move the import folder
   mv /usr/import /tmp
 
+  #Don't allow waylandloginmanager.service to be executable, unit files dont need to be executable
+  chmod -X /lib/systemd/system/waylandloginmanager.service
+  
   #Add nls modules to the initramfs
   echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
   chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules
@@ -276,6 +279,8 @@ compile_all installsmallpackage
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /tmp/import/* -Ka /
 
+#Don't allow waylandloginmanager.service to be executable, unit files dont need to be executable
+chmod -X /lib/systemd/system/waylandloginmanager.service
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
