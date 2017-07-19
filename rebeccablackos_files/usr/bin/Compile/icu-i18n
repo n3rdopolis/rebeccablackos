@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=libmozjs
+SOURCENAME=icu-i18n
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/ptomato/mozjs
+SOURCEURL=http://download.icu-project.org/files/icu4c/59.1/icu4c-59_1-src.tgz
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=GIT
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
+REPOSITORYTYPE=ARCHIVE
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=mozjs52
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
+SOURCEREVISION=
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -47,6 +47,10 @@ REBUILDNEWREVISION=0
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
 
+#VARIABLES PRESENTED
+# EXTERNALBUILDHOME : For out of tree builds 
+# INTERNALBUILDHOME : For in tree builds
+
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
@@ -57,29 +61,22 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#patch -f -p1 < /usr/share/RBOS_PATCHES/libmozjs.diff
-export SHELL=/bin/bash
-#cd mozjs-38.0.0/js/src/
-mkdir build
-cd build
-../js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) ---enable-posix-nspr-emulation --with-system-zlib --with-system-icu --with-intl-api --enable-release --disable-debug-symbols --disable-debug AUTOCONF=autoconf
+cd icu/source
+./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
-export SHELL=/bin/bash
-make
+cd icu/source
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
-export SHELL=/bin/bash
+cd icu/source
 make install
-cp dist/include/js-config.h $INSTALLDIR/include
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
