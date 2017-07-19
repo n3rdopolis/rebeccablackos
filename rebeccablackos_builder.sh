@@ -70,7 +70,11 @@ function setup_buildprocess
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
   trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
-  trap 'wait' 18
+  #Handle when the script is resumed
+  trap 'kill -CONT $ROOTPID; wait' 18
+
+  #Stop the background process that the script is waiting on when CTRL+Z is sent
+  trap 'kill -STOP $ROOTPID' 20
 }
 
 #Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
