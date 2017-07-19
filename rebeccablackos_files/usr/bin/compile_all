@@ -25,7 +25,7 @@ argument=$1
 
 CLEANUPOVERLAY=1
 export BUILDCOREMAKEDEBS=1
-if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 ]]
+if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
 then
   export BUILDCORECLEANOVERLAY=1
 fi
