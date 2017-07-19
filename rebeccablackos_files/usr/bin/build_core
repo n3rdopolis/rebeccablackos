@@ -807,10 +807,18 @@ function MakeAndInstall()
           DIRECTDEPENDS=$(readelf -d "$FILE" 2>/dev/null | grep NEEDED |sed -e 's/\[//g' -e 's/]//g' |awk '{print $5}')
           DIRECTDEPENDS=$(echo $DIRECTDEPENDS | sed 's/ /\\\|/g')
           ALLDEPENDS=$(ldd "$FILE" 2>/dev/null | grep =\> | awk '{print $3}')
-          echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS" | grep -v "$BUILTSOFILES"
+          echo "$FILE" "$ALLDEPENDS" "$DIRECTDEPENDS" "$BUILTSOFILES" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+          if [[ -z $BUILTSOFILES ]]
+          then
+            echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS"  
+          else
+            echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS" | grep -v "$BUILTSOFILES"
+          fi
+          echo "---------------------------------------------------------" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
       done | sort | uniq | grep -v ^$ | while read LIBRARY
       do
+        echo $LIBRARY >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         if [[ -e "$LIBRARY" ]]
         then
           DEPEND=$(dlocate -S --package-only "$LIBRARY"$)
