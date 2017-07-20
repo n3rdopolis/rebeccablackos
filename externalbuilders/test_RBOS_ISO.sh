@@ -451,6 +451,7 @@ then
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/var/run/dbus
   #give more information in the testuser .bashrc
   echo "
+export \$(dbus-launch)
 (. /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
 echo \"
 Weston Session commands:
