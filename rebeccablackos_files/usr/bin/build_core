@@ -206,8 +206,8 @@ function GetVersionGIT()
 #Function to cleanup GIT repos
 function CleanupGIT()
 {
-  $NONROOTCOMMAND mkdir -p "/$SOURCENAME"
-  cd "/$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
+  cd "$SOURCENAME"
   git submodule foreach --recursive git reset --hard 
   git submodule foreach --recursive git clean -fdx
   git clean -fdx
