@@ -16,6 +16,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#This function retrives the PID, and some of the child PIDs, to eventually get the pid 1 of the namespace for the build
+function GetJobPIDs
+{
+  PYTHONPID=$(pgrep -oP $SUBSHELLPID 2>/dev/null)
+  UNSHAREPID=$(pgrep -oP $PYTHONPID 2>/dev/null)
+  ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+}
+
 #This function takes the same arguments as echo, behaves like echo, except all the text is saved in a variable to be written to a log later
 function echolog
 {
@@ -68,13 +76,13 @@ function setup_buildprocess
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
   #Handle when the script is resumed
   trap 'if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -CONT $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -CONT --nslist pid --ns $ROOTPID ""; fi' 18
 
   #Stop the background process that the script is waiting on when CTRL+Z is sent
-  trap 'echo "CTRL+Z pressed, pausing..."; if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -STOP $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -STOP --nslist pid --ns $ROOTPID ""; fi' 20
+  trap 'echo "CTRL+Z pressed, pausing..."; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -STOP $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -STOP --nslist pid --ns $ROOTPID ""; fi' 20
 }
 
 #Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
@@ -99,10 +107,8 @@ function NAMESPACE_EXECUTE {
   #Abort if not started in 1 minute
   for (( element = 0 ; element < 120 ; element++ ))
   do
-    sleep .5
-    PYTHONPID=$(pgrep -oP $SUBSHELLPID 2>/dev/null)
-    UNSHAREPID=$(pgrep -oP $PYTHONPID 2>/dev/null)
-    ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+    read -t .5
+    GetJobPIDs
     if [[ ! -z $ROOTPID ]]
     then
       break
