@@ -99,6 +99,7 @@ function NAMESPACE_EXECUTE {
   #Abort if not started in 1 minute
   for (( element = 0 ; element < 120 ; element++ ))
   do
+    sleep .5
     PYTHONPID=$(pgrep -oP $SUBSHELLPID 2>/dev/null)
     UNSHAREPID=$(pgrep -oP $PYTHONPID 2>/dev/null)
     ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
@@ -106,7 +107,6 @@ function NAMESPACE_EXECUTE {
     then
       break
     fi
-    sleep .5
   done
   if [[ -z $ROOTPID ]]
   then
