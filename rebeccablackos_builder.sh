@@ -71,10 +71,10 @@ function setup_buildprocess
   trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
   #Handle when the script is resumed
-  trap 'kill -CONT $SUBSHELLPID; pkill -CONT --nslist pid --ns $ROOTPID ""' 18
+  trap 'if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -CONT $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -CONT --nslist pid --ns $ROOTPID ""; fi' 18
 
   #Stop the background process that the script is waiting on when CTRL+Z is sent
-  trap 'echo "CTRL+Z pressed, pausing..."; kill -STOP $SUBSHELLPID; pkill -STOP --nslist pid --ns $ROOTPID ""' 20
+  trap 'echo "CTRL+Z pressed, pausing..."; if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -STOP $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -STOP --nslist pid --ns $ROOTPID ""; fi' 20
 }
 
 #Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
@@ -115,6 +115,10 @@ function NAMESPACE_EXECUTE {
 
   #Wait for the PID to complete
   read < <(tail -f /dev/null --pid=$UNSHAREPID)
+  unset SUBSHELLPID
+  unset PYTHONPID
+  unset UNSHAREPID
+  unset ROOTPID
 }
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
