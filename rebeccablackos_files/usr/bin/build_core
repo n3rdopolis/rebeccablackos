@@ -787,7 +787,7 @@ function MakeAndInstall()
       /usr/sbin/update-dlocatedb
       
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
-      BUILTSOFILES=$(find /$SOURCEDIR/$SOURCENAME/ |grep -e '\.so$' -e '\.so\.' |while read SOFILE
+      BUILTSOFILES=$(find /"$SOURCEDIR"/$SOURCENAME/ |grep -e '\.so$' -e '\.so\.' |while read SOFILE
       do 
         SOFILE=$(basename "$SOFILE")
         IFS="."
@@ -799,7 +799,7 @@ function MakeAndInstall()
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       echo "Evaluating dependancies, this might take some time..."
-      DEPENDS=$(find /$SOURCEDIR/$SOURCENAME/ -type f -executable | while read FILE
+      DEPENDS=$(find /"$SOURCEDIR"/$SOURCENAME/ -type f -executable | while read FILE
       do
         FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
         if [[ $FILETYPE == application ]]
