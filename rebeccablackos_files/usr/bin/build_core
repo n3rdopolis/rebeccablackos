@@ -786,8 +786,17 @@ function MakeAndInstall()
       #Update database containing the list of files that belong to packages
       /usr/sbin/update-dlocatedb
       
+      #If being built as a chroot, and overlayfs is supported, then the srcbuild path will have an upperdir exposed
+      #where it can be searched, so that only new/changed files need to be evaluated
+      if [[ $BUILDCORECLEANOVERLAY == 1 && -e "/$SOURCEDIROVERLAYDIR/$SOURCENAME" ]]
+      then
+        DEPENDSEARCHROOT="/$SOURCEDIROVERLAYDIR/$SOURCENAME"
+      else
+        DEPENDSEARCHROOT=/"$SOURCEDIR"/$SOURCENAME/
+      fi
+
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
-      BUILTSOFILES=$(find /"$SOURCEDIR"/$SOURCENAME/ |grep -e '\.so$' -e '\.so\.' |while read SOFILE
+      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |grep -e '\.so$' -e '\.so\.' |while read SOFILE
       do 
         SOFILE=$(basename "$SOFILE")
         IFS="."
@@ -799,7 +808,7 @@ function MakeAndInstall()
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       echo "Evaluating dependancies, this might take some time..."
-      DEPENDS=$(find /"$SOURCEDIR"/$SOURCENAME/ -type f -executable | while read FILE
+      DEPENDS=$(find "$DEPENDSEARCHROOT" -type f -executable | while read FILE
       do
         FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
         if [[ $FILETYPE == application ]]
