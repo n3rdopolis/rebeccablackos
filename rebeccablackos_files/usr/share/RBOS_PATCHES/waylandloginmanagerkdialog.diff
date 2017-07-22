@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-16 16:06:54.842451868 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-16 16:27:31.578139649 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-07-21 23:20:22.229825395 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-07-21 23:22:11.702218045 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -326,19 +326,19 @@
 -    ActionMenu+="\nDebug\nTerminal Login..."
 +    ActionMenu+=$'\n'"Debug"$'\n'"Terminal Login..."
    fi
--  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null; exit ${PIPESTATUS[1]})
+-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplay.log; exit ${PIPESTATUS[1]})
 -ZENITYSTATUS=$?
 +
 +  IFS=$'\n'
 +  ActionMenu=($ActionMenu)
 +  unset IFS
 +
-+  USERACTION=$($KDIALOGCMD --title="Login Manager" --menu "Select an Action" -- "${ActionMenu[@]}" 2>/dev/null)
++  USERACTION=$($KDIALOGCMD --title="Login Manager" --menu "Select an Action" -- "${ActionMenu[@]}"  2>> /var/log/loginmanagerdisplay.log)
 +  DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -1552,8 +1550,8 @@
+@@ -1552,12 +1550,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -347,5 +347,10 @@
 +  #if the dialog program segfaults, then something is wrong. wait longer
 +  if [[ $DIALOGSTATUS == 139 ]]
    then
-     $SLEEPCMD 30
+     $SLEEPCMD 5
    fi
+-  exit $ZENITYSTATUS
++  exit $DIALOGSTATUS
+ }
+ 
+ 

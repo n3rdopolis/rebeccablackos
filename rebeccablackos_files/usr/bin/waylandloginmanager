@@ -271,7 +271,7 @@ function PrepareLoginManager
     ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
   else
     WriteToLog "Error: Another instance is already running"
-    exit
+    exit 1
   fi
   #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
   #this ensures that the linked /proc/pid/cmdline is this pid
@@ -280,14 +280,14 @@ function PrepareLoginManager
   if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
     WriteToLog "Error: Another instance is already running"
-    exit
+    exit 1
   fi
 
   #Require root privlages
   if [[ $UID != 0 ]]
   then
     echo "Must be run as root."
-    exit
+    exit 1
   fi
   
   #Configure missing things if they are missing. This can be turned on or off
@@ -448,8 +448,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
-      openvt -c 63 -s -f -- rbos-failedboot
-      exit
+      openvt -c 63 -s -f -w -- rbos-failedboot
+      exit 1
     fi
   fi
 
@@ -477,7 +477,7 @@ Will now start a utility to assist you in configuring your system to boot with a
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
-    exit
+    exit 1
   fi
 
   #Get the TTY that will hold the Wayland server that displays the login screen.
@@ -496,7 +496,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
     WriteToLog "ERROR: Not Enough TTYs for login manager display!"
-    exit
+    exit 1
   fi
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
@@ -981,7 +981,7 @@ The Login Manager Display is running on tty: $LOGINMANAGERDISPLAYTTY
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt" 2>> /var/log/loginmanagerdisplay.log
+The i icon shows this help prompt"
 
 }
 
@@ -1438,8 +1438,8 @@ function StartLoginManagerDisplay
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
   systemd-notify --ready
-  openvt -c 63 -s -f -- rbos-failedboot
-  exit
+  openvt -c 63 -s -f -w -- rbos-failedboot
+  exit 1
 }
 
 #This function determines the systemd session of the loginmanagerdisplay
@@ -1543,7 +1543,7 @@ function UserActionDialog
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action" 2>/dev/null; exit ${PIPESTATUS[1]})
+  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplay.log; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
@@ -1555,8 +1555,9 @@ ZENITYSTATUS=$?
   #if zenity segfaults, then something is wrong. wait longer
   if [[ $ZENITYSTATUS == 139 ]]
   then
-    $SLEEPCMD 30
+    $SLEEPCMD 5
   fi
+  exit $ZENITYSTATUS
 }
 
 
@@ -1575,6 +1576,7 @@ function CommandFIFOProxy
 function ReadCommandFIFO
 {
   SessionStartFailed=0
+  UserActionFailCount=0
   #loop 'forever'
   while [ 1 ]
   do
@@ -1586,6 +1588,31 @@ function ReadCommandFIFO
         ((UIJobCount++))
       fi
     done < <(jobs -p -r)
+
+    if [[ ! -z $LastUserActionPID && ! -e /proc/$LastUserActionPID ]]
+    then
+      wait $LastUserActionPID
+      UserActionResult=$?
+      if [[ $UserActionResult != 0 && $LastUserActionPID != 1 ]]
+      then
+        ((UserActionFailCount++))
+        WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
+      else
+        UserActionFailCount=0
+      fi
+    fi
+
+    if [[ $UserActionFailCount == 5 ]]
+    then
+      kill -9 $LoginManagerDisplayWatcherPID
+      fuser -k /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay
+      WriteToLog "The prompt for the user action terminated incorrectly too many times in a row."
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row.
+
+Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+      openvt -c 63 -s -f -w -- rbos-failedboot
+      exit 1
+    fi
 
     if [[ $UIJobCount == 0 ]]
     then
@@ -1807,6 +1834,7 @@ then
 
   #Start the main loginmanagerdisplay Weston server
   StartLoginManagerDisplay &
+  LoginManagerDisplayWatcherPID=$!
 
   #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
   #Only do an autologin once per boot, and not per start of the waylandloginmanager
@@ -1839,5 +1867,5 @@ then
   SendSelfCommand $2
 else
   echo "waylandloginmanager: Please start with no arguments."
-  exit
+  exit 1
 fi
