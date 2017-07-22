@@ -53,6 +53,8 @@ elif [[ $DEBIAN_DISTRO == Debian ]]
 then
   dpkg-divert --local --rename --add /usr/share/plymouth/debian-logo.png
 fi
+dpkg-divert --local --rename --add /usr/lib/os-release
+mv /usr/lib/os-release.rbos /usr/lib/os-release
 
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
