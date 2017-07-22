@@ -19,6 +19,8 @@
 #This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
 #It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the BUILDCOREMAKEDEBS argument.
 
+MAXDOWNLOADINSTANCES=5
+MAXCLEANINSTANCES=5
 argument=$1
 
 CLEANUPOVERLAY=1
