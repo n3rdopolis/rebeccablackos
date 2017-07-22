@@ -449,6 +449,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
+      systemctl stop waylandloginmanager.service
       exit 1
     fi
   fi
@@ -477,6 +478,7 @@ Will now start a utility to assist you in configuring your system to boot with a
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
+    systemctl stop waylandloginmanager.service
     exit 1
   fi
 
@@ -496,6 +498,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
     WriteToLog "ERROR: Not Enough TTYs for login manager display!"
+    systemctl stop waylandloginmanager.service
     exit 1
   fi
 
@@ -1439,6 +1442,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
   systemd-notify --ready
   openvt -c 63 -s -f -w -- rbos-failedboot
+  systemctl stop waylandloginmanager.service
   exit 1
 }
 
@@ -1611,6 +1615,7 @@ function ReadCommandFIFO
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
+      systemctl stop waylandloginmanager.service
       exit 1
     fi
 
