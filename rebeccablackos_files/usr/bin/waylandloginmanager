@@ -1419,7 +1419,7 @@ function StartLoginManagerDisplay
       then
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
         do
