@@ -1581,6 +1581,7 @@ function ReadCommandFIFO
 {
   SessionStartFailed=0
   UserActionFailCount=0
+  UserActionFailSkip=0
   #loop 'forever'
   while [ 1 ]
   do
@@ -1597,12 +1598,13 @@ function ReadCommandFIFO
     then
       wait $LastUserActionPID
       UserActionResult=$?
-      if [[ $UserActionResult != 0 && $LastUserActionPID != 1 ]]
+      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) && UserActionFailSkip == 0 ]]
       then
         ((UserActionFailCount++))
         WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
       else
         UserActionFailCount=0
+        UserActionFailSkip=0
       fi
     fi
 
@@ -1727,6 +1729,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z $LastUserActionPID ]]
         then
           kill -15 -$LastUserActionPID &> /dev/null
+          UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
         SwitchUserDialog &
@@ -1750,6 +1753,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z $LastUserActionPID ]]
         then
           kill -15 -$LastUserActionPID &> /dev/null
+          UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
         GetUserCredentials &
@@ -1765,6 +1769,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z $LastUserActionPID ]]
         then
           kill -15 -$LastUserActionPID &> /dev/null
+          UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
         LeavePrompt &
@@ -1784,6 +1789,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z $LastUserActionPID ]]
         then
           kill -15 -$LastUserActionPID &> /dev/null
+          UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
         ShowInfo &
