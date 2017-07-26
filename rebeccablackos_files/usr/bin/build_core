@@ -153,7 +153,7 @@ function RunDownloadAndOrBuild
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
-    cd "/$SOURCEDIR"
+    cd "$SOURCEDIR"
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
   fi
@@ -265,7 +265,7 @@ function DownloadGIT()
     MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
     MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
 
-    cd "/$SOURCEDIR"
+    cd "$SOURCEDIR"
     cd "$SOURCENAME"
 
     $NONROOTCOMMAND mkdir -p $MODULENAME
@@ -498,7 +498,7 @@ function DownloadSource()
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
   fi
   mkdir -p "/$SOURCEDIR"
-  cd "/$SOURCEDIR"
+  cd "$SOURCEDIR"
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
   #count the number of non-empty debs for this package
@@ -569,7 +569,7 @@ function DownloadSource()
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    cd "/$SOURCEDIR/$SOURCENAME"
+    cd "$SOURCEDIR/$SOURCENAME"
 
     DownloadTOMLData
     PackageDownloadSource
@@ -612,7 +612,7 @@ function PrepareBuild()
 {
   SetBuildVariables
   mkdir -p "/$SOURCEDIR"
-  cd "/$SOURCEDIR"
+  cd "$SOURCEDIR"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
 
@@ -626,7 +626,7 @@ function PrepareBuild()
 function MakeAndInstall()
 {
   mkdir -p "/$SOURCEDIR"
-  cd "/$SOURCEDIR"
+  cd "$SOURCEDIR"
   mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   mkdir -p "$INSTALLDIR/share/aclocal"
@@ -693,7 +693,7 @@ function MakeAndInstall()
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    cd "/$SOURCEDIR/$SOURCENAME"
+    cd "$SOURCEDIR/$SOURCENAME"
     #Call PrepareBuild functions
     PrepareBuild
 
