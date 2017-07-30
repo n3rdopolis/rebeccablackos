@@ -122,8 +122,11 @@ function UserSessionWorker
   #if the user booted with wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 ]]
   then
+    export PIXMANARGS="--use-pixman"
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=softpipe
+  else
+    export PIXMANARGS=""
   fi
 
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
@@ -140,7 +143,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
+    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
