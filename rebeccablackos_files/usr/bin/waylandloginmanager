@@ -376,8 +376,11 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
+    export PIXMANARGS="--use-pixman"
     export LIBGL_ALWAYS_SOFTWARE=1
     export GALLIUM_DRIVER=softpipe
+  else
+    export PIXMANARGS=""
   fi
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
   if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline) != 0 ]]
@@ -1419,7 +1422,7 @@ function StartLoginManagerDisplay
       then
         systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
         do
