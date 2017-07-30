@@ -148,9 +148,9 @@ function UserSessionWorker
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
     #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
-    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<3 ]]
+    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<15 ]]
     do
-      $SLEEPCMD 5
+      $SLEEPCMD 1
       ((WaitTimes++))
     done
     #If the socket doesn't exist, then the server failed to start, and switch back
