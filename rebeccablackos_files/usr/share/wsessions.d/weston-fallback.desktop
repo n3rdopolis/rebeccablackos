@@ -1,0 +1,18 @@
+[Desktop Entry]
+Enabled=1
+Type=WSession
+Name=Weston Low Graphics Mode
+Comment=Weston with Software Rendering
+CompositorExec=/opt/bin/weston
+CompositorSupportsKMS=1
+CompositorSupportsFB=1
+CompositorSupportsWL=0
+CompositorWLArguments=--backend=wayland-backend.so
+CompositorDisplayArgument=--socket=
+SessionArgument=--modules=screen-share.so
+AdditionalArguments=--xwayland --use-pixman
+IsFallbackSession=1
+NeedsFile=/opt/bin/weston
+[EnvironmentFile]
+set=QT_WAYLAND_SHELL_INTEGRATION=wl-shell
+
