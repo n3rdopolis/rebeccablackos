@@ -1808,7 +1808,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $wlmdebug == 1 ]]
       then
-        if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0  ]]
+        if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0 || $wlmdebuginsecure == 1  ]]
         then
           DiagnosticTerminal &
           LastDebugPID=$!
