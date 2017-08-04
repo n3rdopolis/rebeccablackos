@@ -23,7 +23,7 @@
 #It depends on zenity kbd, weston, and expect
 #It also requires logger to log to syslog, but won't fail without it
 
-#It depends on a small patch in weston for a workaround for bug https://bugs.freedesktop.org/show_bug.cgi?id=73782 on framebuffer devices, and the line
+#It depends on the line
 #SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
 #in a udev rules file.
 #or pass wlmglobalfbpermissions to the kernel
