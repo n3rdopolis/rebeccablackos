@@ -101,7 +101,7 @@ fi
 echo 'To exit Weston, hit CTRL-ALT-BACKSPACE,'
 echo 'or run shutdowndialog, and select "Log Off" '
 echo ' '
-echo 'When using Wayland, to run a program under xwayland, run'
+echo 'To run a program under xwayland, run'
 echo '   xwaylandapp programname --arguments'
 echo ' '
 echo 'You also find Wayland programs under the application launcher'
