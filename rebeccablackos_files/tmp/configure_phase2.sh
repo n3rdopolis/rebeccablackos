@@ -61,6 +61,7 @@ apt-get install -f
 dpkg --configure -a
 
 #Create the correct /etc/resolv.conf symlink
+rm /etc/resolv.conf
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #install basic applications that the system needs to get repositories and packages

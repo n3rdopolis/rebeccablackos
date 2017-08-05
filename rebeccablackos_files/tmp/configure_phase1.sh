@@ -29,6 +29,7 @@ export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
 export DEBIAN_FRONTEND=noninteractive
 
 #Create the correct /etc/resolv.conf symlink
+rm /etc/resolv.conf
 ln -s ../run/resolvconf/resolv.conf /etc/resolv.conf 
 
 #Create _apt user that apt drops to to run things as non-root
