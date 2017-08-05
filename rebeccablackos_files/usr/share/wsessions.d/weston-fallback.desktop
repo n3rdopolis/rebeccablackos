@@ -5,7 +5,7 @@ Name=Weston Low Graphics Mode
 Comment=Weston with Software Rendering
 CompositorExec=/opt/bin/weston
 CompositorSupportsKMS=1
-CompositorSupportsFB=1
+CompositorSupportsFB=0
 CompositorSupportsWL=0
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
