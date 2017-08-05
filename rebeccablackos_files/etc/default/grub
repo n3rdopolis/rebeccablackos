@@ -3,6 +3,7 @@
 # For full documentation of the options in this file, see:
 #   info -f grub -n 'Simple configuration'
 
+GRUB_ENABLE_CRYPTODISK=y
 GRUB_HIDDEN_TIMEOUT=1
 GRUB_DISTRIBUTOR="RebeccaBlackOS"
 GRUB_CMDLINE_LINUX_DEFAULT="vt.global_cursor_default=0 loglevel=3 splash"
