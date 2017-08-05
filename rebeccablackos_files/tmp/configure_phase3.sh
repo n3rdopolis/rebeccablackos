@@ -145,6 +145,9 @@ function PostInstallActions
     /usr/sbin/plymouth-set-default-theme spinfinity
   fi
 
+  #Correct warning that the newer fontconfig now outputs, comment out lines that it doesn't respond to anymore
+  sed -i -e 's|<blank>|<!--|g' -e 's|</blank>|-->|g' /etc/fonts/fonts.conf
+
   #configure /etc/issue
   echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
   setterm -cursor on >> /etc/issue
