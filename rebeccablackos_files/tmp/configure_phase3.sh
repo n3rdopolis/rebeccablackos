@@ -109,7 +109,7 @@ then
 fi
 
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
-echo "export CRYPTSETUP=y" > /usr/share/initramfs-tools/conf-hooks.d/forcecryptsetup
+echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 
 
 #run the script that calls all compile scripts in a specified order, in build only mode
