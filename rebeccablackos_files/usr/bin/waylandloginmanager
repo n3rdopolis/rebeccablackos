@@ -191,6 +191,10 @@ function UserSessionWorker
     fg 1
   fi
 
+  #Write any Journal logs for this session into the logfile
+  echo -e "\nSession's Journal Logs:" >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+
   exit
 }
 
