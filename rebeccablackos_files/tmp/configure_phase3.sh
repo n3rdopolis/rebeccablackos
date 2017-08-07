@@ -111,6 +111,8 @@ fi
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 
+#Set default user groups
+printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo dip lpadmin sambashare systemd-journald"\n" >> /etc/adduser.conf
 
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
