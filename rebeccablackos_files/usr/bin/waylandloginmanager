@@ -125,7 +125,7 @@ function UserSessionWorker
   then
     export PIXMANARGS="--use-pixman"
     export LIBGL_ALWAYS_SOFTWARE=1
-    export GALLIUM_DRIVER=softpipe
+    export GALLIUM_DRIVER=llvmpipe
   else
     export PIXMANARGS=""
   fi
@@ -386,7 +386,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   then
     export PIXMANARGS="--use-pixman"
     export LIBGL_ALWAYS_SOFTWARE=1
-    export GALLIUM_DRIVER=softpipe
+    export GALLIUM_DRIVER=llvmpipe
   else
     export PIXMANARGS=""
   fi
