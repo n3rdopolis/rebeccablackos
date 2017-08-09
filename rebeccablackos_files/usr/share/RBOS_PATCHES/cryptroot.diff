@@ -5,18 +5,10 @@
  	fi
  
 +	depdev="$(lsblk $dev  -p -n -o NAME -r | sed -n 2p)"
-+	if [ -z "$depdev" ]; then
++	if [ ! -z "$depdev" ]; then
 +		dev=$depdev
 +	fi
 +
  	altdev="${dev#/dev/mapper/}"
  	if [ "$altdev" != "$dev" ]; then
  		echo "$altdev"
-@@ -704,6 +709,7 @@
- 	copy_exec /sbin/cryptsetup
- 	copy_exec /sbin/dmsetup
- 	copy_exec /lib/cryptsetup/askpass
-+	copy_exec /sbin/lsblk
- 
- 	# We need sed. Either via busybox or as standalone binary.
- 	if [ "$BUSYBOX" = "n" ] || [ ! -e ${BUSYBOXDIR}/busybox ]; then
