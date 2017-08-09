@@ -1,12 +1,14 @@
 --- /usr/share/cryptsetup/cryptroot_setup.sh	2016-07-01 05:01:39.000000000 -0400
 +++ /usr/share/initramfs-tools/hooks/cryptroot	2017-08-08 23:44:52.800026639 -0400
-@@ -439,6 +439,11 @@
+@@ -439,6 +439,13 @@
  		done
  	fi
  
 +	depdev="$(lsblk $dev  -p -n -o NAME -r | sed -n 2p)"
 +	if [ ! -z "$depdev" ]; then
-+		dev=$depdev
++		if [ "${depdev#/dev/mapper/}" != "$depdev" ]; then
++			dev="$depdev"
++		fi
 +	fi
 +
  	altdev="${dev#/dev/mapper/}"
