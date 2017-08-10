@@ -1609,7 +1609,7 @@ function ReadCommandFIFO
     then
       wait $LastUserActionPID
       UserActionResult=$?
-      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) && UserActionFailSkip == 0 ]]
+      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) && $UserActionFailSkip == 0 ]]
       then
         ((UserActionFailCount++))
         WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
