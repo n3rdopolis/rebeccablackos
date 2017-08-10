@@ -73,12 +73,16 @@ then
   . "$2"
   shift
   shift
+  export REBUILDNEWREVISION
 fi
 
 export NONROOTUSER=nobody
 export SOURCEDIR=/srcbuild
 export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
-export REBUILDNEWREVISION=0
+if [[ -z $REBUILDNEWREVISION ]]
+then
+  REBUILDNEWREVISION=0
+fi
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
 export BUILDLOGDIR=/buildlogs/build_core
