@@ -29,6 +29,9 @@ then
   export WLSUDO_CMD="$@"
   sudo -A -E waylandapp dbus-launch --exit-with-session "$@"
 else
+  export PATH=/opt/bin:/opt/games:/usr/games:$PATH
+  export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+  export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
   zenity --forms --text="The following command will be executed as root
 
 $WLSUDO_CMD
