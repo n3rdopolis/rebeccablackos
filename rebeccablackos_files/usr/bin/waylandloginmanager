@@ -123,9 +123,11 @@ function UserSessionWorker
   #if the user booted with wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 ]]
   then
-    export PIXMANARGS="--use-pixman"
+    if [[ $DefaultBackendType == KMS ]]
+    then
+      export PIXMANARGS="--use-pixman"
+    fi
     export LIBGL_ALWAYS_SOFTWARE=1
-    export GALLIUM_DRIVER=llvmpipe
   else
     export PIXMANARGS=""
   fi
@@ -384,9 +386,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
-    export PIXMANARGS="--use-pixman"
+    export WLM_FORCE_SOFTWARE=1
     export LIBGL_ALWAYS_SOFTWARE=1
-    export GALLIUM_DRIVER=llvmpipe
   else
     export PIXMANARGS=""
   fi
@@ -423,6 +424,10 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     SupportedBackends+=(KMS)
     DefaultBackendType=KMS
     WESTONBACKEND=drm-backend.so
+    if [[ $WLM_FORCE_SOFTWARE == 1 ]]
+    then
+      export PIXMANARGS="--use-pixman"
+    fi
     HardwareSupported=1
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
