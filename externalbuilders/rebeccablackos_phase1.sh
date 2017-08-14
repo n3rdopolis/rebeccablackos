@@ -89,8 +89,8 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 
 #Copy in system resolv.conf
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/resolvconf/
-cp /etc/resolv.conf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/resolvconf/
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/resolv.conf
+cp /etc/resolv.conf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/resolv.conf
 
 #Configure the Live system########################################
 TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)

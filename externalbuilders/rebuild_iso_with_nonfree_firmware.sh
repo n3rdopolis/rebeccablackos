@@ -342,8 +342,8 @@ NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/isorebuild/unionmountpoint/run/shm
 NAMESPACE_ENTER mount --bind /run/shm "$MOUNTHOME"/isorebuild/unionmountpoint/run/shm
 
 #Install the nonfree firmware, and build a new ISO
-NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/isorebuild/unionmountpoint/run/resolvconf
-NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/isorebuild/unionmountpoint/run/resolvconf
+NAMESPACE_ENTER rm "$MOUNTHOME"/isorebuild/unionmountpoint/etc/resolv.conf
+NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/isorebuild/unionmountpoint/etc/resolv.conf
 NAMESPACE_ENTER sed -i 's/main/main non-free/g' "$MOUNTHOME"/isorebuild/unionmountpoint/etc/apt/sources.list
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get update
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y firmware-misc-nonfree firmware-linux-nonfree
