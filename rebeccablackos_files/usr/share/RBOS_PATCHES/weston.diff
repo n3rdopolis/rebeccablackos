@@ -15,3 +15,40 @@ index 7368cb42..4f909849 100644
  	if (ret != 0) {
  		/* The mode switch failed.  Clear the pending and
  		 * reconfigure as per normal */
+
+
+
+diff --git a/libweston/compositor-drm.c b/libweston/compositor-drm.c
+index 10adb463..44b2e448 100644
+--- a/libweston/compositor-drm.c
++++ b/libweston/compositor-drm.c
+@@ -3502,8 +3502,13 @@ drm_backend_create(struct weston_compositor *compositor,
+ 	struct udev_device *drm_device;
+ 	struct wl_event_loop *loop;
+ 	const char *seat_id = default_seat;
++	const char *session_seat;
+ 	int ret;
+ 
++	session_seat=getenv("XDG_SEAT");
++	if (session_seat)
++		seat_id=session_seat;
++
+ 	weston_log("initializing drm backend\n");
+ 
+ 	b = zalloc(sizeof *b);
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index e80a5040..81e5ec3b 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -712,6 +712,11 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ {
+ 	struct fbdev_backend *backend;
+ 	const char *seat_id = default_seat;
++	const char *session_seat;
++
++	session_seat=getenv("XDG_SEAT");
++	if (session_seat)
++		seat_id=session_seat;
+ 
+ 	weston_log("initializing fbdev backend\n");
+ 
