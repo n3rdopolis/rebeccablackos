@@ -76,8 +76,6 @@ make install
 function PackagePostInstall()
 {
 cp -r /etc/fonts/ /$INSTALLDIR/etc
-#Correct warning that the newer fontconfig now outputs, comment out lines that it doesn't respond to anymore
-sed -i -e 's|<blank>|<!--|g' -e 's|</blank>|-->|g' /$INSTALLDIR/etc/fonts/fonts.conf
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
