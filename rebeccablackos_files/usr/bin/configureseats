@@ -45,7 +45,6 @@ do
 
   #get properties of the device
   DeviceProperties=$(udevadm info --query=property  --name=$Device)
-  DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "DEVPATH" {print $0}' | cut -d = -f2- | tail -1 )
   DeviceSessionSeatID=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
   DeviceWLSeatID=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "WL_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
   IsDeviceInput=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_INPUT" {print $0}' | cut -d = -f2- | tail -1 )
@@ -56,11 +55,13 @@ do
   if [[ $IsDeviceInput == 1 ]]
   then
     IsDeviceInput=1
+    DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "DEVPATH" {print $0}' | cut -d = -f2- | tail -1 )
     DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_SERIAL" {print $0}' | cut -d = -f2- | tail -1 )
     DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
   else
     IsDeviceInput=0
-    DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_FOR_SEAT" {print $0}' | cut -d = -f2- | tail -1 )
+    DeviceConnection=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "ID_PATH" {print $0}' | cut -d = -f2- | tail -1 )
+    DeviceName=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "DEVNAME" {print $0}' | cut -d = -f2- | tail -1 )
     DeviceSubsystem=$(echo "$DeviceProperties" | awk -F ' *= *' '$1 == "SUBSYSTEM" {print $0}' | cut -d = -f2- | tail -1 )
     if [[ $DeviceSubsystem == "drm" ]]
     then
@@ -143,7 +144,15 @@ do
   fi
 
   #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat.
-  if [[ ! -z $DeviceType ]]
+  DeviceConnectionDuplicate=0
+  for DeviceDuplicateTest in ${DeviceConnections[@]}
+  do
+    if [[ $DeviceDuplicateTest == $DeviceConnection ]]
+    then
+      DeviceConnectionDuplicate=1
+    fi
+  done
+  if [[ ! -z $DeviceType && $DeviceConnectionDuplicate == 0 ]]
   then
     ((NumberOfDevices++))
     DevicePaths[$NumberOfDevices]=$Device
@@ -186,7 +195,7 @@ Closing with will not interfere with the wizard, as it just serves as a guide to
 Please note that some devices have multiple internal components, and sometimes register themselves more than once.
 
 Devices:
-$DeviceList " --title="Multipointer Configuration" &
+$DeviceList " --title="Multipointer and Seat Configuration" &
 MainFormPID=$!
 sleep 5
 
@@ -220,30 +229,28 @@ do
   unset NewSessionSeatNumber
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
-    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
     Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}
-    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
   else
-    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
   fi
   NewSeatSelection=($NewSeatSelection)
   NewSessionSeatNumber=${NewSeatSelection[0]}
   NewWLSeatNumber=${NewSeatSelection[1]}
 
   #only change the seat id in udev if the user specified to do so
-  if [[ -z $NewWLSeatNumber && -z $NewSessionSeatNumber ]]
+  if [[ ! -z $NewWLSeatNumber || ! -z $NewSessionSeatNumber ]]
   then
-    zenity --info --text "Seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]} not Changed" --title="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)"
-  else
     if [[ ! -z $NewWLSeatNumber ]]
     then
       DeviceWLSeatIDs[CurrentDeviceNumber]=$NewWLSeatNumber
@@ -257,9 +264,9 @@ do
     awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
-      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
+      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
     else
-      echo "ENV{ID_FOR_SEAT}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
+      echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
     fi
     rm /tmp/99-westonseats.rules.work
   fi
@@ -271,7 +278,7 @@ kill -9 $MainFormPID
 #tell the user that Weston is going to 'flicker' as the tty is switched in and out so that Weston is forced to see the new Udev config
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-Press OK to apply the changes. The screen may flicker for less than a second." --title="Multipointer Configuration"
+Press OK to apply the changes. The screen may flicker for less than a second." --title="Multipointer and Seat Configuration"
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
