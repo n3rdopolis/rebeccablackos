@@ -235,8 +235,8 @@ do
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-    Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}
-    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}
+    Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
   else
     NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
