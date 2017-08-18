@@ -191,16 +191,16 @@ done
 zenity --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager. Multipointer is not supported by all Wayland servers.
 
 This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
-   -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus
-
-   -  Session 'Seats' are a grouping of a monitor, and input devices for side-by-side user sessions
+   -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
       on one physical computer
+
+   -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus, but within one session
+        There can be multiple Wayland Seats per Session Seats. (To enable multipointer on a needed Session Seat)
 
 Input are remembered by the device's internal name (usually containing the make and model), and the port they are plugged into.
 In order for the configuration to work each time you plug your devices, you need to plug them into the same port, (otherwise they will default to the default seat)
 
-The default Seat for Wayland pointers is 'default', while the default seat for Session seats is 'seat0'
-if you wish to return one to the default
+The default Seat for Wayland pointers is 'default', while the default seat for Session seats is 'seat0', if you wish to return one to the default.
 
 This Dialog lists all the devices that will be configured by this wizard. You can close this dialog at anytime,
 Closing with will not interfere with the wizard, as it just serves as a guide to tell you how many devices are left.
