@@ -71,8 +71,8 @@ do
     then
       DeviceType="Frame Buffer"
     fi
-    DeviceDisplayName="$Device "
-    DeviceDisplayName+=$(udevadm info -q all --attribute-walk --name=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
+    DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
+    DeviceDisplayName+=" $Device"
   fi
   #if the device doesn't have a serial ID, which usually tells the make and model, then display it as 'generic' to the user
   if [[ -z $DeviceDisplayName ]]
@@ -146,11 +146,17 @@ do
 
   #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat.
   DeviceConnectionDuplicate=0
-  for DeviceDuplicateTest in ${DeviceConnections[@]}
+  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
   do
+    DeviceDuplicateTest=${DeviceConnections[$CurrentDeviceNumber]}
     if [[ $DeviceDuplicateTest == $DeviceConnection ]]
     then
       DeviceConnectionDuplicate=1
+      if [[ $IsDeviceInput == 0 ]]
+      then
+        DeviceTypes[$CurrentDeviceNumber]+="/$DeviceType"
+        DeviceDisplayNames[$CurrentDeviceNumber]+=", $Device"
+      fi
     fi
   done
   if [[ ! -z $DeviceType && $DeviceConnectionDuplicate == 0 ]]
@@ -252,13 +258,13 @@ do
   #only change the seat id in udev if the user specified to do so
   if [[ ! -z $NewWLSeatNumber || ! -z $NewSessionSeatNumber ]]
   then
-    if [[ ! -z $NewWLSeatNumber ]]
+    if [[ -z $NewWLSeatNumber ]]
     then
       NewWLSeatNumber="${DeviceWLSeatIDs[CurrentDeviceNumber]}"
     fi
-    if [[ ! -z $NewSessionSeatNumber ]]
+    if [[ -z $NewSessionSeatNumber ]]
     then
-      NewSessionSeatNumber="${DeviceWLSeatIDs[CurrentDeviceNumber]}"
+      NewSessionSeatNumber="${DeviceSessionSeatIDs[CurrentDeviceNumber]}"
     fi
 
     cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
