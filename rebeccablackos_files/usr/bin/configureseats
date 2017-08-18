@@ -262,11 +262,12 @@ do
     fi
 
     cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
-    awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
+      awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
       echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
     else
+      awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
       echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
     fi
     rm /tmp/99-westonseats.rules.work
