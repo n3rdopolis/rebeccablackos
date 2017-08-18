@@ -71,7 +71,8 @@ do
     then
       DeviceType="Frame Buffer"
     fi
-    DeviceDisplayName=$(udevadm info -q all --attribute-walk --name=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
+    DeviceDisplayName="$Device "
+    DeviceDisplayName+=$(udevadm info -q all --attribute-walk --name=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
   fi
   #if the device doesn't have a serial ID, which usually tells the make and model, then display it as 'generic' to the user
   if [[ -z $DeviceDisplayName ]]
@@ -253,20 +254,20 @@ do
   then
     if [[ ! -z $NewWLSeatNumber ]]
     then
-      DeviceWLSeatIDs[CurrentDeviceNumber]=$NewWLSeatNumber
+      DeviceWLSeatIDs[CurrentDeviceNumber]="$NewWLSeatNumber"
     fi
     if [[ ! -z $NewSessionSeatNumber ]]
     then
-      DeviceWLSeatIDs[CurrentDeviceNumber]=$NewSessionSeatNumber
+      DeviceWLSeatIDs[CurrentDeviceNumber]="$NewSessionSeatNumber"
     fi
 
     cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
     awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
-      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
+      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
     else
-      echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewWLSeatNumber\"">> /lib/udev/rules.d/99-westonseats.rules
+      echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
     fi
     rm /tmp/99-westonseats.rules.work
   fi
