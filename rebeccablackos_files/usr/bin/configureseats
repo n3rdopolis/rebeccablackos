@@ -254,11 +254,11 @@ do
   then
     if [[ ! -z $NewWLSeatNumber ]]
     then
-      DeviceWLSeatIDs[CurrentDeviceNumber]="$NewWLSeatNumber"
+      NewWLSeatNumber="${DeviceWLSeatIDs[CurrentDeviceNumber]}"
     fi
     if [[ ! -z $NewSessionSeatNumber ]]
     then
-      DeviceWLSeatIDs[CurrentDeviceNumber]="$NewSessionSeatNumber"
+      NewSessionSeatNumber="${DeviceWLSeatIDs[CurrentDeviceNumber]}"
     fi
 
     cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
