@@ -17,14 +17,20 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This script is for configuring multiple seats in Weston. It matches the devices connection ID, and the devices serial ID, and sets the ENV{WL_SEAT}= value in a the udev file /lib/udev/rules.d/99-westonseats.rules 
-#This makes it easier for users to configure multiple pointers and keyboard focuses.
+#This script is for configuring multiple seats in Weston. It matches the devices devpath, and the devices serial ID, and sets the ENV{WL_SEAT} and ENV{ID_SEAT} values, or the devices path ID and sets the ENV{ID_SEAT} value in a the udev file /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+#This makes it easier for users to configure multiple pointers and keyboard focuses, as well as multiple sessions.
 
 #Require root privlages
 if [[ $UID != 0 ]]
 then
   echo "Must be run as root."
   exit
+fi
+
+#Move the old udev rules file to the new name, if it exists
+if [[ -e /lib/udev/rules.d/99-westonseats.rules && ! -e /lib/udev/rules.d/weston_seats_and_udev_seats.rules ]]
+then
+  mv /lib/udev/rules.d/99-westonseats.rules /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
 fi
 
 #Allow Exclamation points to be used in commands by turning off the history
@@ -90,7 +96,7 @@ do
     DeviceWLSeatID="default"
   fi
 
-  #if the device has no configured ID_SEAT value, then weston sees it as it being under the seat0 seat
+  #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
   if [[ -z $DeviceSessionSeatID ]]
   then
     DeviceSessionSeatID="seat0"
@@ -144,7 +150,7 @@ do
   DeviceType+="Keyboard"
   fi
 
-  #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat.
+  #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat, or udev multiseat.
   DeviceConnectionDuplicate=0
   for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
   do
@@ -208,7 +214,7 @@ sleep 5
 
 
 #Create the config file
-touch /lib/udev/rules.d/99-westonseats.rules
+touch /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
 
 #Generate a list of wayland seats for the Zenity dialogs for selection
 unset WLSeatList
@@ -256,7 +262,7 @@ do
   NewWLSeatNumber=${NewSeatSelection[1]}
 
   #only change the seat id in udev if the user specified to do so
-  if [[ ! -z $NewWLSeatNumber || ! -z $NewSessionSeatNumber ]]
+  if [[ ! -z ${NewSeatSelection[0]} || ! -z ${NewSeatSelection[1]} ]]
   then
     if [[ -z $NewWLSeatNumber ]]
     then
@@ -267,26 +273,26 @@ do
       NewSessionSeatNumber="${DeviceSessionSeatIDs[CurrentDeviceNumber]}"
     fi
 
-    cat /lib/udev/rules.d/99-westonseats.rules > /tmp/99-westonseats.rules.work
+    cat /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules > /tmp/99-weston_seats_and_udev_seats.rules.work
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
-      awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
-      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
+      awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
     else
-      awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-westonseats.rules.work > /lib/udev/rules.d/99-westonseats.rules
-      echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-westonseats.rules
+      awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
     fi
-    rm /tmp/99-westonseats.rules.work
+    rm /tmp/99-weston_seats_and_udev_seats.rules.work
   fi
 done
 
 #Close the main zenity window that lists all devices when this script is exiting
 kill -9 $MainFormPID
 
-#tell the user that Weston is going to 'flicker' as the tty is switched in and out so that Weston is forced to see the new Udev config
+#tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-Press OK to apply the changes. The screen may flicker for less than a second." --title="Multipointer and Seat Configuration"
+Press OK to apply all the changes. The screen may flicker for less than a second." --no-wrap --title="Multipointer and Seat Configuration"
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
