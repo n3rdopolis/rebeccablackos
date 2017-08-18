@@ -242,24 +242,26 @@ do
   unset NewSessionSeatNumber
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
-    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$(zenity  --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
     Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}
-    Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
   else
-    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$(zenity --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
   fi
+  IFS="@"
   NewSeatSelection=($NewSeatSelection)
-  NewSessionSeatNumber=${NewSeatSelection[0]}
-  NewWLSeatNumber=${NewSeatSelection[1]}
+  unset IFS
+  NewSessionSeatNumber=(${NewSeatSelection[0]})
+  NewWLSeatNumber=(${NewSeatSelection[1]})
 
   #only change the seat id in udev if the user specified to do so
   if [[ ! -z ${NewSeatSelection[0]} || ! -z ${NewSeatSelection[1]} ]]
@@ -276,10 +278,25 @@ do
     cat /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules > /tmp/99-weston_seats_and_udev_seats.rules.work
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
-      awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      if [[ ! -z ${DeviceNames[$CurrentDeviceNumber]} && ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
+      then
+        awk "!/${DeviceNames[$CurrentDeviceNumber]}/ || !/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      else
+        if [[ ! -z ${DeviceNames[$CurrentDeviceNumber]} ]]
+        then
+          awk "!/${DeviceNames[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+        fi
+        if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
+        then
+          awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+        fi
+      fi
       echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{DEVPATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{WL_SEAT}=\"$NewWLSeatNumber\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
     else
-      awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
+      then
+        awk "!/${DeviceConnections[$CurrentDeviceNumber]}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      fi
       echo "ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /lib/udev/rules.d/99-weston_seats_and_udev_seats.rules
     fi
     rm /tmp/99-weston_seats_and_udev_seats.rules.work
