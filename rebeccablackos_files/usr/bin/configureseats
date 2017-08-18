@@ -218,16 +218,26 @@ for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDevi
 do
   unset NewWLSeatNumber
   unset NewSessionSeatNumber
-  NewSeatSelection=$(zenity --height=450 --forms --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+  if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
+  then
+    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
-  Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
-  Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
+    Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
+    Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-  Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}
-  Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+    Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+  else
+    NewSeatSelection=$(zenity --height=450 --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+
+    Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
+    Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
+
+    Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator=" " --title "Multipointer Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)")
+  fi
   NewSeatSelection=($NewSeatSelection)
-  NewWLSeatNumber=${NewSeatSelection[0]}
-  NewSessionSeatNumber=${NewSeatSelection[1]}
+  NewSessionSeatNumber=${NewSeatSelection[0]}
+  NewWLSeatNumber=${NewSeatSelection[1]}
 
   #only change the seat id in udev if the user specified to do so
   if [[ -z $NewWLSeatNumber && -z $NewSessionSeatNumber ]]
