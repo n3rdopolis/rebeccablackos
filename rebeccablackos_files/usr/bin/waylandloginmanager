@@ -599,15 +599,16 @@ function ExportSessionData
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
-#This function sends a command to the waylandloginmanager's own loginmanager_control FIFO. It takes 1 argument, the command to send to the command FIFO
+#This function sends a command to the waylandloginmanager's own loginmanager_control FIFO. It takes 2 arguments, the command to send to the command FIFO, and the relevant seat
 function SendSelfCommand
 {
   SENDCOMMAND=$1
+  SENDSEATARG=$2
   while [[ -e /run/waylandloginmanager/fifolock ]]
   do
     $SLEEPCMD 1
   done
-  echo -e "\n$SENDCOMMAND" > /run/waylandloginmanager/loginmanager_control
+  echo -e "\n$SENDCOMMAND@$SENDSEATARG" > /run/waylandloginmanager/loginmanager_control
 }
 
 #This function sends registration data to the waylandloginmanager's own loginmanager_register FIFO. It takes 1 argument, the data string to send to the registration FIFO.
@@ -1586,7 +1587,7 @@ function CommandFIFOProxy
 {
   while [ 1 ]
   do
-    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch$|^Change$|^Login$|^Leave$|^RegisterSession$|^Info$|^Debug$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
+    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
     $SLEEPCMD .1
   done
 }
@@ -1725,11 +1726,18 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       unset NewAllSessionIDs
     fi
 
-    #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 20 bytes at a time.
-    read -n 20 -t 1 COMMAND <&1000
+    #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 288 bytes at a time.
+    #32 for the command, 1 for the delimiter, and 255 for the max logind seat name size
+    read -n 288 -t 1 COMMANDDATA <&1000
+    IFS=@
+    COMMANDDATA=($COMMANDDATA)
+    unset IFS
+    COMMAND=${COMMANDDATA[0]}
+    SEATARG=${COMMANDDATA[1]}
+
     if [[ $COMMAND != "" ]]
     then
-      WriteToLog "received command $COMMAND"
+      WriteToLog "received command $COMMAND for seat $SEATARG"
     fi
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
@@ -1822,12 +1830,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           DiagnosticTerminal &
           LastDebugPID=$!
-          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay"
+          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay for $SEATARG"
         else
           WriteToLog "A handler for the Debug command is already open"
         fi
       else
-        WriteToLog "Invalid command: $COMMAND received, but wlmdebug not passed to the kernel, or not in Live CD mode."
+        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebug not passed to the kernel, or not in Live CD mode."
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
@@ -1835,7 +1843,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       :
     #if the command is unknown, then log that.
     else
-      WriteToLog "Invalid command: $COMMAND received"
+      WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
     $SLEEPCMD .5
   done
@@ -1891,7 +1899,13 @@ then
   UserSessionWorker "$@" &> /dev/null
 elif [[ $1 == "--sendcommand" ]]
 then
-  SendSelfCommand $2
+  if [[ -z $3 ]]
+  then
+    SEAT=$XDG_SEAT
+  else
+    SEAT=$3
+  fi
+  SendSelfCommand $2 $SEAT
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit 1
