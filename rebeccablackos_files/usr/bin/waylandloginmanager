@@ -160,7 +160,7 @@ function UserSessionWorker
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
       echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-      SendSelfCommand Change
+      SendSelfCommand Change "$XDG_SEAT"
       exit
     fi
   else
@@ -374,7 +374,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export XDG_DATA_DIRS=/opt/share:/usr/share
   export GDK_BACKEND=wayland
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
-  export WAYLAND_DISPLAY=loginmanagerdisplay
   #Set the default path for weston
   export DEFAULTWAYLANDSERVER=$(which weston)
   #Specify where wsession files are found
@@ -500,12 +499,12 @@ Will now reboot." 20 50 --no-cancel
 
   #Get the TTY that will hold the Wayland server that displays the login screen.
   ReadyNotifySent=0
-  OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay 2>/dev/null)
+  OLDPID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0 2>/dev/null)
   if [[ ! -z $OLDPID ]]
   then
     LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDPID | awk '{print $2}' | sed 's/tty//g')
     #Get the logind session of the weston instance running loginmanagerdisplay
-    GetLoginManagerDisplaySession 0
+    GetLoginManagerDisplaySession 0 seat0
     systemd-notify --ready
   else
     LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
@@ -678,9 +677,10 @@ function RegisterSession
   fi
 }
 
-#This function takes two arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string.
+#This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
 function DialogWait
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$3"
   waitseconds=$1
   displaystring="$2"
   countseconds=0
@@ -693,10 +693,10 @@ function DialogWait
   done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
 }
 
-#This function takes no arguments and waits for the loginmanagerdisplay to startup
+#This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
 function DisplayServerWait
 {
-  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay &>/dev/null; echo $?) == 1 ]]
+  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$1" &>/dev/null; echo $?) == 1 ]]
   do
     $SLEEPCMD 1
   done
@@ -704,8 +704,10 @@ function DisplayServerWait
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
+#It takes 1 argument, the seat to show the dialogs on
 function ChooseSessionType
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=${AllSessions}000
   export WAYLAND_HOST=wlhost-$SESSIONID
@@ -959,8 +961,10 @@ function ChooseSessionType
 
 
 #This function displays a diagnostic terminal. depending on if the more secure debug option was passed, wlmdebug it, temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system, and opens the login terminal window running as a service user. If the more insecure wlmdebuginsecure option was passed, then it starts the terminal as root, with a root terminal.
+#It takes 1 argument, the seat to display the terminal on
 function DiagnosticTerminal 
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   if [[ $wlmdebuginsecure == 1 ]]
   then
     vte -g 500x300 &>/dev/null
@@ -977,8 +981,10 @@ function DiagnosticTerminal
 }
 
 #This function is called when the loginmanager_control recives the Info command. It brings up a help dialog for the user, about the waylandloginmanager and the system.
+#It takes 1 argument, the seat to display the dialog on
 function ShowInfo
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #If the backend type is FB, then add a string to tell the user that in the help dialog
   if [[ $DefaultBackendType == "FB" ]]
   then
@@ -1006,8 +1012,10 @@ The i icon shows this help prompt"
 }
 
 #This function is called when the loginmanager_control FIFO recives the command "Switch". It brings up a dialog containing the list of all running login sessions, to allow the user to pick and switch to start a mew session, by containing the FIFO.
+#It takes 1 argument, the seat to display the dialog on, and only the sessions belonging to the seat will be shown
 function SwitchUserDialog 
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   unset SessionList
   #get the number of registered sessions
   NumberOfSessions=${#AllSessionPIDs[@]}
@@ -1064,7 +1072,7 @@ function SwitchUserDialog
   #if the chosen session is -1 then contact the FIFO with a login prompt, otherwise switch to the selected session
   if [[ $ChangeSession == "-1" ]]
   then
-    SendSelfCommand Login
+    SendSelfCommand Login "$1"
   else 
     #if a session is selected, then get the PID, TTY, logind session ID with the selected Session ID as the array element number.
     if [[ $ChangeSession ]]
@@ -1178,8 +1186,10 @@ function StartUserSession
 #Expect has to be run as a non root user, otherwise it always reports success. Run it as the user specified with $PROBETESTUSER
 #it returns failure or success
 #This is called by GetUserCredentials, after it collects the user name and password for the user. It reads the password from stdin
+#It takes 1 argument, the seat to show the dialogs on.
 function AuthenticateUser
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   unset USERPASSWORD
   TryPassword=$(cat -)
   #Test the users login with an embedded expect script running as PROBETESTUSER
@@ -1195,11 +1205,11 @@ function AuthenticateUser
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
     #Prompt for the session type
-    ChooseSessionType
+    ChooseSessionType "$1"
 
     #if the password and username is correct, start the session
     WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY"
-    DialogWait 3 "Attempting to start the selected session..."
+    DialogWait 3 "Attempting to start the selected session..." "$1"
     StartUserSession "$SessionTTY" "$LOGINUSER" "$WSESSIONDATA" &
     #report success
     return 0
@@ -1212,8 +1222,10 @@ function AuthenticateUser
 
 #Get the users username and password by allowing the user to select the username in a list, or enter it manually, and then enter thier password
 #This function is called when the loginmanager_control FIFO recives the command "Login"
+#It takes 1 argument, the seat to display the login prompt on
 function GetUserCredentials
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
   UIDMIN=$(grep -e "^UID_MIN" /etc/login.defs| awk '{print $2}')
@@ -1287,7 +1299,7 @@ function GetUserCredentials
       exit 1
     fi
     #send the password to an AuthenticateUser function with stdin
-    echo $USERPASSWORD | AuthenticateUser
+    echo $USERPASSWORD | AuthenticateUser "$1"
     #get the result from AuthenticateUser in the pipe, (and not the echo command)
     passwordresult=${PIPESTATUS[1]}
     unset USERPASSWORD
@@ -1304,8 +1316,10 @@ function GetUserCredentials
 
 
 #This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
+#It takes 1 argument, the seat to display the dialogs on
 function LeavePrompt
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
   CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
   if [[ $CanPowerOff == 1 ]]
@@ -1410,7 +1424,7 @@ function LeavePrompt
 }
 
 
-#This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 1 second, then try to call it back up
+#This calls the loginmanagerdisplay weston session.  Everytime the weston session dies, wait 1 second, then try to call it back up.
 function StartLoginManagerDisplay
 {
   #Reset the contents of the tty
@@ -1421,7 +1435,7 @@ function StartLoginManagerDisplay
   do
 
     #Detect if the socket for the loginmanagerdisplay exists
-    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay ]]
+    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0 ]]
     then
       LOGINMANAGERDISPLAYSTATUS=1
     else
@@ -1434,17 +1448,17 @@ function StartLoginManagerDisplay
       WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY"
       if [[ -x "$DEFAULTWAYLANDSERVER" ]]
       then
-        systemctl reset-failed wlm-loginmanagerdisplay &> /dev/null
+        systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        systemd-run --unit=wlm-loginmanagerdisplay -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay --log=/var/log/loginmanagerdisplay.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay_seat0 -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_seat0 --log=/var/log/loginmanagerdisplay_seat0.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
         do
-          LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay.service &> /dev/null; echo $?)
+          LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_seat0.service &> /dev/null; echo $?)
           $SLEEPCMD 1
         done
         #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
-        GetLoginManagerDisplaySession 1
+        GetLoginManagerDisplaySession 1 seat0
         loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       else
         WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
@@ -1463,15 +1477,16 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   exit 1
 }
 
-#This function determines the systemd session of the loginmanagerdisplay
+#This function determines the systemd session of the loginmanagerdisplay, it takes 2 arguments, the first is if it should send the registration or not.
+#The second, is the seat.
 function GetLoginManagerDisplaySession
 {
   RegisterLoginManagerDisplay=$1
   #Get the pid of loginmanagerdisplay
-  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay.service -p MainPID --value 2>/dev/null)
+  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$2".service -p MainPID --value 2>/dev/null)
   IFS=" "
   #Get all logind sessions
-  WLMLOGINDSESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
+  WLMLOGINDSESSIONS=($(loginctl show-seat "$2" -p Sessions --value 2>/dev/null ))
   unset IFS
   #Go thorugh each logind session, see the one where the main pid matches the pid of the loginmanagerdisplay
   for WLMLOGINDSESSION in "${WLMLOGINDSESSIONS[@]}"
@@ -1509,8 +1524,8 @@ function StartAutoLogin
   if [[ ! -z $AUTOLOGINUSER ]]
   then
     #Wait until the loginmanagerdisplay becomes availible
-    DisplayServerWait
-    ChooseSessionType
+    DisplayServerWait seat0
+    ChooseSessionType seat0
     #Abort if the user selected cancel on the zenity dialog
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
@@ -1519,7 +1534,7 @@ function StartAutoLogin
     fi
     #get the TTY to start the autologin session on
     export AutoSessionTTY=$(GetNextTTY)
-    DialogWait 3 "Attempting to start the selected session..."
+    DialogWait 3 "Attempting to start the selected session..." seat0
     #if there is a tty for the autologin session, the autologin is configured, start the autologin session
     if [[ $AutoSessionTTY -ne -1 ]]
     then
@@ -1552,10 +1567,12 @@ function SetupLoggingAndFIFO
 }
 
 #This function displays a dialog containing actions for the Wayland Login Manager for the user, Shutdown, Switch User, login, and show a help dialog. It's optional, for in the case Weston isn't configured
+#It takes 1 argument, the seat.
 function UserActionDialog
 {
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #wait for the loginmanagerdisplay
-  DisplayServerWait
+  DisplayServerWait "$1"
   ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
   if [[ $wlmdebuginsecure == 1 ]]
   then
@@ -1569,7 +1586,7 @@ ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
-    SendSelfCommand $USERACTION
+    SendSelfCommand $USERACTION "$1"
   else
     $SLEEPCMD .1
   fi
@@ -1628,7 +1645,7 @@ function ReadCommandFIFO
     if [[ $UserActionFailCount == 5 ]]
     then
       kill -9 $LoginManagerDisplayWatcherPID
-      fuser -k /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay
+      fuser -k /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row."
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row.
 
@@ -1640,7 +1657,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
     if [[ $UIJobCount == 0 ]]
     then
-      UserActionDialog &
+      UserActionDialog seat0 &
       LastUserActionPID=$!
     fi
 
@@ -1745,7 +1762,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
-        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value) &>/dev/null
+        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
         loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
       if [[ $(jobs -p -r | grep -c ^$LastSwitchPID$) == 0 ]]
@@ -1756,7 +1773,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
-        SwitchUserDialog &
+        SwitchUserDialog "$SEATARG" &
         LastSwitchPID=$!
       else
         WriteToLog "A handler for the Switch command is already open"
@@ -1766,7 +1783,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
-        loginctl lock-session $(loginctl show-seat seat0 -p ActiveSession --value) &>/dev/null
+        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
         loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
@@ -1780,7 +1797,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
-        GetUserCredentials &
+        GetUserCredentials "$SEATARG" &
         LastLogonPID=$!
       else
         WriteToLog "A handler for the Login command is already open"
@@ -1796,7 +1813,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
-        LeavePrompt &
+        LeavePrompt $SEATARG &
         LastLeavePID=$!
       else
         WriteToLog "A handler for the Leave command is already open"
@@ -1816,7 +1833,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           UserActionFailSkip=1
           wait $LastUserActionPID 2>/dev/null
         fi
-        ShowInfo &
+        ShowInfo "$SEATARG" &
         LastInfoPID=$!
       else
         WriteToLog "A handler for the Info command is already open"
@@ -1828,7 +1845,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ $(jobs -p -r | grep -c ^$LastDebugPID$) == 0 || $wlmdebuginsecure == 1  ]]
         then
-          DiagnosticTerminal &
+          DiagnosticTerminal "$SEATARG" &
           LastDebugPID=$!
           WriteToLog "Spawned a login terminal window on the loginmanagerdisplay for $SEATARG"
         else
@@ -1905,7 +1922,7 @@ then
   else
     SEAT=$3
   fi
-  SendSelfCommand $2 $SEAT
+  SendSelfCommand $2 "$SEAT"
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit 1
