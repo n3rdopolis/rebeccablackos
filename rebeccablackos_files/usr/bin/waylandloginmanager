@@ -1155,20 +1155,21 @@ function StartUserSession
   #The array makes it easy to get the data out of WSESSIONDATA. any variables in the strings are expanded with perl
   #line 1 is the path to the compositor
   #line 2 is the argument to start with a paticular backend
-  #line 3 is the argument to start the Wayland server with a specific WAYLAND_DISPLAY
-  #line 4 is the argument to start the Wayland server on a paticular XDG_SEAT
-  #line 5 is any other arguments needed
-  #line 6 specifies the environment file which is processed by the user session, which is documented at the top of the script.
-  #line 7 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
-  #line 8 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
+  #line 3 is the argument with paticular session information
+  #line 4 is the argument to start the Wayland server with a specific WAYLAND_DISPLAY
+  #line 5 is the argument to start the Wayland server on a paticular XDG_SEAT
+  #line 6 is any additional arguments needed
+  #line 7 specifies the environment file which is processed by the user session, which is documented at the top of the script.
+  #line 8 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
+  #line 9 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
   CompositorExec="$( echo -n "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendArguments="$( echo -n "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   SessionArgument="$( echo -n "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  AdditionalArguments="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  SeatArgument="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  BackendData="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export EnvironmentFile="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  SeatArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  AdditionalArguments="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  export EnvironmentFile="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  BackendData="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   export SessionName="$( echo -n "${WSESSIONDATA[8]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   IFS=_
   BackendData=($BackendData)
