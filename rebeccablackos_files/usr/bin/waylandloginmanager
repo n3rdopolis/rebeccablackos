@@ -67,6 +67,7 @@
       #Leave : calls up a dialog with shutdown/restart/supend options on the loginmanagerdisplay (see documentation for function LeavePrompt)
       #Login : Starts the login process (see documentation for function GetUserCredentials)
       #RegisterSession : Tells the waylandloginmanager to read from the loginmanager_register FIFO. When this is called the process must be attempting to write to the loginmanager_register already. If there is nothing being written in the short .01 second timeout, it is ignored. (see documentation for function RegisterSession)
+  #Each command is then ended by a @ followed by the argument for the specified seat
 
 #These functions are for the user session part of the waylandloginmanager
 
@@ -941,13 +942,13 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--backend=drm-backend.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
+      WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--seat=$USERSEAT"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
+      WSESSIONDATA+="--xwayland"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -961,13 +962,13 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--backend=fbdev-backend.so"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
+      WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--seat=$USERSEAT"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
+      WSESSIONDATA+="--xwayland"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -1166,7 +1167,7 @@ function StartUserSession
   BackendArguments="$( echo -n "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   SessionArgument="$( echo -n "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  SeatArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorSeatArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   AdditionalArguments="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   export EnvironmentFile="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendData="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
@@ -1180,7 +1181,7 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$SeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY on seat $USERSEAT"
+  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY on seat $USERSEAT"
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID" &> /dev/null
   #Reset the contents of the tty
   echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
@@ -1190,7 +1191,7 @@ function StartUserSession
   then
     chvt $USERSESSIONTTY &>/dev/null &
   fi
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $SeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
@@ -1669,7 +1670,7 @@ function ReadCommandFIFO
     then
       wait $LastUserActionPID
       UserActionResult=$?
-      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) && $UserActionFailSkip == 0 ]]
+      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) || $UserActionFailSkip == 0 ]]
       then
         ((UserActionFailCount++))
         WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
@@ -1681,8 +1682,6 @@ function ReadCommandFIFO
 
     if [[ $UserActionFailCount == 5 ]]
     then
-      kill -9 $LoginManagerDisplayWatcherPID
-      fuser -k /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row."
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row.
 
@@ -1928,7 +1927,6 @@ then
 
   #Start the main loginmanagerdisplay Weston server
   StartLoginManagerDisplay &
-  LoginManagerDisplayWatcherPID=$!
 
   #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
   #Only do an autologin once per boot, and not per start of the waylandloginmanager
