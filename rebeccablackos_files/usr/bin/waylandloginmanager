@@ -237,6 +237,10 @@ function ReadEnvironmentFile
     then
       VARDATA=$WAYLAND_DISPLAY
     fi
+    if [[ $VARDATA == "\$XDG_SEAT" ]]
+    then
+      VARDATA=$XDG_SEAT
+    fi
 
     #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
     if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
@@ -709,7 +713,8 @@ function DisplayServerWait
 #It takes 1 argument, the seat to show the dialogs on
 function ChooseSessionType
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  CurrentHandleSeat="$1"
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$CurrentHandleSeat"
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=${AllSessions}000
   export WAYLAND_HOST=wlhost-$SESSIONID
@@ -734,11 +739,11 @@ function ChooseSessionType
 
     #Append empty values to the bottom of the DesktopFileData, This is so that when parsed for an array, the array elements line up. The FIRST result will be matched by sed,
     #Only single occuring, non dynamic values (as in NOT the backend type) will be handled by the array, which is most values
-    DesktopFileDataWithPlaceholders=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
+    DesktopFileDataWithPlaceholders=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"CompositorSeatArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
 
     #Create an array with a fixed layout for the values.
     IFS=$'\n'
-    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *SessionArgument *= */006#/' -e 's/^ *AdditionalArguments *= */007#/' -e 's/^ *CompositorExec *= */008#/' -e 's/^ *EnvironmentFile *= */009#/' -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -k1,1 -u))
+    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *CompositorSeatArgument *= */006#/' -e 's/^ *SessionArgument *= */007#/' -e 's/^ *AdditionalArguments *= */008#/' -e 's/^ *CompositorExec *= */009#/' -e 's/^ *EnvironmentFile *= */010#/' -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -k1,1 -u))
     unset IFS
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
@@ -784,10 +789,11 @@ function ChooseSessionType
       IsFallbackSession=0
     fi
     CompositorDisplayArgument=${DesktopFileMainArray[5]:4}
-    SessionArgument=${DesktopFileMainArray[6]:4}
-    AdditionalArguments=${DesktopFileMainArray[7]:4}
-    CompositorExec=${DesktopFileMainArray[8]:4}
-    EnvironmentFile=${DesktopFileMainArray[9]:4}
+    CompositorSeatArgument=${DesktopFileMainArray[6]:4}
+    SessionArgument=${DesktopFileMainArray[7]:4}
+    AdditionalArguments=${DesktopFileMainArray[8]:4}
+    CompositorExec=${DesktopFileMainArray[9]:4}
+    EnvironmentFile=${DesktopFileMainArray[10]:4}
     if [[ -z "$EnvironmentFile" ]]
     then
       EnvironmentFile=$SESSIONFILE
@@ -848,6 +854,14 @@ function ChooseSessionType
       CompositorDisplayArgument=""
     fi
 
+    #if the session supports the CompositorSeatArgument, for setting the XDG_SEAT it should use, then ammend the CurrentHandleSeat to the end of the command.
+    if [[ ! -z $CompositorSeatArgument ]]
+    then
+      CompositorSeatArgument="$CompositorSeatArgument$CurrentHandleSeat"
+    else
+      CompositorSeatArgument=""
+    fi
+
     #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
     if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
@@ -862,6 +876,7 @@ function ChooseSessionType
       WSESSIONLIST+="$BackendArguments"$'\n'
       WSESSIONLIST+="$SessionArgument"$'\n'
       WSESSIONLIST+="$CompositorDisplayArgument"$'\n'
+      WSESSIONLIST+="$CompositorSeatArgument"$'\n'
       WSESSIONLIST+="$AdditionalArguments"$'\n'
       WSESSIONLIST+="$EnvironmentFile"$'\n'
       WSESSIONLIST+=""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"$'\n'
@@ -882,7 +897,7 @@ function ChooseSessionType
       WSESSIONARRAY[$WSESSIONARRAYELEMENT]="$LINE"
       ((WSESSIONARRAYELEMENT++))
     done <<< "$WSESSIONLIST"
-    WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/9))
+    WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/10))
 
     WSESSIONPICKLIST=""
     for (( element=0; element<$WSESSIONCOUNT; element++ ))
@@ -891,10 +906,10 @@ function ChooseSessionType
       then
         WSESSIONPICKLIST+=$'\n'
       fi
-      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((7+element*9))]}"#"${WSESSIONARRAY[$((8+element*9))]}
+      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
     done
     WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
-    #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
+    #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
     WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
     #Abort if the user selected cancel on the zenity dialog
@@ -903,7 +918,7 @@ function ChooseSessionType
     then
       exit 1
     fi
-    WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*9))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*9))]}$'\n'
+    WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
 
   else 
     unset WSESSIONDATA
@@ -930,6 +945,8 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--seat=$USERSEAT"
+      WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
@@ -947,6 +964,8 @@ function ChooseSessionType
       WSESSIONDATA+="--modules=xwayland.so,cms-colord.so"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
+      WSESSIONDATA+=$'\n'
+      WSESSIONDATA+="--seat=$USERSEAT"
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+=""
       WSESSIONDATA+=$'\n'
@@ -1137,18 +1156,20 @@ function StartUserSession
   #line 1 is the path to the compositor
   #line 2 is the argument to start with a paticular backend
   #line 3 is the argument to start the Wayland server with a specific WAYLAND_DISPLAY
-  #line 4 is any other arguments needed
-  #line 5 specifies the environment file which is processed by the user session, which is documented at the top of the script.
-  #line 6 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
-  #line 7 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
+  #line 4 is the argument to start the Wayland server on a paticular XDG_SEAT
+  #line 5 is any other arguments needed
+  #line 6 specifies the environment file which is processed by the user session, which is documented at the top of the script.
+  #line 7 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
+  #line 8 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
   CompositorExec="$( echo -n "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendArguments="$( echo -n "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   SessionArgument="$( echo -n "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  AdditionalArguments="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  SeatArgument="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  AdditionalArguments="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   BackendData="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export EnvironmentFile="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export SessionName="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  export EnvironmentFile="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  export SessionName="$( echo -n "${WSESSIONDATA[8]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
   IFS=_
   BackendData=($BackendData)
   unset IFS
@@ -1158,7 +1179,7 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY"
+  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$SeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY on seat $USERSEAT"
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID" &> /dev/null
   #Reset the contents of the tty
   echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
@@ -1168,7 +1189,7 @@ function StartUserSession
   then
     chvt $USERSESSIONTTY &>/dev/null &
   fi
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $SeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')

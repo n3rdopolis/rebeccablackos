@@ -11,6 +11,7 @@ CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
+CompositorSeatArgument=--seat=
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston

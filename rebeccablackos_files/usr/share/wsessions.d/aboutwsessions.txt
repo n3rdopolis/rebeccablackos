@@ -93,7 +93,8 @@ Section 2:----------------------------------------------
 The environment file can be placed anywhere, as long as it is specified by the EnvironmentFile value in the wsession file. An example looks like this
 If EnvironmentFile is not specified within the [Desktop Entry] section of a wsession, that same .desktop file will be the EnvironmentFile, that is, if the [EnvironmentFile] section is defined.
 
-The environment file is not executable, but *parsed* and variables are not expanded, and has limited support for conditionals based on the backend type. See line 1 in the example
+The environment file is not executable, but *parsed* and most variables are not expanded, and has limited support for conditionals based on the backend type. See line 1 in the example
+     The only variables that are expanded are XDG_SEAT and WAYLAND_DISPLAY
 
 Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted) and FB (framebuffer)
 
