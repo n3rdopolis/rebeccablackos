@@ -39,6 +39,9 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
   If for example a session only supports KMS, but the hardware only supports FB, then the session will not be available for selection.
   If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
 
+Compositor(BACKEND)SeatAware:
+Similar to CompositorSupports(BACKEND), specify for each backend if it is multiseat aware. Sometimes the KMS backend would be, and the FB backend will not.
+
 Compositor(BACKEND)Arguments:
 If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 10, 11 and 12 on the example below. *These are optional*
 
@@ -48,6 +51,9 @@ This specifies how the compositor is specified what to use for WAYLAND_DISPLAY i
   Not all servers need this so this is optional. some servers have WAYLAND_DISPLAY specified based on what it's exported as, which waylandloginmanager supports
 
   See line 11 in the example
+
+CompositorSeatArgument:
+This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it deosn't need any variables. It only appends it if CompositorSeatArgument is specified
 
 SessionArgument:
 if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or liri shell module opposed to the weston-desktop-shell. See line 13 in the example

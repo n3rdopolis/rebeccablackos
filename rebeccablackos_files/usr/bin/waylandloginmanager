@@ -825,7 +825,14 @@ function ChooseSessionType
         fi
       done
     fi
-    if [[ $CurrentHandleSeat == seat0 ]]
+    if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
+    then
+      FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0" -c)
+      if [[ $FB0INSEAT0 == 1 ]]
+      then
+        SupportsSeat=1
+      fi
+    elif [[ $CurrentHandleSeat == seat0 && $BackendType != "FB" ]]
     then
       SupportsSeat=1
     fi
@@ -1609,7 +1616,6 @@ function StartAutoLogin
     AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
-  touch /run/waylandloginmanager/autologinran
 
   #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
@@ -1673,6 +1679,7 @@ function StartAutoLogin
         fi
         AutoLoginFirstLoop=0
       done
+    done
   fi 
 }
 
@@ -1692,6 +1699,8 @@ function SetupLoggingAndFIFO
   #Prepare logging for the loginmanagerdisplay
   touch /var/log/loginmanagerdisplay.log
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplay.log
+  touch /run/waylandloginmanager/autologinran
+  chmod 700 /run/waylandloginmanager/autologinran
   rm /run/waylandloginmanager/fifolock
 }
 
