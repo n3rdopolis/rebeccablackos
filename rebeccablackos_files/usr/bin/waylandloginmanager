@@ -147,7 +147,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
+    weston --no-config $PIXMANARGS --seat=$XDG_SEAT --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -387,6 +387,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #WLM_LD_LIBRARY_PATH is exported so that it can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
   export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
   export WLM_PATH=$PATH
+  # TODO if Weston fbdev becomes seat aware, change to 1
+  export WESTON_FBDEV_SEAT_AWARE=0
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
@@ -723,6 +725,29 @@ function ChooseSessionType
 
   unset WSESSIONLIST
   FirstRunNotRan=0
+
+  SeatDefaultBackendType=""
+  SeatSupportsKMS=$(loginctl seat-status seat0 |grep -e "/drm/card[0-9]*$" -c)
+  SeatSupportsFB=$(loginctl seat-status seat0 |grep -e "/graphics/fb[0-9]*$" -c)
+  if [[ $SeatSupportsKMS != 0 ]]
+  then
+    SeatSupportedBackends+=(KMS)
+    SeatDefaultBackendType=KMS
+  fi
+  if [[ $WESTON_FBDEV_SEAT_AWARE == 1 ]]
+  then
+    SeatSupportedBackends+=(WL)
+  else
+    if [[ $SeatSupportsKMS != 0 ]]
+    then
+      SeatSupportedBackends+=(WL)
+    fi
+  fi
+  if [[ $SeatSupportsFB != 0 ]]
+  then
+    SeatSupportedBackends+=(FB)
+    SeatDefaultBackendType=FB
+  fi
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
@@ -749,7 +774,7 @@ function ChooseSessionType
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
+    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
     unset IFS
 
     Enabled=${DesktopFileMainArray[0]:4}
@@ -759,9 +784,9 @@ function ChooseSessionType
 
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     SupportsBackend=0
-    for (( element1 = 0 ; element1 < ${#SupportedBackends[@]} ; element1++ ))
+    for (( element1 = 0 ; element1 < ${#SeatSupportedBackends[@]} ; element1++ ))
     do
-      export BackendType=${SupportedBackends[$element1]}
+      export BackendType=${SeatSupportedBackends[$element1]}
       for (( element2 = 0 ; element2 < ${#DesktopFileBackendArray[@]} ; element2++ ))
       do
         IFS="#"
@@ -783,6 +808,27 @@ function ChooseSessionType
         break
       fi
     done
+
+    #See if the current sessions backend is multiseat aware
+    SupportsSeat=0
+    if [[ ! -z $BackendType ]]
+    then
+      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
+      do
+        IFS="#"
+        ThisBackendArray=(${DesktopFileBackendArray[$element]})
+        unset IFS
+        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 002 ]]
+        then
+          SupportsSeat=${ThisBackendArray[2]}
+          break
+        fi
+      done
+    fi
+    if [[ $CurrentHandleSeat == seat0 ]]
+    then
+      SupportsSeat=1
+    fi
 
     IsFallbackSession=${DesktopFileMainArray[4]:4}
     if [[ -z $IsFallbackSession ]]
@@ -810,6 +856,7 @@ function ChooseSessionType
         if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
         then
           BackendArguments=${ThisBackendArray[2]}
+          break
         fi
       done
     fi
@@ -839,7 +886,12 @@ function ChooseSessionType
 
     if [[ $SupportsBackend != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this system: "${SupportedBackends[*]}" , the session will not be availible for selection by the user."
+      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: "${SeatSupportedBackends[*]}" , the session will not be availible for selection by the user."
+    fi
+
+    if [[ $SupportsSeat != 1 ]]
+    then
+      WriteToLog "Warning: $SESSIONFILE backends $BackendType does not support seats, the session will not be availible for selection by the user."
     fi
 
     if [[ $Type != "WSession" ]]
@@ -865,7 +917,7 @@ function ChooseSessionType
 
     #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
-    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
+    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
     then
       if [[ $FirstRunNotRan == 0 ]]
       then
@@ -880,7 +932,7 @@ function ChooseSessionType
       WSESSIONLIST+="$CompositorSeatArgument"$'\n'
       WSESSIONLIST+="$AdditionalArguments"$'\n'
       WSESSIONLIST+="$EnvironmentFile"$'\n'
-      WSESSIONLIST+=""$BackendType"_"$DefaultBackendType"_"$IsFallbackSession"_"$'\n'
+      WSESSIONLIST+=""$BackendType"_"$SeatDefaultBackendType"_"$IsFallbackSession"_"$'\n'
       WSESSIONLIST+="$SessionName"$'\n'
       WSESSIONLIST+="$SessionComment"
     fi
@@ -936,7 +988,7 @@ function ChooseSessionType
       WriteToLog "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell"
     fi
     #There are different commands needed to support different backends
-    if [[ $DefaultBackendType == KMS ]]
+    if [[ $SeatDefaultBackendType == KMS ]]
     then
       WSESSIONDATA="$DEFAULTWAYLANDSERVER"
       WSESSIONDATA+=$'\n'
@@ -956,7 +1008,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="Default Weston Desktop Shell"
 
-    elif [[ $DefaultBackendType == FB ]]
+    elif [[ $SeatDefaultBackendType == FB ]]
     then 
       WSESSIONDATA="$DEFAULTWAYLANDSERVER"
       WSESSIONDATA+=$'\n'
@@ -1488,7 +1540,7 @@ function StartLoginManagerDisplay
       then
         systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        systemd-run --unit=wlm-loginmanagerdisplay_seat0 -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_seat0 --log=/var/log/loginmanagerdisplay_seat0.log &>/dev/null
+        systemd-run --unit=wlm-loginmanagerdisplay_seat0 -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=seat0 --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_seat0 --log=/var/log/loginmanagerdisplay_seat0.log &>/dev/null
         LOGINMANAGERDISPLAYREADY=1
         while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
         do
@@ -1970,7 +2022,6 @@ then
   #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
   #Only do an autologin once per boot, and not per start of the waylandloginmanager
   StartAutoLogin &
-  LastLogonPID=$!
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
