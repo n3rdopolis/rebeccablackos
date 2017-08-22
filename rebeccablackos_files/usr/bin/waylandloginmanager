@@ -1548,6 +1548,7 @@ function GetLoginManagerDisplaySession
 #If autologin is specified, prompt to select the session type to start, then start the session as the autologin user
 function StartAutoLogin
 {
+  AutoLoginFirstLoop=1
   #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
   if [[ -e /etc/waylandloginmanager.conf ]]
   then
@@ -1561,27 +1562,65 @@ function StartAutoLogin
   #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
   then
-    #Wait until the loginmanagerdisplay becomes availible
-    DisplayServerWait seat0
-    ChooseSessionType seat0
-    #Abort if the user selected cancel on the zenity dialog
-    CancelOrOK=$?
-    if [[ $CancelOrOK != 0 ]]
-    then
-      exit 1
-    fi
-    #get the TTY to start the autologin session on
-    export AutoSessionTTY=$(GetNextTTY)
-    DialogWait 3 "Attempting to start the selected session..." seat0
-    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
-    if [[ $AutoSessionTTY -ne -1 ]]
-    then
-      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
-      StartUserSession "$AutoSessionTTY" seat0 "$AUTOLOGINUSER" "$WSESSIONDATA" &
-    else
-      $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
-      WriteToLog "Not Enough TTYs for autologin!"
-    fi
+    while [ 1 ]
+    do
+      if [[ $AutoLoginFirstLoop == 0 ]]
+      then
+        $SLEEPCMD 300
+      fi
+      IFS=$'\n'
+      AllRunningSeats=($(loginctl --no-legend list-seats))
+      AllStartedSeats=($(cat /run/waylandloginmanager/autologinran))
+      unset IFS
+      NewSeats=()
+      for RunningSeat in ${AllRunningSeats[@]}
+      do
+        IncludeSeat=1
+        for StartedSeat in ${AllStartedSeats[@]}
+        do
+          if [[ $RunningSeat == $StartedSeat ]]
+          then
+            IncludeSeat=0
+            break
+          fi
+        done
+        if [[ $IncludeSeat == 1 ]]
+        then
+          NewSeats+=($RunningSeat)
+        fi
+      done
+
+      for NewSeat in ${NewSeats[@]}
+      do
+        echo $NewSeat >> /run/waylandloginmanager/autologinran
+        #Wait until the loginmanagerdisplay becomes availible
+        DisplayServerWait $NewSeat
+        ChooseSessionType $NewSeat
+        #Abort if the user selected cancel on the zenity dialog
+        CancelOrOK=$?
+        if [[ $CancelOrOK != 0 ]]
+        then
+          exit 1
+        fi
+        #get the TTY to start the autologin session on
+        if [[ $NewSeat == seat0 ]]
+        then
+          export AutoSessionTTY=$(GetNextTTY)
+        else
+          export AutoSessionTTY=0
+        fi
+        DialogWait 3 "Attempting to start the selected session..." $NewSeat
+        #if there is a tty for the autologin session, the autologin is configured, start the autologin session
+        if [[ $AutoSessionTTY -ne -1 ]]
+        then
+          WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
+          StartUserSession "$AutoSessionTTY" $NewSeat "$AUTOLOGINUSER" "$WSESSIONDATA" &
+        else
+          $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
+          WriteToLog "Not Enough TTYs for autologin!"
+        fi
+        AutoLoginFirstLoop=0
+      done
   fi 
 }
 
@@ -1930,11 +1969,8 @@ then
 
   #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
   #Only do an autologin once per boot, and not per start of the waylandloginmanager
-  if [[ ! -e /run/waylandloginmanager/autologinran ]]
-  then
-    StartAutoLogin &
-    LastLogonPID=$!
-  fi
+  StartAutoLogin &
+  LastLogonPID=$!
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
