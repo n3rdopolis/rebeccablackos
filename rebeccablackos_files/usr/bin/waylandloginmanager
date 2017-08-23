@@ -1580,7 +1580,7 @@ function StartLoginManagerDisplays
     ((SEATCHECKLOOPS++))
 
     #Wait 5 minutes before checking for seats (for the second time and beyond). 5 second pause. 360 seconds in 5 minutes
-    if [[ $SEATCHECKLOOPS == 72 && $FIRSTSEATCHECK == 1 ]]
+    if [[ $SEATCHECKLOOPS == 72 || $FIRSTSEATCHECK == 1 ]]
     then
       FIRSTSEATCHECK=0
       SEATCHECKLOOPS=0
@@ -1607,6 +1607,7 @@ function StartLoginManagerDisplays
         if [[ $IncludeSeat == 1 ]]
         then
           SeatFailArray+=($RunningSeat@0)
+          echo $RunningSeat >> /run/waylandloginmanager/newseats
         fi
       done
     fi
@@ -1736,43 +1737,41 @@ function HandleAutoLogins
   then
     while [ 1 ]
     do
-      #Wait a long time after the first run.
-      if [[ $AutoLoginFirstLoop == 0 ]]
-      then
-        $SLEEPCMD 300
-      fi
-
       #Get a list of seats that are running, and seats that are handled
-      IFS=$'\n'
-      AllRunningSeats=($(loginctl --no-legend list-seats))
-      AllStartedSeats=($(cat /run/waylandloginmanager/autologinran))
-      unset IFS
-      NewSeats=()
+      if [[ -e /run/waylandloginmanager/newseats ]]
+      then
+        IFS=$'\n'
+        AllRunningSeats=($(cat /run/waylandloginmanager/newseats))
+        AllStartedSeats=($(cat /run/waylandloginmanager/autologinran))
+        unset IFS
+        NewSeats=()
+        rm /run/waylandloginmanager/newseats
 
-      #Find what seats are new
-      for RunningSeat in ${AllRunningSeats[@]}
-      do
-        IncludeSeat=1
-        for StartedSeat in ${AllStartedSeats[@]}
+        #Find what seats are new
+        for RunningSeat in ${AllRunningSeats[@]}
         do
-          if [[ $RunningSeat == $StartedSeat ]]
+          IncludeSeat=1
+          for StartedSeat in ${AllStartedSeats[@]}
+          do
+            if [[ $RunningSeat == $StartedSeat ]]
+            then
+              IncludeSeat=0
+              break
+            fi
+          done
+          if [[ $IncludeSeat == 1 ]]
           then
-            IncludeSeat=0
-            break
+            NewSeats+=($RunningSeat)
           fi
         done
-        if [[ $IncludeSeat == 1 ]]
-        then
-          NewSeats+=($RunningSeat)
-        fi
-      done
 
-      #Start a autologin session on each new seat
-      for NewSeat in ${NewSeats[@]}
-      do
-        StartAutoLogin $NewSeat &
-        AutoLoginFirstLoop=0
-      done
+        #Start a autologin session on each new seat
+        for NewSeat in ${NewSeats[@]}
+        do
+          StartAutoLogin $NewSeat &
+        done
+      fi
+      $SLEEPCMD 5
     done
   fi 
 }
