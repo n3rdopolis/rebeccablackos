@@ -532,6 +532,14 @@ Will now reboot." 20 50 --no-cancel
     wlmdebuginsecure=1
   fi
   
+  #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
+  if [[ -e /etc/waylandloginmanager.conf ]]
+  then
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+  else
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
+  fi
 }
 
 
@@ -1622,7 +1630,10 @@ function StartLoginManagerDisplays
 
           #Add info about the seat, the default fail count as 0, and the backend and pixman info
           SeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
-          echo $RunningSeat >> /run/waylandloginmanager/newseats
+          if [[ ! -z $AUTOLOGINUSER ]]
+          then
+            echo $RunningSeat >> /run/waylandloginmanager/newseats
+          fi
         fi
       done
     fi
@@ -1720,7 +1731,7 @@ function StartLoginManagerDisplays
     $SLEEPCMD 5
   done
   WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached"
-  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay has been reached. 
+  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
@@ -1763,15 +1774,6 @@ function GetLoginManagerDisplaySession
 function HandleAutoLogins
 {
   AutoLoginFirstLoop=1
-  #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
-  if [[ -e /etc/waylandloginmanager.conf ]]
-  then
-    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
-  else
-    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
-    echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
-  fi
-
   #if autologin is specified
   if [[ ! -z $AUTOLOGINUSER ]]
   then
@@ -1935,13 +1937,16 @@ function ReadCommandFIFO
     then
       wait $LastUserActionPID
       UserActionResult=$?
-      if [[ ($UserActionResult != 0 && $LastUserActionPID != 1) || $UserActionFailSkip == 0 ]]
+      if [[ ($UserActionResult != 0 && $UserActionResult != 1) && $UserActionFailSkip == 0 ]]
       then
         ((UserActionFailCount++))
         WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
       else
-        UserActionFailCount=0
-        UserActionFailSkip=0
+        if [[ $UserActionFailSkip == 1 ]]
+        then
+          UserActionFailCount=0
+          UserActionFailSkip=0
+        fi
       fi
     fi
 
