@@ -754,19 +754,19 @@ function ChooseSessionType
   FirstRunNotRan=0
 
   SeatDefaultBackendType=""
-  SeatSupportsKMS=$(loginctl seat-status "$1" |grep -e "/drm/card[0-9]*$" -c)
-  SeatSupportsFB=$(loginctl seat-status "$1" |grep -e "/graphics/fb[0-9]*$" -c)
+  SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" |grep -e "/drm/card[0-9]*$" -c)
+  SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" |grep -e "/graphics/fb[0-9]*$" -c)
   FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0$" -c)
   if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0  ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatDefaultBackendType=KMS
   fi
-  if [[ $WESTON_FBDEV_SEAT_AWARE == 1 ]]
+  if [[ $SeatSupportsKMS != 0 || ($SeatSupportsFB != 0 && $WESTON_FBDEV_SEAT_AWARE == 1 ) ]]
   then
     SeatSupportedBackends+=(WL)
   else
-    if [[ $SeatSupportsKMS != 0 || ( "$1" == "seat0" && $FB0INSEAT0 != 0 ) ]]
+    if [[ "$CurrentHandleSeat" == "seat0" && $FB0INSEAT0 != 0 ]]
     then
       SeatSupportedBackends+=(WL)
     fi
