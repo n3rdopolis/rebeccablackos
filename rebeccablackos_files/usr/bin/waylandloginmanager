@@ -410,9 +410,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     export AllSessions=0
   fi
 
-  #Array that stores all backend types that is supported by the hardware
-  SupportedBackends=()
-
   #Determine if this is running on a live instance, if the root filesystem is overlayfs.
   FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
   if [[ $FSTYPE =~ overlay ]]
@@ -427,18 +424,10 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
-    SupportedBackends+=(KMS)
-    DefaultBackendType=KMS
-    WESTONBACKEND=drm-backend.so
-    if [[ $WLM_FORCE_SOFTWARE == 1 ]]
-    then
-      export PIXMANARGS="--use-pixman"
-    fi
     HardwareSupported=1
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
-  SupportedBackends+=(WL)
   if [[ $(ls  /dev/fb* 2>/dev/null) ]]
   then
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
@@ -446,13 +435,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
       WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
       setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
-    fi
-    SupportedBackends+=(FB)
-    #If KMS not detected, but fbdev is, set weston-backend to fbdev-backend
-    if [[ $HardwareSupported != 1 ]]
-    then
-      DefaultBackendType=FB
-      WESTONBACKEND=fbdev-backend.so
     fi
     HardwareSupported=1
   else
@@ -774,7 +756,8 @@ function ChooseSessionType
   SeatDefaultBackendType=""
   SeatSupportsKMS=$(loginctl seat-status "$1" |grep -e "/drm/card[0-9]*$" -c)
   SeatSupportsFB=$(loginctl seat-status "$1" |grep -e "/graphics/fb[0-9]*$" -c)
-  if [[ $SeatSupportsKMS != 0 ]]
+  FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0$" -c)
+  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0  ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatDefaultBackendType=KMS
@@ -783,7 +766,7 @@ function ChooseSessionType
   then
     SeatSupportedBackends+=(WL)
   else
-    if [[ $SeatSupportsKMS != 0 ]]
+    if [[ $SeatSupportsKMS != 0 || ( "$1" == "seat0" && $FB0INSEAT0 != 0 ) ]]
     then
       SeatSupportedBackends+=(WL)
     fi
@@ -873,7 +856,6 @@ function ChooseSessionType
     #If this is seat0, then don't enforce seatawareness
     if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
     then
-      FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0" -c)
       if [[ $FB0INSEAT0 == 1 ]]
       then
         SupportsSeat=1
@@ -1612,7 +1594,34 @@ function StartLoginManagerDisplays
         done
         if [[ $IncludeSeat == 1 ]]
         then
-          SeatFailArray+=($RunningSeat@0)
+          #Detect hardware abilities, of the seat
+          SeatSupportsKMS=$(loginctl seat-status "$RunningSeat" |grep -e "/drm/card[0-9]*$" -c)
+          SeatSupportsFB=$(loginctl seat-status "$RunningSeat" |grep -e "/graphics/fb[0-9]*$" -c)
+          FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0$" -c)
+
+          #Determine the backend to use
+          WESTONBACKEND=0
+          WESTONUSEPIXMAN=0
+          if [[ $WESTON_FBDEV_SEAT_AWARE == 1 && $SeatSupportsFB != 0 ]]
+          then
+            WESTONBACKEND=FB
+          else
+            if [[ "$RunningSeat" == "seat0" && $FB0INSEAT0 != 0 ]]
+            then
+              WESTONBACKEND=FB
+            fi
+          fi
+          if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
+          then
+            WESTONBACKEND=KMS
+            if [[ $WLM_FORCE_SOFTWARE == 1 ]]
+            then
+              WESTONUSEPIXMAN=1
+            fi
+          fi
+
+          #Add info about the seat, the default fail count as 0, and the backend and pixman info
+          SeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
           echo $RunningSeat >> /run/waylandloginmanager/newseats
         fi
       done
@@ -1627,8 +1636,30 @@ function StartLoginManagerDisplays
       SeatData=($SeatData)
       unset IFS
 
+      #Information about the seat
       CurrentSeat=${SeatData[0]}
       SeatStartCount=${SeatData[1]}
+      SeatWestonBackend=${SeatData[2]}
+      SeatUsePixman=${SeatData[3]}
+
+      #Handle the seat hardware information
+      if [[ $SeatWestonBackend == KMS ]]
+      then
+        WESTONBACKEND="drm-backend.so"
+      elif [[ $SeatWestonBackend == FB ]]
+      then
+        WESTONBACKEND="fbdev-backend.so"
+      elif [[ $SeatWestonBackend == 0 ]]
+      then
+        #If the seat does not support the hardware, then abort
+        WriteToLog "$CurrentSeat does not have any supported hardware to start a loginmanagerdisplay"
+        SeatStartCount=5
+        LOGINMANAGERDISPLAYSTATUS=1
+      fi
+      if [[ $SeatUsePixman == 1 ]]
+      then
+        PIXMANARGS="--use-pixman"
+      fi
 
       #Detect if the socket for the loginmanagerdisplay exists
       if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
@@ -1638,7 +1669,7 @@ function StartLoginManagerDisplays
         LOGINMANAGERDISPLAYSTATUS=0
       fi
 
-      if [[ $LOGINMANAGERDISPLAYSTATUS == 0 ]]
+      if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 ]]
       then
         (( SeatStartCount++ ))
         WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
@@ -1657,7 +1688,10 @@ function StartLoginManagerDisplays
           GetLoginManagerDisplaySession 1 $CurrentSeat
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         else
-          WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
+          if [[ $SeatStartCount == 0 ]]
+          then
+            WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
+          fi
         fi
       fi
 
