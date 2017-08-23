@@ -642,7 +642,7 @@ function SendSelfRegisterData
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
 #Before a process calls RegisterSession to loginmanager_control, the process must also start an attempt to send the data to loginmanager_register, because the timeout period is .01 seconds. If nothing is in loginmanager_register, as if it's not called correctly, or because it's an underprivlaged process that can't write to loginmanager_register, it is ignored.
 #it expects the data to be sent in fields seperated by the @ charachter in this order:
-# NEWSESSION@TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID@SEAT
+# NEWSESSION@TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID@SEAT@DoLock
 # or
 # NEWWLMDISPLAY@logind_Session_ID@SEAT
 function RegisterSession
@@ -667,6 +667,7 @@ function RegisterSession
       SessionUser=${ArraySessionData[3]}
       SessionID=${ArraySessionData[4]}
       SeatID=${ArraySessionData[5]}
+      DoLock=${ArraySessionData[6]}
       if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
       then
         AllSessionTTYs+=($SessionTTY)
@@ -678,6 +679,10 @@ function RegisterSession
         ((AllSessions++))
         #Export the Session data
         ExportSessionData
+        if [[ $DoLock == 1 && $ISLIVE != 1 ]]
+        then
+          loginctl lock-session $SessionID 2> /dev/null
+        fi
       else
         WriteToLog "Session failed to start"
         SessionStartFailed=1
@@ -1222,7 +1227,7 @@ function SwitchUserDialog
   fi
 }
 
-#Function that starts the user sessions, which is called by AuthenticateUser, if the authentication is successful. It takes 4 arguments, TTY number, the seat, user to start the session for, and the multiline string, WSESSIONDATA, which contains specific data about how to start paticular sessions
+#Function that starts the user sessions, which is called by AuthenticateUser, if the authentication is successful. It takes 5 arguments, TTY number, the seat, user to start the session for, to lock the screen upon session start, and the multiline string, WSESSIONDATA, which contains specific data about how to start paticular sessions
 function StartUserSession 
 { 
   #ensure the loginmanager_control fd doesn't get leaked
@@ -1242,10 +1247,11 @@ function StartUserSession
   do
     WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
     ((WSESSIONARGUMENTELEMENT++))
-  done <<< "$4"
+  done <<< "$5"
   USERSESSIONTTY=$1
   USERSEAT=$2
   LOGINUSER=$3
+  STARTLOCKED=$4
 
   #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
   export HOME=$(eval echo ~$LOGINUSER)
@@ -1313,7 +1319,7 @@ function StartUserSession
   loginctl activate $LOGINDSESSION &>/dev/null
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION@$USERSEAT"
+  SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION@$USERSEAT@$STARTLOCKED"
 }
 
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
@@ -1344,7 +1350,7 @@ function AuthenticateUser
     #if the password and username is correct, start the session
     WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY on seat $1"
     DialogWait 3 "Attempting to start the selected session..." "$1"
-    StartUserSession "$SessionTTY" "$1" "$LOGINUSER" "$WSESSIONDATA" &
+    StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
     #report success
     return 0
   else
@@ -1640,11 +1646,11 @@ function StartLoginManagerDisplays
         then
           systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
           chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_seat0 --log=/var/log/loginmanagerdisplay_seat0.log &>/dev/null
+          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
           do
-            LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_seat0.service &> /dev/null; echo $?)
+            LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$CurrentSeat.service &> /dev/null; echo $?)
             $SLEEPCMD 1
           done
           #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
@@ -1801,7 +1807,7 @@ function StartAutoLogin
   if [[ $AutoSessionTTY -ne -1 ]]
   then
     WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
-    StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" "$WSESSIONDATA" &
+    StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
     WriteToLog "Not Enough TTYs for autologin!"
