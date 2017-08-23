@@ -67,6 +67,7 @@
       #Leave : calls up a dialog with shutdown/restart/supend options on the loginmanagerdisplay (see documentation for function LeavePrompt)
       #Login : Starts the login process (see documentation for function GetUserCredentials)
       #RegisterSession : Tells the waylandloginmanager to read from the loginmanager_register FIFO. When this is called the process must be attempting to write to the loginmanager_register already. If there is nothing being written in the short .01 second timeout, it is ignored. (see documentation for function RegisterSession)
+      #DetectSeats: Tells the waylandloginmanager to detect all running seats
   #Each command is then ended by a @ followed by the argument for the specified seat
 
 #These functions are for the user session part of the waylandloginmanager
@@ -1634,6 +1635,7 @@ function StartLoginManagerDisplays
           then
             echo $RunningSeat >> /run/waylandloginmanager/newseats
           fi
+          SendSelfCommand DetectSeats
         fi
       done
     fi
@@ -1903,13 +1905,12 @@ ZENITYSTATUS=$?
   exit $ZENITYSTATUS
 }
 
-
 #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
 function CommandFIFOProxy
 {
   while [ 1 ]
   do
-    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
+    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
     $SLEEPCMD .1
   done
 }
@@ -1921,9 +1922,17 @@ function ReadCommandFIFO
   SessionStartFailed=0
   UserActionFailCount=0
   UserActionFailSkip=0
+  DoDetectSeats=1
   #loop 'forever'
   while [ 1 ]
   do
+
+    #Detect all seats
+    if [[ $DoDetectSeats == 1 ]]
+    then
+      DoDetectSeats=0
+    fi
+
     UIJobCount=0
     while read JOB
     do
@@ -2145,9 +2154,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         WriteToLog "A handler for the Leave command is already open"
       fi
     #if the command is RegisterSession, then attempt to read the loginmanager_register FIFO, and register any data sent to that FIFO.
-    elif [[ $COMMAND = "RegisterSession" ]]
+    elif [[ $COMMAND == "RegisterSession" ]]
     then
       RegisterSession
+    #If the command id DetectSeats, then inventory seats on the next loop
+    elif [[ $COMMAND == "DetectSeats" ]]
+    then
+      DoDetectSeats=1
     #If it recives a Info command, then bring up a info dialog and start a info job, only if there isn't another info job running
     elif [[ $COMMAND == "Info" ]]
     then
