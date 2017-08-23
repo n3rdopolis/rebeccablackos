@@ -572,6 +572,7 @@ fd.close()"
 function GetNextTTY
 {
   SYSTEMDTTYS=()
+  #Only seat0 has TTYs
   SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
   for SESSION in ${SESSIONS[@]}
   do
@@ -635,6 +636,7 @@ function SendSelfRegisterData
     $SLEEPCMD 1
   done
   echo "$SENDDATA" > /run/waylandloginmanager/loginmanager_register &
+  SendSelfCommand RegisterSession
 }
 
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
@@ -737,8 +739,8 @@ function ChooseSessionType
   FirstRunNotRan=0
 
   SeatDefaultBackendType=""
-  SeatSupportsKMS=$(loginctl seat-status seat0 |grep -e "/drm/card[0-9]*$" -c)
-  SeatSupportsFB=$(loginctl seat-status seat0 |grep -e "/graphics/fb[0-9]*$" -c)
+  SeatSupportsKMS=$(loginctl seat-status "$1" |grep -e "/drm/card[0-9]*$" -c)
+  SeatSupportsFB=$(loginctl seat-status "$1" |grep -e "/graphics/fb[0-9]*$" -c)
   if [[ $SeatSupportsKMS != 0 ]]
   then
     SeatSupportedBackends+=(KMS)
@@ -835,6 +837,7 @@ function ChooseSessionType
         fi
       done
     fi
+    #If this is seat0, then don't enforce seatawareness
     if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
     then
       FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0" -c)
@@ -1177,6 +1180,7 @@ function SwitchUserDialog
       #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
       if [[ -e /proc/$ChangeSessionPID/environ ]]
       then
+        #Only seat0 supports TTYs
         if [[ "$1" == "seat0" ]]
         then
           chvt $ChangeSessionTTY &>/dev/null &
@@ -1252,12 +1256,13 @@ function StartUserSession
   #Call the server with the arguments specified by the selected session
   WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY on seat $USERSEAT"
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID" &> /dev/null
-  #Reset the contents of the tty
-  echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
-  #Disable cursor blinking on the TTY the display server will be started on
-  echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
+  #Only seat0 supports TTYs
   if [[ "$USERSEAT" == seat0 ]]
   then
+    #Reset the contents of the tty
+    echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
+    #Disable cursor blinking on the TTY the display server will be started on
+    echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
   fi
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
@@ -1281,7 +1286,6 @@ function StartUserSession
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
   SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION@$USERSEAT"
-  SendSelfCommand RegisterSession
 }
 
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
@@ -1388,7 +1392,7 @@ function GetUserCredentials
       exit 1
     fi
   fi
-  #get the TTY to start the session on
+  #get the TTY to start the session on, only for seat0
   if [[ "$1" == "seat0" ]]
   then
     export SessionTTY=$(GetNextTTY)
@@ -1608,7 +1612,6 @@ function GetLoginManagerDisplaySession
   if [[ $RegisterLoginManagerDisplay == 1 ]]
   then
     SendSelfRegisterData "NEWWLMDISPLAY@$REGISTERDISPLAYSESSION@$2"
-    SendSelfCommand RegisterSession
   fi
 }
 
@@ -1686,7 +1689,7 @@ function StartAutoLogin
   then
     exit 1
   fi
-  #get the TTY to start the autologin session on
+  #get the TTY to start the autologin session on, only for seat0
   if [[ "$1" == seat0 ]]
   then
     export AutoSessionTTY=$(GetNextTTY)
