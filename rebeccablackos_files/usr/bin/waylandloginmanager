@@ -390,6 +390,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export WLM_PATH=$PATH
   # TODO if Weston fbdev becomes seat aware, change to 1
   export WESTON_FBDEV_SEAT_AWARE=0
+  # TODO Determine if this is needed, how weston handles multisession on non seat0
+  export ONLY_SEAT0_SESSION_SWITCH=1
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
@@ -1290,7 +1292,20 @@ function StartUserSession
     echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
   fi
+
+  #If multisession is not supported
+  if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && "$USERSEAT" != seat0 ]]
+  then
+    SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value)
+    if [[ $SeatCanMultiSession != "yes" ]]
+    then
+      loginctl terminate-seat "$USERSEAT"
+      touch /run/waylandloginmanager/inhibit
+    fi
+  fi
+
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  rm /run/waylandloginmanager/inhibit
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
@@ -1655,6 +1670,18 @@ function StartLoginManagerDisplays
       SeatWestonBackend=${SeatData[2]}
       SeatUsePixman=${SeatData[3]}
 
+      #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
+      if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
+      then
+        SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value)
+        SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value)
+        if [[ $SeatCanMultiSession != "yes" && ! -z "$SeatSessions" ]]
+        then
+          SeatStartCount=0
+          LOGINMANAGERDISPLAYSTATUS=1
+        fi
+      fi
+
       #Handle the seat hardware information
       if [[ $SeatWestonBackend == KMS ]]
       then
@@ -1665,7 +1692,10 @@ function StartLoginManagerDisplays
       elif [[ $SeatWestonBackend == 0 ]]
       then
         #If the seat does not support the hardware, then abort
-        WriteToLog "$CurrentSeat does not have any supported hardware to start a loginmanagerdisplay"
+        if [[ $SeatStartCount == 0 ]]
+        then
+          WriteToLog "$CurrentSeat does not have any supported hardware to start a loginmanagerdisplay"
+        fi
         SeatStartCount=5
         LOGINMANAGERDISPLAYSTATUS=1
       fi
@@ -1690,7 +1720,10 @@ function StartLoginManagerDisplays
         then
           systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
           chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
+          if [[ ! -e /run/waylandloginmanager/inhibit ]]
+          then
+            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
+          fi
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
           do
