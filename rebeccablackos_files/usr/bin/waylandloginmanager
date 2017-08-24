@@ -2223,7 +2223,15 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       WriteToLog "received command $COMMAND for seat $SEATARG"
     fi
-    SeatIndexID=$(GetStartedSeatIndex $SEATARG)
+    if [[ ! -z $SEATARG ]]
+    then
+      SeatIndexID=$(GetStartedSeatIndex $SEATARG)
+      if [[ $SeatIndexID == -1 ]]
+      then
+        WriteToLog "Invalid seat $SEATARG specified. Ignoring command"
+        COMMAND=""
+      fi
+    fi
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" && $SeatCanMultiSession == 1 ]]
