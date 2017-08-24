@@ -1976,17 +1976,18 @@ function GetStartedSeatIndex
 {
   ReturnSeatIndex="-1"
   SeatCount=${#StartedSeats[@]}
-  for (( SeatIndex=0; SeatIndex < $SeatCount; SeatIndex++ ))
+  for (( StartIndex=0; StartIndex<=$StartedSeatCount;  StartIndex=StartIndex+2 ))
   do
-    IFS="@"
-    SeatData=(${StartedSeats[$SeatIndex]})
-    unset IFS
-    if [[ ${SeatData[0]} == $1 ]]
+    if [[ ${StartedSeats[$StartIndex]} == $1 ]]
     then
-      ReturnSeatIndex=$SeatIndex
+      ReturnSeatIndex=$StartIndex
       break
     fi
   done
+  if [[ $ReturnSeatIndex <=0 ]]
+  then
+    ReturnSeatIndex=$(($ReturnSeatIndex/2))
+  fi
   echo $ReturnSeatIndex
 }
 
@@ -1999,6 +2000,11 @@ function ReadCommandFIFO
   UserActionFailSkip=0
   DoDetectSeats=1
   StartedSeats=()
+  LastUserActionPIDs=()
+  LastSwitchPIDs=()
+  LastLogonPIDs=()
+  LastLeavePIDs=()
+  LastInfoPIDs=()
   #loop 'forever'
   while [ 1 ]
   do
@@ -2012,12 +2018,10 @@ function ReadCommandFIFO
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
-        for StartedSeat in ${StartedSeats[@]}
+        StartedSeatCount=${#StartedSeats[@]}
+        for (( StartIndex=0; StartIndex<=$StartedSeatCount;  StartIndex=StartIndex+2 ))
         do
-          IFS=@
-          StartedSeatDataArray=($StartedSeat[@])
-          unset IFS
-          if [[ $RunningSeat == ${StartedSeatDataArray[0]} ]]
+          if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
           then
             IncludeSeat=0
             break
@@ -2032,7 +2036,8 @@ function ReadCommandFIFO
           else
             CanMultiSession=0
           fi
-          StartedSeats+=($RunningSeat@$CanMultiSession)
+          StartedSeats+=($RunningSeat)
+          StartedSeats+=($CanMultiSession)
         fi
       done
     fi
