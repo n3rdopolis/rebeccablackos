@@ -659,20 +659,20 @@ function RegisterSession
       SessionPID=${ArraySessionData[2]}
       SessionUser=${ArraySessionData[3]}
       SessionID=${ArraySessionData[4]}
-      SeatID=${ArraySessionData[5]}
-      DoLock=${ArraySessionData[6]}
+      SessionSeatID=${ArraySessionData[5]}
+      SessionDoLock=${ArraySessionData[6]}
       if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
       then
         AllSessionTTYs+=($SessionTTY)
         AllSessionPIDs+=($SessionPID)
         AllSessionUsers+=($SessionUser)
         AllSessionIDs+=($SessionID)
-        AllSeatIDs+=($SeatID)
+        AllSeatIDs+=($SessionSeatID)
         #increment the number of running sessions, now that one is added and running successfuly
         ((AllSessions++))
         #Export the Session data
         ExportSessionData
-        if [[ $DoLock == 1 && $ISLIVE != 1 ]]
+        if [[ $SessionDoLock == 1 && $ISLIVE != 1 ]]
         then
           loginctl lock-session $SessionID 2> /dev/null
         fi
@@ -680,6 +680,7 @@ function RegisterSession
         WriteToLog "Session failed to start"
         SessionStartFailed=1
         FailedSessionTTY=$SessionTTY
+        FailedSessionSeat=$SessionSeatID
       fi
 
 
@@ -1122,7 +1123,7 @@ This is the optimal way to run Weston or other Wayland servers."
 
 $BACKENDSTRING
 
-The Login Manager Display is running on tty: $LOGINMANAGERDISPLAYTTY
+The Login Manager Display for seat0 is running on tty: $LOGINMANAGERDISPLAYTTY
 
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
@@ -1733,7 +1734,10 @@ function StartLoginManagerDisplays
         if [[ -x "$DEFAULTWAYLANDSERVER" ]]
         then
           systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
-          chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
+          if [[ $CurrentSeat == seat0 ]]
+          then
+            chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
+          fi
           if [[ ! -e /run/waylandloginmanager/inhibit ]]
           then
             systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
@@ -2118,7 +2122,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       LastUserActionPIDs[$SeatIndexID]=$!
     fi
 
-    LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay seat0)
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
@@ -2142,9 +2145,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           ResetTTYMode $FailedSessionTTY
         fi
-        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+        # TODO seat0 only has TTYs
+        loginctl activate $(GetSeatLoginManagerDisplay $FailedSessionSeat) &>/dev/null
       fi
       unset FailedSessionTTY
+      unset FailedSessionSeat
     fi
 
     #Handle for when a session is detected to not be running
@@ -2185,8 +2190,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            #TTYs only belong to seat0
-            loginctl activate $(GetSeatLoginManagerDisplay seat0) &>/dev/null
+            # TODO seat0 only has TTYs
+            loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
           fi
         fi
       done
@@ -2236,10 +2241,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" && $SeatCanMultiSession == 1 ]]
     then
-      if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
+      LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
       then
         loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $(GetSeatLoginManagerDisplay "$SEATARG") &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
       if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
       then
@@ -2257,10 +2264,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" && $SeatCanMultiSession == 1 ]]
     then
-      if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
+      LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
       then
         loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $(GetSeatLoginManagerDisplay "$SEATARG") &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
