@@ -2045,7 +2045,7 @@ function ReadCommandFIFO
 
 
 
-    SeatCanMultiSession=$(loginctl show-seat seat0 -p CanMultiSession --value)
+    SeatCanMultiSession=1
     UIJobCount=0
     while read JOB
     do
