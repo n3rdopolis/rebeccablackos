@@ -1913,7 +1913,16 @@ function UserActionDialog
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
   #wait for the loginmanagerdisplay
   DisplayServerWait "$1"
-  ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
+  ActionMenu="Login\nLogin...\n"
+  SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value)
+  if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+  then
+    if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 ]]
+    then
+      ActionMenu+="Switch\nSwitch User...\n"
+    fi
+  fi
+  ActionMenu+="Leave\nShutdown...\nInfo\nHelp..."
   if [[ $wlmdebuginsecure == 1 ]]
   then
     ActionMenu+="\nDebug\nRoot Terminal..."
@@ -1964,7 +1973,13 @@ function ReadCommandFIFO
     if [[ $DoDetectSeats == 1 ]]
     then
       DoDetectSeats=0
+      SeatCanMultiSession=$(loginctl show-seat seat0 -p CanMultiSession --value)
     fi
+
+
+
+
+
 
     UIJobCount=0
     while read JOB
@@ -2035,7 +2050,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     done
 
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
-    if [[ $SessionStartFailed == 1 ]]
+    if [[ $SessionStartFailed == 1 && $SeatCanMultiSession == "yes" ]]
     then
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
@@ -2088,7 +2103,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+            if [[ $SeatCanMultiSession == "yes" ]]
+            then
+              loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+            fi
           fi
         fi
       done
@@ -2126,7 +2144,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     fi
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
-    if [[ $COMMAND == "Switch" ]]
+    if [[ $COMMAND == "Switch" && $SeatCanMultiSession == "yes" ]]
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
@@ -2147,7 +2165,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         WriteToLog "A handler for the Switch command is already open"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
-    elif [[ $COMMAND == "Change" ]]
+    elif [[ $COMMAND == "Change" && $SeatCanMultiSession == "yes" ]]
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
