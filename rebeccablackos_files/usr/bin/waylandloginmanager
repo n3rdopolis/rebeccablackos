@@ -1971,6 +1971,25 @@ function CommandFIFOProxy
   done
 }
 
+#Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
+function GetStartedSeatIndex
+{
+  ReturnSeatIndex="-1"
+  SeatCount=${#StartedSeats[@]}
+  for (( SeatIndex=0; SeatIndex < $SeatCount; SeatIndex++ ))
+  do
+    IFS="@"
+    SeatData=(${StartedSeats[$SeatIndex]})
+    unset IFS
+    if [[ ${SeatData[0]} == $1 ]]
+    then
+      ReturnSeatIndex=$SeatIndex
+      break
+    fi
+  done
+  echo $ReturnSeatIndex
+}
+
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
@@ -1979,6 +1998,7 @@ function ReadCommandFIFO
   UserActionFailCount=0
   UserActionFailSkip=0
   DoDetectSeats=1
+  StartedSeats=()
   #loop 'forever'
   while [ 1 ]
   do
@@ -1987,14 +2007,40 @@ function ReadCommandFIFO
     if [[ $DoDetectSeats == 1 ]]
     then
       DoDetectSeats=0
-      SeatCanMultiSession=$(loginctl show-seat seat0 -p CanMultiSession --value)
+      #Find what seats are new
+      AllRunningSeats=($(loginctl --no-legend list-seats))
+      for RunningSeat in ${AllRunningSeats[@]}
+      do
+        IncludeSeat=1
+        for StartedSeat in ${StartedSeats[@]}
+        do
+          IFS=@
+          StartedSeatDataArray=($StartedSeat[@])
+          unset IFS
+          if [[ $RunningSeat == ${StartedSeatDataArray[0]} ]]
+          then
+            IncludeSeat=0
+            break
+          fi
+        done
+        if [[ $IncludeSeat == 1 ]]
+        then
+          HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value)
+          if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+          then
+            CanMultiSession=1
+          else
+            CanMultiSession=0
+          fi
+          StartedSeats+=($RunningSeat@$CanMultiSession)
+        fi
+      done
     fi
 
 
 
 
-
-
+    SeatCanMultiSession=$(loginctl show-seat seat0 -p CanMultiSession --value)
     UIJobCount=0
     while read JOB
     do
@@ -2008,13 +2054,13 @@ function ReadCommandFIFO
     then
       wait $LastUserActionPID
       UserActionResult=$?
-      if [[ ($UserActionResult != 0 && $UserActionResult != 1) && $UserActionFailSkip == 0 ]]
+      if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
       then
-        ((UserActionFailCount++))
-        WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
-      else
         if [[ $UserActionFailSkip == 1 ]]
         then
+          ((UserActionFailCount++))
+          WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
+        else
           UserActionFailCount=0
           UserActionFailSkip=0
         fi
@@ -2064,7 +2110,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     done
 
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
-    if [[ $SessionStartFailed == 1 && $SeatCanMultiSession == "yes" ]]
+    if [[ $SessionStartFailed == 1 && $SeatCanMultiSession == 1 ]]
     then
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
@@ -2117,7 +2163,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            if [[ $SeatCanMultiSession == "yes" ]]
+            if [[ $SeatCanMultiSession == 1 ]]
             then
               loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
             fi
@@ -2158,7 +2204,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     fi
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
-    if [[ $COMMAND == "Switch" && $SeatCanMultiSession == "yes" ]]
+    if [[ $COMMAND == "Switch" && $SeatCanMultiSession == 1 ]]
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
@@ -2179,7 +2225,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         WriteToLog "A handler for the Switch command is already open"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
-    elif [[ $COMMAND == "Change" && $SeatCanMultiSession == "yes" ]]
+    elif [[ $COMMAND == "Change" && $SeatCanMultiSession == 1 ]]
     then
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
