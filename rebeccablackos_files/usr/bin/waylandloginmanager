@@ -1294,17 +1294,31 @@ function StartUserSession
   fi
 
   #If multisession is not supported
+  RunSession=1
   if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && "$USERSEAT" != seat0 ]]
   then
     SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value)
+    SeatSessions=($(loginctl show-seat "$CurrentSeat" -p Sessions --value))
+    SeatSessionsCount=${#SeatSessions[@]}
+    SeatSessionType=$(loginctl show-session ${SeatSessions[@]} -p Class --value)
     if [[ $SeatCanMultiSession != "yes" ]]
     then
-      loginctl terminate-seat "$USERSEAT"
-      touch /run/waylandloginmanager/inhibit
+      if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
+      then
+        loginctl terminate-session ${SeatSessions[@]}
+        touch /run/waylandloginmanager/inhibit
+      else
+        RunSession=0
+      fi
     fi
   fi
 
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  if [[ $RunSession == 1 ]]
+  then
+    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  else
+    WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
+  fi
   rm /run/waylandloginmanager/inhibit
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
