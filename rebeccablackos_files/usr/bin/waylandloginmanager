@@ -1988,6 +1988,26 @@ function GetStartedSeatIndex
   echo $ReturnSeatIndex
 }
 
+#Function to get the ID of the registered loginmanagerdisplay for this seat. It takes 1 argument, the seat
+function GetSeatLoginManagerDisplay
+{
+  #Get the loginmanagerdisplay for the seat
+  RETURNSESSION=""
+  for SESSION in ${LOGINMANAGERDISPLAYSESSIONS[@]}
+  do
+    IFS="@"
+    SESSION=($SESSION)
+    unset IFS
+
+    if [[ ${SESSION[0]} == "$1" ]]
+    then
+      RETURNSESSION=${SESSION[1]}
+      break
+    fi
+  done
+  echo $RETURNSESSION
+}
+
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
@@ -2098,20 +2118,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       LastUserActionPIDs[$SeatIndexID]=$!
     fi
 
-    #Get the loginmanagerdisplay for the seat
-    LOGINMANAGERDISPLAYSESSION=""
-    for SESSION in ${LOGINMANAGERDISPLAYSESSIONS[@]}
-    do
-      IFS="@"
-      SESSION=($SESSION)
-      unset IFS
-
-      if [[ ${SESSION[0]} == seat0 ]]
-      then
-        LOGINMANAGERDISPLAYSESSION=${SESSION[1]}
-        break
-      fi
-    done
+    LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay seat0)
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
@@ -2141,6 +2148,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     fi
 
     #Handle for when a session is detected to not be running
+    #And also attempt to unlock the TTY, if applicable
     if [[ $NotRunningSessions != 0 ]]
     then
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
@@ -2177,10 +2185,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            if [[ $SeatCanMultiSession == 1 ]]
-            then
-              loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
-            fi
+            #TTYs only belong to seat0
+            loginctl activate $(GetSeatLoginManagerDisplay seat0) &>/dev/null
           fi
         fi
       done
@@ -2225,7 +2231,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+        loginctl activate $(GetSeatLoginManagerDisplay "$SEATARG") &>/dev/null
       fi
       if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
       then
@@ -2246,7 +2252,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       if [[ $ActiveTTY != $LOGINMANAGERDISPLAYTTY ]]
       then
         loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+        loginctl activate $(GetSeatLoginManagerDisplay "$SEATARG") &>/dev/null
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
