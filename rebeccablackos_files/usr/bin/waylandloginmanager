@@ -1690,6 +1690,7 @@ function StartLoginManagerDisplays
       SeatStartCount=${SeatData[1]}
       SeatWestonBackend=${SeatData[2]}
       SeatUsePixman=${SeatData[3]}
+      StartLoginManagerDisplay=1
 
       #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
       if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
@@ -1699,7 +1700,7 @@ function StartLoginManagerDisplays
         if [[ $SeatCanMultiSession != "yes" && ! -z "$SeatSessions" ]]
         then
           SeatStartCount=0
-          LOGINMANAGERDISPLAYSTATUS=1
+          StartLoginManagerDisplay=0
         fi
       fi
 
@@ -1728,12 +1729,10 @@ function StartLoginManagerDisplays
       #Detect if the socket for the loginmanagerdisplay exists
       if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
       then
-        LOGINMANAGERDISPLAYSTATUS=1
-      else
-        LOGINMANAGERDISPLAYSTATUS=0
+        StartLoginManagerDisplay=0
       fi
 
-      if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 ]]
+      if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $StartLoginManagerDisplay == 1 ]]
       then
         (( SeatStartCount++ ))
         WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
@@ -1761,9 +1760,13 @@ function StartLoginManagerDisplays
           GetLoginManagerDisplaySession 1 $CurrentSeat
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         else
-          if [[ $SeatStartCount == 0 ]]
+          if [[ $SeatStartCount == 1 ]]
           then
-            WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist"
+            WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
+          fi
+          if [[ $SeatStartCount == 5 ]]
+          then
+            WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
           fi
         fi
       fi
@@ -2070,6 +2073,7 @@ function ReadCommandFIFO
           else
             CanMultiSession=0
           fi
+          WriteToLog "New seat $RunningSeat detected, multisession support is $CanMultiSession"
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
         fi
@@ -2087,7 +2091,6 @@ function ReadCommandFIFO
       fi
     done < <(jobs -p -r)
 
-    # TODO
     if [[ -z ${UserActionFailCount[$SeatID]} ]]
     then
       UserActionFailCount[$SeatID]=0
@@ -2241,9 +2244,14 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     COMMAND=${COMMANDDATA[0]}
     SEATARG=${COMMANDDATA[1]}
 
-    if [[ $COMMAND != "" ]]
+    if [[ $COMMAND != "" && $COMMAND != "DetectSeats" && $COMMAND != "RegisterSession" ]]
     then
       WriteToLog "received command $COMMAND for seat $SEATARG"
+    else
+      if [[ $COMMAND == "RegisterSession" ]]
+      then
+        WriteToLog "received command $COMMAND"
+      fi
     fi
     if [[ ! -z $SEATARG ]]
     then
