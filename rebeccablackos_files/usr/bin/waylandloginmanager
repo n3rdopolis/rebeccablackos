@@ -647,87 +647,94 @@ function RegisterSession
 {
   #get the data from loginmanager_register
   exec 1001<> /run/waylandloginmanager/loginmanager_register
-  RegisterData=$(while read -n 100 -t .01 data <&1001; do echo $data; done| head -1)
+  RegisterDataLines=$(while read -n 100 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
-  #get the register data, and put it into an array so it can be handled
-  IFS='@'
-  ArraySessionData=($RegisterData)
+  IFS='$\n'
+  RegisterDataLines=$(RegisterDataLines)
   unset IFS
-  RegisterType=${ArraySessionData[0]}
-  if [[ ! -z $RegisterData ]]
-  then
-    WriteToLog "received session data $RegisterData"
-    if [[ $RegisterType == NEWSESSION ]]
+
+  for RegisterData in ${RegisterDataLines[@]}
+  {
+    #get the register data, and put it into an array so it can be handled
+    IFS='@'
+    ArraySessionData=($RegisterData)
+    unset IFS
+    RegisterType=${ArraySessionData[0]}
+    if [[ ! -z $RegisterData ]]
     then
-      #Add the session data to the arrays that store info about the sessions.
-      SessionTTY=${ArraySessionData[1]}
-      SessionPID=${ArraySessionData[2]}
-      SessionUser=${ArraySessionData[3]}
-      SessionID=${ArraySessionData[4]}
-      SessionSeatID=${ArraySessionData[5]}
-      SessionDoLock=${ArraySessionData[6]}
-      if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
+      WriteToLog "received session data $RegisterData"
+      if [[ $RegisterType == NEWSESSION ]]
       then
-        AllSessionTTYs+=($SessionTTY)
-        AllSessionPIDs+=($SessionPID)
-        AllSessionUsers+=($SessionUser)
-        AllSessionIDs+=($SessionID)
-        AllSeatIDs+=($SessionSeatID)
-        #increment the number of running sessions, now that one is added and running successfuly
-        ((AllSessions++))
-        #Export the Session data
-        ExportSessionData
-        if [[ $SessionDoLock == 1 && $ISLIVE != 1 ]]
+        #Add the session data to the arrays that store info about the sessions.
+        SessionTTY=${ArraySessionData[1]}
+        SessionPID=${ArraySessionData[2]}
+        SessionUser=${ArraySessionData[3]}
+        SessionID=${ArraySessionData[4]}
+        SessionSeatID=${ArraySessionData[5]}
+        SessionDoLock=${ArraySessionData[6]}
+        if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
         then
-          loginctl lock-session $SessionID 2> /dev/null
-        fi
-      else
-        WriteToLog "Session failed to start"
-        SessionStartFailed=1
-        FailedSessionTTY=$SessionTTY
-        FailedSessionSeat=$SessionSeatID
-      fi
-
-
-    elif [[ $RegisterType == NEWWLMDISPLAY ]]
-    then
-      RegisterSeat=${ArraySessionData[2]}
-      if [[ $ReadyNotifySent == 0 ]]
-      then
-        systemd-notify --ready
-        ReadyNotifySent=1
-      fi
-      #Remove sessions that are not running from the array
-      RUNNINGSESSIONS=($(loginctl --no-legend list-sessions | while read SESSION OTHERCOLS; do echo $SESSION; done))
-      REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
-      LOGINMANAGERDISPLAYSESSIONS=()
-
-      for REGISTEREDSESSION in ${REGISTEREDSESSIONS[@]}
-      do
-        AddSession=0
-        IFS=@
-        REGISTEREDSESSIONDATA=($REGISTEREDSESSION)
-        unset IFS
-        for RUNNINGSESSION in ${RUNNINGSESSIONS[@]}
-        do
-          if [[ ${REGISTEREDSESSIONDATA[0]} == $RUNNINGSESSION ]]
+          AllSessionTTYs+=($SessionTTY)
+          AllSessionPIDs+=($SessionPID)
+          AllSessionUsers+=($SessionUser)
+          AllSessionIDs+=($SessionID)
+          AllSeatIDs+=($SessionSeatID)
+          #increment the number of running sessions, now that one is added and running successfuly
+          ((AllSessions++))
+          #Export the Session data
+          ExportSessionData
+          if [[ $SessionDoLock == 1 && $ISLIVE != 1 ]]
           then
-            AddSession=1
-            break
+            loginctl lock-session $SessionID 2> /dev/null
+          fi
+        else
+          WriteToLog "Session failed to start"
+          SessionStartFailed=1
+          FailedSessionTTY=$SessionTTY
+          FailedSessionSeat=$SessionSeatID
+        fi
+
+
+      elif [[ $RegisterType == NEWWLMDISPLAY ]]
+      then
+        RegisterSeat=${ArraySessionData[2]}
+        if [[ $ReadyNotifySent == 0 ]]
+        then
+          systemd-notify --ready
+          ReadyNotifySent=1
+        fi
+        #Remove sessions that are not running from the array
+        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions | while read SESSION OTHERCOLS; do echo $SESSION; done))
+        REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
+        LOGINMANAGERDISPLAYSESSIONS=()
+
+        for REGISTEREDSESSION in ${REGISTEREDSESSIONS[@]}
+        do
+          AddSession=0
+          IFS=@
+          REGISTEREDSESSIONDATA=($REGISTEREDSESSION)
+          unset IFS
+          for RUNNINGSESSION in ${RUNNINGSESSIONS[@]}
+          do
+            if [[ ${REGISTEREDSESSIONDATA[0]} == $RUNNINGSESSION ]]
+            then
+              AddSession=1
+              break
+            fi
+          done
+          if [[ $AddSession == 1 ]]
+          then
+            LOGINMANAGERDISPLAYSESSIONS+=($REGISTEREDSESSION)
           fi
         done
-        if [[ $AddSession == 1 ]]
-        then
-          LOGINMANAGERDISPLAYSESSIONS+=($REGISTEREDSESSION)
-        fi
-      done
-      REGISTEREDSESSIONS=()
+        REGISTEREDSESSIONS=()
 
-      LOGINMANAGERDISPLAYSESSIONS+=($RegisterSeat@${ArraySessionData[1]})
+        LOGINMANAGERDISPLAYSESSIONS+=($RegisterSeat@${ArraySessionData[1]})
+      fi
+    else
+      WriteToLog "register session requested, but no data was availible in the FIFO"
     fi
-  else
-    WriteToLog "register session requested, but no data was availible in the FIFO"
-  fi
+  }
 }
 
 #This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
