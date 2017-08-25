@@ -491,7 +491,7 @@ Will now reboot." 20 50 --no-cancel
 
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
-  RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 2>/dev/null | wc -l )
+  RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* |& wc -l )
   OLDSEAT0PID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0 2>/dev/null)
   if [[ $RUNNINGWLMCOUNT != 0 ]]
   then
@@ -2130,7 +2130,7 @@ function ReadCommandFIFO
         UserActionResult=$?
         if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
         then
-          if [[ ${UserActionFailSkips[$SeatIndexID]} == 1 ]]
+          if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
             ((UserActionFailCounts[$SeatIndexID]++))
             WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log."
