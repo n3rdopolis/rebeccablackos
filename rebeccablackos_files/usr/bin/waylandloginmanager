@@ -1620,6 +1620,7 @@ function StartLoginManagerDisplays
       unset IFS
 
       #Find what seats are new
+      NewSeatFailArray=()
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
@@ -1630,7 +1631,7 @@ function StartLoginManagerDisplays
           unset IFS
           if [[ $RunningSeat == ${SeatFailDataArray[0]} ]]
           then
-            IncludeSeat=0
+            NewSeatFailArray+=($SeatFailData)
             break
           fi
         done
@@ -1663,14 +1664,15 @@ function StartLoginManagerDisplays
           fi
 
           #Add info about the seat, the default fail count as 0, and the backend and pixman info
-          SeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
+          NewSeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
           if [[ ! -z $AUTOLOGINUSER ]]
           then
             echo $RunningSeat >> /run/waylandloginmanager/newseats
           fi
-          SendSelfCommand DetectSeats
         fi
       done
+      SeatFailArray=${NewSeatFailArray}
+      unset NewSeatFailArray
     fi
 
     #Go through each running seat, and start the loginmanagerdisplay for each seat, for a limited number of times
@@ -2073,7 +2075,6 @@ function ReadCommandFIFO
       done
     fi
 
-    SeatCanMultiSession=1
     UIJobCount=0
     SeatIndexID=$(GetStartedSeatIndex seat0)
 
@@ -2141,7 +2142,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     done
 
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
-    if [[ $SessionStartFailed == 1 && $SeatCanMultiSession == 1 ]]
+    if [[ $SessionStartFailed == 1 ]]
     then
       read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
@@ -2152,7 +2153,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           ResetTTYMode $FailedSessionTTY
         fi
-        # TODO seat0 only has TTYs
+      fi
+      SeatIndexID=$(GetStartedSeatIndex $FailedSessionSeat)
+      SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
+      if [[ $SeatCanMultiSession == 1 ]]
+      then
         loginctl activate $(GetSeatLoginManagerDisplay $FailedSessionSeat) &>/dev/null
       fi
       unset FailedSessionTTY
@@ -2190,14 +2195,18 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           NewAllSessionIDs+=($RunningSessionID)
           NewAllSeatIDs+=($RunningSeatID)
         else
+          SeatIndexID=$(GetStartedSeatIndex $RunningSeatID)
+          SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-          if [[ $RunningSessionTTY == $ActiveSystemTTY ]]
+          if [[ $RunningSeat != "seat0" && $SeatCanMultiSession == 1 ]]
+          then
+            loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
+          elif [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
             if [[ ! -z $RunningSessionTTY ]]
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            # TODO seat0 only has TTYs
             loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
           fi
         fi
@@ -2244,6 +2253,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         COMMAND=""
       fi
     fi
+    SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" && $SeatCanMultiSession == 1 ]]
