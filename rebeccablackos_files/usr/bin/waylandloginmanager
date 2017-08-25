@@ -1989,7 +1989,7 @@ function GetStartedSeatIndex
 {
   ReturnSeatIndex="-1"
   SeatCount=${#StartedSeats[@]}
-  for (( StartIndex=0; StartIndex<=$StartedSeatCount;  StartIndex=StartIndex+2 ))
+  for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
   do
     if [[ ${StartedSeats[$StartIndex]} == $1 ]]
     then
@@ -1997,7 +1997,7 @@ function GetStartedSeatIndex
       break
     fi
   done
-  if [[ $ReturnSeatIndex <=0 ]]
+  if [[ $ReturnSeatIndex != "-1" ]]
   then
     ReturnSeatIndex=$(($ReturnSeatIndex/2))
   fi
@@ -2046,7 +2046,7 @@ function ReadCommandFIFO
   while [ 1 ]
   do
 
-    #Detect all seats
+    #Detect all seats, and add them to the array
     if [[ $DoDetectSeats == 1 ]]
     then
       DoDetectSeats=0
@@ -2056,7 +2056,7 @@ function ReadCommandFIFO
       do
         IncludeSeat=1
         StartedSeatCount=${#StartedSeats[@]}
-        for (( StartIndex=0; StartIndex<=$StartedSeatCount;  StartIndex=StartIndex+2 ))
+        for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
         do
           if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
           then
@@ -2076,6 +2076,26 @@ function ReadCommandFIFO
           WriteToLog "New seat $RunningSeat detected, multisession support is $CanMultiSession"
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
+        fi
+      done
+
+      #Find out what seats went away, and reset their fail counts
+      StartedSeatCount=${#StartedSeats[@]}
+      for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
+      do
+        SeatRemoved=1
+        for RunningSeat in ${AllRunningSeats[@]}
+        do
+          if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
+          then
+            SeatRemoved=0
+          fi
+        done
+        if [[ $SeatRemoved == 1 ]]
+        then
+          ChangeIndex=$((StartIndex/2))
+          UserActionFailCounts[$ChangeIndex]=0
+          UserActionFailSkips[$ChangeIndex]=0
         fi
       done
     fi
@@ -2159,7 +2179,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         fi
       fi
       SeatIndexID=$(GetStartedSeatIndex $FailedSessionSeat)
-      SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
+      SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
       if [[ $SeatCanMultiSession == 1 ]]
       then
         loginctl activate $(GetSeatLoginManagerDisplay $FailedSessionSeat) &>/dev/null
@@ -2200,7 +2220,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           NewAllSeatIDs+=($RunningSeatID)
         else
           SeatIndexID=$(GetStartedSeatIndex $RunningSeatID)
-          SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
+          SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSeat != "seat0" && $SeatCanMultiSession == 1 ]]
           then
@@ -2257,7 +2277,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       SeatIndexID=$(GetStartedSeatIndex $SEATARG)
     fi
-    SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
+    SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" ]]
