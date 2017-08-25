@@ -2252,6 +2252,20 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ ! -z $SEATARG ]]
     then
       SeatIndexID=$(GetStartedSeatIndex $SEATARG)
+      SeatIsRunning=0
+      for RunningSeat in ${AllRunningSeats[@]}
+      do
+        if [[ $SEATARG == $RunningSeat ]]
+        then
+          SeatIsRunning=1
+          break
+        fi
+      done
+      if [[ $SeatIsRunning == 0 ]]
+      then
+        WriteToLog "Ignoring $COMMAND command as specified seat $SEATARG not running or invalid"
+        COMMAND=""
+      fi
     fi
     SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
 
