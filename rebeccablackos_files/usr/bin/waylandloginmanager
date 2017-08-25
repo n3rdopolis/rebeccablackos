@@ -2116,9 +2116,9 @@ function ReadCommandFIFO
         fi
       done < <(jobs -p -r)
 
-      if [[ -z ${UserActionFailCount[$SeatID]} ]]
+      if [[ -z ${UserActionFailCounts[$SeatID]} ]]
       then
-        UserActionFailCount[$SeatID]=0
+        UserActionFailCounts[$SeatID]=0
       fi
       if [[ -z ${UserActionFailSkips[$SeatID]} ]]
       then
@@ -2305,7 +2305,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
             kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-            UserActionFailSkip=1
+            ${UserActionFailSkips[$SeatID]}=1
             wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
           SwitchUserDialog "$SEATARG" &
@@ -2335,7 +2335,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          UserActionFailSkip=1
+          ${UserActionFailSkips[$SeatID]}=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         GetUserCredentials "$SEATARG" &
@@ -2351,7 +2351,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          UserActionFailSkip=1
+          ${UserActionFailSkips[$SeatID]}=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         LeavePrompt $SEATARG &
@@ -2375,7 +2375,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          UserActionFailSkip=1
+          ${UserActionFailSkips[$SeatID]}=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         ShowInfo "$SEATARG" &
