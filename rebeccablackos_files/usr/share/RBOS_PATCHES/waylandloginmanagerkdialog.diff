@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-08-09 23:32:48.457949639 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-08-09 23:32:00.217948194 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-08-25 08:09:13.397820254 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-08-25 08:22:54.757844854 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -21,28 +21,26 @@
    #These are optional as the waylandloginmanager displays a selection list with the same commands as well
  #/etc/loginmanagerdisplay/weston.ini
    #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/wayland_login_helpers to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
-@@ -357,7 +357,7 @@
+@@ -365,7 +365,7 @@
    set -m
  
    export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
 -  #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
-+  #User that the kdialog dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
++  User that the kdialog dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that the su test in AuthenticateUser user runs as
    export PROBETESTUSER=waylandloginmanager
-@@ -370,9 +370,10 @@
+@@ -378,7 +378,8 @@
    export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
 -  export GDK_BACKEND=wayland
-   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
-   export WAYLAND_DISPLAY=loginmanagerdisplay
 +  export QT_QPA_PLATFORM=wayland
 +  export QT_STYLE_OVERRIDE=oxygen
+   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston)
-   #Specify where wsession files are found
-@@ -413,7 +414,7 @@
+@@ -420,7 +421,7 @@
      ISLIVE=1
    fi
  
@@ -51,10 +49,10 @@
    TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-@@ -675,16 +676,7 @@
- #This function takes two arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string.
+@@ -734,16 +735,7 @@
  function DialogWait
  {
+   export WAYLAND_DISPLAY=loginmanagerdisplay_"$3"
 -  waitseconds=$1
 -  displaystring="$2"
 -  countseconds=0
@@ -65,30 +63,29 @@
 -    ((countseconds++))
 -    $SLEEPCMD 1
 -  done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
-+  $KDIALOGCMD --passivepopup "$2" "$1"
++  $KDIALOGCMD --passivepopup "$2" "$1" 2>/dev/null
  }
  
- #This function takes no arguments and waits for the loginmanagerdisplay to startup
-@@ -881,12 +873,16 @@
+ #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
+@@ -1011,12 +1003,15 @@
        then
          WSESSIONPICKLIST+=$'\n'
        fi
--      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((7+element*9))]}"#"${WSESSIONARRAY[$((8+element*9))]}
-+      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((7+element*9))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((8+element*9))]}
+-      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
++      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((8+element*10))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((0+element*10))]}
      done
      WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
 +    IFS=$'\n'
 +    WSESSIONPICKLIST=($WSESSIONPICKLIST)
 +    unset IFS
-+
-     #select the session. Each line is handled as a column. currently there are 8 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 9 is in collumn 1 again
+     #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
      #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
 -    WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
 +    WSESSIONNUMBER=$($KDIALOGCMD --geometry=700x300+0+0 --title="Pick a Session..." --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
      #Abort if the user selected cancel on the zenity dialog
      CancelOrOK=$?
      if [[ $CancelOrOK != 0 ]]
-@@ -905,7 +901,7 @@
+@@ -1035,7 +1030,7 @@
    then 
      if [[ $PROMPTED == 1 ]]
      then
@@ -97,7 +94,7 @@
      else
        WriteToLog "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell"
      fi
-@@ -986,7 +982,7 @@
+@@ -1124,7 +1119,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -106,7 +103,7 @@
  
  $BACKENDSTRING
  
-@@ -1008,27 +1004,17 @@
+@@ -1148,12 +1143,6 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -119,24 +116,20 @@
    while [[ $NumberOfSessions -ge 0 ]]
    do
      #determine if the current session is alive, before adding it to the list
-     if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
-     then
--    if [[ ! -z $SessionList ]]
-+      if [[ ! -z $SessionList ]]
-       then
-         SessionList+=$'\n'
+@@ -1165,11 +1154,7 @@
        fi
-       SessionList+="$NumberOfSessions"$'\n'
--      SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"$'\n'
--      SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
--      SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
--      SessionList+="${AllSessionIDs[$NumberOfSessions]}"
--
-+      SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
+       if [[ ${AllSeatIDs[$NumberOfSessions]} == "$1" ]]
+       then
+-        SessionList+="$NumberOfSessions"$'\n'
+-        SessionList+="${AllSessionIDs[$NumberOfSessions]}"$'\n'
+-        SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
+-        SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
+-        SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"
++        SessionList+="${AllSessionIDs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
+       fi
      fi
      ((NumberOfSessions--))
-   done
-@@ -1038,19 +1024,17 @@
+@@ -1180,19 +1165,17 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -162,7 +155,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1074,7 +1058,7 @@
+@@ -1220,7 +1203,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -171,7 +164,7 @@
        fi
      fi
    fi
-@@ -1233,26 +1217,30 @@
+@@ -1420,26 +1403,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -210,7 +203,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1260,9 +1248,9 @@
+@@ -1447,9 +1434,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -222,19 +215,16 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1273,9 +1261,9 @@
+@@ -1465,7 +1452,7 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
 -    USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
 +    USERPASSWORD=$( $KDIALOGCMD --title="Password" --password "Type Password for $LOGINUSER" 2>/dev/null )
      CancelOrOK=$?
--    #Abort if the user selected cancel on the zenity dialog
-+    #Abort if the user selected cancel on the dialog
+     #Abort if the user selected cancel on the zenity dialog
      if [[ $CancelOrOK != 0 ]]
-     then
-       exit 1
-@@ -1287,20 +1275,20 @@
+@@ -1479,22 +1466,22 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
@@ -252,14 +242,16 @@
  
 -#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
 +#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a dialog for handling power options for the computer.
+ #It takes 1 argument, the seat to display the dialogs on
  function LeavePrompt
  {
+   export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
 -  #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 +  #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
    if [[ $CanPowerOff == 1 ]]
    then
-@@ -1356,16 +1344,21 @@
+@@ -1550,16 +1537,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -270,6 +262,7 @@
 +  unset IFS
 +
 +  ACTION=$($KDIALOGCMD --title="Leave..." --menu "What do you want to do?" -- "${ACTIONSTRING[@]}" 2>/dev/null )
++
    CancelOrOK=$?
 -  #Abort if the user selected cancel on the zenity dialog
 +  #Abort if the user selected cancel on the dialog
@@ -284,7 +277,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -1399,7 +1392,7 @@
+@@ -1593,7 +1586,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -293,30 +286,38 @@
    fi
  }
  
-@@ -1505,7 +1498,7 @@
-     #Wait until the loginmanagerdisplay becomes availible
-     DisplayServerWait
-     ChooseSessionType
--    #Abort if the user selected cancel on the zenity dialog
-+    #Abort if the user selected cancel on the dialog
-     CancelOrOK=$?
-     if [[ $CancelOrOK != 0 ]]
-     then
-@@ -1520,7 +1513,7 @@
-       WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
-       StartUserSession "$AutoSessionTTY" "$AUTOLOGINUSER" "$WSESSIONDATA" &
-     else
--      $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
-+      $KDIALOGCMD --title="System Error" --error "Not Enough TTYs!" 2>/dev/null
-       WriteToLog "Not Enough TTYs for autologin!"
-     fi
-   fi 
-@@ -1550,16 +1543,21 @@
- {
+@@ -1843,7 +1836,7 @@
+   #Wait until the loginmanagerdisplay becomes availible
+   DisplayServerWait "$1"
+   ChooseSessionType "$1"
+-  #Abort if the user selected cancel on the zenity dialog
++  #Abort if the user selected cancel on the dialog
+   CancelOrOK=$?
+   if [[ $CancelOrOK != 0 ]]
+   then
+@@ -1863,7 +1856,7 @@
+     WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
+     StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
+   else
+-    $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
++    $KDIALOGCMD --title="System Error" --error "Not Enough TTYs!" 2>/dev/null
+     WriteToLog "Not Enough TTYs for autologin!"
+   fi
+ }
+@@ -1896,22 +1889,27 @@
+   export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
    #wait for the loginmanagerdisplay
-   DisplayServerWait
--  ActionMenu="Login\nLogin...\nSwitch\nSwitch User...\nLeave\nShutdown...\nInfo\nHelp..."
-+  ActionMenu="Login"$'\n'"Login..."$'\n'"Switch"$'\n'"Switch User..."$'\n'"Leave"$'\n'"Shutdown..."$'\n'"Info"$'\n'"Help..."
+   DisplayServerWait "$1"
+-  ActionMenu="Login\nLogin...\n"
++  ActionMenu="Login"$'\n'"Login..."$'\n'
+   SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value)
+   if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+   then
+-    ActionMenu+="Switch\nSwitch User...\n"
++    ActionMenu+="Switch"$'\n'"Switch User..."$'\n'
+   fi
+-  ActionMenu+="Leave\nShutdown...\nInfo\nHelp..."
++  ActionMenu+="Leave"$'\n'"Shutdown..."$'\n'"Info"$'\n'"Help..."
    if [[ $wlmdebuginsecure == 1 ]]
    then
 -    ActionMenu+="\nDebug\nRoot Terminal..."
@@ -326,7 +327,7 @@
 -    ActionMenu+="\nDebug\nTerminal Login..."
 +    ActionMenu+=$'\n'"Debug"$'\n'"Terminal Login..."
    fi
--  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplay.log; exit ${PIPESTATUS[1]})
+-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$1".log; exit ${PIPESTATUS[1]})
 -ZENITYSTATUS=$?
 +
 +  IFS=$'\n'
@@ -338,7 +339,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -1567,12 +1565,12 @@
+@@ -1919,12 +1917,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -353,4 +354,4 @@
 +  exit $DIALOGSTATUS
  }
  
- 
+ #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
