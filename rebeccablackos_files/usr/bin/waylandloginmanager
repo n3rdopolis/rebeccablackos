@@ -1609,8 +1609,8 @@ function StartLoginManagerDisplays
   do
     ((SEATCHECKLOOPS++))
 
-    #Wait 5 minutes before checking for seats (for the second time and beyond). 5 second pause. 360 seconds in 5 minutes
-    if [[ $SEATCHECKLOOPS == 72 || $FIRSTSEATCHECK == 1 ]]
+    #Wait 1 minute before checking for seats (for the second time and beyond). 5 second pause. 60 seconds in 1 minute
+    if [[ $SEATCHECKLOOPS == 12 || $FIRSTSEATCHECK == 1 ]]
     then
       FIRSTSEATCHECK=0
       SEATCHECKLOOPS=0
@@ -1673,6 +1673,7 @@ function StartLoginManagerDisplays
       done
       SeatFailArray=${NewSeatFailArray}
       unset NewSeatFailArray
+      SendSelfCommand DetectSeats
     fi
 
     #Go through each running seat, and start the loginmanagerdisplay for each seat, for a limited number of times
@@ -2063,7 +2064,7 @@ function ReadCommandFIFO
         if [[ $IncludeSeat == 1 ]]
         then
           HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value)
-          if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+          if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $HasMultiSession == "yes" ]]
           then
             CanMultiSession=1
           else
@@ -2247,46 +2248,47 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ ! -z $SEATARG ]]
     then
       SeatIndexID=$(GetStartedSeatIndex $SEATARG)
-      if [[ $SeatIndexID == -1 ]]
-      then
-        WriteToLog "Invalid seat $SEATARG specified. Ignoring command $COMMAND"
-        COMMAND=""
-      fi
     fi
     SeatCanMultiSession=${StartedSeats[((SeatIndexID+1))]}
 
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
-    if [[ $COMMAND == "Switch" && $SeatCanMultiSession == 1 ]]
+    if [[ $COMMAND == "Switch" ]]
     then
-      LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
-      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
-      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
+      if [[ $SeatCanMultiSession == 1 ]]
       then
-        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
-      fi
-      if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
-      then
-        if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
+        LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+        if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
         then
-          kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          UserActionFailSkip=1
-          wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
+          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
+          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
-        SwitchUserDialog "$SEATARG" &
-        LastSwitchPIDs[$SeatIndexID]=$!
-      else
-        WriteToLog "A handler for the Switch command is already open"
+        if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
+        then
+          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
+          then
+            kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
+            UserActionFailSkip=1
+            wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
+          fi
+          SwitchUserDialog "$SEATARG" &
+          LastSwitchPIDs[$SeatIndexID]=$!
+        else
+          WriteToLog "A handler for the Switch command is already open"
+        fi
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
-    elif [[ $COMMAND == "Change" && $SeatCanMultiSession == 1 ]]
+    elif [[ $COMMAND == "Change" ]]
     then
-      LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
-      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
-      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
+      if [[ $SeatCanMultiSession == 1 ]]
       then
-        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
-        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+        LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+        if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
+        then
+          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
+          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+        fi
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
