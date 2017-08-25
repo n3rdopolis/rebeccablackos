@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-08-25 08:09:13.397820254 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-08-25 08:22:54.757844854 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-08-25 18:01:26.338884477 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-08-25 18:10:56.774901561 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -49,7 +49,12 @@
    TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-@@ -734,16 +735,7 @@
+@@ -730,20 +731,11 @@
+   fi
+ }
+ 
+-#This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
++#This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
  function DialogWait
  {
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$3"
@@ -67,24 +72,49 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1011,12 +1003,15 @@
+@@ -793,10 +785,10 @@
+     SeatSupportedBackends+=(FB)
+     SeatDefaultBackendType=FB
+   fi
+-  #Parse the list of sessions specified, so that zenity can use it as a list of sessions
++  #Parse the list of sessions specified, so that kdialog can use it as a list of sessions
+   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
+   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
+-  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a zenity dialog.
++  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a dialog process.
+   while read SESSIONFILE
+   do
+     IsExecutable=$(find $SESSIONFILE |wc -l)
+@@ -991,7 +983,7 @@
+   done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
+ 
+ 
+-  #If wesessions where found above then show a zenity dialog. If there where none, use a default session.
++  #If wesessions where found above then show a dialog. If there where none, use a default session.
+   if [[ ! -z $WSESSIONLIST ]]
+   then
+     PROMPTED=1
+@@ -1011,13 +1003,16 @@
        then
          WSESSIONPICKLIST+=$'\n'
        fi
 -      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
-+      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((8+element*10))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((0+element*10))]}
++      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((8+element*10))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((9+element*10))]}
      done
      WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
 +    IFS=$'\n'
 +    WSESSIONPICKLIST=($WSESSIONPICKLIST)
 +    unset IFS
      #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
-     #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
+-    #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
 -    WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
+-    #Abort if the user selected cancel on the zenity dialog
++    #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
 +    WSESSIONNUMBER=$($KDIALOGCMD --geometry=700x300+0+0 --title="Pick a Session..." --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
-     #Abort if the user selected cancel on the zenity dialog
++    #Abort if the user selected cancel on the dialog
      CancelOrOK=$?
      if [[ $CancelOrOK != 0 ]]
+     then
 @@ -1035,7 +1030,7 @@
    then 
      if [[ $PROMPTED == 1 ]]
@@ -215,15 +245,18 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1465,7 +1452,7 @@
+@@ -1465,9 +1452,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
 -    USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
 +    USERPASSWORD=$( $KDIALOGCMD --title="Password" --password "Type Password for $LOGINUSER" 2>/dev/null )
      CancelOrOK=$?
-     #Abort if the user selected cancel on the zenity dialog
+-    #Abort if the user selected cancel on the zenity dialog
++    #Abort if the user selected cancel on the dialog
      if [[ $CancelOrOK != 0 ]]
+     then
+       exit 1
 @@ -1479,22 +1466,22 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
@@ -334,7 +367,7 @@
 +  ActionMenu=($ActionMenu)
 +  unset IFS
 +
-+  USERACTION=$($KDIALOGCMD --title="Login Manager" --menu "Select an Action" -- "${ActionMenu[@]}"  2>> /var/log/loginmanagerdisplay.log)
++  USERACTION=$($KDIALOGCMD --title="Login Manager" --menu "Select an Action" -- "${ActionMenu[@]}"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$1".log)
 +  DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
