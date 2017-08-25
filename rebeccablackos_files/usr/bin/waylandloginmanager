@@ -2034,8 +2034,7 @@ function ReadCommandFIFO
           if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
           then
             StartAutoLogin $RunningSeat &
-            AutoLoginSeatIndexID=$(GetStartedSeatIndex $RunningSeat)
-            LastLogonPIDs[$AutoLoginSeatIndexID]=$!
+            LastLogonPIDs[$StartIndex+1]=$!
           fi
         fi
       done
