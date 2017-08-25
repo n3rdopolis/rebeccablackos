@@ -1987,7 +1987,7 @@ function ReadCommandFIFO
 
   LastUserActionPIDs=()
   LastSwitchPIDs=()
-  LastLogonPIDs=()
+  LastLoginPIDs=()
   LastLeavePIDs=()
   LastInfoPIDs=()
   LastDebugPIDs=()
@@ -2034,7 +2034,7 @@ function ReadCommandFIFO
           if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
           then
             StartAutoLogin $RunningSeat &
-            LastLogonPIDs[$StartIndex+1]=$!
+            LastLoginPIDs[$StartIndex]=$!
           fi
         fi
       done
@@ -2069,7 +2069,7 @@ function ReadCommandFIFO
 
       while read JOB
       do
-        if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLogonPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
+        if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLoginPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
         then
           ((UIJobCount++))
         fi
@@ -2290,7 +2290,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
     then
-      if [[ $(jobs -p -r | grep -c ^${LastLogonPIDs[$SeatIndexID]}$) == 0  ]]
+      if [[ $(jobs -p -r | grep -c ^${LastLoginPIDs[$SeatIndexID]}$) == 0  ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
@@ -2299,7 +2299,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         GetUserCredentials "$SEATARG" &
-        LastLogonPIDs[$SeatIndexID]=$!
+        LastLoginPIDs[$SeatIndexID]=$!
       else
         WriteToLog "A handler for the Login command is already open"
       fi
