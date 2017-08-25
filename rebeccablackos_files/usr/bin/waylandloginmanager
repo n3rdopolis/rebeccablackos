@@ -491,7 +491,7 @@ Will now reboot." 20 50 --no-cancel
 
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
-  if /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 1> /dev/null 2>&1
+  if ls /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 1> /dev/null 2>&1
   then
     RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* |& wc -l )
   else
@@ -1670,10 +1670,6 @@ function StartLoginManagerDisplays
 
           #Add info about the seat, the default fail count as 0, and the backend and pixman info
           NewSeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
-          if [[ ! -z $AUTOLOGINUSER ]]
-          then
-            echo $RunningSeat >> /run/waylandloginmanager/newseats
-          fi
         fi
       done
       SeatFailArray=${NewSeatFailArray}
@@ -1840,55 +1836,6 @@ function GetLoginManagerDisplaySession
 }
 
 
-#This determines if the autologin user was specified, and then configures that value to /etc/waylandloginmanager.conf, as in an unsafe shutdown, the lightdm config file has sometimes dropped the autologin user.
-#It starts an autologin session on each seat for the specified user
-function HandleAutoLogins
-{
-  AutoLoginFirstLoop=1
-  #if autologin is specified
-  if [[ ! -z $AUTOLOGINUSER ]]
-  then
-    while [ 1 ]
-    do
-      #Get a list of seats that are running, and seats that are handled
-      if [[ -e /run/waylandloginmanager/newseats ]]
-      then
-        IFS=$'\n'
-        AllRunningSeats=($(cat /run/waylandloginmanager/newseats))
-        AllStartedSeats=($(cat /run/waylandloginmanager/autologinran))
-        unset IFS
-        NewSeats=()
-        rm /run/waylandloginmanager/newseats
-
-        #Find what seats are new
-        for RunningSeat in ${AllRunningSeats[@]}
-        do
-          IncludeSeat=1
-          for StartedSeat in ${AllStartedSeats[@]}
-          do
-            if [[ $RunningSeat == $StartedSeat ]]
-            then
-              IncludeSeat=0
-              break
-            fi
-          done
-          if [[ $IncludeSeat == 1 ]]
-          then
-            NewSeats+=($RunningSeat)
-          fi
-        done
-
-        #Start a autologin session on each new seat
-        for NewSeat in ${NewSeats[@]}
-        do
-          StartAutoLogin $NewSeat &
-        done
-      fi
-      $SLEEPCMD 5
-    done
-  fi 
-}
-
 #This fuction starts an autologin session, and takes 1 argument, the seat to start the autologin session on
 function StartAutoLogin
 {
@@ -1935,7 +1882,7 @@ function SetupLoggingAndFIFO
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
   #Prepare logging for the loginmanagerdisplay
-  mkdir /var/log/loginmanagerdisplays/
+  mkdir -p /var/log/loginmanagerdisplays/
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplays
   touch /run/waylandloginmanager/autologinran
   chmod 700 /run/waylandloginmanager/autologinran
@@ -2082,6 +2029,14 @@ function ReadCommandFIFO
           WriteToLog "New seat $RunningSeat detected, multisession support is $CanMultiSession"
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
+          SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
+          #if autologin is specified
+          if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
+          then
+            StartAutoLogin $RunningSeat &
+            AutoLoginSeatIndexID=$(GetStartedSeatIndex $RunningSeat)
+            LastLogonPIDs[$AutoLoginSeatIndexID]=$!
+          fi
         fi
       done
 
@@ -2311,7 +2266,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
             kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-            ${UserActionFailSkips[$SeatID]}=1
+            UserActionFailSkips[$SeatID]=1
             wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
           SwitchUserDialog "$SEATARG" &
@@ -2341,7 +2296,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          ${UserActionFailSkips[$SeatID]}=1
+          UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         GetUserCredentials "$SEATARG" &
@@ -2357,7 +2312,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          ${UserActionFailSkips[$SeatID]}=1
+          UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         LeavePrompt $SEATARG &
@@ -2381,7 +2336,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
-          ${UserActionFailSkips[$SeatID]}=1
+          UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         ShowInfo "$SEATARG" &
@@ -2437,9 +2392,6 @@ then
 
   #Start the main loginmanagerdisplay Weston servers for each seat
   StartLoginManagerDisplays &
-
-  #Start the autologin launcher, which will determine if there is an autologin user. Treat it as a login prompt, to not allow any other login prompts to start, until the job ends.
-  HandleAutoLogins &
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
