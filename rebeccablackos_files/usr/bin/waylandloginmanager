@@ -49,7 +49,7 @@
 
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
-  #/var/log/loginmanagerdisplay.log : This is the log file for the Weston server that is the loginmanagerdisplay
+  #/var/log/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
   #~/wlsessionlogs/waylandsession_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
   #~/wlsessionlogs/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
@@ -491,7 +491,12 @@ Will now reboot." 20 50 --no-cancel
 
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
-  RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* |& wc -l )
+  if /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 1> /dev/null 2>&1
+  then
+    RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* |& wc -l )
+  else
+    RUNNINGWLMCOUNT=0
+  fi
   OLDSEAT0PID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0 2>/dev/null)
   if [[ $RUNNINGWLMCOUNT != 0 ]]
   then
@@ -1749,7 +1754,7 @@ function StartLoginManagerDisplays
           fi
           if [[ ! -e /run/waylandloginmanager/inhibit ]]
           then
-            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
+            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
           fi
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
@@ -1930,8 +1935,8 @@ function SetupLoggingAndFIFO
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
   #Prepare logging for the loginmanagerdisplay
-  touch /var/log/loginmanagerdisplay.log
-  chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplay.log
+  mkdir /var/log/loginmanagerdisplays/
+  chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplays
   touch /run/waylandloginmanager/autologinran
   chmod 700 /run/waylandloginmanager/autologinran
   rm /run/waylandloginmanager/fifolock
@@ -1958,7 +1963,7 @@ function UserActionDialog
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplay.log; exit ${PIPESTATUS[1]})
+  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$1".log; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
@@ -2131,6 +2136,7 @@ function ReadCommandFIFO
         if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
         then
           UserActionResult=0
+          unset LastUserActionPIDs[$SeatIndexID]
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
             ((UserActionFailCounts[$SeatIndexID]++))
