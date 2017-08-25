@@ -1159,7 +1159,7 @@ function SwitchUserDialog
     #determine if the current session is alive, before adding it to the list
     if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
     then
-    if [[ ! -z $SessionList ]]
+      if [[ ! -z $SessionList ]]
       then
         SessionList+=$'\n'
       fi
