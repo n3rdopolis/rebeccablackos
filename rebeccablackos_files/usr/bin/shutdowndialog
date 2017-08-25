@@ -20,11 +20,22 @@
 
 #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 
+# TODO find if this is needed
+ONLY_SEAT0_SESSION_SWITCH=1
 
-ACTIONSTRING="Switch User
-Switch User
-Logoff
-Logoff Session"
+SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
+
+if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+then
+  ACTIONSTRING="Switch User"$'\n'"Switch User"
+fi
+
+if [[ ! -z $ACTIONSTRING ]]
+then
+  ACTIONSTRING+=$'\n'
+fi
+ACTIONSTRING+="Logoff"$'\n'"Logoff Session"
+
 
 CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
 if [[ $CanPowerOff == 1 ]]
