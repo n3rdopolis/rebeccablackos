@@ -650,7 +650,7 @@ function RegisterSession
   RegisterDataLines=$(while read -n 100 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
   IFS='$\n'
-  RegisterDataLines=$(RegisterDataLines)
+  RegisterDataLines=($RegisterDataLines)
   unset IFS
 
   for RegisterData in ${RegisterDataLines[@]}
