@@ -1292,6 +1292,9 @@ function StartUserSession
     #Disable cursor blinking on the TTY the display server will be started on
     echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
+    OutputArgs="-p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p"
+  else
+    OutputArgs=""
   fi
 
   #If multisession is not supported
@@ -1316,7 +1319,7 @@ function StartUserSession
 
   if [[ $RunSession == 1 ]]
   then
-    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" -p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
   else
     WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
   fi
@@ -1737,10 +1740,13 @@ function StartLoginManagerDisplays
           if [[ $CurrentSeat == seat0 ]]
           then
             chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
+            OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+          else
+            OutputArgs=""
           fi
           if [[ ! -e /run/waylandloginmanager/inhibit ]]
           then
-            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" -p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
+            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
           fi
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
@@ -2096,11 +2102,12 @@ function ReadCommandFIFO
       then
         if [[ ${UserActionFailSkips[$SeatIndexID]} == 1 ]]
         then
-          #((UserActionFailCounts[$SeatIndexID]++))
+          ((UserActionFailCounts[$SeatIndexID]++))
           WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
         else
           UserActionFailCounts[$SeatIndexID]=0
           UserActionFailSkips[$SeatIndexID]=0
+          UserActionResult=0
         fi
       fi
     fi
@@ -2233,7 +2240,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       SeatIndexID=$(GetStartedSeatIndex $SEATARG)
       if [[ $SeatIndexID == -1 ]]
       then
-        WriteToLog "Invalid seat $SEATARG specified. Ignoring command"
+        WriteToLog "Invalid seat $SEATARG specified. Ignoring command $COMMAND"
         COMMAND=""
       fi
     fi
