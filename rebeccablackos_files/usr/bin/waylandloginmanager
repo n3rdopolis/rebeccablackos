@@ -2130,6 +2130,7 @@ function ReadCommandFIFO
         UserActionResult=$?
         if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
         then
+          UserActionResult=0
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
             ((UserActionFailCounts[$SeatIndexID]++))
@@ -2137,7 +2138,6 @@ function ReadCommandFIFO
           else
             UserActionFailCounts[$SeatIndexID]=0
             UserActionFailSkips[$SeatIndexID]=0
-            UserActionResult=0
           fi
         fi
       fi
