@@ -2100,46 +2100,60 @@ function ReadCommandFIFO
       done
     fi
 
-    UIJobCount=0
-    SeatIndexID=$(GetStartedSeatIndex seat0)
-
-    while read JOB
+    for RunningSeat in ${AllRunningSeats[@]}
     do
-      if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLogonPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
-      then
-        ((UIJobCount++))
-      fi
-    done < <(jobs -p -r)
+      UIPromptAttemptsMaxedOut=1
+      UIJobCount=0
+      SeatIndexID=$(GetStartedSeatIndex $RunningSeat)
 
-    if [[ -z ${UserActionFailCount[$SeatID]} ]]
-    then
-      UserActionFailCount[$SeatID]=0
-    fi
-    if [[ -z ${UserActionFailSkips[$SeatID]} ]]
-    then
-      UserActionFailSkips[$SeatID]=0
-    fi
-    if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} && ! -e /proc/${LastUserActionPIDs[$SeatIndexID]} ]]
-    then
-      wait ${LastUserActionPIDs[$SeatIndexID]}
-      UserActionResult=$?
-      if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
-      then
-        if [[ ${UserActionFailSkips[$SeatIndexID]} == 1 ]]
+      while read JOB
+      do
+        if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLogonPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
         then
-          ((UserActionFailCounts[$SeatIndexID]++))
-          WriteToLog "The prompt for the user action terminated incorrectly. Please see the loginmanagerdisplay log."
-        else
-          UserActionFailCounts[$SeatIndexID]=0
-          UserActionFailSkips[$SeatIndexID]=0
-          UserActionResult=0
+          ((UIJobCount++))
+        fi
+      done < <(jobs -p -r)
+
+      if [[ -z ${UserActionFailCount[$SeatID]} ]]
+      then
+        UserActionFailCount[$SeatID]=0
+      fi
+      if [[ -z ${UserActionFailSkips[$SeatID]} ]]
+      then
+        UserActionFailSkips[$SeatID]=0
+      fi
+      if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} && ! -e /proc/${LastUserActionPIDs[$SeatIndexID]} ]]
+      then
+        wait ${LastUserActionPIDs[$SeatIndexID]}
+        UserActionResult=$?
+        if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
+        then
+          if [[ ${UserActionFailSkips[$SeatIndexID]} == 1 ]]
+          then
+            ((UserActionFailCounts[$SeatIndexID]++))
+            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log."
+          else
+            UserActionFailCounts[$SeatIndexID]=0
+            UserActionFailSkips[$SeatIndexID]=0
+            UserActionResult=0
+          fi
         fi
       fi
-    fi
 
-    if [[ ${UserActionFailCounts[$SeatIndexID]} == 5 ]]
+      if [[ ${UserActionFailCounts[$SeatIndexID]} != 5 ]]
+      then
+        UIPromptAttemptsMaxedOut=0
+        if [[ $UIJobCount == 0 ]]
+        then
+          UserActionDialog $RunningSeat &
+          LastUserActionPIDs[$SeatIndexID]=$!
+        fi
+      fi
+    done
+
+    if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
-      WriteToLog "The prompt for the user action terminated incorrectly too many times in a row."
+      WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -2147,13 +2161,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       systemctl stop waylandloginmanager.service
       exit 1
     fi
-
-    if [[ $UIJobCount == 0 ]]
-    then
-      UserActionDialog seat0 &
-      LastUserActionPIDs[$SeatIndexID]=$!
-    fi
-
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
