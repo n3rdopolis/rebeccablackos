@@ -1691,6 +1691,7 @@ function StartLoginManagerDisplays
       SeatWestonBackend=${SeatData[2]}
       SeatUsePixman=${SeatData[3]}
       StartLoginManagerDisplay=1
+      LOGINMANAGERDISPLAYSTATUS=0
 
       #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
       if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
@@ -2100,6 +2101,7 @@ function ReadCommandFIFO
       done
     fi
 
+    #Handle the main dialog for each seat
     for RunningSeat in ${AllRunningSeats[@]}
     do
       UIPromptAttemptsMaxedOut=1
@@ -2140,7 +2142,7 @@ function ReadCommandFIFO
         fi
       fi
 
-      if [[ ${UserActionFailCounts[$SeatIndexID]} != 5 ]]
+      if [[ ${UserActionFailCounts[$SeatIndexID]} < 5 ]]
       then
         UIPromptAttemptsMaxedOut=0
         if [[ $UIJobCount == 0 ]]
