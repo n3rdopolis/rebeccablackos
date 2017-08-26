@@ -332,7 +332,12 @@ session         optional        pam_systemd.so type=wayland
 session         optional        pam_ecryptfs.so unwrap
 " > /etc/pam.d/waylandloginmanager
     fi
-    
+    if [[ ! -e /etc/pam.d/waylandloginmanager-loginmanagerdisplay ]]
+    then
+      cp /etc/pam.d/waylandloginmanager /etc/pam.d/waylandloginmanager-loginmanagerdisplay
+      sed -i 's/type=wayland/type=wayland class=greeter/g' /etc/pam.d/waylandloginmanager-loginmanagerdisplay
+    fi
+
     if [[ ! -e /lib/udev/rules.d/70-uaccess-fbdev.rules ]]
     then
       echo "ACTION=="remove", GOTO="uaccess_fbdev_end"
