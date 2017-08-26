@@ -505,7 +505,7 @@ Will now reboot." 20 50 --no-cancel
       LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDSEAT0PID | awk '{print $2}' | sed 's/tty//g')
     fi
     #Get the logind session of the weston instance running loginmanagerdisplay for each seat
-    AllRunningSeats=($(loginctl --no-legend list-seats))
+    AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
     for RunningSeat in ${AllRunningSeats[@]}
     do
       GetLoginManagerDisplaySession 0 $RunningSeat
@@ -574,7 +574,7 @@ function GetNextTTY
   SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
   for SESSION in ${SESSIONS[@]}
   do
-    SYSTEMDTTYS+=($(loginctl show-session $SESSION -p TTY --value))
+    SYSTEMDTTYS+=($(loginctl show-session $SESSION -p TTY --value 2>/dev/null))
   done
 
   TTYNotInLogind=0
@@ -704,7 +704,7 @@ function RegisterSession
           ReadyNotifySent=1
         fi
         #Remove sessions that are not running from the array
-        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions | while read SESSION OTHERCOLS; do echo $SESSION; done))
+        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
         REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
         LOGINMANAGERDISPLAYSESSIONS=()
 
@@ -778,9 +778,9 @@ function ChooseSessionType
   FirstRunNotRan=0
 
   SeatDefaultBackendType=""
-  SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" |grep -e "/drm/card[0-9]*$" -c)
-  SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" |grep -e "/graphics/fb[0-9]*$" -c)
-  FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0$" -c)
+  SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+  SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+  FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
   if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0  ]]
   then
     SeatSupportedBackends+=(KMS)
@@ -1313,15 +1313,15 @@ function StartUserSession
   RunSession=1
   if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && "$USERSEAT" != seat0 ]]
   then
-    SeatCanMultiSession=$(loginctl show-seat "$USERSEAT" -p CanMultiSession --value)
-    SeatSessions=($(loginctl show-seat "$USERSEAT" -p Sessions --value))
+    SeatCanMultiSession=$(loginctl show-seat "$USERSEAT" -p CanMultiSession --value 2>/dev/null)
+    SeatSessions=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null))
     SeatSessionsCount=${#SeatSessions[@]}
-    SeatSessionType=$(loginctl show-session ${SeatSessions[@]} -p Class --value)
+    SeatSessionType=$(loginctl show-session ${SeatSessions[@]} -p Class --value 2>/dev/null)
     if [[ $SeatCanMultiSession != "yes" ]]
     then
       if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
       then
-        loginctl terminate-session ${SeatSessions[@]}
+        loginctl terminate-session ${SeatSessions[@]} 2>/dev/null
         touch /run/waylandloginmanager/inhibit
       else
         RunSession=0
@@ -1628,7 +1628,7 @@ function StartLoginManagerDisplays
       SEATCHECKLOOPS=0
       #Get a list of seats that are running, and seats that are handled
       IFS=$'\n'
-      AllRunningSeats=($(loginctl --no-legend list-seats))
+      AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
       unset IFS
 
       #Find what seats are new
@@ -1650,9 +1650,9 @@ function StartLoginManagerDisplays
         if [[ $IncludeSeat == 1 ]]
         then
           #Detect hardware abilities, of the seat
-          SeatSupportsKMS=$(loginctl seat-status "$RunningSeat" |grep -e "/drm/card[0-9]*$" -c)
-          SeatSupportsFB=$(loginctl seat-status "$RunningSeat" |grep -e "/graphics/fb[0-9]*$" -c)
-          FB0INSEAT0=$(loginctl seat-status seat0 |grep -e "/graphics/fb0$" -c)
+          SeatSupportsKMS=$(loginctl seat-status "$RunningSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+          SeatSupportsFB=$(loginctl seat-status "$RunningSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+          FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
 
           #Determine the backend to use
           WESTONBACKEND=0
@@ -1704,8 +1704,8 @@ function StartLoginManagerDisplays
       #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
       if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
       then
-        SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value)
-        SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value)
+        SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
+        SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
         if [[ $SeatCanMultiSession != "yes" && ! -z "$SeatSessions" ]]
         then
           SeatStartCount=0
@@ -1904,7 +1904,7 @@ function UserActionDialog
   #wait for the loginmanagerdisplay
   DisplayServerWait "$1"
   ActionMenu="Login\nLogin...\n"
-  SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value)
+  SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value 2>dev/null)
   if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
   then
     ActionMenu+="Switch\nSwitch User...\n"
@@ -2011,7 +2011,7 @@ function ReadCommandFIFO
     then
       DoDetectSeats=0
       #Find what seats are new
-      AllRunningSeats=($(loginctl --no-legend list-seats))
+      AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
@@ -2026,7 +2026,7 @@ function ReadCommandFIFO
         done
         if [[ $IncludeSeat == 1 ]]
         then
-          HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value)
+          HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
           if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $HasMultiSession == "yes" ]]
           then
             CanMultiSession=1
@@ -2275,10 +2275,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       if [[ $SeatCanMultiSession == 1 ]]
       then
         LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
-        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
         if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
         then
-          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
+          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
         if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
@@ -2301,10 +2301,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       if [[ $SeatCanMultiSession == 1 ]]
       then
         LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
-        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value)
+        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
         if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
         then
-          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value) &>/dev/null
+          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
       fi
