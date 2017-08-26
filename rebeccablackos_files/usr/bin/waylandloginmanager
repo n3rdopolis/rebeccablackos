@@ -1777,10 +1777,12 @@ function StartLoginManagerDisplays
             systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
           fi
           LOGINMANAGERDISPLAYREADY=1
-          while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
+          TRYCOUNT=0
+          while [[ $LOGINMANAGERDISPLAYREADY != 0 && $TRYCOUNT -le 5 ]]
           do
             LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$CurrentSeat.service &> /dev/null; echo $?)
             $SLEEPCMD 1
+            ((TRYCOUNT++))
           done
           #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
           GetLoginManagerDisplaySession 1 $CurrentSeat
