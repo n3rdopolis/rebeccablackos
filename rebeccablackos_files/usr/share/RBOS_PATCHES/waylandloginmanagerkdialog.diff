@@ -343,7 +343,7 @@
    DisplayServerWait "$1"
 -  ActionMenu="Login\nLogin...\n"
 +  ActionMenu="Login"$'\n'"Login..."$'\n'
-   SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value 2>dev/null)
+   SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value 2>/dev/null)
    if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
    then
 -    ActionMenu+="Switch\nSwitch User...\n"
