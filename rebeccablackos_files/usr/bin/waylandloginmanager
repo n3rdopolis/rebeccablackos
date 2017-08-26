@@ -1129,6 +1129,12 @@ function DiagnosticTerminal
 function ShowInfo
 {
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  if [[ $1 == seat0 ]]
+  then
+    SEATSTRING="This Login Manager Display for seat seat0 is running on tty: $LOGINMANAGERDISPLAYTTY"
+  else
+    SEATSTRING="This Login Manager Display is for seat $1"
+  fi
   #If the backend type is FB, then add a string to tell the user that in the help dialog
   if [[ $DefaultBackendType == "FB" ]]
   then
@@ -1146,7 +1152,7 @@ This is the optimal way to run Weston or other Wayland servers."
 
 $BACKENDSTRING
 
-The Login Manager Display for seat "$1" is running on tty: $LOGINMANAGERDISPLAYTTY
+$SEATSTRING
 
 The key icon brings up a login prompt
 The arrow icon brings up a prompt to switch between running sessions
