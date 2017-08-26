@@ -1705,16 +1705,21 @@ function StartLoginManagerDisplays
       SeatUsePixman=${SeatData[3]}
       StartLoginManagerDisplay=1
       LOGINMANAGERDISPLAYSTATUS=0
+      SeatUseMultiSessionConfig=1
 
       #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
       if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
       then
         SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
         SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
-        if [[ $SeatCanMultiSession != "yes" && ! -z "$SeatSessions" ]]
+        if [[ $SeatCanMultiSession != "yes" ]]
         then
-          SeatStartCount=0
-          StartLoginManagerDisplay=0
+          SeatUseMultiSessionConfig=0
+          if [[ ! -z "$SeatSessions" ]]
+          then
+            SeatStartCount=0
+            StartLoginManagerDisplay=0
+          fi
         fi
       fi
 
@@ -1760,9 +1765,15 @@ function StartLoginManagerDisplays
           else
             OutputArgs=""
           fi
+          if [[ $SeatUseMultiSessionConfig == 1 ]]
+          then
+            WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-switch.ini"
+          else
+            WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
+          fi
           if [[ ! -e /run/waylandloginmanager/inhibit ]]
           then
-            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log &>/dev/null
+            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
           fi
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
