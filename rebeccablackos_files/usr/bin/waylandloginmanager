@@ -711,17 +711,21 @@ function RegisterSession
         fi
         #Remove sessions that are not running from the array
         RUNNINGSESSIONS=($(loginctl --no-legend list-sessions 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
+        #Move LOGINMANAGERDISPLAYSESSIONS array into a temporary array, and clear LOGINMANAGERDISPLAYSESSIONS
         REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
         LOGINMANAGERDISPLAYSESSIONS=()
 
+        #Go through the temporary array
         for REGISTEREDSESSION in ${REGISTEREDSESSIONS[@]}
         do
           AddSession=0
           IFS=@
           REGISTEREDSESSIONDATA=($REGISTEREDSESSION)
           unset IFS
+          #Go through the list of sessions
           for RUNNINGSESSION in ${RUNNINGSESSIONS[@]}
           do
+            #If there is a match, add the line back to the array
             if [[ ${REGISTEREDSESSIONDATA[0]} == $RUNNINGSESSION ]]
             then
               AddSession=1
@@ -735,6 +739,7 @@ function RegisterSession
         done
         REGISTEREDSESSIONS=()
 
+        #Add the new session to the array
         LOGINMANAGERDISPLAYSESSIONS+=($RegisterSeat@${ArraySessionData[1]})
       fi
     else
@@ -1965,10 +1970,12 @@ function CommandFIFOProxy
 }
 
 #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
+#This is so per-seat information can be stored in arrays using the same index to refer to the data per-seat
 function GetStartedSeatIndex
 {
   ReturnSeatIndex="-1"
   SeatCount=${#StartedSeats[@]}
+  #Go through the StartedSeats array, untill the index matches the specified seat
   for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
   do
     if [[ ${StartedSeats[$StartIndex]} == $1 ]]
@@ -1987,8 +1994,8 @@ function GetStartedSeatIndex
 #Function to get the ID of the registered loginmanagerdisplay for this seat. It takes 1 argument, the seat
 function GetSeatLoginManagerDisplay
 {
-  #Get the loginmanagerdisplay for the seat
   RETURNSESSION=""
+  #Go through the list of registered loginmanagerdisplay sessions, until the specified seat matches
   for SESSION in ${LOGINMANAGERDISPLAYSESSIONS[@]}
   do
     IFS="@"
@@ -2032,6 +2039,8 @@ function ReadCommandFIFO
       DoDetectSeats=0
       #Find what seats are new
       AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
+      #Find new seats by going the list of running ones, going through all stored ones
+      #Then finding ones that have no matches
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
@@ -2046,6 +2055,7 @@ function ReadCommandFIFO
         done
         if [[ $IncludeSeat == 1 ]]
         then
+          #Determine and store if this seat is multisession compatible
           HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
           if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $HasMultiSession == "yes" ]]
           then
@@ -2054,6 +2064,7 @@ function ReadCommandFIFO
             CanMultiSession=0
           fi
           WriteToLog "New seat $RunningSeat detected, multisession support is $CanMultiSession"
+          #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
@@ -2067,6 +2078,8 @@ function ReadCommandFIFO
       done
 
       #Find out what seats went away, and reset their fail counts
+      #Go through the list of registred seats, the list of running seats
+      #If there are no matches for the registered seat, then it is gone
       StartedSeatCount=${#StartedSeats[@]}
       for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
       do
@@ -2078,6 +2091,7 @@ function ReadCommandFIFO
             SeatRemoved=0
           fi
         done
+        #Reset the fail count info for this seat in the arrays, it's possible the seat could be recreated
         if [[ $SeatRemoved == 1 ]]
         then
           ChangeIndex=$((StartIndex/2))
@@ -2094,6 +2108,7 @@ function ReadCommandFIFO
       UIJobCount=0
       SeatIndexID=$(GetStartedSeatIndex $RunningSeat)
 
+      #Determine if there are any running UI jobs for the paticular seat
       while read JOB
       do
         if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLoginPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
@@ -2102,6 +2117,7 @@ function ReadCommandFIFO
         fi
       done < <(jobs -p -r)
 
+      #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
       then
         UserActionFailCounts[$SeatID]=0
@@ -2110,10 +2126,14 @@ function ReadCommandFIFO
       then
         UserActionFailSkips[$SeatID]=0
       fi
+
+      #If the PID for the seats UserActionDialog is not running, get the return status
       if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} && ! -e /proc/${LastUserActionPIDs[$SeatIndexID]} ]]
       then
         wait ${LastUserActionPIDs[$SeatIndexID]}
         UserActionResult=$?
+        #If the return status is not 0 or 1 (1 is a valid press of cancel, and not a crash)
+        #increase the fail count
         if [[ ($UserActionResult != 0 && $UserActionResult != 1) ]]
         then
           UserActionResult=0
@@ -2129,6 +2149,7 @@ function ReadCommandFIFO
         fi
       fi
 
+      #If every seat had the UserActionDialog fail 5 times, declare it
       if [[ ${UserActionFailCounts[$SeatIndexID]} < 5 ]]
       then
         UIPromptAttemptsMaxedOut=0
@@ -2140,6 +2161,7 @@ function ReadCommandFIFO
       fi
     done
 
+    #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
@@ -2269,10 +2291,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         WriteToLog "received command $COMMAND"
       fi
     fi
+    #If a seat is specified, and it is not running, ignore the command
     if [[ ! -z $SEATARG ]]
     then
       SeatIndexID=$(GetStartedSeatIndex $SEATARG)
       SeatIsRunning=0
+      #Go through the list of running seats, check if one of them matches the specified one
       for RunningSeat in ${AllRunningSeats[@]}
       do
         if [[ $SEATARG == $RunningSeat ]]
