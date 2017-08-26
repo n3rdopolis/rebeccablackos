@@ -1727,10 +1727,10 @@ function StartLoginManagerDisplays
       #Handle the seat hardware information
       if [[ $SeatWestonBackend == KMS ]]
       then
-        WESTONBACKEND="drm-backend.so"
+        WESTONBACKENDSTRING="drm-backend.so"
       elif [[ $SeatWestonBackend == FB ]]
       then
-        WESTONBACKEND="fbdev-backend.so"
+        WESTONBACKENDSTRING="fbdev-backend.so"
       elif [[ $SeatWestonBackend == 0 ]]
       then
         #If the seat does not support the hardware, then abort
@@ -1774,7 +1774,7 @@ function StartLoginManagerDisplays
           fi
           if [[ ! -e /run/waylandloginmanager/inhibit ]]
           then
-            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKEND $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
+            systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
           fi
           LOGINMANAGERDISPLAYREADY=1
           while [[ $LOGINMANAGERDISPLAYREADY != 0 ]]
