@@ -511,6 +511,7 @@ Will now reboot." 20 50 --no-cancel
     fi
     #Get the logind session of the weston instance running loginmanagerdisplay for each seat
     AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
+    LOGINMANAGERDISPLAYSESSIONS=()
     for RunningSeat in ${AllRunningSeats[@]}
     do
       GetLoginManagerDisplaySession 0 $RunningSeat
