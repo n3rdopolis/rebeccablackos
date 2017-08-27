@@ -1902,7 +1902,7 @@ function StartAutoLogin
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
-    WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY"
+    WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
     StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
