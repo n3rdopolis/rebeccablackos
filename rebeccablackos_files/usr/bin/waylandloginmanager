@@ -1785,7 +1785,7 @@ function StartLoginManagerDisplays
         fi
         if [[ -x "$DEFAULTWAYLANDSERVER" ]]
         then
-          systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
+          systemctl reset-failed wlm-loginmanagerdisplay_$CurrentSeat &> /dev/null
           if [[ $CurrentSeat == seat0 ]]
           then
             chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
