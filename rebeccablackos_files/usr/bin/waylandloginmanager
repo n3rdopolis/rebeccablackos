@@ -1814,10 +1814,14 @@ function StartLoginManagerDisplays
           done
           #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
           GetLoginManagerDisplaySession 1 $CurrentSeat
-          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+          if [[ ! -z $REGISTERDISPLAYSESSION ]]
+          then
+            loginctl activate $REGISTERDISPLAYSESSION &>/dev/null
+          fi
         else
           if [[ $SeatStartCount == 1 ]]
           then
+            (( SeatStartCount++ ))
             WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
           fi
         fi
@@ -1869,6 +1873,7 @@ function GetLoginManagerDisplaySession
 {
   RegisterLoginManagerDisplay=$1
   #Get the pid of loginmanagerdisplay
+  unset REGISTERDISPLAYSESSION
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$2".service -p MainPID --value 2>/dev/null)
   IFS=" "
   #Get all logind sessions
@@ -1885,7 +1890,7 @@ function GetLoginManagerDisplaySession
       break
     fi
   done
-  if [[ $RegisterLoginManagerDisplay == 1 ]]
+  if [[ $RegisterLoginManagerDisplay == 1 && ! -z $REGISTERDISPLAYSESSION ]]
   then
     SendSelfRegisterData "NEWWLMDISPLAY@$REGISTERDISPLAYSESSION@$2"
   fi
