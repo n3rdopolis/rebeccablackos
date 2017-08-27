@@ -396,8 +396,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   # TODO if Weston fbdev becomes seat aware, change to 1
   export WESTON_FBDEV_SEAT_AWARE=0
   export ONLY_SEAT0_SESSION_SWITCH=0
-  # TODO remove, this is not needed, but it needs to be fully tested
-  export ONLY_SEAT0_SESSION_SWITCH=1
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then
@@ -1262,7 +1260,7 @@ function StartUserSession
   while read var
   do 
     unset "$var" &> /dev/null
-  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" ) 
+  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$|^ONLY_SEAT0_SESSION_SWITCH$" )
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONDATA=()
@@ -1352,6 +1350,7 @@ function StartUserSession
       fi
     fi
   fi
+  unset ONLY_SEAT0_SESSION_SWITCH
 
   if [[ $RunSession == 1 ]]
   then
