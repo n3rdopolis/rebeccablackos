@@ -1361,7 +1361,7 @@ function StartUserSession
     rm /run/waylandloginmanager/inhibit_"$USERSEAT" 2>/dev/null
     $SLEEPCMD 5
     #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
-    USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
+    USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$USERSEAT" -p ExecMainPID --value 2>/dev/null)
     #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
     SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
     for SESSION in "${SESSIONS[@]}"
