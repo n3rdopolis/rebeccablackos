@@ -710,7 +710,7 @@ function RegisterSession
           ReadyNotifySent=1
         fi
         #Remove sessions that are not running from the array
-        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
+        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions $RegisterSeat 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
         #Move LOGINMANAGERDISPLAYSESSIONS array into a temporary array, and clear LOGINMANAGERDISPLAYSESSIONS
         REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
         LOGINMANAGERDISPLAYSESSIONS=()
@@ -1311,7 +1311,13 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER on tty $USERSESSIONTTY on seat $USERSEAT"
+  if [[ "$USERSEAT" == seat0 ]]
+  then
+    TTYSTRING=" on tty $USERSESSIONTTY"
+  else
+    TTYSTRING=""
+  fi
+  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID" &> /dev/null
   #Only seat0 supports TTYs
   if [[ "$USERSEAT" == seat0 ]]
@@ -1660,6 +1666,7 @@ function StartLoginManagerDisplays
           unset IFS
           if [[ $RunningSeat == ${SeatFailDataArray[0]} ]]
           then
+            IncludeSeat=0
             NewSeatFailArray+=($SeatFailData)
             break
           fi
@@ -1770,7 +1777,12 @@ function StartLoginManagerDisplays
       if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $StartLoginManagerDisplay == 1 ]]
       then
         (( SeatStartCount++ ))
-        WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
+        if [[ "$CurrentSeat" == seat0 ]]
+        then
+          WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
+        else
+          WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat"
+        fi
         if [[ -x "$DEFAULTWAYLANDSERVER" ]]
         then
           systemctl reset-failed wlm-loginmanagerdisplay_$1 &> /dev/null
@@ -1814,7 +1826,7 @@ function StartLoginManagerDisplays
         fi
       fi
 
-      SeatFailArray[$SeatIndex]="$CurrentSeat@$SeatStartCount"
+      SeatFailArray[$SeatIndex]="$CurrentSeat@$SeatStartCount@$SeatWestonBackend@$SeatUsePixman"
     done
 
     #Determine if all seats failed, if so, then abort the loop
@@ -1902,7 +1914,12 @@ function StartAutoLogin
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
-    WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
+    if [[ "$1" == seat0 ]]
+    then
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
+    else
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $1"
+    fi
     StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
