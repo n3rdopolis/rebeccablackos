@@ -52,3 +52,42 @@ index e80a5040..81e5ec3b 100644
  
  	weston_log("initializing fbdev backend\n");
  
+
+
+
+
+diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
+index a069bd4f..11627590 100644
+--- a/libweston/launcher-logind.c
++++ b/libweston/launcher-logind.c
+@@ -762,18 +762,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
+ 		free(t);
+ 		goto err_session;
+ 	}
+-	free(t);
+ 
+-	r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
+-	if (r < 0) {
+-		weston_log("logind: session not running on a VT\n");
+-		goto err_session;
+-	} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
+-		weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
+-			   tty, wl->vtnr);
+-		r = -EINVAL;
+-		goto err_session;
++        if (!strcmp(t, "seat0")) {
++		r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
++		if (r < 0) {
++			weston_log("logind: session not running on a VT\n");
++			goto err_session;
++		} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
++			weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
++				   tty, wl->vtnr);
++			r = -EINVAL;
++			goto err_session;
++		}
+ 	}
++	free(t);
+ 
+ 	loop = wl_display_get_event_loop(compositor->wl_display);
+ 	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
