@@ -1691,6 +1691,15 @@ function StartLoginManagerDisplays
               WESTONUSEPIXMAN=1
             fi
           fi
+          if [[ $WESTONBACKEND == KMS ]]
+          then
+            WriteToLog "Kernel mode setting found for seat $RunningSeat ."
+          elif [[ $WESTONBACKEND == FB ]]
+          then
+            WriteToLog "Framebuffer found for seat $RunningSeat ."
+          else
+            WriteToLog "No usable display hardware found on seat $RunningSeat ."
+          fi
 
           #Add info about the seat, the default fail count as 0, and the backend and pixman info
           NewSeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
@@ -1744,11 +1753,6 @@ function StartLoginManagerDisplays
         WESTONBACKENDSTRING="fbdev-backend.so"
       elif [[ $SeatWestonBackend == 0 ]]
       then
-        #If the seat does not support the hardware, then abort
-        if [[ $SeatStartCount == 0 ]]
-        then
-          WriteToLog "$CurrentSeat does not have any supported hardware to start a loginmanagerdisplay"
-        fi
         SeatStartCount=5
         LOGINMANAGERDISPLAYSTATUS=1
       fi
