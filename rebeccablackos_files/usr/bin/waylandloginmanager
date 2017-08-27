@@ -1344,8 +1344,8 @@ function StartUserSession
     then
       if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
       then
-        loginctl terminate-session ${SeatSessions[@]} 2>/dev/null
-        touch /run/waylandloginmanager/inhibit
+        touch /run/waylandloginmanager/inhibit_"$USERSEAT"
+        loginctl kill-session ${SeatSessions[@]} 2>/dev/null
       else
         RunSession=0
       fi
@@ -1354,31 +1354,32 @@ function StartUserSession
 
   if [[ $RunSession == 1 ]]
   then
-    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$USERSEAT" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+
+    rm /run/waylandloginmanager/inhibit_"$USERSEAT" 2>/dev/null
+    $SLEEPCMD 5
+    #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
+    USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
+    #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
+    SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
+    for SESSION in "${SESSIONS[@]}"
+    do
+      SessionPid=$(loginctl show-session $SESSION -p Leader --value 2>/dev/null)
+      if [[ $SessionPid == $USERSESSIONPID ]]
+      then
+        LOGINDSESSION=$SESSION
+        break
+      fi
+    done < <(echo "$SESSIONS")
+
+    #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
+    loginctl activate $LOGINDSESSION &>/dev/null
+
+    #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
+    SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION@$USERSEAT@$STARTLOCKED"
   else
     WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
   fi
-  rm /run/waylandloginmanager/inhibit 2>/dev/null
-  $SLEEPCMD 5
-  #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
-  USERSESSIONPID=$(ps --tty /dev/tty$USERSESSIONTTY | sed -n 2p | awk '{print $1}')
-  #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
-  SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
-  for SESSION in "${SESSIONS[@]}"
-  do
-    SessionPid=$(loginctl show-session $SESSION -p Leader --value 2>/dev/null)
-    if [[ $SessionPid == $USERSESSIONPID ]]
-    then
-      LOGINDSESSION=$SESSION
-      break
-    fi
-  done < <(echo "$SESSIONS")
-
-  #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
-  loginctl activate $LOGINDSESSION &>/dev/null
-
-  #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  SendSelfRegisterData "NEWSESSION@$USERSESSIONTTY@$USERSESSIONPID@$LOGNAME@$LOGINDSESSION@$USERSEAT@$STARTLOCKED"
 }
 
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
@@ -1799,7 +1800,7 @@ function StartLoginManagerDisplays
           else
             WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
           fi
-          if [[ ! -e /run/waylandloginmanager/inhibit ]]
+          if [[ ! -e /run/waylandloginmanager/inhibit_$CurrentSeat ]]
           then
             systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
           fi
@@ -1819,10 +1820,11 @@ function StartLoginManagerDisplays
           then
             WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
           fi
-          if [[ $SeatStartCount == 5 ]]
-          then
-            WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
-          fi
+        fi
+      else
+        if [[ $SeatStartCount == 5 ]]
+        then
+          WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
         fi
       fi
 
