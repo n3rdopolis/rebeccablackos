@@ -710,7 +710,7 @@ function RegisterSession
           ReadyNotifySent=1
         fi
         #Remove sessions that are not running from the array
-        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions $RegisterSeat 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
+        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
         #Move LOGINMANAGERDISPLAYSESSIONS array into a temporary array, and clear LOGINMANAGERDISPLAYSESSIONS
         REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
         LOGINMANAGERDISPLAYSESSIONS=()
@@ -1662,7 +1662,7 @@ function StartLoginManagerDisplays
         for SeatFailData in ${SeatFailArray[@]}
         do
           IFS=@
-          SeatFailDataArray=($SeatFailData[@])
+          SeatFailDataArray=($SeatFailData)
           unset IFS
           if [[ $RunningSeat == ${SeatFailDataArray[0]} ]]
           then
@@ -1712,7 +1712,7 @@ function StartLoginManagerDisplays
           NewSeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
         fi
       done
-      SeatFailArray=${NewSeatFailArray}
+      SeatFailArray=(${NewSeatFailArray[@]})
       unset NewSeatFailArray
       SendSelfCommand DetectSeats
     fi
