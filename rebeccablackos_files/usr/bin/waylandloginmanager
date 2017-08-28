@@ -2229,7 +2229,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         fi
       fi
       SeatIndexID=$(GetStartedSeatIndex $FailedSessionSeat)
-      SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
+      SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
       if [[ $SeatCanMultiSession == 1 ]]
       then
         loginctl activate $(GetSeatLoginManagerDisplay $FailedSessionSeat) &>/dev/null
@@ -2270,7 +2270,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           NewAllSeatIDs+=($RunningSeatID)
         else
           SeatIndexID=$(GetStartedSeatIndex $RunningSeatID)
-          SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
+          SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSeat != "seat0" && $SeatCanMultiSession == 1 ]]
           then
@@ -2334,6 +2334,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ $SEATARG == $RunningSeat ]]
         then
           SeatIsRunning=1
+          SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
           break
         fi
       done
@@ -2343,8 +2344,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         COMMAND=""
       fi
     fi
-    SeatCanMultiSession=${StartedSeats[SeatIndexID+1]}
-
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     if [[ $COMMAND == "Switch" ]]
     then
