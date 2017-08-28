@@ -20,8 +20,7 @@
 
 #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 
-# TODO find if this is needed
-ONLY_SEAT0_SESSION_SWITCH=1
+ONLY_SEAT0_SESSION_SWITCH=0
 
 SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
 
