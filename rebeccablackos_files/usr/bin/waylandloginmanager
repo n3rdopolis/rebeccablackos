@@ -714,7 +714,7 @@ function RegisterSession
         REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
         LOGINMANAGERDISPLAYSESSIONS=()
 
-        #Go through the temporary array
+        #Go through the temporary array, cleaning up stale entries before appending the new one
         for REGISTEREDSESSION in ${REGISTEREDSESSIONS[@]}
         do
           AddSession=0
@@ -725,7 +725,7 @@ function RegisterSession
           for RUNNINGSESSION in ${RUNNINGSESSIONS[@]}
           do
             #If there is a match, add the line back to the array
-            if [[ ${REGISTEREDSESSIONDATA[0]} == $RUNNINGSESSION ]]
+            if [[ ${REGISTEREDSESSIONDATA[1]} == $RUNNINGSESSION ]]
             then
               AddSession=1
               break
@@ -1885,7 +1885,6 @@ function GetLoginManagerDisplaySession
     if [[ $LOGINMANAGERDISPLAYPID == $WLMLOGINDSESSIONPID ]]
     then
       REGISTERDISPLAYSESSION=$WLMLOGINDSESSION
-      LOGINMANAGERDISPLAYSESSIONS+=("$2"@$WLMLOGINDSESSION)
       break
     fi
   done
@@ -2096,7 +2095,7 @@ function ReadCommandFIFO
           else
             CanMultiSession=0
           fi
-          WriteToLog "New seat $RunningSeat detected, multisession support is $CanMultiSession"
+          WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
