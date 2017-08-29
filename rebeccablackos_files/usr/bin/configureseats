@@ -356,7 +356,7 @@ kill -9 $MainFormPID
 #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
 zenity --info --text "Seat Configuration for all devices is now complete.
 
-Press OK to apply all the changes. The screen may flicker for less than a second." --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+Press OK to apply all the changes. The screen may flicker for less than a second, 5 seconds after dismissing this dialog." --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
