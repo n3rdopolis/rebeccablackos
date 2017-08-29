@@ -17,7 +17,7 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 
-#This script is for configuring multiple seats in Weston. It matches the devices devpath, and the devices serial ID, and sets the ENV{WL_SEAT} and ENV{ID_SEAT} values, or the devices path ID and sets the ENV{ID_SEAT} value in a the udev file /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+#This script is for configuring multiple seats in Weston. It matches the devices devpath, and the devices serial ID, and sets the ENV{WL_SEAT} and ENV{ID_SEAT} values, or the devices path ID and sets the ENV{ID_SEAT} value in a the udev file /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
 #This makes it easier for users to configure multiple pointers and keyboard focuses, as well as multiple sessions.
 
 #Require root privlages
@@ -261,7 +261,7 @@ sleep 5
 
 
 #Create the config file
-touch /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+touch /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
 
 #Generate a list of wayland seats for the Zenity dialogs for selection
 unset WLSeatList
@@ -322,31 +322,31 @@ do
       NewSessionSeatNumber="${DeviceSessionSeatIDs[CurrentDeviceNumber]}"
     fi
 
-    cat /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules > /tmp/99-weston_seats_and_udev_seats.rules.work
+    cat /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules > /tmp/72-weston_seats_and_udev_seats.rules.work
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
       if [[ ! -z ${DeviceNames[$CurrentDeviceNumber]} && ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
       then
-        awk "!/${DeviceNames[$CurrentDeviceNumber]//\//\\/}/ || !/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+        awk "!/${DeviceNames[$CurrentDeviceNumber]//\//\\/}/ || !/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
       else
         if [[ ! -z ${DeviceNames[$CurrentDeviceNumber]} ]]
         then
-          awk "!/${DeviceNames[$CurrentDeviceNumber]}//\//\\/}//" /tmp/99-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+          awk "!/${DeviceNames[$CurrentDeviceNumber]}//\//\\/}//" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
         fi
         if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
         then
-          awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+          awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
         fi
       fi
-      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_FOR_SEAT}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_FOR_SEAT}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
     else
       if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
       then
-        awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/99-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+        awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
       fi
-      echo "ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /etc/udev/rules.d/99-weston_seats_and_udev_seats.rules
+      echo "ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
     fi
-    rm /tmp/99-weston_seats_and_udev_seats.rules.work
+    rm /tmp/72-weston_seats_and_udev_seats.rules.work
   fi
 done
 
