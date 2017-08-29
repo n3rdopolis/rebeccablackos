@@ -898,6 +898,10 @@ function ChooseSessionType
     then
       SupportsSeat=1
     fi
+    if [[ $BackendType == "WL" ]]
+    then
+      SupportsSeat=1
+    fi
 
     IsFallbackSession=${DesktopFileMainArray[4]:4}
     if [[ -z $IsFallbackSession ]]
