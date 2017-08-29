@@ -338,13 +338,13 @@ do
           awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
         fi
       fi
-      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_FOR_SEAT}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
+      echo "TAG==\"seat\", ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_FOR_SEAT}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
     else
       if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
       then
         awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
       fi
-      echo "ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
+      echo "TAG==\"seat\", ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
     fi
     rm /tmp/72-weston_seats_and_udev_seats.rules.work
   fi
@@ -363,9 +363,13 @@ udevadm control --reload-rules
 
 
 #Notify each input device about the change with udev, instead of doing a full trigger on all devices on the system
-udevadm trigger --subsystem-match=input
-udevadm trigger --subsystem-match=drm
-udevadm trigger --subsystem-match=graphics
+for (( CurrentSeat=1; CurrentSeat<5; CurrentSeat++ ))
+do
+  udevadm trigger --subsystem-match=input
+  udevadm trigger --subsystem-match=drm
+  udevadm trigger --subsystem-match=graphics
+  sleep 1
+done
 
 #If the Wayland server is hosted 
 if [[ ! -z $WAYLAND_HOST ]]
