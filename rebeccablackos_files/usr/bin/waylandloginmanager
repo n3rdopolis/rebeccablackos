@@ -148,7 +148,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config $PIXMANARGS --seat=$XDG_SEAT --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
+    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -1067,7 +1067,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--seat=$USERSEAT"
+      WSESSIONDATA+=$'\n'
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--xwayland"
       WSESSIONDATA+=$'\n'
@@ -1087,7 +1087,7 @@ function ChooseSessionType
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--socket=$WAYLAND_GUEST"
       WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--seat=$USERSEAT"
+      WSESSIONDATA+=$'\n'
       WSESSIONDATA+=$'\n'
       WSESSIONDATA+="--xwayland"
       WSESSIONDATA+=$'\n'
@@ -1801,7 +1801,7 @@ function StartLoginManagerDisplays
           else
             WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
           fi
-          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --seat=$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
+          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
 
           LOGINMANAGERDISPLAYREADY=1
           TRYCOUNT=0
