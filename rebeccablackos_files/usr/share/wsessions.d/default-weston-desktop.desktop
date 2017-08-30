@@ -11,8 +11,8 @@ CompositorKMSArguments=--backend=drm-backend.so
 CompositorFBArguments=--backend=fbdev-backend.so
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
-CompositorSeatArgument=--seat=
 CompositorKMSSeatAware=1
+CompositorKMSSeatArgument=--seat=
 CompositorFBSeatAware=0
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland

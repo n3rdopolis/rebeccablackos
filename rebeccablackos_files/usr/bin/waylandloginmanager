@@ -839,7 +839,7 @@ function ChooseSessionType
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
+    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -re  "s/^ *Compositor([A-Z]*)SeatArgument *= */003#\1#/" -e "/^[0-9][0-9][0-9]#/!d" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
     unset IFS
 
     Enabled=${DesktopFileMainArray[0]:4}
@@ -890,6 +890,24 @@ function ChooseSessionType
         fi
       done
     fi
+
+    #See if the current sessions backend is multiseat aware
+    BackendSeatArgument=""
+    if [[ ! -z $BackendType ]]
+    then
+      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
+      do
+        IFS="#"
+        ThisBackendArray=(${DesktopFileBackendArray[$element]})
+        unset IFS
+        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 003 ]]
+        then
+          BackendSeatArgument=${ThisBackendArray[2]}
+          break
+        fi
+      done
+    fi
+
     #If this is seat0, then don't enforce seatawareness
     if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
     then
@@ -913,6 +931,11 @@ function ChooseSessionType
     fi
     CompositorDisplayArgument=${DesktopFileMainArray[5]:4}
     CompositorSeatArgument=${DesktopFileMainArray[6]:4}
+    #The backend argument might be different. If one is set for this backend, override.
+    if [[ ! -z $BackendSeatArgument ]]
+    then
+      CompositorSeatArgument=$BackendSeatArgument
+    fi
     SessionArgument=${DesktopFileMainArray[7]:4}
     AdditionalArguments=${DesktopFileMainArray[8]:4}
     CompositorExec=${DesktopFileMainArray[9]:4}
@@ -984,7 +1007,7 @@ function ChooseSessionType
     fi
 
     #if the session supports the CompositorSeatArgument, for setting the XDG_SEAT it should use, then ammend the CurrentHandleSeat to the end of the command.
-    if [[ ! -z $CompositorSeatArgument ]]
+    if [[ ! -z $CompositorSeatArgument && $BackendType != "WL" ]]
     then
       CompositorSeatArgument="$CompositorSeatArgument$CurrentHandleSeat"
     else

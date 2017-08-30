@@ -45,6 +45,7 @@ Similar to CompositorSupports(BACKEND), specify for each backend if it is multis
 Compositor(BACKEND)Arguments:
 If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 10, 11 and 12 on the example below. *These are optional*
 
+
 CompositorDisplayArgument:
 This specifies how the compositor is specified what to use for WAYLAND_DISPLAY in weston it is --socket= . waylandloginmanager then automatically appends the session ID after it, so it doesn't need any variables. it only appends it if CompositorDisplayArgument is specified
 
@@ -52,8 +53,20 @@ This specifies how the compositor is specified what to use for WAYLAND_DISPLAY i
 
   See line 11 in the example
 
+
+Compositor(BACKEND)SeatAware:
+This determines if a paticular backend supported by the compositor is seat aware. (As in, will start on something other than seat0 properly)
+The option for hosted (WL) sessions if specified in this file is ignored, as the Display server that is the host is concerned about that detail.
+See Lines 19 and 20 as examples
+
 CompositorSeatArgument:
-This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it deosn't need any variables. It only appends it if CompositorSeatArgument is specified
+This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it deosn't need any variables. It only appends it if CompositorSeatArgument is specified. This is ignored when using the WL backend (running hosted)
+See line 21 as example
+
+Compositor(BACKEND)SeatArgument:
+This specifies how the compositor is specified as to what XDG_SEAT it is started on, similar to CompositorSeatArgument for a paticular backend. This overrides CompositorSeatArgument if it is set.
+(CompositorWLSeatArgument would be ignored, as the WL backend means that it is not directly concerned about the hardware)
+See line 22 as example. (It CAN be different from what is specified in line 21)
 
 SessionArgument:
 if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or liri shell module opposed to the weston-desktop-shell. See line 13 in the example
@@ -90,6 +103,10 @@ An example:
 16.|    NeedsFile=/opt/bin/weston
 17.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
 18.|    IsFallbackSession=0
+19.|    CompositorKMSSeatAware=1
+20.|    CompositorFBSeatAware=0
+21.|    CompositorSeatArgument=--seat
+22.|    CompositorKMSSeatArgument=--seat
 ----------------------------------------------
 
 
