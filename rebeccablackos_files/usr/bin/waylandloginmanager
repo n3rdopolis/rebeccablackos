@@ -858,81 +858,57 @@ function ChooseSessionType
     Type=${DesktopFileMainArray[3]:4}
 
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
+    #Get the hardware support status
     SupportsBackend=0
-    for (( element1 = 0 ; element1 < ${#SeatSupportedBackends[@]} ; element1++ ))
+    for SEATBACKEND in ${SeatSupportedBackends[@]}
     do
-      export BackendType=${SeatSupportedBackends[$element1]}
-      for (( element2 = 0 ; element2 < ${#DesktopFileBackendArray[@]} ; element2++ ))
+      export BackendType=$SEATBACKEND
+      SupportsSeat=0
+      unset BackendSeatArgument
+      unset BackendArguments
+      for (( element1 = 0 ; element1 < ${#DesktopFileBackendArray[@]} ; element1=element1+4 ))
       do
         IFS="#"
-        ThisBackendArray=(${DesktopFileBackendArray[$element2]})
+        BackendSupportedArray=(${DesktopFileBackendArray[$element1]})
+        BackendArgumentArray=(${DesktopFileBackendArray[$element1+1]})
+        BackendCanSeatArray=(${DesktopFileBackendArray[$element1+2]})
+        BackendSeatArgArray=(${DesktopFileBackendArray[$element1+3]})
         unset IFS
-        if [[ ${ThisBackendArray[1]} == $BackendType ]]
+        if [[ ${BackendSupportedArray[1]} == $BackendType ]]
         then
-          if [[ ${ThisBackendArray[2]} == 1 && ${ThisBackendArray[0]} == 000 ]]
+          #If this is seat0, then don't enforce seatawareness
+          if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
           then
-            SupportsBackend=1
+            if [[ $FB0INSEAT0 == 1 ]]
+            then
+              SupportsSeat=1
+            fi
+          elif [[ $CurrentHandleSeat == seat0 && $BackendType != "FB" ]]
+          then
+            SupportsSeat=1
+          elif [[ $BackendType == "WL" ]]
+          then
+            SupportsSeat=1
+          fi
+          if [[ $SupportsSeat == 0 ]]
+          then
+            SupportsSeat=${BackendCanSeatArray[2]}
+          fi
+          SupportsBackend=${BackendSupportedArray[2]}
+          if [[ $SupportsBackend == 1 && $SupportsSeat == 1 ]]
+          then
+            BackendArguments=${BackendArgumentArray[2]}
+            BackendSeatArgument=${BackendSeatArgArray[2]}
             break
-          else
-            SupportsBackend=0
           fi
         fi
       done
-      if [[ $SupportsBackend == 1 ]]
+      if [[ $SupportsBackend == 1 && $SupportsSeat == 1 ]]
       then
         break
       fi
     done
 
-    #See if the current sessions backend is multiseat aware
-    SupportsSeat=0
-    if [[ ! -z $BackendType ]]
-    then
-      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
-      do
-        IFS="#"
-        ThisBackendArray=(${DesktopFileBackendArray[$element]})
-        unset IFS
-        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 002 ]]
-        then
-          SupportsSeat=${ThisBackendArray[2]}
-          break
-        fi
-      done
-    fi
-
-    #See if the current sessions backend is multiseat aware
-    BackendSeatArgument=""
-    if [[ ! -z $BackendType ]]
-    then
-      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
-      do
-        IFS="#"
-        ThisBackendArray=(${DesktopFileBackendArray[$element]})
-        unset IFS
-        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 003 ]]
-        then
-          BackendSeatArgument=${ThisBackendArray[2]}
-          break
-        fi
-      done
-    fi
-
-    #If this is seat0, then don't enforce seatawareness
-    if [[ $CurrentHandleSeat == seat0 && $BackendType="FB" ]]
-    then
-      if [[ $FB0INSEAT0 == 1 ]]
-      then
-        SupportsSeat=1
-      fi
-    elif [[ $CurrentHandleSeat == seat0 && $BackendType != "FB" ]]
-    then
-      SupportsSeat=1
-    fi
-    if [[ $BackendType == "WL" ]]
-    then
-      SupportsSeat=1
-    fi
 
     IsFallbackSession=${DesktopFileMainArray[4]:4}
     if [[ -z $IsFallbackSession ]]
@@ -954,21 +930,7 @@ function ChooseSessionType
     then
       EnvironmentFile=$SESSIONFILE
     fi
-    unset BackendArguments
-    if [[ ! -z $BackendType ]]
-    then
-      for (( element = 0 ; element < ${#DesktopFileBackendArray[@]} ; element++ ))
-      do
-        IFS="#"
-        ThisBackendArray=(${DesktopFileBackendArray[$element]})
-        unset IFS
-        if [[ ${ThisBackendArray[1]} == $BackendType && ${ThisBackendArray[0]} == 001 ]]
-        then
-          BackendArguments=${ThisBackendArray[2]}
-          break
-        fi
-      done
-    fi
+
     #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
     NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *NeedsFile *= */000#/' -e "/[0-9][0-9][0-9]#/!d" -e 's/[0-9][0-9][0-9]#//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
     if [[ ! -z $NeedsFile ]]
