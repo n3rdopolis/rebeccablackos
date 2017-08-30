@@ -695,8 +695,11 @@ function RegisterSession
         else
           WriteToLog "Session failed to start"
           SessionStartFailed=1
-          FailedSessionTTY=$SessionTTY
-          FailedSessionSeat=$SessionSeatID
+          if [[ $SessionTTY != 0 ]]
+          then
+            FailedSessionTTY=$SessionTTY
+          fi
+          FailedSessionSeat+=($SessionSeatID)
         fi
 
 
@@ -2220,25 +2223,32 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
     if [[ $SessionStartFailed == 1 ]]
     then
-      read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
-      ActiveSystemTTY=${ActiveSystemTTY:3}
-      SessionStartFailed=0
-      if [[ $FailedSessionTTY == $ActiveSystemTTY ]]
-      then
-        if [[ ! -z $FailedSessionTTY ]]
+      for FailSeat in ${FailedSessionSeat[@]}
+      do
+        if [[ $FailSeat == seat0 ]]
         then
-          ResetTTYMode $FailedSessionTTY
+          read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+          ActiveSystemTTY=${ActiveSystemTTY:3}
+          SessionStartFailed=0
+          if [[ $FailedSessionTTY == $ActiveSystemTTY ]]
+          then
+            if [[ ! -z $FailedSessionTTY ]]
+            then
+              ResetTTYMode $FailedSessionTTY
+            fi
+          fi
         fi
-      fi
-      SeatIndexID=$(GetStartedSeatIndex $FailedSessionSeat)
-      SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
-      if [[ $SeatCanMultiSession == 1 ]]
-      then
-        loginctl activate $(GetSeatLoginManagerDisplay $FailedSessionSeat) &>/dev/null
-      fi
-      unset FailedSessionTTY
-      unset FailedSessionSeat
+        SeatIndexID=$(GetStartedSeatIndex $FailSeat)
+        SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
+        if [[ $SeatCanMultiSession == 1 ]]
+        then
+          WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID as a session failed to start"
+          loginctl activate $(GetSeatLoginManagerDisplay $FailSeat) &>/dev/null
+        fi
+      done
     fi
+    unset FailedSessionTTY
+    FailedSessionSeat=()
 
     #Handle for when a session is detected to not be running
     #And also attempt to unlock the TTY, if applicable
@@ -2274,8 +2284,9 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           SeatIndexID=$(GetStartedSeatIndex $RunningSeatID)
           SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-          if [[ $RunningSeat != "seat0" && $SeatCanMultiSession == 1 ]]
+          if [[ $RunningSeatID != "seat0" && $SeatCanMultiSession == 1 ]]
           then
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
           elif [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
@@ -2283,6 +2294,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
           fi
         fi
