@@ -838,8 +838,17 @@ function ChooseSessionType
     unset IFS
 
     #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
+    BackendPlaceHolders=""
+    for BACKEND in KMS WL FB
+    do
+      BackendPlaceHolders+=$'\n'"CompositorSupports${BACKEND}="
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}Arguments="
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware="
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument="
+    done
+    DesktopFileBackendArrayWithBackendPlaceholders=$DesktopFileData$'\n'$BackendPlaceHolders
     IFS=$'\n'
-    DesktopFileBackendArray=($(echo "$DesktopFileData" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -re  "s/^ *Compositor([A-Z]*)SeatArgument *= */003#\1#/" -e "/^[0-9][0-9][0-9]#/!d" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
+    DesktopFileBackendArray=($(echo "$DesktopFileBackendArrayWithBackendPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -re  "s/^ *Compositor([A-Z]*)SeatArgument *= */003#\1#/" -e "/^[0-9][0-9][0-9]#/!d" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
     unset IFS
 
     Enabled=${DesktopFileMainArray[0]:4}
