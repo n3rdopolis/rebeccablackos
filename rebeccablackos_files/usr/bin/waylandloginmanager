@@ -2223,13 +2223,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If a session failed to start (it terminates before it can register the PID, and session ID), switch back to the loginmanagerdisplay
     if [[ $SessionStartFailed == 1 ]]
     then
+      SessionStartFailed=0
       for FailSeat in ${FailedSessionSeat[@]}
       do
         if [[ $FailSeat == seat0 ]]
         then
           read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
           ActiveSystemTTY=${ActiveSystemTTY:3}
-          SessionStartFailed=0
           if [[ $FailedSessionTTY == $ActiveSystemTTY ]]
           then
             if [[ ! -z $FailedSessionTTY ]]
