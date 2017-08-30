@@ -808,7 +808,10 @@ function ChooseSessionType
   if [[ $SeatSupportsFB != 0 ]]
   then
     SeatSupportedBackends+=(FB)
-    SeatDefaultBackendType=FB
+    if [[ -z $SeatDefaultBackendType ]]
+    then
+      SeatDefaultBackendType=FB
+    fi
   fi
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
