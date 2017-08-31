@@ -91,3 +91,70 @@ index a069bd4f..11627590 100644
  
  	loop = wl_display_get_event_loop(compositor->wl_display);
  	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
+
+
+
+
+
+diff --git a/compositor/main.c b/compositor/main.c
+index f632fc0e..5358f25a 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -574,6 +574,7 @@ usage(int error_code)
+ 		"Options for fbdev-backend.so:\n\n"
+ 		"  --tty=TTY\t\tThe tty to use\n"
+ 		"  --device=DEVICE\tThe framebuffer device to use\n"
++		"  --seat=SEAT\t\tThe seat that weston should run on, instead of the seat defined in XDG_SEAT\n"
+ 		"\n");
+ #endif
+ 
+@@ -1446,6 +1447,7 @@ load_fbdev_backend(struct weston_compositor *c,
+ 	const struct weston_option fbdev_options[] = {
+ 		{ WESTON_OPTION_INTEGER, "tty", 0, &config.tty },
+ 		{ WESTON_OPTION_STRING, "device", 0, &config.device },
++		{ WESTON_OPTION_STRING, "seat", 0, &config.seat_id },
+ 	};
+ 
+ 	parse_options(fbdev_options, ARRAY_LENGTH(fbdev_options), argc, argv);
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index 81e5ec3b..f4103d20 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -717,6 +717,8 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 	session_seat=getenv("XDG_SEAT");
+ 	if (session_seat)
+ 		seat_id=session_seat;
++	if (param->seat_id)
++		seat_id = param->seat_id;
+ 
+ 	weston_log("initializing fbdev backend\n");
+ 
+@@ -740,7 +742,7 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 	wl_signal_add(&compositor->session_signal,
+ 		      &backend->session_listener);
+ 	compositor->launcher =
+-		weston_launcher_connect(compositor, param->tty, "seat0", false);
++		weston_launcher_connect(compositor, param->tty, seat_id, false);
+ 	if (!compositor->launcher) {
+ 		weston_log("fatal: fbdev backend should be run "
+ 			   "using weston-launch binary or as root\n");
+@@ -786,6 +788,7 @@ config_init_to_defaults(struct weston_fbdev_backend_config *config)
+ 	 * udev, rather than passing a device node in as a parameter. */
+ 	config->tty = 0; /* default to current tty */
+ 	config->device = "/dev/fb0"; /* default frame buffer */
++	config->seat_id = "seat0"; /* default seat*/
+ }
+ 
+ WL_EXPORT int
+diff --git a/libweston/compositor-fbdev.h b/libweston/compositor-fbdev.h
+index 8b7d900e..c4e3305a 100644
+--- a/libweston/compositor-fbdev.h
++++ b/libweston/compositor-fbdev.h
+@@ -43,6 +43,7 @@ struct weston_fbdev_backend_config {
+ 
+ 	int tty;
+ 	char *device;
++	char *seat_id;
+ 
+ 	/** Callback used to configure input devices.
+ 	 *
