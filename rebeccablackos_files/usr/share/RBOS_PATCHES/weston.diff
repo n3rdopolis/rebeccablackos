@@ -158,3 +158,65 @@ index 8b7d900e..c4e3305a 100644
  
  	/** Callback used to configure input devices.
  	 *
+
+
+
+
+
+
+
+
+
+ 
+
+
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index f4103d20..e2a5da68 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -714,12 +714,43 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 	const char *seat_id = default_seat;
+ 	const char *session_seat;
+ 
++	struct udev *udev;
++	struct udev_enumerate *e;
++	struct udev_list_entry *entry;
++	const char *path, *device_seat;
++	struct udev_device *device, *fb_device;
++
+ 	session_seat=getenv("XDG_SEAT");
+ 	if (session_seat)
+ 		seat_id=session_seat;
+ 	if (param->seat_id)
+ 		seat_id = param->seat_id;
+ 
++	e = udev_enumerate_new(udev);
++	udev_enumerate_add_match_subsystem(e, "graphics");
++	udev_enumerate_add_match_sysname(e, "fb[0-9]*");
++
++	udev_enumerate_scan_devices(e);
++	fb_device = NULL;
++	udev_list_entry_foreach(entry, udev_enumerate_get_list_entry(e)) {
++
++		path = udev_list_entry_get_name(entry);
++		device = udev_device_new_from_syspath(udev, path);
++		if (!device)
++			continue;
++		device_seat = udev_device_get_property_value(device, "ID_SEAT");
++		if (!device_seat)
++			device_seat = default_seat;
++		if (!strcmp(device_seat, param->seat_id)) {
++			udev_device_unref(device);
++			fb_device = udev_device_get_sysattr_value(device, "name");
++			udev_enumerate_unref(e);
++			break;
++		}
++	}
++	if (fb_device)
++            param->device = fb_device;
++
+ 	weston_log("initializing fbdev backend\n");
+ 
+ 	backend = zalloc(sizeof *backend);
+
+ 
