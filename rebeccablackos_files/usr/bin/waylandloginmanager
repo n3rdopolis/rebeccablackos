@@ -508,13 +508,6 @@ Will now reboot." 20 50 --no-cancel
     then
       LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDSEAT0PID | awk '{print $2}' | sed 's/tty//g')
     fi
-    #Get the logind session of the weston instance running loginmanagerdisplay for each seat
-    AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
-    LOGINMANAGERDISPLAYSESSIONS=()
-    for RunningSeat in ${AllRunningSeats[@]}
-    do
-      GetLoginManagerDisplaySession 0 $RunningSeat
-    done
     systemd-notify --ready
   else
     LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
@@ -646,8 +639,6 @@ function SendSelfRegisterData
 #Before a process calls RegisterSession to loginmanager_control, the process must also start an attempt to send the data to loginmanager_register, because the timeout period is .01 seconds. If nothing is in loginmanager_register, as if it's not called correctly, or because it's an underprivlaged process that can't write to loginmanager_register, it is ignored.
 #it expects the data to be sent in fields seperated by the @ charachter in this order:
 # NEWSESSION@TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID@SEAT@DoLock
-# or
-# NEWWLMDISPLAY@logind_Session_ID@SEAT
 function RegisterSession
 {
   #get the data from loginmanager_register
@@ -659,7 +650,7 @@ function RegisterSession
   unset IFS
 
   for RegisterData in ${RegisterDataLines[@]}
-  {
+  do
     #get the register data, and put it into an array so it can be handled
     IFS='@'
     ArraySessionData=($RegisterData)
@@ -701,53 +692,11 @@ function RegisterSession
           fi
           FailedSessionSeat+=($SessionSeatID)
         fi
-
-
-      elif [[ $RegisterType == NEWWLMDISPLAY ]]
-      then
-        RegisterSeat=${ArraySessionData[2]}
-        if [[ $ReadyNotifySent == 0 ]]
-        then
-          systemd-notify --ready
-          ReadyNotifySent=1
-        fi
-        #Remove sessions that are not running from the array
-        RUNNINGSESSIONS=($(loginctl --no-legend list-sessions 2>/dev/null | while read SESSION OTHERCOLS; do echo $SESSION; done))
-        #Move LOGINMANAGERDISPLAYSESSIONS array into a temporary array, and clear LOGINMANAGERDISPLAYSESSIONS
-        REGISTEREDSESSIONS=(${LOGINMANAGERDISPLAYSESSIONS[@]})
-        LOGINMANAGERDISPLAYSESSIONS=()
-
-        #Go through the temporary array, cleaning up stale entries before appending the new one
-        for REGISTEREDSESSION in ${REGISTEREDSESSIONS[@]}
-        do
-          AddSession=0
-          IFS=@
-          REGISTEREDSESSIONDATA=($REGISTEREDSESSION)
-          unset IFS
-          #Go through the list of sessions
-          for RUNNINGSESSION in ${RUNNINGSESSIONS[@]}
-          do
-            #If there is a match, add the line back to the array
-            if [[ ${REGISTEREDSESSIONDATA[1]} == $RUNNINGSESSION ]]
-            then
-              AddSession=1
-              break
-            fi
-          done
-          if [[ $AddSession == 1 ]]
-          then
-            LOGINMANAGERDISPLAYSESSIONS+=($REGISTEREDSESSION)
-          fi
-        done
-        REGISTEREDSESSIONS=()
-
-        #Add the new session to the array
-        LOGINMANAGERDISPLAYSESSIONS+=($RegisterSeat@${ArraySessionData[1]})
+      else
+        WriteToLog "register session requested, but no data was availible in the FIFO"
       fi
-    else
-      WriteToLog "register session requested, but no data was availible in the FIFO"
     fi
-  }
+  done
 }
 
 #This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
@@ -1354,7 +1303,6 @@ function StartUserSession
     then
       if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
       then
-        touch /run/waylandloginmanager/inhibit_"$USERSEAT"
         loginctl kill-session ${SeatSessions[@]} 2>/dev/null
       else
         RunSession=0
@@ -1368,7 +1316,6 @@ function StartUserSession
     WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
     systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$USERSEAT" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
-    rm /run/waylandloginmanager/inhibit_"$USERSEAT" 2>/dev/null
     $SLEEPCMD 5
     #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
     USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$USERSEAT" -p ExecMainPID --value 2>/dev/null)
@@ -1640,254 +1587,185 @@ function LeavePrompt
   fi
 }
 
-
-#This calls the loginmanagerdisplay_(seat) weston sessions.  Everytime a weston session dies, wait 5 seconds, then try to call it back up. Only 5 times each.
-function StartLoginManagerDisplays
+#This function gets the desired backend information for the specified seat for what backend should be used for the loginmanagerdisplay
+#It takes 1 argument, the seat
+function GetSeatCapabilityString
 {
-  #Reset the contents of the tty
-  echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
-  #Disable cursor blinking on the TTY the display server will be started on
-  echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
-  SEATCHECKLOOPS=0
-  FIRSTSEATCHECK=1
+  #Detect hardware abilities, of the seat
+  SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+  SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+  FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
 
-  SeatFailArray=()
-
-  while [ 1 ]
-  do
-    ((SEATCHECKLOOPS++))
-
-    #Wait 1 minute before checking for seats (for the second time and beyond). 5 second pause. 60 seconds in 1 minute
-    if [[ $SEATCHECKLOOPS == 12 || $FIRSTSEATCHECK == 1 ]]
+  #Determine the backend to use
+  WESTONBACKEND=0
+  WESTONUSEPIXMAN=0
+  if [[ $WESTON_FBDEV_SEAT_AWARE == 1 && $SeatSupportsFB != 0 ]]
+  then
+    WESTONBACKEND=FB
+  else
+    if [[ "$1" == "seat0" && $FB0INSEAT0 != 0 ]]
     then
-      FIRSTSEATCHECK=0
-      SEATCHECKLOOPS=0
-      #Get a list of seats that are running, and seats that are handled
-      IFS=$'\n'
-      AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
-      unset IFS
-
-      #Find what seats are new
-      NewSeatFailArray=()
-      for RunningSeat in ${AllRunningSeats[@]}
-      do
-        IncludeSeat=1
-        for SeatFailData in ${SeatFailArray[@]}
-        do
-          IFS=@
-          SeatFailDataArray=($SeatFailData)
-          unset IFS
-          if [[ $RunningSeat == ${SeatFailDataArray[0]} ]]
-          then
-            IncludeSeat=0
-            NewSeatFailArray+=($SeatFailData)
-            break
-          fi
-        done
-        if [[ $IncludeSeat == 1 ]]
-        then
-          #Detect hardware abilities, of the seat
-          SeatSupportsKMS=$(loginctl seat-status "$RunningSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
-          SeatSupportsFB=$(loginctl seat-status "$RunningSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
-          FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
-
-          #Determine the backend to use
-          WESTONBACKEND=0
-          WESTONUSEPIXMAN=0
-          if [[ $WESTON_FBDEV_SEAT_AWARE == 1 && $SeatSupportsFB != 0 ]]
-          then
-            WESTONBACKEND=FB
-          else
-            if [[ "$RunningSeat" == "seat0" && $FB0INSEAT0 != 0 ]]
-            then
-              WESTONBACKEND=FB
-            fi
-          fi
-          if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
-          then
-            WESTONBACKEND=KMS
-            if [[ $WLM_FORCE_SOFTWARE == 1 ]]
-            then
-              WESTONUSEPIXMAN=1
-            fi
-          fi
-          if [[ $WESTONBACKEND == KMS ]]
-          then
-            WriteToLog "Kernel mode setting found for seat $RunningSeat ."
-          elif [[ $WESTONBACKEND == FB ]]
-          then
-            WriteToLog "Framebuffer found for seat $RunningSeat ."
-          else
-            WriteToLog "No usable display hardware found on seat $RunningSeat ."
-          fi
-
-          #Add info about the seat, the default fail count as 0, and the backend and pixman info
-          NewSeatFailArray+=($RunningSeat@0@$WESTONBACKEND@$WESTONUSEPIXMAN)
-        fi
-      done
-      SeatFailArray=(${NewSeatFailArray[@]})
-      unset NewSeatFailArray
-      SendSelfCommand DetectSeats
+      WESTONBACKEND=FB
     fi
-
-    #Go through each running seat, and start the loginmanagerdisplay for each seat, for a limited number of times
-    RunningSeatCount=${#SeatFailArray[@]}
-    for ((SeatIndex=0; SeatIndex<$RunningSeatCount; SeatIndex++ ))
-    do
-      SeatData=${SeatFailArray[$SeatIndex]}
-      IFS=@
-      SeatData=($SeatData)
-      unset IFS
-
-      #Information about the seat
-      CurrentSeat=${SeatData[0]}
-      SeatStartCount=${SeatData[1]}
-      SeatWestonBackend=${SeatData[2]}
-      SeatUsePixman=${SeatData[3]}
-      StartLoginManagerDisplay=1
-      LOGINMANAGERDISPLAYSTATUS=0
-      SeatUseMultiSessionConfig=1
-
-      #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
-      if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
-      then
-        SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
-        SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
-        if [[ $SeatCanMultiSession != "yes" ]]
-        then
-          SeatUseMultiSessionConfig=0
-          if [[ ! -z "$SeatSessions" || -e /run/waylandloginmanager/inhibit_$CurrentSeat ]]
-          then
-            SeatStartCount=0
-            StartLoginManagerDisplay=0
-          fi
-        fi
-      fi
-
-      #Handle the seat hardware information
-      if [[ $SeatWestonBackend == KMS ]]
-      then
-        WESTONBACKENDSTRING="drm-backend.so"
-      elif [[ $SeatWestonBackend == FB ]]
-      then
-        WESTONBACKENDSTRING="fbdev-backend.so"
-      elif [[ $SeatWestonBackend == 0 ]]
-      then
-        SeatStartCount=5
-        LOGINMANAGERDISPLAYSTATUS=1
-      fi
-      if [[ $SeatUsePixman == 1 ]]
-      then
-        PIXMANARGS="--use-pixman"
-      fi
-
-      #Detect if the socket for the loginmanagerdisplay exists
-      if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
-      then
-        StartLoginManagerDisplay=0
-      fi
-
-      if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $StartLoginManagerDisplay == 1 ]]
-      then
-        (( SeatStartCount++ ))
-        if [[ "$CurrentSeat" == seat0 ]]
-        then
-          WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
-        else
-          WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat"
-        fi
-        if [[ -x "$DEFAULTWAYLANDSERVER" ]]
-        then
-          systemctl reset-failed wlm-loginmanagerdisplay_$CurrentSeat &> /dev/null
-          if [[ $CurrentSeat == seat0 ]]
-          then
-            chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-            OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
-          else
-            OutputArgs=""
-          fi
-          if [[ $SeatUseMultiSessionConfig == 1 ]]
-          then
-            WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-switch.ini"
-          else
-            WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
-          fi
-          systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
-
-          LOGINMANAGERDISPLAYREADY=1
-          TRYCOUNT=0
-          while [[ $LOGINMANAGERDISPLAYREADY != 0 && $TRYCOUNT -le 5 ]]
-          do
-            LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$CurrentSeat.service &> /dev/null; echo $?)
-            $SLEEPCMD 1
-            ((TRYCOUNT++))
-          done
-          #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
-          GetLoginManagerDisplaySession 1 $CurrentSeat
-          if [[ ! -z $REGISTERDISPLAYSESSION ]]
-          then
-            loginctl activate $REGISTERDISPLAYSESSION &>/dev/null
-          fi
-        else
-          if [[ $SeatStartCount == 1 ]]
-          then
-            WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
-          fi
-        fi
-      else
-        if [[ $SeatStartCount == 5 ]]
-        then
-          (( SeatStartCount++ ))
-          WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
-        fi
-      fi
-
-      SeatFailArray[$SeatIndex]="$CurrentSeat@$SeatStartCount@$SeatWestonBackend@$SeatUsePixman"
-    done
-
-    #Determine if all seats failed, if so, then abort the loop
-    for SeatData in ${SeatFailArray[@]}
-    {
-      AttemptsMaxedOut=1
-      IFS=@
-      SeatData=($SeatData)
-      unset IFS
-
-      SeatAttemptCount=${SeatData[1]}
-      if [[ $SeatAttemptCount < 5 ]]
-      then
-        AttemptsMaxedOut=0
-        break
-      fi
-    }
-    if [[ $AttemptsMaxedOut == 1 ]]
+  fi
+  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
+  then
+    WESTONBACKEND=KMS
+    if [[ $WLM_FORCE_SOFTWARE == 1 ]]
     then
-      break
+      WESTONUSEPIXMAN=1
     fi
-    $SLEEPCMD 5
-  done
-  WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached"
-  openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
+   fi
+  if [[ $WESTONBACKEND == KMS ]]
+  then
+    WriteToLog "Kernel mode setting found for seat $1 ."
+  elif [[ $WESTONBACKEND == FB ]]
+  then
+    WriteToLog "Framebuffer found for seat $1 ."
+  else
+    WriteToLog "No usable display hardware found on seat $1 ."
+  fi
 
-Will show a menu with a few options for diagnosis." 20 50 --no-cancel
-
-  systemd-notify --ready
-  openvt -c 63 -s -f -w -- rbos-failedboot
-  systemctl stop waylandloginmanager.service
-  exit 1
+  #Return the seat compatibility info
+  echo "$WESTONBACKEND $WESTONUSEPIXMAN"
 }
 
-#This function determines the systemd session of the loginmanagerdisplay, it takes 2 arguments, the first is if it should send the registration or not.
-#The second, is the seat.
+#This calls the loginmanagerdisplay_(seat) weston sessions. It takes 1 argument, the seat
+function StartLoginManagerDisplay
+{
+  if [[ $1 == seat0 ]]
+  then
+    #Reset the contents of the tty
+    echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
+    #Disable cursor blinking on the TTY the display server will be started on
+    echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
+  fi
+
+  #Information about the seat
+  CurrentSeat=$1
+  SeatStartCount=${LoginManagerDisplayFailCounts[$SeatIndexID]}
+  SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
+  SeatUsePixman=${LoginManagerDisplayPixmanFlags[$SeatIndexID]}
+  DoStartLoginManagerDisplay=1
+  LOGINMANAGERDISPLAYSTATUS=0
+  SeatUseMultiSessionConfig=1
+
+  #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
+  if [[ $ONLY_SEAT0_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
+  then
+    SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
+    SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
+    if [[ $SeatCanMultiSession != "yes" ]]
+    then
+      SeatUseMultiSessionConfig=0
+      if [[ ! -z "$SeatSessions" || ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
+      then
+        SeatStartCount=0
+        DoStartLoginManagerDisplay=0
+      fi
+    fi
+  fi
+
+  #Handle the seat hardware information
+  if [[ $SeatWestonBackend == KMS ]]
+  then
+    WESTONBACKENDSTRING="drm-backend.so"
+  elif [[ $SeatWestonBackend == FB ]]
+  then
+    WESTONBACKENDSTRING="fbdev-backend.so"
+  elif [[ $SeatWestonBackend == "" ]]
+  then
+    WriteToLog "No backend found for $CurrentSeat ."
+    SeatStartCount=5
+    LOGINMANAGERDISPLAYSTATUS=1
+  fi
+  if [[ $SeatUsePixman == 1 ]]
+  then
+    PIXMANARGS="--use-pixman"
+  fi
+
+  #Detect if the socket for the loginmanagerdisplay exists
+  if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
+  then
+    DoStartLoginManagerDisplay=0
+  fi
+
+  if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $DoStartLoginManagerDisplay == 1 ]]
+  then
+    (( SeatStartCount++ ))
+    if [[ "$CurrentSeat" == seat0 ]]
+    then
+      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
+    else
+      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat"
+    fi
+    if [[ -x "$DEFAULTWAYLANDSERVER" ]]
+    then
+      systemctl reset-failed wlm-loginmanagerdisplay_$CurrentSeat &> /dev/null
+      if [[ $CurrentSeat == seat0 ]]
+      then
+        chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
+        OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+      else
+        OutputArgs=""
+      fi
+      if [[ $SeatUseMultiSessionConfig == 1 ]]
+      then
+        WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-switch.ini"
+      else
+        WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
+      fi
+      systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
+
+      LOGINMANAGERDISPLAYREADY=1
+      TRYCOUNT=0
+      while [[ $LOGINMANAGERDISPLAYREADY != 0 && $TRYCOUNT -le 5 ]]
+      do
+        LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$CurrentSeat.service &> /dev/null; echo $?)
+        $SLEEPCMD 1
+        ((TRYCOUNT++))
+      done
+      #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
+      NewLoginManagerDisplaySession=$(GetLoginManagerDisplaySession $CurrentSeat)
+      LoginManagerDisplaySessions[$SeatIndexID]=$NewLoginManagerDisplaySession
+      if [[ ! -z $NewLoginManagerDisplaySession ]]
+      then
+        if [[ $ReadyNotifySent == 0 ]]
+        then
+          ReadyNotifySent=1
+          systemd-notify --ready
+        fi
+        loginctl activate $NewLoginManagerDisplaySession &>/dev/null
+      fi
+    else
+      if [[ $SeatStartCount == 1 ]]
+      then
+        WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
+      fi
+    fi
+  else
+    if [[ $SeatStartCount == 5 ]]
+    then
+      (( SeatStartCount++ ))
+      WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
+    fi
+  fi
+  LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
+  if [[ $SeatStartCount < 5 ]]
+  then
+    LoginManagerDisplayAttemptsMaxedOut=0
+  fi
+}
+
+#This function determines the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
 function GetLoginManagerDisplaySession
 {
-  RegisterLoginManagerDisplay=$1
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
-  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$2".service -p MainPID --value 2>/dev/null)
+  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$1".service -p MainPID --value 2>/dev/null)
   IFS=" "
   #Get all logind sessions
-  WLMLOGINDSESSIONS=($(loginctl show-seat "$2" -p Sessions --value 2>/dev/null ))
+  WLMLOGINDSESSIONS=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null ))
   unset IFS
   #Go thorugh each logind session, see the one where the main pid matches the pid of the loginmanagerdisplay
   for WLMLOGINDSESSION in "${WLMLOGINDSESSIONS[@]}"
@@ -1899,15 +1777,7 @@ function GetLoginManagerDisplaySession
       break
     fi
   done
-  if [[ $RegisterLoginManagerDisplay == 1 && ! -z $REGISTERDISPLAYSESSION ]]
-  then
-    SendSelfRegisterData "NEWWLMDISPLAY@$REGISTERDISPLAYSESSION@$2"
-  else
-    if [[ ! -z $REGISTERDISPLAYSESSION ]]
-    then
-      LOGINMANAGERDISPLAYSESSIONS+=($1@$REGISTERDISPLAYSESSION)
-    fi
-  fi
+  echo $REGISTERDISPLAYSESSION
 }
 
 
@@ -2039,30 +1909,12 @@ function GetStartedSeatIndex
   echo $ReturnSeatIndex
 }
 
-#Function to get the ID of the registered loginmanagerdisplay for this seat. It takes 1 argument, the seat
-function GetSeatLoginManagerDisplay
-{
-  RETURNSESSION=""
-  #Go through the list of registered loginmanagerdisplay sessions, until the specified seat matches
-  for SESSION in ${LOGINMANAGERDISPLAYSESSIONS[@]}
-  do
-    IFS="@"
-    SESSION=($SESSION)
-    unset IFS
-
-    if [[ ${SESSION[0]} == "$1" ]]
-    then
-      RETURNSESSION=${SESSION[1]}
-      break
-    fi
-  done
-  echo $RETURNSESSION
-}
-
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
+  LoginManagerFirstLoop=0
+  LoginManagerLoopCount=0
   SessionStartFailed=0
   DoDetectSeats=1
   StartedSeats=()
@@ -2077,13 +1929,19 @@ function ReadCommandFIFO
   UserActionFailCounts=()
   UserActionFailSkips=()
 
+  LoginManagerDisplaySessions=()
+  LoginManagerDisplayBackends=()
+  LoginManagerDisplayPixmanFlags=()
+  LoginManagerDisplayFailCounts=()
+  
   #loop 'forever'
   while [ 1 ]
   do
-
-    #Detect all seats, and add them to the array
-    if [[ $DoDetectSeats == 1 ]]
+    ((LoginManagerLoopCount++))
+    #Detect all seats, and add them to the array. (every minute, as it sleeps every .5 seconds)
+    if [[ $DoDetectSeats == 1 || $LoginManagerLoopCount == 120 ]]
     then
+      LoginManagerLoopCount=0
       DoDetectSeats=0
       #Find what seats are new
       AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
@@ -2119,8 +1977,12 @@ function ReadCommandFIFO
           #if autologin is specified
           if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
           then
+            SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
             StartAutoLogin $RunningSeat &
             LastLoginPIDs[$StartIndex/2]=$!
+            LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
+            LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
+            LoginManagerDisplayFailCounts[$StartIndex/2]=0
           fi
         fi
       done
@@ -2145,13 +2007,15 @@ function ReadCommandFIFO
           ChangeIndex=$((StartIndex/2))
           UserActionFailCounts[$ChangeIndex]=0
           UserActionFailSkips[$ChangeIndex]=0
+          LoginManagerDisplayFailCounts[$ChangeIndex]=0
         fi
       done
     fi
 
-    #Handle the main dialog for each seat
+    #Handle the loginmanagerdisplay, and the main dialog for each seat
     for RunningSeat in ${AllRunningSeats[@]}
     do
+      LoginManagerDisplayAttemptsMaxedOut=1
       UIPromptAttemptsMaxedOut=1
       UIJobCount=0
       SeatIndexID=$(GetStartedSeatIndex $RunningSeat)
@@ -2164,6 +2028,16 @@ function ReadCommandFIFO
           ((UIJobCount++))
         fi
       done < <(jobs -p -r)
+
+      #Start the loginmanagerdisplay
+      if [[ $LoginManagerFirstLoop == 1 ]]
+      then
+        LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
+      fi
+      if [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
+      then
+        StartLoginManagerDisplay $RunningSeat
+      fi
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
@@ -2208,6 +2082,20 @@ function ReadCommandFIFO
         fi
       fi
     done
+
+    #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
+    if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
+    then
+      WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached"
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
+
+Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+
+      systemd-notify --ready
+      openvt -c 63 -s -f -w -- rbos-failedboot
+      systemctl stop waylandloginmanager.service
+      exit 1
+    fi
 
     #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
@@ -2254,7 +2142,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ $SeatCanMultiSession == 1 ]]
         then
           WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID as a session failed to start"
-          loginctl activate $(GetSeatLoginManagerDisplay $FailSeat) &>/dev/null
+          loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
         fi
       done
     fi
@@ -2298,7 +2186,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           if [[ $RunningSeatID != "seat0" && $SeatCanMultiSession == 1 ]]
           then
             WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
-            loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
+            loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
           elif [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
             if [[ ! -z $RunningSessionTTY ]]
@@ -2306,7 +2194,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
               ResetTTYMode $RunningSessionTTY
             fi
             WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
-            loginctl activate $(GetSeatLoginManagerDisplay $RunningSeatID) &>/dev/null
+            loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
           fi
         fi
       done
@@ -2343,7 +2231,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       WriteToLog "received command $COMMAND for seat $SEATARG"
     else
-      if [[ $COMMAND == "RegisterSession" ]]
+      if [[ $COMMAND == "RegisterSession" || $COMMAND == "DetectSeats" ]]
       then
         WriteToLog "received command $COMMAND"
       fi
@@ -2374,7 +2262,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $SeatCanMultiSession == 1 ]]
       then
-        LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+        LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
         ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
         if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
         then
@@ -2400,7 +2288,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $SeatCanMultiSession == 1 ]]
       then
-        LOGINMANAGERDISPLAYSESSION=$(GetSeatLoginManagerDisplay "$SEATARG")
+        LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
         ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
         if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
         then
@@ -2488,6 +2376,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     else
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
+    LoginManagerFirstLoop=0
     $SLEEPCMD .5
   done
 }
@@ -2509,9 +2398,6 @@ if [[ $1 == "" ]]
 then
   #Prepare the loginmanager
   PrepareLoginManager
-
-  #Start the main loginmanagerdisplay Weston servers for each seat
-  StartLoginManagerDisplays &
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
