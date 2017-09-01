@@ -1902,6 +1902,11 @@ function GetLoginManagerDisplaySession
   if [[ $RegisterLoginManagerDisplay == 1 && ! -z $REGISTERDISPLAYSESSION ]]
   then
     SendSelfRegisterData "NEWWLMDISPLAY@$REGISTERDISPLAYSESSION@$2"
+  else
+    if [[ ! -z $REGISTERDISPLAYSESSION ]]
+    then
+      LOGINMANAGERDISPLAYSESSIONS+=($1@$REGISTERDISPLAYSESSION)
+    fi
   fi
 }
 
