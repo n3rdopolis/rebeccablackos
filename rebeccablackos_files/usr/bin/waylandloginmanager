@@ -1678,30 +1678,33 @@ function StartLoginManagerDisplay
     if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
     then
       DoStartLoginManagerDisplay=0
+      return
     fi
   else
     if [[ $(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null; echo $?) == 1 ]]
     then
       DoStartLoginManagerDisplay=0
+      return
     fi
+  fi
+
+  #Handle the seat hardware information
+  if [[ $SeatWestonBackend == KMS ]]
+  then
+    WESTONBACKENDSTRING="drm-backend.so"
+  elif [[ $SeatWestonBackend == FB ]]
+  then
+    WESTONBACKENDSTRING="fbdev-backend.so"
+  elif [[ $SeatWestonBackend == "" ]]
+  then
+    WriteToLog "No backend found for $CurrentSeat ."
+    SeatStartCount=5
+    LOGINMANAGERDISPLAYSTATUS=1
   fi
 
   if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $DoStartLoginManagerDisplay == 1 ]]
   then
 
-    #Handle the seat hardware information
-    if [[ $SeatWestonBackend == KMS ]]
-    then
-      WESTONBACKENDSTRING="drm-backend.so"
-    elif [[ $SeatWestonBackend == FB ]]
-    then
-      WESTONBACKENDSTRING="fbdev-backend.so"
-    elif [[ $SeatWestonBackend == "" ]]
-    then
-      WriteToLog "No backend found for $CurrentSeat ."
-      SeatStartCount=5
-      LOGINMANAGERDISPLAYSTATUS=1
-    fi
     if [[ $SeatUsePixman == 1 ]]
     then
       PIXMANARGS="--use-pixman"
@@ -1923,7 +1926,7 @@ function GetStartedSeatIndex
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function ReadCommandFIFO
 {
-  LoginManagerFirstLoop=0
+  LoginManagerFirstLoop=1
   LoginManagerLoopCount=0
   SessionStartFailed=0
   DoDetectSeats=1
@@ -2083,7 +2086,6 @@ function ReadCommandFIFO
       then
         LoginManagerDisplayAttemptsMaxedOut=0
       fi
-
       #If the seat had the UserActionDialog fail 5 times, declare it
       if [[ ${UserActionFailCounts[$SeatIndexID]} < 5 ]]
       then
