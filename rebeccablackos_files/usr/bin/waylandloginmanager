@@ -1367,7 +1367,13 @@ function AuthenticateUser
     ChooseSessionType "$1"
 
     #if the password and username is correct, start the session
-    WriteToLog "Opening a session for $LOGINUSER on TTY $SessionTTY on seat $1"
+    if [[ $1 == seat0 ]]
+    then
+      TTYSTRING="on TTY $SessionTTY"
+    else
+      TTYSTRING=""
+    fi
+    WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
     DialogWait 3 "Attempting to start the selected session..." "$1"
     StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
     #report success
@@ -1976,16 +1982,16 @@ function ReadCommandFIFO
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
+          SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
+          LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
+          LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
+          LoginManagerDisplayFailCounts[$StartIndex/2]=0
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
           #if autologin is specified
           if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
           then
-            SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
             StartAutoLogin $RunningSeat &
             LastLoginPIDs[$StartIndex/2]=$!
-            LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
-            LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
-            LoginManagerDisplayFailCounts[$StartIndex/2]=0
           fi
         fi
       done
