@@ -1681,7 +1681,7 @@ function StartLoginManagerDisplay
       return
     fi
   else
-    if [[ $(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null; echo $?) == 1 ]]
+    if [[ $(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null; echo $?) == 0 ]]
     then
       DoStartLoginManagerDisplay=0
       return
