@@ -382,6 +382,8 @@ fi
 
 #Force the server to pickup the changes
 waylandloginmanager --sendcommand Switch $XDG_SEAT
+waylandloginmanager --sendcommand DetectSeats
+
 #chvt 63
 #sleep .1
 #chvt $CurrentTTY

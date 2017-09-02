@@ -1658,30 +1658,12 @@ function StartLoginManagerDisplay
     if [[ $SeatCanMultiSession != "yes" ]]
     then
       SeatUseMultiSessionConfig=0
-      if [[ ! -z "$SeatSessions" || ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
+      if [[ ! -z "$SeatSessions" && ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
       then
         SeatStartCount=0
         DoStartLoginManagerDisplay=0
       fi
     fi
-  fi
-
-  #Handle the seat hardware information
-  if [[ $SeatWestonBackend == KMS ]]
-  then
-    WESTONBACKENDSTRING="drm-backend.so"
-  elif [[ $SeatWestonBackend == FB ]]
-  then
-    WESTONBACKENDSTRING="fbdev-backend.so"
-  elif [[ $SeatWestonBackend == "" ]]
-  then
-    WriteToLog "No backend found for $CurrentSeat ."
-    SeatStartCount=5
-    LOGINMANAGERDISPLAYSTATUS=1
-  fi
-  if [[ $SeatUsePixman == 1 ]]
-  then
-    PIXMANARGS="--use-pixman"
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists
@@ -1692,6 +1674,25 @@ function StartLoginManagerDisplay
 
   if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $DoStartLoginManagerDisplay == 1 ]]
   then
+
+    #Handle the seat hardware information
+    if [[ $SeatWestonBackend == KMS ]]
+    then
+      WESTONBACKENDSTRING="drm-backend.so"
+    elif [[ $SeatWestonBackend == FB ]]
+    then
+      WESTONBACKENDSTRING="fbdev-backend.so"
+    elif [[ $SeatWestonBackend == "" ]]
+    then
+      WriteToLog "No backend found for $CurrentSeat ."
+      SeatStartCount=5
+      LOGINMANAGERDISPLAYSTATUS=1
+    fi
+    if [[ $SeatUsePixman == 1 ]]
+    then
+      PIXMANARGS="--use-pixman"
+    fi
+
     (( SeatStartCount++ ))
     if [[ "$CurrentSeat" == seat0 ]]
     then
@@ -1751,10 +1752,6 @@ function StartLoginManagerDisplay
     fi
   fi
   LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
-  if [[ $SeatStartCount < 5 ]]
-  then
-    LoginManagerDisplayAttemptsMaxedOut=0
-  fi
 }
 
 #This function determines the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
@@ -1906,7 +1903,6 @@ function GetStartedSeatIndex
   then
     ReturnSeatIndex=$(($ReturnSeatIndex/2))
   fi
-  echo $ReturnSeatIndex
 }
 
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
@@ -2018,7 +2014,8 @@ function ReadCommandFIFO
       LoginManagerDisplayAttemptsMaxedOut=1
       UIPromptAttemptsMaxedOut=1
       UIJobCount=0
-      SeatIndexID=$(GetStartedSeatIndex $RunningSeat)
+      GetStartedSeatIndex $RunningSeat
+      SeatIndexID=$ReturnSeatIndex
 
       #Determine if there are any running UI jobs for the paticular seat
       while read JOB
@@ -2034,10 +2031,7 @@ function ReadCommandFIFO
       then
         LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
       fi
-      if [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
-      then
-        StartLoginManagerDisplay $RunningSeat
-      fi
+      StartLoginManagerDisplay $RunningSeat
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
@@ -2071,7 +2065,13 @@ function ReadCommandFIFO
         fi
       fi
 
-      #If every seat had the UserActionDialog fail 5 times, declare it
+      #If the seat had the loginmanagerdisplay fail 5 times, declare it
+      if [[ ${LoginManagerDisplayFailCounts[$SeatIndexID]} < 5 ]]
+      then
+        LoginManagerDisplayAttemptsMaxedOut=0
+      fi
+
+      #If the seat had the UserActionDialog fail 5 times, declare it
       if [[ ${UserActionFailCounts[$SeatIndexID]} < 5 ]]
       then
         UIPromptAttemptsMaxedOut=0
@@ -2086,7 +2086,7 @@ function ReadCommandFIFO
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
     then
-      WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached"
+      WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -2101,7 +2101,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row.
+      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
@@ -2137,7 +2137,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             fi
           fi
         fi
-        SeatIndexID=$(GetStartedSeatIndex $FailSeat)
+        GetStartedSeatIndex $FailSeat
+        SeatIndexID=$ReturnSeatIndex
         SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
         if [[ $SeatCanMultiSession == 1 ]]
         then
@@ -2180,7 +2181,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           NewAllSessionIDs+=($RunningSessionID)
           NewAllSeatIDs+=($RunningSeatID)
         else
-          SeatIndexID=$(GetStartedSeatIndex $RunningSeatID)
+          GetStartedSeatIndex $RunningSeatID
+          SeatIndexID=$ReturnSeatIndex
           SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSeatID != "seat0" && $SeatCanMultiSession == 1 ]]
@@ -2239,7 +2241,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If a seat is specified, and it is not running, ignore the command
     if [[ ! -z $SEATARG ]]
     then
-      SeatIndexID=$(GetStartedSeatIndex $SEATARG)
+      GetStartedSeatIndex $SEATARG
+      SeatIndexID=$ReturnSeatIndex
       SeatIsRunning=0
       #Go through the list of running seats, check if one of them matches the specified one
       for RunningSeat in ${AllRunningSeats[@]}
