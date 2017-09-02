@@ -2034,13 +2034,15 @@ function ReadCommandFIFO
       SeatIndexID=$ReturnSeatIndex
 
       #Determine if there are any running UI jobs for the paticular seat
-      while read JOB
-      do
-        if [[ $JOB == ${LastUserActionPIDs[$SeatIndexID]} || $JOB == ${LastSwitchPIDs[$SeatIndexID]} || $JOB == ${LastLoginPIDs[$SeatIndexID]} || $JOB == ${LastLeavePIDs[$SeatIndexID]} || $JOB == ${LastInfoPIDs[$SeatIndexID]} ]]
-        then
-          ((UIJobCount++))
-        fi
-      done < <(jobs -p -r)
+      if [[
+      ( ! -z ${LastUserActionPIDs[$SeatIndexID]} && -d /proc/${LastUserActionPIDs[$SeatIndexID]}) ||
+      ( ! -z ${LastSwitchPIDs[$SeatIndexID]} && -d /proc/${LastSwitchPIDs[$SeatIndexID]}) ||
+      ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -d /proc/${LastLoginPIDs[$SeatIndexID]}) ||
+      ( ! -z ${LastLeavePIDs[$SeatIndexID]} && -d /proc/${LastLeavePIDs[$SeatIndexID]}) ||
+      ( ! -z ${LastInfoPIDs[$SeatIndexID]} && -d /proc/${LastInfoPIDs[$SeatIndexID]}) ]]
+      then
+        ((UIJobCount++))
+      fi
 
       #Start the loginmanagerdisplay
       if [[ $LoginManagerFirstLoop == 1 ]]
