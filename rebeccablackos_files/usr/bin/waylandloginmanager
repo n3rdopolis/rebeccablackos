@@ -1664,10 +1664,17 @@ function StartLoginManagerDisplay
     if [[ $SeatCanMultiSession != "yes" ]]
     then
       SeatUseMultiSessionConfig=0
+      #The Autologin prompt starts before the loginmanagerdisplay
       if [[ ! -z "$SeatSessions" && ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
       then
         SeatStartCount=0
         DoStartLoginManagerDisplay=0
+      else
+        if [[ ! -z "$SeatSessions" ]]
+        then
+          SeatStartCount=0
+          DoStartLoginManagerDisplay=0
+        fi
       fi
     fi
   fi
