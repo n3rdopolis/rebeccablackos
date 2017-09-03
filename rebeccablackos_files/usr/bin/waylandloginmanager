@@ -733,8 +733,8 @@ function ChooseSessionType
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$CurrentHandleSeat"
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=${AllSessions}000
-  export WAYLAND_HOST=wlhost-$SESSIONID
-  export WAYLAND_GUEST=wayland-$SESSIONID
+  export WAYLAND_HOST=wlhost-$SESSIONID-$1
+  export WAYLAND_GUEST=wayland-$SESSIONID-$1
 
   unset WSESSIONLIST
   FirstRunNotRan=0
