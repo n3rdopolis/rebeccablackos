@@ -2309,6 +2309,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         else
           WriteToLog "A handler for the Switch command is already open"
         fi
+      else
+        WriteToLog "$SEATARG does not support switching the session"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
@@ -2322,6 +2324,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
+      else
+        WriteToLog "$SEATARG does not support switching the session"
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
