@@ -1938,6 +1938,7 @@ function ReadCommandFIFO
   SessionStartFailed=0
   DoDetectSeats=1
   StartedSeats=()
+  RejectedSeats=()
 
   LastUserActionPIDs=()
   LastSwitchPIDs=()
@@ -1969,6 +1970,15 @@ function ReadCommandFIFO
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
+        SeatAlreadyRejected=0
+        for RejectedSeat in ${RejectedSeats[@]}
+        do
+          if [[ $RejectedSeat == $RunningSeat ]]
+          then
+            SeatAlreadyRejected=1
+          fi
+        done
+
         StartedSeatCount=${#StartedSeats[@]}
         for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
         do
@@ -1978,6 +1988,16 @@ function ReadCommandFIFO
             break
           fi
         done
+        #Seats can be 255 chars long. However files can only be 255 chars long. Wayland socket files and log files need more room.
+        if [[ ${#RunningSeat} > 200 ]]
+        then
+          IncludeSeat=0
+          if [[ $SeatAlreadyRejected == 0 ]]
+          then
+            RejectedSeats+=($RunningSeat)
+            WriteToLog "$RunningSeat is larger than 200 charachters, and cannot be handled by waylandloginmanager"
+          fi
+        fi
         if [[ $IncludeSeat == 1 ]]
         then
           #Determine and store if this seat is multisession compatible
