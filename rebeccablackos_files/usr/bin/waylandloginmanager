@@ -2031,11 +2031,11 @@ function ReadCommandFIFO
       done
     fi
 
+    LoginManagerDisplayAttemptsMaxedOut=1
+    UIPromptAttemptsMaxedOut=1
     #Handle the loginmanagerdisplay, and the main dialog for each seat
     for RunningSeat in ${AllRunningSeats[@]}
     do
-      LoginManagerDisplayAttemptsMaxedOut=1
-      UIPromptAttemptsMaxedOut=1
       UIJobCount=0
       GetStartedSeatIndex $RunningSeat
       SeatIndexID=$ReturnSeatIndex
