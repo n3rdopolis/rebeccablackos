@@ -1989,7 +1989,7 @@ function ReadCommandFIFO
           fi
         done
         #Seats can be 255 chars long. However files can only be 255 chars long. Wayland socket files and log files need more room.
-        if [[ ${#RunningSeat} > 200 ]]
+        if [[ ${#RunningSeat} -gt 200 ]]
         then
           IncludeSeat=0
           if [[ $SeatAlreadyRejected == 0 ]]
