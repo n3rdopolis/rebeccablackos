@@ -637,7 +637,7 @@ function SendSelfRegisterData
 
 #This function is called when the loginmanager_control FIFO recives the command "RegisterSession". This function will read the contents of loginmanager_register, which only root can write to. 
 #Before a process calls RegisterSession to loginmanager_control, the process must also start an attempt to send the data to loginmanager_register, because the timeout period is .01 seconds. If nothing is in loginmanager_register, as if it's not called correctly, or because it's an underprivlaged process that can't write to loginmanager_register, it is ignored.
-#it expects the data to be sent in fields seperated by the @ charachter in this order:
+#it expects the data to be sent in fields seperated by the @ character in this order:
 # NEWSESSION@TTY_Number@PID_of_Session_Process@User_Name@logind_Session_ID@SEAT@DoLock
 function RegisterSession
 {
@@ -1995,7 +1995,7 @@ function ReadCommandFIFO
           if [[ $SeatAlreadyRejected == 0 ]]
           then
             RejectedSeats+=($RunningSeat)
-            WriteToLog "$RunningSeat is larger than 200 charachters, and cannot be handled by waylandloginmanager"
+            WriteToLog "$RunningSeat is larger than 200 characters, and cannot be handled by waylandloginmanager"
           fi
         fi
         if [[ $IncludeSeat == 1 ]]
