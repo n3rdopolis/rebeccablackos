@@ -108,7 +108,7 @@ do
   if [[ $IsDeviceInput == 1 ]]
   then
     IsDeviceInput=1
-    DeviceConnection=$DEV_ID_FOR_SEAT
+    DeviceConnection=$DEV_ID_PATH
     DeviceName=$DEV_ID_SERIAL
     DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
   else
@@ -338,7 +338,7 @@ do
           awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
         fi
       fi
-      echo "TAG==\"seat\", ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_FOR_SEAT}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
+      echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
     else
       if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
       then
