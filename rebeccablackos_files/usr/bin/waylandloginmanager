@@ -1964,21 +1964,38 @@ function ReadCommandFIFO
     then
       DoDetectSeats=0
       #Find what seats are new
-      AllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
+      AllRunningSeats=()
+      NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
+      #Make sure the seat names are acceptable. Ones that are too long will go over the file system limit
+      for NewRunningSeat in ${NewAllRunningSeats[@]}
+      do
+        SeatAlreadyRejected=0
+        for RejectedSeat in ${RejectedSeats[@]}
+        do
+          if [[ $RejectedSeat == $NewRunningSeat ]]
+          then
+            SeatAlreadyRejected=1
+          fi
+        done
+        #Seats can be 255 chars long. However files can only be 255 chars long. Wayland socket files and log files need more room.
+        if [[ ${#NewRunningSeat} -gt 200 ]]
+        then
+          IncludeSeat=0
+          if [[ $SeatAlreadyRejected == 0 ]]
+          then
+            RejectedSeats+=($NewRunningSeat)
+            WriteToLog "$NewRunningSeat is larger than 200 characters, and cannot be handled by waylandloginmanager"
+          fi
+        else
+          AllRunningSeats+=($NewRunningSeat)
+        fi
+      done
+
       #Find new seats by going the list of running ones, going through all stored ones
       #Then finding ones that have no matches
       for RunningSeat in ${AllRunningSeats[@]}
       do
         IncludeSeat=1
-        SeatAlreadyRejected=0
-        for RejectedSeat in ${RejectedSeats[@]}
-        do
-          if [[ $RejectedSeat == $RunningSeat ]]
-          then
-            SeatAlreadyRejected=1
-          fi
-        done
-
         StartedSeatCount=${#StartedSeats[@]}
         for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
         do
@@ -1988,16 +2005,6 @@ function ReadCommandFIFO
             break
           fi
         done
-        #Seats can be 255 chars long. However files can only be 255 chars long. Wayland socket files and log files need more room.
-        if [[ ${#RunningSeat} -gt 200 ]]
-        then
-          IncludeSeat=0
-          if [[ $SeatAlreadyRejected == 0 ]]
-          then
-            RejectedSeats+=($RunningSeat)
-            WriteToLog "$RunningSeat is larger than 200 characters, and cannot be handled by waylandloginmanager"
-          fi
-        fi
         if [[ $IncludeSeat == 1 ]]
         then
           #Determine and store if this seat is multisession compatible
