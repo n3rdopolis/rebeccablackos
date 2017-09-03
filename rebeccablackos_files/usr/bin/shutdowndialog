@@ -20,11 +20,11 @@
 
 #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 
-ONLY_SEAT0_SESSION_SWITCH=0
+ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
 
 SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
 
-if [[ $ONLY_SEAT0_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
 then
   ACTIONSTRING="Switch User"$'\n'"Switch User"
 fi
