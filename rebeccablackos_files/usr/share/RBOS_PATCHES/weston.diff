@@ -165,8 +165,42 @@ index 8b7d900e..c4e3305a 100644
 
 
 
-
-
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index f4103d20..93888494 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -477,6 +477,8 @@ fbdev_output_create(struct fbdev_backend *backend,
+                     const char *device)
+ {
+ 	struct fbdev_output *output;
++	struct fb_var_screeninfo varinfo;
++
+ 	int fb_fd;
  
+ 	weston_log("Creating fbdev output.\n");
+@@ -495,6 +497,13 @@ fbdev_output_create(struct fbdev_backend *backend,
+ 		goto out_free;
+ 	}
+ 
++	/* Attempt to correct the framebuffer settings */
++	if (fbdev_set_screen_info(output, fb_fd,
++	                          &output->fb_info) < 0) {
++		weston_log("Failed to set mode settings. "
++		           "Attempting to open output anyway.\n");
++	}
++
+ 	output->base.name = strdup("fbdev");
+ 	output->base.destroy = fbdev_output_destroy;
+ 	output->base.disable = NULL;
+
+
+
+
+
+
+
+
+
+
 
 
