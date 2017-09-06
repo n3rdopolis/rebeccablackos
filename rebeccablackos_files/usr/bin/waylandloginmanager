@@ -393,9 +393,12 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #WLM_LD_LIBRARY_PATH is exported so that it can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
   export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
   export WLM_PATH=$PATH
-  # TODO if Weston fbdev becomes seat aware, change to 1
-  export WESTON_FBDEV_SEAT_AWARE=0
+
+  ####These settings are dependant on Weston patches####
+  export WESTON_FBDEV_SEAT_AWARE=1
   export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
+  ######################################################
+
   #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
   then

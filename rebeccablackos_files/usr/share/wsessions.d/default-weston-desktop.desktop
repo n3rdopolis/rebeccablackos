@@ -13,7 +13,8 @@ CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
 CompositorKMSSeatAware=1
 CompositorKMSSeatArgument=--seat=
-CompositorFBSeatAware=0
+CompositorFBSeatAware=1
+CompositorFBSeatArgument=--seat=
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston
