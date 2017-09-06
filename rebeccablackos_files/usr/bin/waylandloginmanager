@@ -42,6 +42,28 @@
      #to set a different autologin user per seat or
      #      autologin-user-{$SEAT}=
      #to turn off autologin for a seat
+     #
+     #It also supports setting
+     #wlmforceswrender-{$SEAT}=1
+     #to force software rendering on a seat or
+     #wlmforceswrender=1
+     #to force software rendering globally.
+     #wlmforceswrender-{$SEAT}=0 will NOT override
+     #wlmforceswrender=1
+
+     #wlmforcevblankoff-{$SEAT}=1
+     #to force vblank off on a seat or
+     #wlmforcevblankoff=1
+     #to force software rendering globally.
+     #wlmforcevblankoff-{$SEAT}=0 will NOT override
+     #wlmforcevblankoff=1
+
+     #wlmforcefbdev-{$SEAT}=1
+     #to force vblank off on a seat or
+     #wlmforcefbdev=1
+     #to force software rendering globally.
+     #wlmforcefbdev-{$SEAT}=0 will NOT override
+     #wlmforcefbdev=1
 
 #/usr/libexec/wayland_login_helpers/*
   #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/weston.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
@@ -129,7 +151,9 @@ function UserSessionWorker
   unset IFS
 
   #if the user booted with wlmforceswrender, force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 ]]
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforceswrender=1$" /etc/waylandloginmanager.conf) == 1
+  || $(grep -c "^wlmforceswrender-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) == 1 ]]
   then
     if [[ $DefaultBackendType == KMS ]]
     then
@@ -141,7 +165,9 @@ function UserSessionWorker
   fi
 
   #if the user booted with wlmforcevblankoff, force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline) != 0 ]]
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcevblankoff=1$" /etc/waylandloginmanager.conf) == 1
+  || $(grep -c "^wlmforcevblankoff-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) == 1 ]]
   then
     export vblank_mode=0
   fi
@@ -752,7 +778,13 @@ function ChooseSessionType
   SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
   FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
-  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0  ]]
+  #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
+  #for this seat
+  if [[ $SeatSupportsKMS != 0 && ! (
+  $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcefbdev=1$" /etc/waylandloginmanager.conf) == 1
+  || $(grep -c "^wlmforcefbdev-${CurrentHandleSeat}=1$" /etc/waylandloginmanager.conf) == 1
+  )  ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatDefaultBackendType=KMS
