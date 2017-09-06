@@ -1095,16 +1095,19 @@ function ShowInfo
   else
     SWITCHSTRING=""
   fi
+  GetStartedSeatIndex $1
+  SeatIndexID=$ReturnSeatIndex
+  SeatDefaultBackendType=${LoginManagerDisplayBackends[$SeatIndexID]}
   #If the backend type is FB, then add a string to tell the user that in the help dialog
-  if [[ $DefaultBackendType == "FB" ]]
+  if [[ $SeatDefaultBackendType == "FB" ]]
   then
-    BACKENDSTRING="The framebuffer backend is being used.
+    BACKENDSTRING="The framebuffer backend is being used for this seat.
 
 This probably means the current video card drivers do not 
 support the native kernel mode setting that is optimal for Weston or other Wayland servers.
 or the system was started with the wlmforcefbdev argument."
   else
-    BACKENDSTRING="Kernel mode setting is being used.
+    BACKENDSTRING="Kernel mode setting is being used for this seat.
 
 This is the optimal way to run Weston or other Wayland servers."
   fi
