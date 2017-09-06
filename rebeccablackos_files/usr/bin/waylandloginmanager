@@ -150,10 +150,11 @@ function UserSessionWorker
   ArgArray=($ArgumentString)
   unset IFS
 
-  #if the user booted with wlmforceswrender, force software rendering to be enabled
+  #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
+  #force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0
-  || $(grep -c "^wlmforceswrender=1$" /etc/waylandloginmanager.conf) == 1
-  || $(grep -c "^wlmforceswrender-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) == 1 ]]
+  || $(grep -c "^wlmforceswrender=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforceswrender-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) != 0 ]]
   then
     if [[ $DefaultBackendType == KMS ]]
     then
@@ -164,10 +165,11 @@ function UserSessionWorker
     export PIXMANARGS=""
   fi
 
-  #if the user booted with wlmforcevblankoff, force vblank to be disabled
+  #if the user booted with wlmforcevblankoff, or configured vblank globally, or for the seat
+  #force vblank to be disabled
   if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0
-  || $(grep -c "^wlmforcevblankoff=1$" /etc/waylandloginmanager.conf) == 1
-  || $(grep -c "^wlmforcevblankoff-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) == 1 ]]
+  || $(grep -c "^wlmforcevblankoff=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcevblankoff-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) != 0 ]]
   then
     export vblank_mode=0
   fi
@@ -431,19 +433,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
   ######################################################
 
-  #if the user booted with a hidden option wlmforceswrender, force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline) != 0 ]]
-  then
-    export WLM_FORCE_SOFTWARE=1
-    export LIBGL_ALWAYS_SOFTWARE=1
-  else
-    export PIXMANARGS=""
-  fi
-  #if the user booted with wlmforcevblankoff, force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline) != 0 ]]
-  then
-    export vblank_mode=0
-  fi
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
   #default the number of sessions registered to be 0 if unset
@@ -782,8 +771,8 @@ function ChooseSessionType
   #for this seat
   if [[ $SeatSupportsKMS != 0 && ! (
   $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) != 0
-  || $(grep -c "^wlmforcefbdev=1$" /etc/waylandloginmanager.conf) == 1
-  || $(grep -c "^wlmforcefbdev-${CurrentHandleSeat}=1$" /etc/waylandloginmanager.conf) == 1
+  || $(grep -c "^wlmforcefbdev=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcefbdev-${CurrentHandleSeat}=1$" /etc/waylandloginmanager.conf) != 0
   )  ]]
   then
     SeatSupportedBackends+=(KMS)
@@ -1646,6 +1635,28 @@ function GetSeatCapabilityString
   SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
   FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
 
+  #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
+  #force software rendering to be enabled
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforceswrender=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforceswrender-${1}=1$" /etc/waylandloginmanager.conf) != 0 ]]
+  then
+    FORCESOFTWARE=1
+  else
+    FORCESOFTWARE=0
+  fi
+
+  #if the user booted with wlmforceswrender, or configured vblank globally, or for the seat
+  #force vblank to be disabled
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcevblankoff=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcevblankoff-${1}=1$" /etc/waylandloginmanager.conf) != 0 ]]
+  then
+    FORCEVBLANK=1
+  else
+    FORCEVBLANK=0
+  fi
+
   #Determine the backend to use
   WESTONBACKEND=0
   WESTONUSEPIXMAN=0
@@ -1658,10 +1669,16 @@ function GetSeatCapabilityString
       WESTONBACKEND=FB
     fi
   fi
-  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
+  #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
+  #for this seat
+  if [[ $SeatSupportsKMS != 0 && ! (
+  $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcefbdev=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcefbdev-${1}=1$" /etc/waylandloginmanager.conf) != 0
+  )  ]]
   then
     WESTONBACKEND=KMS
-    if [[ $WLM_FORCE_SOFTWARE == 1 ]]
+    if [[ $FORCESOFTWARE == 1 ]]
     then
       WESTONUSEPIXMAN=1
     fi
@@ -1677,7 +1694,7 @@ function GetSeatCapabilityString
   fi
 
   #Return the seat compatibility info
-  echo "$WESTONBACKEND $WESTONUSEPIXMAN"
+  echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
 }
 
 #This calls the loginmanagerdisplay_(seat) weston sessions. It takes 1 argument, the seat
@@ -1998,7 +2015,10 @@ function ReadCommandFIFO
   LoginManagerDisplayBackends=()
   LoginManagerDisplayPixmanFlags=()
   LoginManagerDisplayFailCounts=()
-  
+
+  SeatForceSWRenderFlags=()
+  SeatForceVblankFlags=()
+
   #loop 'forever'
   while [ 1 ]
   do
@@ -2066,6 +2086,8 @@ function ReadCommandFIFO
           SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
           LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
+          SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
+          SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
           SEATAUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep ^autologin-user-"$RunningSeat"= | awk -F = '{print $2}' | head -1 )
