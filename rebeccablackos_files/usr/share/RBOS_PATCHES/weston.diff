@@ -18,6 +18,22 @@ index 7368cb42..4f909849 100644
 
 
 
+
+
+
+diff --git a/compositor/main.c b/compositor/main.c
+index 0615d87e..61bda282 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -562,7 +562,7 @@ usage(int error_code)
+ #if defined(BUILD_DRM_COMPOSITOR)
+ 	fprintf(stderr,
+ 		"Options for drm-backend.so:\n\n"
+-		"  --seat=SEAT\t\tThe seat that weston should run on\n"
++		"  --seat=SEAT\t\tThe seat that weston should run on, instead of the seat defined in XDG_SEAT\n"
+ 		"  --tty=TTY\t\tThe tty to use\n"
+ 		"  --use-pixman\t\tUse the pixman (CPU) renderer\n"
+ 		"  --current-mode\tPrefer current KMS mode over EDID preferred mode\n\n");
 diff --git a/libweston/compositor-drm.c b/libweston/compositor-drm.c
 index 10adb463..44b2e448 100644
 --- a/libweston/compositor-drm.c
@@ -52,45 +68,37 @@ index e80a5040..81e5ec3b 100644
  
  	weston_log("initializing fbdev backend\n");
  
+diff --git a/man/weston-drm.man b/man/weston-drm.man
+index 35d62ae6..cc43c31a 100644
+--- a/man/weston-drm.man
++++ b/man/weston-drm.man
+@@ -99,8 +99,8 @@ switching to the monitor preferred mode.
+ \fB\-\-seat\fR=\fIseatid\fR
+ Use graphics and input devices designated for seat
+ .I seatid
+-instead of the default seat
+-.BR seat0 .
++instead of the seat defined in
++. BR XDG_SEAT .
+ .TP
+ \fB\-\-tty\fR=\fIx\fR
+ Launch Weston on tty
+@@ -122,6 +122,9 @@ The file descriptor (integer) where
+ .B weston-launch
+ is listening. Automatically set by
+ .BR weston-launch .
++.TP
++.B XDG_SEAT
++The seat that Weston will start on.
+ .
+ .\" ***************************************************************
+ .SH "SEE ALSO"
 
 
 
 
-diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
-index a069bd4f..11627590 100644
---- a/libweston/launcher-logind.c
-+++ b/libweston/launcher-logind.c
-@@ -762,18 +762,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
- 		free(t);
- 		goto err_session;
- 	}
--	free(t);
- 
--	r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
--	if (r < 0) {
--		weston_log("logind: session not running on a VT\n");
--		goto err_session;
--	} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
--		weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
--			   tty, wl->vtnr);
--		r = -EINVAL;
--		goto err_session;
-+        if (!strcmp(t, "seat0")) {
-+		r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
-+		if (r < 0) {
-+			weston_log("logind: session not running on a VT\n");
-+			goto err_session;
-+		} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
-+			weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
-+				   tty, wl->vtnr);
-+			r = -EINVAL;
-+			goto err_session;
-+		}
- 	}
-+	free(t);
- 
- 	loop = wl_display_get_event_loop(compositor->wl_display);
- 	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
+
+
 
 
 
@@ -165,38 +173,70 @@ index 8b7d900e..c4e3305a 100644
 
 
 
+
+
+diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
+index f10a2831..311d1749 100644
+--- a/libweston/launcher-logind.c
++++ b/libweston/launcher-logind.c
+@@ -761,18 +761,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
+ 		free(t);
+ 		goto err_session;
+ 	}
+-	free(t);
+ 
+-	r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
+-	if (r < 0) {
+-		weston_log("logind: session not running on a VT\n");
+-		goto err_session;
+-	} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
+-		weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
+-			   tty, wl->vtnr);
+-		r = -EINVAL;
+-		goto err_session;
++        if (!strcmp(t, "seat0")) {
++		r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
++		if (r < 0) {
++			weston_log("logind: session not running on a VT\n");
++			goto err_session;
++		} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
++			weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
++				   tty, wl->vtnr);
++			r = -EINVAL;
++			goto err_session;
++		}
+ 	}
++	free(t);
+ 
+ 	loop = wl_display_get_event_loop(compositor->wl_display);
+ 	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
+
+
+
+
+
+
+
+
+
 diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
-index f4103d20..93888494 100644
+index f4103d20..7e80b6f5 100644
 --- a/libweston/compositor-fbdev.c
 +++ b/libweston/compositor-fbdev.c
-@@ -477,6 +477,8 @@ fbdev_output_create(struct fbdev_backend *backend,
-                     const char *device)
- {
- 	struct fbdev_output *output;
-+	struct fb_var_screeninfo varinfo;
-+
- 	int fb_fd;
- 
- 	weston_log("Creating fbdev output.\n");
-@@ -495,6 +497,13 @@ fbdev_output_create(struct fbdev_backend *backend,
- 		goto out_free;
+@@ -356,6 +356,13 @@ fbdev_frame_buffer_open(struct fbdev_output *output, const char *fb_dev,
+ 		return -1;
  	}
  
 +	/* Attempt to correct the framebuffer settings */
-+	if (fbdev_set_screen_info(output, fb_fd,
++	if (fbdev_set_screen_info(output, fd,
 +	                          &output->fb_info) < 0) {
 +		weston_log("Failed to set mode settings. "
 +		           "Attempting to open output anyway.\n");
 +	}
 +
- 	output->base.name = strdup("fbdev");
- 	output->base.destroy = fbdev_output_destroy;
- 	output->base.disable = NULL;
-
-
-
-
-
+ 	/* Grab the screen info. */
+ 	if (fbdev_query_screen_info(output, fd, screen_info) < 0) {
+ 		weston_log("Failed to get frame buffer info: %s\n",
 
 
 
