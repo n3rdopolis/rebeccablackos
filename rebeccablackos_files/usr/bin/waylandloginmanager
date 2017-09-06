@@ -36,7 +36,13 @@
 #At least systemd v227 as it has all the ability to launch Wayland sessions with systemd-run
 
 #/etc/waylandloginmanager.conf
-  #Otherwise it uses /etc/lightdm/lightdm.conf . the only supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
+  #Otherwise it uses /etc/lightdm/lightdm.conf . The supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
+     #it can also have 
+     #      autologin-user-{$SEAT}=$AUTOLOGINUSER
+     #to set a different autologin user per seat or
+     #      autologin-user-{$SEAT}=
+     #to turn off autologin for a seat
+
 #/usr/libexec/wayland_login_helpers/*
   #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/weston.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
   #These are optional as the waylandloginmanager displays a selection list with the same commands as well
@@ -544,9 +550,9 @@ Will now reboot." 20 50 --no-cancel
   #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
   if [[ -e /etc/waylandloginmanager.conf ]]
   then
-    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
   else
-    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep autologin-user= | awk -F = '{print $2}' | head -1 )
+    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
     echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
   fi
 }
@@ -2030,8 +2036,13 @@ function ReadCommandFIFO
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
+          SEATAUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep ^autologin-user-"$RunningSeat"= | awk -F = '{print $2}' | head -1 )
+          if [[ -z $SEATAUTOLOGINUSER ]]
+          then
+            SEATAUTOLOGINUSER=$AUTOLOGINUSER
+          fi
           #if autologin is specified
-          if [[ ! -z $AUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
+          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
           then
             StartAutoLogin $RunningSeat &
             LastLoginPIDs[$StartIndex/2]=$!
