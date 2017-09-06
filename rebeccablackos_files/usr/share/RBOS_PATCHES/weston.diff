@@ -244,3 +244,80 @@ index f4103d20..7e80b6f5 100644
 
 
 
+
+
+
+diff --git a/compositor/main.c b/compositor/main.c
+index 5358f25a..0a5f08bb 100644
+--- a/compositor/main.c
++++ b/compositor/main.c
+@@ -1452,9 +1452,6 @@ load_fbdev_backend(struct weston_compositor *c,
+ 
+ 	parse_options(fbdev_options, ARRAY_LENGTH(fbdev_options), argc, argv);
+ 
+-	if (!config.device)
+-		config.device = strdup("/dev/fb0");
+-
+ 	config.base.struct_version = WESTON_FBDEV_BACKEND_CONFIG_VERSION;
+ 	config.base.struct_size = sizeof(struct weston_fbdev_backend_config);
+ 	config.configure_device = configure_input_device;
+diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
+index 7e80b6f5..4fde598e 100644
+--- a/libweston/compositor-fbdev.c
++++ b/libweston/compositor-fbdev.c
+@@ -722,6 +722,12 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 	const char *seat_id = default_seat;
+ 	const char *session_seat;
+ 
++	struct udev_enumerate *e;
++	struct udev_list_entry *entry;
++	const char *path, *device_seat;
++        char *fb_device;
++	struct udev_device *device;
++
+ 	session_seat=getenv("XDG_SEAT");
+ 	if (session_seat)
+ 		seat_id=session_seat;
+@@ -745,6 +751,33 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 		goto out_compositor;
+ 	}
+ 
++	e = udev_enumerate_new(backend->udev);
++	udev_enumerate_add_match_subsystem(e, "graphics");
++	udev_enumerate_add_match_sysname(e, "fb[0-9]*");
++
++	udev_enumerate_scan_devices(e);
++	fb_device = NULL;
++	udev_list_entry_foreach(entry, udev_enumerate_get_list_entry(e)) {
++
++		path = udev_list_entry_get_name(entry);
++		device = udev_device_new_from_syspath(backend->udev, path);
++		if (!device)
++			continue;
++		device_seat = udev_device_get_property_value(device, "ID_SEAT");
++		if (!device_seat)
++			device_seat = default_seat;
++		if (!strcmp(device_seat, seat_id)) {
++			fb_device = udev_device_get_devnode(device);
++			if (fb_device && !param->device)
++				param->device = strdup(fb_device);
++			udev_device_unref(device);
++			udev_enumerate_unref(e);
++			break;
++		}
++	}
++	if (!param->device)
++		param->device=strdup("/dev/fb0");
++
+ 	/* Set up the TTY. */
+ 	backend->session_listener.notify = session_notify;
+ 	wl_signal_add(&compositor->session_signal,
+@@ -792,8 +825,6 @@ out_compositor:
+ static void
+ config_init_to_defaults(struct weston_fbdev_backend_config *config)
+ {
+-	/* TODO: Ideally, available frame buffers should be enumerated using
+-	 * udev, rather than passing a device node in as a parameter. */
+ 	config->tty = 0; /* default to current tty */
+ 	config->device = "/dev/fb0"; /* default frame buffer */
+ 	config->seat_id = "seat0"; /* default seat*/
