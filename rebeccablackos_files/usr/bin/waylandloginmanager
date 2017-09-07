@@ -1810,7 +1810,7 @@ function StartLoginManagerDisplay
         WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
       fi
       SetFallbackEnvironmentVariables $CurrentSeat
-      systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
+      systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --setenv=LIBGL_ALWAYS_SOFTWARE="$LIBGL_ALWAYS_SOFTWARE" --setenv=vblank_mode="$vblank_mode" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0

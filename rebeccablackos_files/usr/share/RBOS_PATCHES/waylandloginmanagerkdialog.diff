@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-06 19:50:46.181047246 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-06 19:54:00.609053069 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-06 21:08:07.585186257 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-06 21:13:13.625195423 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -64,7 +64,7 @@
  function DialogWait
  {
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$3"
-   SetFallbackEnvironmentVariables
+   SetFallbackEnvironmentVariables $3
 -  waitseconds=$1
 -  displaystring="$2"
 -  countseconds=0
@@ -286,7 +286,7 @@
  function LeavePrompt
  {
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
-   SetFallbackEnvironmentVariables
+   SetFallbackEnvironmentVariables $1
 -  #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 +  #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
@@ -327,7 +327,7 @@
    fi
  }
  
-@@ -1901,7 +1897,7 @@
+@@ -1902,7 +1898,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1"
@@ -336,7 +336,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -1926,7 +1922,7 @@
+@@ -1927,7 +1923,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -345,8 +345,8 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -1960,22 +1956,27 @@
-   SetFallbackEnvironmentVariables
+@@ -1961,22 +1957,27 @@
+   SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
 -  ActionMenu="Login\nLogin...\n"
@@ -380,7 +380,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -1983,12 +1984,12 @@
+@@ -1984,12 +1985,12 @@
    else
      $SLEEPCMD .1
    fi
