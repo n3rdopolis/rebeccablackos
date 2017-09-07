@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-06 21:08:07.585186257 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-06 21:13:13.625195423 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-06 21:27:52.945221759 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-06 21:28:25.033222720 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -327,7 +327,7 @@
    fi
  }
  
-@@ -1902,7 +1898,7 @@
+@@ -1911,7 +1907,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1"
@@ -336,7 +336,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -1927,7 +1923,7 @@
+@@ -1936,7 +1932,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -345,7 +345,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -1961,22 +1957,27 @@
+@@ -1970,22 +1966,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -380,7 +380,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -1984,12 +1985,12 @@
+@@ -1993,12 +1994,12 @@
    else
      $SLEEPCMD .1
    fi
