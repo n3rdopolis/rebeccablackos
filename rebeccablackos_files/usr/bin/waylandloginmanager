@@ -1324,7 +1324,7 @@ function StartUserSession
     #Disable cursor blinking on the TTY the display server will be started on
     echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
-    OutputArgs="-p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+    OutputArgs="-p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=null -p StandardError=null -p StandardInput=tty"
   else
     OutputArgs=""
   fi
@@ -1799,7 +1799,7 @@ function StartLoginManagerDisplay
       if [[ $CurrentSeat == seat0 ]]
       then
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
-        OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+        OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=null -p StandardError=null -p StandardInput=tty"
       else
         OutputArgs=""
       fi
