@@ -77,6 +77,7 @@ then
 fi
 
 export NONROOTUSER=nobody
+export NONROOTGROUP=nogroup
 export SOURCEDIR=/srcbuild
 export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
 if [[ -z $REBUILDNEWREVISION ]]
@@ -100,6 +101,7 @@ export ACTION=$1
 function SetACLPermissions
 {
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
+  chown -R $NONROOTUSER:$NONROOTGROUP /"$SOURCEDIR"/"$SOURCENAME" /"$SOURCEDIR"/buildhome/config/"$SOURCENAME" /"$SOURCEDIR"/buildhome
   setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" /"$SOURCEDIR"/buildhome/config/"$SOURCENAME" /"$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
 }
@@ -158,6 +160,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == clean ]]
   then
     cd "$SOURCEDIR"
+    SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
     exit
   fi
@@ -212,11 +215,11 @@ function CleanupGIT()
 {
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  git submodule foreach --recursive git reset --hard 
-  git submodule foreach --recursive git clean -fdx
-  git clean -fdx
-  git reset --hard
-  git clean -fdx
+  $NONROOTCOMMAND git submodule foreach --recursive git reset --hard
+  $NONROOTCOMMAND git submodule foreach --recursive git clean -fdx
+  $NONROOTCOMMAND git clean -fdx
+  $NONROOTCOMMAND git reset --hard
+  $NONROOTCOMMAND git clean -fdx
 }
 
 #Function to download git repos
@@ -307,8 +310,8 @@ function CleanupSVN()
 {
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  svn revert --non-interactive --recursive .
-  svn cleanup --non-interactive
+  $NONROOTCOMMAND svn revert --non-interactive --recursive .
+  $NONROOTCOMMAND svn cleanup --non-interactive
 }
 
 #Function to download svn repos
@@ -348,9 +351,9 @@ function CleanupBZR()
 {
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  bzr revert
-  bzr clean-tree --force
-  bzr clean-tree --force --detritus
+  $NONROOTCOMMAND bzr revert
+  $NONROOTCOMMAND bzr clean-tree --force
+  $NONROOTCOMMAND bzr clean-tree --force --detritus
 }
 
 #Function to download bzr repos
@@ -391,8 +394,8 @@ function CleanupHG()
 {
   $NONROOTCOMMAND  mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  hg --config trusted.users=$NONROOTUSER,root revert --all
-  hg --config trusted.users=$NONROOTUSER,root --config extensions.purge= purge
+  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root revert --all
+  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root --config extensions.purge= purge
 }
 
 #Function to download hg repos
