@@ -1784,6 +1784,8 @@ function StartLoginManagerDisplay
     if [[ $SeatUsePixman == 1 ]]
     then
       PIXMANARGS="--use-pixman"
+    else
+      unset PIXMANARGS
     fi
 
     (( SeatStartCount++ ))
