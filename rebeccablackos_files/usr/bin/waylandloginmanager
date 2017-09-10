@@ -1834,12 +1834,18 @@ function StartLoginManagerDisplay
       LoginManagerDisplaySessions[$SeatIndexID]=$NewLoginManagerDisplaySession
       if [[ ! -z $NewLoginManagerDisplaySession ]]
       then
+        loginctl activate $NewLoginManagerDisplaySession &>/dev/null
         if [[ $ReadyNotifySent == 0 ]]
         then
           ReadyNotifySent=1
+          TRYCOUNT=0
+          while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat && $TRYCOUNT -le 5 ]]
+          do
+            $SLEEPCMD 1
+            ((TRYCOUNT++))
+          done
           systemd-notify --ready
         fi
-        loginctl activate $NewLoginManagerDisplaySession &>/dev/null
       fi
     else
       if [[ $SeatStartCount == 1 ]]
