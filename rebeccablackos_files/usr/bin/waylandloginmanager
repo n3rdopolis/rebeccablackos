@@ -2576,8 +2576,8 @@ fi
 if [[ $1 == "" ]]
 then
   #Prepare the loginmanager
-  PrepareLoginManager
   WriteToLog "Starting Up..."
+  PrepareLoginManager
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
