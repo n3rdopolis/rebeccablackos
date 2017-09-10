@@ -485,7 +485,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
       systemctl stop waylandloginmanager.service
-      exit 1
     fi
   fi
 
@@ -514,7 +513,6 @@ Will now start a utility to assist you in configuring your system to boot with a
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     systemctl stop waylandloginmanager.service
-    exit 1
   fi
 
   ReadyNotifySent=0
@@ -2266,7 +2264,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       systemd-notify --ready
       openvt -c 63 -s -f -w -- rbos-failedboot
       systemctl stop waylandloginmanager.service
-      exit 1
     fi
 
     #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
@@ -2278,7 +2275,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
       systemctl stop waylandloginmanager.service
-      exit 1
     fi
 
     #Quickly find if any sessions are not running
@@ -2581,6 +2577,7 @@ if [[ $1 == "" ]]
 then
   #Prepare the loginmanager
   PrepareLoginManager
+  WriteToLog "Starting Up..."
 
   #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
   SetupLoggingAndFIFO
