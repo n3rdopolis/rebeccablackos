@@ -2256,12 +2256,12 @@ function ReadCommandFIFO
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
     then
+      systemd-notify --ready
       WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
-      systemd-notify --ready
       openvt -c 63 -s -f -w -- rbos-failedboot
       systemctl stop waylandloginmanager.service
     fi
