@@ -51,6 +51,13 @@
      #wlmforceswrender-{$SEAT}=0 will NOT override
      #wlmforceswrender=1
 
+     #wlmforcepixman-{$SEAT}=1
+     #to force the loginmanagerdisplay to use pixman
+     #wlmforcepixman=1
+     #to force using pixman globally.
+     #wlmforcepixman-{$SEAT}=0 will NOT override
+     #wlmforcepixman=1
+
      #wlmforcevblankoff-{$SEAT}=1
      #to force vblank off on a seat or
      #wlmforcevblankoff=1
@@ -156,11 +163,18 @@ function UserSessionWorker
   || $(grep -c "^wlmforceswrender=1$" /etc/waylandloginmanager.conf) != 0
   || $(grep -c "^wlmforceswrender-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) != 0 ]]
   then
-    if [[ $DefaultBackendType == KMS ]]
-    then
-      export PIXMANARGS="--use-pixman"
-    fi
     export LIBGL_ALWAYS_SOFTWARE=1
+  fi
+
+  #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
+  #force pixman to be enabled
+  if [[ $DefaultBackendType == KMS && (
+  $(grep -c "\bwlmforcepixman\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcepixman=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcepixman-${XDG_SEAT}=1$" /etc/waylandloginmanager.conf) != 0
+  ) ]]
+  then
+    export PIXMANARGS="--use-pixman"
   else
     export PIXMANARGS=""
   fi
@@ -1684,11 +1698,21 @@ function GetSeatCapabilityString
   )  ]]
   then
     WESTONBACKEND=KMS
-    if [[ $FORCESOFTWARE == 1 ]]
-    then
-      WESTONUSEPIXMAN=1
-    fi
-   fi
+  fi
+
+  #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
+  #force pixman to be enabled
+  if [[ $WESTONBACKEND == KMS && (
+  $(grep -c "\bwlmforcepixman\b" /proc/cmdline ) != 0
+  || $(grep -c "^wlmforcepixman=1$" /etc/waylandloginmanager.conf) != 0
+  || $(grep -c "^wlmforcepixman-${1}=1$" /etc/waylandloginmanager.conf) != 0
+  ) ]]
+  then
+    WESTONUSEPIXMAN=1
+  else
+    WESTONUSEPIXMAN=0
+  fi
+
   if [[ $WESTONBACKEND == KMS ]]
   then
     WriteToLog "Kernel mode setting found for seat $1 ."
