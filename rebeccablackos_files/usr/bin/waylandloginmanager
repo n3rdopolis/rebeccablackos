@@ -2203,6 +2203,13 @@ function ReadCommandFIFO
         LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
       fi
       StartLoginManagerDisplay $RunningSeat
+      #If the first loginmanagerdisplay fails to start on the first attempt
+      #That should not happen, declare the service start as complete, and don't worry about the seamless startup
+      if [[ $ReadyNotifySent == 0 ]]
+      then
+        ReadyNotifySent=1
+        systemd-notify --ready
+      fi
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
