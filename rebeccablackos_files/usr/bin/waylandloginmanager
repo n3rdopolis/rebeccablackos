@@ -475,6 +475,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   fi
   if [[ $(ls  /dev/fb* 2>/dev/null) ]]
   then
+    WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
     then
       WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
@@ -1686,6 +1687,7 @@ function GetSeatCapabilityString
   else
     if [[ "$1" == "seat0" && $FB0INSEAT0 != 0 ]]
     then
+      SeatSupportsFB=1
       WESTONBACKEND=FB
     fi
   fi
@@ -1713,15 +1715,19 @@ function GetSeatCapabilityString
     WESTONUSEPIXMAN=0
   fi
 
-  if [[ $WESTONBACKEND == KMS ]]
+  if [[ $SeatSupportsKMS == 0 && $SeatSupportsFB == 0 ]]
   then
-    WriteToLog "Kernel mode setting found for seat $1 ."
-  elif [[ $WESTONBACKEND == FB ]]
-  then
-    WriteToLog "Framebuffer found for seat $1 ."
-  else
     WriteToLog "No usable display hardware found on seat $1 ."
   fi
+  if [[ $SeatSupportsKMS != 0 ]]
+  then
+    WriteToLog "Kernel mode setting found for seat $1 ."
+  fi
+  if [[ $SeatSupportsFB != 0 ]]
+  then
+    WriteToLog "Framebuffer found for seat $1 ."
+  fi
+
 
   #Return the seat compatibility info
   echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"

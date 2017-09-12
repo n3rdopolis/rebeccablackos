@@ -1,5 +1,5 @@
---- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-10 22:37:23.258184241 -0400
-+++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-10 22:37:46.001511681 -0400
+--- rebeccablackos_files/usr/bin/waylandloginmanager	2017-09-12 07:17:03.918486805 -0400
++++ rebeccablackos_files/usr/bin/waylandloginmanagerkdialog	2017-09-12 07:17:08.840946952 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -55,7 +55,7 @@
    TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-@@ -735,21 +739,12 @@
+@@ -736,21 +740,12 @@
    done
  }
  
@@ -79,7 +79,7 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -809,10 +804,10 @@
+@@ -810,10 +805,10 @@
        SeatDefaultBackendType=FB
      fi
    fi
@@ -92,7 +92,7 @@
    while read SESSIONFILE
    do
      IsExecutable=$(find $SESSIONFILE |wc -l)
-@@ -1006,7 +1001,7 @@
+@@ -1007,7 +1002,7 @@
    done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
  
  
@@ -101,7 +101,7 @@
    if [[ ! -z $WSESSIONLIST ]]
    then
      PROMPTED=1
-@@ -1026,13 +1021,16 @@
+@@ -1027,13 +1022,16 @@
        then
          WSESSIONPICKLIST+=$'\n'
        fi
@@ -122,7 +122,7 @@
      CancelOrOK=$?
      if [[ $CancelOrOK != 0 ]]
      then
-@@ -1050,7 +1048,7 @@
+@@ -1051,7 +1049,7 @@
    then 
      if [[ $PROMPTED == 1 ]]
      then
@@ -131,7 +131,7 @@
      else
        WriteToLog "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell"
      fi
-@@ -1157,7 +1155,7 @@
+@@ -1158,7 +1156,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -140,7 +140,7 @@
  
  $BACKENDSTRING
  
-@@ -1181,12 +1179,6 @@
+@@ -1182,12 +1180,6 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -153,7 +153,7 @@
    while [[ $NumberOfSessions -ge 0 ]]
    do
      #determine if the current session is alive, before adding it to the list
-@@ -1198,11 +1190,7 @@
+@@ -1199,11 +1191,7 @@
          then
            SessionList+=$'\n'
          fi
@@ -166,7 +166,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -1213,19 +1201,17 @@
+@@ -1214,19 +1202,17 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -192,7 +192,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1253,7 +1239,7 @@
+@@ -1254,7 +1240,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -201,7 +201,7 @@
        fi
      fi
    fi
-@@ -1468,26 +1454,30 @@
+@@ -1469,26 +1455,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -240,7 +240,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1495,9 +1485,9 @@
+@@ -1496,9 +1486,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -252,7 +252,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1513,9 +1503,9 @@
+@@ -1514,9 +1504,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
@@ -264,7 +264,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1527,23 +1517,23 @@
+@@ -1528,23 +1518,23 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
@@ -292,7 +292,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
    if [[ $CanPowerOff == 1 ]]
    then
-@@ -1599,16 +1589,22 @@
+@@ -1600,16 +1590,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -318,7 +318,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -1642,7 +1638,7 @@
+@@ -1643,7 +1639,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -327,7 +327,7 @@
    fi
  }
  
-@@ -1949,7 +1945,7 @@
+@@ -1955,7 +1951,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1"
@@ -336,7 +336,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -1974,7 +1970,7 @@
+@@ -1980,7 +1976,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -345,7 +345,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2008,22 +2004,27 @@
+@@ -2014,22 +2010,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -380,7 +380,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2031,12 +2032,12 @@
+@@ -2037,12 +2038,12 @@
    else
      $SLEEPCMD .1
    fi
