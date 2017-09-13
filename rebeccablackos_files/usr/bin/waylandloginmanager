@@ -1719,7 +1719,7 @@ function GetSeatCapabilityString
   then
     WriteToLog "No usable display hardware found on seat $1 ."
   fi
-  if [[ $SeatSupportsKMS != 0 ]]
+  if [[ $SeatSupportsKMS != 0 && $WESTONBACKEND == KMS ]]
   then
     WriteToLog "Kernel mode setting found for seat $1 ."
   fi
