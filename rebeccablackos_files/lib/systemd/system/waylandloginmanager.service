@@ -1,6 +1,6 @@
 [Unit]
 Description=The Wayland Login Manager for RebeccaBlackOS
-Before=getty@tty1.service
+Before=getty@tty1.service plymouth.service
 After=systemd-user-sessions.service
 Conflicts=plymouth-quit-wait.service
 
