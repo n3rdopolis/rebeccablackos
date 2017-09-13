@@ -1819,9 +1819,9 @@ function StartLoginManagerDisplay
     (( SeatStartCount++ ))
     if [[ "$CurrentSeat" == seat0 ]]
     then
-      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat"
+      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempt $SeatStartCount)"
     else
-      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat"
+      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempt $SeatStartCount)"
     fi
     if [[ -x "$DEFAULTWAYLANDSERVER" ]]
     then
@@ -2115,7 +2115,7 @@ function ReadCommandFIFO
       DoDetectSeats=0
       #Find what seats are new
       AllRunningSeats=()
-      NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null))
+      NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
       #Make sure the seat names are acceptable. Ones that are too long will go over the file system limit
       for NewRunningSeat in ${NewAllRunningSeats[@]}
       do
