@@ -954,7 +954,7 @@ function ChooseSessionType
 
     if [[ $SupportsBackend != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: "${SeatSupportedBackends[*]}" , the session will not be availible for selection by the user."
+      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: "${SeatSupportedBackends[@]}" , the session will not be availible for selection by the user."
     fi
 
     if [[ $SupportsSeat != 1 ]]
