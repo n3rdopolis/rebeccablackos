@@ -1777,7 +1777,7 @@ function StartLoginManagerDisplay
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if [[ $LoginManagerLoopCount != 120 ]]
+  if (( ! ($LoginManagerLoopCount % 120) ))
   then
     if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
     then
@@ -2110,7 +2110,7 @@ function ReadCommandFIFO
   do
     ((LoginManagerLoopCount++))
     #Detect all seats, and add them to the array. (every minute, as it sleeps every .5 seconds)
-    if [[ $DoDetectSeats == 1 || $LoginManagerLoopCount == 120 ]]
+    if [[ $DoDetectSeats == 1 || $LoginManagerLoopCount == 1200 ]]
     then
       DoDetectSeats=0
       #Find what seats are new
@@ -2590,7 +2590,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
     LoginManagerFirstLoop=0
-    if [[ $LoginManagerLoopCount == 120 ]]
+    if [[ $LoginManagerLoopCount == 1200 ]]
     then
       LoginManagerLoopCount=0
     fi
