@@ -779,6 +779,8 @@ function ChooseSessionType
   FirstRunNotRan=0
 
   SeatDefaultBackendType=""
+  SeatSupportedBackends=()
+  SeatSupportedBackendsString=""
   SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
   FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
@@ -791,6 +793,7 @@ function ChooseSessionType
   )  ]]
   then
     SeatSupportedBackends+=(KMS)
+    SeatSupportedBackendsString+="KMS "
     SeatDefaultBackendType=KMS
   fi
   if [[ $SeatSupportsKMS != 0 || ($SeatSupportsFB != 0 && $WESTON_FBDEV_SEAT_AWARE == 1 ) ]]
@@ -800,6 +803,7 @@ function ChooseSessionType
     if [[ "$CurrentHandleSeat" == "seat0" && $FB0INSEAT0 != 0 ]]
     then
       SeatSupportedBackends+=(WL)
+      SeatSupportedBackendsString+="WL "
     fi
   fi
   if [[ $SeatSupportsFB != 0 ]]
@@ -808,6 +812,7 @@ function ChooseSessionType
     if [[ -z $SeatDefaultBackendType ]]
     then
       SeatDefaultBackendType=FB
+      SeatSupportedBackendsString+="FB "
     fi
   fi
   #Parse the list of sessions specified, so that zenity can use it as a list of sessions
@@ -954,7 +959,7 @@ function ChooseSessionType
 
     if [[ $SupportsBackend != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: "${SeatSupportedBackends[@]}" , the session will not be availible for selection by the user."
+      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: $SeatSupportedBackendsString , the session will not be availible for selection by the user."
     fi
 
     if [[ $SupportsSeat != 1 ]]
@@ -2348,7 +2353,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
         if [[ $SeatCanMultiSession == 1 ]]
         then
-          WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID as a session failed to start"
+          WriteToLog "Switching back to the loginmanagerdisplay for seat $FailSeat as a session failed to start"
           loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
         fi
       done
