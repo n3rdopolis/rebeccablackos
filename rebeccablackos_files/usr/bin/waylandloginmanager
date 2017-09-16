@@ -1783,7 +1783,7 @@ function StartLoginManagerDisplay
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if (( ! ($LoginManagerLoopCount % 120) ))
+  if (( $LoginManagerLoopCount % 120 ))
   then
     if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
     then
