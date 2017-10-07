@@ -114,11 +114,6 @@ echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 #Set default user groups
 printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo dip lpadmin sambashare systemd-journald"\n" >> /etc/adduser.conf
 
-#Modify Cryptroot setup, to detect depandant devices, to work around calamares bug
-dpkg-divert --add --rename --divert /usr/share/cryptsetup/cryptroot_setup.sh /usr/share/initramfs-tools/hooks/cryptroot
-cp /usr/share/cryptsetup/cryptroot_setup.sh /usr/share/initramfs-tools/hooks/cryptroot
-patch /usr/share/initramfs-tools/hooks/cryptroot /usr/share/RBOS_PATCHES/cryptroot.diff
-
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 

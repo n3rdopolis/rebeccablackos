@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/calamares/calamares.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=v3.1.1
+SOURCEREVISION=3.1.x-stable
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -67,8 +67,8 @@ sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
 sed -i 's/Name=Calamares/Name=Install RebeccaBlackOS/g' calamares.desktop
 sed -i '/pkexec/d' calamares.desktop
 sed -ie "s/  - kdm/  - kdm\n  - waylandloginmanager/g" src/modules/displaymanager/displaymanager.conf
-sed -i 's|/usr/lib/calamares/|/opt/lib/calamares/|'g src/modules/initramfscfg/main.py
-sed -i 's/"-u"]/"-c", "-t"]/g' src/modules/initramfs/main.py
+
+
 git checkout a2a6d2f2439f400cfa149ff0b36e2e68b2cb171e src/modules/displaymanager/main.py
 patch -p1 < /usr/share/RBOS_PATCHES/calamares.diff
 
