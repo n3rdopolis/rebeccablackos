@@ -88,6 +88,9 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/bu
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 
+#Clear list of failed downloads
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/build_core/faileddownloads
+
 #Copy in system resolv.conf
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/resolv.conf
 cp /etc/resolv.conf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/resolv.conf

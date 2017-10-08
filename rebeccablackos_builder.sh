@@ -735,6 +735,14 @@ then
   echolog " "
 fi
 
+if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/faileddownloads ]]
+then
+  echolog -e "\nPackages that failed to download source:"
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/faileddownloads | tr '\n' ' ')
+  echolog "$LIST"
+  echolog " "
+fi
+
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/build_core/failedcompiles ]]
 then
   echolog -e "\nPackages that failed to compile:"

@@ -264,6 +264,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
   $NONROOTCOMMAND git pull -f
+  UpdateCommandResult=$?
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
@@ -293,7 +294,7 @@ function DownloadGIT()
     $NONROOTCOMMAND git submodule update --recursive --force
     $NONROOTCOMMAND git pull -f
   done
-
+  return $UpdateCommandResult
 }
 
 #function to get the revison of SVN repos
@@ -334,6 +335,8 @@ function DownloadSVN()
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION
+  UpdateCommandResult=$?
+  return $UpdateCommandResult
 }
 
 
@@ -377,7 +380,9 @@ function DownloadBZR()
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND bzr pull
+  UpdateCommandResult=$?
   $NONROOTCOMMAND bzr update -r $SOURCEREVISION
+  return $UpdateCommandResult
 }
 
 #function to get the version of HG repos
@@ -420,7 +425,9 @@ function DownloadHG()
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root pull
+  UpdateCommandResult=$?
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
+  return $UpdateCommandResult
 }
 
 
@@ -463,10 +470,12 @@ function DownloadARCHIVE()
   then
     $NONROOTCOMMAND mkdir -p "$SOURCENAME"
     $NONROOTCOMMAND wget "$SOURCEURL" -O $SOURCENAME/SOURCEFILE
+    UpdateCommandResult=$?
     echo "$SOURCEURL" > $SOURCENAME/SOURCEURL
   fi
   cd "$SOURCENAME"
   $NONROOTCOMMAND tar xaf SOURCEFILE -C .
+  return $UpdateCommandResult
 }
 
 #Function to go through all toml files in the PWD, and fetch the dependancies they need
@@ -532,6 +541,11 @@ function DownloadSource()
     SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
     Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+    DownloadRepoResult=${PIPESTATUS[0]}
+    if [[ $DownloadRepoResult != 0 ]]
+    then
+      echo $SOURCENAME >> "$BUILDLOGDIR/faileddownloads"
+    fi
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
