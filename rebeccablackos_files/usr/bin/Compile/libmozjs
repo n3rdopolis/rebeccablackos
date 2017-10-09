@@ -62,7 +62,7 @@ export SHELL=/bin/bash
 #cd mozjs-38.0.0/js/src/
 mkdir build
 cd build
-../js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) ---enable-posix-nspr-emulation --with-system-zlib --with-system-icu --with-intl-api --enable-release --disable-debug-symbols --disable-debug AUTOCONF=autoconf
+../js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) ---enable-posix-nspr-emulation --with-system-zlib --with-system-icu --with-intl-api --enable-release --disable-debug-symbols --disable-debug AUTOCONF=autoconf --disable-jemalloc
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
