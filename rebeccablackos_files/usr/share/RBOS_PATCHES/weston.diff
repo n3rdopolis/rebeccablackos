@@ -1,25 +1,3 @@
-diff --git a/fullscreen-shell/fullscreen-shell.c b/fullscreen-shell/fullscreen-shell.c
-index 7368cb42..4f909849 100644
---- a/fullscreen-shell/fullscreen-shell.c
-+++ b/fullscreen-shell/fullscreen-shell.c
-@@ -569,9 +569,9 @@ fs_output_configure_for_mode(struct fs_output *fsout,
- 	mode.flags = 0;
- 	mode.refresh = fsout->pending.framerate;
- 
--	ret = weston_output_mode_switch_to_temporary(fsout->output, &mode,
--					fsout->output->native_scale);
--
-+	//ret = weston_output_mode_switch_to_temporary(fsout->output, &mode,
-+	//				fsout->output->native_scale);
-+	ret= 0;
- 	if (ret != 0) {
- 		/* The mode switch failed.  Clear the pending and
- 		 * reconfigure as per normal */
-
-
-
-
-
 diff --git a/compositor/main.c b/compositor/main.c
 index 0615d87e..cd07a6bb 100644
 --- a/compositor/main.c
