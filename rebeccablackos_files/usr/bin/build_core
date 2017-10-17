@@ -777,7 +777,7 @@ function MakeAndInstall()
           FILELINKPATH=\$(readlink -f \"\$FILE\")
           if [[ \"\$FILE\" == \"\$FILELINKPATH\" ]]
           then
-            touch \"\$FILE\"
+            strip -x \"\$FILE\" &>/dev/null
           else
             FILELINKDEST=\$(readlink \"\$FILE\")
             rm \"\$FILE\"
