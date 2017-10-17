@@ -79,15 +79,17 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly
-qmake
+mkdir "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly/build
+cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly/build
+qmake ..
 make
-cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly/wiggly $INSTALLDIR/bin
+cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly/build/wiggly $INSTALLDIR/bin
 
-cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix
-qmake
+mkdir "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix/build
+cd "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix/build
+qmake ..
 make
-cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix/tetrix $INSTALLDIR/bin
+cp "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix/build/tetrix $INSTALLDIR/bin
 
 
 }
