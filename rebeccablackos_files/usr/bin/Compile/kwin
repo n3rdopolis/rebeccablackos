@@ -58,7 +58,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #echo "setcap cap_sys_nice=eip $INSTALLDIR/bin/kwin_wayland" > "postinstall-pak"
-#patch -f -p1 < /usr/share/RBOS_PATCHES/kwin.diff
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
