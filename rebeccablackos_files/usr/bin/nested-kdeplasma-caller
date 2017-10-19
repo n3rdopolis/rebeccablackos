@@ -22,6 +22,5 @@
 RANDOMNUMBER=$RANDOM
 ServerID=wayland-$RANDOMNUMBER
 export $(dbus-launch)
-unset DISPLAY
-#export KWIN_COMPOSE=Q
+#unset DISPLAY
 kwin_wayland --xwayland  --windowed --socket=$ServerID /opt/libexec/startplasma
