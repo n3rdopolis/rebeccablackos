@@ -258,13 +258,20 @@ function DownloadGIT()
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git pull -f
   $NONROOTCOMMAND git rebase -s ours
-  $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
+  $NONROOTCOMMAND git checkout -f $SOURCEREVISION
+  GitCheckoutResult=$?
   git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
   $NONROOTCOMMAND git submodule sync --recursive
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
   $NONROOTCOMMAND git pull -f
-  UpdateCommandResult=$?
+  GitPullResult=$?
+  if [[ $GitCheckoutResult == 0 || $GitPullResult == 0 ]]
+  then
+    UpdateCommandResult=0
+  else
+    UpdateCommandResult=1
+  fi
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
