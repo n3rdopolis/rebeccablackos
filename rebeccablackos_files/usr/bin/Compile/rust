@@ -52,6 +52,8 @@ function PackageDownloadSource
 {
 unset SUDO_USER
 cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
+sed -i 's|https://s3.amazonaws.com/rust-lang-ci/cargo-builds/|https://static.rust-lang.org/dist/|g' src/bootstrap/bootstrap.py
+sed -i 's|6b05583d71f982bcad049b9fa094c637c062e751|2017-03-16|g' src/stage0.txt
 python src/bootstrap/bootstrap.py
 }
 
