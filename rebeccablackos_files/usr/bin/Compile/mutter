@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i '/Makefile-tests.am/d' src/Makefile.am
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-compile-warnings=yes --with-xwayland-path=$INSTALLDIR/bin/Xwayland --disable-Werror --enable-egl-device
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-compile-warnings=yes --with-xwayland-path=$INSTALLDIR/bin/Xwayland --disable-Werror --enable-egl-device --enable-gles1 --enable-gles2
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
