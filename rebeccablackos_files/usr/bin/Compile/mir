@@ -23,13 +23,13 @@
 SOURCENAME=mir
 
 #The URL of the Source code repo
-SOURCEURL=http://bazaar.launchpad.net/~mir-team/mir/development-branch
+SOURCEURL=https://github.com/MirServer/mir
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=BZR
+REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=last:1
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
