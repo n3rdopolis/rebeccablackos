@@ -1,8 +1,8 @@
---- a/src/materialdecoration/materialdecoration.cpp
-+++ b/src/materialdecoration/materialdecoration.cpp
- 
- void QWaylandMaterialDecoration::paint(QPaintDevice *device)
-@@ -93,17 +87,16 @@
+diff --git a/src/plugins/decorations/material/materialdecoration.cpp b/src/plugins/decorations/material/materialdecoration.cpp
+index 3c236e37..17935f43 100644
+--- a/src/plugins/decorations/material/materialdecoration.cpp
++++ b/src/plugins/decorations/material/materialdecoration.cpp
+@@ -167,17 +167,16 @@ void QWaylandMaterialDecoration::paint(QPaintDevice *device)
      // Title bar
      int radius = waylandWindow()->isMaximized() ? 0 : dp(3);
      QPainterPath roundedRect;
