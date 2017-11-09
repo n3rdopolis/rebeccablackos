@@ -257,6 +257,8 @@ update-rc.d remastersys-firstboot defaults
         pwconv -R $WORKDIR/dummysys
         grpconv -R $WORKDIR/dummysys
 
+        chgrp shadow $WORKDIR/dummysys/etc/shadow
+        chgrp shadow $WORKDIR/dummysys/etc/gshadow
 
         #cat $WORKDIR/tmpusers1 $WORKDIR/tmpusers2 $WORKDIR/tmpusers3 > $WORKDIR/tmpusers
         #rm -f $WORKDIR/tmpusers[0-9] &> /dev/null
