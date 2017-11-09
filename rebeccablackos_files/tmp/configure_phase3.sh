@@ -114,6 +114,10 @@ echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 #Set default user groups
 printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo dip lpadmin sambashare systemd-journald"\n" >> /etc/adduser.conf
 
+#workaround so that all PAM files are stored in the proper place
+mkdir -p /opt/etc
+ln -s /etc/pam.d /opt/etc/pam.d
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -207,8 +211,9 @@ function PostInstallActions
   #move the import folder
   mv /usr/import /tmp
 
-  #Don't allow waylandloginmanager.service to be executable, unit files dont need to be executable
+  #Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
   chmod -X /lib/systemd/system/waylandloginmanager.service
+  chmod -X /etc/pam.d/*
   
   #Add nls modules to the initramfs
   echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
@@ -287,8 +292,9 @@ compile_all installsmallpackage
 #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
 rsync /tmp/import/* -Ka /
 
-#Don't allow waylandloginmanager.service to be executable, unit files dont need to be executable
+#Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
 chmod -X /lib/systemd/system/waylandloginmanager.service
+chmod -X /etc/pam.d/*
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
