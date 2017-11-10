@@ -2410,7 +2410,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             fi
             WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
-            chvt $LOGINMANAGERDISPLAYTTY &> /dev/null &
           fi
         fi
       done
