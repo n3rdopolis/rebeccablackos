@@ -1335,7 +1335,7 @@ function StartUserSession
     TTYSTRING=""
   fi
 
-  systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID" &> /dev/null
+  systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID-$USERSEAT" &> /dev/null
   #Only seat0 supports TTYs
   if [[ "$USERSEAT" == seat0 ]]
   then
