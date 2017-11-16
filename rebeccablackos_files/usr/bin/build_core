@@ -251,27 +251,23 @@ function DownloadGIT()
   do
     rm "$LOCKFILE"
   done
+
+  $NONROOTCOMMAND git ls-remote "$SOURCEURL" > /dev/null
+  UpdateCommandResult=$?
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
   $NONROOTCOMMAND git reset --hard
   rm -rf .git/rebase-*/
   rm -rf .git/modules/*/rebase-*/
+
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git pull -f
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION
-  GitCheckoutResult=$?
   git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
   $NONROOTCOMMAND git submodule sync --recursive
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
   $NONROOTCOMMAND git pull -f
-  GitPullResult=$?
-  if [[ $GitCheckoutResult == 0 || $GitPullResult == 0 ]]
-  then
-    UpdateCommandResult=0
-  else
-    UpdateCommandResult=1
-  fi
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
@@ -338,11 +334,12 @@ function DownloadSVN()
 
   fi
 
+  $NONROOTCOMMAND svn ls "$SOURCEURL" --depth empty --non-interactive > /dev/null
+  UpdateCommandResult=$?
   $NONROOTCOMMAND svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION
-  UpdateCommandResult=$?
   return $UpdateCommandResult
 }
 
@@ -383,11 +380,12 @@ function DownloadBZR()
 
   fi
 
+  $NONROOTCOMMAND bzr info "$SOURCEURL" > /dev/null
+  UpdateCommandResult=$?
   $NONROOTCOMMAND bzr branch "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND bzr pull
-  UpdateCommandResult=$?
   $NONROOTCOMMAND bzr update -r $SOURCEREVISION
   return $UpdateCommandResult
 }
@@ -427,12 +425,12 @@ function DownloadHG()
 
   fi
 
-  
+  $NONROOTCOMMAND hg identify "$SOURCEURL" > /dev/null
+  UpdateCommandResult=$?
   $NONROOTCOMMAND hg clone "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root pull
-  UpdateCommandResult=$?
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
   return $UpdateCommandResult
 }
@@ -473,11 +471,12 @@ function DownloadARCHIVE()
     fi
   fi
 
+  $NONROOTCOMMAND wget -q --spider "$SOURCEURL" > /dev/null
+  UpdateCommandResult=$?
   if [[ ! -f "$SOURCENAME/SOURCEFILE" ]]
   then
     $NONROOTCOMMAND mkdir -p "$SOURCENAME"
     $NONROOTCOMMAND wget "$SOURCEURL" -O $SOURCENAME/SOURCEFILE
-    UpdateCommandResult=$?
     echo "$SOURCEURL" > $SOURCENAME/SOURCEURL
   fi
   cd "$SOURCENAME"
