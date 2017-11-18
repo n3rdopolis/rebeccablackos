@@ -162,7 +162,7 @@
 -        SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
 -        SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
 -        SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"
-+        SessionList+="${AllSessionIDs[$NumberOfSessions]}"$'\n'"${AllSessionUsers[$NumberOfSessions]}"
++        SessionList+="${AllSessionIDs[$NumberOfSessions]}"$'\n'"${AllSessionIDs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
        fi
      fi
      ((NumberOfSessions--))
