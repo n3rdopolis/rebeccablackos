@@ -329,6 +329,19 @@ then
     exit
   fi
 
+  #Test if the target is still in a usable state
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint sudo -u livetest true
+  if [[ $? != 0 ]]
+  then
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --info --text "Failed to enter the running target system. This should not happen."
+    else
+      echo "Failed to enter the running target system. This should not happen."
+    fi
+    mountisoexit
+  fi
+
   script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
   mountisoexit
 fi
