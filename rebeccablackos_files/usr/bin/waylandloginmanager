@@ -2208,9 +2208,6 @@ function ReadCommandFIFO
         do
           if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
           then
-            WriteToLog "$RunningSeat has been detected to have been removed"
-            kill -15 -${LastUserActionPIDs[$StartIndex]} &> /dev/null
-            UserActionFailSkips[$StartIndex]=1
             SeatRemoved=0
           fi
         done
@@ -2221,6 +2218,9 @@ function ReadCommandFIFO
           UserActionFailCounts[$ChangeIndex]=0
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
+          WriteToLog "$RunningSeat has been detected to have been removed"
+          kill -15 -${LastUserActionPIDs[$StartIndex]} &> /dev/null
+          UserActionFailSkips[$StartIndex]=1
         fi
       done
     fi
