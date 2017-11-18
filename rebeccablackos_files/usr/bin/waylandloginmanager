@@ -2208,6 +2208,7 @@ function ReadCommandFIFO
         do
           if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
           then
+            WriteToLog "$RunningSeat has been detected to have been removed"
             SeatRemoved=0
           fi
         done
