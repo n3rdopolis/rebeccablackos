@@ -131,7 +131,7 @@ index 4b3605cf..cad4b202 100644
  	}
  
 +	if (!param->device)
-+		find_framebuffer_device(backend, seat_id);
++		param->device=find_framebuffer_device(backend, seat_id);
 +	if (!param->device)
 +		param->device=strdup("/dev/fb0");
 +
