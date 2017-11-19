@@ -2219,6 +2219,7 @@ function ReadCommandFIFO
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
           WriteToLog "${StartedSeats[$StartIndex]} has been detected to have been removed"
+          systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}"
         fi
       done
     fi
