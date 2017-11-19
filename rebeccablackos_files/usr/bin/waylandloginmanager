@@ -2094,21 +2094,22 @@ function ReadCommandFIFO
   StartedSeats=()
   RejectedSeats=()
 
+  #Arrays about running helper processes
   LastUserActionPIDs=()
   LastSwitchPIDs=()
   LastLoginPIDs=()
   LastLeavePIDs=()
   LastInfoPIDs=()
   LastDebugPIDs=()
+  LoginManagerDisplaySessions=()
 
+  #Arrays about the seats, what hardware is supported
+  #and how many times something related to the seat failed
   UserActionFailCounts=()
   UserActionFailSkips=()
-
-  LoginManagerDisplaySessions=()
+  LoginManagerDisplayFailCounts=()
   LoginManagerDisplayBackends=()
   LoginManagerDisplayPixmanFlags=()
-  LoginManagerDisplayFailCounts=()
-
   SeatForceSWRenderFlags=()
   SeatForceVblankFlags=()
 
@@ -2178,6 +2179,8 @@ function ReadCommandFIFO
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
           SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
+          UserActionFailCounts[$StartIndex/2]=0
+          UserActionFailSkips[$StartIndex/2]=0
           LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
