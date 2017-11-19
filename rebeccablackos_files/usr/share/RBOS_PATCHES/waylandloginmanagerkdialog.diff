@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2017-11-15 19:44:24.939566982 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2017-11-15 19:43:57.879442328 -0500
+--- usr/bin/waylandloginmanager	2017-11-19 10:03:40.532261875 -0500
++++ usr/bin/waylandloginmanagerkdialog	2017-11-19 10:05:09.960717487 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -21,7 +21,7 @@
    #These are optional as the waylandloginmanager displays a selection list with the same commands as well
  #/etc/loginmanagerdisplay/weston.ini
    #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/wayland_login_helpers to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
-@@ -416,9 +416,12 @@
+@@ -414,9 +414,12 @@
  
    #Enable job control in this script
    set -m
@@ -36,7 +36,7 @@
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that the su test in AuthenticateUser user runs as
    export PROBETESTUSER=waylandloginmanager
-@@ -431,7 +434,8 @@
+@@ -429,7 +432,8 @@
    export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
@@ -46,7 +46,7 @@
    export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston)
-@@ -462,7 +466,7 @@
+@@ -460,7 +464,7 @@
      ISLIVE=1
    fi
  
