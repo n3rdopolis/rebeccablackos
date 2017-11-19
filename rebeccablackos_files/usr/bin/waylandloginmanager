@@ -2175,6 +2175,7 @@ function ReadCommandFIFO
           fi
           WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
           systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
+          rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
