@@ -144,7 +144,7 @@ function UserSessionWorker
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT > 4 ]]
     then
-      rm "$LOGFILE"
+      rm "$LOGFILE" &> /dev/null
     fi
   done
 
@@ -222,7 +222,7 @@ function UserSessionWorker
   #Execute first run scripts
   if [[ ! -e "$HOME"/.config/wlmfirstlogin ]]
   then
-    dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun
+    dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun &>/dev/null
     mkdir -p "$HOME"/.config/
     touch "$HOME"/.config/wlmfirstlogin
   fi
@@ -245,7 +245,7 @@ function UserSessionWorker
 
   #Write any Journal logs for this session into the logfile
   echo -e "\nSession's Journal Logs:" >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log 2>/dev/null
 
   exit
 }
@@ -260,7 +260,7 @@ function UIHost
 function ReadEnvironmentFile
 {
   #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" | awk -F \# '{print $1}' | sed  -e "s/ *= */\#/g" -re "s/ *@([A-Z]*)$/\#\1/g")
+  EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" 2>/dev/null | awk -F \# '{print $1}' | sed  -e "s/ *= */\#/g" -re "s/ *@([A-Z]*)$/\#\1/g")
 
   IFS=$'\n'
   EnvironmentFileData=($EnvironmentFileData)
@@ -305,7 +305,6 @@ function ReadEnvironmentFile
       then
         unset $VARNAME
       fi
-
     fi
   done
 }
@@ -315,7 +314,7 @@ function ReadEnvironmentFile
 #This function writes to the logs. It takes 1 argument, the string to log.
 function WriteToLog
 {
-  logger -t waylandloginmanager "$1" -s  >>/var/log/waylandloginmanager 2>&1
+  logger -t waylandloginmanager -- "$1" -s  >>/var/log/waylandloginmanager 2>&1
 }
 
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
@@ -358,7 +357,6 @@ function PrepareLoginManager
   AutoConfig=0
   if [[ $AutoConfig == 1 ]]
   then
-
     #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
     if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
     then
@@ -487,7 +485,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     WriteToLog "No framebuffer support found"
   fi
 
-
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
   if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 ]]
   then
@@ -499,7 +496,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service
+      systemctl stop waylandloginmanager.service &> /dev/null
     fi
   fi
 
@@ -527,7 +524,7 @@ Will now start a utility to assist you in configuring your system to boot with a
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
-    systemctl stop waylandloginmanager.service
+    systemctl stop waylandloginmanager.service &> /dev/null
   fi
 
   ReadyNotifySent=0
@@ -545,7 +542,7 @@ Will now reboot." 20 50 --no-cancel
     then
       LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDSEAT0PID | awk '{print $2}' | sed 's/tty//g')
     fi
-    systemd-notify --ready
+    systemd-notify --ready &> /dev/null
   else
     LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
   fi
@@ -554,7 +551,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
     WriteToLog "ERROR: Not Enough TTYs for login manager display!"
-    systemctl stop waylandloginmanager.service
+    systemctl stop waylandloginmanager.service &> /dev/null
     exit 1
   fi
 
@@ -581,8 +578,11 @@ Will now reboot." 20 50 --no-cancel
     chmod 755 /etc/waylandloginmanager.conf
     AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
   else
-    AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
-    echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
+    if [[ -e /etc/lightdm/lightdm.conf ]]
+    then
+      AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
+      echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
+    fi
   fi
 }
 
@@ -598,7 +598,7 @@ buf[0] = 0; \
 fd = open('/dev/tty$1', 'wb'); \
 ioctl(fd, 0x4B3A, 0); \
 ioctl(fd, 0x05602, buf); \
-fd.close()"
+fd.close()" &>/dev/null
 }
 
 #This function is used by the WaylandLoginManager to find the next availible tty, starting from CalcTTY+1
@@ -620,7 +620,7 @@ function GetNextTTY
   while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 62) || $TTYNotInLogind -gt 0 ]]
   do
     ((CalcTTY++))
-    fuser -s /dev/tty$CalcTTY
+    fuser -s /dev/tty$CalcTTY &>/dev/null
     TTYNotInUse=$?
     TTYNotInLogind=0
     for SYSTEMDTTY in ${SYSTEMDTTYS[@]}
@@ -1119,14 +1119,14 @@ function DiagnosticTerminal
   then
     vte -g 500x300 &>/dev/null
   else
-    mkdir -p /var/tmp/waylandloginmanager/logincmd
-    chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd
-    chmod 700 /var/tmp/waylandloginmanager/logincmd
-    cp /bin/login /var/tmp/waylandloginmanager/logincmd
-    chmod +s /var/tmp/waylandloginmanager/logincmd/login
+    mkdir -p /var/tmp/waylandloginmanager/logincmd &> /dev/null
+    chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd &> /dev/null
+    chmod 700 /var/tmp/waylandloginmanager/logincmd &> /dev/null
+    cp /bin/login /var/tmp/waylandloginmanager/logincmd &> /dev/null
+    chmod +s /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
     $TERMINALCMD -g 500x300 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &>/dev/null
     wait -n $TERMINALJOB
-    rm /var/tmp/waylandloginmanager/logincmd/login
+    rm /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
   fi
 }
 
@@ -1881,7 +1881,7 @@ function StartLoginManagerDisplay
             $SLEEPCMD 1
             ((TRYCOUNT++))
           done
-          systemd-notify --ready
+          systemd-notify --ready &> /dev/null
         fi
       else
         #If the first loginmanagerdisplay fails to start on the first attempt
@@ -1889,7 +1889,7 @@ function StartLoginManagerDisplay
         if [[ $ReadyNotifySent == 0 ]]
         then
           ReadyNotifySent=1
-          systemd-notify --ready
+          systemd-notify --ready &> /dev/null
         fi
       fi
     else
@@ -2010,7 +2010,7 @@ function SetupLoggingAndFIFO
   chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplays
   touch /run/waylandloginmanager/autologinran
   chmod 700 /run/waylandloginmanager/autologinran
-  rm /run/waylandloginmanager/fifolock
+  rm /run/waylandloginmanager/fifolock 2>/dev/null
 }
 
 #This function displays a dialog containing actions for the Wayland Login Manager for the user, Shutdown, Switch User, login, and show a help dialog. It's optional, for in the case Weston isn't configured
@@ -2057,7 +2057,7 @@ function CommandFIFOProxy
 {
   while [ 1 ]
   do
-    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener
+    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
     $SLEEPCMD .1
   done
 }
@@ -2187,8 +2187,8 @@ function ReadCommandFIFO
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
-          SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran |grep -c "^$RunningSeat$")
-          SEATAUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf | grep ^autologin-user-"$RunningSeat"= | awk -F = '{print $2}' | head -1 )
+          SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran 2>/dev/null |grep -c "^$RunningSeat$")
+          SEATAUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/waylandloginmanager.conf 2>/dev/null | grep ^autologin-user-"$RunningSeat"= | awk -F = '{print $2}' | head -1 )
           if [[ -z $SEATAUTOLOGINUSER ]]
           then
             SEATAUTOLOGINUSER=$AUTOLOGINUSER
@@ -2224,7 +2224,7 @@ function ReadCommandFIFO
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
-          systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}"
+          systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
         fi
       done
@@ -2309,14 +2309,14 @@ function ReadCommandFIFO
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
     then
-      systemd-notify --ready
+      systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
       openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service
+      systemctl stop waylandloginmanager.service &> /dev/null
     fi
 
     #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
@@ -2327,7 +2327,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service
+      systemctl stop waylandloginmanager.service &> /dev/null
     fi
 
     #Quickly find if any sessions are not running
