@@ -2162,7 +2162,7 @@ function ReadCommandFIFO
             break
           fi
         done
-        if [[ $IncludeSeat == 1 ]]
+        if [[ $IncludeSeat == 1 || ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
         then
           #Determine and store if this seat is multisession compatible
           HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
@@ -2173,6 +2173,7 @@ function ReadCommandFIFO
             CanMultiSession=0
           fi
           WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
+          systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           StartedSeats+=($RunningSeat)
           StartedSeats+=($CanMultiSession)
@@ -2218,8 +2219,9 @@ function ReadCommandFIFO
           UserActionFailCounts[$ChangeIndex]=0
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
-          WriteToLog "${StartedSeats[$StartIndex]} has been detected to have been removed"
+          WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}"
+          StartedSeats[$(($StartIndex+1))]=-1
         fi
       done
     fi
