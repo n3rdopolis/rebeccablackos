@@ -314,7 +314,7 @@ function ReadEnvironmentFile
 #This function writes to the logs. It takes 1 argument, the string to log.
 function WriteToLog
 {
-  logger -t waylandloginmanager -- "$1" -s  >>/var/log/waylandloginmanager 2>&1
+  logger -t waylandloginmanager -s -- "$1"  >>/var/log/waylandloginmanager 2>&1
 }
 
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
@@ -2112,6 +2112,7 @@ function ReadCommandFIFO
   LoginManagerDisplayPixmanFlags=()
   SeatForceSWRenderFlags=()
   SeatForceVblankFlags=()
+  SeatCreationDates=()
 
   #loop 'forever'
   while [ 1 ]
@@ -2163,7 +2164,12 @@ function ReadCommandFIFO
             break
           fi
         done
-        if [[ $IncludeSeat == 1 || ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
+        #Detect the age of the seat, by the date stamp of the last entry logged for the seat
+        #As of now, this is the best way to get the creation time of a seat, since the attribute is not presented
+        SeatCreationDate=$(journalctl  -b SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')
+        OldSeatCreationDate=${SeatCreationDates[$(($StartIndex/2))]}
+        #If the seat is new, detected to have been removed in the past, or if the seat date is different, (removed and readded before the detection interval)
+        if [[ $IncludeSeat == 1 || ${StartedSeats[$(($StartIndex+1))]} == -1 || $SeatCreationDate != $OldSeatCreationDate ]]
         then
           #Determine and store if this seat is multisession compatible
           HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
@@ -2182,6 +2188,7 @@ function ReadCommandFIFO
           SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
           UserActionFailCounts[$StartIndex/2]=0
           UserActionFailSkips[$StartIndex/2]=0
+          SeatCreationDates[$StartIndex/2]=$SeatCreationDate
           LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
