@@ -253,7 +253,7 @@ function DownloadGIT()
   done
 
   $NONROOTCOMMAND git ls-remote "$SOURCEURL" > /dev/null
-  UpdateCommandResult=$?
+  SourceURLActive=$?
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
   $NONROOTCOMMAND git reset --hard
   rm -rf .git/rebase-*/
@@ -263,11 +263,19 @@ function DownloadGIT()
   $NONROOTCOMMAND git pull -f
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION
+  GitCheckoutResult=$?
   git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
   $NONROOTCOMMAND git submodule sync --recursive
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
   $NONROOTCOMMAND git pull -f
+  GitPullResult=$?
+  if [[ ($SourceURLActive == 0) && ($GitCheckoutResult == 0 || $GitPullResult == 0) ]]
+  then
+    UpdateCommandResult=0
+  else
+    UpdateCommandResult=1
+  fi
 
   #Get the number of revisions specified.
   SUBMODULEREVISIONCOUNT=$(( ${#SUBMODULEREVISIONS[@]} /2 * 2))
@@ -335,11 +343,18 @@ function DownloadSVN()
   fi
 
   $NONROOTCOMMAND svn ls "$SOURCEURL" --depth empty --non-interactive > /dev/null
-  UpdateCommandResult=$?
+  SourceURLActive=$?
   $NONROOTCOMMAND svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION
+  SvnUpdateResult=$?
+  if [[ ($SourceURLActive == 0) && ($SvnUpdateResult == 0) ]]
+  then
+    UpdateCommandResult=0
+  else
+    UpdateCommandResult=1
+  fi
   return $UpdateCommandResult
 }
 
@@ -381,12 +396,19 @@ function DownloadBZR()
   fi
 
   $NONROOTCOMMAND bzr info "$SOURCEURL" > /dev/null
-  UpdateCommandResult=$?
+  SourceURLActive=$?
   $NONROOTCOMMAND bzr branch "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND bzr pull
+  BzrPullResult=$?
   $NONROOTCOMMAND bzr update -r $SOURCEREVISION
+  if [[ ($SourceURLActive == 0) && ($BzrPullResult == 0) ]]
+  then
+    UpdateCommandResult=0
+  else
+    UpdateCommandResult=1
+  fi
   return $UpdateCommandResult
 }
 
@@ -426,13 +448,20 @@ function DownloadHG()
   fi
 
   $NONROOTCOMMAND hg identify "$SOURCEURL" > /dev/null
-  UpdateCommandResult=$?
+  SourceURLActive=$?
   $NONROOTCOMMAND hg clone "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root pull
+  HgPullResult=$?
   $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
   return $UpdateCommandResult
+  if [[ ($SourceURLActive == 0) && ($HgPullResult == 0) ]]
+  then
+    UpdateCommandResult=0
+  else
+    UpdateCommandResult=1
+  fi
 }
 
 
