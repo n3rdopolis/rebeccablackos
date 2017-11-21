@@ -60,19 +60,19 @@ function PackagePrepareBuild()
 sed -i '/QT_QPA_PLATFORMTHEME/d' src/bin/e_main.c
 sed -i '/QT_STYLE_OVERRIDE/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl --enable-wl-fb --enable-wl-drm --enable-wl-x11 --enable-xwayland --enable-wl-desktop-shell --enable-wayland --with-Xwayland=$INSTALLDIR/bin/Xwayland #--disable-shot --disable-xkbswitch --disable-conf-randr --disable-everything 
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwl-fb=true -Dwl-drm=true -Dwl-x11=true -Dxwayland=true -Dwl-desktop-shell=true -Dwayland=true -Dxwayland-bin=$INSTALLDIR/bin/Xwayland build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make -i
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install -i
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
