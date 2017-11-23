@@ -1784,9 +1784,8 @@ function StartLoginManagerDisplay
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if [[ $FullSocketUseTicks -gt 60 ]]
+  if [[ $FullSocketUseMinutes -ge 1 ]]
   then
-    FullSocketUseTicks=0
     fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
     FUSERRESULT=$?
     if [[ $FUSERRESULT == 0 ]]
@@ -2091,8 +2090,8 @@ function ReadCommandFIFO
 {
   LoginManagerFirstLoop=1
   SessionStartFailed=0
-  MainLoopTicks=0
-  FullSocketUseTicks=0
+  MainLoopMinutes=0
+  FullSocketUseMinutes=0
   DoDetectSeats=1
   StartedSeats=()
   RejectedSeats=()
@@ -2123,13 +2122,14 @@ function ReadCommandFIFO
     #Detect all seats, and add them to the array.
     if [[ $SECONDS -gt 60 ]]
     then
-      ((MainLoopTicks++))
-      ((FullSocketUseTicks++))
+      ((MainLoopMinutes++))
+      ((FullSocketUseMinutes++))
+      SECONDS=0
     fi
-    if [[ $DoDetectSeats == 1 || $MainLoopTicks -gt 600 ]]
+    if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 10 ]]
     then
       DoDetectSeats=0
-      MainLoopTicks=0
+      MainLoopMinutes=0
       #Find what seats are new
       AllRunningSeats=()
       NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
@@ -2276,6 +2276,10 @@ function ReadCommandFIFO
         LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
       fi
       StartLoginManagerDisplay $RunningSeat
+      if [[ $FullSocketUseMinutes -ge 1 ]]
+      then
+        FullSocketUseMinutes=0
+      fi
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
