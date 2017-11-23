@@ -1786,16 +1786,16 @@ function StartLoginManagerDisplay
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
   if [[ $FullSocketUseTicks -gt 60 ]]
   then
-    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
+    FullSocketUseTicks=0
+    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
+    FUSERRESULT=$?
+    if [[ $FUSERRESULT == 0 ]]
     then
       DoStartLoginManagerDisplay=0
       return
     fi
   else
-    FullSocketUseTicks=0
-    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
-    $FUSERRESULT=$?
-    if [[ $FUSERRESULT == 0 ]]
+    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
     then
       DoStartLoginManagerDisplay=0
       return
@@ -1901,12 +1901,11 @@ function StartLoginManagerDisplay
         WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
       fi
     fi
-  else
-    if [[ $SeatStartCount == 5 ]]
-    then
-      (( SeatStartCount++ ))
-      WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
-    fi
+  fi
+  if [[ $SeatStartCount == 5 ]]
+  then
+    (( SeatStartCount++ ))
+    WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
   fi
   LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
 }
@@ -2307,6 +2306,10 @@ function ReadCommandFIFO
             UserActionFailCounts[$SeatIndexID]=0
             UserActionFailSkips[$SeatIndexID]=0
           fi
+        fi
+        if [[ ${UserActionFailCounts[$SeatIndexID] == 5 ]]
+        then
+          WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row."
         fi
       fi
 
