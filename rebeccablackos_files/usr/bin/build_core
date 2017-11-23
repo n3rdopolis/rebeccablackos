@@ -268,9 +268,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git submodule sync --recursive
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
-  $NONROOTCOMMAND git pull -f
-  GitPullResult=$?
-  if [[ ($SourceURLActive == 0) && ($GitCheckoutResult == 0 || $GitPullResult == 0) ]]
+  if [[ ($SourceURLActive == 0) && ($GitCheckoutResult == 0) ]]
   then
     UpdateCommandResult=0
   else
