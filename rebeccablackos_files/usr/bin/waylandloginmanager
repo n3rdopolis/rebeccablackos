@@ -2307,7 +2307,7 @@ function ReadCommandFIFO
             UserActionFailSkips[$SeatIndexID]=0
           fi
         fi
-        if [[ ${UserActionFailCounts[$SeatIndexID] == 5 ]]
+        if [[ ${UserActionFailCounts[$SeatIndexID]} == 5 ]]
         then
           WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row."
         fi
