@@ -400,6 +400,9 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #prevent the WaylandLoginManager from being killed with CTRL+C
   trap '' 2
 
+  #Array that contains the time stamps of the creation date of the seats
+  SeatCreationDates=()
+
   #Attempt to import fast user switching data from a crashed WaylandLoginManager
   if [[ -e /run/waylandloginmanager/sessiondata ]]
   then
@@ -645,7 +648,7 @@ function GetNextTTY
 #Export session data so the waylandloginmanager has user switching data in case of a reload
 function ExportSessionData
 {
-  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs)
+  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs SeatCreationDates)
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
@@ -2114,7 +2117,7 @@ function ReadCommandFIFO
   LoginManagerDisplayPixmanFlags=()
   SeatForceSWRenderFlags=()
   SeatForceVblankFlags=()
-  SeatCreationDates=()
+
 
   #loop 'forever'
   while [ 1 ]
@@ -2188,8 +2191,6 @@ function ReadCommandFIFO
             CanMultiSession=0
           fi
           WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
-          systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
-          rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
@@ -2197,6 +2198,11 @@ function ReadCommandFIFO
           else
             StartedSeats+=($RunningSeat)
             StartedSeats+=($CanMultiSession)
+          fi
+          if [[ $SeatCreationDate != $OldSeatCreationDate && ! -z $OldSeatCreationDate ]]
+          then
+            systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
+            rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
           fi
           SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
           UserActionFailCounts[$StartIndex/2]=0
@@ -2248,6 +2254,9 @@ function ReadCommandFIFO
           StartedSeats[$(($StartIndex+1))]=-1
         fi
       done
+
+      #Export the Session Data
+      ExportSessionData
     fi
 
     LoginManagerDisplayAttemptsMaxedOut=1
