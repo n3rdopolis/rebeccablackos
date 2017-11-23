@@ -2188,11 +2188,11 @@ function ReadCommandFIFO
             CanMultiSession=0
           fi
           WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
+          systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
+          rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
-          if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 || $SeatCreationDate -ne $OldSeatCreationDate ]]
+          if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
-            systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
-            rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2276,10 +2276,6 @@ function ReadCommandFIFO
         LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
       fi
       StartLoginManagerDisplay $RunningSeat
-      if [[ $FullSocketUseMinutes -ge 1 ]]
-      then
-        FullSocketUseMinutes=0
-      fi
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatID]} ]]
@@ -2333,6 +2329,10 @@ function ReadCommandFIFO
         fi
       fi
     done
+    if [[ $FullSocketUseMinutes -ge 1 ]]
+    then
+      FullSocketUseMinutes=0
+    fi
 
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
