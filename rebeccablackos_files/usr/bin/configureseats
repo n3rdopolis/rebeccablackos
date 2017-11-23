@@ -381,8 +381,13 @@ else
 fi
 
 #Force the server to pickup the changes
-waylandloginmanager --sendcommand Switch $XDG_SEAT
 waylandloginmanager --sendcommand DetectSeats
+sleep 1
+RunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
+for RunningSeat in ${RunningSeats[@]}
+do
+  waylandloginmanager --sendcommand Switch $RunningSeat
+done
 
 #chvt 63
 #sleep .1
