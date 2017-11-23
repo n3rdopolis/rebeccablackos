@@ -1784,7 +1784,7 @@ function StartLoginManagerDisplay
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if (( $LoginManagerLoopCount % 120 ))
+  if [[ $FullSocketUseTicks -gt 60 ]]
   then
     if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
     then
@@ -1792,7 +1792,10 @@ function StartLoginManagerDisplay
       return
     fi
   else
-    if [[ $(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null; echo $?) == 0 ]]
+    FullSocketUseTicks=0
+    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
+    $FUSERRESULT=$?
+    if [[ $FUSERRESULT == 0 ]]
     then
       DoStartLoginManagerDisplay=0
       return
@@ -2088,8 +2091,9 @@ function GetStartedSeatIndex
 function ReadCommandFIFO
 {
   LoginManagerFirstLoop=1
-  LoginManagerLoopCount=0
   SessionStartFailed=0
+  MainLoopTicks=0
+  FullSocketUseTicks=0
   DoDetectSeats=1
   StartedSeats=()
   RejectedSeats=()
@@ -2117,11 +2121,16 @@ function ReadCommandFIFO
   #loop 'forever'
   while [ 1 ]
   do
-    ((LoginManagerLoopCount++))
-    #Detect all seats, and add them to the array. (every minute, as it sleeps every .5 seconds)
-    if [[ $DoDetectSeats == 1 || $LoginManagerLoopCount == 1200 ]]
+    #Detect all seats, and add them to the array.
+    if [[ $SECONDS -gt 60 ]]
+    then
+      ((MainLoopTicks++))
+      ((FullSocketUseTicks++))
+    fi
+    if [[ $DoDetectSeats == 1 || $MainLoopTicks -gt 600 ]]
     then
       DoDetectSeats=0
+      MainLoopTicks=0
       #Find what seats are new
       AllRunningSeats=()
       NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
@@ -2617,10 +2626,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
     LoginManagerFirstLoop=0
-    if [[ $LoginManagerLoopCount == 1200 ]]
-    then
-      LoginManagerLoopCount=0
-    fi
     $SLEEPCMD .5
   done
 }
