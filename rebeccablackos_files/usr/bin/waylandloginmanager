@@ -1791,7 +1791,7 @@ function StartLoginManagerDisplay
   then
     fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
     FUSERRESULT=$?
-    if [[ $FUSERRESULT == 0 ]]
+    if [[ $FUSERRESULT == 0 || $ForceFullSocketUseCheck == 1 ]]
     then
       DoStartLoginManagerDisplay=0
       return
@@ -2093,6 +2093,7 @@ function ReadCommandFIFO
 {
   LoginManagerFirstLoop=1
   SessionStartFailed=0
+  ForceFullSocketUseCheck=0
   MainLoopMinutes=0
   FullSocketUseMinutes=0
   DoDetectSeats=1
@@ -2131,6 +2132,7 @@ function ReadCommandFIFO
     fi
     if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 10 ]]
     then
+      ForceFullSocketUseCheck=1
       DoDetectSeats=0
       MainLoopMinutes=0
       #Find what seats are new
@@ -2338,6 +2340,7 @@ function ReadCommandFIFO
         fi
       fi
     done
+    ForceFullSocketUseCheck=0
     if [[ $FullSocketUseMinutes -ge 1 ]]
     then
       FullSocketUseMinutes=0
