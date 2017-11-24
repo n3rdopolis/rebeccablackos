@@ -40,7 +40,7 @@
      #it can also have 
      #      autologin-user-{$SEAT}=$AUTOLOGINUSER
      #to set a different autologin user per seat or
-     #      autologin-user-{$SEAT}=
+     #      autologin-user-{$SEAT}=:
      #to turn off autologin for a seat
      #
      #It also supports setting
@@ -2261,7 +2261,7 @@ function ReadCommandFIFO
             SEATAUTOLOGINUSER=$AUTOLOGINUSER
           fi
           #if autologin is specified
-          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 ]]
+          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
             StartAutoLogin $RunningSeat $SEATAUTOLOGINUSER &
             LastLoginPIDs[$StartIndex/2]=$!
