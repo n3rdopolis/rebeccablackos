@@ -236,9 +236,9 @@ function UserSessionWorker
   then
     fg 2
     echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost.log
-    kill -15 $HostServerPID &> /dev/null
+    TerminateJobPID $HostServerPID 15
     $SLEEPCMD 3
-    kill -9 $HostServerPID &> /dev/null
+    TerminateJobPID $HostServerPID 9
   else
     fg 1
   fi
@@ -315,6 +315,44 @@ function ReadEnvironmentFile
 function WriteToLog
 {
   logger -t waylandloginmanager -s -- "$1"  >>/var/log/waylandloginmanager 2>&1
+}
+
+#This function makes sure a specified PID belongs to a job, before terminating it.
+#This is to ensure that with PID recyling, one that gets reused, and is no longer a subprocess, it does not get terminated
+#It takes 3 arguments, 1 is the pid, 2 is the signal, 3 is 0 or 1, where 0 does not terminate the tree, while 1 terminates the tree
+function TerminateJobPID
+{
+  PIDInJob=0
+  TerminatePID=$1
+  TerminateSignal=$2
+  if [[ -z $TerminateSignal ]]
+  then
+    TerminateSignal=15
+  fi
+  TerminateTree=$3
+  if [[ -z $TerminateTree ]]
+  then
+    TerminateTree=0
+  fi
+
+  for JOBPID in $(jobs -p)
+  do
+    if [[ $JOBPID == $TerminatePID ]]
+    then
+      PIDInJob=1
+      break
+    fi
+  done
+
+  if [[ $PIDInJob == 1 && -d /proc/$TerminatePID ]]
+  then
+    if [[ $TerminateTree == 0 ]]
+    then
+      \kill -$TerminateSignal $TerminatePID &> /dev/null
+    else
+      \kill -$TerminateSignal -- -$TerminatePID &> /dev/null
+    fi
+  fi
 }
 
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
@@ -648,7 +686,7 @@ function GetNextTTY
 #Export session data so the waylandloginmanager has user switching data in case of a reload
 function ExportSessionData
 {
-  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs SeatCreationDates)
+  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs SeatCreationDates 2>/dev/null)
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
@@ -1176,7 +1214,7 @@ $SEATSTRING
 
 The key icon brings up a login prompt$SWITCHSTRING
 The red X icon brings up a shutdown prompt
-The i icon shows this help prompt"
+The i icon shows this help prompt" &> /dev/null
 
 }
 
@@ -2196,7 +2234,7 @@ function ReadCommandFIFO
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
-            kill -15 ${LastUserActionPIDs[$StartIndex]} &> /dev/null
+            TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2255,7 +2293,7 @@ function ReadCommandFIFO
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
-          kill -15 ${LastUserActionPIDs[$StartIndex]} &> /dev/null
+          TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15
         fi
       done
 
@@ -2539,7 +2577,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
-            kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
+            TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
             UserActionFailSkips[$SeatID]=1
             wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
@@ -2573,7 +2611,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
@@ -2589,7 +2627,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
@@ -2613,7 +2651,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          kill -15 -${LastUserActionPIDs[$SeatIndexID]} &> /dev/null
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
