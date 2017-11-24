@@ -2196,6 +2196,7 @@ function ReadCommandFIFO
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
+            kill -15 ${LastUserActionPIDs[$StartIndex]} &> /dev/null
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2254,6 +2255,7 @@ function ReadCommandFIFO
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
+          kill -15 ${LastUserActionPIDs[$StartIndex]} &> /dev/null
         fi
       done
 
