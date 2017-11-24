@@ -2329,13 +2329,13 @@ function ReadCommandFIFO
       StartLoginManagerDisplay $RunningSeat
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
-      if [[ -z ${UserActionFailCounts[$SeatID]} ]]
+      if [[ -z ${UserActionFailCounts[$SeatIndexID]} ]]
       then
-        UserActionFailCounts[$SeatID]=0
+        UserActionFailCounts[$SeatIndexID]=0
       fi
-      if [[ -z ${UserActionFailSkips[$SeatID]} ]]
+      if [[ -z ${UserActionFailSkips[$SeatIndexID]} ]]
       then
-        UserActionFailSkips[$SeatID]=0
+        UserActionFailSkips[$SeatIndexID]=0
       fi
 
       #If the PID for the seats UserActionDialog is not running, get the return status
@@ -2578,7 +2578,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
             TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
-            UserActionFailSkips[$SeatID]=1
+            UserActionFailSkips[$SeatIndexID]=1
             wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
           SwitchUserDialog "$SEATARG" &
@@ -2612,7 +2612,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
-          UserActionFailSkips[$SeatID]=1
+          UserActionFailSkips[$SeatIndexID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         GetUserCredentials "$SEATARG" &
@@ -2628,7 +2628,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
-          UserActionFailSkips[$SeatID]=1
+          UserActionFailSkips[$SeatIndexID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         LeavePrompt $SEATARG &
@@ -2652,7 +2652,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
-          UserActionFailSkips[$SeatID]=1
+          UserActionFailSkips[$SeatIndexID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         ShowInfo "$SEATARG" &
