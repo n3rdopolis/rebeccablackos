@@ -256,6 +256,26 @@ function UIHost
   exit
 }
 
+#Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
+#It takes 2 arguments, the first key to get the value of, the second is the seat (and is optional).
+function GetSeatConfigKey
+{
+  ReturnKeyValue=""
+  SeatKeyValue=""
+  GlobalKeyValue=$(awk -F "${1}\=" '{ if ($2) print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
+  if [[ ! -z $2 ]]
+  then
+    SeatKeyValue=$(awk -F "$1-$2\=" '{ if ($2) print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
+  fi
+  if [[ ! -z $SeatKeyValue ]]
+  then
+    ReturnKeyValue=$SeatKeyValue
+  else
+    ReturnKeyValue=$GlobalKeyValue
+  fi
+  echo $ReturnKeyValue
+}
+
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
 function ReadEnvironmentFile
 {
