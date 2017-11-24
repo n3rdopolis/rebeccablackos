@@ -1825,11 +1825,11 @@ function StartLoginManagerDisplay
   fi
 
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if [[ $FullSocketUseMinutes -ge 1 ]]
+  if [[ $FullSocketUseMinutes -ge 1 || $ForceFullSocketUseCheck == 1 ]]
   then
     fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
     FUSERRESULT=$?
-    if [[ $FUSERRESULT == 0 || $ForceFullSocketUseCheck == 1 ]]
+    if [[ $FUSERRESULT == 0 ]]
     then
       DoStartLoginManagerDisplay=0
       return
