@@ -236,9 +236,9 @@ function UserSessionWorker
   then
     fg 2
     echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost.log
-    TerminateJobPID $HostServerPID 15
+    TerminateJobPID $HostServerPID 15 0
     $SLEEPCMD 3
-    TerminateJobPID $HostServerPID 9
+    TerminateJobPID $HostServerPID 9 0
   else
     fg 1
   fi
@@ -348,7 +348,7 @@ function TerminateJobPID
   then
     if [[ $TerminateTree == 0 ]]
     then
-      \kill -$TerminateSignal $TerminatePID &> /dev/null
+      \kill -$TerminateSignal -- $TerminatePID &> /dev/null
     else
       \kill -$TerminateSignal -- -$TerminatePID &> /dev/null
     fi
@@ -2234,7 +2234,7 @@ function ReadCommandFIFO
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
-            TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15
+            TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2293,7 +2293,7 @@ function ReadCommandFIFO
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
-          TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15
+          TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
         fi
       done
 
@@ -2577,7 +2577,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
-            TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
+            TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
             UserActionFailSkips[$SeatID]=1
             wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
@@ -2611,7 +2611,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
@@ -2627,7 +2627,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
@@ -2651,7 +2651,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatID]=1
           wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
