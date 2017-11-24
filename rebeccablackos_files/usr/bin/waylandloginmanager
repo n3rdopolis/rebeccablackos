@@ -262,10 +262,10 @@ function GetSeatConfigKey
 {
   ReturnKeyValue=""
   SeatKeyValue=""
-  GlobalKeyValue=$(awk -F "${1}\=" '{ if ($2) print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
+  GlobalKeyValue=$(awk -F "^${1}\=" '{ if ($2 != "") print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
   if [[ ! -z $2 ]]
   then
-    SeatKeyValue=$(awk -F "$1-$2\=" '{ if ($2) print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
+    SeatKeyValue=$(awk -F "^$1-$2\=" '{ if ($2 != "") print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
   fi
   if [[ ! -z $SeatKeyValue ]]
   then
@@ -848,11 +848,7 @@ function ChooseSessionType
   FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
-  if [[ $SeatSupportsKMS != 0 && ! (
-  $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) != 0
-  || $(cat /etc/waylandloginmanager.conf 2>/dev/null | grep -c "^wlmforcefbdev=1$") != 0
-  || $(cat /etc/waylandloginmanager.conf 2>/dev/null | grep -c "^wlmforcefbdev-${CurrentHandleSeat}=1$") != 0
-  )  ]]
+  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev ${CurrentHandleSeat}) != 0  ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatSupportedBackendsString+="KMS "
