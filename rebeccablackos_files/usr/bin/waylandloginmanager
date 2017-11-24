@@ -1438,17 +1438,19 @@ function StartUserSession
       fi
     done < <(echo "$SESSIONS")
 
-    USERDISPLAYNAME=$(getent passwd $LOGINUSER | awk -F : '{print $5}' | awk -F , '{print $1}')
-    if [[ -z $USERDISPLAYNAME ]]
+    USERREGISTERDISPLAYNAME=$(getent passwd $LOGINUSER | awk -F : '{print $5}' | awk -F , '{print $1}')
+    if [[ -z $USERREGISTERDISPLAYNAME ]]
     then
-      USERDISPLAYNAME=$LOGINUSER
+      USERREGISTERDISPLAYNAME=$LOGINUSER
+    else
+      USERREGISTERDISPLAYNAME="$USERREGISTERDISPLAYNAME   ($LOGINUSER)"
     fi
 
     #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
     loginctl activate $LOGINDSESSION &>/dev/null
 
     #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-    SendSelfRegisterData "NEWSESSION,$USERSESSIONTTY,$USERSESSIONPID,$USERDISPLAYNAME,$LOGINDSESSION,$USERSEAT,$STARTLOCKED"
+    SendSelfRegisterData "NEWSESSION,$USERSESSIONTTY,$USERSESSIONPID,$USERREGISTERDISPLAYNAME,$LOGINDSESSION,$USERSEAT,$STARTLOCKED"
   else
     WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
   fi
