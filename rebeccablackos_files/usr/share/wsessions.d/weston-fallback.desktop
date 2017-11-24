@@ -7,6 +7,7 @@ CompositorExec=/opt/bin/weston
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorSupportsWL=0
+CompositorKMSArguments=--backend=drm-backend.so
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
 SessionArgument=--modules=screen-share.so
