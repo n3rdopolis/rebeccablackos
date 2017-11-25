@@ -1244,10 +1244,21 @@ function SwitchUserDialog
   #line 3 is the PID of the session
   #line 4 is the user name
   #line 5 is the logind session id.
+  RunningSeatSessions=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null))
   while [[ $NumberOfSessions -ge 0 ]]
   do
     #determine if the current session is alive, before adding it to the list
-    if [[ -e /proc/${AllSessionPIDs[$NumberOfSessions]}/environ ]]
+    SessionisRunning=0
+    for RunningSeatSession in ${RunningSeatSessions[@]}
+    do
+      if [[ $RunningSeatSession == ${AllSessionIDs[$NumberOfSessions]} ]]
+      then
+        SessionisRunning=1
+        break
+      fi
+    done
+
+    if [[ $SessionisRunning == 1 ]]
     then
       if [[ ${AllSeatIDs[$NumberOfSessions]} == "$1" ]]
       then
