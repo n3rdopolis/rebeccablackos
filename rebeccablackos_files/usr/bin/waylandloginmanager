@@ -1473,7 +1473,7 @@ function AuthenticateUser
         expect Password 
         send $TryPassword\r
         catch wait result
-        exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect
+        exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect 2>/dev/null
   PasswordResult=$?
   unset TryPassword
   if [[ 0 == $PasswordResult ]]
