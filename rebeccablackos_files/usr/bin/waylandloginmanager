@@ -1300,7 +1300,7 @@ function SwitchUserDialog
       ChangeSessionID=${AllSessionIDs[$ChangeSession]}
 
       #before switching into a session double check in case if the session crashed after it was listed ealier in the function.
-      if [[ -e /proc/$ChangeSessionPID/environ ]]
+      if [[ $(loginctl show-session "$ChangeSessionID" -p State --value 2>/dev/null) == active ]]
       then
         #Only seat0 supports TTYs
         if [[ "$1" == "seat0" ]]
