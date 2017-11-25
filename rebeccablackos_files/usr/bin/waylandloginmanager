@@ -781,7 +781,7 @@ function RegisterSession
           then
             FailedSessionTTY=$SessionTTY
           fi
-          FailedSessionSeat+=($SessionSeatID)
+          FailedSessionSeat+=("$SessionSeatID")
         fi
       else
         WriteToLog "register session requested, but no data was availible in the FIFO"
@@ -2476,11 +2476,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         #If the session is alive, add its data to the new arrays
         if [[ -e /proc/$RunningSessionPID/environ ]]
         then
-          NewAllSessionTTYs+=($RunningSessionTTY)
-          NewAllSessionPIDs+=($RunningSessionPID)
-          NewAllSessionUsers+=($RunningSessionUser)
-          NewAllSessionIDs+=($RunningSessionID)
-          NewAllSeatIDs+=($RunningSeatID)
+          NewAllSessionTTYs+=("$RunningSessionTTY")
+          NewAllSessionPIDs+=("$RunningSessionPID")
+          NewAllSessionUsers+=("$RunningSessionUser")
+          NewAllSessionIDs+=("$RunningSessionID")
+          NewAllSeatIDs+=("$RunningSeatID")
         else
           GetStartedSeatIndex $RunningSeatID
           SeatIndexID=$ReturnSeatIndex
