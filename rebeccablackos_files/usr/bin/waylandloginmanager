@@ -245,7 +245,7 @@ function UIHost
 }
 
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
-#It takes 2 arguments, the first key to get the value of, the second is the seat, and the third is the default value
+#It takes 3 arguments, the first key to get the value of, the second is the seat, and the third is the default value
 function GetSeatConfigKey
 {
   ReturnKeyValue=""
@@ -2259,7 +2259,7 @@ function ReadCommandFIFO
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran 2>/dev/null |grep -c "^$RunningSeat$")
-          SEATAUTOLOGINUSER=$(GetSeatConfigKey autologin-user "$RunningSeat" "" )
+          SEATAUTOLOGINUSER=$(GetSeatConfigKey autologin-user "$RunningSeat" ":" )
           #if autologin is specified
           if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
