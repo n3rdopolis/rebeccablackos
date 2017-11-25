@@ -2503,11 +2503,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       done
 
       #Set the actual arrays to be the value of the temporary arrays
-      AllSessionTTYs=(${NewAllSessionTTYs[@]})
-      AllSessionPIDs=(${NewAllSessionPIDs[@]})
-      AllSessionUsers=(${NewAllSessionUsers[@]})
-      AllSessionIDs=(${NewAllSessionIDs[@]})
-      AllSeatIDs=(${NewAllSeatIDs[@]})
+      AllSessionTTYs=("${NewAllSessionTTYs[@]}")
+      AllSessionPIDs=("${NewAllSessionPIDs[@]}")
+      AllSessionUsers=("${NewAllSessionUsers[@]}")
+      AllSessionIDs=("${NewAllSessionIDs[@]}")
+      AllSeatIDs=("${NewAllSeatIDs[@]}")
 
       #Export the Session Data
       ExportSessionData
