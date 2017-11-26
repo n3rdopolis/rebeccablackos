@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2017-11-25 13:10:04.933247310 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2017-11-25 13:11:43.977708265 -0500
+--- usr/bin/waylandloginmanager	2017-11-26 13:03:25.536186431 -0500
++++ usr/bin/waylandloginmanagerkdialog	2017-11-26 13:05:35.626853015 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -192,7 +192,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1321,7 +1307,7 @@
+@@ -1322,7 +1308,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -201,7 +201,7 @@
        fi
      fi
    fi
-@@ -1544,26 +1530,30 @@
+@@ -1545,26 +1531,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -240,7 +240,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 1
-@@ -1571,9 +1561,9 @@
+@@ -1572,9 +1562,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -252,7 +252,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1589,9 +1579,9 @@
+@@ -1590,9 +1580,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
@@ -264,7 +264,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 1
-@@ -1603,23 +1593,23 @@
+@@ -1604,23 +1594,23 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
@@ -292,7 +292,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
    if [[ $CanPowerOff == 1 ]]
    then
-@@ -1675,16 +1665,22 @@
+@@ -1676,16 +1666,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -318,7 +318,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -1718,7 +1714,7 @@
+@@ -1719,7 +1715,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -327,7 +327,7 @@
    fi
  }
  
-@@ -2019,7 +2015,7 @@
+@@ -2020,7 +2016,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1"
@@ -336,7 +336,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2044,7 +2040,7 @@
+@@ -2045,7 +2041,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -345,7 +345,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2078,22 +2074,27 @@
+@@ -2079,22 +2075,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -380,7 +380,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2101,12 +2102,12 @@
+@@ -2102,12 +2103,12 @@
    else
      $SLEEPCMD .1
    fi
