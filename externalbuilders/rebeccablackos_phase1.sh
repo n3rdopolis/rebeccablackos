@@ -89,7 +89,10 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 
 #Clear list of failed downloads
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/build_core/faileddownloads
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/build_core/faileddownloads ]]
+then
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/build_core/faileddownloads
+fi
 
 #Copy in system resolv.conf
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/resolv.conf
