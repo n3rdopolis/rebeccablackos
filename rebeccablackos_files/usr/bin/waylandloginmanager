@@ -735,12 +735,12 @@ function RegisterSession
   exec 1001<> /run/waylandloginmanager/loginmanager_register
   RegisterDataLines=$(while read -n 100 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
-  IFS='$\n'
+  IFS=$'\n'
   RegisterDataLines=($RegisterDataLines)
   unset IFS
 
-  IFS='$\n'
-  for RegisterData in ${RegisterDataLines[@]}
+
+  for RegisterData in "${RegisterDataLines[@]}"
   do
     #get the register data, and put it into an array so it can be handled
     IFS=','
