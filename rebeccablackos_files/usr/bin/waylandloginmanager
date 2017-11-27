@@ -198,7 +198,10 @@ function UserSessionWorker
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
       echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-      SendSelfCommand Change "$XDG_SEAT"
+      if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
+      then
+        SendSelfCommand Change "$XDG_SEAT"
+      fi
       exit
     fi
   else
@@ -223,12 +226,20 @@ function UserSessionWorker
   if [[ $BackendType == WL ]]
   then
     fg 2
+    if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
+    then
+      SendSelfCommand Change "$XDG_SEAT"
+    fi
     echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost.log
     TerminateJobPID $HostServerPID 15 0
     $SLEEPCMD 3
     TerminateJobPID $HostServerPID 9 0
   else
     fg 1
+    if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
+    then
+      SendSelfCommand Change "$XDG_SEAT"
+    fi
   fi
 
   #Write any Journal logs for this session into the logfile
