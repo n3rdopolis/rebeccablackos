@@ -30,5 +30,5 @@ else
 fi
 
 #Decode weston's wcap files
-wcap-decode  --yuv4mpeg2 ~/capture.wcap | vpxenc --target-bitrate=1024 --best -t 4 -o ~/weston-screenshots/$NewFileName -
+wcap-decode  --yuv4mpeg2 ~/capture.wcap | vpxenc --target-bitrate=1024 --best -t 4 -o ~/weston-screenshots/$NewFileName - --codec=vp8
 
