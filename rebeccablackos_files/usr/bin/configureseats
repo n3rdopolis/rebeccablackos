@@ -357,7 +357,9 @@ kill -9 $MainFormPID
 zenity --info --text "Seat Configuration for all devices is now complete.
 
 Press OK to apply all the changes. This will switch user to the loginmanager display.
-This is to signal the display server to detect the new changes" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+This is to signal the display server to detect the new changes, and the waylandloginmanager to detect new seats.
+
+Your sessions will not be terminated. You will need to switch back into them with Switch User" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
 
 #Reload the new configuration into udev
 udevadm control --reload-rules
@@ -386,7 +388,12 @@ sleep 1
 RunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
 for RunningSeat in ${RunningSeats[@]}
 do
-  waylandloginmanager --sendcommand Switch $RunningSeat
+  if [[ $RunningSeat == $XDG_SEAT ]]
+  then
+    waylandloginmanager --sendcommand Switch $RunningSeat
+  else
+    waylandloginmanager --sendcommand Change $RunningSeat
+  fi
 done
 
 #chvt 63
