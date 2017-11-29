@@ -18,4 +18,4 @@
 
 #Present a dialog to prompt for a file to open with mplayer
 OPENFILE=$(zenity --file-selection | grep -v 'startup message: remove:')
-/opt/bin/mpv --vo=wayland $OPENFILE
+/opt/bin/mpv --vo=gpu $OPENFILE
