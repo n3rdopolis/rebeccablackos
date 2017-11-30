@@ -811,7 +811,7 @@ function MakeAndInstall()
 
     #Create a script that will be called by checkinstall to build a second deb, with smaller binaries for the smaller ISO
     echo "#! /bin/bash
-    dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | grep -v '^/\.$' | while read FILE
+    dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | grep -v '^/\.\$' | while read FILE
     do
       if [[ -e \"\$FILE\" ]]
       then
