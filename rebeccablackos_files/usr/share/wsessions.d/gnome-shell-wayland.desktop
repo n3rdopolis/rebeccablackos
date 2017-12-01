@@ -12,6 +12,7 @@ CompositorDisplayArgument=
 SessionArgument=
 AdditionalArguments=--session=gnome -f
 NeedsFile=/opt/bin/gnome-shell
+CompositorKMSSeatAware=1
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=GNOME
 unset=COGL_RENDERER
