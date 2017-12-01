@@ -32,6 +32,8 @@
 
 #It needs a user account called waylandloginmanager
 
+#It currently needs a patched Weston to suppport multiple seats
+
 #as well as:
 #At least systemd v227 as it has all the ability to launch Wayland sessions with systemd-run
 
@@ -933,27 +935,34 @@ function ChooseSessionType
       for (( element1 = 0 ; element1 < ${#DesktopFileBackendArray[@]} ; element1=element1+4 ))
       do
         IFS="#"
+        #Stores the values from the config file if this session supports a paticular backend in general
         BackendSupportedArray=(${DesktopFileBackendArray[$element1]})
+        #Stores the values from the config file on the arguments used to start the session with a paticular backend
         BackendArgumentArray=(${DesktopFileBackendArray[$element1+1]})
+        #Stores the values from the config file if each backend is seat aware
         BackendCanSeatArray=(${DesktopFileBackendArray[$element1+2]})
+        #Stores the arguments declared in the config file to specify the seat for each availible backend
         BackendSeatArgArray=(${DesktopFileBackendArray[$element1+3]})
         unset IFS
         if [[ ${BackendSupportedArray[1]} == $BackendType ]]
         then
-          #If this is seat0, then don't enforce seatawareness
+          #If this is seat0, then don't enforce seatawareness, if the first framebuffer device is in seat0
           if [[ $CurrentHandleSeat == seat0 && $BackendType == "FB" ]]
           then
             if [[ $FB0INSEAT0 == 1 ]]
             then
               SupportsSeat=1
             fi
+          #If this is seat0, then this session is implied to be supported on this seat (since ones that don't only run on seat0).
           elif [[ $CurrentHandleSeat == seat0 && $BackendType != "FB" ]]
           then
             SupportsSeat=1
+          #If the wayland (fullscreen shell) backend is supported by this session, and the wayland backend is supported on this seat, then seats are supported, since the weston hosts are seat aware
           elif [[ $BackendType == "WL" ]]
           then
             SupportsSeat=1
           fi
+          #If none of these seat support overrides declare that this session can run on this seat, get it's config value if it can run on the seat
           if [[ $SupportsSeat == 0 ]]
           then
             SupportsSeat=${BackendCanSeatArray[2]}
