@@ -23,7 +23,7 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-  echo "Must be run as root."
+  zenity --info --text="Must be run as root."
   exit
 fi
 
@@ -35,6 +35,9 @@ MaxNumberOfSeats=10
 
 #get the current tty so the script knows what TTY to switch back to
 CurrentTTY=$(fgconsole)
+
+#Dont run zenity as root
+ZENITYCMD="runuser -u $SUDO_USER -m -- zenity"
 
 NumberOfDevices=0
 #Get all input devices from udev, and store attributes into an array
@@ -235,7 +238,7 @@ do
 done
 
 #Show a guide for the users on what devices they have attached to their system, and what will be configured
-zenity --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager. Multipointer is not supported by all Wayland servers.
+$ZENITYCMD --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager. Multipointer is not supported by all Wayland servers.
 
 This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
    -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
@@ -289,7 +292,7 @@ do
   unset NewSessionSeatNumber
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
-    NewSeatSelection=$(zenity  --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$($ZENITYCMD  --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
@@ -297,7 +300,7 @@ do
     Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}
     Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" 2>/dev/null)
   else
-    NewSeatSelection=$(zenity --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
+    NewSeatSelection=$($ZENITYCMD --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
@@ -354,7 +357,7 @@ done
 kill -9 $MainFormPID
 
 #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
-zenity --info --text "Seat Configuration for all devices is now complete.
+$ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
 
 Press OK to apply all the changes. This will switch user to the loginmanager display.
 This is to signal the display server to detect the new changes, and the waylandloginmanager to detect new seats.
