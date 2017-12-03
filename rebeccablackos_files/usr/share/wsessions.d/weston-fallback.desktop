@@ -10,6 +10,10 @@ CompositorSupportsWL=0
 CompositorKMSArguments=--backend=drm-backend.so
 CompositorWLArguments=--backend=wayland-backend.so
 CompositorDisplayArgument=--socket=
+CompositorKMSSeatAware=1
+CompositorKMSSeatArgument=--seat=
+CompositorFBSeatAware=1
+CompositorFBSeatArgument=--seat=
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland --use-pixman
 IsFallbackSession=1
