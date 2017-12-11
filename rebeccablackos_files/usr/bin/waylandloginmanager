@@ -285,7 +285,7 @@ function GetSeatConfigKey
 function ReadEnvironmentFile
 {
   #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" 2>/dev/null | awk -F \# '{print $1}' | sed  -e "s/ *= */\#/g" -re "s/ *@([A-Z]*)$/\#\1/g")
+  EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" 2>/dev/null | awk -F \# '{print $1}' | sed  -e "s/ *= */=/g" -re "s/(.*)@([A-Z]*)$/\2#\1/g")
 
   IFS=$'\n'
   EnvironmentFileData=($EnvironmentFileData)
@@ -300,12 +300,35 @@ function ReadEnvironmentFile
     #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
     IFS="#"
     EnvironmentFileLine=($EnvironmentFileLine)
+    if [[ ${#EnvironmentFileLine[@]} -gt 1 ]]
+    then
+      VARBACKEND=${EnvironmentFileLine[0]}
+      EnvironmentFileLine=${EnvironmentFileLine[@]:1}
+    else
+      unset VARBACKEND
+    fi
+    unset IFS
+
+    IFS="="
+    EnvironmentFileLine=($EnvironmentFileLine)
     unset IFS
 
     VARACTION=${EnvironmentFileLine[0]}
     VARNAME=${EnvironmentFileLine[1]}
-    VARDATA=${EnvironmentFileLine[2]}
-    VARBACKEND=${EnvironmentFileLine[3]}
+
+    VARDATAARRAY=(${EnvironmentFileLine[@]:2})
+    ADDDELIM=0
+    VARDATA=""
+    for VARDATASEGMENT in ${VARDATAARRAY[@]}
+    do
+      if [[ $ADDDELIM != 0 ]]
+      then
+        VARDATA+="="
+      else
+        ADDDELIM=1
+      fi
+      VARDATA+="$VARDATASEGMENT"
+    done
 
     #Only expand some variables
     if [[ $VARDATA == "\$WAYLAND_DISPLAY" ]]
