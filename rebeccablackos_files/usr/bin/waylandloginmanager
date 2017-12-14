@@ -873,7 +873,7 @@ function ChooseSessionType
   SeatSupportedBackendsString=""
   SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
-  FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
+  FB0INSEAT=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb0$" -c)
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
   if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0  ]]
@@ -887,7 +887,7 @@ function ChooseSessionType
     SeatSupportedBackends+=(WL)
     SeatSupportedBackendsString+="WL "
   else
-    if [[ "$CurrentHandleSeat" == "seat0" && $FB0INSEAT0 != 0 ]]
+    if [[ $FB0INSEAT != 0 ]]
     then
       SeatSupportedBackends+=(WL)
       SeatSupportedBackendsString+="WL "
@@ -972,7 +972,7 @@ function ChooseSessionType
           #If this is seat0, then don't enforce seatawareness, if the first framebuffer device is in seat0
           if [[ $CurrentHandleSeat == seat0 && $BackendType == "FB" ]]
           then
-            if [[ $FB0INSEAT0 == 1 ]]
+            if [[ $FB0INSEAT == 1 ]]
             then
               SupportsSeat=1
             fi
@@ -1773,7 +1773,7 @@ function GetSeatCapabilityString
   #Detect hardware abilities, of the seat
   SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
-  FB0INSEAT0=$(loginctl seat-status seat0 2>/dev/null |grep -e "/graphics/fb0$" -c)
+  FB0INSEAT=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb0$" -c)
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
@@ -1800,7 +1800,7 @@ function GetSeatCapabilityString
   then
     WESTONBACKEND=FB
   else
-    if [[ "$1" == "seat0" && $FB0INSEAT0 != 0 ]]
+    if [[ $FB0INSEAT != 0 ]]
     then
       SeatSupportsFB=1
       WESTONBACKEND=FB
@@ -1860,7 +1860,7 @@ function StartLoginManagerDisplay
   LOGINMANAGERDISPLAYSTATUS=0
   SeatUseMultiSessionConfig=1
 
-  #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it
+  #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it. This only would concern seats that are not seat0
   if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
   then
     SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
