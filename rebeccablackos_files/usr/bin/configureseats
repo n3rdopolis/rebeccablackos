@@ -30,6 +30,9 @@ fi
 #Allow Exclamation points to be used in commands by turning off the history
 set +H
 
+#Enable job control
+set -m
+
 #Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
@@ -354,7 +357,7 @@ do
 done
 
 #Close the main zenity window that lists all devices when this script is exiting
-kill -9 -$MainFormPID
+kill -9 -- -$MainFormPID
 
 #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
 $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
