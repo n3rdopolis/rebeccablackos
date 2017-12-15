@@ -357,7 +357,7 @@ do
 done
 
 #Close the main zenity window that lists all devices when this script is exiting
-kill -9 -- -$MainFormPID
+\kill -9 -$MainFormPID
 
 #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
 $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
