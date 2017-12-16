@@ -6,6 +6,7 @@ Comment=The KDE Desktop
 CompositorExec=/opt/bin/kwin_wayland
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
+CompositorKMSSeatAware=1
 CompositorSupportsFB=1
 CompositorWLArguments=--windowed
 CompositorKMSArguments=--drm --libinput
@@ -13,6 +14,5 @@ CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
 AdditionalArguments=--xwayland /opt/libexec/startplasma
-CompositorKMSSeatAware=1
 
 
