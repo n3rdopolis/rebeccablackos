@@ -1,17 +1,17 @@
 diff --git a/compositor/main.c b/compositor/main.c
-index 0615d87e..cd07a6bb 100644
+index 7feb4cb0..02de108b 100644
 --- a/compositor/main.c
 +++ b/compositor/main.c
-@@ -562,7 +562,7 @@ usage(int error_code)
+@@ -563,7 +563,7 @@ usage(int error_code)
  #if defined(BUILD_DRM_COMPOSITOR)
  	fprintf(stderr,
  		"Options for drm-backend.so:\n\n"
 -		"  --seat=SEAT\t\tThe seat that weston should run on\n"
 +		"  --seat=SEAT\t\tThe seat that weston should run on, instead of the seat defined in XDG_SEAT\n"
  		"  --tty=TTY\t\tThe tty to use\n"
+ 		"  --drm-device=CARD\tThe DRM device to use, e.g. \"card0\".\n"
  		"  --use-pixman\t\tUse the pixman (CPU) renderer\n"
- 		"  --current-mode\tPrefer current KMS mode over EDID preferred mode\n\n");
-@@ -573,6 +573,7 @@ usage(int error_code)
+@@ -575,6 +575,7 @@ usage(int error_code)
  		"Options for fbdev-backend.so:\n\n"
  		"  --tty=TTY\t\tThe tty to use\n"
  		"  --device=DEVICE\tThe framebuffer device to use\n"
@@ -19,7 +19,7 @@ index 0615d87e..cd07a6bb 100644
  		"\n");
  #endif
  
-@@ -1444,13 +1445,11 @@ load_fbdev_backend(struct weston_compositor *c,
+@@ -1448,13 +1449,11 @@ load_fbdev_backend(struct weston_compositor *c,
  	const struct weston_option fbdev_options[] = {
  		{ WESTON_OPTION_INTEGER, "tty", 0, &config.tty },
  		{ WESTON_OPTION_STRING, "device", 0, &config.device },
@@ -35,10 +35,10 @@ index 0615d87e..cd07a6bb 100644
  	config.base.struct_size = sizeof(struct weston_fbdev_backend_config);
  	config.configure_device = configure_input_device;
 diff --git a/libweston/compositor-drm.c b/libweston/compositor-drm.c
-index b641d61e..0025f5ba 100644
+index 3eda70f3..5585944e 100644
 --- a/libweston/compositor-drm.c
 +++ b/libweston/compositor-drm.c
-@@ -4002,8 +4002,13 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -4036,8 +4036,13 @@ drm_backend_create(struct weston_compositor *compositor,
  	struct udev_device *drm_device;
  	struct wl_event_loop *loop;
  	const char *seat_id = default_seat;
@@ -53,15 +53,16 @@ index b641d61e..0025f5ba 100644
  
  	b = zalloc(sizeof *b);
 diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
-index 4b3605cf..cad4b202 100644
+index fbab634b..15c17a20 100644
 --- a/libweston/compositor-fbdev.c
 +++ b/libweston/compositor-fbdev.c
-@@ -361,6 +361,13 @@ fbdev_frame_buffer_open(const char *fb_dev,
+@@ -361,6 +361,14 @@ fbdev_frame_buffer_open(const char *fb_dev,
  		return -1;
  	}
  
 +	/* Attempt to correct the framebuffer settings */
-+	if (fbdev_set_screen_info(fd, screen_info) < 0) {
++	if (fbdev_set_screen_info(output, fd,
++	                          screen_info) < 0) {
 +		weston_log("Failed to set mode settings. "
 +		           "Attempting to open output anyway.\n");
 +	}
@@ -70,7 +71,7 @@ index 4b3605cf..cad4b202 100644
  	return fd;
  }
  
-@@ -704,12 +711,55 @@ fbdev_restore(struct weston_compositor *compositor)
+@@ -704,12 +712,55 @@ fbdev_restore(struct weston_compositor *compositor)
  	weston_launcher_restore(compositor->launcher);
  }
  
@@ -126,7 +127,7 @@ index 4b3605cf..cad4b202 100644
  
  	weston_log("initializing fbdev backend\n");
  
-@@ -729,12 +779,17 @@ fbdev_backend_create(struct weston_compositor *compositor,
+@@ -729,12 +780,17 @@ fbdev_backend_create(struct weston_compositor *compositor,
  		goto out_compositor;
  	}
  
@@ -143,9 +144,9 @@ index 4b3605cf..cad4b202 100644
 -		weston_launcher_connect(compositor, param->tty, "seat0", false);
 +		weston_launcher_connect(compositor, param->tty, seat_id, false);
  	if (!compositor->launcher) {
- 		weston_log("fatal: fbdev backend should be run "
- 			   "using weston-launch binary or as root\n");
-@@ -775,10 +830,9 @@ out_compositor:
+ 		weston_log("fatal: fbdev backend should be run using "
+ 			   "weston-launch binary, or your system should "
+@@ -776,10 +832,9 @@ out_compositor:
  static void
  config_init_to_defaults(struct weston_fbdev_backend_config *config)
  {
@@ -171,10 +172,10 @@ index 8b7d900e..ca76a902 100644
  
  #ifdef  __cplusplus
 diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
-index a069bd4f..71f1c465 100644
+index 21d8c37b..875db70f 100644
 --- a/libweston/launcher-logind.c
 +++ b/libweston/launcher-logind.c
-@@ -762,18 +762,22 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
+@@ -769,18 +769,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
  		free(t);
  		goto err_session;
  	}
@@ -193,12 +194,10 @@ index a069bd4f..71f1c465 100644
 +		r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
 +		if (r < 0) {
 +			weston_log("logind: session not running on a VT\n");
-+			free(t);
 +			goto err_session;
 +		} else if (tty > 0 && wl->vtnr != (unsigned int )tty) {
 +			weston_log("logind: requested VT --tty=%d differs from real session VT %u\n",
 +				   tty, wl->vtnr);
-+			free(t);
 +			r = -EINVAL;
 +			goto err_session;
 +		}
@@ -208,7 +207,7 @@ index a069bd4f..71f1c465 100644
  	loop = wl_display_get_event_loop(compositor->wl_display);
  	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
 diff --git a/libweston/launcher-util.c b/libweston/launcher-util.c
-index fa3ed13b..848c6ade 100644
+index 96a0ba6f..777ab755 100644
 --- a/libweston/launcher-util.c
 +++ b/libweston/launcher-util.c
 @@ -111,6 +111,10 @@ WL_EXPORT void
@@ -223,10 +222,10 @@ index fa3ed13b..848c6ade 100644
  	if (compositor->vt_switching == false)
  		return;
 diff --git a/man/weston-drm.man b/man/weston-drm.man
-index d7fd5614..17c1ad31 100644
+index 75d79021..883395f2 100644
 --- a/man/weston-drm.man
 +++ b/man/weston-drm.man
-@@ -94,8 +94,8 @@ switching to the monitor preferred mode.
+@@ -101,8 +101,8 @@ status. For example, use
  \fB\-\-seat\fR=\fIseatid\fR
  Use graphics and input devices designated for seat
  .I seatid
@@ -237,7 +236,7 @@ index d7fd5614..17c1ad31 100644
  .TP
  \fB\-\-tty\fR=\fIx\fR
  Launch Weston on tty
-@@ -117,6 +117,9 @@ The file descriptor (integer) where
+@@ -124,6 +124,9 @@ The file descriptor (integer) where
  .B weston-launch
  is listening. Automatically set by
  .BR weston-launch .
