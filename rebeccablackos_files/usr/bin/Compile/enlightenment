@@ -57,7 +57,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 sed -i '/QT_QPA_PLATFORMTHEME/d' src/bin/e_main.c
 sed -i '/QT_STYLE_OVERRIDE/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
