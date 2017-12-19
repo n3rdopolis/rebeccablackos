@@ -191,7 +191,7 @@
 +  #Abort if the user selected cancel on the dialog
    if [[ $CancelOrOK != 0 ]]
    then
-     exit 1
+     exit 0
 @@ -1365,7 +1351,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
@@ -239,7 +239,7 @@
 +  #Abort if the user selected cancel on the dialog
    if [[ $CancelOrOK != 0 ]]
    then
-     exit 1
+     exit 0
 @@ -1615,9 +1605,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
@@ -251,7 +251,7 @@
 +    #Abort if the user selected cancel on the dialog
      if [[ $CancelOrOK != 0 ]]
      then
-       exit 1
+       exit 0
 @@ -1633,9 +1623,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
@@ -263,7 +263,7 @@
 +    #Abort if the user selected cancel on the dialog
      if [[ $CancelOrOK != 0 ]]
      then
-       exit 1
+       exit 0
 @@ -1647,23 +1637,23 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
@@ -309,7 +309,7 @@
 +  #Abort if the user selected cancel on the dialog
    if [[ $CancelOrOK != 0 ]]
    then
-     exit 1
+     exit 0
    fi
  
    #Prompt the user if they are sure they want to execute the selected action

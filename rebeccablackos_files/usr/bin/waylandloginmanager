@@ -1136,7 +1136,7 @@ function ChooseSessionType
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
     then
-      exit 1
+      exit 0
     fi
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
 
@@ -1339,7 +1339,7 @@ function SwitchUserDialog
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
-    exit 1
+    exit 0
   fi
   #if the chosen session is -1 then contact the FIFO with a login prompt, otherwise switch to the selected session
   if [[ $ChangeSession == "-1" ]]
@@ -1610,7 +1610,7 @@ function GetUserCredentials
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
-    exit 1
+    exit 0
   fi
   #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
   if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
@@ -1620,7 +1620,7 @@ function GetUserCredentials
     #Abort if the user selected cancel on the zenity dialog
     if [[ $CancelOrOK != 0 ]]
     then
-      exit 1
+      exit 0
     fi
   fi
   #get the TTY to start the session on, only for seat0
@@ -1638,7 +1638,7 @@ function GetUserCredentials
     #Abort if the user selected cancel on the zenity dialog
     if [[ $CancelOrOK != 0 ]]
     then
-      exit 1
+      exit 0
     fi
     #send the password to an AuthenticateUser function with stdin
     echo $USERPASSWORD | AuthenticateUser "$1"
@@ -1724,7 +1724,7 @@ function LeavePrompt
   #Abort if the user selected cancel on the zenity dialog
   if [[ $CancelOrOK != 0 ]]
   then
-    exit 1
+    exit 0
   fi
 
   #Prompt the user if they are sure they want to execute the selected action
@@ -2067,7 +2067,7 @@ function StartAutoLogin
   CancelOrOK=$?
   if [[ $CancelOrOK != 0 ]]
   then
-    exit 1
+    exit 0
   fi
   #get the TTY to start the autologin session on, only for seat0
   if [[ "$1" == seat0 ]]
