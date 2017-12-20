@@ -1,21 +1,20 @@
-diff --git a/src/lib/ecore_drm/ecore_drm_device.c b/src/lib/ecore_drm/ecore_drm_device.c
-index ca560340dc..6ee71b1134 100644
---- a/src/lib/ecore_drm/ecore_drm_device.c
-+++ b/src/lib/ecore_drm/ecore_drm_device.c
-@@ -230,7 +230,7 @@ ecore_drm_device_find(const char *name, const char *seat)
- 
-         if ((seat) && (strcmp(seat, devseat))) 
-           goto cont;
--        else if (strcmp(devseat, "seat0"))
-+        else if ((!seat) && strcmp(devseat, "seat0"))
-           goto cont;
- 
-         devparent = eeze_udev_syspath_get_parent_filtered(device, "pci", NULL);
 diff --git a/src/lib/ecore_drm2/ecore_drm2_device.c b/src/lib/ecore_drm2/ecore_drm2_device.c
-index 21963c98fb..27489990a2 100644
+index 21963c98fb..e4da569c33 100644
 --- a/src/lib/ecore_drm2/ecore_drm2_device.c
 +++ b/src/lib/ecore_drm2/ecore_drm2_device.c
-@@ -116,7 +116,7 @@ _drm2_device_find(Elput_Manager *em, const char *seat)
+@@ -95,9 +95,10 @@ static const char *
+ _drm2_device_find(Elput_Manager *em, const char *seat)
+ {
+    Eina_List *devs, *l;
+-   const char *dev, *ret = NULL;
++   const char *dev, *ret, *fdev = NULL;
+    Eina_Bool found = EINA_FALSE;
+    Eina_Bool platform = EINA_FALSE;
++   Eina_Bool fallback = EINA_FALSE;
+    Eina_Bool modeset;
+    int fd;
+ 
+@@ -116,7 +117,7 @@ _drm2_device_find(Elput_Manager *em, const char *seat)
  
          if ((seat) && (strcmp(seat, dseat)))
            goto cont;
@@ -24,6 +23,36 @@ index 21963c98fb..27489990a2 100644
            goto cont;
  
          fd = elput_manager_open(em, dpath, -1);
+@@ -144,6 +145,7 @@ _drm2_device_find(Elput_Manager *em, const char *seat)
+                   id = eeze_udev_syspath_get_sysattr(dparent, "boot_vga");
+                   if (id)
+                     {
++                       fallback = EINA_FALSE;
+                        if (!strcmp(id, "1")) found = EINA_TRUE;
+                        eina_stringshare_del(id);
+                     }
+@@ -154,12 +156,21 @@ _drm2_device_find(Elput_Manager *em, const char *seat)
+              eina_stringshare_del(dparent);
+           }
+ 
++        if (!found && !fdev)
++          {
++             fdev = dev;
++	     fallback = EINA_TRUE;
++	  }
+ cont:
+         eina_stringshare_del(dpath);
+         eina_stringshare_del(dseat);
+         if (found) break;
+      }
+ 
++   if (fallback) dev = fdev;
++
++   if (fdev) found = EINA_TRUE;
++
+    if (!found) goto out;
+ 
+    ret = eeze_udev_syspath_get_devpath(dev);
 diff --git a/src/lib/elput/elput_logind.c b/src/lib/elput/elput_logind.c
 index 842de225e8..8c76fac5d1 100644
 --- a/src/lib/elput/elput_logind.c
