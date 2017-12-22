@@ -13,50 +13,6 @@ index 4a3122136..40b5931fe 100644
              delete s_context;
              s_context = nullptr;
              return nullptr;
-diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..36f91a086 100644
---- a/udev.cpp
-+++ b/udev.cpp
-@@ -51,6 +51,7 @@ public:
-         SysName
-     };
-     void addMatch(Match match, const char *name);
-+    void addMatchProperty(const char *name, const char *value);
-     void scan();
-     UdevDevice::Ptr find(std::function<bool(const UdevDevice::Ptr &)> test);
- 
-@@ -93,6 +94,14 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
-     }
- }
- 
-+void UdevEnumerate::addMatchProperty(const char *name, const char *value)
-+{
-+    if (m_enumerate.isNull()) {
-+        return;
-+    }
-+    udev_enumerate_add_match_property(m_enumerate.data(), name, value);
-+}
-+
- void UdevEnumerate::scan()
- {
-     if (m_enumerate.isNull()) {
-@@ -133,6 +142,7 @@ UdevDevice::Ptr Udev::primaryGpu()
-     UdevEnumerate enumerate(this);
-     enumerate.addMatch(UdevEnumerate::Match::SubSystem, "drm");
-     enumerate.addMatch(UdevEnumerate::Match::SysName, "card[0-9]*");
-+    enumerate.addMatchProperty("ID_SEAT", getenv("XDG_SEAT"));
-     enumerate.scan();
-     return enumerate.find([](const UdevDevice::Ptr &device) {
-         // TODO: check seat
-
-
-
-
-
-
-
-
-
 diff --git a/main_wayland.cpp b/main_wayland.cpp
 index 9d7f49d05..d4ac7ba6a 100644
 --- a/main_wayland.cpp
@@ -70,7 +26,7 @@ index 9d7f49d05..d4ac7ba6a 100644
                                          i18n("The X11 Display to use in windowed mode on platform X11."),
                                          QStringLiteral("display"));
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index e2899f0dd..ca0c2f1b6 100644
+index e2899f0dd..51af0350a 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
 @@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -89,18 +45,35 @@ index e2899f0dd..ca0c2f1b6 100644
  {
  }
  
-@@ -81,11 +83,12 @@ void FramebufferBackend::init()
+@@ -75,17 +77,27 @@ void FramebufferBackend::init()
+     } else {
+         connect(logind, &LogindIntegration::connectedChanged, this, takeControl);
+     }
+-    VirtualTerminal::create(this);
++    if (strcmp(getenv("XDG_SEAT"), "seat0") == 0)
++    {
++        VirtualTerminal::create(this);
++    }
+ }
+ 
  void FramebufferBackend::openFrameBuffer()
  {
-     VirtualTerminal::self()->init();
+-    VirtualTerminal::self()->init();
 -    int fd = LogindIntegration::self()->takeDevice(deviceIdentifier().constData());
++    if (strcmp(getenv("XDG_SEAT"), "seat0") == 0)
++    {
++        VirtualTerminal::self()->init();
++    }
++    char *framebufferDevice = strdup(deviceIdentifier().constData());
 +    UdevDevice::Ptr device = m_udev->primaryFramebuffer();
-+    int fd = LogindIntegration::self()->takeDevice(device->devNode());
++    if (!framebufferDevice)
++	framebufferDevice = strdup(device->devNode());
++    int fd = LogindIntegration::self()->takeDevice(framebufferDevice);
      if (fd < 0) {
          qCWarning(KWIN_FB) << "Failed to open frame buffer device through logind, trying without";
      }
 -    fd = open(deviceIdentifier().constData(), O_RDWR | O_CLOEXEC);
-+    fd = open(device->devNode(), O_RDWR | O_CLOEXEC);
++    fd = open(framebufferDevice, O_RDWR | O_CLOEXEC);
      if (fd < 0) {
          qCWarning(KWIN_FB) << "failed to open frame buffer device";
          emit initFailed();
@@ -126,25 +99,64 @@ index 2ffca0eb9..2fa51f6ab 100644
          quint32 offset;
          quint32 length;
 diff --git a/udev.cpp b/udev.cpp
-index 36f91a086..1804dffa8 100644
+index f65724a9d..4c730586d 100644
 --- a/udev.cpp
 +++ b/udev.cpp
-@@ -150,11 +150,26 @@ UdevDevice::Ptr Udev::primaryGpu()
-         if (!pci) {
-             return false;
-         }
--        const char *systAttrValue = udev_device_get_sysattr_value(pci, "boot_vga");
--        if (systAttrValue && qstrcmp(systAttrValue, "1") == 0) {
-+        //const char *systAttrValue = udev_device_get_sysattr_value(pci, "boot_vga");
-+        //if (systAttrValue && qstrcmp(systAttrValue, "1") == 0) {
-             return true;
--        }
--        return false;
-+        //}
-+        //return false;
-+    });
+@@ -51,6 +51,7 @@ public:
+         SysName
+     };
+     void addMatch(Match match, const char *name);
++    void addMatchProperty(const char *name, const char *value);
+     void scan();
+     UdevDevice::Ptr find(std::function<bool(const UdevDevice::Ptr &)> test);
+ 
+@@ -93,6 +94,14 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
+     }
+ }
+ 
++void UdevEnumerate::addMatchProperty(const char *name, const char *value)
++{
++    if (m_enumerate.isNull()) {
++        return;
++    }
++    udev_enumerate_add_match_property(m_enumerate.data(), name, value);
 +}
 +
+ void UdevEnumerate::scan()
+ {
+     if (m_enumerate.isNull()) {
+@@ -133,9 +142,10 @@ UdevDevice::Ptr Udev::primaryGpu()
+     UdevEnumerate enumerate(this);
+     enumerate.addMatch(UdevEnumerate::Match::SubSystem, "drm");
+     enumerate.addMatch(UdevEnumerate::Match::SysName, "card[0-9]*");
++    enumerate.addMatchProperty("ID_SEAT", getenv("XDG_SEAT"));
+     enumerate.scan();
+-    return enumerate.find([](const UdevDevice::Ptr &device) {
+-        // TODO: check seat
++    UdevDevice::Ptr fallbackDevice, returnDevice;
++    returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
+         auto pci = device->getParentWithSubsystemDevType("pci");
+         if (!pci) {
+             return false;
+@@ -146,6 +156,14 @@ UdevDevice::Ptr Udev::primaryGpu()
+         }
+         return false;
+     });
++    if (!returnDevice)
++    {
++        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
++            return true;
++	});
++    }
++
++    return returnDevice;
+ }
+ 
+ UdevDevice::Ptr Udev::virtualGpu()
+@@ -178,6 +196,38 @@ UdevDevice::Ptr Udev::renderNode()
+     });
+ }
+ 
 +UdevDevice::Ptr Udev::primaryFramebuffer()
 +{
 +    if (!m_udev) {
@@ -155,11 +167,31 @@ index 36f91a086..1804dffa8 100644
 +    enumerate.addMatch(UdevEnumerate::Match::SysName, "fb[0-9]*");
 +    enumerate.addMatchProperty("ID_SEAT", getenv("XDG_SEAT"));
 +    enumerate.scan();
-+    return enumerate.find([](const UdevDevice::Ptr &device) {
-+        return true;
-     });
- }
- 
++    UdevDevice::Ptr fallbackDevice, returnDevice;
++    returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
++        auto pci = device->getParentWithSubsystemDevType("pci");
++        if (!pci) {
++            return false;
++        }
++        const char *systAttrValue = udev_device_get_sysattr_value(pci, "boot_vga");
++        if (systAttrValue && qstrcmp(systAttrValue, "1") == 0) {
++            return true;
++        }
++        return false;
++    });
++    if (!returnDevice)
++    {
++        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
++            return true;
++	});
++    }
++
++    return returnDevice;
++}
++
+ UdevDevice::Ptr Udev::deviceFromSyspath(const char *syspath)
+ {
+     return UdevDevice::Ptr(new UdevDevice(udev_device_new_from_syspath(m_udev, syspath)));
 diff --git a/udev.h b/udev.h
 index 5dad01e56..88a87e869 100644
 --- a/udev.h
