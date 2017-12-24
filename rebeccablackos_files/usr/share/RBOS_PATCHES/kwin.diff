@@ -1,18 +1,56 @@
 diff --git a/libinput/connection.cpp b/libinput/connection.cpp
-index 4a3122136..40b5931fe 100644
+index 4a3122136..6e0a67c1a 100644
 --- a/libinput/connection.cpp
 +++ b/libinput/connection.cpp
-@@ -134,8 +134,8 @@ Connection *Connection::create(QObject *parent)
+@@ -133,9 +133,8 @@ Connection *Connection::create(QObject *parent)
+             s_context = nullptr;
              return nullptr;
          }
-         // TODO: don't hardcode seat name
+-        // TODO: don't hardcode seat name
 -        if (!s_context->assignSeat("seat0")) {
 -            qCWarning(KWIN_LIBINPUT) << "Failed to assign seat seat0";
-+        if (!s_context->assignSeat(getenv("XDG_SEAT"))) {
++        if (!s_context->assignSeat(LogindIntegration::self()->seat())) {
 +            qCWarning(KWIN_LIBINPUT) << "Failed to assign seat";
              delete s_context;
              s_context = nullptr;
              return nullptr;
+diff --git a/logind.cpp b/logind.cpp
+index c300cac67..4ec5bb557 100644
+--- a/logind.cpp
++++ b/logind.cpp
+@@ -438,6 +438,9 @@ void LogindIntegration::getSeat()
+             if (m_seatPath != seatPath) {
+                 m_seatPath = seatPath;
+             }
++            if (m_seatName != seat.name.toStdString().c_str()) {
++                m_seatName = strdup(seat.name.toStdString().c_str());
++            }
+         }
+     );
+ }
+diff --git a/logind.h b/logind.h
+index d0af39fe1..1599874cb 100644
+--- a/logind.h
++++ b/logind.h
+@@ -55,6 +55,10 @@ public:
+ 
+     int takeDevice(const char *path);
+     void releaseDevice(int fd);
++    
++    const char *seat() const {
++        return m_seatName;
++    }
+ 
+ Q_SIGNALS:
+     void connectedChanged();
+@@ -91,6 +95,7 @@ private:
+     bool m_sessionControl;
+     bool m_sessionActive;
+     int m_vt = -1;
++    char *m_seatName;
+     QString m_seatPath;
+     QString m_sessionControllerName;
+     QString m_sessionControllerService;
 diff --git a/main_wayland.cpp b/main_wayland.cpp
 index 9d7f49d05..d4ac7ba6a 100644
 --- a/main_wayland.cpp
@@ -26,7 +64,7 @@ index 9d7f49d05..d4ac7ba6a 100644
                                          i18n("The X11 Display to use in windowed mode on platform X11."),
                                          QStringLiteral("display"));
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index e2899f0dd..51af0350a 100644
+index e2899f0dd..2bf998f55 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
 @@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -50,7 +88,7 @@ index e2899f0dd..51af0350a 100644
          connect(logind, &LogindIntegration::connectedChanged, this, takeControl);
      }
 -    VirtualTerminal::create(this);
-+    if (strcmp(getenv("XDG_SEAT"), "seat0") == 0)
++    if (strcmp(LogindIntegration::self()->seat(), "seat0") == 0)
 +    {
 +        VirtualTerminal::create(this);
 +    }
@@ -60,7 +98,7 @@ index e2899f0dd..51af0350a 100644
  {
 -    VirtualTerminal::self()->init();
 -    int fd = LogindIntegration::self()->takeDevice(deviceIdentifier().constData());
-+    if (strcmp(getenv("XDG_SEAT"), "seat0") == 0)
++    if (strcmp(LogindIntegration::self()->seat(), "seat0") == 0)
 +    {
 +        VirtualTerminal::self()->init();
 +    }
@@ -99,10 +137,18 @@ index 2ffca0eb9..2fa51f6ab 100644
          quint32 offset;
          quint32 length;
 diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..4c730586d 100644
+index f65724a9d..00f2036ad 100644
 --- a/udev.cpp
 +++ b/udev.cpp
-@@ -51,6 +51,7 @@ public:
+@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
+ along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ *********************************************************************/
+ #include "udev.h"
++#include "logind.h"
+ // Qt
+ #include <QByteArray>
+ #include <QScopedPointer>
+@@ -51,6 +52,7 @@ public:
          SysName
      };
      void addMatch(Match match, const char *name);
@@ -110,7 +156,7 @@ index f65724a9d..4c730586d 100644
      void scan();
      UdevDevice::Ptr find(std::function<bool(const UdevDevice::Ptr &)> test);
  
-@@ -93,6 +94,14 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
+@@ -93,6 +95,16 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
      }
  }
  
@@ -120,25 +166,27 @@ index f65724a9d..4c730586d 100644
 +        return;
 +    }
 +    udev_enumerate_add_match_property(m_enumerate.data(), name, value);
++    if (name == "ID_SEAT" && value == "seat0")
++        udev_enumerate_add_match_property(m_enumerate.data(), name, NULL);
 +}
 +
  void UdevEnumerate::scan()
  {
      if (m_enumerate.isNull()) {
-@@ -133,9 +142,10 @@ UdevDevice::Ptr Udev::primaryGpu()
+@@ -133,9 +145,10 @@ UdevDevice::Ptr Udev::primaryGpu()
      UdevEnumerate enumerate(this);
      enumerate.addMatch(UdevEnumerate::Match::SubSystem, "drm");
      enumerate.addMatch(UdevEnumerate::Match::SysName, "card[0-9]*");
-+    enumerate.addMatchProperty("ID_SEAT", getenv("XDG_SEAT"));
++    enumerate.addMatchProperty("ID_SEAT", LogindIntegration::self()->seat());
      enumerate.scan();
 -    return enumerate.find([](const UdevDevice::Ptr &device) {
 -        // TODO: check seat
-+    UdevDevice::Ptr fallbackDevice, returnDevice;
++    UdevDevice::Ptr returnDevice;
 +    returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
          auto pci = device->getParentWithSubsystemDevType("pci");
          if (!pci) {
              return false;
-@@ -146,6 +156,14 @@ UdevDevice::Ptr Udev::primaryGpu()
+@@ -146,6 +159,13 @@ UdevDevice::Ptr Udev::primaryGpu()
          }
          return false;
      });
@@ -146,14 +194,13 @@ index f65724a9d..4c730586d 100644
 +    {
 +        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
 +            return true;
-+	});
++        });
 +    }
-+
 +    return returnDevice;
  }
  
  UdevDevice::Ptr Udev::virtualGpu()
-@@ -178,6 +196,38 @@ UdevDevice::Ptr Udev::renderNode()
+@@ -178,6 +198,37 @@ UdevDevice::Ptr Udev::renderNode()
      });
  }
  
@@ -165,9 +212,9 @@ index f65724a9d..4c730586d 100644
 +    UdevEnumerate enumerate(this);
 +    enumerate.addMatch(UdevEnumerate::Match::SubSystem, "graphics");
 +    enumerate.addMatch(UdevEnumerate::Match::SysName, "fb[0-9]*");
-+    enumerate.addMatchProperty("ID_SEAT", getenv("XDG_SEAT"));
++    enumerate.addMatchProperty("ID_SEAT", LogindIntegration::self()->seat());
 +    enumerate.scan();
-+    UdevDevice::Ptr fallbackDevice, returnDevice;
++    UdevDevice::Ptr returnDevice;
 +    returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
 +        auto pci = device->getParentWithSubsystemDevType("pci");
 +        if (!pci) {
@@ -183,9 +230,8 @@ index f65724a9d..4c730586d 100644
 +    {
 +        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
 +            return true;
-+	});
++        });
 +    }
-+
 +    return returnDevice;
 +}
 +
