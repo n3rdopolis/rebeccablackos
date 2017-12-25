@@ -61,13 +61,19 @@
      #wlmforcevblankoff-{$SEAT}=1
      #to force vblank off on a seat or
      #wlmforcevblankoff=1
-     #to force software rendering globally.
+     #to force vblank off globally.
      #Specifing the option on the kernel command line overrides the config file
 
      #wlmforcefbdev-{$SEAT}=1
      #to force framebuffer on a seat or
      #wlmforcefbdev=1
-     #to force software rendering globally.
+     #to force framebuffer globally.
+     #Specifing the option on the kernel command line overrides the config file
+
+     #wlmnofbdev-{$SEAT}=1
+     #to disable using the  framebuffer on a seat or
+     #wlmnofbdev=1
+     #to disable using the framebuffer globally.
      #Specifing the option on the kernel command line overrides the config file
 
 #/usr/libexec/wayland_login_helpers/*
@@ -560,7 +566,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
-  if [[ $(ls  /dev/fb* 2>/dev/null) ]]
+  if [[ $(ls  /dev/fb* 2>/dev/null) && $(grep -c "\bwlmnofbdev\b" /proc/cmdline) == 0 ]]
   then
     WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
@@ -572,6 +578,11 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     HardwareSupported=1
   else
     WriteToLog "No framebuffer support found"
+  fi
+
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline) != 0 ]]
+  then
+    WriteToLog "Manually override set to disable detection of the framebuffer"
   fi
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
@@ -871,12 +882,22 @@ function ChooseSessionType
   SeatDefaultBackendType=""
   SeatSupportedBackends=()
   SeatSupportedBackendsString=""
-  SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
-  SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  then
+    SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+  else
+    SeatSupportsKMS=0
+  fi
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmnofbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  then
+    SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+  else
+    SeatSupportsFB=0
+  fi
   FB0INSEAT=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb0$" -c)
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
-  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0  ]]
+  if [[ $SeatSupportsKMS != 0 ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatSupportedBackendsString+="KMS "
@@ -1771,9 +1792,20 @@ function LeavePrompt
 function GetSeatCapabilityString
 {
   #Detect hardware abilities, of the seat
-  SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
-  SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
-  FB0INSEAT=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb0$" -c)
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
+  then
+    SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+  else
+    SeatSupportsKMS=0
+  fi
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmnofbdev "$1" 0 ) == 0  ]]
+  then
+    SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+    FB0INSEAT=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb0$" -c)
+  else
+    SeatSupportsFB=0
+    FB0INSEAT=0
+  fi
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
@@ -1808,7 +1840,7 @@ function GetSeatCapabilityString
   fi
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
-  if [[ $SeatSupportsKMS != 0 && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
+  if [[ $SeatSupportsKMS != 0 ]]
   then
     WESTONBACKEND=KMS
   fi

@@ -47,6 +47,7 @@ PROBLEMS:
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
             wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
+            wlmnofbdev: Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even if framebuffers are availible.
             wlmforceswrender: Force all user sessions, and the Login Manager's display to be started with the environment variable LIBGL_ALWAYS_SOFTWARE=1 to force software rendering
             wlmforcepixman: Force the Login Manager's display, and the hosts for any fullscreen-shell supporing session to use Pixman
             wlmforcevblankoff: Force all user sessions, and the Login Manager's display to be started with the environment variable vblank_mode=0 to disable vblank which might have problems on some hardware.
