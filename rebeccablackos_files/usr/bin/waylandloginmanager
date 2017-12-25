@@ -559,14 +559,14 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 ]]
+  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
     HardwareSupported=1
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
-  if [[ $(ls  /dev/fb* 2>/dev/null) && $(grep -c "\bwlmnofbdev\b" /proc/cmdline) == 0 ]]
+  if [[ $(ls  /dev/fb* 2>/dev/null) && $(grep -c "\bwlmnofbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) == 0 ]]
   then
     WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
@@ -580,13 +580,13 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     WriteToLog "No framebuffer support found"
   fi
 
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline) != 0 ]]
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) != 0 ]]
   then
     WriteToLog "Manually override set to disable detection of the framebuffer"
   fi
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 ]]
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) != 0 ]]
   then
     WriteToLog "Manually override set to use to use the framebuffer"
     if [[ $HardwareSupported != 1 ]]
