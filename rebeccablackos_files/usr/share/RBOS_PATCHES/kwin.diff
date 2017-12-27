@@ -29,20 +29,20 @@ index c300cac67..4ec5bb557 100644
      );
  }
 diff --git a/logind.h b/logind.h
-index d0af39fe1..1599874cb 100644
+index d0af39fe1..f5835bb24 100644
 --- a/logind.h
 +++ b/logind.h
-@@ -55,6 +55,10 @@ public:
- 
+@@ -56,6 +56,10 @@ public:
      int takeDevice(const char *path);
      void releaseDevice(int fd);
-+    
+ 
 +    const char *seat() const {
 +        return m_seatName;
 +    }
- 
++
  Q_SIGNALS:
      void connectedChanged();
+     void hasSessionControlChanged(bool);
 @@ -91,6 +95,7 @@ private:
      bool m_sessionControl;
      bool m_sessionActive;
@@ -64,7 +64,7 @@ index 9d7f49d05..d4ac7ba6a 100644
                                          i18n("The X11 Display to use in windowed mode on platform X11."),
                                          QStringLiteral("display"));
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index e2899f0dd..2bf998f55 100644
+index e2899f0dd..5dfec60b2 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
 @@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -83,16 +83,7 @@ index e2899f0dd..2bf998f55 100644
  {
  }
  
-@@ -75,17 +77,27 @@ void FramebufferBackend::init()
-     } else {
-         connect(logind, &LogindIntegration::connectedChanged, this, takeControl);
-     }
--    VirtualTerminal::create(this);
-+    if (strcmp(LogindIntegration::self()->seat(), "seat0") == 0)
-+    {
-+        VirtualTerminal::create(this);
-+    }
- }
+@@ -80,12 +82,19 @@ void FramebufferBackend::init()
  
  void FramebufferBackend::openFrameBuffer()
  {
@@ -104,7 +95,7 @@ index e2899f0dd..2bf998f55 100644
 +    }
 +    char *framebufferDevice = strdup(deviceIdentifier().constData());
 +    UdevDevice::Ptr device = m_udev->primaryFramebuffer();
-+    if (!framebufferDevice)
++    if (strcmp(framebufferDevice,"\0") == 0)
 +	framebufferDevice = strdup(device->devNode());
 +    int fd = LogindIntegration::self()->takeDevice(framebufferDevice);
      if (fd < 0) {
@@ -137,7 +128,7 @@ index 2ffca0eb9..2fa51f6ab 100644
          quint32 offset;
          quint32 length;
 diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..00f2036ad 100644
+index f65724a9d..3b7af9fcf 100644
 --- a/udev.cpp
 +++ b/udev.cpp
 @@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
@@ -156,7 +147,7 @@ index f65724a9d..00f2036ad 100644
      void scan();
      UdevDevice::Ptr find(std::function<bool(const UdevDevice::Ptr &)> test);
  
-@@ -93,6 +95,16 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
+@@ -93,6 +95,14 @@ void UdevEnumerate::addMatch(UdevEnumerate::Match match, const char *name)
      }
  }
  
@@ -166,14 +157,12 @@ index f65724a9d..00f2036ad 100644
 +        return;
 +    }
 +    udev_enumerate_add_match_property(m_enumerate.data(), name, value);
-+    if (name == "ID_SEAT" && value == "seat0")
-+        udev_enumerate_add_match_property(m_enumerate.data(), name, NULL);
 +}
 +
  void UdevEnumerate::scan()
  {
      if (m_enumerate.isNull()) {
-@@ -133,9 +145,10 @@ UdevDevice::Ptr Udev::primaryGpu()
+@@ -133,9 +143,10 @@ UdevDevice::Ptr Udev::primaryGpu()
      UdevEnumerate enumerate(this);
      enumerate.addMatch(UdevEnumerate::Match::SubSystem, "drm");
      enumerate.addMatch(UdevEnumerate::Match::SysName, "card[0-9]*");
@@ -186,11 +175,11 @@ index f65724a9d..00f2036ad 100644
          auto pci = device->getParentWithSubsystemDevType("pci");
          if (!pci) {
              return false;
-@@ -146,6 +159,13 @@ UdevDevice::Ptr Udev::primaryGpu()
+@@ -146,6 +157,13 @@ UdevDevice::Ptr Udev::primaryGpu()
          }
          return false;
      });
-+    if (!returnDevice)
++    if (!returnDevice->devNode())
 +    {
 +        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
 +            return true;
@@ -200,7 +189,7 @@ index f65724a9d..00f2036ad 100644
  }
  
  UdevDevice::Ptr Udev::virtualGpu()
-@@ -178,6 +198,37 @@ UdevDevice::Ptr Udev::renderNode()
+@@ -178,6 +196,41 @@ UdevDevice::Ptr Udev::renderNode()
      });
  }
  
@@ -221,14 +210,18 @@ index f65724a9d..00f2036ad 100644
 +            return false;
 +        }
 +        const char *systAttrValue = udev_device_get_sysattr_value(pci, "boot_vga");
++        const char *seatAttrValue = device->property("ID_SEAT");
 +        if (systAttrValue && qstrcmp(systAttrValue, "1") == 0) {
 +            return true;
 +        }
 +        return false;
 +    });
-+    if (!returnDevice)
++    if (!returnDevice->devNode())
 +    {
 +        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
++            const char *seatAttrValue = device->property("ID_SEAT");
++            if (seatAttrValue != LogindIntegration::self()->seat())
++                return false;
 +            return true;
 +        });
 +    }
