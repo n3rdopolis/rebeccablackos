@@ -128,7 +128,7 @@ index 2ffca0eb9..2fa51f6ab 100644
          quint32 offset;
          quint32 length;
 diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..3b7af9fcf 100644
+index f65724a9d..0aabb25d1 100644
 --- a/udev.cpp
 +++ b/udev.cpp
 @@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
@@ -189,7 +189,7 @@ index f65724a9d..3b7af9fcf 100644
  }
  
  UdevDevice::Ptr Udev::virtualGpu()
-@@ -178,6 +196,41 @@ UdevDevice::Ptr Udev::renderNode()
+@@ -178,6 +196,38 @@ UdevDevice::Ptr Udev::renderNode()
      });
  }
  
@@ -219,9 +219,6 @@ index f65724a9d..3b7af9fcf 100644
 +    if (!returnDevice->devNode())
 +    {
 +        returnDevice = enumerate.find([](const UdevDevice::Ptr &device) {
-+            const char *seatAttrValue = device->property("ID_SEAT");
-+            if (seatAttrValue != LogindIntegration::self()->seat())
-+                return false;
 +            return true;
 +        });
 +    }
