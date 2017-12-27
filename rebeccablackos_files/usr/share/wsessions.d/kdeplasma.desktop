@@ -8,13 +8,12 @@ CompositorSupportsWL=0
 CompositorSupportsKMS=1
 CompositorKMSSeatAware=1
 CompositorSupportsFB=1
-CompositorFBSeatAware=1
+CompositorFBSeatAware=0
 CompositorWLArguments=--windowed
 CompositorKMSArguments=--drm --libinput
 CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
 AdditionalArguments=--xwayland /opt/libexec/startplasma
-[EnvironmentFile]
-set=QT_LOGGING_RULES=*.debug=true;*.warning=true;*.error=true;*.info=true
+
 
