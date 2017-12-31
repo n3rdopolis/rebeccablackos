@@ -64,7 +64,7 @@ index 9d7f49d05..d4ac7ba6a 100644
                                          i18n("The X11 Display to use in windowed mode on platform X11."),
                                          QStringLiteral("display"));
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index e2899f0dd..c033d0bfd 100644
+index e2899f0dd..bd1d5ea02 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
 @@ -24,6 +24,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
@@ -75,16 +75,10 @@ index e2899f0dd..c033d0bfd 100644
  // system
  #include <fcntl.h>
  #include <unistd.h>
-@@ -75,19 +76,22 @@ void FramebufferBackend::init()
-     } else {
-         connect(logind, &LogindIntegration::connectedChanged, this, takeControl);
-     }
--    VirtualTerminal::create(this);
- }
- 
+@@ -81,13 +82,18 @@ void FramebufferBackend::init()
  void FramebufferBackend::openFrameBuffer()
  {
--    VirtualTerminal::self()->init();
+     VirtualTerminal::self()->init();
 -    int fd = LogindIntegration::self()->takeDevice(deviceIdentifier().constData());
 +    QString framebufferDevice = deviceIdentifier().constData();
 +    if (framebufferDevice.isEmpty()) {
@@ -104,7 +98,7 @@ index e2899f0dd..c033d0bfd 100644
          emit initFailed();
          return;
      }
-@@ -119,6 +123,28 @@ bool FramebufferBackend::queryScreenInfo()
+@@ -119,6 +125,28 @@ bool FramebufferBackend::queryScreenInfo()
      if (ioctl(m_fd, FBIOGET_FSCREENINFO, &fixinfo) < 0 || ioctl(m_fd, FBIOGET_VSCREENINFO, &varinfo) < 0) {
          return false;
      }
