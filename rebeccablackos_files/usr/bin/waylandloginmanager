@@ -89,8 +89,8 @@
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
   #/var/log/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
-  #~/wlsessionlogs/waylandsession_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
-  #~/wlsessionlogs/waylandhost.log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
+  #~/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
+  #~/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
   #/run/waylandloginmanager/autologinran: Denotes that the autologin process has run already, after startup (since /run is a tmpfs). This prevents autologin when the service is restarted
@@ -143,7 +143,7 @@ function UserSessionWorker
 
   #Cleanup old log files
   LOGFILECOUNT=0
-  ls -t ~/wlsessionlogs/waylandsession* 2>/dev/null | while read LOGFILE
+  ls -t ~/wlsessionlogs/waylandsession_${XDG_SEAT}_* 2>/dev/null | while read LOGFILE
   do
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT > 4 ]]
@@ -155,9 +155,9 @@ function UserSessionWorker
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
-  export WLM_SESSION_LOG="$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-  echo "Started with the arguments: $ArgumentString" >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-  eval set -- $ArgumentString >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+  export WLM_SESSION_LOG="$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
+  echo "Started with the arguments: $ArgumentString" >> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
+  eval set -- $ArgumentString >> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -192,7 +192,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost.log &
+    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost_${XDG_SEAT}.log &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -205,7 +205,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost.log" &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
+      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost_${XDG_SEAT}.log" &>> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
       if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
       then
         SendSelfCommand Change "$XDG_SEAT"
@@ -226,8 +226,8 @@ function UserSessionWorker
     touch "$HOME"/.config/wlmfirstlogin
   fi
 
-  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_$DATESTAMP.log
-  dbus-run-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log &
+  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
+  dbus-run-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log &
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
@@ -238,7 +238,7 @@ function UserSessionWorker
     then
       SendSelfCommand Change "$XDG_SEAT"
     fi
-    echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost.log
+    echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost_${XDG_SEAT}.log
     TerminateJobPID $HostServerPID 15 0
     $SLEEPCMD 3
     TerminateJobPID $HostServerPID 9 0
@@ -251,8 +251,8 @@ function UserSessionWorker
   fi
 
   #Write any Journal logs for this session into the logfile
-  echo -e "\nSession's Journal Logs:" >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log
-  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_$DATESTAMP.log 2>/dev/null
+  echo -e "\nSession's Journal Logs:" >> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log
+  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_${XDG_SEAT}_${DATESTAMP}.log 2>/dev/null
 
   exit
 }
