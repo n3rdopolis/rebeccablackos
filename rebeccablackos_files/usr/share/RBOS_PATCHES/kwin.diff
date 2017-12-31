@@ -149,7 +149,7 @@ index ec311586c..50e365b4e 100644
      }
      QPainter p(&m_backBuffer);
 diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..006ba1442 100644
+index f65724a9d..f064b089b 100644
 --- a/udev.cpp
 +++ b/udev.cpp
 @@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
@@ -164,7 +164,7 @@ index f65724a9d..006ba1442 100644
      if (m_enumerate.isNull()) {
          return UdevDevice::Ptr();
      }
-+    QString defaultSeat = "seat0";
++    QString defaultSeat = QStringLiteral("seat0");
      udev_list_entry *it = udev_enumerate_get_list_entry(m_enumerate.data());
      UdevDevice::Ptr firstFound;
      while (it) {
