@@ -1549,9 +1549,15 @@ function AuthenticateUser
   })
   TryPassword=$TryPasswordEscaped
   unset TryPasswordEscaped
+
+  #usernames should start with - anyway. If a username starts with - , don't attempt to use it
+  if [[ ${LOGINUSER:0:1} == '-' ]]
+  then
+    return 1
+  fi
   #Test the users login with an embedded expect script running as PROBETESTUSER
   echo "log_user 0
-        spawn su $LOGINUSER -c /bin/true
+        spawn su \"$LOGINUSER\" -c /bin/true
         expect Password 
         send $TryPassword\r
         catch wait result
