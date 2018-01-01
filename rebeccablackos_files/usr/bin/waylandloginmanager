@@ -1543,6 +1543,12 @@ function AuthenticateUser
   SetFallbackEnvironmentVariables $1
   unset USERPASSWORD
   TryPassword=$(cat -)
+  TryPasswordEscaped=$(for ((Iterate=0; Iterate<${#TryPassword}; Iterate++))
+  {
+    printf "\\\u%x" "'${TryPassword:$Iterate:1}"
+  })
+  TryPassword=$TryPasswordEscaped
+  unset TryPasswordEscaped
   #Test the users login with an embedded expect script running as PROBETESTUSER
   echo "log_user 0
         spawn su $LOGINUSER -c /bin/true
