@@ -127,6 +127,7 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
 3.|    set=E_WL_FORCE=fb@FB
 4.|    set=WAYLAND_DEBUG=server
 5.|    unset=GDK_BACKEND
+6.|    set=QMLSCENE_DEVICE=softwarecontext@SOFTWARE
 ----------------------------------------------
 
 the options are: set=varname=vardata                (set a variable to be something)
@@ -136,7 +137,10 @@ the options are: set=varname=vardata                (set a variable to be someth
 
 If it ends with @BACKEND, then the variable action is only performed, if the BackendType is BACKEND. Otherwise if it is unspecified, it is performed on ALL backends.
   in Line 2 of the example the variable E_WL_FORCE to be kms (export E_WL_FORCE=kms) only if the BackendType is KMS.
-  in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is. 
+  in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is.
+
+In Line 6 it ends with the @SOFTWARE instead of a backend (such as FB/KMS/WL). With this, software rendering is being used (wlmforceswrender), then the variable is added to the environment. 
+It is also assumed to use software rendering when the session has to use the FB backend, but it's not always assumed for KMS, or WL.
 
 default.environment is handled by all sessions first, before the specified environment file, in the case of a need of making an environment variable avaible to all sessions.
 

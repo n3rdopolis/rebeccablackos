@@ -165,7 +165,10 @@ function UserSessionWorker
   #force software rendering to be enabled
   if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforceswrender "$XDG_SEAT" 0 ) != 0  ]]
   then
+    WLM_USE_SOFTWARE=1
     export LIBGL_ALWAYS_SOFTWARE=1
+  else
+    WLM_USE_SOFTWARE=0
   fi
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
@@ -347,7 +350,13 @@ function ReadEnvironmentFile
     fi
 
     #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
-    if [[ -z $VARBACKEND || $VARBACKEND == $BackendType ]]
+    if [[ ( $WLM_USE_SOFTWARE == 1 && $VARBACKEND == SOFTWARE) || $BackendType == FB ]]
+    then
+      ADDSWVAR=1
+    else
+      ADDSWVAR=0
+    fi
+    if [[ -z $VARBACKEND || $VARBACKEND == $BackendType || $ADDSWVAR == 1 ]]
     then
       #if it is set, then set the variable
       if [[ $VARACTION == "set" ]]
