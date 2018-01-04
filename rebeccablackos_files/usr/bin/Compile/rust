@@ -23,7 +23,7 @@
 SOURCENAME=rust
 
 #The URL of the Source code repo
-SOURCEURL=https://static.rust-lang.org/dist/rust-src-1.17.0.tar.gz
+SOURCEURL=https://static.rust-lang.org/dist/rustc-1.22.0-src.tar.gz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=ARCHIVE
@@ -51,9 +51,7 @@ REBUILDNEWREVISION=0
 function PackageDownloadSource
 {
 unset SUDO_USER
-cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
-sed -i 's|https://s3.amazonaws.com/rust-lang-ci/cargo-builds/|https://static.rust-lang.org/dist/|g' src/bootstrap/bootstrap.py
-sed -i 's|6b05583d71f982bcad049b9fa094c637c062e751|2017-03-16|g' src/stage0.txt
+cd rustc-1.22.0-src/
 python src/bootstrap/bootstrap.py
 }
 
@@ -62,7 +60,7 @@ python src/bootstrap/bootstrap.py
 function PackagePrepareBuild()
 {
 unset SUDO_USER
-cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
+cd rustc-1.22.0-src/
 LLVMPATH=$(ls  -d /usr/lib/llvm-* |tail -1)
 LLVMVER=$(echo $LLVMPATH | awk -F - '{print $2}')
 cp /usr/share/RBOS_PATCHES/rust.diff rust.diff
@@ -75,7 +73,20 @@ patch -p1 < rust.diff
 function PackageCompileSource()
 {
 unset SUDO_USER
-cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
+cd rustc-1.22.0-src/
+#http://www.linuxfromscratch.org/blfs/view/svn/general/rust.html
+cat <<EOF > config.toml
+# see src/bootstrap/config.toml.example for more possible options
+[llvm]
+targets = "X86"
+
+[build]
+# install cargo as well as rust
+extended = true
+
+[install]
+prefix = "/opt"
+EOF
 ./x.py build
 }
 
@@ -83,8 +94,8 @@ cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
 function PackageInstallSource()
 {
 unset SUDO_USER
-cd rust-src-1.17.0/rust-src/lib/rustlib/src/rust
-./x.py dist --install
+cd rustc-1.22.0-src/
+./x.py dist
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
