@@ -260,12 +260,6 @@ function UserSessionWorker
   exit
 }
 
-function UIHost 
-{
-  "$@"
-  exit
-}
-
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the third is the default value
 function GetSeatConfigKey
@@ -540,9 +534,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
-  #WLM_LD_LIBRARY_PATH is exported so that it can set it as LD_LIBRARY_PATH, as the sudo command that starts it as the LOGINMANAGERDISPLAYUSER drops LD_LIBRARY_PATH, and do the same for PATH
-  export WLM_LD_LIBRARY_PATH=$LD_LIBRARY_PATH
-  export WLM_PATH=$PATH
 
   ####These settings are dependant on Weston patches####
   export WESTON_FBDEV_SEAT_AWARE=1
@@ -564,8 +555,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     ISLIVE=1
   fi
 
-  ZENITYCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost zenity"
-  TERMINALCMD="sudo -E -u $LOGINMANAGERDISPLAYUSER $0 --uihost vte"
+  ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
+  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) == 0 ]]
@@ -601,7 +592,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     if [[ $HardwareSupported != 1 ]]
     then
       WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
@@ -616,20 +607,20 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $ISLIVE == 1 ]]
     then
       WriteToLog "ERROR: No supportable hardware found"
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
     else 
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-add-framebuffer
     fi
-    openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "Can not start Weston.
+    openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "Can not start Weston.
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
@@ -1570,7 +1561,7 @@ function AuthenticateUser
         expect Password 
         send $TryPassword\r
         catch wait result
-        exit [lindex \$result 3]" |sudo -u $PROBETESTUSER expect 2>/dev/null
+        exit [lindex \$result 3]" |runuser -u $PROBETESTUSER -m -- expect 2>/dev/null
   PasswordResult=$?
   unset TryPassword
   if [[ 0 == $PasswordResult ]]
@@ -2211,7 +2202,7 @@ function CommandFIFOProxy
 {
   while [ 1 ]
   do
-    sudo -u $FIFOREADERUSER bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+    runuser -u $FIFOREADERUSER -m -- bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^RegisterSession@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
     $SLEEPCMD .1
   done
 }
@@ -2499,7 +2490,7 @@ function ReadCommandFIFO
     then
       systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
+      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
@@ -2511,7 +2502,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
-      openvt -c 63 -s -f -w -- sudo -E -u $LOGINMANAGERDISPLAYUSER dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
+      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
@@ -2808,7 +2799,6 @@ else
 fi
 
 #If the waylandloginmanager is started with no arguments assume default operation. 
-#If it is started with --uihost, then all arguments after that are treated as a command, but to set LD_LIBRARY_PATH.
 #If it is started with --usersession, then perform operations to start the user session, running as the user
 if [[ $1 == "" ]]
 then
@@ -2824,12 +2814,6 @@ then
 
   #Start the login managers FIFO reader, and function that monitors the running sessions
   ReadCommandFIFO
-elif [[ $1 == "--uihost" ]]
-then
-  shift 
-  export LD_LIBRARY_PATH=$WLM_LD_LIBRARY_PATH
-  export PATH=$WLM_PATH
-  UIHost "$@"
 elif [[ $1 == "--usersession" ]]
 then
   shift
