@@ -188,7 +188,14 @@ then
 fi
 
 #Remove packages that can no longer be downloaded to preserve space
-apt-get autoclean -o APT::Clean-Installed=off
+ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
+if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
+then
+  apt-get autoclean -o APT::Clean-Installed=off                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/purge_obsolete.log
+else
+  echo "Not purging older packages, because apt-get update failed"       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/purge_obsolete.log
+fi
+
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
