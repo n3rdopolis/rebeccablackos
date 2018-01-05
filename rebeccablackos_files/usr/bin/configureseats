@@ -265,6 +265,10 @@ for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDevi
 do
   unset NewWLSeatNumber
   unset NewSessionSeatNumber
+  if [[ $CurrentDeviceNumber == 1 ]]
+  then
+    sleep 1
+  fi
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
     NewSeatSelection=$($ZENITYCMD  --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
