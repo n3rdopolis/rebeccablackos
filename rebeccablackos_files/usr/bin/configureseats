@@ -30,9 +30,6 @@ fi
 #Allow Exclamation points to be used in commands by turning off the history
 set +H
 
-#Enable job control
-set -m
-
 #Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
@@ -240,31 +237,6 @@ do
 "
 done
 
-#Show a guide for the users on what devices they have attached to their system, and what will be configured
-$ZENITYCMD --no-wrap --info --text "The changes made here will effect all users, as well as the loginmanager. Multipointer is not supported by all Wayland servers.
-
-This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
-   -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
-      on one physical computer
-
-   -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus, but within one session
-        There can be multiple Wayland Seats per Session Seats. (To enable multipointer on a needed Session Seat)
-
-Input are remembered by the device's internal name (usually containing the make and model), and the port they are plugged into.
-In order for the configuration to work each time you plug your devices, you need to plug them into the same port, (otherwise they will default to the default seat)
-
-The default Seat for Wayland pointers is 'default', while the default seat for Session seats is 'seat0', if you wish to return one to the default.
-
-This Dialog lists all the devices that will be configured by this wizard. You can close this dialog at anytime,
-Closing with will not interfere with the wizard, as it just serves as a guide to tell you how many devices are left.
-
-Please note that some devices have multiple internal components, and sometimes register themselves more than once.
-
-Devices:
-$DeviceList " --title="Multipointer and Seat Configuration" 2>/dev/null &
-MainFormPID=$!
-sleep 5
-
 
 #Create the config file
 touch /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
@@ -354,10 +326,39 @@ do
     fi
     rm /tmp/72-weston_seats_and_udev_seats.rules.work
   fi
-done
+  sleep .3
+  echo $(($CurrentDeviceNumber*100/$NumberOfDevices))
+done | $ZENITYCMD --no-cancel --auto-close --percentage=0 --progress --text "The changes made here will effect all users, as well as the loginmanager. 
+Multipointer is not supported by all Wayland servers.
 
-#Close the main zenity window that lists all devices when this script is exiting
-\kill -9 -$MainFormPID
+This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
+   -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
+      on one physical computer
+
+   -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus, but within one session
+        There can be multiple Wayland Seats per Session Seats. (To enable multipointer on a needed Session Seat)
+
+Input are remembered by the device's internal name 
+     (usually containing the make and model), and the port they are plugged into.
+
+In order for the configuration to work each time you plug your devices, 
+you need to plug them into the same port, (otherwise they will default to the default seat)
+
+If you wish to return one to the default:
+The default Seat for Wayland pointers is 'default', 
+while the default seat for Session seats is 'seat0'
+
+
+Please note that some devices have multiple internal components, and sometimes register themselves more than once.
+
+Devices:
+$DeviceList " --title="Multipointer and Seat Configuration" 2>/dev/null
+
+
+
+
+
+
 
 #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
 $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
