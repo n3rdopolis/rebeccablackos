@@ -344,7 +344,7 @@ function ReadEnvironmentFile
     fi
 
     #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
-    if [[ ( $WLM_USE_SOFTWARE == 1 && $VARBACKEND == SOFTWARE) || $BackendType == FB ]]
+    if [[ $WLM_USE_SOFTWARE == 1 && $VARBACKEND == SOFTWARE ]]
     then
       ADDSWVAR=1
     else
