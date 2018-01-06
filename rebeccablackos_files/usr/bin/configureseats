@@ -278,6 +278,7 @@ do
 
     Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}
     Current Wayland Seat/Pointer: ${DeviceWLSeatIDs[CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" 2>/dev/null)
+    ZenityResult=$?
   else
     NewSeatSelection=$($ZENITYCMD --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)
 
@@ -285,6 +286,11 @@ do
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
     Current Session Seat: ${DeviceSessionSeatIDs[CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration (Device $CurrentDeviceNumber of $NumberOfDevices)" 2>/dev/null)
+    ZenityResult=$?
+  fi
+  if [[ $ZenityResult != 0 ]]
+  then
+    exit
   fi
   IFS="@"
   NewSeatSelection=($NewSeatSelection)
@@ -363,7 +369,10 @@ Device Progress:
 
 
 
-
+if [[ $ZenityResult != 0 ]]
+then
+  exit
+fi
 
 
 
