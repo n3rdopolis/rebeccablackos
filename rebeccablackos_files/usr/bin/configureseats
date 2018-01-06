@@ -23,7 +23,7 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-  zenity --info --text="Must be run as root."
+  zenity --info --text="Must be run as root." --title="Multipointer and Seat Configuration"
   exit
 fi
 
@@ -371,6 +371,7 @@ Device Progress:
 
 if [[ $ZenityResult != 0 ]]
 then
+  $ZENITYCMD --title="Multipointer and Seat Configuration" --info --text "Configuration aborted"
   exit
 fi
 
