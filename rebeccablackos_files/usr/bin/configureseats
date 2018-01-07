@@ -290,7 +290,7 @@ do
   fi
   if [[ $ZenityResult != 0 ]]
   then
-    exit
+    exit 1
   fi
   IFS="@"
   NewSeatSelection=($NewSeatSelection)
@@ -369,7 +369,7 @@ Device Progress:
 
 
 
-if [[ $ZenityResult != 0 ]]
+if [[ ${PIPESTATUS[0]} != 0 ]]
 then
   $ZENITYCMD --title="Multipointer and Seat Configuration" --info --text "Configuration aborted"
   exit
