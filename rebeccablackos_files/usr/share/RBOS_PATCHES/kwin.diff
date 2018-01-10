@@ -14,43 +14,6 @@ index 46eee7a21..664a8953e 100644
              delete s_context;
              s_context = nullptr;
              return nullptr;
-diff --git a/logind.cpp b/logind.cpp
-index c300cac67..53d5666dd 100644
---- a/logind.cpp
-+++ b/logind.cpp
-@@ -438,6 +438,9 @@ void LogindIntegration::getSeat()
-             if (m_seatPath != seatPath) {
-                 m_seatPath = seatPath;
-             }
-+            if (m_seatName != seat.name) {
-+                m_seatName = seat.name;
-+            }
-         }
-     );
- }
-diff --git a/logind.h b/logind.h
-index d0af39fe1..40e3c4f70 100644
---- a/logind.h
-+++ b/logind.h
-@@ -56,6 +56,10 @@ public:
-     int takeDevice(const char *path);
-     void releaseDevice(int fd);
- 
-+    const QString seat() const {
-+        return m_seatName;
-+    }
-+
- Q_SIGNALS:
-     void connectedChanged();
-     void hasSessionControlChanged(bool);
-@@ -91,6 +95,7 @@ private:
-     bool m_sessionControl;
-     bool m_sessionActive;
-     int m_vt = -1;
-+    QString m_seatName = QStringLiteral("seat0");
-     QString m_seatPath;
-     QString m_sessionControllerName;
-     QString m_sessionControllerService;
 diff --git a/main_wayland.cpp b/main_wayland.cpp
 index 9d7f49d05..d4ac7ba6a 100644
 --- a/main_wayland.cpp
