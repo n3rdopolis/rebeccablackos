@@ -575,21 +575,27 @@ function DownloadSource()
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
     Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
     DownloadRepoResult=${PIPESTATUS[0]}
-    if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" && $REBUILDNEWREVISION == 0 ]]
+    #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
-      rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
-    fi
-    if [[ $DownloadRepoResult != 0 ]]
-    then
-      echo $SOURCENAME >> "$BUILDLOGDIR/faileddownloads"
-      touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
-    else
-      if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" ]]
+      #create directories for output
+      mkdir "/$SOURCEDIR/buildoutput/"
+      mkdir "/$SOURCEDIR/buildoutput/control"
+      if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" && $REBUILDNEWREVISION == 0 ]]
       then
-        rm "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+        rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      fi
+      if [[ $DownloadRepoResult != 0 ]]
+      then
+        echo $SOURCENAME >> "$BUILDLOGDIR/faileddownloads"
+        touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+      else
+        if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" ]]
+        then
+          rm "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+        fi
       fi
     fi
-
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
