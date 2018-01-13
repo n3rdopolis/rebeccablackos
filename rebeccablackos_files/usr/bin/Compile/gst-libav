@@ -23,13 +23,13 @@
 SOURCENAME=gst-libav
 
 #The URL of the Source code repo
-SOURCEURL=https://gstreamer.freedesktop.org/src/gst-libav/gst-libav-1.12.4.tar.xz
+SOURCEURL=git://anongit.freedesktop.org/gstreamer/gst-libav
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=ARCHIVE
+REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
