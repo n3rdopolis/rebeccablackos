@@ -53,7 +53,7 @@ index 3eda70f3..5585944e 100644
  
  	b = zalloc(sizeof *b);
 diff --git a/libweston/compositor-fbdev.c b/libweston/compositor-fbdev.c
-index fbab634b..139d6624 100644
+index fbab634b..8cf0922e 100644
 --- a/libweston/compositor-fbdev.c
 +++ b/libweston/compositor-fbdev.c
 @@ -361,6 +361,13 @@ fbdev_frame_buffer_open(const char *fb_dev,
@@ -70,7 +70,7 @@ index fbab634b..139d6624 100644
  	return fd;
  }
  
-@@ -704,12 +711,83 @@ fbdev_restore(struct weston_compositor *compositor)
+@@ -704,12 +711,84 @@ fbdev_restore(struct weston_compositor *compositor)
  	weston_launcher_restore(compositor->launcher);
  }
  
@@ -123,7 +123,8 @@ index fbab634b..139d6624 100644
 +		/* There can only be one boot_vga device. Try to use it
 +		 * at all costs. */
 +		if (is_boot_vga) {
-+			fb_device = find_device;
++			fb_device = strdup(find_device);
++			udev_device_unref(device);
 +			break;
 +		}
 +
@@ -154,14 +155,14 @@ index fbab634b..139d6624 100644
  
  	weston_log("initializing fbdev backend\n");
  
-@@ -729,12 +807,17 @@ fbdev_backend_create(struct weston_compositor *compositor,
+@@ -729,12 +808,17 @@ fbdev_backend_create(struct weston_compositor *compositor,
  		goto out_compositor;
  	}
  
 +	if (!param->device)
-+		param->device=find_framebuffer_device(backend, seat_id);
++		param->device = strdup(find_framebuffer_device(backend, seat_id));
 +	if (!param->device)
-+		param->device=strdup("/dev/fb0");
++		param->device = strdup("/dev/fb0");
 +
  	/* Set up the TTY. */
  	backend->session_listener.notify = session_notify;
@@ -173,7 +174,23 @@ index fbab634b..139d6624 100644
  	if (!compositor->launcher) {
  		weston_log("fatal: fbdev backend should be run using "
  			   "weston-launch binary, or your system should "
-@@ -776,10 +859,9 @@ out_compositor:
+@@ -755,12 +839,15 @@ fbdev_backend_create(struct weston_compositor *compositor,
+ 	if (fbdev_output_create(backend, param->device) < 0)
+ 		goto out_launcher;
+ 
++	free(param->device);
++
+ 	udev_input_init(&backend->input, compositor, backend->udev,
+ 			seat_id, param->configure_device);
+ 
+ 	return backend;
+ 
+ out_launcher:
++	free(param->device);
+ 	weston_launcher_destroy(compositor->launcher);
+ 
+ out_udev:
+@@ -776,10 +863,9 @@ out_compositor:
  static void
  config_init_to_defaults(struct weston_fbdev_backend_config *config)
  {
