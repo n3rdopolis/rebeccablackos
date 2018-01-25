@@ -196,6 +196,7 @@ else
   SKIPPROMPT=1
 fi
 
+#Checkinstall needs overlayfs
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
