@@ -160,7 +160,7 @@ STORAGESIZE_BUILDOUTPUT=$((2 * $GIGABYTE ))
 STORAGESIZE_PHASE1=$((2 * $GIGABYTE ))
 STORAGESIZE_PHASE2=$((4 * $GIGABYTE ))
 STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
-STORAGESIZE_SRCBUILD=$((25 * $GIGABYTE ))
+STORAGESIZE_SRCBUILD=$((26 * $GIGABYTE ))
 #End config options
 
 #make a folder containing the live cd tools in the users local folder
