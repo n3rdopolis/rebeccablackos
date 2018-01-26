@@ -86,9 +86,6 @@ busybox::PART
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 thermald::FULL
-llvm-3.9::PART
-llvm-3.9-dev::PART
-llvm-3.9-tools::PART
 libomxil-bellagio0::PART
 libomxil-bellagio-dev::PART
 libelf-dev::PART
