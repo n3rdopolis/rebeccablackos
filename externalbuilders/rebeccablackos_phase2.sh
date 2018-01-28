@@ -55,6 +55,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt/lists/*
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/*     "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/apt/sources.list 
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/*
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt
