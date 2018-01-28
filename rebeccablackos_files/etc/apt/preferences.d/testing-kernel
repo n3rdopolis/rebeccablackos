@@ -1,0 +1,12 @@
+Package: *
+Pin: release a=stable
+Pin-Priority: 700
+
+Package: *
+Pin: release a=testing
+Pin-Priority:100
+
+Package: linux-image*
+Pin: release a=testing
+Pin-Priority: 800
+
