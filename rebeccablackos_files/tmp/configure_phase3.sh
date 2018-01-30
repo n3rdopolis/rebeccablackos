@@ -59,8 +59,7 @@ dpkg-divert --local --rename --add /usr/lib/os-release
 mv /usr/lib/os-release.rbos /usr/lib/os-release
 
 #ibus workaround
-mkdir /usr/share/unicode/ucd/
-ln -s /usr/share/unicode/NamesList.txt /usr/share/unicode/ucd/NamesList.txt
+ln -s /usr/share/unicode/ /usr/share/unicode/ucd
 
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
