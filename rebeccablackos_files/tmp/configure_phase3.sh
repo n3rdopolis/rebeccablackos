@@ -58,6 +58,10 @@ fi
 dpkg-divert --local --rename --add /usr/lib/os-release
 mv /usr/lib/os-release.rbos /usr/lib/os-release
 
+#ibus workaround
+mkdir /usr/share/unicode/ucd/
+ln -s /usr/share/unicode/NamesList.txt /usr/share/unicode/ucd/NamesList.txt
+
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
   echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
