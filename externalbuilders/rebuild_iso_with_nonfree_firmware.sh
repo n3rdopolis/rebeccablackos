@@ -381,5 +381,6 @@ echo "Cleaning up..."
 kill -9 $ROOTPID
 
 rm -rf "$MOUNTHOME"/isorebuild/overlay
+rm "$MOUNTHOME"/isorebuild/lockfile
 
 exit
