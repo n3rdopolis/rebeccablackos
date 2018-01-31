@@ -135,6 +135,31 @@ then
   $INSTALLCOMMAND zenity
 fi
 
+#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
+ls $(readlink -f "$MOUNTHOME"/isorebuild/lockfile) &> /dev/null
+existresult=$?
+
+if [[ -e "$MOUNTHOME"/isorebuild/lockfile ]]
+then
+  cmdpathcount=$(cat "$MOUNTHOME"/isorebuild/lockfile | grep -c "$0")
+else
+  cmdpath=0
+fi
+
+if [[ $existresult != 0 || $cmdpathcount == 0 || ! -e "$MOUNTHOME"/isorebuild/lockfile  ]]
+then
+  rm "$MOUNTHOME"/isorebuild/lockfile &> /dev/null
+  "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
+  ln -s /proc/"$$"/cmdline "$MOUNTHOME"/isorebuild/lockfile
+else
+  if [[ $XALIVE == 0 ]]
+  then
+    $ZENITYCOMMAND --info --text "Another instance is already running" 2>/dev/null
+  else
+    echo "Another instance is already running"
+  fi
+  exit
+fi
 
 if [[ $XALIVE == 0 ]]
 then
@@ -198,26 +223,6 @@ mkdir -p "$MOUNTHOME"/isorebuild/isomount
 mkdir -p "$MOUNTHOME"/isorebuild/squashfsmount
 mkdir -p "$MOUNTHOME"/isorebuild/overlay
 mkdir -p "$MOUNTHOME"/isorebuild/unionmountpoint
-
-
-#Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
-ls $(readlink -f "$MOUNTHOME"/isorebuild/lockfile) &> /dev/null
-result=$?
-if [[ $result != 0 || ! -e "$MOUNTHOME"/isorebuild/lockfile  ]]
-then
-  rm "$MOUNTHOME"/isorebuild/lockfile &> /dev/null
-  "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
-  ln -s /proc/"$$"/cmdline "$MOUNTHOME"/isorebuild/lockfile
-else
-  if [[ $XALIVE == 0 ]]
-  then
-    $ZENITYCOMMAND --info --text "Another instance is already running" 2>/dev/null
-  else
-    echo "Another instance is already running"
-  fi
-  exit
-fi
-
 
 #if there is no iso specified 
 if [ -z "$MOUNTISO" ]
