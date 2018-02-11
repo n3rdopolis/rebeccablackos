@@ -39,7 +39,7 @@ do
   Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the log..." on 1 "Change Framebuffer Size" off 2 "Force or unforce the Framebuffer" off 3 "Force or unforce software rendering" off 4 "Force or unforce disabling vblank" off 5 "Restart the system" off 6 "Exit this menu" off 7 "Restart the login manager" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
-    sudo -E -u $DIALOGUSER dialog --textbox /var/log/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
+    sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
   elif [[ $Option == 1 ]]
   then
     if [[ $ISLIVE != 1 ]]

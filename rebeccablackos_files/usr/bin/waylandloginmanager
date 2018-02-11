@@ -88,7 +88,7 @@
 
 #Log Files:
   #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
-  #/var/log/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
+  #/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
   #~/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
   #~/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
@@ -2012,7 +2012,7 @@ function StartLoginManagerDisplay
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
       fi
-      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$WESTONCONFIG" &>/dev/null
+      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$WESTONCONFIG" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
@@ -2162,8 +2162,8 @@ function SetupLoggingAndFIFO
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
   #Prepare logging for the loginmanagerdisplay
-  mkdir -p /var/log/loginmanagerdisplays/
-  chown $LOGINMANAGERDISPLAYUSER /var/log/loginmanagerdisplays
+  mkdir -p /var/log/waylandloginmanager/loginmanagerdisplays/
+  chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
   touch /run/waylandloginmanager/autologinran
   chmod 700 /run/waylandloginmanager/autologinran
   rm /run/waylandloginmanager/fifolock 2>/dev/null
@@ -2192,7 +2192,7 @@ function UserActionDialog
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$SeatFileName".log; exit ${PIPESTATUS[1]})
+  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_"$SeatFileName".log; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
