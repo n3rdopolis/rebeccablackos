@@ -61,7 +61,7 @@ patch -f -p1 < /usr/share/RBOS_PATCHES/lirios-wayland.diff
 qbs setup-toolchains --type gcc /usr/bin/g++ gcc
 qbs setup-qt /opt/bin/qmake qt5
 qbs config profiles.qt5.baseProfile gcc
-qbs resolve profile:qt5 qbs.installRoot:$INSTALLDIR qbs.installPrefix:/ qbs.buildVariant:release
+qbs resolve profile:qt5 qbs.installRoot:/ modules.lirideployment.prefix:$INSTALLDIR qbs.buildVariant:release
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
