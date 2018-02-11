@@ -156,8 +156,10 @@ function UserSessionWorker
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
   export WLM_SESSION_LOG="$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  echo "Started with the arguments: $ArgumentString" >> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  eval set -- $ArgumentString >> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
+  export WLM_HOST_LOG="$HOME"/wlsessionlogs/waylandhost_${WLM_SEAT}.log
+  unset WLM_SEAT
+  echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
+  eval set -- $ArgumentString >> $WLM_SESSION_LOG
   ArgArray=($ArgumentString)
   unset IFS
 
@@ -195,7 +197,7 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> "$HOME"/wlsessionlogs/waylandhost_${WLM_SEAT}.log &
+    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> $WLM_HOST_LOG &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -208,7 +210,7 @@ function UserSessionWorker
     #If the socket doesn't exist, then the server failed to start, and switch back
     if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
     then
-      echo "The host server failed to start. Will not start the guest server for this session. Please see $HOME/wlsessionlogs/waylandhost_${WLM_SEAT}.log" &>> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
+      echo "The host server failed to start. Will not start the guest server for this session. Please see $WLM_HOST_LOG" &>> $WLM_SESSION_LOG
       if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
       then
         SendSelfCommand Change "$XDG_SEAT"
@@ -229,8 +231,8 @@ function UserSessionWorker
     touch "$HOME"/.config/wlmfirstlogin
   fi
 
-  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  dbus-run-session -- ${ArgArray[@]} &>> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log &
+  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_${SEAT}_${DATESTAMP}.log
+  dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
@@ -241,7 +243,7 @@ function UserSessionWorker
     then
       SendSelfCommand Change "$XDG_SEAT"
     fi
-    echo "The guest session has ended. Terminating the host..." &>> "$HOME"/wlsessionlogs/waylandhost_${WLM_SEAT}.log
+    echo "The guest session has ended. Terminating the host..." &>> $WLM_HOST_LOG
     TerminateJobPID $HostServerPID 15 0
     $SLEEPCMD 3
     TerminateJobPID $HostServerPID 9 0
@@ -254,8 +256,8 @@ function UserSessionWorker
   fi
 
   #Write any Journal logs for this session into the logfile
-  echo -e "\nSession's Journal Logs:" >> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> "$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log 2>/dev/null
+  echo -e "\nSession's Journal Logs:" >> $WLM_SESSION_LOG
+  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null
 
   exit
 }
