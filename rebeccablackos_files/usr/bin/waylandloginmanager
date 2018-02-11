@@ -87,7 +87,7 @@
   #These files are documented in /usr/share/wsession/aboutwsessions.txt
 
 #Log Files:
-  #/var/log/waylandloginmanager : this is the main log for the waylandloginmanager
+  #/var/log/waylandloginmanager/waylandloginmanager.log : this is the main log for the waylandloginmanager
   #/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
   #~/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
   #~/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
@@ -371,7 +371,7 @@ function ReadEnvironmentFile
 #This function writes to the logs. It takes 1 argument, the string to log.
 function WriteToLog
 {
-  logger -t waylandloginmanager -s -- "$1"  >>/var/log/waylandloginmanager 2>&1
+  logger -t waylandloginmanager -s -- "$1"  >>/var/log/waylandloginmanager/waylandloginmanager.log 2>&1
 }
 
 #This function makes sure a specified PID belongs to a job, before terminating it.
