@@ -840,7 +840,8 @@ function RegisterSession
 #This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
 function DialogWait
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$3"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $3)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $3
   waitseconds=$1
   displaystring="$2"
@@ -857,7 +858,8 @@ function DialogWait
 #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
 function DisplayServerWait
 {
-  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$1" &>/dev/null; echo $?) == 1 ]]
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" &>/dev/null; echo $?) == 1 ]]
   do
     $SLEEPCMD 1
   done
@@ -869,7 +871,8 @@ function DisplayServerWait
 function ChooseSessionType
 {
   CurrentHandleSeat="$1"
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$CurrentHandleSeat"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $CurrentHandleSeat)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $CurrentHandleSeat
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
   export SESSIONID=${AllSessions}000
@@ -1226,7 +1229,8 @@ function ChooseSessionType
 #It takes 1 argument, the seat to display the terminal on
 function DiagnosticTerminal 
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   if [[ $wlmdebuginsecure == 1 ]]
   then
@@ -1247,7 +1251,8 @@ function DiagnosticTerminal
 #It takes 1 argument, the seat to display the dialog on
 function ShowInfo
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   if [[ $1 == seat0 ]]
   then
@@ -1294,7 +1299,8 @@ The i icon shows this help prompt" &> /dev/null
 #It takes 1 argument, the seat to display the dialog on, and only the sessions belonging to the seat will be shown
 function SwitchUserDialog 
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   unset SessionList
   #get the number of registered sessions
@@ -1539,7 +1545,8 @@ function StartUserSession
 #It takes 1 argument, the seat to show the dialogs on.
 function AuthenticateUser
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   unset USERPASSWORD
   TryPassword=$(cat -)
@@ -1594,7 +1601,8 @@ function AuthenticateUser
 #It takes 1 argument, the seat to display the login prompt on
 function GetUserCredentials
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
@@ -1694,7 +1702,8 @@ function GetUserCredentials
 #It takes 1 argument, the seat to display the dialogs on
 function LeavePrompt
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
   CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
@@ -1900,6 +1909,7 @@ function StartLoginManagerDisplay
   SeatStartCount=${LoginManagerDisplayFailCounts[$SeatIndexID]}
   SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
   SeatUsePixman=${LoginManagerDisplayPixmanFlags[$SeatIndexID]}
+  SeatFileName=${SeatFileNames[$SeatIndexID]}
   DoStartLoginManagerDisplay=1
   LOGINMANAGERDISPLAYSTATUS=0
   SeatUseMultiSessionConfig=1
@@ -1930,7 +1940,7 @@ function StartLoginManagerDisplay
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
   if [[ $FullSocketUseMinutes -ge 1 || $ForceFullSocketUseCheck == 1 ]]
   then
-    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat &>/dev/null
+    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &>/dev/null
     FUSERRESULT=$?
     if [[ $FUSERRESULT == 0 ]]
     then
@@ -1938,7 +1948,7 @@ function StartLoginManagerDisplay
       return
     fi
   else
-    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat ]]
+    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName ]]
     then
       DoStartLoginManagerDisplay=0
       return
@@ -1978,7 +1988,7 @@ function StartLoginManagerDisplay
     fi
     if [[ -x "$DEFAULTWAYLANDSERVER" ]]
     then
-      systemctl reset-failed wlm-loginmanagerdisplay_$CurrentSeat &> /dev/null
+      systemctl reset-failed wlm-loginmanagerdisplay_$SeatFileName &> /dev/null
       if [[ $CurrentSeat == seat0 ]]
       then
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
@@ -2002,13 +2012,13 @@ function StartLoginManagerDisplay
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
       fi
-      systemd-run --unit=wlm-loginmanagerdisplay_$CurrentSeat -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$CurrentSeat --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$CurrentSeat.log --config="$WESTONCONFIG" &>/dev/null
+      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$WESTONCONFIG" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
       while [[ $LOGINMANAGERDISPLAYREADY != 0 && $TRYCOUNT -le 5 ]]
       do
-        LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$CurrentSeat.service &> /dev/null; echo $?)
+        LOGINMANAGERDISPLAYREADY=$(systemctl is-active wlm-loginmanagerdisplay_$SeatFileName.service &> /dev/null; echo $?)
         $SLEEPCMD 1
         ((TRYCOUNT++))
       done
@@ -2022,7 +2032,7 @@ function StartLoginManagerDisplay
         then
           ReadyNotifySent=1
           TRYCOUNT=0
-          while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$CurrentSeat && $TRYCOUNT -le 5 ]]
+          while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && $TRYCOUNT -le 5 ]]
           do
             $SLEEPCMD 1
             ((TRYCOUNT++))
@@ -2056,9 +2066,10 @@ function StartLoginManagerDisplay
 #This function determines the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
 function GetLoginManagerDisplaySession
 {
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
-  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$1".service -p MainPID --value 2>/dev/null)
+  LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$SeatFileName".service -p MainPID --value 2>/dev/null)
   IFS=" "
   #Get all logind sessions
   WLMLOGINDSESSIONS=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null ))
@@ -2162,7 +2173,8 @@ function SetupLoggingAndFIFO
 #It takes 1 argument, the seat.
 function UserActionDialog
 {
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$1"
+  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #wait for the loginmanagerdisplay
   DisplayServerWait "$1"
@@ -2180,7 +2192,7 @@ function UserActionDialog
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
-  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$1".log; exit ${PIPESTATUS[1]})
+  USERACTION=$(echo -e "$ActionMenu"|$ZENITYCMD  --title="Login Manager" --height=300 --hide-column 1 --separator="\n" --list --column action --column display --hide-header --text "Select an Action"  2>> /var/log/loginmanagerdisplays/loginmanagerdisplay_"$SeatFileName".log; exit ${PIPESTATUS[1]})
 ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
@@ -2239,7 +2251,6 @@ function ReadCommandFIFO
   FullSocketUseMinutes=0
   DoDetectSeats=1
   StartedSeats=()
-  RejectedSeats=()
 
   #Arrays about running helper processes
   LastUserActionPIDs=()
@@ -2259,6 +2270,7 @@ function ReadCommandFIFO
   LoginManagerDisplayPixmanFlags=()
   SeatForceSWRenderFlags=()
   SeatForceVblankFlags=()
+  SeatFileNames=()
 
 
   #loop 'forever'
@@ -2279,29 +2291,9 @@ function ReadCommandFIFO
       #Find what seats are new
       AllRunningSeats=()
       NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
-      #Make sure the seat names are acceptable. Ones that are too long will go over the file system limit
       for NewRunningSeat in ${NewAllRunningSeats[@]}
       do
-        SeatAlreadyRejected=0
-        for RejectedSeat in ${RejectedSeats[@]}
-        do
-          if [[ $RejectedSeat == $NewRunningSeat ]]
-          then
-            SeatAlreadyRejected=1
-          fi
-        done
-        #Seats can be 255 chars long. However files can only be 255 chars long. Wayland socket files and log files need more room.
-        if [[ ${#NewRunningSeat} -gt 200 ]]
-        then
-          IncludeSeat=0
-          if [[ $SeatAlreadyRejected == 0 ]]
-          then
-            RejectedSeats+=($NewRunningSeat)
-            WriteToLog "$NewRunningSeat is larger than 200 characters, and cannot be handled by waylandloginmanager"
-          fi
-        else
-          AllRunningSeats+=($NewRunningSeat)
-        fi
+        AllRunningSeats+=($NewRunningSeat)
       done
 
       #Find new seats by going the list of running ones, going through all stored ones
@@ -2343,10 +2335,19 @@ function ReadCommandFIFO
             StartedSeats+=($RunningSeat)
             StartedSeats+=($CanMultiSession)
           fi
+          #Seats can be 255 characters long, file names can only be 255 characters long
+          #If a seat is 64 characters or greater, use the hash. sha256 (hashes are 64 characters long)
+          if [[ ${#RunningSeat} -gt 63 ]]
+          then
+            SeatFileName=$(echo -n $RunningSeat | sha256sum | awk '{print $1}')
+          else
+            SeatFileName=$RunningSeat
+          fi
+          SeatFileNames[$StartIndex/2]=$SeatFileName
           if [[ $SeatCreationDate != $OldSeatCreationDate && ! -z $OldSeatCreationDate ]]
           then
-            systemctl stop "wlm-loginmanagerdisplay_$RunningSeat" &> /dev/null
-            rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$RunningSeat &> /dev/null
+            systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
+            rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &> /dev/null
           fi
           SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
           UserActionFailCounts[$StartIndex/2]=0
@@ -2386,11 +2387,12 @@ function ReadCommandFIFO
         if [[ $SeatRemoved == 1 && ${StartedSeats[$(($StartIndex+1))]} != -1 ]]
         then
           ChangeIndex=$((StartIndex/2))
+          SeatFileName=${SeatFileNames[$ChangeIndex]}
           UserActionFailCounts[$ChangeIndex]=0
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
-          systemctl stop "wlm-loginmanagerdisplay_${StartedSeats[$StartIndex]}" &> /dev/null
+          systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
           TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
         fi
