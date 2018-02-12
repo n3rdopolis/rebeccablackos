@@ -2807,12 +2807,12 @@ fi
 #If it is started with --usersession, then perform operations to start the user session, running as the user
 if [[ $1 == "" ]]
 then
+  #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
+  SetupLoggingAndFIFO
+
   #Prepare the loginmanager
   WriteToLog "Starting Up..."
   PrepareLoginManager
-
-  #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
-  SetupLoggingAndFIFO
 
   #Start the filter proxy that will only send valid data to the main command FIFO
   CommandFIFOProxy &
