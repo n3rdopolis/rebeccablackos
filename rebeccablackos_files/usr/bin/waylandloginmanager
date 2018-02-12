@@ -2245,7 +2245,7 @@ function GetStartedSeatIndex
 
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
-function ReadCommandFIFO
+function WaylandLoginManagerMain
 {
   LoginManagerFirstLoop=1
   SessionStartFailed=0
@@ -2817,8 +2817,8 @@ then
   #Start the filter proxy that will only send valid data to the main command FIFO
   CommandFIFOProxy &
 
-  #Start the login managers FIFO reader, and function that monitors the running sessions
-  ReadCommandFIFO
+  #Start the loginmanager
+  WaylandLoginManagerMain
 elif [[ $1 == "--usersession" ]]
 then
   shift
