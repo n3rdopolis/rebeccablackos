@@ -417,6 +417,18 @@ function TerminateJobPID
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
 function PrepareLoginManager
 {
+
+  export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
+  #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
+  export LOGINMANAGERDISPLAYUSER=waylandloginmanager
+  #User that the su test in AuthenticateUser user runs as
+  export PROBETESTUSER=waylandloginmanager
+  #User that reads from the loginmanager_control FIFO, and filters the command sent to it to loginmanager_listener
+  export FIFOREADERUSER=waylandloginmanager
+  #Get the UID of the $LOGINMANAGERDISPLAYUSER
+  export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
+  export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
+
   #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
   mkdir -p /run/waylandloginmanager
   touch /run/waylandloginmanager/fifolock
@@ -430,7 +442,7 @@ function PrepareLoginManager
     rm -r "/run/waylandloginmanager/$SCRIPTNAME.lock" 2>/dev/null
     ln -s /proc/"$$"/cmdline "/run/waylandloginmanager/$SCRIPTNAME.lock"
   else
-    WriteToLog "Error: Another instance is already running"
+    echo "Error: Another instance is already running"
     exit 1
   fi
   #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
@@ -439,7 +451,7 @@ function PrepareLoginManager
   THISPROCPATH=/proc/$$
   if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
-    WriteToLog "Error: Another instance is already running"
+    echo "Error: Another instance is already running"
     exit 1
   fi
 
@@ -450,6 +462,11 @@ function PrepareLoginManager
     exit 1
   fi
   
+  #Prepare logging for the loginmanagerdisplay
+  mkdir -p /var/log/waylandloginmanager/loginmanagerdisplays/
+  chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
+  WriteToLog "Starting Up..."
+
   #Configure missing things if they are missing. This can be turned on or off
   AutoConfig=0
   if [[ $AutoConfig == 1 ]]
@@ -515,22 +532,12 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Enable job control in this script
   set -m
 
-  export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
-  #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
-  export LOGINMANAGERDISPLAYUSER=waylandloginmanager
-  #User that the su test in AuthenticateUser user runs as
-  export PROBETESTUSER=waylandloginmanager
-  #User that reads from the loginmanager_control FIFO, and filters the command sent to it to loginmanager_listener
-  export FIFOREADERUSER=waylandloginmanager
-  #Get the UID of the $LOGINMANAGERDISPLAYUSER
-  export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
   export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib:/usr/lib
   export XDG_DATA_DIRS=/opt/share:/usr/share
   export GDK_BACKEND=wayland
-  export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
   #Set the default path for weston
   export DEFAULTWAYLANDSERVER=$(which weston)
   #Specify where wsession files are found
@@ -2152,7 +2159,7 @@ function StartAutoLogin
 }
 
 #This function is part of the startup for the waylandloginmanager. it creates the FIFO files, giving ONLY write access to loginmanager_control for ALL users, and only write access to loginmanager_register is given to root. Any other permissions, including read is denied.
-function SetupLoggingAndFIFO
+function SetupIPCFiles
 {
   #Create communication fifo.
   rm -r /run/waylandloginmanager/loginmanager_control &> /dev/null
@@ -2164,9 +2171,7 @@ function SetupLoggingAndFIFO
   chown $FIFOREADERUSER /run/waylandloginmanager/loginmanager_control
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
-  #Prepare logging for the loginmanagerdisplay
-  mkdir -p /var/log/waylandloginmanager/loginmanagerdisplays/
-  chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
+
   touch /run/waylandloginmanager/autologinran
   chmod 700 /run/waylandloginmanager/autologinran
   rm /run/waylandloginmanager/fifolock 2>/dev/null
@@ -2213,7 +2218,7 @@ ZENITYSTATUS=$?
 }
 
 #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-function CommandFIFOProxy
+function UnprivilegedFIFOFilter
 {
   while [ 1 ]
   do
@@ -2807,15 +2812,14 @@ fi
 #If it is started with --usersession, then perform operations to start the user session, running as the user
 if [[ $1 == "" ]]
 then
-  #Setup the FIFO before anything starts using the fifo, and logging for the loginmanagerdisplay
-  SetupLoggingAndFIFO
-
   #Prepare the loginmanager
-  WriteToLog "Starting Up..."
   PrepareLoginManager
 
-  #Start the filter proxy that will only send valid data to the main command FIFO
-  CommandFIFOProxy &
+  #Create files used for ipc
+  SetupIPCFiles
+
+  #Start the filter that will only send valid data to the main command FIFO
+  UnprivilegedFIFOFilter &
 
   #Start the loginmanager
   WaylandLoginManagerMain
