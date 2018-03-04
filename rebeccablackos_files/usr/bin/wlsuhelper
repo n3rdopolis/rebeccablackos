@@ -55,9 +55,16 @@ else
     ((ErrorCount++))
   fi
 
-  if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+  if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
   then
-    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running, or permissions error. Please ensure the server is running, and this user has permissions to it with wlhost."
+    WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+  else
+    WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  fi
+
+  if [[ ! -e $WAYLANDDISPLAYPATH ]]
+  then
+    echo "Wayland Server with socket at $WAYLANDDISPLAYPATH not running, or permissions error. Please ensure the server is running, and this user has permissions to it with wlhost."
     ((ErrorCount++))
   fi
 
@@ -66,34 +73,37 @@ else
     exit 1
   fi
 
-  #Determine an XDG_RUNTIME_DIR . If the standard one fails, the user won't have permissions, and needs to fallback to /run/shm/UID
-  NewRuntimeDir=/run/user/$UID
-  if [[ ! -d $NewRuntimeDir ]]
+  if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
   then
-    mkdir /run/shm/$UID
-    chmod 700 /run/shm/$UID
-    NewRuntimeDir=/run/shm/$UID
+    #Determine an XDG_RUNTIME_DIR . If the standard one fails, the user won't have permissions, and needs to fallback to /run/shm/UID
+    NewRuntimeDir=/run/user/$UID
+    if [[ ! -d $NewRuntimeDir ]]
+    then
+      mkdir /run/shm/$UID
+      chmod 700 /run/shm/$UID
+      NewRuntimeDir=/run/shm/$UID
+    fi
+    OLD_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+    export XDG_RUNTIME_DIR=$NewRuntimeDir
+
+
+    #Try to determine a name to create the wayland symlink without conflict of file name
+    HostUserUID=$(stat -c '%u' .)
+    NewServerName=$HostUserUID-$WAYLAND_DISPLAY
+    if [[ -e $NewServerName ]]
+    then
+      while [[ -e $XDG_RUNTIME_DIR/$NewServerName-$ServerID ]]
+      do
+        ((ServerID++))
+      done
+      NewServerName=$NewServerName-$ServerID
+    fi
+    OLD_WAYLAND_DISPLAY=$WAYLAND_DISPLAY
+    export WAYLAND_DISPLAY=$NewServerName
+
+    #Link the Wayland socket file
+    ln -s $OLD_XDG_RUNTIME_DIR/$OLD_WAYLAND_DISPLAY $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
   fi
-  OLD_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
-  export XDG_RUNTIME_DIR=$NewRuntimeDir
-
-
-  #Try to determine a name to create the wayland symlink without conflict of file name
-  HostUserUID=$(stat -c '%u' .)
-  NewServerName=$HostUserUID-$WAYLAND_DISPLAY
-  if [[ -e $NewServerName ]]
-  then
-    while [[ -e $XDG_RUNTIME_DIR/$NewServerName-$ServerID ]]
-    do
-      ((ServerID++))
-    done
-    NewServerName=$NewServerName-$ServerID
-  fi
-  OLD_WAYLAND_DISPLAY=$WAYLAND_DISPLAY
-  export WAYLAND_DISPLAY=$NewServerName
-
-  #Link the Wayland socket file
-  ln -s $OLD_XDG_RUNTIME_DIR/$OLD_WAYLAND_DISPLAY $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
 
   #Execute the program
   "$@"

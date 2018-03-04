@@ -30,15 +30,22 @@ then
     ((ErrorCount++))
   fi
 
-  if [[ -z "$XDG_RUNTIME_DIR" ]]
+  if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
   then
-    echo "XDG_RUNTIME_DIR not set"
-    ((ErrorCount++))
+    echo "WARNING: $WAYLAND_DISPLAY is an absolute path. Subdirectory permissions will not be handled automatically."
+    WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+  else
+    WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+    if [[ -z "$XDG_RUNTIME_DIR" ]]
+    then
+      echo "XDG_RUNTIME_DIR not set"
+      ((ErrorCount++))
+    fi
   fi
 
-  if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+  if [[ ! -e $WAYLANDDISPLAYPATH ]]
   then
-    echo "Wayland Server with socket at $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY not running"
+    echo "Wayland Server with socket at $WAYLANDDISPLAYPATH not running"
     ((ErrorCount++))
   fi
 
@@ -65,8 +72,8 @@ wlhost 0
 wlhost ++
     Share the WAYLAND_DISPLAY publicly in /run/shm/waylandservers prefixed with the current users's UID
     for example if the user with the UID 1000 was running a WAYLAND_DISPLAY of wayland-0,
-    it will be created as 1000-wayland-0 . In order to use it, you will need to export XDG_RUNTIME_DIR
-    to /run/shm/waylandservers , and WAYLAND_DISPLAY as 1000-wayland-0
+    it will be created as 1000-wayland-0 . In order to use it, you will need to export WAYLAND_DISPLAY
+    as /run/shm/waylandservers/1000-wayland-0
     NOTE: This does not set additional permissions.
 wlhost --
     Unshare the WAYLAND_DISPLAY.
@@ -86,13 +93,16 @@ then
     "Must specify a user to give permissions to."
     exit 1
   fi
-  setfacl -m u:$SECONDARGUMENT:x $XDG_RUNTIME_DIR 2>/dev/null
-  ((ErrorCount+=$?))
-  setfacl -m u:$SECONDARGUMENT:rwx $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
+  then
+    setfacl -m u:$SECONDARGUMENT:x $XDG_RUNTIME_DIR 2>/dev/null
+    ((ErrorCount+=$?))
+  fi
+  setfacl -m u:$SECONDARGUMENT:rwx $WAYLANDDISPLAYPATH 2>/dev/null
   ((ErrorCount+=$?))
   if [[ $ErrorCount == 0 ]]
   then
-    echo "Gave user $SECONDARGUMENT access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Gave user $SECONDARGUMENT access to $WAYLANDDISPLAYPATH"
     xhost +SI:localuser:$SECONDARGUMENT
     if [[ $? == 0 ]]
     then
@@ -100,7 +110,7 @@ then
     fi
     exit 0
   else
-    echo "Failed to give user $SECONDARGUMENT access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Failed to give user $SECONDARGUMENT access to $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
@@ -112,18 +122,21 @@ then
     echo "Must specify a user to remove permissions from."
     exit 1
   fi
-  setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  setfacl -x u:$SECONDARGUMENT $WAYLANDDISPLAYPATH 2>/dev/null
   ((ErrorCount+=$?))
-  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
-  #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
-  if [[ $ACCESS_COUNT == 0 ]]
+  if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
   then
-    setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
-    ((ErrorCount+=$?))
+    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+    #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+    if [[ $ACCESS_COUNT == 0 ]]
+    then
+      setfacl -x u:$SECONDARGUMENT $XDG_RUNTIME_DIR 2>/dev/null
+      ((ErrorCount+=$?))
+    fi
   fi
   if [[ $ErrorCount == 0 ]]
   then
-    echo "Removed user $SECONDARGUMENT access from $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Removed user $SECONDARGUMENT access from $WAYLANDDISPLAYPATH"
     xhost -SI:localuser:$SECONDARGUMENT
     if [[ $? == 0 ]]
     then
@@ -132,48 +145,54 @@ then
     exit
     exit 0
   else
-    echo "Failed to remove user $SECONDARGUMENT access from $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Failed to remove user $SECONDARGUMENT access from $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
 #Give all users permissions to the WAYLAND_DISPLAY
 elif [[ "$FIRSTARGUMENT" == "@" ]]
 then
-  chmod 777 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  chmod 777 $WAYLANDDISPLAYPATH 2>/dev/null
   ((ErrorCount+=$?))
-  chmod 711 $XDG_RUNTIME_DIR
-  ((ErrorCount+=$?))
+  if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
+  then
+    chmod 711 $XDG_RUNTIME_DIR
+    ((ErrorCount+=$?))
+  fi
   if [[ $ErrorCount == 0 ]]
   then
-    echo "Gave all users permissions to Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Gave all users permissions to Wayland display: $WAYLANDDISPLAYPATH"
     exit 0
   else
-    echo "Failed to give all users permissions to Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Failed to give all users permissions to Wayland display: $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
 #Reset the permissions to the WAYLAND_DISPLAY to the default
 elif [[ "$FIRSTARGUMENT" == "0" ]]
 then
-  setfacl -b $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  setfacl -b $WAYLANDDISPLAYPATH 2>/dev/null
   ((ErrorCount+=$?))
-  chmod 700 $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null
+  chmod 700 $WAYLANDDISPLAYPATH 2>/dev/null
   ((ErrorCount+=$?))
-  ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
-  ACCESS_COUNT+=$(($(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "#|^$" | grep "mask::"|grep -c "x$")))
-  #If no users have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
-  if [[ $ACCESS_COUNT == 0 ]]
+  if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
   then
-    chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
-    ((ErrorCount+=$?))
+    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
+    ACCESS_COUNT+=$(($(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null |grep -v -E "#|^$" | grep "mask::"|grep -c "x$")))
+    #If no users have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
+    if [[ $ACCESS_COUNT == 0 ]]
+    then
+      chmod 700 $XDG_RUNTIME_DIR 2>/dev/null
+      ((ErrorCount+=$?))
+    fi
   fi
 
   if [[ $ErrorCount == 0 ]]
   then
-    echo "Reset $WAYLAND_DISPLAY permissions belonging to $XDG_RUNTIME_DIR"
+    echo "Reset $WAYLANDDISPLAYPATH"
     exit 0
   else
-    echo "Failed reset $WAYLAND_DISPLAY permissions belonging to $XDG_RUNTIME_DIR"
+    echo "Failed reset $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
@@ -181,13 +200,13 @@ then
 elif [[ "$FIRSTARGUMENT" == "++" ]]
 then
   mkdir /run/shm/waylandservers
-  ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
+  ln -s $WAYLANDDISPLAYPATH /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
   if [[ $? == 0 ]]
   then
-    echo "Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR shared. Insure permissions are set, and from the target user export XDG_RUNTIME_DIR=/run/shm/waylandservers, and export WAYLAND_DISPLAY=$UID-$WAYLAND_DISPLAY"
+    echo "Wayland display: $WAYLANDDISPLAYPATH shared. Insure permissions are set, and from the target user export WAYLAND_DISPLAY=/run/shm/waylandservers/$UID-$WAYLAND_DISPLAY"
     exit 0
   else
-    echo "Failed to share Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Failed to share Wayland display: $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
@@ -197,10 +216,10 @@ then
   unlink /run/shm/waylandservers/$UID-$WAYLAND_DISPLAY
   if [[ $? == 0 ]]
   then
-    echo "Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR unshared"
+    echo "Wayland display: $WAYLANDDISPLAYPATH"
     exit 0
   else
-    echo "Failed to unshare Wayland display: $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    echo "Failed to unshare Wayland display: $WAYLANDDISPLAYPATH"
     exit 1
   fi
 
@@ -209,19 +228,22 @@ elif [[ "$FIRSTARGUMENT" == "?" ]]
 then
   if [[ -z "$SECONDARGUMENT" ]]
   then
-    ACCESSUSERS=$(getfacl $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}')
-    echo "These users have access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
+    ACCESSUSERS=$(getfacl $WAYLANDDISPLAYPATH 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}')
+    echo "These users have access to $WAYLANDDISPLAYPATH"
     echo "$ACCESSUSERS"
     exit
   else
-    ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT$ )
-    if [[ $ACCESS_COUNT == 0 ]]
+    if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
     then
-      echo "$SECONDARGUMENT does not have additional access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
-      exit 1
-    else 
-      echo "$SECONDARGUMENT does have additional access to $WAYLAND_DISPLAY belonging to $XDG_RUNTIME_DIR"
-      exit 0
+      ACCESS_COUNT=$(getfacl $XDG_RUNTIME_DIR/* 2>/dev/null | grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT$ )
+      if [[ $ACCESS_COUNT == 0 ]]
+      then
+        echo "$SECONDARGUMENT does not have additional access to $WAYLANDDISPLAYPATH"
+        exit 1
+      else 
+        echo "$SECONDARGUMENT does have additional access to $WAYLANDDISPLAYPATH"
+        exit 0
+      fi
     fi
   fi
 else 
