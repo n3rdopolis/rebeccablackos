@@ -201,14 +201,20 @@ function UserSessionWorker
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
+    if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
+    then
+      WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+    else
+      WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+    fi
     #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
-    while [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY && $WaitTimes<15 ]]
+    while [[ ! -e $WAYLANDDISPLAYPATH && $WaitTimes<15 ]]
     do
       $SLEEPCMD 1
       ((WaitTimes++))
     done
     #If the socket doesn't exist, then the server failed to start, and switch back
-    if [[ ! -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY ]]
+    if [[ ! -e $WAYLANDDISPLAYPATH ]]
     then
       echo "The host server failed to start. Will not start the guest server for this session. Please see $WLM_HOST_LOG" &>> $WLM_SESSION_LOG
       if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
