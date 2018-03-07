@@ -34,6 +34,8 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 #update the apt cache
 rm -rf /var/lib/apt/lists/*
 apt-get update
+APTFETCHDATE=$(date -u +%Y%m%dT%H%M%SZ)
+echo -e "\nAPTFETCHDATE=$APTFETCHDATE" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y

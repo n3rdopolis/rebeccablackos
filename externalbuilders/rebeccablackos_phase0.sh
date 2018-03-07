@@ -36,6 +36,17 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
 
+#If using a revisions file, force downloading a snapshot from the time specified
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
+then
+  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+  APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
+  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+else
+  DEBIANREPO="http://httpredir.debian.org/debian"
+fi
+
 #Set the debootstrap dir
 export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 
@@ -44,7 +55,7 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
 then
   echo "Setting up chroot for downloading archives and software..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 http://httpredir.debian.org/debian
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
@@ -65,7 +76,7 @@ then
 
   #setup a really basic Debian installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 http://httpredir.debian.org/debian
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then

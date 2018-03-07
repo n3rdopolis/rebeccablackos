@@ -75,6 +75,14 @@ else
   mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
+#If using a revisions file, force downloading a snapshot from the time specified
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
+then
+  APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
+  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+  sed -i 's|http://httpredir.debian.org/debian|$DEBIANREPO|g' "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list
+fi
+
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc

@@ -639,6 +639,7 @@ mkdir -p ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH"" 2>/dev/null
 ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
+cat ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/APTFETCHDATE" >> ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt"
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
 
