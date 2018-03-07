@@ -188,6 +188,8 @@ function PostInstallActions
   (. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
   echo "Post Install action: gdk-pixbuf-query-loaders"
   (. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
+  echo "Post Install action: fc-cache"
+  (. /usr/bin/build_vars; fc-cache)
 
   find /opt/share/polkit-1/actions/ | while read FILE;
   do
