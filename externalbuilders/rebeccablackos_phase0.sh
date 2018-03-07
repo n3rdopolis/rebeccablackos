@@ -83,3 +83,11 @@ then
     touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   fi
 fi
+
+
+#If using a revisions file for this pass, mark the chroot targets to be rebuilt
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
+then
+  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+fi
