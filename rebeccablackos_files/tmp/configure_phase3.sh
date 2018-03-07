@@ -123,6 +123,13 @@ printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo dip lpadmin s
 mkdir -p /opt/etc
 ln -s /etc/pam.d /opt/etc/pam.d
 
+#clean apt stuff
+apt-get clean
+rm -rf /var/cache/apt-xapian-index/*
+rm -rf /var/lib/apt/lists/*
+rm -rf /var/lib/dlocate/*
+
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
@@ -313,10 +320,5 @@ rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 rm /etc/dpkg/dpkg.cfg.d/force-confold
 rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
-#clean more apt stuff
-apt-get clean
-rm -rf /var/cache/apt-xapian-index/*
-rm -rf /var/lib/apt/lists/*
-rm -rf /var/lib/dlocate/*
 #start the remastersys job
 remastersys dist
