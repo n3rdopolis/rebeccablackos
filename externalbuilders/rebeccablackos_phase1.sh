@@ -80,7 +80,7 @@ if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.
 then
   APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-  sed -i 's|http://httpredir.debian.org/debian|$DEBIANREPO|g' "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list
+  sed -i "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/sources.list
 fi
 
 #mounting critical fses on chrooted fs with bind 

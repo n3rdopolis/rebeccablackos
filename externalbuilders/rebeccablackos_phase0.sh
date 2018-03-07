@@ -39,8 +39,6 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 #If using a revisions file, force downloading a snapshot from the time specified
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
 then
-  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
-  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
 else

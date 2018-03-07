@@ -326,6 +326,11 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
 RUN_PHASE_0=0
+if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
+then
+  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" &>/dev/null
+  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" &>/dev/null
+fi
 if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
 then
   #If set to clean up all files
