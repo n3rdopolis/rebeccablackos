@@ -34,7 +34,11 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 #update the apt cache
 rm -rf /var/lib/apt/lists/*
 apt-get update
-APTFETCHDATE=$(date -u +%Y%m%dT%H%M%SZ)
+APTFETCHDATE=$(grep APTFETCHDATE= /tmp/buildcore_revisions.txt 2>/dev/null | head -1 | sed 's/APTFETCHDATE=//g')
+if [[ -z $APTFETCHDATE ]]
+then
+  APTFETCHDATE=$(date -u +%Y%m%dT%H%M%SZ)
+fi
 echo -e "\nAPTFETCHDATE=$APTFETCHDATE" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
