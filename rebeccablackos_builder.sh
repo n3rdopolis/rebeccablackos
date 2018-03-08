@@ -552,6 +552,11 @@ then
   cp "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
   rm "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
   touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
+
+  #If using a revisions file, force downloading a snapshot from the time specified
+  APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
+  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+  sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
 fi
 
 #Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt

@@ -60,6 +60,12 @@ cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUIL
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt
 
+#If a sources.list was created for Debian Snapshots, import it in
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list ]]
+then
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/sources.list
+fi
+
 #Configure the Live system########################################
 TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
 if [[ $TARGETBITSIZE == 32 ]]
