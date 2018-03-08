@@ -39,6 +39,9 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 #If using a revisions file, force downloading a snapshot from the time specified
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
 then
+  #add
+  #--keyring /usr/share/keyrings/debian-archive-removed-keys.gpg
+  #to debootstrap if in the future building a snapshot, and debootstrap fails with 'Release signed by unknown key'
   APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
 else
