@@ -195,7 +195,7 @@ fi
 
 #Remove packages that can no longer be downloaded to preserve space
 ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
-if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
+if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 && ! -e /tmp/buildcore_revisions.txt ]]
 then
   apt-get autoclean -o APT::Clean-Installed=off                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/purge_obsolete.log
 else
