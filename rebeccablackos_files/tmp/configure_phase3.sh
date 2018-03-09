@@ -133,6 +133,9 @@ rm -rf /var/lib/dlocate/*
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Append the snapshot date to the end of the revisions file
+cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
+
 #Actions that are performed after all the packages are compiled
 function PostInstallActions
 {

@@ -61,6 +61,7 @@ cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/*.bin "$BUILDLOC
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt
 
 #If a sources.list was created for Debian Snapshots, import it in
+cp ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/APTFETCHDATE" ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/APTFETCHDATE"
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list ]]
 then
   cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/sources.list
