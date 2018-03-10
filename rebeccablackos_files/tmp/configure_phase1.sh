@@ -34,12 +34,13 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 #update the apt cache
 rm -rf /var/lib/apt/lists/*
 apt-get update
-APTFETCHDATE=$(grep APTFETCHDATE= /tmp/buildcore_revisions.txt 2>/dev/null | head -1 | sed 's/APTFETCHDATE=//g')
+APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= /tmp/buildcore_revisions.txt 2>/dev/null | head -1 | sed 's/APTFETCHDATESECONDS=//g')
 if [[ -z $APTFETCHDATE ]]
 then
-  APTFETCHDATE=$(date -u +%Y%m%dT%H%M%SZ)
+  APTFETCHDATESECONDS=$(date +%s)
 fi
-echo -e "\nAPTFETCHDATE=$APTFETCHDATE" > /tmp/APTFETCHDATE
+APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
+echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
 apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y

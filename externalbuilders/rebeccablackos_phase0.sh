@@ -42,7 +42,8 @@ then
   #add
   #--keyring /usr/share/keyrings/debian-archive-removed-keys.gpg
   #to debootstrap if in the future building a snapshot, and debootstrap fails with 'Release signed by unknown key'
-  APTFETCHDATE=$(grep APTFETCHDATE= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATE=//g')
+  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
+  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
 else
   DEBIANREPO="http://httpredir.debian.org/debian"

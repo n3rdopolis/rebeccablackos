@@ -65,7 +65,7 @@ BUILDING:
           svn co svn://svn.code.sf.net/p/rebeccablackos/code/
      run the rebeccablackos_builder.sh, and then select the build architechture to run. The build process only works on Linux computers, but should work on most distros. A full build from scratch may take about a day depending on your hardware, and may take several GB. If nothing is selected to be rebuilt on the second build attempt, it may take less than an hour depending on your hardware.
 
-     If you need to select specific revisions of the packages, copy buildcore_revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418 are fully compatible for the packages. Revisions files can also specify a snapshot date for the underlying Debian packages, but only since commit 5552.
+     If you need to select specific revisions of the packages, copy buildcore_revisions_(architechture).txt into ~/RBOS_Build_Files . Ensure that the file is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418 are fully compatible for the packages. Revisions files can also specify a snapshot date for the underlying Debian packages, but only since commit 5554.
 
 
      CONTROL FILES (relative to ~/RBOS_Build_Files):
