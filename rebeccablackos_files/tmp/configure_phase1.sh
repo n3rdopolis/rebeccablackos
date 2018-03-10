@@ -35,7 +35,7 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 rm -rf /var/lib/apt/lists/*
 apt-get update
 APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= /tmp/buildcore_revisions.txt 2>/dev/null | head -1 | sed 's/APTFETCHDATESECONDS=//g')
-if [[ -z $APTFETCHDATE ]]
+if [[ -z $APTFETCHDATESECONDS ]]
 then
   APTFETCHDATESECONDS=$(date +%s)
 fi
