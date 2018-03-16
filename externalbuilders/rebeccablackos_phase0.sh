@@ -31,10 +31,10 @@ fi
 mount --make-rprivate /
 
 #Initilize the two systems, Phase1 is the download system, for filling  "$BUILDLOCATION"/build/"$BUILDARCH"/archives and  "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild, and phase2 is the base of the installed system
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/archives
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/archives
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt/archives
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt/archives
 
 #If using a revisions file, force downloading a snapshot from the time specified
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
@@ -54,10 +54,10 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 
 #setup a really basic Debian installation for downloading 
 #if set to rebuild phase 1
-if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
+if [[ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
   echo "Setting up chroot for downloading archives and software..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 $DEBIANREPO
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
@@ -66,30 +66,22 @@ then
 fi
 
 #if set to rebuild phase 1
-if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
+if [[ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" || $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
   #Force phase1 to rehandle downloads if phase2 is reset
   if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
   then
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt.downloadbak
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/FAILEDDOWNLOADS.txt
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt
   fi
 
   #setup a really basic Debian installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 $DEBIANREPO
+  "$BUILDLOCATION"/debootstrap/debootstrap --arch "$BUILDARCH" stretch "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
     touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   fi
-fi
-
-
-#If using a revisions file for this pass, mark the chroot targets to be rebuilt
-if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt ]]
-then
-  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
-  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
 fi

@@ -41,15 +41,15 @@ fi
 mount --make-rprivate /
 
 #copy the dselect data saved in phase 2 into phase 1
-if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLSSTATUS.txt ]]
+if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLSSTATUS.txt ]]
 then
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLSSTATUS.txt
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt
 fi
 
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #bind mount phase1 to the workdir. 
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   OLDPWD=$PWD
   cd "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
   RESULT=$?
@@ -57,7 +57,7 @@ then
     then
       find | grep -v ^./etc | while read FILE 
       do
-        rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/"$FILE" &> /dev/null
+        rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/"$FILE" &> /dev/null
       done
     fi
   cd $OLDPWD
@@ -66,19 +66,19 @@ then
   rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 else
   #Force /etc/apt/sources.list in the importdata dir to win
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/sources.list
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/preferences.d/
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/preferences.d/*
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/preferences.d/
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/sources.list
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/*
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #If a sources.list was created for Debian Snapshots, import it in
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list ]]
 then
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/etc/apt/sources.list
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/sources.list
 fi
 
 #mounting critical fses on chrooted fs with bind 

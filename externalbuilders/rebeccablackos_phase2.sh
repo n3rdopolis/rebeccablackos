@@ -31,11 +31,11 @@ fi
 mount --make-rprivate /
 
 #copy the installs data copied in phase 1 into phase 2 
-cp "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt 
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLS.txt 
 
 
 #bind mount phase2 at the workdir
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind /dev "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
@@ -51,20 +51,20 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 
 #Bring in needed files.
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt/lists/*
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt/lists/*
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/*     "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/apt/sources.list 
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/*
-cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/preferences.d/
-cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/cache/apt
-cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/var/lib/apt
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/etc/apt/preferences.d/
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/etc/apt/preferences.d/*
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/etc/apt/preferences.d/
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt
 
 #If a sources.list was created for Debian Snapshots, import it in
-cp ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/APTFETCHDATE" ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/APTFETCHDATE"
+cp ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/APTFETCHDATE" ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/APTFETCHDATE"
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list ]]
 then
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/etc/apt/sources.list
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/etc/apt/sources.list
 fi
 
 #Configure the Live system########################################

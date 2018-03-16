@@ -44,15 +44,15 @@ if [[ $HASOVERLAYFS == 0 ]]
 then
   #Copy phase3 from phase2, and bind mount phase3 at the workdir
   echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
-  cp --reflink=auto -a "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/. "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
+  cp --reflink=auto -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/. "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
   #Union mount phase2 and phase3
   if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 ]]
   then
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_2,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   else
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_2,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   fi
 fi
 

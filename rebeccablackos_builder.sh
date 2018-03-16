@@ -328,8 +328,19 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 RUN_PHASE_0=0
 if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
 then
-  rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" &>/dev/null
-  rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" &>/dev/null
+  export PHASE1_PATHNAME=snapshot_phase_1
+  export PHASE2_PATHNAME=snapshot_phase_2
+  export BUILD_SNAPSHOT_SYSTEMS=1
+  RUN_PHASE_0=1
+  echolog "Clearing phase1 and phase2 snapshot build systems..."
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+else
+  export PHASE1_PATHNAME=phase_1
+  export PHASE2_PATHNAME=phase_2
+  export BUILD_SNAPSHOT_SYSTEMS=0
 fi
 if [[ ! -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
 then
@@ -345,6 +356,8 @@ then
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/archives/*
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
+    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
     rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
@@ -357,7 +370,7 @@ then
   fi
 
   #if set to rebuild phase 1
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]
+  if [[ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" && $BUILD_SNAPSHOT_SYSTEMS == 0 ]]
   then
     echolog "Control file for phase_1 removed, or non existing. Deleting phase_1 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/*
@@ -365,13 +378,18 @@ then
   fi
 
   #if set to rebuild phase 2
-  if [ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]
+  if [[ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" && $BUILD_SNAPSHOT_SYSTEMS == 0 ]]
   then
     echolog "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+  elif [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+  then
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
+    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp/INSTALLS.txt.installbak
   fi
   RUN_PHASE_0=1
 fi
@@ -395,8 +413,8 @@ then
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
 
   #Force phase_1 to rehandle downloads
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/INSTALLS.txt.downloadbak
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/FAILEDDOWNLOADS.txt
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt.downloadbak &> /dev/null
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/FAILEDDOWNLOADS.txt &> /dev/null
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_ARCHIVES))
 fi
 
@@ -415,6 +433,8 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
@@ -543,10 +563,10 @@ rsync "$SCRIPTFOLDERPATH"/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/exportsourc
 
 #Support importing the control file to use fixed revisions of the source code
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt > /dev/null 2>&1
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1/tmp/buildcore_revisions.txt > /dev/null 2>&1
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/buildcore_revisions.txt > /dev/null 2>&1
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/buildcore_revisions.txt > /dev/null 2>&1
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/buildcore_revisions.txt > /dev/null 2>&1
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/tmp/buildcore_revisions.txt > /dev/null 2>&1
-if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/
   cp "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
@@ -701,6 +721,11 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+then
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
+fi
 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
 

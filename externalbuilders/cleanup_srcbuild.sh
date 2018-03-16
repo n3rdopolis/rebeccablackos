@@ -44,14 +44,14 @@ mount --make-rprivate /
 if [[ $HASOVERLAYFS == 0 ]]
 then
   #bind mount phase1 to the workdir. 
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
   #copy the files to where they belong
   rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
 else
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_1,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #mounting critical fses on chrooted fs with bind 
