@@ -57,7 +57,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-git revert  -n 962712ddc2dbfc72c7d84d444569832cf7e12b0d
 sed -i '/Makefile-tests.am/d' src/Makefile.am
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-compile-warnings=yes --with-xwayland-path=$INSTALLDIR/bin/Xwayland --disable-Werror --enable-egl-device --enable-gles1 --enable-gles2
 }
