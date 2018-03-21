@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/KhronosGroup/Vulkan-LoaderAndValidationLayers
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=sdk-1.0.61.1
+SOURCEREVISION=sdk-1.1.70.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,7 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-sed "s/build_[a-Z\-]*$//g" update_external_sources.sh > download_external_sources.sh
+sed "s/build_[a-Z\-]*$/:/g" update_external_sources.sh > download_external_sources.sh
 chmod +x download_external_sources.sh
 ./download_external_sources.sh
 }
