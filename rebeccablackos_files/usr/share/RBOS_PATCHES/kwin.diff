@@ -1,8 +1,8 @@
 diff --git a/libinput/connection.cpp b/libinput/connection.cpp
-index 46eee7a21..664a8953e 100644
+index 82c374d71..7664659d6 100644
 --- a/libinput/connection.cpp
 +++ b/libinput/connection.cpp
-@@ -137,9 +137,8 @@ Connection *Connection::create(QObject *parent)
+@@ -135,9 +135,8 @@ Connection *Connection::create(QObject *parent)
              s_context = nullptr;
              return nullptr;
          }
@@ -15,10 +15,10 @@ index 46eee7a21..664a8953e 100644
              s_context = nullptr;
              return nullptr;
 diff --git a/main_wayland.cpp b/main_wayland.cpp
-index 9d7f49d05..d4ac7ba6a 100644
+index 2107bc85a..434b5e39e 100644
 --- a/main_wayland.cpp
 +++ b/main_wayland.cpp
-@@ -585,7 +585,6 @@ int main(int argc, char * argv[])
+@@ -587,7 +587,6 @@ int main(int argc, char * argv[])
      QCommandLineOption framebufferDeviceOption(QStringLiteral("fb-device"),
                                                 i18n("The framebuffer device to render to."),
                                                 QStringLiteral("fbdev"));
@@ -111,86 +111,3 @@ index ec311586c..50e365b4e 100644
          return;
      }
      QPainter p(&m_backBuffer);
-diff --git a/udev.cpp b/udev.cpp
-index f65724a9d..f064b089b 100644
---- a/udev.cpp
-+++ b/udev.cpp
-@@ -18,6 +18,7 @@ You should have received a copy of the GNU General Public License
- along with this program.  If not, see <http://www.gnu.org/licenses/>.
- *********************************************************************/
- #include "udev.h"
-+#include "logind.h"
- // Qt
- #include <QByteArray>
- #include <QScopedPointer>
-@@ -106,6 +107,7 @@ UdevDevice::Ptr UdevEnumerate::find(std::function<bool(const UdevDevice::Ptr &de
-     if (m_enumerate.isNull()) {
-         return UdevDevice::Ptr();
-     }
-+    QString defaultSeat = QStringLiteral("seat0");
-     udev_list_entry *it = udev_enumerate_get_list_entry(m_enumerate.data());
-     UdevDevice::Ptr firstFound;
-     while (it) {
-@@ -115,6 +117,13 @@ UdevDevice::Ptr UdevEnumerate::find(std::function<bool(const UdevDevice::Ptr &de
-         if (!device) {
-             continue;
-         }
-+        QString deviceSeat = device->property("ID_SEAT");
-+        if (deviceSeat.isEmpty()) {
-+            deviceSeat = defaultSeat;
-+        }
-+        if (deviceSeat != LogindIntegration::self()->seat()) {
-+            continue;
-+        }
-         if (test(device)) {
-             return device;
-         }
-@@ -135,7 +144,6 @@ UdevDevice::Ptr Udev::primaryGpu()
-     enumerate.addMatch(UdevEnumerate::Match::SysName, "card[0-9]*");
-     enumerate.scan();
-     return enumerate.find([](const UdevDevice::Ptr &device) {
--        // TODO: check seat
-         auto pci = device->getParentWithSubsystemDevType("pci");
-         if (!pci) {
-             return false;
-@@ -178,6 +186,28 @@ UdevDevice::Ptr Udev::renderNode()
-     });
- }
- 
-+UdevDevice::Ptr Udev::primaryFramebuffer()
-+{
-+    if (!m_udev) {
-+        return UdevDevice::Ptr();
-+    }
-+    UdevEnumerate enumerate(this);
-+    enumerate.addMatch(UdevEnumerate::Match::SubSystem, "graphics");
-+    enumerate.addMatch(UdevEnumerate::Match::SysName, "fb[0-9]*");
-+    enumerate.scan();
-+    return enumerate.find([](const UdevDevice::Ptr &device) {
-+        auto pci = device->getParentWithSubsystemDevType("pci");
-+        if (!pci) {
-+            return false;
-+        }
-+        const char *systAttrValue = udev_device_get_sysattr_value(pci, "boot_vga");
-+        if (systAttrValue && qstrcmp(systAttrValue, "1") == 0) {
-+            return true;
-+        }
-+        return false;
-+    });
-+}
-+
- UdevDevice::Ptr Udev::deviceFromSyspath(const char *syspath)
- {
-     return UdevDevice::Ptr(new UdevDevice(udev_device_new_from_syspath(m_udev, syspath)));
-diff --git a/udev.h b/udev.h
-index 5dad01e56..88a87e869 100644
---- a/udev.h
-+++ b/udev.h
-@@ -82,6 +82,7 @@ public:
-         return m_udev != nullptr;
-     }
-     UdevDevice::Ptr primaryGpu();
-+    UdevDevice::Ptr primaryFramebuffer();
-     UdevDevice::Ptr virtualGpu();
-     UdevDevice::Ptr renderNode();
-     UdevDevice::Ptr deviceFromSyspath(const char *syspath);
