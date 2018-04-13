@@ -698,6 +698,9 @@ Will now reboot." 20 50 --no-cancel
       echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
     fi
   fi
+
+  HOSTNAME=$(hostname)
+  MACHINE_ID=$(cat /var/lib/dbus/machine-id)
 }
 
 
@@ -2326,7 +2329,7 @@ function WaylandLoginManagerMain
         done
         #Detect the age of the seat, by the date stamp of the last entry logged for the seat
         #As of now, this is the best way to get the creation time of a seat, since the attribute is not presented
-        SeatCreationDate=$(journalctl  -b SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')
+        SeatCreationDate=$(journalctl  -b _HOSTNAME=$HOSTNAME _MACHINE_ID=$MACHINE_ID SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')
         OldSeatCreationDate=${SeatCreationDates[$(($StartIndex/2))]}
         #If the seat is new, detected to have been removed in the past, or if the seat date is different, (removed and readded before the detection interval)
         if [[ $IncludeSeat == 1 || ${StartedSeats[$(($StartIndex+1))]} == -1 || $SeatCreationDate != $OldSeatCreationDate ]]
