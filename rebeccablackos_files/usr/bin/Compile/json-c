@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=sway
+SOURCENAME=json-c
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/SirCmpwn/sway.git
+SOURCEURL=https://github.com/json-c/json-c
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
@@ -61,34 +61,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's/werror=true/werror=false/g' meson.build
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-ninja -v -C build 
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-ninja -C build install
+make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-if [[ -e $INSTALLDIR/bin/sway ]]
-then
-  mkdir -p /etc/skel/.config/sway
-  cp config $INSTALLDIR/etc/sway/config /etc/skel/.config/sway 
-  sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
-  sed -i 's\/opt/share/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RebeccaBlackOS/Desktop.jpg\g' /etc/skel/.config/sway/config
-  sed -i 's/urxvt/weston-terminal/g' /etc/skel/.config/sway/config
-  sed -i 's/dmenu_run/bemenu/g' /etc/skel/.config/sway/config
-fi
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
