@@ -858,7 +858,8 @@ function RegisterSession
 #This function takes three arguments. The first is the number of seconds to wait, and the second is the string to show in the dialog. it shows a Zenity dialog with a progress bar to count down the specified time, with the string. The third is the seat to display it on
 function DialogWait
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $3)]}
+  GetStartedSeatIndex $3
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $3
   waitseconds=$1
@@ -876,7 +877,8 @@ function DialogWait
 #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
 function DisplayServerWait
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" &>/dev/null; echo $?) == 1 ]]
   do
     $SLEEPCMD 1
@@ -889,7 +891,8 @@ function DisplayServerWait
 function ChooseSessionType
 {
   CurrentHandleSeat="$1"
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $CurrentHandleSeat)]}
+  GetStartedSeatIndex $CurrentHandleSeat
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $CurrentHandleSeat
   #The number of Session IDs start from 0. when a session is added, the number of running sessions is 1 for the next session. The second session gets the ID of 1 etc...
@@ -1247,7 +1250,8 @@ function ChooseSessionType
 #It takes 1 argument, the seat to display the terminal on
 function DiagnosticTerminal 
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   if [[ $wlmdebuginsecure == 1 ]]
@@ -1269,7 +1273,8 @@ function DiagnosticTerminal
 #It takes 1 argument, the seat to display the dialog on
 function ShowInfo
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   if [[ $1 == seat0 ]]
@@ -1317,7 +1322,8 @@ The i icon shows this help prompt" &> /dev/null
 #It takes 1 argument, the seat to display the dialog on, and only the sessions belonging to the seat will be shown
 function SwitchUserDialog 
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   unset SessionList
@@ -1437,11 +1443,12 @@ function StartUserSession
     WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
     ((WSESSIONARGUMENTELEMENT++))
   done <<< "$5"
+  GetStartedSeatIndex $USERSEAT
   USERSESSIONTTY=$1
   USERSEAT=$2
   LOGINUSER=$3
   STARTLOCKED=$4
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $USERSEAT)]}
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
 
   #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
   export HOME=$(eval echo ~$LOGINUSER)
@@ -1564,7 +1571,8 @@ function StartUserSession
 #It takes 1 argument, the seat to show the dialogs on.
 function AuthenticateUser
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   unset USERPASSWORD
@@ -1620,7 +1628,8 @@ function AuthenticateUser
 #It takes 1 argument, the seat to display the login prompt on
 function GetUserCredentials
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
@@ -1721,7 +1730,8 @@ function GetUserCredentials
 #It takes 1 argument, the seat to display the dialogs on
 function LeavePrompt
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
@@ -2085,7 +2095,8 @@ function StartLoginManagerDisplay
 #This function determines the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
 function GetLoginManagerDisplaySession
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$SeatFileName".service -p MainPID --value 2>/dev/null)
@@ -2190,7 +2201,8 @@ function SetupIPCFiles
 #It takes 1 argument, the seat.
 function UserActionDialog
 {
-  SeatFileName=${SeatFileNames[$(GetStartedSeatIndex $1)]}
+  GetStartedSeatIndex $1
+  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
   #wait for the loginmanagerdisplay
