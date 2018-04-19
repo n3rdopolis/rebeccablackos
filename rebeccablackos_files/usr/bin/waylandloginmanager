@@ -1445,11 +1445,11 @@ function StartUserSession
     WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
     ((WSESSIONARGUMENTELEMENT++))
   done <<< "$5"
-  GetStartedSeatIndex $USERSEAT
   USERSESSIONTTY=$1
   USERSEAT=$2
   LOGINUSER=$3
   STARTLOCKED=$4
+  GetStartedSeatIndex $USERSEAT
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
 
   #Change to the users homepath so weston starts in the right place, and set some varaibles for the user
