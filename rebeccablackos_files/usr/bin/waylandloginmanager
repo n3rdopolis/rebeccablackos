@@ -260,9 +260,11 @@ function UserSessionWorker
       SendSelfCommand Change "$XDG_SEAT"
     fi
   fi
+  wait $GuestServerPID
+  SessionReturnCode=$?
 
-  #Write any Journal logs for this session into the logfile
-  echo -e "\nSession's Journal Logs:" >> $WLM_SESSION_LOG
+  #Write the error code and any Journal logs for this session into the logfile
+  echo -e "\nSession exited with the error code: $SessionReturnCode\nSession's Journal Logs:" >> $WLM_SESSION_LOG
   journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null
 
   exit
