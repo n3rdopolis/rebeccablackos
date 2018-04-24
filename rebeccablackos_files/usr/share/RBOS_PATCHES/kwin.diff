@@ -1,5 +1,5 @@
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index d5c9b5c29..f48686f72 100644
+index b0875c345..bd1d5ea02 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
 @@ -125,6 +125,28 @@ bool FramebufferBackend::queryScreenInfo()
@@ -31,24 +31,3 @@ index d5c9b5c29..f48686f72 100644
      m_resolution = QSize(varinfo.xres, varinfo.yres);
      m_physicalSize = QSize(varinfo.width, varinfo.height);
      m_id = QByteArray(fixinfo.id);
-diff --git a/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp b/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
-index ec311586c..50e365b4e 100644
---- a/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
-+++ b/plugins/platforms/fbdev/scene_qpainter_fb_backend.cpp
-@@ -20,6 +20,7 @@ along with this program.  If not, see <http://www.gnu.org/licenses/>.
- #include "scene_qpainter_fb_backend.h"
- #include "fb_backend.h"
- #include "composite.h"
-+#include "logind.h"
- #include "cursor.h"
- #include "virtual_terminal.h"
- // Qt
-@@ -75,7 +76,7 @@ void FramebufferQPainterBackend::present(int mask, const QRegion &damage)
- {
-     Q_UNUSED(mask)
-     Q_UNUSED(damage)
--    if (!VirtualTerminal::self()->isActive()) {
-+    if (!LogindIntegration::self()->isActiveSession()) {
-         return;
-     }
-     QPainter p(&m_backBuffer);
