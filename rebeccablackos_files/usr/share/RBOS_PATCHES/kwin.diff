@@ -1,7 +1,27 @@
 diff --git a/plugins/platforms/fbdev/fb_backend.cpp b/plugins/platforms/fbdev/fb_backend.cpp
-index b0875c345..bd1d5ea02 100644
+index d5c9b5c29..871c66199 100644
 --- a/plugins/platforms/fbdev/fb_backend.cpp
 +++ b/plugins/platforms/fbdev/fb_backend.cpp
+@@ -98,8 +98,8 @@ void FramebufferBackend::openFrameBuffer()
+         return;
+     }
+     m_fd = fd;
+-    if (!queryScreenInfo()) {
+-        qCWarning(KWIN_FB) << "failed to query framebuffer information";
++    if (!handleScreenInfo()) {
++        qCWarning(KWIN_FB) << "failed to handle framebuffer information";
+         emit initFailed();
+         return;
+     }
+@@ -112,7 +112,7 @@ void FramebufferBackend::openFrameBuffer()
+     emit screensQueried();
+ }
+ 
+-bool FramebufferBackend::queryScreenInfo()
++bool FramebufferBackend::handleScreenInfo()
+ {
+     if (m_fd < 0) {
+         return false;
 @@ -125,6 +125,28 @@ bool FramebufferBackend::queryScreenInfo()
      if (ioctl(m_fd, FBIOGET_FSCREENINFO, &fixinfo) < 0 || ioctl(m_fd, FBIOGET_VSCREENINFO, &varinfo) < 0) {
          return false;
@@ -24,10 +44,23 @@ index b0875c345..bd1d5ea02 100644
 +    ioctl(m_fd, FBIOPUT_VSCREENINFO, &varinfo);
 +
 +    // Probe the device for new screen information.
-+    if (ioctl(m_fd, FBIOGET_FSCREENINFO, &fixinfo) < 0 || ioctl(m_fd, FBIOGET_VSCREENINFO, &varinfo) < 0) {
++    if (ioctl(m_fd, FBIOGET_VSCREENINFO, &varinfo) < 0) {
 +        return false;
 +    }
 +
      m_resolution = QSize(varinfo.xres, varinfo.yres);
      m_physicalSize = QSize(varinfo.width, varinfo.height);
      m_id = QByteArray(fixinfo.id);
+diff --git a/plugins/platforms/fbdev/fb_backend.h b/plugins/platforms/fbdev/fb_backend.h
+index 2ffca0eb9..0fc952704 100644
+--- a/plugins/platforms/fbdev/fb_backend.h
++++ b/plugins/platforms/fbdev/fb_backend.h
+@@ -84,7 +84,7 @@ public:
+ 
+ private:
+     void openFrameBuffer();
+-    bool queryScreenInfo();
++    bool handleScreenInfo();
+     void initImageFormat();
+     QSize m_resolution;
+     QSize m_physicalSize;
