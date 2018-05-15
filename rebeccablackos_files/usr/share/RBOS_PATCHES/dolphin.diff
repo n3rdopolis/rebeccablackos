@@ -1,0 +1,30 @@
+diff --git a/src/dolphincontextmenu.cpp b/src/dolphincontextmenu.cpp
+index befe98677..331ca9d16 100644
+--- a/src/dolphincontextmenu.cpp
++++ b/src/dolphincontextmenu.cpp
+@@ -357,6 +357,12 @@ void DolphinContextMenu::openViewportContextMenu()
+ 
+     addSeparator();
+ 
++    // Insert 'Sort By' and 'View Mode'
++    addAction(m_mainWindow->actionCollection()->action(QStringLiteral("sort")));
++    addAction(m_mainWindow->actionCollection()->action(QStringLiteral("view_mode")));
++
++    addSeparator();
++
+     QAction* pasteAction = createPasteAction();
+     addAction(pasteAction);
+     addSeparator();
+@@ -402,6 +408,12 @@ void DolphinContextMenu::insertDefaultItemActions(const KFileItemListProperties&
+ 
+     addSeparator();
+ 
++    // Insert 'Sort By' and 'View Mode'
++    addAction(m_mainWindow->actionCollection()->action(QStringLiteral("sort")));
++    addAction(m_mainWindow->actionCollection()->action(QStringLiteral("view_mode")));
++
++    addSeparator();
++
+     // Insert 'Rename'
+     addAction(collection->action(KStandardAction::name(KStandardAction::RenameFile)));
+ 
