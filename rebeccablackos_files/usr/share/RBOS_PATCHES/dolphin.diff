@@ -1,8 +1,8 @@
 diff --git a/src/dolphincontextmenu.cpp b/src/dolphincontextmenu.cpp
 --- a/src/dolphincontextmenu.cpp
 +++ b/src/dolphincontextmenu.cpp
-@@ -359,6 +359,12 @@
- 
+@@ -363,6 +363,12 @@
+     addAction(pasteAction);
      addSeparator();
  
 +    // Insert 'Sort By' and 'View Mode'
@@ -11,7 +11,34 @@ diff --git a/src/dolphincontextmenu.cpp b/src/dolphincontextmenu.cpp
 +
 +    addSeparator();
 +
-     QAction* pasteAction = createPasteAction();
-     addAction(pasteAction);
-     addSeparator();
+     // Insert service actions
+     fileItemActions.addServiceActionsTo(this);
+     fileItemActions.addPluginActionsTo(this);
+diff --git a/src/dolphinmainwindow.cpp b/src/dolphinmainwindow.cpp
+--- a/src/dolphinmainwindow.cpp
++++ b/src/dolphinmainwindow.cpp
+@@ -877,8 +877,8 @@
+         menu->addSeparator();
+     }
+ 
+-    added = addActionToMenu(ac->action(QStringLiteral("view_mode")), menu) |
+-            addActionToMenu(ac->action(QStringLiteral("sort")), menu) |
++    added = addActionToMenu(ac->action(QStringLiteral("sort")), menu) |
++            addActionToMenu(ac->action(QStringLiteral("view_mode")), menu) |
+             addActionToMenu(ac->action(QStringLiteral("additional_info")), menu) |
+             addActionToMenu(ac->action(QStringLiteral("show_preview")), menu) |
+             addActionToMenu(ac->action(QStringLiteral("show_in_groups")), menu) |
+diff --git a/src/dolphinui.rc b/src/dolphinui.rc
+--- a/src/dolphinui.rc
++++ b/src/dolphinui.rc
+@@ -21,8 +21,8 @@
+             <Action name="invert_selection" />
+         </Menu>
+         <Menu name="view">
+-            <Action name="view_mode" />
+             <Action name="sort" />
++            <Action name="view_mode" />
+             <Action name="additional_info" />
+             <Action name="show_preview" />
+             <Action name="show_in_groups" />
 
