@@ -23,7 +23,7 @@
 SOURCENAME=libmozjs
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/ptomato/mozjs
+SOURCEURL=https://github.com/ptomato/mozjs/
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -62,7 +62,7 @@ export SHELL=/bin/bash
 #cd mozjs-38.0.0/js/src/
 mkdir build
 cd build
-../js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) ---enable-posix-nspr-emulation --with-system-zlib --with-system-icu --with-intl-api --enable-release --disable-debug-symbols --disable-debug AUTOCONF=autoconf --disable-jemalloc
+../js/src/configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-system-nspr --with-system-zlib --with-system-icu --with-intl-api --enable-release --disable-debug-symbols --disable-debug AUTOCONF=autoconf --disable-jemalloc --enable-threadsafe --enable-readline 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
