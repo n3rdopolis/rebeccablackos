@@ -1,0 +1,67 @@
+From 707982a7b10f0b40e0340b967949d2f607b81cc8 Mon Sep 17 00:00:00 2001
+From: Kyle De'Vir <kyle.devir@mykolab.com>
+Date: Fri, 23 Feb 2018 10:13:04 +0000
+Subject: [PATCH] GTK3 SSD fix
+https://bugs.kde.org/attachment.cgi?id=110928
+---
+ gdk/wayland/gdkwaylandwindow.h  |  3 +++
+ gdk/wayland/gdkwindow-wayland.c | 15 +++++++++++++++
+ gtk/gtkwindow.c                 |  2 ++
+ 3 files changed, 20 insertions(+)
+
+diff --git a/gdk/wayland/gdkwaylandwindow.h b/gdk/wayland/gdkwaylandwindow.h
+index 93b7802b6e..0718bdcea3 100644
+--- a/gdk/wayland/gdkwaylandwindow.h
++++ b/gdk/wayland/gdkwaylandwindow.h
+@@ -80,6 +80,9 @@ gboolean                 gdk_wayland_window_set_transient_for_exported (GdkWindo
+ GDK_AVAILABLE_IN_3_22
+ void gdk_wayland_window_announce_csd                        (GdkWindow *window);
+ 
++GDK_AVAILABLE_IN_3_22
++void gdk_wayland_window_announce_ssd                        (GdkWindow *window);
++
+ G_END_DECLS
+ 
+ #endif /* __GDK_WAYLAND_WINDOW_H__ */
+diff --git a/gdk/wayland/gdkwindow-wayland.c b/gdk/wayland/gdkwindow-wayland.c
+index 9ee4fe2be4..f111f4a2b9 100644
+--- a/gdk/wayland/gdkwindow-wayland.c
++++ b/gdk/wayland/gdkwindow-wayland.c
+@@ -1716,6 +1716,21 @@ gdk_wayland_window_announce_csd (GdkWindow *window)
+                                                 ORG_KDE_KWIN_SERVER_DECORATION_MANAGER_MODE_CLIENT);
+ }
+ 
++void
++gdk_wayland_window_announce_ssd (GdkWindow *window)
++{
++  GdkWaylandDisplay *display_wayland = GDK_WAYLAND_DISPLAY (gdk_window_get_display (window));
++  GdkWindowImplWayland *impl = GDK_WINDOW_IMPL_WAYLAND (window->impl);
++  if (!display_wayland->server_decoration_manager)
++    return;
++  impl->display_server.server_decoration =
++    org_kde_kwin_server_decoration_manager_create (display_wayland->server_decoration_manager,
++                                                  impl->display_server.wl_surface);
++  if (impl->display_server.server_decoration)
++    org_kde_kwin_server_decoration_request_mode (impl->display_server.server_decoration,
++                                                ORG_KDE_KWIN_SERVER_DECORATION_MANAGER_MODE_SERVER);
++}
++
+ static GdkWindow *
+ get_real_parent_and_translate (GdkWindow *window,
+                                gint      *x,
+diff --git a/gtk/gtkwindow.c b/gtk/gtkwindow.c
+index c6aa5425ff..9d7312005d 100644
+--- a/gtk/gtkwindow.c
++++ b/gtk/gtkwindow.c
+@@ -7490,6 +7490,8 @@ gtk_window_realize (GtkWidget *widget)
+ #ifdef GDK_WINDOWING_WAYLAND
+   if (priv->client_decorated && GDK_IS_WAYLAND_WINDOW (gdk_window))
+     gdk_wayland_window_announce_csd (gdk_window);
++  if (!priv->client_decorated && GDK_IS_WAYLAND_WINDOW (gdk_window))
++    gdk_wayland_window_announce_ssd (gdk_window);
+ #endif
+ 
+   if (!priv->deletable)
+-- 
+2.16.2
+
