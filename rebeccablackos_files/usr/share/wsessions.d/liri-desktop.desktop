@@ -8,7 +8,7 @@ CompositorSupportsWL=1
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorWLArguments=-platform wayland
-CompositorKMSArguments=-platform liri
+CompositorKMSArguments=-platform eglfs
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
@@ -16,5 +16,5 @@ AdditionalArguments=
 NeedsFile=/opt/bin/liri-session
 CompositorKMSSeatAware=1
 [EnvironmentFile]
-set=LIRI_QPA_INTEGRATION=kms@KMS
+set=QT_QPA_EGLFS_INTEGRATION=kms@KMS
 set=QT_WAYLAND_SHELL_INTEGRATION=fullscreen-shell@WL
