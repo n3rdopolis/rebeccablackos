@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/kwin.diff
 
-#echo "setcap cap_sys_nice=eip $INSTALLDIR/bin/kwin_wayland" > "postinstall-pak"
+echo "setcap cap_sys_nice=eip $INSTALLDIR/bin/kwin_wayland" > "postinstall-pak"
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  -DCMAKE_INSTALL_RPATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_SKIP_BUILD_RPATH=FALSE -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
