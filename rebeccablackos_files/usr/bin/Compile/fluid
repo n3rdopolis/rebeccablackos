@@ -57,10 +57,11 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed 
 qbs setup-toolchains --type gcc /usr/bin/g++ gcc
 qbs setup-qt /opt/bin/qmake qt5
 qbs config profiles.qt5.baseProfile gcc
-qbs resolve profile:qt5 profile:qt5 qbs.installRoot:/ modules.lirideployment.prefix:$INSTALLDIR qbs.buildVariant:release projects.Fluid.useSystemQbsShared:true
+qbs resolve profile:qt5 profile:qt5 qbs.installRoot:/ modules.lirideployment.prefix:$INSTALLDIR qbs.buildVariant:release projects.Fluid.useSystemQbsShared:true projects.Fluid.withDocumentation:false
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
