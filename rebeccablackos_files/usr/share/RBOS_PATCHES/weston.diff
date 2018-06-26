@@ -307,7 +307,7 @@ index 03f3219b..41ac7950 100644
  	if (compositor->vt_switching == false)
  		return;
 diff --git a/man/weston-drm.man b/man/weston-drm.man
-index d4cb75a7..407be7c3 100644
+index d4cb75a7..7ebfadf7 100644
 --- a/man/weston-drm.man
 +++ b/man/weston-drm.man
 @@ -105,8 +105,8 @@ status. For example, use
@@ -327,7 +327,7 @@ index d4cb75a7..407be7c3 100644
  .BR weston-launch .
 +.TP
 +.B XDG_SEAT
-+The default seat that Weston will start on.
++The seat Weston will start on, unless overridden on the command line.
  .
  .\" ***************************************************************
  .SH "SEE ALSO"
