@@ -257,10 +257,10 @@ index 8b7d900e..540120a4 100644
  
  #ifdef  __cplusplus
 diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
-index d0559c8f..36a4e642 100644
+index d0559c8f..34e6e5ca 100644
 --- a/libweston/launcher-logind.c
 +++ b/libweston/launcher-logind.c
-@@ -762,18 +762,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
+@@ -762,17 +762,20 @@ launcher_logind_connect(struct weston_launcher **out, struct weston_compositor *
  		free(t);
  		goto err_session;
  	}
@@ -275,7 +275,9 @@ index d0559c8f..36a4e642 100644
 -			   tty, wl->vtnr);
 -		r = -EINVAL;
 -		goto err_session;
-+	if (!strcmp(t, "seat0")) {
++	r = strcmp(t, "seat0");
++	free(t);
++	if (r == 0) {
 +		r = weston_sd_session_get_vt(wl->sid, &wl->vtnr);
 +		if (r < 0) {
 +			weston_log("logind: session not running on a VT\n");
@@ -287,10 +289,8 @@ index d0559c8f..36a4e642 100644
 +			goto err_session;
 +		}
  	}
-+	free(t);
  
  	loop = wl_display_get_event_loop(compositor->wl_display);
- 	r = weston_dbus_open(loop, DBUS_BUS_SYSTEM, &wl->dbus, &wl->dbus_ctx);
 diff --git a/libweston/launcher-util.c b/libweston/launcher-util.c
 index 03f3219b..41ac7950 100644
 --- a/libweston/launcher-util.c
