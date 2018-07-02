@@ -51,17 +51,11 @@ REBUILDNEWREVISION=1
 function PackageDownloadSource
 {
 :
-#wget https://patchwork.freedesktop.org/patch/112163/raw/ -O westonpatch1.diff
-#wget https://patchwork.freedesktop.org/patch/112521/raw/ -O westonpatch2.diff
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/weston.diff
-#patch -f -p1 < westonpatch1.diff
-#patch -f -p1 < westonpatch2.diff
-
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-libunwind --with-cairo=image --enable-tablet-shell --enable-clients --enable-demo-clients-install --enable-rdp-compositor --enable-screen-sharing --enable-libinput-backend --with-xserver-path=$INSTALLDIR/bin/Xwayland
 }
 
