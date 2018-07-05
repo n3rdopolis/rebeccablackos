@@ -75,8 +75,11 @@ make install
 function PackagePostInstall()
 {
 # Workaround to install generated private headers.
-QTWaylandVersion=$(ls -d ./include/QtCompositor/5.*| awk -F / '{print $4}')
-cp ./include/QtCompositor/$QTWaylandVersion/QtCompositor/private/{qwayland-server-*,*protocol*}.h $INSTALLDIR/include/QtCompositor/$QTWaylandVersion/QtCompositor/private/
+QtWaylandVersion=$(ls -d ./include/QtWaylandClient/5.*| awk -F / '{print $4}')
+cp ./src/client/qwayland-wayland.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+cp ./src/client/wayland-wayland-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+cp ./src/client/qwayland-xdg-shell.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+cp ./src/client/wayland-xdg-shell-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
