@@ -25,6 +25,13 @@ fi
 
 export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
 
+#create folder for install logs
+mkdir -p "$PACKAGEOPERATIONLOGDIR"
+
+#Create folder to hold the install logs
+mkdir "$PACKAGEOPERATIONLOGDIR"/Downloads
+
+
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
@@ -34,6 +41,12 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 #update the apt cache
 rm -rf /var/lib/apt/lists/*
 apt-get update
+Result=$?
+if [[ $Result != 0 ]]
+then
+ echo "APT source update failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
+fi
+
 APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= /tmp/buildcore_revisions.txt 2>/dev/null | head -1 | sed 's/APTFETCHDATESECONDS=//g')
 if [[ -z $APTFETCHDATESECONDS ]]
 then
@@ -51,13 +64,6 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 
 #update the dselect database
 yes Y | dselect update
-
-
-#create folder for install logs
-mkdir -p "$PACKAGEOPERATIONLOGDIR"
-
-#Create folder to hold the install logs
-mkdir "$PACKAGEOPERATIONLOGDIR"/Downloads
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 rm /tmp/INSTALLS.txt
