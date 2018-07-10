@@ -15,5 +15,6 @@ NeedsFile=/opt/bin/gnome-shell
 CompositorKMSSeatAware=1
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=GNOME
+set=GIO_LAUNCH_DESKTOP=/opt/bin/gio-launch-desktop
 unset=COGL_RENDERER
 unset=GDK_BACKEND
