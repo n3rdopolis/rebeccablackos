@@ -706,7 +706,7 @@ Will now reboot." 20 50 --no-cancel
 }
 
 
-#This function sends the KDSETMODE ioctl (0x4B3A) with the parameter KD_TEXT (0x00) to the active TTY, then it sends the VT_SETMODE ioctl (0x5602) with the parameter VT_AUTO (0x00) to the active TTY
+#This function sends the KDSETMODE ioctl (0x4B3A) with the parameter KD_TEXT (0x00) to the TTY number specified in the first argument, then it sends the VT_SETMODE ioctl (0x5602) with the parameter VT_AUTO (0x00) to the active TTY
 #This forces the TTY to be in a state that allows the kernel to switch the TTY (switching to VT_AUTO), instead of a process (VT_PROCESS), when it's in VT_PROCESS, and the process is defunct, the TTY switch fails.
 function ResetTTYMode
 {
@@ -717,6 +717,18 @@ buf[0] = 0; \
 fd = open('/dev/tty$1', 'wb'); \
 ioctl(fd, 0x4B3A, 0); \
 ioctl(fd, 0x05602, buf); \
+fd.close()" &>/dev/null
+}
+
+#This function sends the KDSETMODE ioctl (0x4B3A) with the parameter KD_GRAPHICS (0x01) to the TTY number specified in the first argument, to prevent keyboard input from appearing from between the time the switch to the TTY, and before the display server starts.
+function SetTTYModeGraphics
+{
+    python3 -c "from array import array; \
+from fcntl import ioctl; \
+buf = array('h', [0]); \
+buf[0] = 0; \
+fd = open('/dev/tty$1', 'wb'); \
+ioctl(fd, 0x4B3A, 1); \
 fd.close()" &>/dev/null
 }
 
@@ -1502,6 +1514,7 @@ function StartUserSession
     echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
     #Disable cursor blinking on the TTY the display server will be started on
     echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
+    SetTTYModeGraphics $USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
     OutputArgs="-p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=null -p StandardError=null -p StandardInput=tty"
   else
@@ -1933,6 +1946,7 @@ function StartLoginManagerDisplay
     echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
     #Disable cursor blinking on the TTY the display server will be started on
     echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
+    SetTTYModeGraphics $USERSESSIONTTY
   fi
 
   #Information about the seat
