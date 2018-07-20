@@ -1,5 +1,5 @@
 diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
-index 5a0ea7e..30b5dfb 100644
+index ee89561..7a15b1a 100644
 --- a/kioclient/kioclient.cpp
 +++ b/kioclient/kioclient.cpp
 @@ -32,6 +32,9 @@
@@ -12,11 +12,11 @@ index 5a0ea7e..30b5dfb 100644
  #include <QDBusConnection>
  #include <QCommandLineParser>
  #include <QFileDialog>
-@@ -326,6 +329,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+@@ -324,6 +327,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
      }
-+    else if ( command == "appmenu" )
++    else if ( command == QLatin1String("appmenu") )
 +    {
 +      QList<QUrl> list;
 +      KOpenWithDialog dlg(list, i18n("Select an Application to run..."), QString(), 0);
@@ -26,5 +26,5 @@ index 5a0ea7e..30b5dfb 100644
 +      }
 +    }
  #endif
-     else if ( command == "download" )
+     else if ( command == QLatin1String("download") )
      {
