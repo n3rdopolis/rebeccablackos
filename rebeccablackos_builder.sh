@@ -575,9 +575,12 @@ then
 
   #If using a revisions file, force downloading a snapshot from the time specified
   APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
-  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
-  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-  sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+  if [[ $APTFETCHDATESECONDS == [0-9]* ]]
+  then
+    APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
+    DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+    sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+  fi
 fi
 
 #Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt
