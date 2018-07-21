@@ -233,8 +233,10 @@ done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-  DeviceList+="     ${DeviceTypes[$CurrentDeviceNumber]}:      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})
-"
+  DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})"
+  DeviceList+=$'\n'
+  DeviceList+=$'\t'$'\t'"Session Seat: ${DeviceSessionSeatIDs[$CurrentDeviceNumber]} / Wayland Seat: ${DeviceWLSeatIDs[$CurrentDeviceNumber]}"
+  DeviceList+=$'\n'
 done
 
 
@@ -348,16 +350,13 @@ This will allow you to configure what seats devices belong to, for Wayland, and 
    -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus, but within one session
         There can be multiple Wayland Seats per Session Seats. (To enable multipointer on a needed Session Seat)
 
-Input are remembered by the device's internal name 
-     (usually containing the make and model), and the port they are plugged into.
+Input are remembered by the device's internal name, usually containing the make and model, and the port they are plugged into.
 
 In order for the configuration to work each time you plug your devices, 
 you need to plug them into the same port, (otherwise they will default to the default seat)
 
-If you wish to return one to the default:
-The default Seat for Wayland pointers is 'default', 
-while the default seat for Session seats is 'seat0'
-
+If you wish to return one to the default, The default seat for Session seats is 'seat0', and the default Seat 
+for Wayland pointers is 'default', 
 
 Please note that some devices have multiple internal components, and sometimes register themselves more than once.
 
