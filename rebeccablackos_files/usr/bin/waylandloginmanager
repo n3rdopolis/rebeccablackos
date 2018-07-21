@@ -1514,8 +1514,8 @@ function StartUserSession
     echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
     #Disable cursor blinking on the TTY the display server will be started on
     echo -n -e '\e[?25l' > /dev/tty$USERSESSIONTTY
-    SetTTYModeGraphics $USERSESSIONTTY
     chvt $USERSESSIONTTY &>/dev/null &
+    SetTTYModeGraphics $USERSESSIONTTY
     OutputArgs="-p TTYPath=/dev/tty"$USERSESSIONTTY" -p StandardOutput=null -p StandardError=null -p StandardInput=tty"
   else
     OutputArgs=""
