@@ -328,15 +328,24 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 RUN_PHASE_0=0
 if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
 then
-  export PHASE1_PATHNAME=snapshot_phase_1
-  export PHASE2_PATHNAME=snapshot_phase_2
-  export BUILD_SNAPSHOT_SYSTEMS=1
-  RUN_PHASE_0=1
-  echolog "Clearing phase1 and phase2 snapshot build systems..."
-  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
-  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
-  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
-  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
+  if [[ $APTFETCHDATESECONDS == [0-9]* ]]
+  then
+    export PHASE1_PATHNAME=snapshot_phase_1
+    export PHASE2_PATHNAME=snapshot_phase_2
+    export BUILD_SNAPSHOT_SYSTEMS=1
+    RUN_PHASE_0=1
+    echolog "Clearing phase1 and phase2 snapshot build systems..."
+    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+  else
+    echo "APTFETCHDATESECONDS $APTFETCHDATESECONDS not set, falling back to default apt source file"
+    export PHASE1_PATHNAME=phase_1
+    export PHASE2_PATHNAME=phase_2
+    export BUILD_SNAPSHOT_SYSTEMS=0
+  fi
 else
   export PHASE1_PATHNAME=phase_1
   export PHASE2_PATHNAME=phase_2
@@ -575,12 +584,9 @@ then
 
   #If using a revisions file, force downloading a snapshot from the time specified
   APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
-  if [[ $APTFETCHDATESECONDS == [0-9]* ]]
-  then
-    APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
-    DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-    sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
-  fi
+  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
+  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+  sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
 fi
 
 #Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt
