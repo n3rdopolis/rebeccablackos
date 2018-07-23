@@ -326,9 +326,9 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
 RUN_PHASE_0=0
-if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
+if [ -s  ]
 then
-  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
+  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
   if [[ $APTFETCHDATESECONDS == [0-9]* ]]
   then
     export PHASE1_PATHNAME=snapshot_phase_1
