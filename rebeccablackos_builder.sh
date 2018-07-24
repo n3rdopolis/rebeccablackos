@@ -326,9 +326,9 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
 RUN_PHASE_0=0
-if [ -s  ]
+if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
 then
-  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
+  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
   if [[ $APTFETCHDATESECONDS == [0-9]* ]]
   then
     export PHASE1_PATHNAME=snapshot_phase_1
@@ -583,7 +583,6 @@ then
   touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
 
   #If using a revisions file, force downloading a snapshot from the time specified
-  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
   APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
   sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
