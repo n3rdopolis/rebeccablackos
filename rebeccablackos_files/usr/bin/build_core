@@ -500,6 +500,10 @@ function DownloadARCHIVE()
 
   $NONROOTCOMMAND wget -q --spider "$SOURCEURL" > /dev/null
   UpdateCommandResult=$?
+  if [[ $UpdateCommandResult != 0 ]]
+  then
+    echo "$SOURCEURL failed to download"
+  fi
   if [[ ! -f "$SOURCENAME/SOURCEFILE" ]]
   then
     $NONROOTCOMMAND mkdir -p "$SOURCENAME"
