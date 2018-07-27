@@ -328,7 +328,7 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 RUN_PHASE_0=0
 if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
 then
-  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
+  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
   if [[ $APTFETCHDATESECONDS == [0-9]* ]]
   then
     export PHASE1_PATHNAME=snapshot_phase_1
@@ -338,10 +338,8 @@ then
     echolog "Clearing phase1 and phase2 snapshot build systems..."
     rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
     rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
-    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
-    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
   else
-    echo "APTFETCHDATESECONDS $APTFETCHDATESECONDS not set, falling back to default apt source file"
+    echolog "APTFETCHDATESECONDS $APTFETCHDATESECONDS not set, falling back to default apt source file"
     export PHASE1_PATHNAME=phase_1
     export PHASE2_PATHNAME=phase_2
     export BUILD_SNAPSHOT_SYSTEMS=0
@@ -394,11 +392,6 @@ then
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
-  elif [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
-  then
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
-    mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp/INSTALLS.txt.installbak
   fi
   RUN_PHASE_0=1
 fi
@@ -461,49 +454,78 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
 
-RAMDISKSIZE=0
+RAMDISKSIZE=$STORAGESIZE_PADDING
 #Determine the size of the ram disk, determine if enough free ram for base in ramdisk
-RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD))
-if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
+RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_TMPBASEBUILD))
+if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
   RAMDISK_FOR_BASE=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPBASEBUILD))
+  RAMDISKTESTSIZE=$RAMDISKSIZE
 fi
 
 #Determine if enough free RAM for srcbuild_overlay in ramdisk
-RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY))
-if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
+if [[ $HASOVERLAYFS == 1 ]]
 then
-  RAMDISK_FOR_SRCBUILD=1
-  RAMDISKSIZE=$RAMDISKTESTSIZE
-else
-  if [[ $HASOVERLAYFS == 1 ]]
+  RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPSRCBUILDOVERLAY))
+  if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
   then
-    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
+    RAMDISK_FOR_SRCBUILD=1
+    RAMDISKSIZE=$RAMDISKTESTSIZE
   else
-    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDFULL))
+    RAMDISKTESTSIZE=$RAMDISKSIZE
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
   fi
+  ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDFULL))
 fi
 
 #Determine if enough free RAM for phase3 in ramdisk
-RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY+STORAGESIZE_TMPPHASE3))
-if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
+RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPPHASE3))
+if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
   RAMDISK_FOR_PHASE3=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  RAMDISKTESTSIZE=$RAMDISKSIZE
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPPHASE3))
 fi
 
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+then
+
+  RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_PHASE1))
+  if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
+  then
+    RAMDISK_FOR_PHASE1=1
+    RAMDISKSIZE=$RAMDISKTESTSIZE
+  else
+    RAMDISKTESTSIZE=$RAMDISKSIZE
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
+  fi
+
+  RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_PHASE2-STORAGESIZE_PHASE1))
+  if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
+  then
+    RAMDISK_FOR_PHASE2=1
+    RAMDISKSIZE=$RAMDISKTESTSIZE
+  else
+    RAMDISKTESTSIZE=$RAMDISKSIZE
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+    ((STORAGESIZE_TOTALSIZE-=STORAGESIZE_PHASE1))
+  fi
+
+fi
+
 #Determine if enough free RAM for Remastersys in ramdisk
-RAMDISKTESTSIZE=$((STORAGESIZE_TMPBASEBUILD+STORAGESIZE_TMPSRCBUILDOVERLAY+STORAGESIZE_TMPPHASE3+STORAGESIZE_TMPREMASTERSYS))
-if [[ $FREERAM -gt $((STORAGESIZE_PADDING+RAMDISKTESTSIZE)) ]]
+RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_TMPREMASTERSYS))
+if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
   RAMDISK_FOR_REMASTERSYS=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  RAMDISKTESTSIZE=$RAMDISKSIZE
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
 fi
 
@@ -542,6 +564,18 @@ then
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/importdata "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/externalbuilders "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/exportsource "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
+fi
+
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 && $RAMDISK_FOR_PHASE1 == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_1
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1
+fi
+
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 && $RAMDISK_FOR_PHASE2 == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_2
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_2 "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2
 fi
 
 if [[ $RAMDISK_FOR_SRCBUILD == 1 && $RAMDISK_STATUS == 0 ]]
@@ -630,6 +664,18 @@ PHASE1_STARTTIME=$(date +%s)
 echolog "Starting phase1..."
 NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/phase1.log "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/"$BUILDUNIXNAME"_phase1.sh
 PHASE1_ENDTIME=$(date +%s)
+
+#copy the installs data copied in phase 1 into phase 2
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLS.txt
+
+#Remove Phase 1 if it's a snapshot
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+then
+  echolog "Clearing phase1 snapshot build system..."
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp
+  touch "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp/INSTALLS.txt.installbak
+fi
 
 PHASE2_STARTTIME=$(date +%s)
 echolog "Starting phase2..."
@@ -731,7 +777,6 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
-  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
   rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
 fi
 
