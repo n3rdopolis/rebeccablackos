@@ -19,16 +19,6 @@ echo "PHASE 1"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  fi
-fi
-
 unset HOME
 
 if [[ -z "$BUILDARCH" || -z $BUILDLOCATION || $UID != 0 ]]
@@ -46,38 +36,18 @@ then
   cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt
 fi
 
-if [[ $HASOVERLAYFS == 0 ]]
+#Force /etc/apt/sources.list in the importdata dir to win
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/sources.list
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/*
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
+#Union mount importdata and phase1
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
+if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
 then
-  #bind mount phase1 to the workdir. 
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-  OLDPWD=$PWD
-  cd "$BUILDLOCATION"/build/"$BUILDARCH"/importdata
-  RESULT=$?
-    if [[ $RESULT == 0 ]]
-    then
-      find | grep -v ^./etc | while read FILE 
-      do
-        rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/"$FILE" &> /dev/null
-      done
-    fi
-  cd $OLDPWD
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/bin/Compile/*
-  #copy the files to where they belong
-  rsync "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* -CKr "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/ 
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
-  #Force /etc/apt/sources.list in the importdata dir to win
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/sources.list
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/*
-  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
-  #Union mount importdata and phase1
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
-  then
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-  else
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-  fi
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #If a sources.list was created for Debian Snapshots, import it in

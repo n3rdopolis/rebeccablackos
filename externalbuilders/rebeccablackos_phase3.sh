@@ -19,16 +19,6 @@ echo "PHASE 3"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  fi
-fi
-
 unset HOME
 
 if [[ -z "$BUILDARCH" || -z $BUILDLOCATION || $UID != 0 ]]
@@ -40,20 +30,12 @@ fi
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
-if [[ $HASOVERLAYFS == 0 ]]
+#Union mount phase2 and phase3
+if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 ]]
 then
-  #Copy phase3 from phase2, and bind mount phase3 at the workdir
-  echo "Duplicating Phase 2 for usage in Phase 3. This may take some time..."
-  cp --reflink=auto -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/. "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
-  #Union mount phase2 and phase3
-  if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 ]]
-  then
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-  else
-    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
-  fi
+  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #mounting critical fses on chrooted fs with bind 
@@ -70,19 +52,14 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 
-#If no overlayfs is supported, set up srcbuild as a normal bind mount into the system, if overlayfs is supported, and there is enough ram, use the ramdisk as the upperdir, if not, use a path on the same filesystem as the upperdir
-if [[ $HASOVERLAYFS == 0 ]]
+#if there is enough ram, use the ramdisk as the upperdir, if not, use a path on the same filesystem as the upperdir
+if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
 then
-  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-else
-  if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
-  then
-    mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+  mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
     mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
-  else
-    mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
-    mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
-  fi
+else
+  mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 fi
 
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
