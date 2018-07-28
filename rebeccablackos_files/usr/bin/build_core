@@ -545,7 +545,7 @@ function DownloadSource()
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
     chmod 755 /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
-    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION; \declare -p SUBMODULEREVISIONS" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
+    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION 2>&-; \declare -p SUBMODULEREVISIONS 2>&-" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     chmod +x /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
