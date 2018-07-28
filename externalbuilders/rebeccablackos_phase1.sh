@@ -72,7 +72,12 @@ else
   cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
   #Union mount importdata and phase1
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
+  then
+    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  else
+    mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  fi
 fi
 
 #If a sources.list was created for Debian Snapshots, import it in

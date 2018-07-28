@@ -569,6 +569,7 @@ fi
 if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 && $RAMDISK_FOR_PHASE1 == 1 && $RAMDISK_STATUS == 0 ]]
 then
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_1
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_1 "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1
 fi
 
@@ -666,7 +667,13 @@ NAMESPACE_EXECUTE 1 "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs/p
 PHASE1_ENDTIME=$(date +%s)
 
 #copy the installs data copied in phase 1 into phase 2
+rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt/lists/*
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLS.txt
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt
+cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt
+
+#If a sources.list was created for Debian Snapshots, import it in
+cp ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/APTFETCHDATE" ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/APTFETCHDATE"
 
 #Remove Phase 1 if it's a snapshot
 if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
