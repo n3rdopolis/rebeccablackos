@@ -610,13 +610,17 @@ rm "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt > 
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/buildcore_revisions.txt > /dev/null 2>&1
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/buildcore_revisions.txt > /dev/null 2>&1
 rm "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/tmp/buildcore_revisions.txt > /dev/null 2>&1
-if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
 then
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/
   cp "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/buildcore_revisions.txt
   rm "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
   touch "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
+fi
 
+#If there is a date specified in the revisions file, create the Debian snapshot sources.list for that time
+if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+then
   #If using a revisions file, force downloading a snapshot from the time specified
   APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
   DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
