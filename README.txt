@@ -79,3 +79,4 @@ BUILDING:
         build/(architechture)/buildoutput/control/(packagename): Delete these files to specify a specific package to rebuild.
         buildcore_revisions_(architechture).txt: Add a revisions file into this path, to specify paticular packages, as described above
         RestartPackageList_(architechture).txt: add in the list of packages (as in the files in build/(architechture)/buildoutput/control/ ). One per each line. For batch resetting paticular packages
+        DontForceSnapshotBuild(architechture): Delete this file only after the first run is complete. This forces temporary chroots to be built

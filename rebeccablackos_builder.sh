@@ -325,24 +325,29 @@ rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
 
 #Only run phase0 if phase1 and phase2 are going to be reset. phase0 only resets
 RUN_PHASE_0=0
-if [ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]
+
+if [[ ! -f "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH" && -f "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH" ]]
 then
-  APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
-  if [[ $APTFETCHDATESECONDS == [0-9]* ]]
+  FORCE_SNAPSHOT_BUILD=1
+  touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
+else
+  FORCE_SNAPSHOT_BUILD=0
+fi
+
+if [[ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt || $FORCE_SNAPSHOT_BUILD == 1 ]]
+then
+  if [[ -s "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt ]]
   then
-    export PHASE1_PATHNAME=snapshot_phase_1
-    export PHASE2_PATHNAME=snapshot_phase_2
-    export BUILD_SNAPSHOT_SYSTEMS=1
-    RUN_PHASE_0=1
-    echolog "Clearing phase1 and phase2 snapshot build systems..."
-    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
-    rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
-  else
-    echolog "APTFETCHDATESECONDS $APTFETCHDATESECONDS not set, falling back to default apt source file"
-    export PHASE1_PATHNAME=phase_1
-    export PHASE2_PATHNAME=phase_2
-    export BUILD_SNAPSHOT_SYSTEMS=0
+    APTFETCHDATESECONDS=$(grep APTFETCHDATESECONDS= "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt | head -1 | sed 's/APTFETCHDATESECONDS=//g')
   fi
+
+  export PHASE1_PATHNAME=snapshot_phase_1
+  export PHASE2_PATHNAME=snapshot_phase_2
+  export BUILD_SNAPSHOT_SYSTEMS=1
+  RUN_PHASE_0=1
+  echolog "Clearing phase1 and phase2 snapshot build systems..."
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
+  rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
 else
   export PHASE1_PATHNAME=phase_1
   export PHASE2_PATHNAME=phase_2
@@ -370,6 +375,7 @@ then
     rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
+    touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
     touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
     REBUILT="to rebuild from scratch"
@@ -614,7 +620,7 @@ then
 fi
 
 #If there is a date specified in the revisions file, create the Debian snapshot sources.list for that time
-if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
+if [[ $APTFETCHDATESECONDS == [0-9]* ]]
 then
   #If using a revisions file, force downloading a snapshot from the time specified
   APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
