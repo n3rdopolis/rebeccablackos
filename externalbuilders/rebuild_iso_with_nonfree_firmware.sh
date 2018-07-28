@@ -47,6 +47,9 @@ then
   if [[ $HASOVERLAYFSMODULE == 0 ]]
   then
     HASOVERLAYFS=1
+  else
+    echo "Building without overlayfs is no longer supported"
+    exit 1
   fi
 fi
 
@@ -312,28 +315,21 @@ else
 fi
 
 #Prepare the ramdisk
-if [[ $RAMDISK_STATUS == 0 && $RAMDISK_FOR_OVERLAY == 1 && $HASOVERLAYFS == 1 ]]
+if [[ $RAMDISK_STATUS == 0 && $RAMDISK_FOR_OVERLAY == 1 ]]
 then
   NAMESPACE_ENTER mkdir "$MOUNTHOME"/isorebuild/ramdisk/overlay
   NAMESPACE_ENTER mkdir "$MOUNTHOME"/isorebuild/ramdisk/unionwork
 fi
 
 #Create the union between squashfs and the overlay
-if [[ $HASOVERLAYFS == 0 ]]
+mkdir -p "$MOUNTHOME"/isorebuild/unionwork "$MOUNTHOME"/isorebuild/overlay/
+
+#Union mount phase2 and phase3
+if [ $( NAMESPACE_ENTER test -d "$MOUNTHOME"/isorebuild/ramdisk/overlay; echo $? ) == 0  ]
 then
-  echo "no overlayfs detected! Copying files..."
-  cp -a "$MOUNTHOME"/isorebuild/squashfsmount/* "$MOUNTHOME"/isorebuild/overlay
+  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/isorebuild/squashfsmount,upperdir="$MOUNTHOME"/isorebuild/ramdisk/overlay,workdir="$MOUNTHOME"/isorebuild/ramdisk/unionwork "$MOUNTHOME"/isorebuild/unionmountpoint
 else
-  mkdir -p "$MOUNTHOME"/isorebuild/unionwork "$MOUNTHOME"/isorebuild/overlay/
-  
-  
-  #Union mount phase2 and phase3
-  if [ $( NAMESPACE_ENTER test -d "$MOUNTHOME"/isorebuild/ramdisk/overlay; echo $? ) == 0  ]
-  then
-    NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/isorebuild/squashfsmount,upperdir="$MOUNTHOME"/isorebuild/ramdisk/overlay,workdir="$MOUNTHOME"/isorebuild/ramdisk/unionwork "$MOUNTHOME"/isorebuild/unionmountpoint
-  else
-    NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/isorebuild/squashfsmount,upperdir="$MOUNTHOME"/isorebuild/overlay,workdir="$MOUNTHOME"/isorebuild/unionwork "$MOUNTHOME"/isorebuild/unionmountpoint
-  fi
+  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/isorebuild/squashfsmount,upperdir="$MOUNTHOME"/isorebuild/overlay,workdir="$MOUNTHOME"/isorebuild/unionwork "$MOUNTHOME"/isorebuild/unionmountpoint
 fi
 
 #bind mount in the critical filesystems

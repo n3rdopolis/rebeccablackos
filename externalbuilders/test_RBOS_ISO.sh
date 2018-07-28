@@ -45,6 +45,9 @@ then
   if [[ $HASOVERLAYFSMODULE == 0 ]]
   then
     HASOVERLAYFS=1
+  else 
+    echo "Running without overlayfs is no longer supported"
+    exit 1
   fi
 fi
 export HOME=$(eval echo ~$SUDO_USER)
@@ -119,14 +122,6 @@ else
   exit
 fi
 
-
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  if ! type unionfs-fuse &> /dev/null
-  then
-    $INSTALLCOMMAND unionfs-fuse
-  fi
-fi
 
 if ! type dialog &> /dev/null
 then
@@ -404,13 +399,8 @@ fi
 NAMESPACE_ENTER mount -o loop "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomount/casper/filesystem.squashfs "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/squashfsmount
 
 #Create the union between squashfs and the overlay
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  NAMESPACE_ENTER unionfs-fuse -o cow,use_ino,suid,dev,default_permissions,allow_other,nonempty,max_files=131068 "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/overlay=RW:"$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/squashfsmount "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint
-else
-  mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionwork
-  NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/overlay,workdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionwork "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint
-fi
+mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionwork
+NAMESPACE_ENTER mount -t overlay overlay -o lowerdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/squashfsmount,upperdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/overlay,workdir="$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionwork "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint
 
 #bind mount in the critical filesystems
 NAMESPACE_ENTER mount --rbind /sys "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/sys
