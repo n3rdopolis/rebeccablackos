@@ -31,6 +31,10 @@ fi
 mount --make-rprivate /
 
 #copy the dselect data saved in phase 2 into phase 1
+if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt ]]
+then
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt
+fi
 if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLSSTATUS.txt ]]
 then
   cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLSSTATUS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt
