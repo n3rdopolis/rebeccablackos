@@ -185,15 +185,30 @@ done
 
 #install updates
 apt-get dist-upgrade -y                                                 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
+Result=${PIPESTATUS[0]}
+if [[ $Result != 0 ]]
+then
+ echo "APT dist-upgrade failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+fi
 
 #Delete the old depends of the packages no longer needed.
 apt-get --purge autoremove -y                                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
+Result=${PIPESTATUS[0]}
+if [[ $Result != 0 ]]
+then
+ echo "APT autoremove failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+fi
 
 #prevent packages removed from the repositories upstream to not make it in the ISOS
 ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
 if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
 then
   aptitude purge ?obsolete -y                                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  Result=${PIPESTATUS[0]}
+  if [[ $Result != 0 ]]
+  then
+   echo "APT purge failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+  fi
 else
   echo        "Not purging older packages, because apt-get update failed"    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 fi
