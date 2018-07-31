@@ -33,6 +33,7 @@ fi
 function CompilePackage
 {
   BUILDNAME=$1
+
   #compile_all is running to download the source
   if [[ "$argument" == download-only ]]
   then
@@ -48,7 +49,15 @@ function CompilePackage
       RUNJOBSCOUNT=${#RUNJOBS[@]}
       sleep .1
     done
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
+    if [[ -x /usr/bin/Compile/$BUILDNAME ]]
+    then
+      build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
+    else
+      mkdir -p /buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecDownloadBuilder
+      echo "$BUILDNAME" >> /buildlogs/build_core/faileddownloads
+      return
+    fi
   fi
 
   #compile_all is running to build the source
@@ -56,7 +65,15 @@ function CompilePackage
   then
     #Cleanup any files in the srcbuild_overlay from the last build
     echo "building $BUILDNAME"
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
+    if [[ -x /usr/bin/Compile/$BUILDNAME ]]
+    then
+      build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
+    else
+      mkdir -p /buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
+      echo "$BUILDNAME" >> /buildlogs/build_core/failedcompiles
+      return
+    fi
     if [[ $BUILDCORECLEANOVERLAY == 1 ]]
     then
       mount -o remount /srcbuild/
@@ -67,7 +84,14 @@ function CompilePackage
   if [[ "$argument" == installsmallpackage ]]
   then
     echo "Attempting to install smaller version of $BUILDNAME"
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
+    if [[ -x /usr/bin/Compile/$BUILDNAME ]]
+    then
+      build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
+    else
+      mkdir -p /buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecSmallInstallBuilder
+      return
+    fi
   fi
   
   #compile_all is running to clean the source
@@ -84,13 +108,26 @@ function CompilePackage
       RUNJOBSCOUNT=${#RUNJOBS[@]}
       sleep .1
     done
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
+    if [[ -x /usr/bin/Compile/$BUILDNAME ]]
+    then
+      build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
+    else
+      mkdir -p /buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
+      return
+    fi
   fi
   
   #compile_all is running to download and build
   if [[ ! -n "$argument" ]]
   then
-    build_core buildspec "/usr/bin/Compile/$BUILDNAME"
+    if [[ -x /usr/bin/Compile/$BUILDNAME ]]
+    then
+      build_core buildspec "/usr/bin/Compile/$BUILDNAME"
+    else
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/"
+      return
+    fi
   fi
   
 }
