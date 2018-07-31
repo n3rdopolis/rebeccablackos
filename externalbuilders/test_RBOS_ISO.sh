@@ -30,6 +30,14 @@ else
   ZENITYCOMMAND=""
 fi
 
+ZENITYHASELLIPSIZE=$(zenity --help-info |& grep '\-\-ellipsize' | wc -l)
+if [[ $ZENITYHASELLIPSIZE == 1 ]]
+then
+  ZENITYELLIPSIZE="--ellipsize"
+else
+  ZENITYELLIPSIZE=""
+fi
+
 MOUNTISO=$(readlink -f "$1")
 
 #Identify the ISO, create a hash of the path to the ISO, so each ISO that is mounted can have its own path
@@ -139,7 +147,7 @@ if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --question --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
+    $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
   unmountanswer=$?
   else
     dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
@@ -162,7 +170,7 @@ then
 
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --question --text "Keep Temporary overlay files?" 2>/dev/null
+      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files?" 2>/dev/null
       deleteanswer=$?
     else
       dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
@@ -182,7 +190,7 @@ exit
 
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info --text "This will call a chroot shell from an iso.
+  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will call a chroot shell from an iso.
 
   The password for the test user is the same password as the sudo users.
 
@@ -215,7 +223,7 @@ then
   else
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --question --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
+      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
       MOUNTORUSEANSWER=$?
     else
       dialog --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 20 60
@@ -265,7 +273,7 @@ then
   else
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
       MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
     else
       dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
@@ -298,7 +306,7 @@ then
   then
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info --text "Will now bring up a prompt for the existing system." 2>/dev/null
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Will now bring up a prompt for the existing system." 2>/dev/null
     else
       echo "Will now bring up a prompt for the existing system."
       echo "Type exit to go back to your system."
@@ -306,7 +314,7 @@ then
   else
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info --text "Entering the Target system" 2>/dev/null
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Entering the Target system" 2>/dev/null
     else
       echo "Entering the Target system"
       echo "Type exit to go back to your system."
@@ -330,7 +338,7 @@ then
   then
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info --text "Failed to enter the running target system. This should not happen."
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Failed to enter the running target system. This should not happen."
     else
       echo "Failed to enter the running target system. This should not happen."
     fi
@@ -383,7 +391,7 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomo
 then
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
@@ -426,7 +434,7 @@ NAMESPACE_ENTER mount --bind "$MOUNTHOME"/liveisotest/shareddir "$MOUNTHOME"/liv
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image" 2>/dev/null
+  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image" 2>/dev/null
 else
   echo "
 Type exit to go back to your system"

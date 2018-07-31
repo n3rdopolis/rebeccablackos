@@ -34,6 +34,14 @@ else
   ZENITYCOMMAND=""
 fi
 
+ZENITYHASELLIPSIZE=$(zenity --help-info |& grep '\-\-ellipsize' | wc -l)
+if [[ $ZENITYHASELLIPSIZE == 1 ]]
+then
+  ZENITYELLIPSIZE="--ellipsize"
+else
+  ZENITYELLIPSIZE=""
+fi
+
 MOUNTISO=$(readlink -f "$1")
 MOUNTISOPATH=$(dirname "$MOUNTISO")
 MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
@@ -157,7 +165,7 @@ then
 else
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "Another instance is already running" 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Another instance is already running" 2>/dev/null
   else
     echo "Another instance is already running"
   fi
@@ -166,7 +174,7 @@ fi
 
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info --text "This will remaster the specified ISO, to install non-free firmware packages
+  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
 and don't have the same freedoms as the rest of the rest of the packages on these ISOs,
 but may allow more hardware to work." 2>/dev/null
@@ -233,7 +241,7 @@ then
 
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
     MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
   else
     dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
@@ -275,7 +283,7 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/isorebuild/isomount/casper/filesyst
 then
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
@@ -296,7 +304,7 @@ if [[ $REMASTERSYS_STATUS == 0 ]]
 then 
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
   else
     echo "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
   fi
@@ -363,14 +371,14 @@ then
   chown $SUDO_USER:$SUDO_GID "$NEWISO"
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
   else
     echo "ISO creation successful! $NEWISO has been created."
   fi
 else 
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info --text "ISO creation Failed!" 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation Failed!" 2>/dev/null
   else
     echo "ISO creation Failed!"
   fi
