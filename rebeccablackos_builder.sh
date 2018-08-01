@@ -765,6 +765,14 @@ if [[ $RAMDISK_FOR_PHASE3 == 1 && $RAMDISK_STATUS == 0 ]]
 then
   umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
 fi
+if [[ $RAMDISK_FOR_PHASE1 == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME
+fi
+if [[ $RAMDISK_FOR_PHASE2 == 1 && $RAMDISK_STATUS == 0 ]]
+then
+  umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME
+fi
 if [[ $RAMDISK_FOR_REMASTERSYS == 1 && $RAMDISK_STATUS == 0 ]]
 then
   umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
