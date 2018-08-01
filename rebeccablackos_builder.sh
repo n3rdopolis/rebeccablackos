@@ -709,8 +709,10 @@ EXPORT_STARTTIME=$(date +%s)
 #Take a snapshot of the source
 
 rm "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
-tar -czvf "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . &>/dev/null
 
+#Pack the source into a tar file, trying to always get the same filehash
+TARDATESTAMP=$(cat ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
+GZIP=-n tar -czvf "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz -C "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource/ . --mtime=@$TARDATESTAMP &>/dev/null
 
 if [[ ! -f "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/remastersys/custom-full.iso ]]
 then  
