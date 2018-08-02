@@ -926,7 +926,12 @@ function MakeAndInstall()
 
       #create the new deb
       STARTTIME=$(date +%s)
-      PACKAGEDATE=$(date +%s)
+      if [[ -f /tmp/APTFETCHDATE ]]
+      then
+        PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
+      else
+        PACKAGEDATE=$(date +%s)
+      fi
       $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
