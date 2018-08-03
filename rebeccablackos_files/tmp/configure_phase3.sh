@@ -68,6 +68,13 @@ fi
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
 
+if [[ -f /tmp/APTFETCHDATE ]]
+then
+  PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
+else
+  PACKAGEDATE=$(date +%s)
+fi
+
 #Copy the import files into the system, while creating a deb with checkinstall.
 cp /usr/import/tmp/* /tmp
 cd /tmp
@@ -75,7 +82,7 @@ mkdir debian
 touch debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-/usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="expect,whois,dlocate,xterm,vpx-tools,screen,kbd,acl,xdg-utils,psmisc,kbd,bash-builtins" /tmp/configure_phase3_helper.sh
+/usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="expect,whois,dlocate,xterm,vpx-tools,screen,kbd,acl,xdg-utils,psmisc,kbd,bash-builtins" /tmp/configure_phase3_helper.sh
 cd $OLDPWD
 
 #Create a virtual configuration package for the waylandloginmanager
@@ -142,7 +149,7 @@ function PostInstallActions
   #Create a package with all the menu items.
   cd /tmp
   rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
-  checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$(date +%s)  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
   cp *.deb "/srcbuild/buildoutput/"
   cd $OLDPWD
 
