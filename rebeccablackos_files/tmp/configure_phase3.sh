@@ -216,13 +216,15 @@ function PostInstallActions
   echo "Post Install action: fc-cache"
   (. /usr/bin/build_vars; fc-cache)
 
-  find /opt/share/polkit-1/actions/ | while read FILE;
+  mkdir -p /usr/share/polkit-1/actions/
+  find /opt/share/polkit-1/actions/ -type f | while read FILE;
   do
     FILENAME=$(basename $FILE)
     ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
   done
 
-  find /opt/share/polkit-1/rules.d | while read FILE;
+  mkdir -p /usr/share/polkit-1/rules.d/
+  find /opt/share/polkit-1/rules.d -type f | while read FILE;
   do
     FILENAME=$(basename $FILE)
     ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
