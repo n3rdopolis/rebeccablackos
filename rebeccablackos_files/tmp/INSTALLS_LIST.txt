@@ -26,7 +26,7 @@ acl::PART
 bash-completion::FULL
 bash-builtins::PART
 unicode-data::PART
-libpam-dev::PART
+libpam0g-dev::PART
 libpwquality1::PART
 libpwquality-dev::PART
 libacl1::PART
@@ -113,7 +113,6 @@ libmariadbd18::PART
 libxapian-dev::PART
 libleveldb1v5::PART
 libleveldb-dev::PART
-busybox-static::PART
 busybox::PART
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
@@ -444,7 +443,6 @@ lockfile-progs::PART
 libfam0::PART
 libfam-dev::PART
 ssl-cert::PART
-libssl-dev::PART
 libssl1.1::PART
 libssl1.0-dev::PART
 liborbit2::PART
