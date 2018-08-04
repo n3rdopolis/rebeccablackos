@@ -184,7 +184,7 @@ do
 done
 
 #install updates
-apt-get dist-upgrade -y                                                 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
+apt-get dist-upgrade -y --no-install-recommends                         2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
