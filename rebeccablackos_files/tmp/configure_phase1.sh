@@ -67,7 +67,6 @@ yes Y | dselect update
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
 rm /tmp/INSTALLS.txt
-sed -i 's/^ *//;s/ *$//' /tmp/FAILEDDOWNLOADS.txt
 
 #Set some variables
 export DEBIAN_ARCH=$(dpkg --print-architecture)
@@ -116,26 +115,16 @@ do
 done
 
 #Ensure that the files that are being created exist
-touch /tmp/FAILEDDOWNLOADS.txt
 touch /tmp/INSTALLS.txt
-touch /tmp/INSTALLS.txt.downloadbak
 
 #Cleanup INSTALLS files
-sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/FAILEDDOWNLOADS.txt
 sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/INSTALLS.txt
-sed -i 's/^ *//;s/ *$//;/^$/d' /tmp/INSTALLS.txt.downloadbak
 
+#Generate a list of all valid packages off the apt cache into a quickly parseable format, to test if a package name is valid.
+apt-cache search . | awk '{print $1}' > /tmp/AVAILABLEPACKAGES.txt
 
-#Get list of new packages to download, compared from the previous run
-INSTALLS="$(grep -Fxv -f /tmp/INSTALLS.txt.downloadbak /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
-INSTALLS_FAILAPPEND="$INSTALLS"
-
-#Add the FAILEDDOWNLOADS.txt contents to the installs list, insure that the failed package is still set to be installed by INSTALLS_LIST.txt
-INSTALLS+="
-$(grep -Fx -f /tmp/INSTALLS.txt /tmp/FAILEDDOWNLOADS.txt )"
-
-#log new packages to FAILEDDOWNLOADS.txt, which will then be removed once the download is successful
-echo "$INSTALLS_FAILAPPEND" >> /tmp/FAILEDDOWNLOADS.txt
+#Get list of new packages to download
+INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
 
 #Clear whitespace
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
@@ -150,25 +139,39 @@ then
 fi
 
 #DOWNLOAD THE PACKAGES SPECIFIED
+PART_PACKAGES=""
+FULL_PACKAGES=""
 while read PACKAGEINSTRUCTION
 do
   PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
   METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
+
+  AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$PACKAGE$)
+  if [[ $AvailableCount == 0 ]]
+  then
+    Result=1
+  else
+    Result=0
+  fi
+
   #Partial install
   if [[ $METHOD == "PART" ]]
   then
-    echo "Downloading with partial dependancies for $PACKAGE"                       2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    apt-get --no-install-recommends install $PACKAGE -d -y    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    Result=${PIPESTATUS[0]}
+    if [[ $Result == 0 ]]
+    then
+      echo "Downloading with partial dependancies for $PACKAGE"                     > "$PACKAGEOPERATIONLOGDIR"/Downloads/PART_Downloads.log
+      PART_PACKAGES+="$PACKAGE "
+    fi
   #with all dependancies
   elif [[ $METHOD == "FULL" ]]
   then
-    echo "Downloading with all dependancies for $PACKAGE"                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    apt-get install $PACKAGE -d -y                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    Result=${PIPESTATUS[0]}
+    if [[ $Result == 0 ]]
+    then
+      echo "Downloading with all dependancies for $PACKAGE"                         > "$PACKAGEOPERATIONLOGDIR"/Downloads/FULL_Downloads.log
+      FULL_PACKAGES+="$PACKAGE "
+    fi
   else
-    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
-    Result=1
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   > "$PACKAGEOPERATIONLOGDIR"/Downloads/"$PACKAGE".log
     METHOD="INVALID OPERATION SPECIFIED"
   fi
 
@@ -176,20 +179,33 @@ do
   if [[ $Result != 0 ]]
   then
     echo "$PACKAGE failed to $METHOD" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
-  else
-    echo "$PACKAGE successfully $METHOD"
-    grep -v "$PACKAGEINSTRUCTION" /tmp/FAILEDDOWNLOADS.txt > /tmp/FAILEDDOWNLOADS.txt.bak
-    cat /tmp/FAILEDDOWNLOADS.txt.bak > /tmp/FAILEDDOWNLOADS.txt
-    rm /tmp/FAILEDDOWNLOADS.txt.bak
   fi
 done < <(echo -n "$INSTALLS")
 
-#Save the INSTALLS.txt so that it can be compared with the next run
-cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.downloadbak
+
+apt-get --no-install-recommends install $PART_PACKAGES -d -y    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/PART_Downloads.log
+Result=${PIPESTATUS[0]}
+if [[ $Result != 0 ]]
+then
+  echo "Partial Downloads failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
+fi
+
+apt-get install $FULL_PACKAGES -d -y                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/FULL_Downloads.log
+Result=${PIPESTATUS[0]}
+if [[ $Result != 0 ]]
+then
+  echo "Full Downloads failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
+fi
 
 #Download updates
 apt-get dist-upgrade -d -y                                              2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/dist-upgrade.log
-    
+Result=${PIPESTATUS[0]}
+if [[ $Result != 0 ]]
+then
+  echo "Dist Upgrade failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Downloads/failedpackages.log
+fi
+
+
 #Use dselect-upgrade in download only mode to force the downloads of the cached and uninstalled debs in phase 1
 if [[ -f /tmp/INSTALLSSTATUS.txt ]]
 then

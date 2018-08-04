@@ -377,7 +377,7 @@ then
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
     touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.lastrun
     REBUILT="to rebuild from scratch"
   fi
 
@@ -395,7 +395,7 @@ then
     echolog "Control file for phase_2 removed, or non existing. Deleting phase_2 system for $BUILDARCH"
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.installbak
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp/INSTALLS.txt.lastrun
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
   fi
   RUN_PHASE_0=1
@@ -419,9 +419,6 @@ then
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/archives
   touch "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
 
-  #Force phase_1 to rehandle downloads
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt.downloadbak &> /dev/null
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/FAILEDDOWNLOADS.txt &> /dev/null
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_ARCHIVES))
 fi
 
@@ -686,7 +683,7 @@ then
   echolog "Clearing phase1 snapshot build system..."
   rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp
-  touch "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp/INSTALLS.txt.installbak
+  touch "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/tmp/INSTALLS.txt.lastrun
 fi
 
 PHASE2_STARTTIME=$(date +%s)
