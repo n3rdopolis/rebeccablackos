@@ -485,6 +485,15 @@ function PrepareLoginManager
   then
     mv /var/log/waylandloginmanager.log /var/log/waylandloginmanager/waylandloginmanager.log
   fi
+
+  #Only save the last 250 lines of /var/log/waylandloginmanager/waylandloginmanager.log
+  if [[ -f /var/log/waylandloginmanager/waylandloginmanager.log ]]
+  then
+    mv /var/log/waylandloginmanager/waylandloginmanager.log /var/log/waylandloginmanager/waylandloginmanager.log.bak
+    tail -n 250 /var/log/waylandloginmanager/waylandloginmanager.log.bak > /var/log/waylandloginmanager/waylandloginmanager.log
+    rm /var/log/waylandloginmanager/waylandloginmanager.log.bak
+  fi
+
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
   WriteToLog "Starting Up..."
 
