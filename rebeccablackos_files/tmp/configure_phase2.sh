@@ -61,7 +61,7 @@ apt-get install -f
 dpkg --configure -a
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget rustc curl locales acl sudo -y
+apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
