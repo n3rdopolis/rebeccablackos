@@ -1976,15 +1976,6 @@ function GetSeatCapabilityString
 #This calls the loginmanagerdisplay_(seat) weston sessions. It takes 1 argument, the seat
 function StartLoginManagerDisplay
 {
-  if [[ $1 == seat0 ]]
-  then
-    #Reset the contents of the tty
-    echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
-    #Disable cursor blinking on the TTY the display server will be started on
-    echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
-    SetTTYModeGraphics $USERSESSIONTTY
-  fi
-
   #Information about the seat
   CurrentSeat=$1
   SeatStartCount=${LoginManagerDisplayFailCounts[$SeatIndexID]}
@@ -2063,6 +2054,12 @@ function StartLoginManagerDisplay
     if [[ "$CurrentSeat" == seat0 ]]
     then
       WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempt $SeatStartCount)"
+      #Reset the contents of the tty
+      echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
+      #Disable cursor blinking on the TTY the display server will be started on
+      echo -n -e '\e[?25l' > /dev/tty$LOGINMANAGERDISPLAYTTY
+      ResetTTYMode $LOGINMANAGERDISPLAYTTY
+      SetTTYModeGraphics $LOGINMANAGERDISPLAYTTY
     else
       WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempt $SeatStartCount)"
     fi
