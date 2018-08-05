@@ -471,7 +471,20 @@ function PrepareLoginManager
   fi
   
   #Prepare logging for the loginmanagerdisplay
+
+  #Older versions of the waylandloginmanager used to log to /var/log/waylandloginmanager , now /var/log/waylandloginmanager is a folder
+  #Handle rare cases where an older version of waylandloginmanager would now prevent proper logging.
+  if [[ -f /var/log/waylandloginmanager ]]
+  then
+    mv /var/log/waylandloginmanager /var/log/waylandloginmanager.log
+  fi
   mkdir -p /var/log/waylandloginmanager/loginmanagerdisplays/
+
+  #If /var/log/waylandloginmanager.log exists, or was renamed, move it into the correct, now created folder
+  if [[ -f /var/log/waylandloginmanager.log ]]
+  then
+    mv /var/log/waylandloginmanager.log /var/log/waylandloginmanager/waylandloginmanager.log
+  fi
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
   WriteToLog "Starting Up..."
 
