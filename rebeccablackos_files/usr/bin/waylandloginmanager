@@ -649,16 +649,18 @@ Will now reboot." 20 50 --no-cancel
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
   if ls /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 1> /dev/null 2>&1
   then
-    RUNNINGWLMCOUNT=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* |& wc -l )
+    RUNNINGWLMCOUNT=$(systemctl show wlm-loginmanagerdisplay_*.service -p MainPID --value |& wc -l )
   else
     RUNNINGWLMCOUNT=0
   fi
-  OLDSEAT0PID=$(fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_seat0 2>/dev/null)
+  OLDSEAT0WLMPID=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p MainPID --value 2>/dev/null)
   if [[ $RUNNINGWLMCOUNT != 0 ]]
   then
-    if [[ ! -z $OLDSEAT0PID ]]
+    if [[ $OLDSEAT0WLMPID != 0 ]]
     then
-      LOGINMANAGERDISPLAYTTY=$(ps --no-headers $OLDSEAT0PID | awk '{print $2}' | sed 's/tty//g')
+      LOGINMANAGERDISPLAYTTY=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p TTYPath --value | sed 's|/dev/tty||g')
+    else
+      LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
     fi
     systemd-notify --ready &> /dev/null
   else
@@ -1997,9 +1999,8 @@ function StartLoginManagerDisplay
   #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
   if [[ $FullSocketUseMinutes -ge 1 || $ForceFullSocketUseCheck == 1 ]]
   then
-    fuser /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &>/dev/null
-    FUSERRESULT=$?
-    if [[ $FUSERRESULT == 0 ]]
+    OLDSEATWLMPID=$(systemctl show wlm-loginmanagerdisplay_$SeatFileName.service -p MainPID --value 2>/dev/null)
+    if [[ $OLDSEATWLMPID != 0 ]]
     then
       DoStartLoginManagerDisplay=0
       return
