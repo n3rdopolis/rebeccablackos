@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wesession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
+#This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 
@@ -1177,7 +1177,7 @@ function ChooseSessionType
   done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
 
 
-  #If wesessions where found above then show a zenity dialog. If there where none, use a default session.
+  #If wsessions where found above then show a zenity dialog. If there where none, use a default session.
   if [[ ! -z $WSESSIONLIST ]]
   then
     PROMPTED=1
