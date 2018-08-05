@@ -2360,7 +2360,7 @@ function WaylandLoginManagerMain
       ((FullSocketUseMinutes++))
       SECONDS=0
     fi
-    if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 10 ]]
+    if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 120 ]]
     then
       ForceFullSocketUseCheck=1
       DoDetectSeats=0
