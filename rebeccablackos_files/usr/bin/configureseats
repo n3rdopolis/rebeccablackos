@@ -40,6 +40,7 @@ CurrentTTY=$(fgconsole)
 ZENITYCMD="runuser -u $SUDO_USER -m -- zenity"
 
 NumberOfDevices=0
+DeviceList=""
 #Get all input devices from udev, and store attributes into an array
 while read Device
 do
@@ -126,6 +127,10 @@ do
     if [[ $DeviceSubsystem == "graphics" ]]
     then
       DeviceType="Frame Buffer"
+    fi
+    if [[ $DeviceSubsystem == "sound" ]]
+    then
+      DeviceType="Sound Card"
     fi
     DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
     DeviceDisplayName+=" $Device"
@@ -228,12 +233,17 @@ do
     DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
    fi
 
-done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* ! -path "*-*")
+done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*")
 
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
 do
-  DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceWLSeatIDs[$CurrentDeviceNumber]}"
+  if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
+  then
+    DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceWLSeatIDs[$CurrentDeviceNumber]}"
+  else
+    DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]}"
+  fi
   DeviceList+=$'\n'
 done
 
@@ -393,6 +403,7 @@ do
   udevadm trigger --subsystem-match=input
   udevadm trigger --subsystem-match=drm
   udevadm trigger --subsystem-match=graphics
+  udevadm trigger --subsystem-match=sound
   sleep 1
 done
 
