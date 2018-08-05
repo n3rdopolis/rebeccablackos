@@ -44,7 +44,7 @@ DeviceList=""
 #Get all input devices from udev, and store attributes into an array
 while read Device
 do
-  #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a logitech transciver, will appear as "Mouse / Keyboard"
+  #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a transciver that multiple wireless devices can register with, will appear as "Mouse / Keyboard"
   unset DeviceType
 
   #get properties of the device
