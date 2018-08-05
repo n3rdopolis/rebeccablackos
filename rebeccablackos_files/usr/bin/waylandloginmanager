@@ -574,6 +574,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
+  WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) == 0 ]]
@@ -893,10 +894,21 @@ function DisplayServerWait
 {
   GetStartedSeatIndex $1
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-  while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" &>/dev/null; echo $?) == 1 ]]
-  do
-    $SLEEPCMD 1
-  done
+  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
+  command -v weston-info &> /dev/null
+  WestonInfoResult=$?
+  if [[ $WestonInfoResult == 0 ]]
+  then
+    while [[ $($WESTONINFOCMD &>/dev/null; echo $?) != 0 ]]
+    do
+      $SLEEPCMD 1
+    done
+  else
+    while [[ $(fuser -s /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" &>/dev/null; echo $?) == 1 ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
 }
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
