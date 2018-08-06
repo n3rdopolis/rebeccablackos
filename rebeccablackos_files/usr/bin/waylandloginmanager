@@ -2406,7 +2406,7 @@ function WaylandLoginManagerMain
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
-            TerminateJobPID ${LastUserActionPIDs[$(($StartIndex/2))]} 15 1
+            TerminateJobPID ${LastUserActionPIDs[$StartIndex/2]} 15 1
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2471,7 +2471,8 @@ function WaylandLoginManagerMain
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
-          TerminateJobPID ${LastUserActionPIDs[$(($StartIndex/2))]} 15 1
+          TerminateJobPID ${LastUserActionPIDs[$StartIndex/2]} 15 1
+          unset LastUserActionPIDs[$StartIndex/2]
         fi
       done
 
@@ -2519,7 +2520,7 @@ function WaylandLoginManagerMain
       #If the PID for the seats UserActionDialog is not running, get the return status
       if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} && ! -e /proc/${LastUserActionPIDs[$SeatIndexID]} ]]
       then
-        wait ${LastUserActionPIDs[$SeatIndexID]}
+        wait ${LastUserActionPIDs[$SeatIndexID]} 2> /dev/null
         UserActionResult=$?
         #If the return status is not 0 or 1 (1 is a valid press of cancel, and not a crash)
         #increase the fail count
