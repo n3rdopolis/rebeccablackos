@@ -419,6 +419,7 @@ function TerminateJobPID
     else
       \kill -$TerminateSignal -- -$TerminatePID &> /dev/null
     fi
+    wait $TerminatePID &> /dev/null
   fi
 }
 
@@ -2758,7 +2759,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           then
             TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
             UserActionFailSkips[$SeatIndexID]=1
-            wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
           fi
           SwitchUserDialog "$SEATARG" &
           LastSwitchPIDs[$SeatIndexID]=$!
@@ -2792,7 +2792,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatIndexID]=1
-          wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         GetUserCredentials "$SEATARG" &
         LastLoginPIDs[$SeatIndexID]=$!
@@ -2808,7 +2807,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatIndexID]=1
-          wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         LeavePrompt $SEATARG &
         LastLeavePIDs[$SeatIndexID]=$!
@@ -2832,7 +2830,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
           UserActionFailSkips[$SeatIndexID]=1
-          wait ${LastUserActionPIDs[$SeatIndexID]} 2>/dev/null
         fi
         ShowInfo "$SEATARG" &
         LastInfoPIDs[$SeatIndexID]=$!
