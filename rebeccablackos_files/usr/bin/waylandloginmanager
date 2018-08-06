@@ -2010,21 +2010,11 @@ function StartLoginManagerDisplay
     fi
   fi
 
-  #Detect if the socket for the loginmanagerdisplay exists, and every minute, if it is in use
-  if [[ $FullSocketUseMinutes -ge 1 || $ForceFullSocketUseCheck == 1 ]]
+  #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
+  if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
   then
-    OLDSEATWLMPID=$(systemctl show wlm-loginmanagerdisplay_$SeatFileName.service -p MainPID --value 2>/dev/null)
-    if [[ $OLDSEATWLMPID != 0 ]]
-    then
-      DoStartLoginManagerDisplay=0
-      return
-    fi
-  else
-    if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName ]]
-    then
-      DoStartLoginManagerDisplay=0
-      return
-    fi
+    DoStartLoginManagerDisplay=0
+    return
   fi
 
   #Handle the seat hardware information
@@ -2101,8 +2091,16 @@ function StartLoginManagerDisplay
         ((TRYCOUNT++))
       done
       #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
-      NewLoginManagerDisplaySession=$(GetLoginManagerDisplaySession $CurrentSeat)
+      NewLoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $CurrentSeat)
+      IFS=@
+      NewLoginManagerDisplayInfo=($NewLoginManagerDisplayInfo)
+      unset IFS
+
+      NewLoginManagerDisplayPID=${NewLoginManagerDisplayInfo[0]}
+      NewLoginManagerDisplaySession=${NewLoginManagerDisplayInfo[1]}
+      LoginManagerDisplayPIDs[$SeatIndexID]=$NewLoginManagerDisplayPID
       LoginManagerDisplaySessions[$SeatIndexID]=$NewLoginManagerDisplaySession
+
       if [[ ! -z $NewLoginManagerDisplaySession ]]
       then
         loginctl activate $NewLoginManagerDisplaySession &>/dev/null
@@ -2141,8 +2139,8 @@ function StartLoginManagerDisplay
   LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
 }
 
-#This function determines the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
-function GetLoginManagerDisplaySession
+#This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
+function GetLoginManagerDisplayInfo
 {
   GetStartedSeatIndex $1
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
@@ -2163,7 +2161,7 @@ function GetLoginManagerDisplaySession
       break
     fi
   done
-  echo $REGISTERDISPLAYSESSION
+  echo "$LOGINMANAGERDISPLAYPID@$REGISTERDISPLAYSESSION"
 }
 
 #This function sets fallback environment variables such as LIBGL_ALWAYS_SOFTWARE if it is specified for the seat
@@ -2324,9 +2322,7 @@ function WaylandLoginManagerMain
 {
   LoginManagerFirstLoop=1
   SessionStartFailed=0
-  ForceFullSocketUseCheck=0
   MainLoopMinutes=0
-  FullSocketUseMinutes=0
   DoDetectSeats=1
   StartedSeats=()
 
@@ -2338,6 +2334,7 @@ function WaylandLoginManagerMain
   LastInfoPIDs=()
   LastDebugPIDs=()
   LoginManagerDisplaySessions=()
+  LoginManagerDisplayPIDs=()
 
   #Arrays about the seats, what hardware is supported
   #and how many times something related to the seat failed
@@ -2358,12 +2355,10 @@ function WaylandLoginManagerMain
     if [[ $SECONDS -gt 60 ]]
     then
       ((MainLoopMinutes++))
-      ((FullSocketUseMinutes++))
       SECONDS=0
     fi
     if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 120 ]]
     then
-      ForceFullSocketUseCheck=1
       DoDetectSeats=0
       MainLoopMinutes=0
       #Find what seats are new
@@ -2504,7 +2499,12 @@ function WaylandLoginManagerMain
       #Start the loginmanagerdisplay
       if [[ $LoginManagerFirstLoop == 1 ]]
       then
-        LoginManagerDisplaySessions[$SeatIndexID]=$(GetLoginManagerDisplaySession $RunningSeat)
+        LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $RunningSeat)
+        IFS=@
+        LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
+        unset IFS
+        LoginManagerDisplayPIDs[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
+        LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
       fi
       StartLoginManagerDisplay $RunningSeat
 
@@ -2560,11 +2560,6 @@ function WaylandLoginManagerMain
         fi
       fi
     done
-    ForceFullSocketUseCheck=0
-    if [[ $FullSocketUseMinutes -ge 1 ]]
-    then
-      FullSocketUseMinutes=0
-    fi
 
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
