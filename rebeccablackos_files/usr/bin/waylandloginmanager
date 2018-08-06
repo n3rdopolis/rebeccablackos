@@ -2406,7 +2406,7 @@ function WaylandLoginManagerMain
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
-            TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
+            TerminateJobPID ${LastUserActionPIDs[$(($StartIndex/2))]} 15 1
             StartedSeats[$(($StartIndex+1))]=$CanMultiSession
           else
             StartedSeats+=($RunningSeat)
@@ -2471,7 +2471,7 @@ function WaylandLoginManagerMain
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
-          TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
+          TerminateJobPID ${LastUserActionPIDs[$(($StartIndex/2))]} 15 1
         fi
       done
 
