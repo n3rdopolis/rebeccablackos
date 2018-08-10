@@ -1008,10 +1008,10 @@ function ChooseSessionType
       SeatSupportedBackendsString+="FB "
     fi
   fi
-  #Parse the list of sessions specified, so that zenity can use it as a list of sessions
+  #Parse the list of sessions specified, so that the ui dialog can use it as a list of sessions
   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
-  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a zenity dialog.
+  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a ui dialog.
   while read SESSIONFILE
   do
     IsExecutable=$(find $SESSIONFILE |wc -l)
@@ -1216,7 +1216,7 @@ function ChooseSessionType
   done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
 
 
-  #If wsessions where found above then show a zenity dialog. If there where none, use a default session.
+  #If wsessions where found above then show a ui dialog. If there where none, use a default session.
   if [[ ! -z $WSESSIONLIST ]]
   then
     PROMPTED=1

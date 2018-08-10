@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-08-09 22:50:04.000545348 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2018-08-09 22:51:45.277385127 -0400
+--- usr/bin/waylandloginmanager	2018-08-09 23:11:58.747216736 -0400
++++ usr/bin/waylandloginmanagerkdialog	2018-08-09 23:13:17.711835421 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -88,28 +88,6 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1008,10 +1006,10 @@
-       SeatSupportedBackendsString+="FB "
-     fi
-   fi
--  #Parse the list of sessions specified, so that zenity can use it as a list of sessions
-+  #Parse the list of sessions specified, so that kdialog can use it as a list of sessions
-   #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
-   #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
--  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a zenity dialog.
-+  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a dialog process.
-   while read SESSIONFILE
-   do
-     IsExecutable=$(find $SESSIONFILE |wc -l)
-@@ -1216,7 +1214,7 @@
-   done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
- 
- 
--  #If wsessions where found above then show a zenity dialog. If there where none, use a default session.
-+  #If wsessions where found above then show a dialog. If there where none, use a default session.
-   if [[ ! -z $WSESSIONLIST ]]
-   then
-     PROMPTED=1
 @@ -1236,13 +1234,16 @@
        then
          WSESSIONPICKLIST+=$'\n'
