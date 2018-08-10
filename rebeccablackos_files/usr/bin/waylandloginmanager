@@ -455,6 +455,7 @@ function PrepareLoginManager
   #Create the waylandloginmanager folder in /run for FIFOs and lockfiles
   mkdir -p /run/waylandloginmanager
   touch /run/waylandloginmanager/fifolock
+  mkdir -p /var/log/waylandloginmanager/
 
   #Create and open an empty file, with file descriptor #1023.
   touch /run/waylandloginmanager/pidfile
@@ -467,8 +468,14 @@ function PrepareLoginManager
     #When this path is valid, this check will not allow the new instance to run, because there already is one
     rm -r "/run/waylandloginmanager/waylandloginmanager.lock" 2>/dev/null
     ln -s /proc/"$$"/fd/1023 "/run/waylandloginmanager/waylandloginmanager.lock"
+    Status=$?
+    if [[ $Status != 0 ]]
+    then
+      WriteToLog "Failed to create a lock file." 1
+      exit 1
+    fi
   else
-    echo "Error: Another instance is already running"
+    WriteToLog "Error: Another instance is already running" 1
     exit 1
   fi
   #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
@@ -477,7 +484,7 @@ function PrepareLoginManager
   THISPROCPATH=/proc/$$/fd/1023
   if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
-    echo "Error: Another instance is already running"
+    WriteToLog "Error: Another instance is already running" 1
     exit 1
   fi
 
