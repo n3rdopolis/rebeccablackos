@@ -964,6 +964,7 @@ function ChooseSessionType
   unset WSESSIONLIST
   FirstRunNotRan=0
 
+  #Check the hardware in this seat, to see what backends will be supported
   SeatDefaultBackendType=""
   SeatSupportedBackends=()
   SeatSupportedBackendsString=""
@@ -1008,10 +1009,81 @@ function ChooseSessionType
       SeatSupportedBackendsString+="FB "
     fi
   fi
-  #Parse the list of sessions specified, so that the ui dialog can use it as a list of sessions
-  #Find all executable files, in the wsessions path (and not in any of its subdirectories) 
-  #The subshell outputs a multiline string with all session data. every session is a fixed number of lines.
-  #ONLY the session lines should be set through stdio in the while loop. This string is sent to a ui dialog.
+
+  #Find all wession files, smaller than 16kb
+  WSESSIONFILELIST=$(find /usr/share/wsessions.d/ -maxdepth 1 -type f -size -16384c -name *.desktop)
+
+  #Read all the wession .desktop files
+  DesktopFileData=$(gawk 'BEGIN{filenum+=1} {print $0 "#" filenum} \
+    ENDFILE {print "[Desktop Entry]#" filenum; print "PhysicalFileName=" FILENAME "#" filenum; \
+    print "Enabled=#" filenum; print "Name=#" filenum; print "Comment=#" filenum; print "Type=#" filenum; \
+    print "IsFallbackSession=#" filenum; print "CompositorDisplayArgument=#" filenum; \
+    print "CompositorSeatArgument=#" filenum; print "SessionArgument=#" filenum; \
+    print "AdditionalArguments=#" filenum; print "CompositorExec=#" filenum; \
+    print "EnvironmentFile=#" filenum; print "EOF=#" filenum; \
+    filenum+=1}' $WSESSIONFILELIST | awk '/\[Desktop Entry]/{flag=1;next}/\[/{flag=0}flag' )
+
+  #Create the arrays for the common attributes for each wession
+  DesktopFileDataArrays=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' \
+    -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' \
+    -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *CompositorSeatArgument *= */006#/' -e 's/^ *SessionArgument *= */007#/' \
+    -e 's/^ *AdditionalArguments *= */008#/' -e 's/^ *CompositorExec *= */009#/' -e 's/^ *EnvironmentFile *= */010#/' \
+    -e 's/^ *PhysicalFileName *= */011#/' -e 's/^ *EOF *= */012#/' \
+    -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -nk 3,3 -k1,1 -u | sed -e 's/#[[:digit:]]\+$//g' -e 's/012#/\r/g' )
+  DesktopFileDataArrays=${DesktopFileDataArrays//$'\n'$'\r'$'\n'/$'\r'}
+  IFS=$'\r'
+  DesktopFileDataArrays=(${DesktopFileDataArrays//$'\n'$'\r'/})
+  unset IFS
+
+  #Get the number of files in the array
+  DesktopFileCount=${#DesktopFileDataArrays[@]}
+
+  #Build the array containing NeedsFile lines (as there can be more than one, and not fixed in DesktopFileDataArrays
+  NeedsFileArrays=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' \
+    -e 's/^ *NeedsFile *= */000#/' -e 's/^ *PhysicalFileName *= */001#/' \
+    -e 's/^ *EOF *= */002#/' \
+    -e "/[0-9][0-9][0-9]#/!d" | perl -pe 's/\$(\w+)/$ENV{$1}/g' | sort -t "#" -k 3,3 -k 1,1 | sed -e 's/#[[:digit:]]\+$//g' -e 's/002#/\r/g')
+  NeedsFileArrays=${NeedsFileArrays//$'\n'$'\r'$'\n'/$'\r'}
+  IFS=$'\r'
+  NeedsFileArrays=(${NeedsFileArrays//$'\n'$'\r'/})
+  unset IFS
+
+  #Create a line of placeholders for the array for the backend hardware support information for the wsessions
+  #This will keep the array a fixed size
+  SeatHardwareArrayPlaceholders=""
+  for (( iterator=1 ; iterator <= $DesktopFileCount ; iterator++ ))
+  do
+    for BACKEND in KMS WL FB
+    do
+      HardwarePlaceHolders=""
+      HardwarePlaceHolders+=$'\n'"CompositorSupports${BACKEND}=#$iterator"
+      HardwareHolders+=$'\n'"Compositor${BACKEND}Arguments=#$iterator"
+      HardwarePlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware=#$iterator"
+      HardwarePlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument=#$iterator"
+      SeatHardwareArrayPlaceholders+=$'\n'$HardwarePlaceHolders$'\n'
+    done
+  done
+
+  SeatHardwareArrays=$(echo "$DesktopFileData"$'\n'"$SeatHardwareArrayPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' \
+    -re "s/^ *CompositorSupports(KMS|WL|FB) *= */000#000#\1#/" \
+    -re  "s/^ *Compositor(KMS|WL|FB)Arguments *= */000#001#\1#/" \
+    -re  "s/^ *Compositor(KMS|WL|FB)SeatAware *= */000#002#\1#/" \
+    -re  "s/^ *Compositor(KMS|WL|FB)SeatArgument *= */000#003#\1#/" \
+    -e 's/^ *EOF *= */001#999#999#/' \
+    -e "/^[0-9][0-9][0-9]#/!d" | sed -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#KMS#/\1#100#/g' \
+    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#WL#/\1#101#/g' \
+    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#FB#/\1#102#/g' | sort -t "#"  -k5,5 -k1,1 -u -k3,3 -k2,2 | sed -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#100#/\1#KMS#/g' \
+    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#101#/\1#WL#/g' \
+    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#102#/\1#FB#/g' | sed -e 's/#[[:digit:]]\+$//g' -e 's/001#999#999#/\r/g')
+  SeatHardwareArrays=${SeatHardwareArrays//$'\n'$'\r'$'\n'/$'\r'}
+  IFS=$'\r'
+  SeatHardwareArrays=(${SeatHardwareArrays//$'\n'$'\r'/})
+  unset IFS
+
+  #Unset the string containing the raw text of the .desktop files
+  unset DesktopFileData
+  unset SeatHardwareArrayPlaceholders
+
   while read SESSIONFILE
   do
     IsExecutable=$(find $SESSIONFILE |wc -l)
