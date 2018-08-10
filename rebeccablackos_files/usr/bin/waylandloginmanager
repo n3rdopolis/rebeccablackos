@@ -20,7 +20,8 @@
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 
-#It depends on zenity kbd, weston, and expect
+#It depends on zenity kbd, weston, and gawk, and expect
+
 
 #It depends on the line
 #SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
