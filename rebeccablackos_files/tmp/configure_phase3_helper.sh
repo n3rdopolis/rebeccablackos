@@ -38,6 +38,8 @@ cp -a /usr/import/usr/share/* /usr/share
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/* /etc/skel
 
+mkdir -p /etc/skel/Desktop
+
 mkdir -p /lib
 cp -a /usr/import/lib/* /lib
 
