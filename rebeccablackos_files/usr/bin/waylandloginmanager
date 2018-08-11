@@ -1017,10 +1017,10 @@ function ChooseSessionType
     fi
   fi
 
-  #Find all wession files, smaller than 16kb
+  #Find all wsession files, smaller than 16kb
   WSESSIONFILELIST=$(find /usr/share/wsessions.d/ -maxdepth 1 -type f -size -16384c -name *.desktop)
 
-  #Read all the wession .desktop files
+  #Read all the wsession .desktop files
   DesktopFileData=$(gawk 'BEGIN{filenum+=1} {print $0 "#" filenum} \
     ENDFILE {print "[Desktop Entry]#" filenum; print "PhysicalFileName=" FILENAME "#" filenum; \
     print "Enabled=#" filenum; print "Name=#" filenum; print "Comment=#" filenum; print "Type=#" filenum; \
@@ -1030,7 +1030,7 @@ function ChooseSessionType
     print "EnvironmentFile=#" filenum; print "EOF=#" filenum; \
     filenum+=1}' $WSESSIONFILELIST | awk '/\[Desktop Entry]/{flag=1;next}/\[/{flag=0}flag' )
 
-  #Create the arrays for the common attributes for each wession
+  #Create the arrays for the common attributes for each wsession
   DesktopFileDataArrays=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' \
     -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' \
     -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *CompositorSeatArgument *= */006#/' -e 's/^ *SessionArgument *= */007#/' \
@@ -1057,21 +1057,21 @@ function ChooseSessionType
 
   #Create a line of placeholders for the array for the backend hardware support information for the wsessions
   #This will keep the array a fixed size
-  SeatHardwareArrayPlaceholders=""
+  SeatBackendArrayPlaceholders=""
   for (( iterator=1 ; iterator <= $DesktopFileCount ; iterator++ ))
   do
     for BACKEND in KMS WL FB
     do
-      HardwarePlaceHolders=""
-      HardwarePlaceHolders+=$'\n'"CompositorSupports${BACKEND}=#$iterator"
-      HardwareHolders+=$'\n'"Compositor${BACKEND}Arguments=#$iterator"
-      HardwarePlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware=#$iterator"
-      HardwarePlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument=#$iterator"
-      SeatHardwareArrayPlaceholders+=$'\n'$HardwarePlaceHolders$'\n'
+      BackendPlaceHolders=""
+      BackendPlaceHolders+=$'\n'"CompositorSupports${BACKEND}=#$iterator"
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}Arguments=#$iterator"
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware=#$iterator"
+      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument=#$iterator"
+      SeatBackendArrayPlaceholders+=$'\n'$BackendPlaceHolders$'\n'
     done
   done
 
-  SeatHardwareArrays=$(echo "$DesktopFileData"$'\n'"$SeatHardwareArrayPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' \
+  SeatBackendArrays=$(echo "$DesktopFileData"$'\n'"$SeatBackendArrayPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' \
     -re "s/^ *CompositorSupports(KMS|WL|FB) *= */000#000#\1#/" \
     -re  "s/^ *Compositor(KMS|WL|FB)Arguments *= */000#001#\1#/" \
     -re  "s/^ *Compositor(KMS|WL|FB)SeatAware *= */000#002#\1#/" \
@@ -1082,58 +1082,37 @@ function ChooseSessionType
     -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#FB#/\1#102#/g' | sort -t "#"  -k5,5 -k1,1 -u -k3,3 -k2,2 | sed -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#100#/\1#KMS#/g' \
     -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#101#/\1#WL#/g' \
     -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#102#/\1#FB#/g' | sed -e 's/#[[:digit:]]\+$//g' -e 's/001#999#999#/\r/g')
-  SeatHardwareArrays=${SeatHardwareArrays//$'\n'$'\r'$'\n'/$'\r'}
+  SeatBackendArrays=${SeatBackendArrays//$'\n'$'\r'$'\n'/$'\r'}
   IFS=$'\r'
-  SeatHardwareArrays=(${SeatHardwareArrays//$'\n'$'\r'/})
+  SeatBackendArrays=(${SeatBackendArrays//$'\n'$'\r'/})
   unset IFS
 
   #Unset the string containing the raw text of the .desktop files
   unset DesktopFileData
-  unset SeatHardwareArrayPlaceholders
+  unset SeatBackendArrayPlaceholders
 
-  while read SESSIONFILE
+  #Use the arrays created from parsing the wsession files, to determine if each is supported, and to construct the list that will be shown in the dialog
+  for (( wsessionnum=0 ; wsessionnum < $DesktopFileCount ; wsessionnum++ ))
   do
-    IsExecutable=$(find $SESSIONFILE |wc -l)
-    if [[ $IsExecutable == 0 ]]
-    then
-      WriteToLog "Warning: $SESSIONFILE is not executable, the session will not be availible for selection by the user." 0
-    fi
-    #split away all the data from this file, starting at [Desktop Entry]
-    DesktopFileData=$(sed '0,/\[Desktop Entry\]/d;/^\[/Q' "$SESSIONFILE" | awk -F \# '{print $1}')
-    #Read all the supported values that are specified in the wsession file
-
-    #Append empty values to the bottom of the DesktopFileData, This is so that when parsed for an array, the array elements line up. The FIRST result will be matched by sed,
-    #Only single occuring, non dynamic values (as in NOT the backend type) will be handled by the array, which is most values
-    DesktopFileDataWithPlaceholders=$DesktopFileData$'\n'"Enabled="$'\n'"Name="$'\n'"Comment="$'\n'"Type="$'\n'"IsFallbackSession="$'\n'"CompositorDisplayArgument="$'\n'"CompositorSeatArgument="$'\n'"SessionArgument="$'\n'"AdditionalArguments="$'\n'"CompositorExec="$'\n'"EnvironmentFile="$'\n'
-
-    #Create an array with a fixed layout for the values.
+    #The array with a fixed layout for the values, for this wsession.
     IFS=$'\n'
-    DesktopFileMainArray=($(echo "$DesktopFileDataWithPlaceholders" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *CompositorSeatArgument *= */006#/' -e 's/^ *SessionArgument *= */007#/' -e 's/^ *AdditionalArguments *= */008#/' -e 's/^ *CompositorExec *= */009#/' -e 's/^ *EnvironmentFile *= */010#/' -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -k1,1 -u))
+    DesktopFileDataArray=(${DesktopFileDataArrays[$wsessionnum]})
     unset IFS
 
-    #Create an array of arrays (each line has three fields seperated by |, which is then treated as an array) describing the backends supported by the session
-    DesktopFileBackendArrayWithBackendPlaceholders=""
-    for BACKEND in KMS WL FB
-    do
-      BackendPlaceHolders=""
-      BackendPlaceHolders+=$'\n'"CompositorSupports${BACKEND}="
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}Arguments="
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware="
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument="
-      if [[ ! -z $DesktopFileBackendArrayWithBackendPlaceholders ]]
-      then
-        DesktopFileBackendArrayWithBackendPlaceholders+=$'\n'
-      fi
-      DesktopFileBackendArrayWithBackendPlaceholders+=$DesktopFileData$'\n'$BackendPlaceHolders
-    done
+    #The array of arrays (each line has three fields seperated by #, which is then treated as an array) describing the backends supported by the session
     IFS=$'\n'
-    DesktopFileBackendArray=($(echo "$DesktopFileBackendArrayWithBackendPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' -re "s/^ *CompositorSupports([A-Z]*) *= */000#\1#/" -re  "s/^ *Compositor([A-Z]*)Arguments *= */001#\1#/"  -re  "s/^ *Compositor([A-Z]*)SeatAware *= */002#\1#/" -re  "s/^ *Compositor([A-Z]*)SeatArgument *= */003#\1#/" -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -u -k2,2 -k1,1))
+    SeatBackendArray=(${SeatBackendArrays[$wsessionnum]})
     unset IFS
 
-    Enabled=${DesktopFileMainArray[0]:4}
-    SessionName=${DesktopFileMainArray[1]:4}
-    SessionComment=${DesktopFileMainArray[2]:4}
-    Type=${DesktopFileMainArray[3]:4}
+    #The array of all NeedsFile lines specified
+    IFS=$'\n'
+    NeedsFileArray=(${NeedsFileArrays[$wsessionnum]})
+    unset IFS
+
+    Enabled=${DesktopFileDataArray[0]:4}
+    SessionName=${DesktopFileDataArray[1]:4}
+    SessionComment=${DesktopFileDataArray[2]:4}
+    Type=${DesktopFileDataArray[3]:4}
 
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     #Get the hardware support status
@@ -1144,19 +1123,19 @@ function ChooseSessionType
       SupportsSeat=0
       unset BackendSeatArgument
       unset BackendArguments
-      for (( element1 = 0 ; element1 < ${#DesktopFileBackendArray[@]} ; element1=element1+4 ))
+      for (( element1 = 0 ; element1 < ${#SeatBackendArray[@]} ; element1=element1+4 ))
       do
         IFS="#"
         #Stores the values from the config file if this session supports a paticular backend in general
-        BackendSupportedArray=(${DesktopFileBackendArray[$element1]})
+        BackendSupportedArray=(${SeatBackendArray[$element1]})
         #Stores the values from the config file on the arguments used to start the session with a paticular backend
-        BackendArgumentArray=(${DesktopFileBackendArray[$element1+1]})
+        BackendArgumentArray=(${SeatBackendArray[$element1+1]})
         #Stores the values from the config file if each backend is seat aware
-        BackendCanSeatArray=(${DesktopFileBackendArray[$element1+2]})
+        BackendCanSeatArray=(${SeatBackendArray[$element1+2]})
         #Stores the arguments declared in the config file to specify the seat for each availible backend
-        BackendSeatArgArray=(${DesktopFileBackendArray[$element1+3]})
+        BackendSeatArgArray=(${SeatBackendArray[$element1+3]})
         unset IFS
-        if [[ ${BackendSupportedArray[1]} == $BackendType ]]
+        if [[ ${BackendSupportedArray[2]} == $BackendType ]]
         then
           #If this is seat0, then don't enforce seatawareness, if the first framebuffer device is in seat0
           if [[ $CurrentHandleSeat == seat0 && $BackendType == "FB" ]]
@@ -1177,13 +1156,13 @@ function ChooseSessionType
           #If none of these seat support overrides declare that this session can run on this seat, get it's config value if it can run on the seat
           if [[ $SupportsSeat == 0 ]]
           then
-            SupportsSeat=${BackendCanSeatArray[2]}
+            SupportsSeat=${BackendCanSeatArray[3]}
           fi
-          SupportsBackend=${BackendSupportedArray[2]}
+          SupportsBackend=${BackendSupportedArray[3]}
           if [[ $SupportsBackend == 1 && $SupportsSeat == 1 ]]
           then
-            BackendArguments=${BackendArgumentArray[2]}
-            BackendSeatArgument=${BackendSeatArgArray[2]}
+            BackendArguments=${BackendArgumentArray[3]}
+            BackendSeatArgument=${BackendSeatArgArray[3]}
             break
           fi
         fi
@@ -1195,64 +1174,64 @@ function ChooseSessionType
     done
 
 
-    IsFallbackSession=${DesktopFileMainArray[4]:4}
+    IsFallbackSession=${DesktopFileDataArray[4]:4}
     if [[ -z $IsFallbackSession ]]
     then
       IsFallbackSession=0
     fi
-    CompositorDisplayArgument=${DesktopFileMainArray[5]:4}
-    CompositorSeatArgument=${DesktopFileMainArray[6]:4}
+    CompositorDisplayArgument=${DesktopFileDataArray[5]:4}
+    CompositorSeatArgument=${DesktopFileDataArray[6]:4}
     #The backend argument might be different. If one is set for this backend, override.
     if [[ ! -z $BackendSeatArgument ]]
     then
       CompositorSeatArgument=$BackendSeatArgument
     fi
-    SessionArgument=${DesktopFileMainArray[7]:4}
-    AdditionalArguments=${DesktopFileMainArray[8]:4}
-    CompositorExec=${DesktopFileMainArray[9]:4}
-    EnvironmentFile=${DesktopFileMainArray[10]:4}
-    if [[ -z "$EnvironmentFile" ]]
+    SessionArgument=${DesktopFileDataArray[7]:4}
+    AdditionalArguments=${DesktopFileDataArray[8]:4}
+    CompositorExec=${DesktopFileDataArray[9]:4}
+    EnvironmentFile=${DesktopFileDataArray[10]:4}
+    WSessionFilePath=${DesktopFileDataArray[11]:4}
+
+    if [[ ! -x $WSessionFilePath ]]
     then
-      EnvironmentFile=$SESSIONFILE
+      WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user." 0
     fi
 
-    #The strings in NeedsFile are expanded here, so that the script can later determine if the full expanded path exists.
-    NeedsFile=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *NeedsFile *= */000#/' -e "/[0-9][0-9][0-9]#/!d" -e 's/[0-9][0-9][0-9]#//g' | perl -pe 's/\$(\w+)/$ENV{$1}/g')
-    if [[ ! -z $NeedsFile ]]
+    if [[ -z "$EnvironmentFile" ]]
     then
-      NeedsFile+=$'\n'
+      EnvironmentFile=$WSessionFilePath
     fi
-    NeedsFile+=$CompositorExec
 
     #Iterate through all NeedsFile values, to make sure that they exist. if one doesn't exist increment NotFoundCount.
     NotFoundCount=0
-    while read FILE
+    for NeedsFile in ${NeedsFileArray[@]}
     do
-      if [[ ! -e $FILE && -n $FILE ]]
+      NeedsFile=${NeedsFile:4}
+      if [[ ! -e $NeedsFile && -n $NeedsFile ]]
       then
-        WriteToLog "Warning: Cannot find needed file $FILE for $SESSIONFILE , the session will not be availible for selection by the user." 0
+        WriteToLog "Warning: Cannot find needed file $NeedsFile for $WSessionFilePath , the session will not be availible for selection by the user." 0
         ((NotFoundCount++))
       fi
-    done < <(echo "$NeedsFile")
+    done
 
     if [[ $Enabled != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE is disabled, the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath is disabled, the session will not be availible for selection by the user." 0
     fi
 
     if [[ $SupportsBackend != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE can't run on any backends supported by this seat: $SeatSupportedBackendsString , the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath can't run on any backends supported by this seat: $SeatSupportedBackendsString , the session will not be availible for selection by the user." 0
     fi
 
     if [[ $SupportsBackend == 1 && $SupportsSeat != 1 ]]
     then
-      WriteToLog "Warning: $SESSIONFILE backends $BackendType does not support seats, the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath backends $BackendType does not support seats, the session will not be availible for selection by the user." 0
     fi
 
     if [[ $Type != "WSession" ]]
     then
-      WriteToLog "Warning: $SESSIONFILE does not have a Type of 'WSession' , the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath does not have a Type of 'WSession' , the session will not be availible for selection by the user." 0
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
@@ -1292,7 +1271,7 @@ function ChooseSessionType
       WSESSIONLIST+="$SessionName"$'\n'
       WSESSIONLIST+="$SessionComment"
     fi
-  done < <(find $WSESSIONSPATH -maxdepth 1 -name "*\.desktop" -type f | sort )
+  done
 
 
   #If wsessions where found above then show a ui dialog. If there where none, use a default session.
