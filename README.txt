@@ -13,7 +13,7 @@ OVERVIEW:
 
   Xwayland is also included, which allows X applications to run under a Wayland server. Xwayland is very usable except for a few bugs.
 
-  There are also other Wayland Desktop environments installed: Orbital, Liri, Enlightenment, Orbment, and Gnome Shell Wayland, Kwin, and Papyros aside from the default Weston shell.
+  There are also other Wayland Desktop environments installed: Liri, Enlightenment, and Gnome Shell Wayland, Kwin, and Sway aside from the default Weston shell.
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
