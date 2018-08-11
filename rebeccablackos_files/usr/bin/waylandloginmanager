@@ -1018,7 +1018,7 @@ function ChooseSessionType
   fi
 
   #Find all wsession files, smaller than 16kb
-  WSESSIONFILELIST=$(find /usr/share/wsessions.d/ -maxdepth 1 -type f -size -16384c -name *.desktop)
+  WSESSIONFILELIST=$(find $WSESSIONSPATH -maxdepth 1 -type f -size -16384c -name *.desktop)
 
   #Read all the wsession .desktop files
   DesktopFileData=$(gawk 'BEGIN{filenum+=1} {print $0 "#" filenum} \
@@ -1277,7 +1277,6 @@ function ChooseSessionType
   #If wsessions where found above then show a ui dialog. If there where none, use a default session.
   if [[ ! -z $WSESSIONLIST ]]
   then
-    PROMPTED=1
     WSESSIONARRAY=()
     WSESSIONARRAYELEMENT=0
     while read LINE
@@ -1308,63 +1307,12 @@ function ChooseSessionType
     fi
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
 
-  else 
+  else
     unset WSESSIONDATA
     unset WSESSIONNUMBER
-  fi
-
-  #If there are wsessions, it does prompt the user, if the user doesn't select one, it tells the user that its falling back to the default. If there are no wsessions, it silently falls back to the default, by adding hardcoded values to the wsessiondata variable.
-  if [[ -z $WSESSIONDATA ]]
-  then 
-    if [[ $PROMPTED == 1 ]]
-    then
-      $ZENITYCMD --width=500 --warning --text="No session selected. Defaulting to the Default Weston Desktop Shell." 2>/dev/null
-    else
-      WriteToLog "No sessions installed in $WSESSIONSPATH or no sessions are enabled, or are missing files specified by NeedsFile values. Defaulting to the Default Weston Desktop Shell" 1
-    fi
-    #There are different commands needed to support different backends
-    if [[ $SeatDefaultBackendType == KMS ]]
-    then
-      WSESSIONDATA="$DEFAULTWAYLANDSERVER"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--backend=drm-backend.so"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$WAYLAND_GUEST"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--xwayland"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="KMS_KMS_0_"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="Default Weston Desktop Shell"
-
-    elif [[ $SeatDefaultBackendType == FB ]]
-    then 
-      WSESSIONDATA="$DEFAULTWAYLANDSERVER"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--backend=fbdev-backend.so"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--socket=$WAYLAND_GUEST"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="--xwayland"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+=""
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="FB_FB_0_"
-      WSESSIONDATA+=$'\n'
-      WSESSIONDATA+="Default Weston Desktop Shell"
-    fi
-    #export the WSESSIONDATA varaible
-    export WSESSIONDATA
+    $ZENITYCMD --width=500 --warning --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
+    WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ." 1
+    exit 1
   fi
 }
 
