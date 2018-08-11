@@ -2,12 +2,13 @@ LICENSE:
   The build script are all under GPL v2, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ or rebeccablacklinux/rebeccablackos_files/usr/import/ 
   Some diffs are for software that is under a different Open Source license, for example Calamares is GPLv3
   
-  The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on KDE-look, this was documented in the commit message for commit #1985, but document it better, because the file was moved, and git-svn (or git) doesn't retain the logs of moved files
+  The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on KDE-look, this was documented in the commit message for commit #1985, but the file was moved, and git-svn (or git) doesn't retain the logs of moved files, on the git mirror
 
 OVERVIEW:
   Use the latest ISO here: http://sourceforge.net/projects/rebeccablackos/files/
 
   This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only this is RebeccaBlackOS. 
+  This KDE blog post from 2011 also inspired the idea. http://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
 
   There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support Wayland as well as mpv, and gstreamer. There are a few applications that don't work, but many more are starting to work.
 
