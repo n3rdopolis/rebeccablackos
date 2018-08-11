@@ -1018,7 +1018,12 @@ function ChooseSessionType
   fi
 
   #Find all wsession files, smaller than 16kb
-  WSESSIONFILELIST=$(find $WSESSIONSPATH -maxdepth 1 -type f -size -16384c -name *.desktop)
+  WSESSIONFILELIST=$(find $WSESSIONSPATH -maxdepth 1 -type f -size -16384c -o -size 16384c -name *.desktop)
+  LARGEWSESSIONFILES=$(find $WSESSIONSPATH -maxdepth 1 -type f -size +16384c -name *.desktop -printf "\'%p\' ")
+  if [[ ! -z $LARGEWSESSIONFILES ]]
+  then
+    WriteToLog "The following files: $LARGEWSESSIONFILES have been ignored because they are too large"
+  fi
 
   #Read all the wsession .desktop files
   DesktopFileData=$(gawk 'BEGIN{filenum+=1} {print $0 "#" filenum} \
