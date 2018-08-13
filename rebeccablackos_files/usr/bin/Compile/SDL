@@ -79,7 +79,7 @@ function PackagePostInstall()
 {
 cd test
 ./configure
-make
+make -i
 #Install more includes
 cp /"$SOURCEDIR"/"$SOURCENAME"/include/* $INSTALLDIR/include/SDL2
 #install sdl tests
