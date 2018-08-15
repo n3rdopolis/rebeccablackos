@@ -385,7 +385,7 @@ function WriteToLog
 {
   if [[ $2 == 1 ]]
   then
-    date --utc "+%FT%TZ: $1"  >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
+    builtin printf "%(%F %T %z)T: %s\n" -1 "$1"   >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
   else
     echo "$1" >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
   fi
