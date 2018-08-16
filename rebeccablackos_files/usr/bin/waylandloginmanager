@@ -288,7 +288,7 @@ function GetSeatConfigKey
     read -r -n 16000 -d $'\r' LoginManagerConfig 2>/dev/null </etc/waylandloginmanager.conf
     if [[ ${#LoginManagerConfig} == 16000 ]]
     then
-      WriteToLog "/etc/waylandloginmanager.conf is too large" 1
+      WriteToLog "/etc/waylandloginmanager.conf is too large"
       return
     fi
   fi
@@ -450,15 +450,10 @@ function ReadEnvironmentFile
 
 #All functions below this point are for the main operation of the waylandloginmanager
 
-#This function writes to the logs. It takes 2 argument, the string to log, and the option to log the date or not.
+#This function writes to the logs. It takes 1 argument, the string to log.
 function WriteToLog
 {
-  if [[ $2 == 1 ]]
-  then
-    builtin printf "%(%F %T %z)T: %s\n" -1 "$1"   >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
-  else
-    echo "$1" >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
-  fi
+  builtin printf "%(%F %T %z)T: %s\n" -1 "$1"   >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
 }
 
 #This function makes sure a specified PID belongs to a job, before terminating it.
@@ -541,11 +536,11 @@ function PrepareLoginManager
     Status=$?
     if [[ $Status != 0 ]]
     then
-      WriteToLog "Failed to create a lock file." 1
+      WriteToLog "Failed to create a lock file."
       exit 1
     fi
   else
-    WriteToLog "Error: Another instance is already running" 1
+    WriteToLog "Error: Another instance is already running"
     exit 1
   fi
   #second check to make sure this instance 'won' as a second instance could report success, and execute as the first instance is OK to run, but before it creates the lockfile
@@ -554,7 +549,7 @@ function PrepareLoginManager
   THISPROCPATH=/proc/$$/fd/1023
   if [[ $LOCKPROCPATH != $THISPROCPATH ]]
   then
-    WriteToLog "Error: Another instance is already running" 1
+    WriteToLog "Error: Another instance is already running"
     exit 1
   fi
 
@@ -583,7 +578,7 @@ function PrepareLoginManager
   fi
 
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
-  WriteToLog "Starting Up..." 1
+  WriteToLog "Starting Up..."
 
   #Configure missing things if they are missing. This can be turned on or off
   AutoConfig=0
@@ -592,7 +587,7 @@ function PrepareLoginManager
     #Create a user for non-privlaged commands for the waylandloginmanager if it doesn't exist
     if [[ $(id waylandloginmanager &>/dev/null; echo $? ) == 1 ]]
     then
-      WriteToLog "Error: The user waylandloginmanager does NOT exist. Creating the user account..." 1
+      WriteToLog "Error: The user waylandloginmanager does NOT exist. Creating the user account..."
       adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
     fi
 
@@ -689,37 +684,37 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) == 0 ]]
   then 
-    WriteToLog "Kernel mode setting found." 1
+    WriteToLog "Kernel mode setting found."
     HardwareSupported=1
   else
-    WriteToLog "No kernel mode setting found. Using the framebuffer" 1
+    WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
   if [[ $(ls  /dev/fb* 2>/dev/null) && $(grep -c "\bwlmnofbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) == 0 ]]
   then
-    WriteToLog "Frame buffer support found." 1
+    WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
     then
-      WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files" 1
+      WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
       setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     fi
     HardwareSupported=1
   else
-    WriteToLog "No framebuffer support found" 1
+    WriteToLog "No framebuffer support found"
   fi
 
   if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) != 0 ]]
   then
-    WriteToLog "Manually override set to disable detection of the framebuffer" 1
+    WriteToLog "Manually override set to disable detection of the framebuffer"
   fi
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
   if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) != 0 ]]
   then
-    WriteToLog "Manually override set to use to use the framebuffer" 1
+    WriteToLog "Manually override set to use to use the framebuffer"
     if [[ $HardwareSupported != 1 ]]
     then
-      WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!" 1
+      WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
       openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -734,7 +729,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   then
     if [[ $ISLIVE == 1 ]]
     then
-      WriteToLog "ERROR: No supportable hardware found" 1
+      WriteToLog "ERROR: No supportable hardware found"
       openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
@@ -780,7 +775,7 @@ Will now reboot." 20 50 --no-cancel
   MinimumTTY=$LOGINMANAGERDISPLAYTTY
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
-    WriteToLog "ERROR: Not Enough TTYs for login manager display!" 1
+    WriteToLog "ERROR: Not Enough TTYs for login manager display!"
     systemctl stop waylandloginmanager.service &> /dev/null
     exit 1
   fi
@@ -789,7 +784,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
-    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay" 1
+    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
     wlmdebug=1
   fi
 
@@ -797,7 +792,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $(grep -c "\bwlmdebuginsecure\b" /proc/cmdline) != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
-    WriteToLog "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay" 1
+    WriteToLog "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay"
     wlmdebug=1
     wlmdebuginsecure=1
   fi
@@ -941,7 +936,7 @@ function RegisterSession
     RegisterType=${ArraySessionData[0]}
     if [[ ! -z $RegisterData ]]
     then
-      WriteToLog "received session data $RegisterData" 0
+      WriteToLog "received session data $RegisterData"
       if [[ $RegisterType == NEWSESSION ]]
       then
         #Add the session data to the arrays that store info about the sessions.
@@ -967,7 +962,7 @@ function RegisterSession
             loginctl lock-session $SessionID 2> /dev/null
           fi
         else
-          WriteToLog "Session failed to start" 1
+          WriteToLog "Session failed to start"
           SessionStartFailed=1
           if [[ $SessionTTY != 0 ]]
           then
@@ -976,7 +971,7 @@ function RegisterSession
           FailedSessionSeat+=("$SessionSeatID")
         fi
       else
-        WriteToLog "register session requested, but no data was availible in the FIFO" 1
+        WriteToLog "register session requested, but no data was availible in the FIFO"
       fi
     fi
   done
@@ -1269,7 +1264,7 @@ function ChooseSessionType
 
     if [[ ! -x $WSessionFilePath ]]
     then
-      WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user."
     fi
 
     if [[ -z "$EnvironmentFile" ]]
@@ -1284,29 +1279,29 @@ function ChooseSessionType
       NeedsFile=${NeedsFile:4}
       if [[ ! -e $NeedsFile && -n $NeedsFile ]]
       then
-        WriteToLog "Warning: Cannot find needed file $NeedsFile for $WSessionFilePath , the session will not be availible for selection by the user." 0
+        WriteToLog "Warning: Cannot find needed file $NeedsFile for $WSessionFilePath , the session will not be availible for selection by the user."
         ((NotFoundCount++))
       fi
     done
 
     if [[ $Enabled != 1 ]]
     then
-      WriteToLog "Warning: $WSessionFilePath is disabled, the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath is disabled, the session will not be availible for selection by the user."
     fi
 
     if [[ $SupportsBackend != 1 ]]
     then
-      WriteToLog "Warning: $WSessionFilePath can't run on any backends supported by this seat: $SeatSupportedBackendsString , the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath can't run on any backends supported by this seat: $SeatSupportedBackendsString , the session will not be availible for selection by the user."
     fi
 
     if [[ $SupportsBackend == 1 && $SupportsSeat != 1 ]]
     then
-      WriteToLog "Warning: $WSessionFilePath backends $BackendType does not support seats, the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath backends $BackendType does not support seats, the session will not be availible for selection by the user."
     fi
 
     if [[ $Type != "WSession" ]]
     then
-      WriteToLog "Warning: $WSessionFilePath does not have a Type of 'WSession' , the session will not be availible for selection by the user." 0
+      WriteToLog "Warning: $WSessionFilePath does not have a Type of 'WSession' , the session will not be availible for selection by the user."
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
@@ -1386,7 +1381,7 @@ function ChooseSessionType
     unset WSESSIONDATA
     unset WSESSIONNUMBER
     $ZENITYCMD --width=500 --warning --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-    WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ." 1
+    WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
     exit 1
   fi
 }
@@ -1675,7 +1670,7 @@ function StartUserSession
 
   if [[ $RunSession == 1 ]]
   then
-    WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT" 1
+    WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
     systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
     $SLEEPCMD 5
@@ -1707,7 +1702,7 @@ function StartUserSession
     #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
     SendSelfRegisterData "NEWSESSION,$USERSESSIONTTY,$USERSESSIONPID,$USERREGISTERDISPLAYNAME,$LOGINDSESSION,$USERSEAT,$STARTLOCKED"
   else
-    WriteToLog "Too many sessions on $USERSEAT that does not support session switching" 1
+    WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
   fi
 }
 
@@ -1758,7 +1753,7 @@ function AuthenticateUser
     else
       TTYSTRING=""
     fi
-    WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1" 1
+    WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
     DialogWait 3 "Attempting to start the selected session..." "$1"
     StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
     #report success
@@ -1864,11 +1859,11 @@ function GetUserCredentials
     if [[ $passwordresult != 0 ]]
     then
       $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
-      WriteToLog "Invalid password for $LOGINUSER, or username invalid" 1
+      WriteToLog "Invalid password for $LOGINUSER, or username invalid"
     fi
   else
     $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
-    WriteToLog "Not Enough TTYs for user login!" 1
+    WriteToLog "Not Enough TTYs for user login!"
   fi
 }
 
@@ -2053,15 +2048,15 @@ function GetSeatCapabilityString
 
   if [[ $SeatSupportsKMS == 0 && $SeatSupportsFB == 0 ]]
   then
-    WriteToLog "No usable display hardware found on seat $1 ." 1
+    WriteToLog "No usable display hardware found on seat $1 ."
   fi
   if [[ $SeatSupportsKMS != 0 && $WESTONBACKEND == KMS ]]
   then
-    WriteToLog "Kernel mode setting found for seat $1 ." 0
+    WriteToLog "Kernel mode setting found for seat $1 ."
   fi
   if [[ $SeatSupportsFB != 0 ]]
   then
-    WriteToLog "Framebuffer found for seat $1 ." 0
+    WriteToLog "Framebuffer found for seat $1 ."
   fi
 
 
@@ -2121,7 +2116,7 @@ function StartLoginManagerDisplay
     WESTONBACKENDSTRING="fbdev-backend.so"
   elif [[ $SeatWestonBackend == "" ]]
   then
-    WriteToLog "No backend found for $CurrentSeat ." 1
+    WriteToLog "No backend found for $CurrentSeat ."
     SeatStartCount=5
     LOGINMANAGERDISPLAYSTATUS=1
   fi
@@ -2139,7 +2134,7 @@ function StartLoginManagerDisplay
     (( SeatStartCount++ ))
     if [[ "$CurrentSeat" == seat0 ]]
     then
-      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempt $SeatStartCount)" 1
+      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempt $SeatStartCount)"
       #Reset the contents of the tty
       echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
       #Disable cursor blinking on the TTY the display server will be started on
@@ -2147,7 +2142,7 @@ function StartLoginManagerDisplay
       ResetTTYMode $LOGINMANAGERDISPLAYTTY
       SetTTYModeGraphics $LOGINMANAGERDISPLAYTTY
     else
-      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempt $SeatStartCount)" 1
+      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempt $SeatStartCount)"
     fi
     if [[ -x "$DEFAULTWAYLANDSERVER" ]]
     then
@@ -2222,14 +2217,14 @@ function StartLoginManagerDisplay
     else
       if [[ $SeatStartCount == 1 ]]
       then
-        WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat" 1
+        WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
       fi
     fi
   fi
   if [[ $SeatStartCount == 5 ]]
   then
     (( SeatStartCount++ ))
-    WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached" 1
+    WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
   fi
   LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
 }
@@ -2309,14 +2304,14 @@ function StartAutoLogin
   then
     if [[ "$1" == seat0 ]]
     then
-      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1" 1
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
     else
-      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $1" 1
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $1"
     fi
     StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
-    WriteToLog "Not Enough TTYs for autologin!" 1
+    WriteToLog "Not Enough TTYs for autologin!"
   fi
 }
 
@@ -2493,7 +2488,7 @@ function WaylandLoginManagerMain
           else
             CanMultiSession=0
           fi
-          WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession" 1
+          WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
           #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
           if [[ ${StartedSeats[$(($StartIndex+1))]} == -1 ]]
           then
@@ -2559,7 +2554,7 @@ function WaylandLoginManagerMain
           UserActionFailCounts[$ChangeIndex]=0
           UserActionFailSkips[$ChangeIndex]=0
           LoginManagerDisplayFailCounts[$ChangeIndex]=0
-          WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed" 1
+          WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
           TerminateJobPID ${LastUserActionPIDs[$StartIndex/2]} 15 1
@@ -2627,7 +2622,7 @@ function WaylandLoginManagerMain
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
             ((UserActionFailCounts[$SeatIndexID]++))
-            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log." 1
+            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log."
           else
             UserActionFailCounts[$SeatIndexID]=0
             UserActionFailSkips[$SeatIndexID]=0
@@ -2635,7 +2630,7 @@ function WaylandLoginManagerMain
         fi
         if [[ ${UserActionFailCounts[$SeatIndexID]} == 5 ]]
         then
-          WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row." 1
+          WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row."
         fi
       fi
 
@@ -2660,7 +2655,7 @@ function WaylandLoginManagerMain
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
     then
       systemd-notify --ready &> /dev/null
-      WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat" 1
+      WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
       openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -2672,7 +2667,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
-      WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat." 1
+      WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
       openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -2713,7 +2708,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         SeatCanMultiSession=${StartedSeats[$SeatIndexID*2+1]}
         if [[ $SeatCanMultiSession == 1 ]]
         then
-          WriteToLog "Switching back to the loginmanagerdisplay for seat $FailSeat as a session failed to start" 1
+          WriteToLog "Switching back to the loginmanagerdisplay for seat $FailSeat as a session failed to start"
           loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
         fi
       done
@@ -2758,7 +2753,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSeatID != "seat0" && $SeatCanMultiSession == 1 ]]
           then
-            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated" 1
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
           elif [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
@@ -2766,7 +2761,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
             then
               ResetTTYMode $RunningSessionTTY
             fi
-            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated" 1
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
           fi
         fi
@@ -2802,11 +2797,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
     if [[ $COMMAND != "" && $COMMAND != "DetectSeats" && $COMMAND != "RegisterSession" ]]
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG" 1
+      WriteToLog "received command $COMMAND for seat $SEATARG"
     else
       if [[ $COMMAND == "RegisterSession" || $COMMAND == "DetectSeats" ]]
       then
-        WriteToLog "received command $COMMAND" 1
+        WriteToLog "received command $COMMAND"
       fi
     fi
     #If a seat is specified, and it is not running, ignore the command
@@ -2827,7 +2822,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       done
       if [[ $SeatIsRunning == 0 ]]
       then
-        WriteToLog "Ignoring $COMMAND command as specified seat $SEATARG not running or invalid" 1
+        WriteToLog "Ignoring $COMMAND command as specified seat $SEATARG not running or invalid"
         COMMAND=""
       fi
     fi
@@ -2853,10 +2848,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           SwitchUserDialog "$SEATARG" &
           LastSwitchPIDs[$SeatIndexID]=$!
         else
-          WriteToLog "A handler for the Switch command is already open" 0
+          WriteToLog "A handler for the Switch command is already open"
         fi
       else
-        WriteToLog "$SEATARG does not support switching the session" 1
+        WriteToLog "$SEATARG does not support switching the session"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
@@ -2871,7 +2866,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
       else
-        WriteToLog "$SEATARG does not support switching the session" 0
+        WriteToLog "$SEATARG does not support switching the session"
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
@@ -2886,7 +2881,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         GetUserCredentials "$SEATARG" &
         LastLoginPIDs[$SeatIndexID]=$!
       else
-        WriteToLog "A handler for the Login command is already open" 0
+        WriteToLog "A handler for the Login command is already open"
       fi
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
@@ -2901,7 +2896,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         LeavePrompt $SEATARG &
         LastLeavePIDs[$SeatIndexID]=$!
       else
-        WriteToLog "A handler for the Leave command is already open" 0
+        WriteToLog "A handler for the Leave command is already open"
       fi
     #if the command is RegisterSession, then attempt to read the loginmanager_register FIFO, and register any data sent to that FIFO.
     elif [[ $COMMAND == "RegisterSession" ]]
@@ -2924,7 +2919,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         ShowInfo "$SEATARG" &
         LastInfoPIDs[$SeatIndexID]=$!
       else
-        WriteToLog "A handler for the Info command is already open" 0
+        WriteToLog "A handler for the Info command is already open"
       fi
     #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
     elif [[ $COMMAND == "Debug" ]]
@@ -2935,12 +2930,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           DiagnosticTerminal "$SEATARG" &
           LastDebugPIDs[$SeatIndexID]=$!
-          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay for $SEATARG" 1
+          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay for $SEATARG"
         else
-          WriteToLog "A handler for the Debug command is already open" 0
+          WriteToLog "A handler for the Debug command is already open"
         fi
       else
-        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebug not passed to the kernel, or not in Live CD mode." 1
+        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebug not passed to the kernel, or not in Live CD mode."
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
@@ -2948,7 +2943,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       :
     #if the command is unknown, then log that.
     else
-      WriteToLog "Invalid command: $COMMAND received for seat $SEATARG" 0
+      WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
     LoginManagerFirstLoop=0
     $SLEEPCMD .5
