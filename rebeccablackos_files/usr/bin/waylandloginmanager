@@ -276,13 +276,46 @@ function UserSessionWorker
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the third is the default value
 function GetSeatConfigKey
 {
+  GlobalKeyValue=""
   ReturnKeyValue=""
   SeatKeyValue=""
-  GlobalKeyValue=$(awk -F "^${1}\=" '{ if ($2 != "") print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
-  if [[ ! -z $2 ]]
+
+  #Only allow /etc/waylandloginmanager.conf to be less that 16kb.
+  read -r -n 16000 -d $'\r' LoginManagerConfig </etc/waylandloginmanager.conf
+  if [[ ${#LoginManagerConfig} == 16000 ]]
   then
-    SeatKeyValue=$(awk -F "^$1-$2\=" '{ if ($2 != "") print $2}' /etc/waylandloginmanager.conf 2>/dev/null | head -1)
+    WriteToLog "/etc/waylandloginmanager.conf is too large"
+    return
   fi
+
+  #Convert to an array
+  IFS=$'\n'
+  LoginManagerConfig=($LoginManagerConfig)
+  unset IFS
+
+  for LoginManagerConfigLine in ${LoginManagerConfig[@]}
+  do
+    IFS="="
+    LoginManagerConfigLine=($LoginManagerConfigLine)
+    unset IFS
+
+    #Find the config value for all seats
+    if [[  ${LoginManagerConfigLine[0]} == "$1" && -z $GlobalKeyValue ]]
+    then
+      GlobalKeyValue=${LoginManagerConfigLine[1]}
+    fi
+
+    #If a seat is specified as an argument and a config value is specifed for a seat, favor it
+    if [[ ! -z $2 ]]
+    then
+      if [[  ${LoginManagerConfigLine[0]} == "$1-$2" && -z $SeatKeyValue ]]
+      then
+        SeatKeyValue=${LoginManagerConfigLine[1]}
+        break
+      fi
+    fi
+  done
+
   if [[ ! -z $SeatKeyValue ]]
   then
     ReturnKeyValue=$SeatKeyValue
