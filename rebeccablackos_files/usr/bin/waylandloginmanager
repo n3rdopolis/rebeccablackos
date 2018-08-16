@@ -273,19 +273,41 @@ function UserSessionWorker
 }
 
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
-#It takes 3 arguments, the first key to get the value of, the second is the seat, and the third is the default value
+#It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
+#the 4th is 1 or 0 to consider /proc/cmdline (or 2 to only consider /proc/cmdline), and the 5th is the variable to return to
 function GetSeatConfigKey
 {
+  CommandLineValue=""
   GlobalKeyValue=""
   ReturnKeyValue=""
   SeatKeyValue=""
 
   #Only allow /etc/waylandloginmanager.conf to be less that 16kb.
-  read -r -n 16000 -d $'\r' LoginManagerConfig </etc/waylandloginmanager.conf
-  if [[ ${#LoginManagerConfig} == 16000 ]]
+  if [[ -f /etc/waylandloginmanager.conf ]]
   then
-    WriteToLog "/etc/waylandloginmanager.conf is too large"
-    return
+    read -r -n 16000 -d $'\r' LoginManagerConfig 2>/dev/null </etc/waylandloginmanager.conf
+    if [[ ${#LoginManagerConfig} == 16000 ]]
+    then
+      WriteToLog "/etc/waylandloginmanager.conf is too large" 1
+      return
+    fi
+  fi
+
+  #If specified to consider /proc/cmdline
+  #This can only be boolean, and global, (for instance not wlmsomething=something or wlmsomething-seat0=something)
+  #Just when wlmsomething is passed to /proc/cmdline, it returns 1
+  if [[ $4 == 1 || $4 == 2 ]]
+  then
+    read -r -n 16000 -d $'\r' KernelCommandLine </proc/cmdline
+    if [[ $KernelCommandLine =~ ([[:space:]]|^)"$1"([[:space:]]|$) ]]
+    then
+      CommandLineValue=1
+    else
+      if [[ $4 == 2 ]]
+      then
+        CommandLineValue=0
+      fi
+    fi
   fi
 
   #Convert to an array
@@ -293,40 +315,55 @@ function GetSeatConfigKey
   LoginManagerConfig=($LoginManagerConfig)
   unset IFS
 
-  for LoginManagerConfigLine in ${LoginManagerConfig[@]}
-  do
-    IFS="="
-    LoginManagerConfigLine=($LoginManagerConfigLine)
-    unset IFS
+  #If the command line value overrides or not
+  if [[ -z $CommandLineValue ]]
+  then
+    for LoginManagerConfigLine in ${LoginManagerConfig[@]}
+    do
+      IFS="="
+      LoginManagerConfigLine=($LoginManagerConfigLine)
+      unset IFS
 
-    #Find the config value for all seats
-    if [[  ${LoginManagerConfigLine[0]} == "$1" && -z $GlobalKeyValue ]]
-    then
-      GlobalKeyValue=${LoginManagerConfigLine[1]}
-    fi
-
-    #If a seat is specified as an argument and a config value is specifed for a seat, favor it
-    if [[ ! -z $2 ]]
-    then
-      if [[  ${LoginManagerConfigLine[0]} == "$1-$2" && -z $SeatKeyValue ]]
+      #Find the config value for all seats
+      if [[  ${LoginManagerConfigLine[0]} == "$1" && -z $GlobalKeyValue ]]
       then
-        SeatKeyValue=${LoginManagerConfigLine[1]}
-        break
+        GlobalKeyValue=${LoginManagerConfigLine[1]}
       fi
-    fi
-  done
 
-  if [[ ! -z $SeatKeyValue ]]
-  then
-    ReturnKeyValue=$SeatKeyValue
+      #If a seat is specified as an argument and a config value is specifed for a seat, favor it
+      if [[ ! -z $2 ]]
+      then
+        if [[  ${LoginManagerConfigLine[0]} == "$1-$2" && -z $SeatKeyValue ]]
+        then
+          SeatKeyValue=${LoginManagerConfigLine[1]}
+          break
+        fi
+      fi
+    done
+
+    #Determine if the default value, global specified value, or seat specified value wins
+    if [[ ! -z $SeatKeyValue ]]
+    then
+      ReturnKeyValue=$SeatKeyValue
+    else
+      ReturnKeyValue=$GlobalKeyValue
+    fi
+    if [[ -z $ReturnKeyValue ]]
+    then
+      ReturnKeyValue=$3
+    fi
   else
-    ReturnKeyValue=$GlobalKeyValue
+    ReturnKeyValue=$CommandLineValue
   fi
-  if [[ -z $ReturnKeyValue ]]
+
+  #Either return for use in a subshell if the 5th argument is empty
+  #Or return the value to the variable specified in the 5th argument
+  if [[ ! -z $5 ]]
   then
-    ReturnKeyValue=$3
+    builtin printf -v "$5" '%s' "$ReturnKeyValue"
+  else
+    echo $ReturnKeyValue
   fi
-  echo $ReturnKeyValue
 }
 
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
