@@ -1980,7 +1980,7 @@ function LeavePrompt
 }
 
 #This function gets the desired backend information for the specified seat for what backend should be used for the loginmanagerdisplay
-#It takes 1 argument, the seat
+#It takes 2 arguments, the seat, and second is the variable to set the string to
 function GetSeatCapabilityString
 {
   #Detect hardware abilities, of the seat
@@ -2061,7 +2061,12 @@ function GetSeatCapabilityString
 
 
   #Return the seat compatibility info
-  echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
+  if [[ ! -z $2 ]]
+  then
+    printf -v "$2" '%s' "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
+  else
+    echo $2
+  fi
 }
 
 #This calls the loginmanagerdisplay_(seat) weston sessions. It takes 1 argument, the seat
@@ -2512,7 +2517,8 @@ function WaylandLoginManagerMain
             systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
             rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &> /dev/null
           fi
-          SeatCapabilityArr=($(GetSeatCapabilityString $RunningSeat))
+          GetSeatCapabilityString $RunningSeat $SeatCapabilityArr
+          SeatCapabilityArr=($SeatCapabilityArr)
           UserActionFailCounts[$StartIndex/2]=0
           UserActionFailSkips[$StartIndex/2]=0
           SeatCreationDates[$StartIndex/2]=$SeatCreationDate
