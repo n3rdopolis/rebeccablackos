@@ -2520,7 +2520,7 @@ function WaylandLoginManagerMain
             systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
             rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &> /dev/null
           fi
-          GetSeatCapabilityString $RunningSeat $SeatCapabilityArr
+          GetSeatCapabilityString $RunningSeat SeatCapabilityArr
           SeatCapabilityArr=($SeatCapabilityArr)
           UserActionFailCounts[$StartIndex/2]=0
           UserActionFailSkips[$StartIndex/2]=0
