@@ -285,8 +285,10 @@ function GetSeatConfigKey
   #Only allow /etc/waylandloginmanager.conf to be less that 16kb.
   if [[ -f /etc/waylandloginmanager.conf ]]
   then
-    read -r -n 16000 -d $'\r' LoginManagerConfig 2>/dev/null </etc/waylandloginmanager.conf
-    if [[ ${#LoginManagerConfig} == 16000 ]]
+    #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
+    #The most accepted bytes is 16384, or 16KB, which is more than enough
+    read -r -n 16385 -d $'\r' LoginManagerConfig 2>/dev/null </etc/waylandloginmanager.conf
+    if [[ ${#LoginManagerConfig} == 16385 ]]
     then
       WriteToLog "/etc/waylandloginmanager.conf is too large"
       return
@@ -298,7 +300,7 @@ function GetSeatConfigKey
   #Just when wlmsomething is passed to /proc/cmdline, it returns 1
   if [[ $4 == 1 || $4 == 2 ]]
   then
-    read -r -n 16000 -d $'\r' KernelCommandLine </proc/cmdline
+    read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
     if [[ $KernelCommandLine =~ ([[:space:]]|^)"$1"([[:space:]]|$) ]]
     then
       CommandLineValue=1
