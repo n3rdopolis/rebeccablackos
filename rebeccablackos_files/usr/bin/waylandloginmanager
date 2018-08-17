@@ -272,6 +272,19 @@ function UserSessionWorker
   exit
 }
 
+#Function that uses a bash builtin to check the existance of files, it takes 1 argument, the files to probe, the files may have wildcards and regex
+#it returns 1 if the files exist, and 0 if there are no files
+function ProbeFilesExist
+{
+  builtin compgen -G "$1" &> /dev/null
+  if [[ $? == 0 ]]
+  then
+    return 1
+  else
+    return 0
+  fi
+}
+
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
 #the 4th is 1 or 0 to consider /proc/cmdline (or 2 to only consider /proc/cmdline), and the 5th is the variable to return to
