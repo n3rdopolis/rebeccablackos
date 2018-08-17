@@ -1627,13 +1627,14 @@ function StartUserSession
   done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$|^ONLY_CAN_MULTISESSION_SESSION_SWITCH$" )
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
+  WSESSIONSTRING="$( echo -n "$5" | perl -pe 's/\$(\w+)/$ENV{$1}/g')"
   WSESSIONDATA=()
   WSESSIONARGUMENTELEMENT=0
   while read LINE
   do
     WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
     ((WSESSIONARGUMENTELEMENT++))
-  done <<< "$5"
+  done <<< "$WSESSIONSTRING"
   USERSESSIONTTY=$1
   USERSEAT=$2
   LOGINUSER=$3
@@ -1658,15 +1659,15 @@ function StartUserSession
   #line 7 specifies the environment file which is processed by the user session, which is documented at the top of the script.
   #line 8 specifies the backend data, which tells the user session what backend is being used, the default one, and if the session file is calling the session with fallback capabilies. This variable is broken up, and exported as BackendType, DefaultBackendType, and IsFallbackSession
   #line 9 specifies the session name for the user and for helpdialog to know what session is running. this is exported as a varaible.
-  CompositorExec="$( echo -n "${WSESSIONDATA[0]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  BackendArguments="$( echo -n "${WSESSIONDATA[1]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  SessionArgument="$( echo -n "${WSESSIONDATA[2]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  CompositorDisplayArgument="$( echo -n "${WSESSIONDATA[3]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  CompositorSeatArgument="$( echo -n "${WSESSIONDATA[4]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  AdditionalArguments="$( echo -n "${WSESSIONDATA[5]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export EnvironmentFile="$( echo -n "${WSESSIONDATA[6]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  BackendData="$( echo -n "${WSESSIONDATA[7]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
-  export SessionName="$( echo -n "${WSESSIONDATA[8]}" | perl -pe 's/\$(\w+)/$ENV{$1}/g' )"
+  CompositorExec="${WSESSIONDATA[0]}"
+  BackendArguments="${WSESSIONDATA[1]}"
+  SessionArgument="${WSESSIONDATA[2]}"
+  CompositorDisplayArgument="${WSESSIONDATA[3]}"
+  CompositorSeatArgument="${WSESSIONDATA[4]}"
+  AdditionalArguments="${WSESSIONDATA[5]}"
+  export EnvironmentFile="${WSESSIONDATA[6]}"
+  BackendData="${WSESSIONDATA[7]}"
+  export SessionName="${WSESSIONDATA[8]}"
   IFS=_
   BackendData=($BackendData)
   unset IFS
