@@ -680,7 +680,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  GetConfigKey wlmforcefbdev "" 0 wlmforcefbdev
+  GetConfigKey wlmforcefbdev "" 0 2 wlmforcefbdev
   if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $wlmforcefbdev == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
@@ -689,7 +689,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
 
-  GetConfigKey wlmnofbdev "" 0 wlmnofbdev
+  GetConfigKey wlmnofbdev "" 0 2 wlmnofbdev
   if [[ $(ls  /dev/fb* 2>/dev/null) && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
