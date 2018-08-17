@@ -2581,10 +2581,20 @@ function WaylandLoginManagerMain
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
-          SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran 2>/dev/null |grep -c "^$RunningSeat$")
+          if [[ -f /run/waylandloginmanager/autologinran ]]
+          then
+            read -r -d $'\r' AUTOLOGINFILE 2>/dev/null </run/waylandloginmanager/autologinran
+            if [[ $AUTOLOGINFILE =~ (^|$'\n')$RunningSeat($'\n'|$) ]]
+            then
+              SEATAUTOLOGINDONE=1
+            else
+              SEATAUTOLOGINDONE=0
+            fi
+            unset AUTOLOGINFILE
+          fi
           SEATAUTOLOGINUSER=$(GetConfigKey autologin-user "$RunningSeat" ":" )
           #if autologin is specified
-          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 && $SEATAUTOLOGINUSER != ':' ]]
+          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINDONE == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
             StartAutoLogin $RunningSeat $SEATAUTOLOGINUSER &
             LastLoginPIDs[$StartIndex/2]=$!
