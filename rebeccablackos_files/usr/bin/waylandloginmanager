@@ -272,16 +272,25 @@ function UserSessionWorker
   exit
 }
 
-#Function that uses a bash builtin to check the existance of files, it takes 1 argument, the files to probe, the files may have wildcards and regex
-#it returns 1 if the files exist, and 0 if there are no files
+#Function that uses a bash builtin to check the existance of files, it takes 2 arguments, the files to probe, the files may have wildcards and regex
+#it returns 1 if the files exist, and 0 if there are no files, and the variable name to set the status to.
 function ProbeFilesExist
 {
   builtin compgen -G "$1" &> /dev/null
   if [[ $? == 0 ]]
   then
-    return 1
+    ReturnStatus=1
   else
-    return 0
+    ReturnStatus=0
+  fi
+
+  #Either return for use in a subshell if the 2nd argument is empty
+  #Or return the value to the variable specified in the 2nd argument
+  if [[ ! -z $2 ]]
+  then
+    builtin printf -v "$2" '%s' "$ReturnStatus"
+  else
+    echo $ReturnStatus
   fi
 }
 
@@ -694,16 +703,19 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 2 wlmforcefbdev
-  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $wlmforcefbdev == 0 ]]
+  ProbeFilesExist /dev/dri/card[0-9]* KMSFileProbe
+  if [[ $KMSFileProbe == 1 && $wlmforcefbdev == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
     HardwareSupported=1
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
+  unset KMSFileProbe
 
   GetConfigKey wlmnofbdev "" 0 2 wlmnofbdev
-  if [[ $(ls  /dev/fb* 2>/dev/null) && $wlmnofbdev == 0 ]]
+  ProbeFilesExist /dev/fb[0-9]* FBFileProbe
+  if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
@@ -768,12 +780,14 @@ Will now reboot." 20 50 --no-cancel
 
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
-  if ls /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_* 1> /dev/null 2>&1
+  ProbeFilesExist /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"*" LoginManagerDisplayFileProbe
+  if [[ $LoginManagerDisplayFileProbe == 1 ]]
   then
     RUNNINGWLMCOUNT=$(systemctl show wlm-loginmanagerdisplay_*.service -p MainPID --value |& wc -l )
   else
     RUNNINGWLMCOUNT=0
   fi
+  unset LoginManagerDisplayFileProbe
   OLDSEAT0WLMPID=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p MainPID --value 2>/dev/null)
   if [[ $RUNNINGWLMCOUNT != 0 ]]
   then
