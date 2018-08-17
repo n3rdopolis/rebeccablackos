@@ -36,40 +36,40 @@ fi
 ACTIONSTRING+="Logoff"$'\n'"Logoff Session"
 
 
-CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff |grep -c yes)
-if [[ $CanPowerOff == 1 ]]
+CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
+if [[ $CanPowerOff =~ " \"yes\"" ]]
 then
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Shutdown"
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Shutdown Computer"
 fi
-CanReboot=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanReboot |grep -c yes)
-if [[ $CanReboot == 1 ]]
+CanReboot=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanReboot)
+if [[ $CanReboot =~ " \"yes\"" ]]
 then
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Restart"
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Restart Computer"
 fi
-CanSuspend=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanSuspend |grep -c yes)
-if [[ $CanSuspend == 1 ]]
+CanSuspend=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanSuspend)
+if [[ $CanSuspend =~ " \"yes\"" ]]
 then
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Standby"
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Standby Computer"
 fi
-CanHybridSleep=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHybridSleep |grep -c yes)
-if [[ $CanHybridSleep == 1 ]]
+CanHybridSleep=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHybridSleep)
+if [[ $CanHybridSleep =~ " \"yes\"" ]]
 then
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Hybrid Sleep"
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Hybrid Sleep Computer"
 fi
-CanHibernate=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHibernate |grep -c yes)
-if [[ $CanHibernate == 1 ]]
+CanHibernate=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanHibernate)
+if [[ $CanHibernate =~ " \"yes\"" ]]
 then
   ACTIONSTRING+=$'\n'
   ACTIONSTRING+="Hibernate"
