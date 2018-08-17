@@ -1043,19 +1043,39 @@ function ChooseSessionType
   SeatDefaultBackendType=""
   SeatSupportedBackends=()
   SeatSupportedBackendsString=""
+  LoginctlSeatStatusString=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null)
   if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0 ]]
   then
-    SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+    if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
+    then
+      SeatSupportsKMS=1
+    else
+      SeatSupportsKMS=0
+    fi
   else
     SeatSupportsKMS=0
   fi
   if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$CurrentHandleSeat" 0 ) == 0 ]]
   then
-    SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
+    if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
+    then
+      SeatSupportsFB=1
+    else
+      SeatSupportsFB=0
+    fi
   else
     SeatSupportsFB=0
   fi
-  FB0INSEAT=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb0$" -c)
+
+  #Detect if /dev/fb0 is in this seat
+  if [[ "$LoginctlSeatStatusString" =~ /graphics/fb0[[:space:]] ]]
+  then
+    FB0INSEAT=1
+  else
+    FB0INSEAT=0
+  fi
+  unset LoginctlSeatStatusString
+
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
   if [[ $SeatSupportsKMS != 0 ]]
@@ -1987,20 +2007,38 @@ function LeavePrompt
 function GetSeatCapabilityString
 {
   #Detect hardware abilities, of the seat
+  LoginctlSeatStatusString=$(loginctl seat-status "$1" 2>/dev/null)
   if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
   then
-    SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
+    if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
+    then
+      SeatSupportsKMS=1
+    else
+      SeatSupportsKMS=0
+    fi
   else
     SeatSupportsKMS=0
   fi
   if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$1" 0 ) == 0  ]]
   then
-    SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
-    FB0INSEAT=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb0$" -c)
+    if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
+    then
+      SeatSupportsFB=1
+    else
+      SeatSupportsFB=0
+    fi
+    #Detect if /dev/fb0 is in this seat
+    if [[ "$LoginctlSeatStatusString" =~ /graphics/fb0[[:space:]] ]]
+    then
+      FB0INSEAT=1
+    else
+      FB0INSEAT=0
+    fi
   else
     SeatSupportsFB=0
     FB0INSEAT=0
   fi
+  unset LoginctlSeatStatusString
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
