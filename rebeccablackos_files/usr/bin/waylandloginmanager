@@ -511,9 +511,9 @@ function TerminateJobPID
   then
     if [[ $TerminateTree == 0 ]]
     then
-      \kill -$TerminateSignal -- $TerminatePID &> /dev/null
+      builtin kill -$TerminateSignal -- $TerminatePID &> /dev/null
     else
-      \kill -$TerminateSignal -- -$TerminatePID &> /dev/null
+      builtin kill -$TerminateSignal -- -$TerminatePID &> /dev/null
     fi
     wait $TerminatePID &> /dev/null
   fi
@@ -840,7 +840,7 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   HOSTNAME=$(hostname)
-  MACHINE_ID=$(cat /var/lib/dbus/machine-id)
+  read -r -d $'\r' MACHINE_ID 2>/dev/null </var/lib/dbus/machine-id
 }
 
 
