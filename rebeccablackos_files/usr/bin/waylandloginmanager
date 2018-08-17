@@ -718,12 +718,14 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
-    if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
+    GetConfigKey wlmglobalfbpermissions "" 0 2 wlmglobalfbpermissions
+    if [[ $wlmglobalfbpermissions != 0 ]]
     then
       WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
       setfacl -m "g:plugdev:rwx" /dev/fb*
       setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
     fi
+    unset wlmglobalfbpermissions
     HardwareSupported=1
   else
     WriteToLog "No framebuffer support found"
@@ -811,7 +813,8 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
-  if [[ $(grep -c "\bwlmdebug\b" /proc/cmdline) != 0 ]]
+  GetConfigKey wlmdebug "" 0 2 wlmdebug
+  if [[ $wlmdebug != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
     WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
@@ -819,7 +822,8 @@ Will now reboot." 20 50 --no-cancel
   fi
 
   #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument, this is for testing commands that need to be run within the same context as the waylandloginmanager
-  if [[ $(grep -c "\bwlmdebuginsecure\b" /proc/cmdline) != 0 ]]
+  GetConfigKey wlmdebuginsecure "" 0 2 wlmdebuginsecure
+  if [[ $wlmdebuginsecure != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
     WriteToLog "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay"
