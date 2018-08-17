@@ -167,7 +167,7 @@ function UserSessionWorker
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforceswrender "$XDG_SEAT" 0 ) != 0  ]]
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforceswrender "$XDG_SEAT" 0 ) != 0  ]]
   then
     WLM_USE_SOFTWARE=1
     export LIBGL_ALWAYS_SOFTWARE=1
@@ -177,7 +177,7 @@ function UserSessionWorker
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
-  if [[ $DefaultBackendType == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcepixman "$XDG_SEAT" 0 ) != 0  ]]
+  if [[ $DefaultBackendType == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcepixman "$XDG_SEAT" 0 ) != 0  ]]
   then
     export PIXMANARGS="--use-pixman"
   else
@@ -186,7 +186,7 @@ function UserSessionWorker
 
   #if the user booted with wlmforcevblankoff, or configured vblank globally, or for the seat
   #force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcevblankoff "$XDG_SEAT" 0 ) != 0  ]]
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcevblankoff "$XDG_SEAT" 0 ) != 0  ]]
   then
     export vblank_mode=0
   fi
@@ -275,7 +275,7 @@ function UserSessionWorker
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
 #the 4th is 1 or 0 to consider /proc/cmdline (or 2 to only consider /proc/cmdline), and the 5th is the variable to return to
-function GetSeatConfigKey
+function GetConfigKey
 {
   CommandLineValue=""
   GlobalKeyValue=""
@@ -673,25 +673,24 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   fi
 
   #Determine if this is running on a live instance, if the root filesystem is overlayfs.
-  FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-  if [[ $FSTYPE =~ overlay ]]
-  then
-    ISLIVE=1
-  fi
+  GetConfigKey boot=casper "" 0 2 ISLIVE
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) == 0 ]]
+  GetConfigKey wlmforcefbdev "" 0 wlmforcefbdev
+  if [[ $(ls  /dev/dri/card* 2>/dev/null ) && $wlmforcefbdev == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
     HardwareSupported=1
   else
     WriteToLog "No kernel mode setting found. Using the framebuffer"
   fi
-  if [[ $(ls  /dev/fb* 2>/dev/null) && $(grep -c "\bwlmnofbdev\b" /proc/cmdline) == 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) == 0 ]]
+
+  GetConfigKey wlmnofbdev "" 0 wlmnofbdev
+  if [[ $(ls  /dev/fb* 2>/dev/null) && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
     if [[ $(grep -c "\bwlmglobalfbpermissions\b" /proc/cmdline) != 0 ]]
@@ -705,13 +704,14 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     WriteToLog "No framebuffer support found"
   fi
 
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmnofbdev "" 0 ) != 0 ]]
+  if [[ $wlmnofbdev != 0 ]]
   then
     WriteToLog "Manually override set to disable detection of the framebuffer"
   fi
+  unset wlmnofbdev
 
   #if the user booted with a hidden option wlmforcefbdev, set the backend for Weston / Wayland server sessions to be fbdev
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline) != 0 && $(GetSeatConfigKey wlmforcefbdev "" 0 ) != 0 ]]
+  if [[ $wlmforcefbdev != 0 ]]
   then
     WriteToLog "Manually override set to use to use the framebuffer"
     if [[ $HardwareSupported != 1 ]]
@@ -724,6 +724,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       systemctl stop waylandloginmanager.service &> /dev/null
     fi
   fi
+  unset wlmforcefbdev
 
   #if there is no Framebuffer or Kernel mode setting, tell the user with a text mode dialog on TTY63, and restart.
   #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
@@ -1042,13 +1043,13 @@ function ChooseSessionType
   SeatDefaultBackendType=""
   SeatSupportedBackends=()
   SeatSupportedBackendsString=""
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0 ]]
   then
     SeatSupportsKMS=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   else
     SeatSupportsKMS=0
   fi
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmnofbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$CurrentHandleSeat" 0 ) == 0 ]]
   then
     SeatSupportsFB=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
   else
@@ -1986,13 +1987,13 @@ function LeavePrompt
 function GetSeatCapabilityString
 {
   #Detect hardware abilities, of the seat
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
+  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
   then
     SeatSupportsKMS=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/drm/card[0-9]*$" -c)
   else
     SeatSupportsKMS=0
   fi
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmnofbdev "$1" 0 ) == 0  ]]
+  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$1" 0 ) == 0  ]]
   then
     SeatSupportsFB=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb[0-9]*$" -c)
     FB0INSEAT=$(loginctl seat-status "$1" 2>/dev/null |grep -e "/graphics/fb0$" -c)
@@ -2003,7 +2004,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 || $(GetSeatConfigKey wlmforceswrender "$1" 0 ) != 0  ]]
+  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 || $(GetConfigKey wlmforceswrender "$1" 0 ) != 0  ]]
   then
     FORCESOFTWARE=1
   else
@@ -2012,7 +2013,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforceswrender, or configured vblank globally, or for the seat
   #force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0 || $(GetSeatConfigKey wlmforcevblankoff "$1" 0 ) != 0  ]]
+  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0 || $(GetConfigKey wlmforcevblankoff "$1" 0 ) != 0  ]]
   then
     FORCEVBLANK=1
   else
@@ -2041,7 +2042,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
-  if [[ $WESTONBACKEND == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetSeatConfigKey wlmforcepixman "$1" 0 ) != 0  ]]
+  if [[ $WESTONBACKEND == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcepixman "$1" 0 ) != 0  ]]
   then
     WESTONUSEPIXMAN=1
   else
@@ -2530,7 +2531,7 @@ function WaylandLoginManagerMain
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
           LoginManagerDisplayFailCounts[$StartIndex/2]=0
           SEATAUTOLOGINCOUNT=$(cat /run/waylandloginmanager/autologinran 2>/dev/null |grep -c "^$RunningSeat$")
-          SEATAUTOLOGINUSER=$(GetSeatConfigKey autologin-user "$RunningSeat" ":" )
+          SEATAUTOLOGINUSER=$(GetConfigKey autologin-user "$RunningSeat" ":" )
           #if autologin is specified
           if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINCOUNT == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
