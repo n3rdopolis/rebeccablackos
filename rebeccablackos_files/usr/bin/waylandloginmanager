@@ -1094,7 +1094,7 @@ function ChooseSessionType
     SeatSupportsKMS=0
   fi
   unset wlmforcefbdev
-  GetConfigKey wlmnofbdev "$CurrentHandleSeat" 1 wlmnofbdev
+  GetConfigKey wlmnofbdev "$CurrentHandleSeat" 0 1 wlmnofbdev
   if [[ $wlmnofbdev == 0 ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
@@ -2063,7 +2063,7 @@ function GetSeatCapabilityString
     SeatSupportsKMS=0
   fi
   unset wlmforcefbdev
-  GetConfigKey wlmnofbdev "$1" 1 wlmnofbdev
+  GetConfigKey wlmnofbdev "$1" 0 1 wlmnofbdev
   if [[ $wlmnofbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
