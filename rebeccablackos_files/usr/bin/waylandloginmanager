@@ -302,7 +302,7 @@ function ProbeFilesExist
 
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
-#the 4th is 0 to not consider /proc/cmdline, 1 to consider /proc/cmdline, or 2 to only consider /proc/cmdline, and the 5th is the variable to return to
+#the 4th is 0 consider just the config file, 1 to consider /proc/cmdline and the config file, or 2 to only consider /proc/cmdline, and the 5th is the variable to return to
 function GetConfigKey
 {
   CommandLineValue=""
@@ -700,7 +700,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     export AllSessions=0
   fi
 
-  #Determine if this is running on a live instance, if the root filesystem is overlayfs.
+  #Determine if this is running on a live instance, if booted with casper
   GetConfigKey boot=casper "" 0 2 ISLIVE
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
@@ -708,7 +708,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
-  GetConfigKey wlmforcefbdev "" 0 2 wlmforcefbdev
+  GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
   ProbeFilesExist /dev/dri/card[0-9]* KMSFileProbe
   if [[ $KMSFileProbe == 1 && $wlmforcefbdev == 0 ]]
   then 
@@ -719,7 +719,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   fi
   unset KMSFileProbe
 
-  GetConfigKey wlmnofbdev "" 0 2 wlmnofbdev
+  GetConfigKey wlmnofbdev "" 0 1 wlmnofbdev
   ProbeFilesExist /dev/fb[0-9]* FBFileProbe
   if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
   then
