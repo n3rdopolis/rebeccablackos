@@ -1437,7 +1437,7 @@ function ChooseSessionType
     CancelOrOK=$?
     if [[ $CancelOrOK != 0 ]]
     then
-      exit 0
+      return 1
     fi
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
 
@@ -1446,7 +1446,7 @@ function ChooseSessionType
     unset WSESSIONNUMBER
     $ZENITYCMD --width=500 --warning --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
     WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
-    exit 1
+    return 1
   fi
 }
 
@@ -1810,6 +1810,10 @@ function AuthenticateUser
     export USERHOME=$(eval echo ~$LOGINUSER)
     #Prompt for the session type
     ChooseSessionType "$1"
+    if [[ $? != 0 ]]
+    then
+      return 0
+    fi
 
     #if the password and username is correct, start the session
     if [[ $1 == seat0 ]]
@@ -1824,8 +1828,8 @@ function AuthenticateUser
     #report success
     return 0
   else
-      #report failure
-      return 1
+    #report failure
+    return 1
   fi
 }
 
