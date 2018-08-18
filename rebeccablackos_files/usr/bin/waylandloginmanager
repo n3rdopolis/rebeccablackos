@@ -1139,10 +1139,10 @@ function ChooseSessionType
   if [[ $SeatSupportsFB != 0 ]]
   then
     SeatSupportedBackends+=(FB)
+    SeatSupportedBackendsString+="FB "
     if [[ -z $SeatDefaultBackendType ]]
     then
       SeatDefaultBackendType=FB
-      SeatSupportedBackendsString+="FB "
     fi
   fi
 
