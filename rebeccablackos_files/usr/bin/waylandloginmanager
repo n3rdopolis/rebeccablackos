@@ -167,29 +167,35 @@ function UserSessionWorker
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforceswrender "$XDG_SEAT" 0 ) != 0  ]]
+  GetConfigKey wlmforceswrender "$XDG_SEAT" 0 1 wlmforceswrender
+  if [[ $wlmforceswrender != 0  ]]
   then
     WLM_USE_SOFTWARE=1
     export LIBGL_ALWAYS_SOFTWARE=1
   else
     WLM_USE_SOFTWARE=0
   fi
+  unset wlmforceswrender
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
-  if [[ $DefaultBackendType == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcepixman "$XDG_SEAT" 0 ) != 0  ]]
+  GetConfigKey wlmforcepixman "$XDG_SEAT" 0 1 wlmforcepixman
+  if [[ $DefaultBackendType == KMS && $wlmforcepixman != 0  ]]
   then
     export PIXMANARGS="--use-pixman"
   else
     export PIXMANARGS=""
   fi
+  unset wlmforcepixman
 
   #if the user booted with wlmforcevblankoff, or configured vblank globally, or for the seat
   #force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcevblankoff "$XDG_SEAT" 0 ) != 0  ]]
+  GetConfigKey wlmforcevblankoff "$XDG_SEAT" 0 1 wlmforcevblankoff
+  if [[ $wlmforcevblankoff != 0  ]]
   then
     export vblank_mode=0
   fi
+  unset wlmforcevblankoff
 
   if [[ $BackendType == WL ]]
   then
@@ -296,7 +302,7 @@ function ProbeFilesExist
 
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
 #It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
-#the 4th is 1 or 0 to consider /proc/cmdline (or 2 to only consider /proc/cmdline), and the 5th is the variable to return to
+#the 4th is 0 to not consider /proc/cmdline, 1 to consider /proc/cmdline, or 2 to only consider /proc/cmdline, and the 5th is the variable to return to
 function GetConfigKey
 {
   CommandLineValue=""
