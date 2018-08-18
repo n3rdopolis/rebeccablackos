@@ -113,8 +113,8 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
--    $ZENITYCMD --width=500 --warning --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-+    $KDIALOGCMD --title="Session Selection" --msgbox "No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
+-    $ZENITYCMD --width=500 --error --title "Session Selection" --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
++    $KDIALOGCMD --title="Session Selection" --error "No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
      WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
