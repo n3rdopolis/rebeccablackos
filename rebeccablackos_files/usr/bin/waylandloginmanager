@@ -1081,7 +1081,8 @@ function ChooseSessionType
   SeatSupportedBackends=()
   SeatSupportedBackendsString=""
   LoginctlSeatStatusString=$(loginctl seat-status "$CurrentHandleSeat" 2>/dev/null)
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  GetConfigKey wlmforcefbdev "$CurrentHandleSeat" 0 1 wlmforcefbdev
+  if [[ $wlmforcefbdev == 0 ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
     then
@@ -1092,7 +1093,9 @@ function ChooseSessionType
   else
     SeatSupportsKMS=0
   fi
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$CurrentHandleSeat" 0 ) == 0 ]]
+  unset wlmforcefbdev
+  GetConfigKey wlmnofbdev "$CurrentHandleSeat" 1 wlmnofbdev
+  if [[ $wlmnofbdev == 0 ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
     then
@@ -1103,6 +1106,7 @@ function ChooseSessionType
   else
     SeatSupportsFB=0
   fi
+  unset wlmnofbdev
 
   #Detect if /dev/fb0 is in this seat
   if [[ "$LoginctlSeatStatusString" =~ /graphics/fb0[[:space:]] ]]
@@ -2046,7 +2050,8 @@ function GetSeatCapabilityString
 {
   #Detect hardware abilities, of the seat
   LoginctlSeatStatusString=$(loginctl seat-status "$1" 2>/dev/null)
-  if [[ $(grep -c "\bwlmforcefbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcefbdev "$1" 0 ) == 0  ]]
+  GetConfigKey wlmforcefbdev "$1" 0 1 wlmforcefbdev
+  if [[ $wlmforcefbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
     then
@@ -2057,7 +2062,9 @@ function GetSeatCapabilityString
   else
     SeatSupportsKMS=0
   fi
-  if [[ $(grep -c "\bwlmnofbdev\b" /proc/cmdline ) == 0 && $(GetConfigKey wlmnofbdev "$1" 0 ) == 0  ]]
+  unset wlmforcefbdev
+  GetConfigKey wlmnofbdev "$1" 1 wlmnofbdev
+  if [[ $wlmnofbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
     then
@@ -2076,25 +2083,30 @@ function GetSeatCapabilityString
     SeatSupportsFB=0
     FB0INSEAT=0
   fi
+  unset wlmnofbdev
   unset LoginctlSeatStatusString
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
-  if [[ $(grep -c "\bwlmforceswrender\b" /proc/cmdline ) != 0 || $(GetConfigKey wlmforceswrender "$1" 0 ) != 0  ]]
+  GetConfigKey wlmforceswrender "$1" 0 1 wlmforceswrender
+  if [[ $wlmforceswrender != 0  ]]
   then
     FORCESOFTWARE=1
   else
     FORCESOFTWARE=0
   fi
+  unset wlmforceswrender
 
   #if the user booted with wlmforceswrender, or configured vblank globally, or for the seat
   #force vblank to be disabled
-  if [[ $(grep -c "\bwlmforcevblankoff\b" /proc/cmdline ) != 0 || $(GetConfigKey wlmforcevblankoff "$1" 0 ) != 0  ]]
+  GetConfigKey wlmforcevblankoff "$1" 0 1 wlmforcevblankoff
+  if [[ $wlmforcevblankoff != 0  ]]
   then
     FORCEVBLANK=1
   else
     FORCEVBLANK=0
   fi
+  unset wlmforcevblankoff
 
   #Determine the backend to use
   WESTONBACKEND=0
@@ -2118,12 +2130,14 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
-  if [[ $WESTONBACKEND == KMS && $(grep -c "\bwlmforcepixmanb" /proc/cmdline ) == 0 && $(GetConfigKey wlmforcepixman "$1" 0 ) != 0  ]]
+  GetConfigKey wlmforcepixman "$1" 0 1 wlmforcepixman
+  if [[ $WESTONBACKEND == KMS && $wlmforcepixman != 0  ]]
   then
     WESTONUSEPIXMAN=1
   else
     WESTONUSEPIXMAN=0
   fi
+  unset wlmforcepixman
 
   if [[ $SeatSupportsKMS == 0 && $SeatSupportsFB == 0 ]]
   then
@@ -2617,7 +2631,7 @@ function WaylandLoginManagerMain
             fi
             unset AUTOLOGINFILE
           fi
-          SEATAUTOLOGINUSER=$(GetConfigKey autologin-user "$RunningSeat" ":" )
+          GetConfigKey autologin-user "$RunningSeat" ":" 0 SEATAUTOLOGINUSER
           #if autologin is specified
           if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINDONE == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
