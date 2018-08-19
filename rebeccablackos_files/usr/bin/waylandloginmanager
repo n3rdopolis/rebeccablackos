@@ -1342,7 +1342,7 @@ function ChooseSessionType
 
     #Iterate through all NeedsFile values, to make sure that they exist. if one doesn't exist increment NotFoundCount.
     NotFoundCount=0
-    for NeedsFile in ${NeedsFileArray[@]}
+    for NeedsFile in "${NeedsFileArray[@]}"
     do
       NeedsFile=${NeedsFile:4}
       if [[ ! -e $NeedsFile && -n $NeedsFile ]]
