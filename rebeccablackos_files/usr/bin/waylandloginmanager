@@ -346,7 +346,7 @@ function GetConfigKey
   #If the command line value overrides or not
   if [[ -z $CommandLineValue ]]
   then
-    for LoginManagerConfigLine in ${LoginManagerConfig[@]}
+    for LoginManagerConfigLine in "${LoginManagerConfig[@]}"
     do
       IFS="="
       LoginManagerConfigLine=($LoginManagerConfigLine)
@@ -400,11 +400,9 @@ function ReadEnvironmentFile
   #parse the session event file if specified, and it exists
   EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" 2>/dev/null | awk -F \# '{print $1}' | sed  -e "s/ *= */=/g" -re "s/(.*)@([A-Z]*)$/\2#\1/g")
 
-  IFS=$'\n'
-  EnvironmentFileData=($EnvironmentFileData)
-  unset IFS
+  readarray -t EnvironmentFileData <<< "$EnvironmentFileData"
 
-  for EnvironmentFileLine in ${EnvironmentFileData[@]}
+  for EnvironmentFileLine in "${EnvironmentFileData[@]}"
   do
     #environment files are specified as action=var=data
     #Examples
@@ -432,7 +430,7 @@ function ReadEnvironmentFile
     VARDATAARRAY=(${EnvironmentFileLine[@]:2})
     ADDDELIM=0
     VARDATA=""
-    for VARDATASEGMENT in ${VARDATAARRAY[@]}
+    for VARDATASEGMENT in "${VARDATAARRAY[@]}"
     do
       if [[ $ADDDELIM != 0 ]]
       then
@@ -964,9 +962,7 @@ function RegisterSession
   exec 1001<> /run/waylandloginmanager/loginmanager_register
   RegisterDataLines=$(while read -n 100 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
-  IFS=$'\n'
-  RegisterDataLines=($RegisterDataLines)
-  unset IFS
+  readarray -t RegisterDataLines <<< "$RegisterDataLines"
 
 
   for RegisterData in "${RegisterDataLines[@]}"
@@ -1231,19 +1227,13 @@ function ChooseSessionType
   for (( wsessionnum=0 ; wsessionnum < $DesktopFileCount ; wsessionnum++ ))
   do
     #The array with a fixed layout for the values, for this wsession.
-    IFS=$'\n'
-    DesktopFileDataArray=(${DesktopFileDataArrays[$wsessionnum]})
-    unset IFS
+    readarray -t DesktopFileDataArray <<< "${DesktopFileDataArrays[$wsessionnum]}"
 
     #The array of arrays (each line has three fields seperated by #, which is then treated as an array) describing the backends supported by the session
-    IFS=$'\n'
-    SeatBackendArray=(${SeatBackendArrays[$wsessionnum]})
-    unset IFS
+    readarray -t SeatBackendArray <<< "${SeatBackendArrays[$wsessionnum]}"
 
     #The array of all NeedsFile lines specified
-    IFS=$'\n'
-    NeedsFileArray=(${NeedsFileArrays[$wsessionnum]})
-    unset IFS
+    readarray -t NeedsFileArray <<< "${NeedsFileArrays[$wsessionnum]}"
 
     Enabled=${DesktopFileDataArray[0]:4}
     SessionName=${DesktopFileDataArray[1]:4}
@@ -1253,7 +1243,7 @@ function ChooseSessionType
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     #Get the hardware support status
     SupportsBackend=0
-    for SEATBACKEND in ${SeatSupportedBackends[@]}
+    for SEATBACKEND in "${SeatSupportedBackends[@]}"
     do
       export BackendType=$SEATBACKEND
       SupportsSeat=0
@@ -1550,7 +1540,7 @@ function SwitchUserDialog
   do
     #determine if the current session is alive, before adding it to the list
     SessionisRunning=0
-    for RunningSeatSession in ${RunningSeatSessions[@]}
+    for RunningSeatSession in "${RunningSeatSessions[@]}"
     do
       if [[ $RunningSeatSession == ${AllSessionIDs[$NumberOfSessions]} ]]
       then
@@ -2558,14 +2548,14 @@ function WaylandLoginManagerMain
       #Find what seats are new
       AllRunningSeats=()
       NewAllRunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
-      for NewRunningSeat in ${NewAllRunningSeats[@]}
+      for NewRunningSeat in "${NewAllRunningSeats[@]}"
       do
         AllRunningSeats+=($NewRunningSeat)
       done
 
       #Find new seats by going the list of running ones, going through all stored ones
       #Then finding ones that have no matches
-      for RunningSeat in ${AllRunningSeats[@]}
+      for RunningSeat in "${AllRunningSeats[@]}"
       do
         IncludeSeat=1
         StartedSeatCount=${#StartedSeats[@]}
@@ -2654,7 +2644,7 @@ function WaylandLoginManagerMain
       for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+2 ))
       do
         SeatRemoved=1
-        for RunningSeat in ${AllRunningSeats[@]}
+        for RunningSeat in "${AllRunningSeats[@]}"
         do
           if [[ $RunningSeat == ${StartedSeats[$StartIndex]} ]]
           then
@@ -2684,7 +2674,7 @@ function WaylandLoginManagerMain
     LoginManagerDisplayAttemptsMaxedOut=1
     UIPromptAttemptsMaxedOut=1
     #Handle the loginmanagerdisplay, and the main dialog for each seat
-    for RunningSeat in ${AllRunningSeats[@]}
+    for RunningSeat in "${AllRunningSeats[@]}"
     do
       UIJobCount=0
       GetStartedSeatIndex $RunningSeat
@@ -2792,7 +2782,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
     #Quickly find if any sessions are not running
     NotRunningSessions=0
-    for SessionPid in ${AllSessionPIDs[@]}
+    for SessionPid in "${AllSessionPIDs[@]}"
     do
       if [[ ! -e /proc/$SessionPid/environ ]]
       then
@@ -2804,7 +2794,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $SessionStartFailed == 1 ]]
     then
       SessionStartFailed=0
-      for FailSeat in ${FailedSessionSeat[@]}
+      for FailSeat in "${FailedSessionSeat[@]}"
       do
         if [[ $FailSeat == seat0 ]]
         then
@@ -2926,7 +2916,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       SeatIndexID=$ReturnSeatIndex
       SeatIsRunning=0
       #Go through the list of running seats, check if one of them matches the specified one
-      for RunningSeat in ${AllRunningSeats[@]}
+      for RunningSeat in "${AllRunningSeats[@]}"
       do
         if [[ $SEATARG == $RunningSeat ]]
         then
