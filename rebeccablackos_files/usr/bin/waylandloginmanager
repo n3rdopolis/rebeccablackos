@@ -602,21 +602,14 @@ function PrepareLoginManager
   #Only save the last 1000 lines of /var/log/waylandloginmanager/waylandloginmanager.log
   if [[ -f /var/log/waylandloginmanager/waylandloginmanager.log ]]
   then
-    echo "$(tail -n 1000 /var/log/waylandloginmanager/waylandloginmanager.log)" > /var/log/waylandloginmanager/waylandloginmanager.log
+    echo "$(tail -n 1000 /var/log/waylandloginmanager/waylandloginmanager.log 2>/dev/null)" > /var/log/waylandloginmanager/waylandloginmanager.log 2>/dev/null
   fi
 
-  LoginManagerDisplayLogs=$(find /var/log/waylandloginmanager/loginmanagerdisplays -maxdepth 1 -iname "loginmanagerdisplay_*.log" -type f)
-  IFS=$'\n'
-  LoginManagerDisplayLogs=($LoginManagerDisplayLogs)
-  unset IFS
-
   #Only save last 1000 lines for the loginmanagerdisplay log files
-  for LoginManagerDisplayLog in ${LoginManagerDisplayLogs[@]}
+  for LoginManagerDisplayLog in /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_*.log
   do
-    echo "$(tail -n 1000 "$LoginManagerDisplayLog")" > "$LoginManagerDisplayLog"
-    unset LoginManagerDisplayLog
+    echo "$(tail -n 1000 "$LoginManagerDisplayLog" 2>/dev/null)" > "$LoginManagerDisplayLog" 2>/dev/null
   done
-  unset LoginManagerDisplayLogs
 
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
   WriteToLog "Starting Up..."
