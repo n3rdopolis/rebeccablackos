@@ -2962,7 +2962,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
           loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
         fi
-        if [[ $(jobs -p -r | grep -c ^${LastSwitchPIDs[$SeatIndexID]}$) == 0 ]]
+        if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastSwitchPIDs[$SeatIndexID]}([[:space:]]|$) ]]
         then
           if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
           then
@@ -2995,7 +2995,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
     then
-      if [[ $(jobs -p -r | grep -c ^${LastLoginPIDs[$SeatIndexID]}$) == 0  ]]
+      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLoginPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
@@ -3010,7 +3010,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
     then
-      if [[ $(jobs -p -r | grep -c ^${LastLeavePIDs[$SeatIndexID]}$) == 0  ]]
+      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLeavePIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
@@ -3033,7 +3033,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Info command, then bring up a info dialog and start a info job, only if there isn't another info job running
     elif [[ $COMMAND == "Info" ]]
     then
-      if [[ $(jobs -p -r | grep -c ^${LastInfoPIDs[$SeatIndexID]}$) == 0  ]]
+      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastInfoPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
@@ -3050,7 +3050,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $wlmdebug == 1 ]]
       then
-        if [[ $(jobs -p -r | grep -c ^${LastDebugPIDs[$SeatIndexID]}$) == 0 || $wlmdebuginsecure == 1  ]]
+        if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastDebugPIDs[$SeatIndexID]}([[:space:]]|$) || $wlmdebuginsecure == 1  ]]
         then
           DiagnosticTerminal "$SEATARG" &
           LastDebugPIDs[$SeatIndexID]=$!
