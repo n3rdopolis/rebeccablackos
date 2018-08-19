@@ -2699,7 +2699,7 @@ function WaylandLoginManagerMain
         LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
         unset IFS
         LoginManagerDisplayPIDs[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
-        LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
+        LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[1]}
       fi
       StartLoginManagerDisplay $RunningSeat
 
