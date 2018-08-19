@@ -341,9 +341,7 @@ function GetConfigKey
   fi
 
   #Convert to an array
-  IFS=$'\n'
-  LoginManagerConfig=($LoginManagerConfig)
-  unset IFS
+  readarray -t LoginManagerConfig <<< "$LoginManagerConfig"
 
   #If the command line value overrides or not
   if [[ -z $CommandLineValue ]]
