@@ -397,81 +397,121 @@ function GetConfigKey
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
 function ReadEnvironmentFile
 {
-  #parse the session event file if specified, and it exists
-  EnvironmentFileData=$(sed '0,/\[EnvironmentFile\]/d;/^\[/Q' "$1" 2>/dev/null | awk -F \# '{print $1}' | sed  -e "s/ *= */=/g" -re "s/(.*)@([A-Z]*)$/\2#\1/g")
+  unset EnvironmentFileLinesArray
+  EnvironmentFilePath=$1
+  #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
+  #The most accepted bytes is 16384, or 16KB, which is more than enough
+  if [[ -f "$EnvironmentFilePath" ]]
+  then
+    read -r -n 16385 -d $'\r' EnvironmentFileArray 2>/dev/null < "$EnvironmentFilePath"
+  else
+    echo "$EnvironmentFilePath is not a file"
+    continue
+  fi
 
-  readarray -t EnvironmentFileData <<< "$EnvironmentFileData"
+  #If the file is too large
+  if [[ ${#EnvironmentFileArray} -ge 16385 ]]
+  then
+    echo "$EnvironmentFilePath is too large, and will be ignored"
+    continue
+  fi
 
-  for EnvironmentFileLine in "${EnvironmentFileData[@]}"
+  #Convert the file data to an array
+  readarray -t EnvironmentFileArray <<< "$EnvironmentFileArray"
+
+  #Build the initial array for the NeedsFile list
+  EnvironmentFileLinesArray=()
+
+  #Handle all the valid lines in the file
+  ParseINISegment=0
+  for EnvironmentFileLine in "${EnvironmentFileArray[@]}"
   do
-    #environment files are specified as action=var=data
-    #Examples
-    #set=varname=data sets variable called varname, with the content of data.
-    #unset=varname unsets a variable called varname
-    #unset=varname@FB unsets a variable called varname ONLY if the current backend is FB. waylandloginmanager tells this script what the current backend is
-    IFS="#"
-    EnvironmentFileLine=($EnvironmentFileLine)
-    if [[ ${#EnvironmentFileLine[@]} -gt 1 ]]
-    then
-      VARBACKEND=${EnvironmentFileLine[0]}
-      EnvironmentFileLine=${EnvironmentFileLine[@]:1}
-    else
-      unset VARBACKEND
-    fi
-    unset IFS
+    EnvironmentFileLine="${EnvironmentFileLine##*( )}"
+    EnvironmentFileLine="${EnvironmentFileLine%%*( )}"
 
+    if [[ $ParseINISegment == 1 && $EnvironmentFileLine =~ ^[[:space:]]*"["  ]]
+    then
+      ParseINISegment=0
+    fi
+    if [[ $EnvironmentFileLine == "[EnvironmentFile]" ]]
+    then
+      ParseINISegment=1
+      continue
+    fi
+    if [[ $ParseINISegment == 0 ]]
+    then
+      continue
+    fi
+
+    KeyAction=""
+    KeyName=""
+    KeyValue=""
+    KeyBackend=""
+    [[ $EnvironmentFileLine =~ @([A-Z]*) ]]
+    if [[ ! -z ${BASH_REMATCH[1]} ]]
+    then
+      EnvironmentFileLine=${EnvironmentFileLine%%${BASH_REMATCH[0]}}
+      KeyBackend=${BASH_REMATCH[1]}
+    fi
+
+    EnvironmentFileLineLastChar=${EnvironmentFileLine:$((${#EnvironmentFileLine} -1 )):1}
     IFS="="
     EnvironmentFileLine=($EnvironmentFileLine)
     unset IFS
 
-    VARACTION=${EnvironmentFileLine[0]}
-    VARNAME=${EnvironmentFileLine[1]}
+    KeyAction=${EnvironmentFileLine[0]}
+    KeyAction="${KeyAction##*( )}"
+    KeyAction="${KeyAction%%*( )}"
 
-    VARDATAARRAY=(${EnvironmentFileLine[@]:2})
-    ADDDELIM=0
-    VARDATA=""
-    for VARDATASEGMENT in "${VARDATAARRAY[@]}"
-    do
-      if [[ $ADDDELIM != 0 ]]
+    KeyName=${EnvironmentFileLine[1]}
+    KeyName="${KeyName##*( )}"
+    KeyName="${KeyName%%*( )}"
+
+    if [[ ${#EnvironmentFileLine[@]} -gt 2 ]]
+    then
+      printf -v KeyValue "=%s" "${EnvironmentFileLine[@]:2}"
+      KeyValue=${KeyValue:1}
+      KeyValue="${KeyValue##*( )}"
+      KeyValue="${KeyValue%%*( )}"
+      if [[ $EnvironmentFileLineLastChar == "=" ]]
       then
-        VARDATA+="="
-      else
-        ADDDELIM=1
+        KeyValue+=$EnvironmentFileLineLastChar
       fi
-      VARDATA+="$VARDATASEGMENT"
-    done
+    fi
 
     #Only expand some variables
-    if [[ $VARDATA == "\$WAYLAND_DISPLAY" ]]
+    if [[ $KeyValue == "\$WAYLAND_DISPLAY" ]]
     then
-      VARDATA=$WAYLAND_DISPLAY
+      KeyValue=$WAYLAND_DISPLAY
     fi
-    if [[ $VARDATA == "\$XDG_SEAT" ]]
+    if [[ $KeyValue == "\$XDG_SEAT" ]]
     then
-      VARDATA=$XDG_SEAT
+      KeyValue=$XDG_SEAT
     fi
 
     #if the backend for this line is unspecified, OR if the backend on this line matches the current one running then handle the variable
-    if [[ $WLM_USE_SOFTWARE == 1 && $VARBACKEND == SOFTWARE ]]
+    if [[ $WLM_USE_SOFTWARE == 1 && $KeyBackend == SOFTWARE ]]
     then
       ADDSWVAR=1
     else
       ADDSWVAR=0
     fi
-    if [[ -z $VARBACKEND || $VARBACKEND == $BackendType || $ADDSWVAR == 1 ]]
+
+    if [[ -z $KeyBackend || $KeyBackend == $BackendType || $ADDSWVAR == 1 ]]
     then
       #if it is set, then set the variable
-      if [[ $VARACTION == "set" ]]
+      if [[ $KeyAction == "set" ]]
       then
-        export $VARNAME=$VARDATA
+        export $KeyName=$KeyValue
       fi
       #if it is unset, then unset the variable
-      if [[ $VARACTION == "unset" ]]
+      if [[ $KeyAction == "unset" ]]
       then
-        unset $VARNAME
+        unset $KeyName
       fi
     fi
   done
+  unset EnvironmentFileArray
 }
 
 #All functions below this point are for the main operation of the waylandloginmanager
