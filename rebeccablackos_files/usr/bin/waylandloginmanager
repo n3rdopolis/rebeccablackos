@@ -1056,6 +1056,252 @@ function DisplayServerWait
   fi
 }
 
+#This takes no arguments, this splits all the wsession file data into fixed arrays usable for session selection
+function ParseWSessionFiles
+{
+  unset DesktopFileDataArrays
+  unset NeedsFileArrays
+  unset SeatBackendArrays
+
+  SeatBackendArrayElementOffset=5
+  for WSESSIONFILE in $WSESSIONSPATH/*.desktop
+  do
+    #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
+    #The most accepted bytes is 16384, or 16KB, which is more than enough
+    if [[ -f "$WSESSIONFILE" ]]
+    then
+      read -r -n 16385 -d $'\r' WSESSIONFILEDATA 2>/dev/null < "$WSESSIONFILE"
+    else
+      WriteToLog "$WSESSIONFILE is not a file"
+      continue
+    fi
+
+    #If the file is too large
+    if [[ ${#WSESSIONFILEDATA} -ge 16385 ]]
+    then
+      WriteToLog "$WSESSIONFILE is too large, and will be ignored"
+      continue
+    fi
+
+    #Convert the file data to an array
+    readarray -t WSESSIONFILEDATA <<< "$WSESSIONFILEDATA"
+
+    #Build the initial array for the main keys
+    DesktopFileDataArray=""
+    for Iterator in {000..012}
+    do
+      if [[ ! -z $DesktopFileDataArray ]]
+      then
+        DesktopFileDataArray+=$'\n'
+      fi
+      DesktopFileDataArray+=${Iterator}"#"
+    done
+    readarray -t DesktopFileDataArray <<< "$DesktopFileDataArray"
+    DesktopFileDataArray[11]="011#$WSESSIONFILE"
+
+    #Build the initial array for the NeedsFile list
+    NeedsFileArray=()
+    NeedsFileArray+=("001#$WSESSIONFILE")
+
+    #Build the initial array for the backend support table
+    SeatBackendArray=""
+    for BACKEND in KMS WL FB
+    do
+      for Iterator in {000..003}
+      do
+        if [[ ! -z $SeatBackendArray ]]
+        then
+          SeatBackendArray+=$'\n'
+        fi
+        SeatBackendArray+="000#"${Iterator}"#"${BACKEND}"#"
+      done
+    done
+    readarray -t SeatBackendArray <<< "$SeatBackendArray"
+
+    #Handle all the valid lines in the file
+    ParseINISegment=0
+    for WSESSIONLINE in "${WSESSIONFILEDATA[@]}"
+    do
+      WSESSIONLINE="${WSESSIONLINE##*( )}"
+      WSESSIONLINE="${WSESSIONLINE%%*( )}"
+
+      if [[ $ParseINISegment == 1 && $WSESSIONLINE =~ ^[[:space:]]*"["  ]]
+      then
+        ParseINISegment=0
+      fi
+      if [[ $WSESSIONLINE == "[Desktop Entry]" ]]
+      then
+        ParseINISegment=1
+        continue
+      fi
+      if [[ $ParseINISegment == 0 ]]
+      then
+        continue
+      fi
+
+      WSESSIONLINELASTCHAR=${WSESSIONLINE:$((${#WSESSIONLINE} -1 )):1}
+      IFS="="
+      WSESSIONLINE=($WSESSIONLINE)
+      unset IFS
+
+      KeyName=${WSESSIONLINE[0]}
+      KeyName="${KeyName##*( )}"
+      KeyName="${KeyName%%*( )}"
+
+      if [[ ${#WSESSIONLINE[@]} -gt 1 ]]
+      then
+        printf -v KeyValue "=%s" "${WSESSIONLINE[@]:1}"
+        KeyValue=${KeyValue:1}
+        KeyValue="${KeyValue##*( )}"
+        KeyValue="${KeyValue%%*( )}"
+        if [[ $WSESSIONLINELASTCHAR == "=" ]]
+        then
+          KeyValue+=$WSESSIONLINELASTCHAR
+        fi
+      fi
+
+      #Set the NeedFile
+      if [[ $KeyName == NeedsFile ]]
+      then
+        NeedsFileArray+=("000#$KeyValue")
+        continue
+      fi
+
+      ChangeArrayElement=-1
+      case $KeyName in
+        Enabled)
+          ChangeArrayElement=0;;
+        Name)
+          ChangeArrayElement=1;;
+        Comment)
+          ChangeArrayElement=2;;
+        Type)
+          ChangeArrayElement=3;;
+        IsFallbackSession)
+          ChangeArrayElement=4;;
+        CompositorDisplayArgument)
+          ChangeArrayElement=5;;
+        CompositorSeatArgument)
+          ChangeArrayElement=6;;
+        SessionArgument)
+          ChangeArrayElement=7;;
+        AdditionalArguments)
+          ChangeArrayElement=8;;
+        CompositorExec)
+          ChangeArrayElement=9;;
+        EnvironmentFile)
+          ChangeArrayElement=10;;
+      esac
+
+      if [[ $ChangeArrayElement != -1 ]]
+      then
+        printf -v OffsetID "%03d" $ChangeArrayElement
+        if [[ ${DesktopFileDataArray[$ChangeArrayElement]} == "$OffsetID#" ]]
+        then
+          DesktopFileDataArray[$ChangeArrayElement]="$OffsetID#$KeyValue"
+        fi
+        continue
+      fi
+
+      #If the line is for a backend, determine what element to set on the backend array
+      #Each backend has a number elements each, and are always in order KMS, WL, FB
+      #The number of elements are fixed place for if it's supports the backend, arguments for the backend, if the backend supports seats, ect.
+      if [[ $KeyName =~ [a-Z]*KMS[a-Z]* || $KeyName =~ [a-Z]*WL[a-Z]* || $KeyName =~ [a-Z]*FB[a-Z]* ]]
+      then
+        for BACKEND in KMS WL FB
+        do
+          ChangeArrayOffset=-1
+          if [[ $BACKEND == KMS ]]
+          then
+            ChangeArrayMultiplicand=0
+          elif [[ $BACKEND == WL ]]
+          then
+            ChangeArrayMultiplicand=1
+          elif [[ $BACKEND == FB ]]
+          then
+            ChangeArrayMultiplicand=2
+          fi
+
+          if [[ $KeyName =~ CompositorSupports${BACKEND} ]]
+          then
+            ChangeArrayOffset=0
+          fi
+          if [[ $KeyName =~ Compositor${BACKEND}Arguments ]]
+          then
+            ChangeArrayOffset=1
+          fi
+          if [[ $KeyName =~ Compositor${BACKEND}SeatAware ]]
+          then
+            ChangeArrayOffset=2
+          fi
+          if [[ $KeyName =~ Compositor${BACKEND}SeatArgument ]]
+          then
+            ChangeArrayOffset=3
+          fi
+
+          if [[ $ChangeArrayOffset != -1 ]]
+          then
+            printf -v OffsetID "%03d" $ChangeArrayOffset
+            ChangeArrayElement=$(( (SeatBackendArrayElementOffset * ChangeArrayMultiplicand) + ChangeArrayOffset ))
+            if [[ ${SeatBackendArray[$ChangeArrayElement]} == "000#$OffsetID#${BACKEND}#" ]]
+            then
+              SeatBackendArray[$ChangeArrayElement]="000#$OffsetID#${BACKEND}#$KeyValue"
+            fi
+          fi
+        done
+      fi
+    done
+
+    FirstElement=0
+    for Element in "${DesktopFileDataArray[@]}"
+    do
+      if [[ $FirstElement != 0 ]]
+      then
+        DesktopFileDataArrays+=$'\n'
+      fi
+      DesktopFileDataArrays+=$Element
+      FirstElement=1
+    done
+    DesktopFileDataArrays+=$'\r'
+    unset DesktopFileDataArray
+
+    FirstElement=0
+    for Element in "${NeedsFileArray[@]}"
+    do
+      if [[ $FirstElement != 0 ]]
+      then
+        NeedsFileArrays+=$'\n'
+      fi
+      NeedsFileArrays+=$Element
+      FirstElement=1
+    done
+    NeedsFileArrays+=$'\r'
+    unset DesktopFileDataArray
+
+    FirstElement=0
+    for Element in "${SeatBackendArray[@]}"
+    do
+      if [[ $FirstElement != 0 ]]
+      then
+        SeatBackendArrays+=$'\n'
+      fi
+      SeatBackendArrays+=$Element
+      FirstElement=1
+    done
+    SeatBackendArrays+=$'\r'
+    unset DesktopFileDataArray
+
+    unset WSESSIONFILEDATA
+  done
+
+  IFS=$'\r'
+  DesktopFileDataArrays=($DesktopFileDataArrays)
+  NeedsFileArrays=($NeedsFileArrays)
+  SeatBackendArrays=($SeatBackendArrays)
+  unset IFS
+}
+
+
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
 #It takes 1 argument, the seat to show the dialogs on
@@ -1144,84 +1390,10 @@ function ChooseSessionType
     fi
   fi
 
-  #Find all wsession files, smaller than 16kb
-  WSESSIONFILELIST=$(find $WSESSIONSPATH -maxdepth 1 -iname "*.desktop" -type f -size -16384c -o -size 16384c)
-  LARGEWSESSIONFILES=$(find $WSESSIONSPATH -maxdepth 1 -iname "*.desktop" -type f -size +16384c -printf "\'%p\' ")
-  if [[ ! -z $LARGEWSESSIONFILES ]]
-  then
-    WriteToLog "The following files: $LARGEWSESSIONFILES have been ignored because they are too large"
-  fi
-
-  #Read all the wsession .desktop files
-  DesktopFileData=$(gawk 'BEGIN{filenum+=1} {print $0 "#" filenum} \
-    ENDFILE {print "[Desktop Entry]#" filenum; print "PhysicalFileName=" FILENAME "#" filenum; \
-    print "Enabled=#" filenum; print "Name=#" filenum; print "Comment=#" filenum; print "Type=#" filenum; \
-    print "IsFallbackSession=#" filenum; print "CompositorDisplayArgument=#" filenum; \
-    print "CompositorSeatArgument=#" filenum; print "SessionArgument=#" filenum; \
-    print "AdditionalArguments=#" filenum; print "CompositorExec=#" filenum; \
-    print "EnvironmentFile=#" filenum; print "EOF=#" filenum; \
-    filenum+=1}' $WSESSIONFILELIST | awk '/\[Desktop Entry]/{flag=1;next}/\[/{flag=0}flag' )
-
-  #Create the arrays for the common attributes for each wsession
-  DesktopFileDataArrays=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' -e 's/^ *Enabled *= */000#/' \
-    -e 's/^ *Name *= */001#/' -e 's/^ *Comment *= */002#/' -e 's/^ *Type *= */003#/' -e 's/^ *IsFallbackSession *= */004#/' \
-    -e 's/^ *CompositorDisplayArgument *= */005#/' -e 's/^ *CompositorSeatArgument *= */006#/' -e 's/^ *SessionArgument *= */007#/' \
-    -e 's/^ *AdditionalArguments *= */008#/' -e 's/^ *CompositorExec *= */009#/' -e 's/^ *EnvironmentFile *= */010#/' \
-    -e 's/^ *PhysicalFileName *= */011#/' -e 's/^ *EOF *= */012#/' \
-    -e "/^[0-9][0-9][0-9]#/!d" | sort -t "#" -nk 3,3 -k1,1 -u | sed -e 's/#[[:digit:]]\+$//g' -e 's/012#/\r/g' )
-  DesktopFileDataArrays=${DesktopFileDataArrays//$'\n'$'\r'$'\n'/$'\r'}
-  IFS=$'\r'
-  DesktopFileDataArrays=(${DesktopFileDataArrays//$'\n'$'\r'/})
-  unset IFS
+  ParseWSessionFiles
 
   #Get the number of files in the array
   DesktopFileCount=${#DesktopFileDataArrays[@]}
-
-  #Build the array containing NeedsFile lines (as there can be more than one, and not fixed in DesktopFileDataArrays
-  NeedsFileArrays=$(echo "$DesktopFileData" | sed -e 's/[0-9][0-9][0-9]#//g' \
-    -e 's/^ *NeedsFile *= */000#/' -e 's/^ *PhysicalFileName *= */001#/' \
-    -e 's/^ *EOF *= */002#/' \
-    -e "/[0-9][0-9][0-9]#/!d" | perl -pe 's/\$(\w+)/$ENV{$1}/g' | sort -t "#" -k 3,3 -k 1,1 | sed -e 's/#[[:digit:]]\+$//g' -e 's/002#/\r/g')
-  NeedsFileArrays=${NeedsFileArrays//$'\n'$'\r'$'\n'/$'\r'}
-  IFS=$'\r'
-  NeedsFileArrays=(${NeedsFileArrays//$'\n'$'\r'/})
-  unset IFS
-
-  #Create a line of placeholders for the array for the backend hardware support information for the wsessions
-  #This will keep the array a fixed size
-  SeatBackendArrayPlaceholders=""
-  for (( iterator=1 ; iterator <= $DesktopFileCount ; iterator++ ))
-  do
-    for BACKEND in KMS WL FB
-    do
-      BackendPlaceHolders=""
-      BackendPlaceHolders+=$'\n'"CompositorSupports${BACKEND}=#$iterator"
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}Arguments=#$iterator"
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatAware=#$iterator"
-      BackendPlaceHolders+=$'\n'"Compositor${BACKEND}SeatArgument=#$iterator"
-      SeatBackendArrayPlaceholders+=$'\n'$BackendPlaceHolders$'\n'
-    done
-  done
-
-  SeatBackendArrays=$(echo "$DesktopFileData"$'\n'"$SeatBackendArrayPlaceholders" | sed  -e 's/[0-9][0-9][0-9]#//g' \
-    -re "s/^ *CompositorSupports(KMS|WL|FB) *= */000#000#\1#/" \
-    -re  "s/^ *Compositor(KMS|WL|FB)Arguments *= */000#001#\1#/" \
-    -re  "s/^ *Compositor(KMS|WL|FB)SeatAware *= */000#002#\1#/" \
-    -re  "s/^ *Compositor(KMS|WL|FB)SeatArgument *= */000#003#\1#/" \
-    -e 's/^ *EOF *= */001#999#999#/' \
-    -e "/^[0-9][0-9][0-9]#/!d" | sed -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#KMS#/\1#100#/g' \
-    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#WL#/\1#101#/g' \
-    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#FB#/\1#102#/g' | sort -t "#"  -k5,5 -k1,1 -u -k3,3 -k2,2 | sed -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#100#/\1#KMS#/g' \
-    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#101#/\1#WL#/g' \
-    -re 's/^([0-9][0-9][0-9]#[0-9][0-9][0-9])#102#/\1#FB#/g' | sed -e 's/#[[:digit:]]\+$//g' -e 's/001#999#999#/\r/g')
-  SeatBackendArrays=${SeatBackendArrays//$'\n'$'\r'$'\n'/$'\r'}
-  IFS=$'\r'
-  SeatBackendArrays=(${SeatBackendArrays//$'\n'$'\r'/})
-  unset IFS
-
-  #Unset the string containing the raw text of the .desktop files
-  unset DesktopFileData
-  unset SeatBackendArrayPlaceholders
 
   #Use the arrays created from parsing the wsession files, to determine if each is supported, and to construct the list that will be shown in the dialog
   for (( wsessionnum=0 ; wsessionnum < $DesktopFileCount ; wsessionnum++ ))
@@ -1321,6 +1493,9 @@ function ChooseSessionType
     if [[ ! -x $WSessionFilePath ]]
     then
       WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user."
+      IsExecutable=0
+    else
+      IsExecutable=1
     fi
 
     if [[ -z "$EnvironmentFile" ]]
