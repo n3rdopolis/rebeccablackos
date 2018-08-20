@@ -294,7 +294,7 @@ function ProbeFilesExist
   #Or return the value to the variable specified in the 2nd argument
   if [[ ! -z $2 ]]
   then
-    builtin printf -v "$2" '%s' "$ReturnStatus"
+    builtin printf -v "$2" '%s' "$ReturnStatus" 2> /dev/null
   else
     echo $ReturnStatus
   fi
@@ -749,7 +749,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
-  ProbeFilesExist /dev/dri/card[0-9]* KMSFileProbe
+  ProbeFilesExist "/dev/dri/card[0-9]*" KMSFileProbe
   if [[ $KMSFileProbe == 1 && $wlmforcefbdev == 0 ]]
   then 
     WriteToLog "Kernel mode setting found."
@@ -760,7 +760,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   unset KMSFileProbe
 
   GetConfigKey wlmnofbdev "" 0 1 wlmnofbdev
-  ProbeFilesExist /dev/fb[0-9]* FBFileProbe
+  ProbeFilesExist "/dev/fb[0-9]*" FBFileProbe
   if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
@@ -828,7 +828,7 @@ Will now reboot." 20 50 --no-cancel
 
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
-  ProbeFilesExist /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"*" LoginManagerDisplayFileProbe
+  ProbeFilesExist "/run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_*" LoginManagerDisplayFileProbe
   if [[ $LoginManagerDisplayFileProbe == 1 ]]
   then
     RUNNINGWLMCOUNT=$(systemctl show wlm-loginmanagerdisplay_*.service -p MainPID --value |& wc -l )
