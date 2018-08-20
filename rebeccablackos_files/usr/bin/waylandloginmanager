@@ -1063,7 +1063,7 @@ function ParseWSessionFiles
   unset NeedsFileArrays
   unset SeatBackendArrays
 
-  SeatBackendArrayElementOffset=5
+  SeatBackendArrayElementOffset=4
   for WSESSIONFILE in $WSESSIONSPATH/*.desktop
   do
     #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
