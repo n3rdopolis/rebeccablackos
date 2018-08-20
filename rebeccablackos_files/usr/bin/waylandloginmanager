@@ -3268,6 +3268,15 @@ then
     SEAT=$3
   fi
   SendSelfCommand $2 "$SEAT"
+elif [[ $1 == "--udevtrigger" ]]
+then
+  if [[ $UID == 0 ]]
+  then
+    if [[ -f /run/waylandloginmanager/sessiondata ]]
+    then
+      SendSelfCommand DetectSeats
+    fi
+  fi
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit 1
