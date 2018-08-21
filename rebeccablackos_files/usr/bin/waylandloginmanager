@@ -79,9 +79,12 @@
      #defaultwsession=Unquoted Session Name
      #to force a wsession (based off the Name= key)
      #to be the default session
-     #or defaultwsession-{$USER_LOGNAME}=Unquoted Session Name
+     #or defaultwsession--{$USER_LOGNAME}=Unquoted Session Name
      #to force it for a paticular user only
-     #or defaultwsession-{$USER_LOGNAME}=:
+     #or defaultwsession--{$USER_LOGNAME}=:
+     #or defaultwsession-{$SEAT}=Unquoted Session Name
+     #or defaultwsession-{$SEAT}-{$USER_LOGNAME}=Unquoted Session Name
+     #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
 
 #/usr/libexec/wayland_login_helpers/*
@@ -1636,7 +1639,8 @@ function ChooseSessionType
     done <<< "$WSESSIONLIST"
     WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/10))
 
-    GetConfigKey defaultwsession "$SessionUser" ":" 0 DEFAULTWSESSION
+    GetConfigKey defaultwsession "-$SessionUser" ":" 0 DEFAULTWSESSION
+    GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$DEFAULTWSESSION" 0 DEFAULTWSESSION
     WSESSIONNUMBER=-1
     if [[ $DEFAULTWSESSION != ":" ]]
     then
@@ -1650,8 +1654,8 @@ function ChooseSessionType
       done
       if [[ $WSESSIONNUMBER == -1 ]]
       then
-        $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found" 2>/dev/null
-        WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found"
+        $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found, configured correctly, or supported by the hardware in this seat." 2>/dev/null
+        WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
         return 1
       fi
     fi
