@@ -301,8 +301,8 @@ function ProbeFilesExist
 }
 
 #Function that reads the waylandloginmanager config, and reports the value of it, if it exists.
-#It takes 3 arguments, the first key to get the value of, the second is the seat, and the is the default value,
-#the 4th is 0 consider just the config file, 1 to consider /proc/cmdline and the config file, or 2 to only consider /proc/cmdline, and the 5th is the variable to return to
+#It takes 5 arguments, the first key to get the value of, the second is the subvalue (Value, Value-seat ; Value-Value-user), and the 3rd is the default value,
+#the 4th is: 0 to consider just the config file, 1 to consider /proc/cmdline and the config file, or 2 to only consider /proc/cmdline, and the 5th is the variable to return to
 function GetConfigKey
 {
   CommandLineValue=""
