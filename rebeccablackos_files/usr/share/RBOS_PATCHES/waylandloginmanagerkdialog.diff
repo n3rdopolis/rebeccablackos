@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-08-19 23:53:34.604915107 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2018-08-19 23:54:36.037276232 -0400
+--- usr/bin/waylandloginmanager	2018-08-21 00:15:55.674482358 -0400
++++ usr/bin/waylandloginmanagerkdialog	2018-08-21 00:16:20.818638066 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -88,28 +88,37 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1634,13 +1632,16 @@
+@@ -1642,7 +1640,7 @@
+       done
+       if [[ $WSESSIONNUMBER == -1 ]]
        then
-         WSESSIONPICKLIST+=$'\n'
+-        $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found" 2>/dev/null
++        $KDIALOGCMD --title="Session Selection" --error "$DEFAULTWSESSION set as default session for $SessionUser, but was not found" 2>/dev/null
+         WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found"
+         return 1
        fi
--      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
-+      WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((8+element*10))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((9+element*10))]}
-     done
-     WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
-+    IFS=$'\n'
-+    WSESSIONPICKLIST=($WSESSIONPICKLIST)
-+    unset IFS
-     #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
--    #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
--    WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
--    #Abort if the user selected cancel on the zenity dialog
-+    #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
-+    WSESSIONNUMBER=$($KDIALOGCMD --geometry=700x300+0+0 --title="Pick a Session..." --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
-+    #Abort if the user selected cancel on the dialog
-     CancelOrOK=$?
-     if [[ $CancelOrOK != 0 ]]
-     then
-@@ -1651,7 +1652,7 @@
+@@ -1657,13 +1655,16 @@
+         then
+           WSESSIONPICKLIST+=$'\n'
+         fi
+-        WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
++        WSESSIONPICKLIST+=$element"#"${WSESSIONARRAY[$((8+element*10))]}$'\t'$'\t'$'\t'${WSESSIONARRAY[$((9+element*10))]}
+       done
+       WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
++      IFS=$'\n'
++      WSESSIONPICKLIST=($WSESSIONPICKLIST)
++      unset IFS
+       #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
+-      #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
+-      WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
+-      #Abort if the user selected cancel on the zenity dialog
++      #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
++      WSESSIONNUMBER=$($KDIALOGCMD --geometry=700x300+0+0 --title="Pick a Session..." --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
++      #Abort if the user selected cancel on the dialog
+       CancelOrOK=$?
+       if [[ $CancelOrOK != 0 ]]
+       then
+@@ -1675,7 +1676,7 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
@@ -118,7 +127,7 @@
      WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
-@@ -1718,7 +1719,7 @@
+@@ -1742,7 +1743,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -127,7 +136,7 @@
  
  $BACKENDSTRING
  
-@@ -1744,12 +1745,6 @@
+@@ -1768,12 +1769,6 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -140,7 +149,7 @@
    RunningSeatSessions=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null))
    while [[ $NumberOfSessions -ge 0 ]]
    do
-@@ -1772,11 +1767,7 @@
+@@ -1796,11 +1791,7 @@
          then
            SessionList+=$'\n'
          fi
@@ -153,7 +162,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -1787,19 +1778,17 @@
+@@ -1811,19 +1802,17 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -179,7 +188,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -1828,7 +1817,7 @@
+@@ -1852,7 +1841,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -188,7 +197,7 @@
        fi
      fi
    fi
-@@ -2075,26 +2064,30 @@
+@@ -2099,26 +2088,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -227,7 +236,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2102,9 +2095,9 @@
+@@ -2126,9 +2119,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -239,7 +248,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2120,9 +2113,9 @@
+@@ -2144,9 +2137,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
@@ -251,7 +260,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2134,17 +2127,17 @@
+@@ -2158,17 +2151,17 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
@@ -272,7 +281,7 @@
  #It takes 1 argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2152,7 +2145,7 @@
+@@ -2176,7 +2169,7 @@
    SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
    SetFallbackEnvironmentVariables $1
@@ -281,7 +290,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2208,16 +2201,22 @@
+@@ -2232,16 +2225,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -307,7 +316,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2251,7 +2250,7 @@
+@@ -2275,7 +2274,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -316,16 +325,16 @@
    fi
  }
  
-@@ -2594,7 +2593,7 @@
+@@ -2618,7 +2617,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
-   ChooseSessionType "$1"
+   ChooseSessionType "$1" "$AUTOLOGINUSER"
 -  #Abort if the user selected cancel on the zenity dialog
 +  #Abort if the user selected cancel on the dialog
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2619,7 +2618,7 @@
+@@ -2643,7 +2642,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -334,7 +343,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2653,22 +2652,27 @@
+@@ -2677,22 +2676,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -369,7 +378,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2676,12 +2680,12 @@
+@@ -2700,12 +2704,12 @@
    else
      $SLEEPCMD .1
    fi

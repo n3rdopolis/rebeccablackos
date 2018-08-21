@@ -1344,10 +1344,11 @@ function ParseWSessionFiles
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
-#It takes 1 argument, the seat to show the dialogs on
+#It takes 2 arguments, the seat to show the dialogs on, and the user name (for reading configs)
 function ChooseSessionType
 {
   CurrentHandleSeat="$1"
+  SessionUser="$2"
   GetStartedSeatIndex $CurrentHandleSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
@@ -1627,24 +1628,47 @@ function ChooseSessionType
     done <<< "$WSESSIONLIST"
     WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/10))
 
-    WSESSIONPICKLIST=""
-    for (( element=0; element<$WSESSIONCOUNT; element++ ))
-    do
-      if [[ ! -z $WSESSIONPICKLIST ]]
-      then
-        WSESSIONPICKLIST+=$'\n'
-      fi
-      WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
-    done
-    WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
-    #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
-    #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
-    WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
-    #Abort if the user selected cancel on the zenity dialog
-    CancelOrOK=$?
-    if [[ $CancelOrOK != 0 ]]
+    GetConfigKey defaultwsession "$SessionUser" "" 0 DEFAULTWSESSION
+    WSESSIONNUMBER=-1
+    if [[ ! -z $DEFAULTWSESSION ]]
     then
-      return 1
+      for (( element=0; element<$WSESSIONCOUNT; element++ ))
+      do
+        if [[ "$DEFAULTWSESSION" == "${WSESSIONARRAY[$((8+element*10))]}" ]]
+        then
+          WSESSIONNUMBER=$element
+          break
+        fi
+      done
+      if [[ $WSESSIONNUMBER == -1 ]]
+      then
+        $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found" 2>/dev/null
+        WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found"
+        return 1
+      fi
+    fi
+
+    if [[ -z $DEFAULTWSESSION ]]
+    then
+      WSESSIONPICKLIST=""
+      for (( element=0; element<$WSESSIONCOUNT; element++ ))
+      do
+        if [[ ! -z $WSESSIONPICKLIST ]]
+        then
+          WSESSIONPICKLIST+=$'\n'
+        fi
+        WSESSIONPICKLIST+=$element$"#"${WSESSIONARRAY[$((8+element*10))]}"#"${WSESSIONARRAY[$((9+element*10))]}
+      done
+      WSESSIONPICKLIST=$(echo "$WSESSIONPICKLIST" | sort -t "#" -k 2,2 | sed 's/#/\n/g')
+      #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
+      #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
+      WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
+      #Abort if the user selected cancel on the zenity dialog
+      CancelOrOK=$?
+      if [[ $CancelOrOK != 0 ]]
+      then
+        return 1
+      fi
     fi
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
 
@@ -2016,7 +2040,7 @@ function AuthenticateUser
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
     #Prompt for the session type
-    ChooseSessionType "$1"
+    ChooseSessionType "$1" "$LOGINUSER"
     if [[ $? != 0 ]]
     then
       return 0
@@ -2593,7 +2617,7 @@ function StartAutoLogin
   echo "$1" >> /run/waylandloginmanager/autologinran
   #Wait until the loginmanagerdisplay becomes availible
   DisplayServerWait "$1"
-  ChooseSessionType "$1"
+  ChooseSessionType "$1" "$AUTOLOGINUSER"
   #Abort if the user selected cancel on the zenity dialog
   CancelOrOK=$?
   if [[ $CancelOrOK != 0 ]]
