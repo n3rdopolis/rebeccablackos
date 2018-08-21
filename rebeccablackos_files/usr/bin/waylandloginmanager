@@ -76,6 +76,12 @@
      #to disable using the framebuffer globally.
      #Specifing the option on the kernel command line overrides the config file
 
+     #defaultwsession=Unquoted Session Name
+     #to force a wsession (based off the Name= key)
+     #to be the default session
+     #or defaultwsession-{$USER_LOGNAME}=Unquoted Session Name
+     #to force it for a paticular user only
+
 #/usr/libexec/wayland_login_helpers/*
   #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/weston.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
   #These are optional as the waylandloginmanager displays a selection list with the same commands as well
