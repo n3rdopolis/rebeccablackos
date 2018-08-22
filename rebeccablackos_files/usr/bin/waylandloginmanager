@@ -76,6 +76,8 @@
      #to disable using the framebuffer globally.
      #Specifing the option on the kernel command line overrides the config file
 
+     #Auto session selection only takes place during autologin
+     #It is automatically set by the last manual session selection for the user on the seat.
      #defaultwsession=Unquoted Session Name
      #to force a wsession (based off the Name= key)
      #to be the default session
@@ -84,6 +86,8 @@
      #or defaultwsession--{$USER_LOGNAME}=:
      #or defaultwsession-{$SEAT}=Unquoted Session Name
      #or defaultwsession-{$SEAT}-{$USER_LOGNAME}=Unquoted Session Name
+     #set defaultwsession-{$SEAT}-{$USER_LOGNAME}=::
+     #to make it always prompt for autologins
      #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
 
@@ -404,6 +408,57 @@ function GetConfigKey
     echo $ReturnKeyValue
   fi
 }
+
+#Function to set values in /etc/waylandloginmanager.conf, takes 2 arguments, the key name, and the value
+#Only full values are accepted
+function SetConfigKey
+{
+  unset LoginManagerConfig
+  #Only allow /etc/waylandloginmanager.conf to be less that 16kb.
+  if [[ -f /etc/waylandloginmanager.conf ]]
+  then
+    #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
+    #The most accepted bytes is 16384, or 16KB, which is more than enough
+    read -r -n 16385 -d $'\r' LoginManagerConfig 2>/dev/null </etc/waylandloginmanager.conf
+    if [[ ${#LoginManagerConfig} == 16385 ]]
+    then
+      WriteToLog "/etc/waylandloginmanager.conf is too large"
+      return
+    fi
+  fi
+
+  #Convert to an array
+  readarray -t LoginManagerConfig <<< "$LoginManagerConfig"
+
+  LoginManagerConfigOutput=""
+
+  for LoginManagerConfigLine in "${LoginManagerConfig[@]}"
+  do
+    IFS="="
+    LoginManagerConfigLineArray=($LoginManagerConfigLine)
+    unset IFS
+
+    #Find the config value for all seats
+    if [[  ${LoginManagerConfigLineArray[0]} != "$1" ]]
+    then
+      if [[ ! -z $LoginManagerConfigOutput ]]
+      then
+        LoginManagerConfigOutput+=$'\n'
+      fi
+      LoginManagerConfigOutput+="$LoginManagerConfigLine"
+    fi
+  done
+  if [[ ! -z $1 ]]
+  then
+    if [[ ! -z $LoginManagerConfigOutput ]]
+    then
+      LoginManagerConfigOutput+=$'\n'
+    fi
+    LoginManagerConfigOutput+="${1}=${2}"
+  fi
+  echo "$LoginManagerConfigOutput" > /etc/waylandloginmanager.conf
+}
+
 
 #Function that takes the argument of an environment file, and handles the definitions (for --usersession)
 function ReadEnvironmentFile
@@ -1355,11 +1410,12 @@ function ParseWSessionFiles
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
-#It takes 2 arguments, the seat to show the dialogs on, and the user name (for reading configs)
+#It takes 3 arguments, the seat to show the dialogs on, the user optional user name (for reading configs for default sessions), and if this is an autologin
 function ChooseSessionType
 {
   CurrentHandleSeat="$1"
   SessionUser="$2"
+  IsAutologin="$3"
   GetStartedSeatIndex $CurrentHandleSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
@@ -1639,8 +1695,14 @@ function ChooseSessionType
     done <<< "$WSESSIONLIST"
     WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/10))
 
-    GetConfigKey defaultwsession "-$SessionUser" ":" 0 DEFAULTWSESSION
-    GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$DEFAULTWSESSION" 0 DEFAULTWSESSION
+    GetConfigKey defaultwsession "-$SessionUser" ":" 0 GETDEFAULTWSESSION
+    GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
+    if [[ $IsAutologin == 1 ]]
+    then
+      DEFAULTWSESSION="$GETDEFAULTWSESSION"
+    else
+      DEFAULTWSESSION=":"
+    fi
     WSESSIONNUMBER=-1
     if [[ $DEFAULTWSESSION != ":" ]]
     then
@@ -1683,6 +1745,10 @@ function ChooseSessionType
       fi
     fi
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
+    if [[ $GETDEFAULTWSESSION != "::" ]]
+    then
+      SetConfigKey "defaultwsession-${CurrentHandleSeat}-${SessionUser}" "${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
+    fi
 
   else
     unset WSESSIONDATA
@@ -2052,7 +2118,7 @@ function AuthenticateUser
   then
     export USERHOME=$(eval echo ~$LOGINUSER)
     #Prompt for the session type
-    ChooseSessionType "$1" "$LOGINUSER"
+    ChooseSessionType "$1" "$LOGINUSER" 0
     if [[ $? != 0 ]]
     then
       return 0
@@ -2629,7 +2695,7 @@ function StartAutoLogin
   echo "$1" >> /run/waylandloginmanager/autologinran
   #Wait until the loginmanagerdisplay becomes availible
   DisplayServerWait "$1"
-  ChooseSessionType "$1" "$AUTOLOGINUSER"
+  ChooseSessionType "$1" "$AUTOLOGINUSER" 1
   #Abort if the user selected cancel on the zenity dialog
   CancelOrOK=$?
   if [[ $CancelOrOK != 0 ]]
