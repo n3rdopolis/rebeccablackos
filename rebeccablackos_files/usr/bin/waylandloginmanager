@@ -363,22 +363,42 @@ function GetConfigKey
   then
     for LoginManagerConfigLine in "${LoginManagerConfig[@]}"
     do
+      LoginManagerConfigLine="${LoginManagerConfigLine##*( )}"
+      LoginManagerConfigLine="${LoginManagerConfigLine%%*( )}"
+
+      LoginManagerConfigLineLastChar=${LoginManagerConfigLine:$((${#LoginManagerConfigLine} -1 )):1}
       IFS="="
       LoginManagerConfigLine=($LoginManagerConfigLine)
       unset IFS
 
-      #Find the config value for all seats
-      if [[  ${LoginManagerConfigLine[0]} == "$1" && -z $GlobalKeyValue ]]
+      KeyName=${LoginManagerConfigLine[0]}
+      KeyName="${KeyName##*( )}"
+      KeyName="${KeyName%%*( )}"
+
+      if [[ ${#LoginManagerConfigLine[@]} -gt 1 ]]
       then
-        GlobalKeyValue=${LoginManagerConfigLine[1]}
+        printf -v KeyValue "=%s" "${LoginManagerConfigLine[@]:1}"
+        KeyValue=${KeyValue:1}
+        KeyValue="${KeyValue##*( )}"
+        KeyValue="${KeyValue%%*( )}"
+        if [[ $LoginManagerConfigLineLastChar == "=" ]]
+        then
+          KeyValue+=$LoginManagerConfigLineLastChar
+        fi
+      fi
+
+      #Find the config value for all seats
+      if [[  $KeyName == "$1" && -z $GlobalKeyValue ]]
+      then
+        GlobalKeyValue=$KeyValue
       fi
 
       #If a seat is specified as an argument and a config value is specifed for a seat, favor it
       if [[ ! -z $2 ]]
       then
-        if [[  ${LoginManagerConfigLine[0]} == "$1-$2" && -z $SeatKeyValue ]]
+        if [[  $KeyName == "$1-$2" && -z $SeatKeyValue ]]
         then
-          SeatKeyValue=${LoginManagerConfigLine[1]}
+          SeatKeyValue=$KeyValue
           break
         fi
       fi
@@ -434,12 +454,19 @@ function SetConfigKey
 
   for LoginManagerConfigLine in "${LoginManagerConfig[@]}"
   do
+    LoginManagerConfigLine="${LoginManagerConfigLine##*( )}"
+    LoginManagerConfigLine="${LoginManagerConfigLine%%*( )}"
+
     IFS="="
     LoginManagerConfigLineArray=($LoginManagerConfigLine)
     unset IFS
 
+    KeyName=${LoginManagerConfigLineArray[0]}
+    KeyName="${KeyName##*( )}"
+    KeyName="${KeyName%%*( )}"
+
     #Find the config value for all seats
-    if [[  ${LoginManagerConfigLineArray[0]} != "$1" ]]
+    if [[  $KeyName != "$1" ]]
     then
       if [[ ! -z $LoginManagerConfigOutput ]]
       then
