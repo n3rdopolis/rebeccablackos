@@ -1731,7 +1731,7 @@ function ChooseSessionType
       DEFAULTWSESSION=":"
     fi
     WSESSIONNUMBER=-1
-    if [[ $DEFAULTWSESSION != ":" ]]
+    if [[ $DEFAULTWSESSION != ":" && $DEFAULTWSESSION != "::" ]]
     then
       for (( element=0; element<$WSESSIONCOUNT; element++ ))
       do
@@ -1749,7 +1749,7 @@ function ChooseSessionType
       fi
     fi
 
-    if [[ $DEFAULTWSESSION == ":" ]]
+    if [[ $DEFAULTWSESSION == ":" || $DEFAULTWSESSION == "::" ]]
     then
       WSESSIONPICKLIST=""
       for (( element=0; element<$WSESSIONCOUNT; element++ ))
