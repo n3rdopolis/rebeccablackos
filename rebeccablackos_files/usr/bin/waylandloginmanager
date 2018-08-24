@@ -1113,7 +1113,7 @@ function ReadRegister
     RegisterType=${ArraySessionData[0]}
     if [[ ! -z $RegisterData ]]
     then
-      WriteToLog "received session data $RegisterData"
+      WriteToLog "received register data: ${RegisterData//$'\n'/\n}"
       if [[ $RegisterType == NEWSESSION ]]
       then
         #Add the session data to the arrays that store info about the sessions.
