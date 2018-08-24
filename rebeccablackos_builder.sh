@@ -140,9 +140,6 @@ export BUILDLOCATION="$HOMELOCATION"/RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
 export BUILDFRIENDLYNAME=RebeccaBlackOS
 
-#Create the logs folder for any logs the script may need to write if it aborts early
-mkdir -p "$BUILDLOCATION"/logs/failedlogs
-
 #Values for determining how much free disk/ramdisk space is needed
 GIGABYTE=1048576
 STORAGESIZE_TOTALSIZE=0
@@ -164,6 +161,9 @@ STORAGESIZE_SRCBUILD=$((26 * $GIGABYTE ))
 
 #make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
+
+#Create the logs folder for any logs the script may need to write if it aborts early
+mkdir -p "$BUILDLOCATION"/logs/failedlogs
 
 #switch to that folder
 cd "$BUILDLOCATION"
