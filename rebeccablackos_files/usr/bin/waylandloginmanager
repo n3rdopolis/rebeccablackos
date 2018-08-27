@@ -2043,6 +2043,7 @@ function StartUserSession
     TTYSTRING=""
   fi
 
+  systemctl stop "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" &> /dev/null
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" &> /dev/null
   #Only seat0 supports TTYs
   if [[ "$USERSEAT" == seat0 ]]
@@ -2593,6 +2594,7 @@ function StartLoginManagerDisplay
     fi
     if [[ -x "$DEFAULTWAYLANDSERVER" ]]
     then
+      systemctl stop wlm-loginmanagerdisplay_$SeatFileName &> /dev/null
       systemctl reset-failed wlm-loginmanagerdisplay_$SeatFileName &> /dev/null
       if [[ $CurrentSeat == seat0 ]]
       then
