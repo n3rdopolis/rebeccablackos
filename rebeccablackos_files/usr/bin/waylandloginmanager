@@ -735,10 +735,15 @@ function PrepareLoginManager
   fi
 
   #Only save last 1000 lines for the loginmanagerdisplay log files
-  for LoginManagerDisplayLog in /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_*.log
-  do
-    echo "$(tail -n 1000 "$LoginManagerDisplayLog" 2>/dev/null)" > "$LoginManagerDisplayLog" 2>/dev/null
-  done
+  ProbeFilesExist "/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_*.log" LoginManagerLogFileProbe
+  if [[ $LoginManagerDisplayLogProbe == 1 ]]
+  then
+    for LoginManagerDisplayLog in /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_*.log
+    do
+      echo "$(tail -n 1000 "$LoginManagerDisplayLog" 2>/dev/null)" > "$LoginManagerDisplayLog" 2>/dev/null
+    done
+  fi
+  unset LoginManagerLogFileProbe
 
   chown $LOGINMANAGERDISPLAYUSER /var/log/waylandloginmanager/loginmanagerdisplays
   WriteToLog "Starting Up..."
