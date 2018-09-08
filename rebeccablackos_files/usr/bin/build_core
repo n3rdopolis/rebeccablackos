@@ -775,12 +775,19 @@ function MakeAndInstall()
     #Complile the source
     STARTTIME=\$(date +%s)
     PackageCompileSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
+    PackageCompileSourceResult=\${PIPESTATUS[0]}
     ENDTIME=\$(date +%s)
+    if [[ \$PackageCompileSourceResult != 0 ]]
+    then
+      exit 1
+    fi
     echo "PackageCompileSource finished in '$((ENDTIME-STARTTIME))' seconds" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
 " > "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
 
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
     $NONROOTCOMMAND "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
+    PackageCompileSourceResult=$?
+
 
     #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
     echo "#! /bin/bash
@@ -807,7 +814,7 @@ function MakeAndInstall()
     PackagePostInstall 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     ENDTIME=\$(date +%s)
     echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
-    if [[ \$PackageInstallSourceResult != 0 ]]
+    if [[ \$PackageInstallSourceResult != 0 || $PackageCompileSourceResult != 0 ]]
     then
       mkdir \"/usr/share/buildcore_revisions/buildresults/\"
       touch $SOURCENAME \"/usr/share/buildcore_revisions/buildresults/$SOURCENAME\"
