@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-09-01 08:28:39.158928037 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2018-09-01 08:29:49.623210102 -0400
+--- usr/bin/waylandloginmanager	2018-09-11 22:18:06.013896875 -0400
++++ usr/bin/waylandloginmanagerkdialog	2018-09-11 22:19:00.350203346 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -197,7 +197,7 @@
        fi
      fi
    fi
-@@ -2219,26 +2208,30 @@
+@@ -2195,26 +2184,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -236,7 +236,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2246,9 +2239,9 @@
+@@ -2222,9 +2215,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -248,7 +248,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2264,9 +2257,9 @@
+@@ -2240,9 +2233,9 @@
    if [[ $SessionTTY -ne -1 ]]
    then
      #Prompt for the users password
@@ -260,13 +260,17 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2278,17 +2271,17 @@
+@@ -2254,7 +2247,7 @@
      unset USERPASSWORD
      if [[ $passwordresult != 0 ]]
      then
 -      $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
 +      $KDIALOGCMD --title="Login Failed" --msgbox "Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
+     else
+       export USERHOME=$(eval echo ~$LOGINUSER)
+@@ -2277,13 +2270,13 @@
+       StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
      fi
    else
 -    $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
@@ -281,7 +285,7 @@
  #It takes 1 argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2296,7 +2289,7 @@
+@@ -2291,7 +2284,7 @@
    SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
    SetFallbackEnvironmentVariables $1
@@ -290,7 +294,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2352,16 +2345,22 @@
+@@ -2347,16 +2340,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -316,7 +320,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2395,7 +2394,7 @@
+@@ -2390,7 +2389,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -325,7 +329,7 @@
    fi
  }
  
-@@ -2739,7 +2738,7 @@
+@@ -2734,7 +2733,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -334,7 +338,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2764,7 +2763,7 @@
+@@ -2759,7 +2758,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -343,7 +347,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2798,22 +2797,27 @@
+@@ -2793,22 +2792,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -378,7 +382,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2821,12 +2825,12 @@
+@@ -2816,12 +2820,12 @@
    else
      $SLEEPCMD .1
    fi

@@ -2126,13 +2126,8 @@ function StartUserSession
 #Expect has to be run as a non root user, otherwise it always reports success. Run it as the user specified with $PROBETESTUSER
 #it returns failure or success
 #This is called by GetUserCredentials, after it collects the user name and password for the user. It reads the password from stdin
-#It takes 1 argument, the seat to show the dialogs on.
 function AuthenticateUser
 {
-  GetStartedSeatIndex $1
-  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
   unset USERPASSWORD
   TryPassword=$(cat -)
   TryPasswordEscaped=$(for ((Iterate=0; Iterate<${#TryPassword}; Iterate++))
@@ -2158,25 +2153,6 @@ function AuthenticateUser
   unset TryPassword
   if [[ 0 == $PasswordResult ]]
   then
-    export USERHOME=$(eval echo ~$LOGINUSER)
-    #Prompt for the session type
-    ChooseSessionType "$1" "$LOGINUSER" 0
-    if [[ $? != 0 ]]
-    then
-      return 0
-    fi
-
-    #if the password and username is correct, start the session
-    if [[ $1 == seat0 ]]
-    then
-      TTYSTRING="on TTY $SessionTTY"
-    else
-      TTYSTRING=""
-    fi
-    WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
-    DialogWait 3 "Attempting to start the selected session..." "$1"
-    StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
-    #report success
     return 0
   else
     #report failure
@@ -2280,6 +2256,25 @@ function GetUserCredentials
     then
       $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
       WriteToLog "Invalid password for $LOGINUSER, or username invalid"
+    else
+      export USERHOME=$(eval echo ~$LOGINUSER)
+      #Prompt for the session type
+      ChooseSessionType "$1" "$LOGINUSER" 0
+      if [[ $? != 0 ]]
+      then
+        return 0
+      fi
+
+      #if the password and username is correct, start the session
+      if [[ $1 == seat0 ]]
+      then
+        TTYSTRING="on TTY $SessionTTY"
+      else
+        TTYSTRING=""
+      fi
+      WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
+      DialogWait 3 "Attempting to start the selected session..." "$1"
+      StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
     fi
   else
     $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
