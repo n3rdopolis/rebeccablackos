@@ -3457,6 +3457,18 @@ then
       SendSelfCommand DetectSeats
     fi
   fi
+elif [[ $1 == "--getconfigkey" ]]
+then
+  GetConfigKey "$2" "$3" "$4" "$5"
+elif [[ $1 == "--setconfigkey" ]]
+then
+  #Require root privlages
+  if [[ $UID != 0 ]]
+  then
+    echo "Must be run as root."
+    exit 1
+  fi
+  SetConfigKey "$2" "$3"
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit 1
