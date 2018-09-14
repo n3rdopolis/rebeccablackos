@@ -30,14 +30,10 @@ fi
 
 
 #See if wlmforcevblankoff  is configured to be on or off to tell the user
-CURRENTOPTION=$(cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | grep -c wlmforcevblankoff )
-if [[ $CURRENTOPTION != 0 ]]
-then
-  CURRENTOPTION=1
-fi
+CURRENTOPTION=$(/usr/bin/waylandloginmanager --getconfigkey wlmforcevblankoff "" 0 0)
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force disable vblank" 7 60
+sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, so that the vblank option is forced. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it. " 10 60
 
 #Ask the user what to do
 FORCEVB=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force/unforce vblank?
@@ -47,27 +43,14 @@ OKSelected=$?
 #If the user hit OK, and didn't select "leave unchanged"
 if [[ $OKSelected == 0 && $FORCEVB != 2 ]]
 then
-  #if the user selected to force software rendering, then add the wlmforcevblankoff  argument to the default command line. But make sure it's the only wlmforcevblankoff   being passed
+  #if the user selected to force vblank off, then set the wlmforcevblankoff argument to 1 in the config file.
   if [[ $FORCEVB == 1 ]]
   then
-    sed -ri 's/wlmforcevblankoff //gI' /etc/default/grub
-    sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"wlmforcevblankoff  /g" /etc/default/grub
-  #if the user selected to not force software rendering, then remove the wlmforcevblankoff  argument from the default command line
+    /usr/bin/waylandloginmanager --setconfigkey wlmforcevblankoff 1
+  #if the user selected to not force vblank off, then set the wlmforcevblankoff argument to 0 in the config file.
   elif [[ $FORCEVB == 0 ]]
-   then
-    sed -ri 's/wlmforcevblankoff //gI' /etc/default/grub
-  fi
-
-  #update the grub configs, and ask the user to restart now or later
-  update-grub
-  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
-
-Restart now?" 7 60
-  OKSelected=$?
-  #if the user opted to restart, then restart
-  if [[ $OKSelected == 0 ]]
   then
-    reboot
+    /usr/bin/waylandloginmanager --setconfigkey wlmforcevblankoff 0
   fi
-
+  sudo -E -u $DIALOGUSER dialog  --msgbox "You will need to restart the waylandloginmanager service for the change to take effect" 7 60
 fi

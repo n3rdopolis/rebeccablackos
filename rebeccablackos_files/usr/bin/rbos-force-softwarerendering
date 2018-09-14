@@ -30,14 +30,10 @@ fi
 
 
 #See if wlmforceswrender is configured to be on or off to tell the user
-CURRENTOPTION=$(cat /etc/default/grub | grep GRUB_CMDLINE_LINUX_DEFAULT | grep -c wlmforceswrender)
-if [[ $CURRENTOPTION != 0 ]]
-then
-  CURRENTOPTION=1
-fi
+CURRENTOPTION=$(/usr/bin/waylandloginmanager --getconfigkey wlmforceswrender "" 0 0)
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force software rendering." 7 60
+sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force software rendering. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it." 10 60
 
 #Ask the user what to do
 FORCESW=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force/unforce software rendering?
@@ -47,27 +43,14 @@ OKSelected=$?
 #If the user hit OK, and didn't select "leave unchanged"
 if [[ $OKSelected == 0 && $FORCESW != 2 ]]
 then
-  #if the user selected to force software rendering, then add the wlmforceswrender argument to the default command line. But make sure it's the only wlmforceswrender  being passed
+  #if the user selected to force software rendering, then set the wlmforceswrender argument to 1 in the config file.
   if [[ $FORCESW == 1 ]]
   then
-    sed -ri 's/wlmforceswrender//gI' /etc/default/grub
-    sed -i "s/GRUB_CMDLINE_LINUX_DEFAULT=\"/GRUB_CMDLINE_LINUX_DEFAULT=\"wlmforceswrender /g" /etc/default/grub
-  #if the user selected to not force software rendering, then remove the wlmforceswrender argument from the default command line
+    /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 1
+  #if the user selected to not force software rendering, then set the wlmforceswrender argument to 0 in the config file.
   elif [[ $FORCESW == 0 ]]
-   then
-    sed -ri 's/wlmforceswrender//gI' /etc/default/grub
-  fi
-
-  #update the grub configs, and ask the user to restart now or later
-  update-grub
-  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
-
-Restart now?" 7 60
-  OKSelected=$?
-  #if the user opted to restart, then restart
-  if [[ $OKSelected == 0 ]]
   then
-    reboot
+    /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 0
   fi
-
+  sudo -E -u $DIALOGUSER dialog  --msgbox "You will need to restart the waylandloginmanager service for the change to take effect" 7 60
 fi
