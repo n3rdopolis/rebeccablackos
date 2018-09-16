@@ -99,7 +99,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
 fi
 
 echo 'To exit most sessions, hit CTRL-ALT-BACKSPACE, or run'
-echo 'waylandloginmanager --shutdowndialog'
+echo 'shutdowndialog'
 echo 'and select "Log Off" '
 echo ' '
 echo 'To run a program under xwayland, run'
