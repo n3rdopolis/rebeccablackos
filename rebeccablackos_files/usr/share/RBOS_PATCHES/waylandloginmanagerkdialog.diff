@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-09-11 22:18:06.013896875 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2018-09-11 22:19:00.350203346 -0400
+--- usr/bin/waylandloginmanager	2018-09-16 10:08:00.691883562 -0400
++++ usr/bin/waylandloginmanagerkdialog	2018-09-16 10:07:58.635870005 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -282,19 +282,28 @@
  
 -#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
 +#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a dialog for handling power options for the computer.
- #It takes 1 argument, the seat to display the dialogs on
+ #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2291,7 +2284,7 @@
-   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-   SetFallbackEnvironmentVariables $1
+@@ -2294,7 +2287,7 @@
+     export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
+     SetFallbackEnvironmentVariables $1
+   else
+-    ZENITYCMD=zenity
++    KDIALOGCMD=kdialog
+     SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
+ 
+     if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+@@ -2331,7 +2324,7 @@
+   unset RunningSessions
+   unset RunningLoginManagerDisplaySessions
+ 
 -  #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 +  #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2347,16 +2340,22 @@
+@@ -2387,16 +2380,22 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -315,12 +324,12 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
--  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to $ACTION" 2>/dev/null
-+  $KDIALOGCMD --title="Leave..." --yesno "Are you sure you want to $ACTION" 2>/dev/null
+-  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to ${ACTION}? Number of running sessions: $RunningSessionCount" 2>/dev/null
++  $KDIALOGCMD --title="Leave..." --yesno "Are you sure you want to ${ACTION}? Number of running sessions: $RunningSessionCount" 2>/dev/null
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2390,7 +2389,7 @@
+@@ -2445,7 +2444,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -329,7 +338,7 @@
    fi
  }
  
-@@ -2734,7 +2733,7 @@
+@@ -2789,7 +2788,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -338,7 +347,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2759,7 +2758,7 @@
+@@ -2814,7 +2813,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -347,7 +356,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2793,22 +2792,27 @@
+@@ -2848,22 +2847,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -382,7 +391,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2816,12 +2820,12 @@
+@@ -2871,12 +2875,12 @@
    else
      $SLEEPCMD .1
    fi

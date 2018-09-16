@@ -2284,13 +2284,54 @@ function GetUserCredentials
 
 
 #This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
-#It takes 1 argument, the seat to display the dialogs on
+#It takes 1 optional argument, the seat to display the dialogs on
 function LeavePrompt
 {
-  GetStartedSeatIndex $1
-  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
+  if [[ ! -z $1 ]]
+  then
+    GetStartedSeatIndex $1
+    SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
+    export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
+    SetFallbackEnvironmentVariables $1
+  else
+    LOGINMANAGERDISPLAYUSER=waylandloginmanager
+    ZENITYCMD=zenity
+    SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
+
+    if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+    then
+      ACTIONSTRING="Switch User"$'\n'"Switch User"
+    fi
+    if [[ ! -z $ACTIONSTRING ]]
+    then
+      ACTIONSTRING+=$'\n'
+    fi
+    ACTIONSTRING+="Logoff"$'\n'"Logoff Session"
+  fi
+
+  #Get the number of running sessions
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
+  RunningLoginManagerDisplaySessions=($(loginctl show-user -p Sessions $LOGINMANAGERDISPLAYUSER --value 2>/dev/null))
+  RunningSessionCount=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    Include=1
+    for RunningLoginManagerDisplaySession in "${RunningLoginManagerDisplaySessions[@]}"
+    do
+      if [[ $RunningSession == $RunningLoginManagerDisplaySession ]]
+      then
+        Include=0
+        break
+      fi
+    done
+    if [[ $Include == 1 ]]
+    then
+      ((RunningSessionCount++))
+    fi
+  done
+  unset RunningSessions
+  unset RunningLoginManagerDisplaySessions
+
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
   CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
   if [[ $CanPowerOff =~ " \"yes\"" ]]
@@ -2356,15 +2397,30 @@ function LeavePrompt
   fi
 
   #Prompt the user if they are sure they want to execute the selected action
-  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to $ACTION" 2>/dev/null
+  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to ${ACTION}? Number of running sessions: $RunningSessionCount" 2>/dev/null
   CONFIRM=$?
   if [[ $CONFIRM != 0 ]]
   then
     exit 1
   fi
 
-  #For all actions use the dbus commands to logind
-  if [[ $ACTION == "Shutdown" ]]
+  #For switch user, send the Switch command to the waylandloginmanager
+  if [[ $ACTION == "Switch User" ]]
+  then
+    waylandloginmanager --sendcommand Switch
+    RESULT=$?
+  #If the request is logoff, then unmount ecryptfs, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
+  elif [[ $ACTION == "Logoff" ]]
+  then
+    ecryptfs-umount-private
+    waylandloginmanager --sendcommand Change
+    loginctl terminate-session $XDG_SESSION_ID
+    sleep 3
+    disown
+    nohup fuser -k -15 "/dev/tty$(loginctl show-session $XDG_SESSION_ID| grep VTNr| awk -F = '{print $2}')" >/dev/null 2>&1 &
+    RESULT=$?
+  #For all other actions, use logind dbus commands
+  elif [[ $ACTION == "Shutdown" ]]
   then
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.PowerOff boolean:true
     RESULT=$?
@@ -3469,6 +3525,9 @@ then
     exit 1
   fi
   SetConfigKey "$2" "$3"
+elif [[ $1 == "--shutdowndialog" ]]
+then
+  LeavePrompt
 else
   echo "waylandloginmanager: Please start with no arguments."
   exit 1
