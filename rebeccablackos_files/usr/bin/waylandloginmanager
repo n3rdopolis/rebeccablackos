@@ -3529,6 +3529,9 @@ elif [[ $1 == "--shutdowndialog" ]]
 then
   LeavePrompt
 else
-  echo "waylandloginmanager: Please start with no arguments."
+  echo "waylandloginmanager: incorrect usage"
+  echo "Useful options:"
+  echo "   --shutdowndialog shows a shutdown dialog."
+  echo "   --udevtrigger forces seats to be redetected"
   exit 1
 fi
