@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-09-16 22:50:16.407514760 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2018-09-16 22:55:53.931805423 -0400
+--- usr/bin/waylandloginmanager	2018-09-17 07:33:01.045940912 -0400
++++ usr/bin/waylandloginmanagerkdialog	2018-09-17 07:33:12.706041170 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -285,16 +285,16 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2299,7 +2292,7 @@
-     SetFallbackEnvironmentVariables $1
+@@ -2300,7 +2293,7 @@
+     SessionPromptThreshold=1
    else
      SetNonRootUsers
 -    ZENITYCMD=zenity
 +    KDIALOGCMD=kdialog
      SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
+     SessionPromptThreshold=2
  
-     if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
-@@ -2336,7 +2329,7 @@
+@@ -2338,7 +2331,7 @@
    unset RunningSessions
    unset RunningLoginManagerDisplaySessions
  
@@ -303,7 +303,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2392,9 +2385,15 @@
+@@ -2394,9 +2387,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -321,7 +321,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2408,7 +2407,7 @@
+@@ -2410,7 +2409,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -330,7 +330,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2457,7 +2456,7 @@
+@@ -2459,7 +2458,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -339,7 +339,7 @@
    fi
  }
  
-@@ -2801,7 +2800,7 @@
+@@ -2803,7 +2802,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -348,7 +348,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2826,7 +2825,7 @@
+@@ -2828,7 +2827,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -357,7 +357,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2860,22 +2859,27 @@
+@@ -2862,22 +2861,27 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -392,7 +392,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2883,12 +2887,12 @@
+@@ -2885,12 +2889,12 @@
    else
      $SLEEPCMD .1
    fi

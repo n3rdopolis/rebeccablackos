@@ -2297,10 +2297,12 @@ function LeavePrompt
     SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
     export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
     SetFallbackEnvironmentVariables $1
+    SessionPromptThreshold=1
   else
     SetNonRootUsers
     ZENITYCMD=zenity
     SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
+    SessionPromptThreshold=2
 
     if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
     then
@@ -2400,7 +2402,7 @@ function LeavePrompt
     exit 0
   fi
 
-  if [[ $ACTION != "Logoff" && $ACTION != "Switch User" ]]
+  if [[ $ACTION != "Logoff" && $ACTION != "Switch User" && $RunningSessionCount -ge $SessionPromptThreshold ]]
   then
     SESSIONINFO="Number of running sessions: $RunningSessionCount"
   else
