@@ -654,17 +654,21 @@ function TerminateJobPID
   fi
 }
 
-#Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
-function PrepareLoginManager
+function SetNonRootUsers
 {
-
-  export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
   #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
   export LOGINMANAGERDISPLAYUSER=waylandloginmanager
   #User that the su test in AuthenticateUser user runs as
   export PROBETESTUSER=waylandloginmanager
   #User that reads from the loginmanager_control FIFO, and filters the command sent to it to loginmanager_listener
   export FIFOREADERUSER=waylandloginmanager
+}
+
+#Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
+function PrepareLoginManager
+{
+  SetNonRootUsers
+  export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
   #Get the UID of the $LOGINMANAGERDISPLAYUSER
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
   export XDG_RUNTIME_DIR=/run/user/$LOGINMANAGERDISPLAYUID
@@ -2294,7 +2298,7 @@ function LeavePrompt
     export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
     SetFallbackEnvironmentVariables $1
   else
-    LOGINMANAGERDISPLAYUSER=waylandloginmanager
+    SetNonRootUsers
     ZENITYCMD=zenity
     SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
 
