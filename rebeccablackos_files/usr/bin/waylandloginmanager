@@ -2400,8 +2400,15 @@ function LeavePrompt
     exit 0
   fi
 
+  if [[ $ACTION != "Logoff" && $ACTION != "Switch User" ]]
+  then
+    SESSIONINFO="Number of running sessions: $RunningSessionCount"
+  else
+    SESSIONINFO=""
+  fi
+
   #Prompt the user if they are sure they want to execute the selected action
-  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to ${ACTION}? Number of running sessions: $RunningSessionCount" 2>/dev/null
+  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to ${ACTION}? $SESSIONINFO" 2>/dev/null
   CONFIRM=$?
   if [[ $CONFIRM != 0 ]]
   then
