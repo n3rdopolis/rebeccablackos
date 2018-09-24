@@ -80,6 +80,9 @@ cp ./src/client/qwayland-wayland.h $INSTALLDIR/include/QtWaylandClient/$QtWaylan
 cp ./src/client/wayland-wayland-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 cp ./src/client/qwayland-xdg-shell.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 cp ./src/client/wayland-xdg-shell-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+
+mkdir -p $INSTALLDIR/lib/plugins/wayland-decoration-client
+ln -s $INSTALLDIR/plugins/wayland-decoration-client/libbradient.so $INSTALLDIR/lib/plugins/wayland-decoration-client
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
