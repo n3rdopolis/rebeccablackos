@@ -75,6 +75,9 @@ else
   PACKAGEDATE=$(date +%s)
 fi
 
+#Create a python path
+mkdir -p /opt/lib/python3.5/site-packages/
+
 #Copy the import files into the system, while creating a deb with checkinstall.
 cp /usr/import/tmp/* /tmp
 cd /tmp
