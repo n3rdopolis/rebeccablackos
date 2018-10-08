@@ -78,6 +78,9 @@ fi
 #Create a python path
 mkdir -p /opt/lib/python3.5/site-packages/
 
+#Set the pager to not be interactive
+export PAGER=cat
+
 #Copy the import files into the system, while creating a deb with checkinstall.
 cp /usr/import/tmp/* /tmp
 cd /tmp

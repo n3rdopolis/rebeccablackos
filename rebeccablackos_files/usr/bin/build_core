@@ -121,6 +121,7 @@ function RunDownloadAndOrBuild
     exit
   fi
 
+  export PAGER=cat
   export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
   rm -rf "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   rm -rf "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
