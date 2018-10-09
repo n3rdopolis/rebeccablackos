@@ -18,6 +18,8 @@ OVERVIEW:
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
+  It is based on Debian Buster for Tier 1 packages
+
 
 How to use the ISO:
   Burn it, (or put it in a VM), reboot, set the BIOS to boot from the CD if it does not already, boot from the CD. Once it boots you can use the live system. 
