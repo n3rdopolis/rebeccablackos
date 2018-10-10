@@ -45,4 +45,4 @@ export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
 export ACLOCAL_PATH=$INSTALLDIR/share/aclocal:/usr/share/aclocal
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
-export PYTHONPATH=/opt/lib/python3.5/site-packages/
+export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/

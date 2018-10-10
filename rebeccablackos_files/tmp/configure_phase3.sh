@@ -76,7 +76,7 @@ else
 fi
 
 #Create a python path
-mkdir -p /opt/lib/python3.5/site-packages/
+mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 
 #Set the pager to not be interactive
 export PAGER=cat
