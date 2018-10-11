@@ -57,7 +57,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i -e "s|QMAKE_CFLAGS_ISYSTEM.*|QMAKE_CFLAGS_ISYSTEM =|" mkspecs/common/gcc-base.conf
-patch -f -p1 < /usr/share/RBOS_PATCHES/qtbase.diff
 mkdir build
 cd build
 ../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -dbus -no-gtk -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput
