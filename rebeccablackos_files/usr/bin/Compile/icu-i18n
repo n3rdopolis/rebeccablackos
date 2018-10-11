@@ -62,6 +62,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/icu-i18n.diff
+sed -i '/xlocale.h/d' icu/source/i18n/digitlst.cpp
 cd icu/source
 ./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 }
