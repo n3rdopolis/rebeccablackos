@@ -153,24 +153,6 @@ function RunDownloadAndOrBuild
 
   mkdir -p "$EXTERNALBUILDHOME"/bin
 
-  #If BUILD_CORE_FORCE_GCC_VERSION specified, the "$EXTERNALBUILDHOME"/bin folder is at the top of $PATH
-  #and is filled with symlinks, such as gcc gpp, that link to /usr/bin/gcc-$VERSION to override without
-  #changing tier 1 packages
-  BUILD_CORE_FORCE_GCC_VERSION=$(. /usr/bin/build_vars &>/dev/null; echo $BUILD_CORE_FORCE_GCC_VERSION)
-  if [[ ! -z $BUILD_CORE_FORCE_GCC_VERSION ]]
-  then
-    ls /usr/bin/*-$BUILD_CORE_FORCE_GCC_VERSION | while read FILE
-    do
-      TARGET=${FILE//-[0-9]*/}
-      IFS="/"
-      TARGET=($TARGET)
-      unset IFS
-      TARGET=${TARGET[-1]}
-      ln -s $FILE "$EXTERNALBUILDHOME"/bin/$TARGET
-    done
-  fi
-
-
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
   setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"
@@ -732,6 +714,22 @@ function MakeAndInstall()
   mkdir -p "$INSTALLDIR/doc"
   mkdir -p "$INSTALLDIR/include"
 
+  #If BUILD_CORE_FORCE_GCC_VERSION specified, the "$EXTERNALBUILDHOME"/bin folder is at the top of $PATH
+  #and is filled with symlinks, such as gcc gpp, that link to /usr/bin/gcc-$VERSION to override without
+  #changing tier 1 packages
+  BUILD_CORE_FORCE_GCC_VERSION=$(. /usr/bin/build_vars &>/dev/null; echo $BUILD_CORE_FORCE_GCC_VERSION)
+  if [[ ! -z $BUILD_CORE_FORCE_GCC_VERSION ]]
+  then
+    ls /usr/bin/*-$BUILD_CORE_FORCE_GCC_VERSION | while read FILE
+    do
+      TARGET=${FILE//-[0-9]*/}
+      IFS="/"
+      TARGET=($TARGET)
+      unset IFS
+      TARGET=${TARGET[-1]}
+      ln -s $FILE "$EXTERNALBUILDHOME"/bin/$TARGET
+    done
+  fi
   
   #Get all Source 
   if [[ ! -e /usr/share/buildcore_revisions.txt ]]
