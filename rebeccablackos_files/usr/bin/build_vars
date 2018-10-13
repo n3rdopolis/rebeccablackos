@@ -24,6 +24,7 @@ then
   export INSTALLDIR=/opt
 fi
 
+export BUILD_CORE_FORCE_GCC_VERSION=7
 export DESTDIR=/
 export BUILD_CPU_COUNT=$(cat /proc/cpuinfo | grep ^"processor" -c)
 export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
