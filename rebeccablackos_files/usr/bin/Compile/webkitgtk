@@ -23,7 +23,7 @@
 SOURCENAME=webkitgtk
 
 #The URL of the Source code repo
-SOURCEURL=https://webkitgtk.org/releases/webkitgtk-2.17.4.tar.xz
+SOURCEURL=https://webkitgtk.org/releases/webkitgtk-2.22.2.tar.xz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=ARCHIVE
@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DUSE_LIBHYPHEN=OFF 
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DUSE_LIBHYPHEN=OFF -DENABLE_X11_TARGET=OFF
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
