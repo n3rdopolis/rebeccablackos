@@ -65,7 +65,7 @@ sed -i "s@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/
 sed -i 's/overlayfs/overlay/g' hooks/casper
 sed -i '/manual_add_modules aufs/d' hooks/casper
 sed -i '/manual_add_modules unionfs/d' hooks/casper
-patch -p0 < /usr/share/RBOS_PATCHES/casper.diff
+patch --no-backup-if-mismatch -p0 < /usr/share/RBOS_PATCHES/casper.diff
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
