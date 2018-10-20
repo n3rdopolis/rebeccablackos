@@ -89,17 +89,6 @@ fi
 
 
 
-if [[ $SessionName =~ "Orbital" ]]
-then
-
-  zenity --title="Help" --no-wrap --info --text '
-Expose:                 CTRL key + e
-Show Workspaces:        CTRL key + g
-'
-
-fi
-
-
 
 if [[ $SessionName =~ "Liri" ]]
 then
