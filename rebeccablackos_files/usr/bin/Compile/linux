@@ -23,13 +23,13 @@
 SOURCENAME=linux
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/torvalds/linux.git
+SOURCEURL=https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.18.tar.gz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
-REPOSITORYTYPE=GIT
+REPOSITORYTYPE=ARCHIVE
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=master
+SOURCEREVISION=
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -61,6 +61,8 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+cd linux-4.18
+patch -p1 < /usr/share/RBOS_PATCHES/linux.diff
 cp /usr/share/RBOS_PATCHES/linux.config ./.config
 
 if [[ $TARGETBITSIZE == 32 ]]
@@ -77,29 +79,27 @@ make olddefconfig
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make 
+cd linux-4.18
+CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+make prepare
+make scripts
+cd drivers/gpu/drm/udl/
+make -C /lib/modules/$CURRENTKERNELVERSION/build M=$(pwd) modules
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+cd linux-4.18
+CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
 KERNELVERSION=$(cat include/config/kernel.release)
-make modules_install
-make firmware_install
-cp arch/x86/boot/bzImage /boot/vmlinuz-$KERNELVERSION
-cp -a ./include /usr/src/linux-headers-$KERNELVERSION
+cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-KERNELVERSION=$(cat include/config/kernel.release)
-rm /vmlinuz /initrd.img
-ln -s "/boot/vmlinuz-$KERNELVERSION" /vmlinuz
-ln -sf "/boot/initrd.img-$KERNELVERSION" /initrd.img
-unlink "/lib/modules/$KERNELVERSION/build"
-unlink "/lib/modules/$KERNELVERSION/source"
-ln -s "/usr/src/linux-headers-$KERNELVERSION" "/lib/modules/$KERNELVERSION/build"
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
