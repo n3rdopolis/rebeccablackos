@@ -112,6 +112,8 @@ libleveldb-dev::PART
 busybox::PART
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
+linux-headers-$DEBIAN_ARCH::PART::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
+linux-headers-686-pae::PART::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 thermald::FULL
 libomxil-bellagio0::PART
 libomxil-bellagio-dev::PART
@@ -122,6 +124,7 @@ libxkbcommon-dev::PART
 python-xcbgen::PART
 manpages::FULL
 build-essential::PART
+bc::PART
 gcc-7::PART
 g++-7::PART
 cmake::PART
