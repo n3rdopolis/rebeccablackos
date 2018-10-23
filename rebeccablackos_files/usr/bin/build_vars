@@ -28,8 +28,8 @@ export BUILD_CORE_FORCE_GCC_VERSION=7
 export DESTDIR=/
 export BUILD_CPU_COUNT=$(cat /proc/cpuinfo | grep ^"processor" -c)
 export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
-export CFLAGS="-Os" 
-export CXXFLAGS="-Os"
+export CFLAGS="-Os -Wno-error" 
+export CXXFLAGS="-Os -Wno-error"
 export TARGETBITSIZE=$(getconf LONG_BIT)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export MAKEFLAGS="-j $(( $BUILD_CPU_COUNT ))"
