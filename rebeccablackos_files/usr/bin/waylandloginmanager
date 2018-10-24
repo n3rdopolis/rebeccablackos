@@ -1816,15 +1816,6 @@ function DiagnosticTerminal
   if [[ $wlmdebuginsecure == 1 ]]
   then
     vte -N &>/dev/null
-  else
-    mkdir -p /var/tmp/waylandloginmanager/logincmd &> /dev/null
-    chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd &> /dev/null
-    chmod 700 /var/tmp/waylandloginmanager/logincmd &> /dev/null
-    cp /bin/login /var/tmp/waylandloginmanager/logincmd &> /dev/null
-    chmod +s /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
-    $TERMINALCMD -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &>/dev/null
-    wait -n $TERMINALJOB
-    rm /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
   fi
 }
 
@@ -3453,7 +3444,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
     elif [[ $COMMAND == "Debug" ]]
     then
-      if [[ $wlmdebug == 1 ]]
+      if [[ $wlmdebuginsecure == 1 ]]
       then
         if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastDebugPIDs[$SeatIndexID]}([[:space:]]|$) || $wlmdebuginsecure == 1  ]]
         then
