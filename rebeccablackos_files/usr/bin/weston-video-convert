@@ -25,8 +25,8 @@ This dialog will close 5 seconds after all jobs complete" &
 zenityjob=$!
 
 mkdir ~/weston-screenshots
-vte -g 500x300 -c /usr/libexec/wayland_helpers/weston-video-convert-helper
-vte -g 500x300 -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
+vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper
+vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
 
 NewFileName=weston-screenshot
 FileNumber=1

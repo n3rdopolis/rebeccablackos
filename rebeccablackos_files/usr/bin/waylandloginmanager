@@ -846,7 +846,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   GetConfigKey boot=casper "" 0 2 ISLIVE
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
-  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
+  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte -N"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
@@ -1815,14 +1815,14 @@ function DiagnosticTerminal
   SetFallbackEnvironmentVariables $1
   if [[ $wlmdebuginsecure == 1 ]]
   then
-    vte -g 500x300 &>/dev/null
+    vte -N &>/dev/null
   else
     mkdir -p /var/tmp/waylandloginmanager/logincmd &> /dev/null
     chown $LOGINMANAGERDISPLAYUSER /var/tmp/waylandloginmanager/logincmd &> /dev/null
     chmod 700 /var/tmp/waylandloginmanager/logincmd &> /dev/null
     cp /bin/login /var/tmp/waylandloginmanager/logincmd &> /dev/null
     chmod +s /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
-    $TERMINALCMD -g 500x300 -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &>/dev/null
+    $TERMINALCMD -c "screen -s /var/tmp/waylandloginmanager/logincmd/login" &>/dev/null
     wait -n $TERMINALJOB
     rm /var/tmp/waylandloginmanager/logincmd/login &> /dev/null
   fi
