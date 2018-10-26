@@ -846,7 +846,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   GetConfigKey boot=casper "" 0 2 ISLIVE
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
-  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte -N"
+  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
@@ -1805,7 +1805,7 @@ function ChooseSessionType
 }
 
 
-#This function displays a diagnostic terminal. depending on if the more secure debug option was passed, wlmdebug it, temporarilly copies a setuid /bin/login so that the host terminal window doesn't have to run as root, and the setuid login binary isn't accessible to the rest of the system, and opens the login terminal window running as a service user. If the more insecure wlmdebuginsecure option was passed, then it starts the terminal as root, with a root terminal.
+#This function displays a diagnostic terminal. It starts the terminal as root, with a root terminal. (only when wlmdebuginsecure is passed as a boot option)
 #It takes 1 argument, the seat to display the terminal on
 function DiagnosticTerminal 
 {
@@ -2863,7 +2863,7 @@ function UserActionDialog
   if [[ $wlmdebuginsecure == 1 ]]
   then
     ActionMenu+="\nDebug\nRoot Terminal..."
-  elif [[ $wlmdebug == 1 ]]
+  elif [[ $wlmdebuginsecure == 1 ]]
   then
     ActionMenu+="\nDebug\nTerminal Login..."
   fi
