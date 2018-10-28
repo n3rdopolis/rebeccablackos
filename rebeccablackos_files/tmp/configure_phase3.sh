@@ -296,6 +296,9 @@ echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 #Create a log folder for the remove operations
 mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
 
+#Generate a list of all valid packages off the apt cache into a quickly parseable format, to test if a package name is valid.
+apt-cache search . | awk '{print $1}' > /tmp/AVAILABLEPACKAGES.txt
+
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
 
@@ -313,12 +316,17 @@ REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep
 apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
-REMOVEDEVPGKS=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf unicode-data texinfo rustc gcc-7 g++-7 clang linux-headers-"*")
+REMOVEDEVPGKS=""
+REMOVEDEVPGKSPROPOSED=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial texinfo autoconf unicode-data texinfo rustc gcc-7 g++-7 clang linux-headers-"*")
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
 do
-  REMOVEPACKAGENAME=${REMOVEDEVPGKS[$Iterator]}
-  apt-get purge $REMOVEPACKAGENAME -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/$REMOVEPACKAGENAME.log
+  AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$PACKAGE$)
+  if [[ $AvailableCount != 0 ]]
+  then
+    REMOVEDEVPGKS+="$PACKAGE "
+  fi
 done
+apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/$REMOVEPACKAGENAME.log
 
 apt-get autoremove -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
