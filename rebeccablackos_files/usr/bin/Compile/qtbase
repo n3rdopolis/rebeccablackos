@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 sed -i -e "s|QMAKE_CFLAGS_ISYSTEM.*|QMAKE_CFLAGS_ISYSTEM =|" mkspecs/common/gcc-base.conf
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -dbus -no-gtk -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput
+../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -dbus -no-gtk -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
