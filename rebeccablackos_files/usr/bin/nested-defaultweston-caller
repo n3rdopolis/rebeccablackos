@@ -20,5 +20,4 @@
 . /usr/bin/wlruntime_vars
 ServerID=wayland-$RANDOM
 export QT_WAYLAND_FORCE_DPI=100
-export QT_WAYLAND_SHELL_INTEGRATION=wl-shell
 weston --socket=$ServerID --xwayland
