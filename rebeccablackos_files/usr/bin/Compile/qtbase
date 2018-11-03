@@ -56,7 +56,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i -e "s|QMAKE_CFLAGS_ISYSTEM.*|QMAKE_CFLAGS_ISYSTEM =|" mkspecs/common/gcc-base.conf
 mkdir build
 cd build
 ../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -dbus -no-gtk -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size
