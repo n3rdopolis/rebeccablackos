@@ -76,10 +76,8 @@ function PackagePostInstall()
 {
 # Workaround to install generated private headers.
 QtWaylandVersion=$(ls -d ./include/QtWaylandClient/5.*| awk -F / '{print $4}')
-cp ./src/client/qwayland-wayland.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
-cp ./src/client/wayland-wayland-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
-cp ./src/client/qwayland-xdg-shell.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
-cp ./src/client/wayland-xdg-shell-client-protocol.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+cp ./src/client/qwayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
+cp ./src/client/wayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 
 mkdir -p $INSTALLDIR/lib/plugins/wayland-decoration-client
 ln -s $INSTALLDIR/plugins/wayland-decoration-client/libbradient.so $INSTALLDIR/lib/plugins/wayland-decoration-client
