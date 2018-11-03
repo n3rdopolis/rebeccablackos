@@ -38,6 +38,7 @@ export PATH=/srcbuild/buildhome/cargocache/:"$INSTALLDIR/sbin:$INSTALLDIR/bin:/u
 export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
 export ACLOCAL="aclocal -I $INSTALLDIR/share/aclocal"
 export CPATH=$INSTALLDIR/include
+export LIBRARY_PATH=$INSTALLDIR/lib
 export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
