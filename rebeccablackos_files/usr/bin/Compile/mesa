@@ -59,19 +59,19 @@ function PackagePrepareBuild()
 {
 export CFLAGS="-O2" 
 export CXXFLAGS="-O2"
-./autogen.sh --prefix=$INSTALLDIR --enable-driglx-direct --enable-dri --with-dri-drivers=r200,radeon,nouveau,i915,i965,swrast --enable-osmesa --enable-xa --enable-glx-tls --enable-shared-dricore --enable-gles1 --enable-gles2  --with-gallium-drivers=nouveau,svga,r300,r600,swrast,radeonsi,virgl  --with-platforms=x11,wayland,drm --enable-gbm --enable-shared-glapi --enable-gallium-egl --with-llvm-prefix=/usr/lib/llvm-6.0 --with-llvm-shared-libs --with-vulkan-drivers=intel,radeon --enable-llvm --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=true -Dgles2=true -Dplatforms=x11,wayland,drm -Dgallium-drivers=nouveau,svga,r300,r600,swrast,radeonsi,virgl -Ddri-drivers=r200,nouveau,i915,i965 -Dosmesa=gallium -Dgallium-xa=true -Dgbm=true -Dshared-glapi=true -Dshared-llvm=true -Dvulkan-drivers=intel,amd -Dllvm=true build 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make 
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
