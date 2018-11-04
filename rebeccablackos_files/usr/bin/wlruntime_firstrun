@@ -25,7 +25,7 @@ fi
 #Build the KDE configuration database
 if [[ ! -e $HOME/.cache/ksycoca5 ]]
 then
-  kbuildsycoca5 &>/dev/null
+  kbuildsycoca5 &>/dev/null &
 fi
 
 #Build RDP keys for weston-share
