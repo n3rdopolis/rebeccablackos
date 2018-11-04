@@ -267,7 +267,8 @@ function UserSessionWorker
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WL ]]
   then
-    fg 2
+    wait $GuestServerPID
+    SessionReturnCode=$?
     if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
     then
       SendSelfCommand Change "$XDG_SEAT"
@@ -277,14 +278,13 @@ function UserSessionWorker
     $SLEEPCMD 3
     TerminateJobPID $HostServerPID 9 0
   else
-    fg 1
+    wait $GuestServerPID
+    SessionReturnCode=$?
     if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
     then
       SendSelfCommand Change "$XDG_SEAT"
     fi
   fi
-  wait $GuestServerPID
-  SessionReturnCode=$?
 
   #Write the error code and any Journal logs for this session into the logfile
   echo -e "\nSession exited with the error code: $SessionReturnCode\nSession's Journal Logs:" >> $WLM_SESSION_LOG
