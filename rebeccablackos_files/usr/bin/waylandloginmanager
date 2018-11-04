@@ -371,6 +371,9 @@ function GetConfigKey
       LoginManagerConfigLine=($LoginManagerConfigLine)
       unset IFS
 
+      KeyName=""
+      KeyValue=""
+
       KeyName=${LoginManagerConfigLine[0]}
       KeyName="${KeyName##*( )}"
       KeyName="${KeyName%%*( )}"
@@ -460,6 +463,8 @@ function SetConfigKey
     IFS="="
     LoginManagerConfigLineArray=($LoginManagerConfigLine)
     unset IFS
+
+    KeyName=""
 
     KeyName=${LoginManagerConfigLineArray[0]}
     KeyName="${KeyName##*( )}"
@@ -1294,6 +1299,13 @@ function ParseWSessionFiles
       IFS="="
       WSESSIONLINE=($WSESSIONLINE)
       unset IFS
+
+      KeyName=""
+      KeyValue=""
+      ChangeArrayElement=""
+      ChangeArrayOffset=""
+      OffsetID=""
+      ChangeArrayMultiplicand=""
 
       KeyName=${WSESSIONLINE[0]}
       KeyName="${KeyName##*( )}"
