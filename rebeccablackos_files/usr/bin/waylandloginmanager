@@ -3459,12 +3459,12 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         then
           DiagnosticTerminal "$SEATARG" &
           LastDebugPIDs[$SeatIndexID]=$!
-          WriteToLog "Spawned a login terminal window on the loginmanagerdisplay for $SEATARG"
+          WriteToLog "Spawned a root terminal window on the loginmanagerdisplay for $SEATARG"
         else
           WriteToLog "A handler for the Debug command is already open"
         fi
       else
-        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebug not passed to the kernel, or not in Live CD mode."
+        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebuginsecure not passed to the kernel, or not in Live CD mode."
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
