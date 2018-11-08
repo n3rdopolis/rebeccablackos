@@ -47,6 +47,8 @@ PROBLEMS:
 
       When virtualized, under QEMU, be sure to use either KVM32 or KVM64 as the 'emulated' processor. It appears to be caused by specifying an emulated processor that reports capabilities that the host processor doesn't have, and causes failures. Selecting an emulated processor that reports CPU capabilities that it doesn't have. This affects even the upstream install of Mesa, and not just the newer one provided in /opt.
 
+      Especially when virtualized, programs may hang on startup. This is due to a recent fix in the Linux Kernel that makes getrandom() block, until there is enough "randomness", provided by hardware sources. On hardware that is not as complex, (like a VM) there is not enough hardware providing this "randomness", so some programs that rely on getrandom() will hang. One workaround is to randomly mash the keyboard for a few seconds, as keyboards are among devices used.
+
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu, or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes 5 times.)
             wlmforcefbdev: Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel mode setting is availible.
