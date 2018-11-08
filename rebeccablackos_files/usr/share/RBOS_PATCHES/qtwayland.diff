@@ -1,0 +1,26 @@
+http://code.qt.io/cgit/qt/qtwayland.git/commit/?h=5.12.0&id=7451faab740ec6294159be60d8a713f5e8070c09
+
+diff --git a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
+index 3d3af692..c055cbb1 100644
+--- a/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
++++ b/src/plugins/shellintegration/xdg-shell-v6/qwaylandxdgshellv6.cpp
+@@ -342,6 +342,7 @@ void QWaylandXdgSurfaceV6::zxdg_surface_v6_configure(uint32_t serial)
+     if (!m_configured) {
+         // We have to do the initial applyConfigure() immediately, since that is the expose.
+         applyConfigure();
++        m_exposeRegion = QRegion(QRect(QPoint(), m_window->geometry().size()));
+     } else {
+         // Later configures are probably resizes, so we have to queue them up for a time when we
+         // are not painting to the window.
+diff --git a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
+index c723192c..014b6bed 100644
+--- a/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
++++ b/src/plugins/shellintegration/xdg-shell/qwaylandxdgshell.cpp
+@@ -376,6 +376,7 @@ void QWaylandXdgSurface::xdg_surface_configure(uint32_t serial)
+     if (!m_configured) {
+         // We have to do the initial applyConfigure() immediately, since that is the expose.
+         applyConfigure();
++        m_exposeRegion = QRegion(QRect(QPoint(), m_window->geometry().size()));
+     } else {
+         // Later configures are probably resizes, so we have to queue them up for a time when we
+         // are not painting to the window.
