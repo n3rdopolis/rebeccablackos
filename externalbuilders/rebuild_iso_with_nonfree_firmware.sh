@@ -21,7 +21,6 @@
 
 trap 'kill -9 $ROOTPID; exit' 2
 
-
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
@@ -46,6 +45,8 @@ MOUNTISO=$(readlink -f "$1")
 MOUNTISOPATH=$(dirname "$MOUNTISO")
 MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
 NEWISO="${MOUNTISOPATH}/${MOUNTISONAME}_nonfree.iso"
+
+FIRMWARESELECT="$2"
 
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
@@ -107,10 +108,11 @@ if [[ $UID != 0 || -z $SUDO_USER ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    $TERMCOMMAND "bash -c \"sudo -E "$0" "$MOUNTISO" 2>/dev/null\""
+    RUNCOMMAND="sudo -E \\\"$0\\\" \\\"$MOUNTISO\\\" \\\"$FIRMWARESELECT\\\""
+    $TERMCOMMAND "bash -c \"$RUNCOMMAND 2>/dev/null\""
     exit
   else
-    sudo -E "$0" "$MOUNTISO"
+    sudo -E "$0" "$MOUNTISO" "$FIRMWARESELECT"
     exit
   fi
 
@@ -203,28 +205,32 @@ firmware-zd1211"
 
 FIRMWAREUILIST=""
 
-if [[ $XALIVE != 0 ]]
+if [ -z $FIRMWARESELECT ]
 then
-  while read FIRMWARE
-  do
-    FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
-  done < <(echo "$FIRMWARELIST")
-  FIRMWARESELECT=$(dialog --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
-else
-  while read FIRMWARE
-  do
-    if [[ $FIRMWAREUILIST != "" ]]
-    then
-      FIRMWAREUILIST+=$'\n'$'\n'
-    else
-      FIRMWAREUILIST+=$'\n'
-    fi
-    FIRMWAREUILIST+="$FIRMWARE"
-  done < <(echo "$FIRMWARELIST")
+  if [[ $XALIVE != 0 ]]
+  then
+    while read FIRMWARE
+    do
+      FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
+    done < <(echo "$FIRMWARELIST")
+    FIRMWARESELECT=$(dialog --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
+  else
+    while read FIRMWARE
+    do
+      if [[ $FIRMWAREUILIST != "" ]]
+      then
+        FIRMWAREUILIST+=$'\n'$'\n'
+      else
+        FIRMWAREUILIST+=$'\n'
+      fi
+      FIRMWAREUILIST+="$FIRMWARE"
+    done < <(echo "$FIRMWARELIST")
 
-  FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+    FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+  fi
 fi
 FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
+echo "Additional Firmware Selected: $FIRMWARESELECT"
 
 #enter users home directory
 cd "$MOUNTHOME"
@@ -248,6 +254,7 @@ then
     MOUNTISO=$(dialog --fselect "$MOUNTHOME"/ 20 60 --stdout)
   fi
 fi
+echo "Using ISO file: $MOUNTISO"
 
 #Create the PID and Mount namespaces, pid 1 to sleep forever
 unshare -f --pid --mount --mount-proc sleep infinity &
