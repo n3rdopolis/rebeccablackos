@@ -174,18 +174,21 @@ else
   exit
 fi
 
-if [[ $XALIVE == 0 ]]
+if [[ ! $2 ]]
 then
-  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
+  if [[ $XALIVE == 0 ]]
+  then
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
 and don't have the same freedoms as the rest of the rest of the packages on these ISOs,
 but may allow more hardware to work." 2>/dev/null
-else
-  echo "This will remaster the specified ISO, to install non-free firmware packages
+  else
+    echo "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
 and don't have the same freedoms as the rest of the rest of the packages on these ISOs
 but may allow more hardware to work."
-  read a
+    read a
+  fi
 fi
 
 FIRMWARELIST="atmel-firmware
