@@ -57,7 +57,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p0 < /usr/share/RBOS_PATCHES/SDL.diff
 ./autogen.sh 
 ./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-shared=no
 }
