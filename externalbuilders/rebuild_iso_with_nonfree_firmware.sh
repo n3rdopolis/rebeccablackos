@@ -193,8 +193,8 @@ fi
 
 FIRMWARELIST="atmel-firmware
 firmware-atheros
-firmware-b43-installer
-firmware-b43legacy-installer
+firmware-bnx2
+firmware-bnx2x
 firmware-brcm80211
 firmware-intelwimax
 firmware-ipw2x00
