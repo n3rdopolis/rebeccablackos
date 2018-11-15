@@ -853,6 +853,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
+  DIALOGCMD="systemd-run --unit="wlm-ttydialog" -G --wait -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
+  TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" -G --wait -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
@@ -897,10 +899,11 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     if [[ $HardwareSupported != 1 ]]
     then
       WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
-      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+      chvt 63
+      $DIALOGCMD --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
-      openvt -c 63 -s -f -w -- rbos-failedboot
+      $TTYWIZARDCMD rbos-failedboot
       exit 0
     fi
   fi
@@ -910,23 +913,24 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
   if [[ $HardwareSupported != 1 ]]
   then
+    chvt 63
     if [[ $ISLIVE == 1 ]]
     then
       WriteToLog "ERROR: No supportable hardware found"
-      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      $DIALOGCMD --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
     else 
-      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      $DIALOGCMD --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
 This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
 
 Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
-      openvt -c 63 -s -f -w -- rbos-add-framebuffer
+      $TTYWIZARDCMD rbos-add-framebuffer
     fi
-    openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "Can not start Weston.
+    $DIALOGCMD --msgbox "Can not start Weston.
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
@@ -3185,11 +3189,12 @@ function WaylandLoginManagerMain
     then
       systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
-      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
+      chvt 63
+      $DIALOGCMD --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
-      openvt -c 63 -s -f -w -- rbos-failedboot
+      $TTYWIZARDCMD rbos-failedboot
       exit 1
     fi
 
@@ -3197,10 +3202,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
-      openvt -c 63 -s -f -w -- runuser -u $LOGINMANAGERDISPLAYUSER -m -- dialog --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
+      chvt 63
+      $DIALOGCMD --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
-      openvt -c 63 -s -f -w -- rbos-failedboot
+      $TTYWIZARDCMD rbos-failedboot
       exit 1
     fi
 

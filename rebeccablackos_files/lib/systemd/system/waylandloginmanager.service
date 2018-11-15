@@ -9,9 +9,9 @@ Conflicts=plymouth-quit-wait.service
 Type=notify
 ExecStart=/usr/bin/waylandloginmanager
 IgnoreSIGPIPE=no
-StandardOutput=tty
-StandardInput=tty
-TTYPath=/dev/tty63
+#StandardOutput=tty
+#StandardInput=tty
+#TTYPath=/dev/tty63
 PrivateTmp=yes
 
 [Install]
