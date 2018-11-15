@@ -901,7 +901,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service &> /dev/null
+      exit 0
     fi
   fi
   unset wlmforcefbdev
@@ -930,7 +930,7 @@ Will now start a utility to assist you in configuring your system to boot with a
 
 Will now reboot." 20 50 --no-cancel
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
-    systemctl stop waylandloginmanager.service &> /dev/null
+    exit 1
   fi
 
   ReadyNotifySent=0
@@ -961,9 +961,9 @@ Will now reboot." 20 50 --no-cancel
   if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
   then
     WriteToLog "ERROR: Not Enough TTYs for login manager display!"
-    systemctl stop waylandloginmanager.service &> /dev/null
     exit 1
   fi
+
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
   GetConfigKey wlmdebug "" 0 2 wlmdebug
@@ -3190,7 +3190,7 @@ function WaylandLoginManagerMain
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service &> /dev/null
+      exit 1
     fi
 
     #If it is declared that the UserActionDialog process failed for all seats, then show a text mode dialog
@@ -3201,7 +3201,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       openvt -c 63 -s -f -w -- rbos-failedboot
-      systemctl stop waylandloginmanager.service &> /dev/null
+      exit 1
     fi
 
     #Quickly find if any sessions are not running
