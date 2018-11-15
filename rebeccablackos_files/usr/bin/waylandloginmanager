@@ -2742,7 +2742,8 @@ function StartLoginManagerDisplay
     else
       if [[ $SeatStartCount == 1 ]]
       then
-        WriteToLog "$DEFAULTWAYLANDSERVER is not executable, or does not exist, or not supported on seat $CurrentSeat"
+        WriteToLog "The DEFAULTWAYLANDSERVER is not executable, or does not exist. Could not start the loginmanagerdisplay for $CurrentSeat."
+        echo "The DEFAULTWAYLANDSERVER is not executable, or does not exist." >> /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log
       fi
     fi
   fi
