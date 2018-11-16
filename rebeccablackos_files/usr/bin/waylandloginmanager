@@ -853,8 +853,8 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
-  DIALOGCMD="systemd-run --unit="wlm-ttydialog" -G --wait -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
-  TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" -G --wait -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+  DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
+  TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
 
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
