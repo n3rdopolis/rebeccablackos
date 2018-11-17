@@ -834,7 +834,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
 
-  ####These settings are dependant on Weston patches####
+  ######################################################
   export WESTON_FBDEV_SEAT_AWARE=1
   export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
   ######################################################
@@ -974,7 +974,7 @@ Will now reboot." 20 50 --no-cancel
   if [[ $wlmdebug != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
-    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel, or the system is in Live CD mode. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
+    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
     wlmdebug=1
   fi
 
@@ -3471,7 +3471,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           WriteToLog "A handler for the Debug command is already open"
         fi
       else
-        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebuginsecure not passed to the kernel, or not in Live CD mode."
+        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebuginsecure not passed to the kernel."
       fi
     #if the command is empty, then execute bash's built in null command
     elif [[ $COMMAND == "" ]]
