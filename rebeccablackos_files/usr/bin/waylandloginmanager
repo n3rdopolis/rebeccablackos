@@ -2646,7 +2646,7 @@ function StartLoginManagerDisplay
     LOGINMANAGERDISPLAYSTATUS=1
   fi
 
-  if [[ $DoStartLoginManagerDisplay == 0 ]]
+  if [[ $DoStartLoginManagerDisplay == 1 ]]
   then
     (( SeatStartCount-- ))
   fi
