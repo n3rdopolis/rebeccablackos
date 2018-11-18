@@ -2594,7 +2594,7 @@ function StartLoginManagerDisplay
 {
   #Information about the seat
   CurrentSeat=$1
-  SeatStartCount=${LoginManagerDisplayFailCounts[$SeatIndexID]}
+  SeatStartCount=${LoginManagerDisplayAttemptCounts[$SeatIndexID]}
   SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
   SeatUsePixman=${LoginManagerDisplayPixmanFlags[$SeatIndexID]}
   SeatFileName=${SeatFileNames[$SeatIndexID]}
@@ -2752,7 +2752,7 @@ function StartLoginManagerDisplay
   then
     WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
   fi
-  LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
+  LoginManagerDisplayAttemptCounts[$SeatIndexID]=$SeatStartCount
 }
 
 #This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
@@ -2951,9 +2951,9 @@ function WaylandLoginManagerMain
 
   #Arrays about the seats, what hardware is supported
   #and how many times something related to the seat failed
-  UserActionFailCounts=()
+  UserActionAttemptCounts=()
   UserActionFailSkips=()
-  LoginManagerDisplayFailCounts=()
+  LoginManagerDisplayAttemptCounts=()
   LoginManagerDisplayBackends=()
   LoginManagerDisplayPixmanFlags=()
   SeatForceSWRenderFlags=()
@@ -3037,14 +3037,14 @@ function WaylandLoginManagerMain
           fi
           GetSeatCapabilityString $RunningSeat SeatCapabilityArr
           SeatCapabilityArr=($SeatCapabilityArr)
-          UserActionFailCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
+          UserActionAttemptCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$StartIndex/2]=0
           SeatCreationDates[$StartIndex/2]=$SeatCreationDate
           LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
-          LoginManagerDisplayFailCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
+          LoginManagerDisplayAttemptCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
           if [[ -f /run/waylandloginmanager/autologinran ]]
           then
             read -r -d $'\r' AUTOLOGINFILE 2>/dev/null </run/waylandloginmanager/autologinran
@@ -3085,9 +3085,9 @@ function WaylandLoginManagerMain
         then
           ChangeIndex=$((StartIndex/2))
           SeatFileName=${SeatFileNames[$ChangeIndex]}
-          UserActionFailCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
+          UserActionAttemptCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$ChangeIndex]=0
-          LoginManagerDisplayFailCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
+          LoginManagerDisplayAttemptCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
@@ -3133,9 +3133,9 @@ function WaylandLoginManagerMain
       StartLoginManagerDisplay $RunningSeat
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
-      if [[ -z ${UserActionFailCounts[$SeatIndexID]} ]]
+      if [[ -z ${UserActionAttemptCounts[$SeatIndexID]} ]]
       then
-        UserActionFailCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
+        UserActionAttemptCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
       fi
       if [[ -z ${UserActionFailSkips[$SeatIndexID]} ]]
       then
@@ -3155,26 +3155,26 @@ function WaylandLoginManagerMain
           unset LastUserActionPIDs[$SeatIndexID]
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
-            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log. (Attempts Left: ${UserActionFailCounts[$SeatIndexID]})"
-            ((UserActionFailCounts[$SeatIndexID]--))
+            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log. (Attempts Left: ${UserActionAttemptCounts[$SeatIndexID]})"
+            ((UserActionAttemptCounts[$SeatIndexID]--))
           else
-            UserActionFailCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
+            UserActionAttemptCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
             UserActionFailSkips[$SeatIndexID]=0
           fi
         fi
-        if [[ ${UserActionFailCounts[$SeatIndexID]} == -1 ]]
+        if [[ ${UserActionAttemptCounts[$SeatIndexID]} == -1 ]]
         then
           WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row."
         fi
       fi
 
       #If the seat had the loginmanagerdisplay fail 5 times, declare it
-      if [[ ${LoginManagerDisplayFailCounts[$SeatIndexID]} -ge 0 ]]
+      if [[ ${LoginManagerDisplayAttemptCounts[$SeatIndexID]} -ge 0 ]]
       then
         LoginManagerDisplayAttemptsMaxedOut=0
       fi
       #If the seat had the UserActionDialog fail 5 times, declare it
-      if [[ ${UserActionFailCounts[$SeatIndexID]} -ge 0 ]]
+      if [[ ${UserActionAttemptCounts[$SeatIndexID]} -ge 0 ]]
       then
         UIPromptAttemptsMaxedOut=0
         if [[ $UIJobCount == 0 ]]
