@@ -837,6 +837,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   ######################################################
   export WESTON_FBDEV_SEAT_AWARE=1
   export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
+  export MAX_UI_ATTEMPTS=5
   ######################################################
 
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
@@ -2612,12 +2613,12 @@ function StartLoginManagerDisplay
       #The Autologin prompt starts before the loginmanagerdisplay
       if [[ ! -z "$SeatSessions" && ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
       then
-        SeatStartCount=0
+        SeatStartCount=$MAX_UI_ATTEMPTS
         DoStartLoginManagerDisplay=0
       else
         if [[ ! -z "$SeatSessions" ]]
         then
-          SeatStartCount=0
+          SeatStartCount=$MAX_UI_ATTEMPTS
           DoStartLoginManagerDisplay=0
         fi
       fi
@@ -2641,11 +2642,15 @@ function StartLoginManagerDisplay
   elif [[ $SeatWestonBackend == "" ]]
   then
     WriteToLog "No backend found for $CurrentSeat ."
-    SeatStartCount=5
+    SeatStartCount=-1
     LOGINMANAGERDISPLAYSTATUS=1
   fi
 
-  if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount < 5 && $DoStartLoginManagerDisplay == 1 ]]
+  if [[ $DoStartLoginManagerDisplay == 0 ]]
+  then
+    (( SeatStartCount-- ))
+  fi
+  if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount -ge 0 && $DoStartLoginManagerDisplay == 1 ]]
   then
 
     if [[ $SeatUsePixman == 1 ]]
@@ -2655,10 +2660,9 @@ function StartLoginManagerDisplay
       unset PIXMANARGS
     fi
 
-    (( SeatStartCount++ ))
     if [[ "$CurrentSeat" == seat0 ]]
     then
-      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempt $SeatStartCount)"
+      WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempts left: $SeatStartCount)"
       #Reset the contents of the tty
       echo -n -e '\e[3J' > /dev/tty$LOGINMANAGERDISPLAYTTY
       #Disable cursor blinking on the TTY the display server will be started on
@@ -2741,15 +2745,11 @@ function StartLoginManagerDisplay
       fi
     else
       WriteToLog "The DEFAULTWAYLANDSERVER is not executable, or does not exist. Could not start the loginmanagerdisplay for $CurrentSeat."
-      if [[ $SeatStartCount == 1 ]]
-      then
-        echo "The DEFAULTWAYLANDSERVER is not executable, or does not exist." >> /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log
-      fi
+      echo "The DEFAULTWAYLANDSERVER is not executable, or does not exist." >> /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log
     fi
   fi
-  if [[ $SeatStartCount == 5 ]]
+  if [[ $SeatStartCount == -1 ]]
   then
-    (( SeatStartCount++ ))
     WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
   fi
   LoginManagerDisplayFailCounts[$SeatIndexID]=$SeatStartCount
@@ -3037,14 +3037,14 @@ function WaylandLoginManagerMain
           fi
           GetSeatCapabilityString $RunningSeat SeatCapabilityArr
           SeatCapabilityArr=($SeatCapabilityArr)
-          UserActionFailCounts[$StartIndex/2]=0
+          UserActionFailCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$StartIndex/2]=0
           SeatCreationDates[$StartIndex/2]=$SeatCreationDate
           LoginManagerDisplayBackends[$StartIndex/2]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex/2]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex/2]=${SeatCapabilityArr[2]}
           SeatForceVblankFlags[$StartIndex/2]=${SeatCapabilityArr[3]}
-          LoginManagerDisplayFailCounts[$StartIndex/2]=0
+          LoginManagerDisplayFailCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
           if [[ -f /run/waylandloginmanager/autologinran ]]
           then
             read -r -d $'\r' AUTOLOGINFILE 2>/dev/null </run/waylandloginmanager/autologinran
@@ -3085,9 +3085,9 @@ function WaylandLoginManagerMain
         then
           ChangeIndex=$((StartIndex/2))
           SeatFileName=${SeatFileNames[$ChangeIndex]}
-          UserActionFailCounts[$ChangeIndex]=0
+          UserActionFailCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$ChangeIndex]=0
-          LoginManagerDisplayFailCounts[$ChangeIndex]=0
+          LoginManagerDisplayFailCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           StartedSeats[$(($StartIndex+1))]=-1
@@ -3135,7 +3135,7 @@ function WaylandLoginManagerMain
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionFailCounts[$SeatIndexID]} ]]
       then
-        UserActionFailCounts[$SeatIndexID]=0
+        UserActionFailCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
       fi
       if [[ -z ${UserActionFailSkips[$SeatIndexID]} ]]
       then
@@ -3155,26 +3155,26 @@ function WaylandLoginManagerMain
           unset LastUserActionPIDs[$SeatIndexID]
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
-            ((UserActionFailCounts[$SeatIndexID]++))
-            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log."
+            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log. (Attempts Left: ${UserActionFailCounts[$SeatIndexID]})"
+            ((UserActionFailCounts[$SeatIndexID]--))
           else
-            UserActionFailCounts[$SeatIndexID]=0
+            UserActionFailCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
             UserActionFailSkips[$SeatIndexID]=0
           fi
         fi
-        if [[ ${UserActionFailCounts[$SeatIndexID]} == 5 ]]
+        if [[ ${UserActionFailCounts[$SeatIndexID]} == -1 ]]
         then
           WriteToLog "The prompt for the user action for seat $RunningSeat has terminated incorrectly too many times in a row."
         fi
       fi
 
       #If the seat had the loginmanagerdisplay fail 5 times, declare it
-      if [[ ${LoginManagerDisplayFailCounts[$SeatIndexID]} < 5 ]]
+      if [[ ${LoginManagerDisplayFailCounts[$SeatIndexID]} -ge 0 ]]
       then
         LoginManagerDisplayAttemptsMaxedOut=0
       fi
       #If the seat had the UserActionDialog fail 5 times, declare it
-      if [[ ${UserActionFailCounts[$SeatIndexID]} < 5 ]]
+      if [[ ${UserActionFailCounts[$SeatIndexID]} -ge 0 ]]
       then
         UIPromptAttemptsMaxedOut=0
         if [[ $UIJobCount == 0 ]]
