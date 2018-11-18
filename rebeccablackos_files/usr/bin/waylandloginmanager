@@ -3155,8 +3155,11 @@ function WaylandLoginManagerMain
           unset LastUserActionPIDs[$SeatIndexID]
           if [[ ${UserActionFailSkips[$SeatIndexID]} == 0 ]]
           then
-            WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log. (Attempts Left: ${UserActionAttemptCounts[$SeatIndexID]})"
             ((UserActionAttemptCounts[$SeatIndexID]--))
+            if [[ ${UserActionAttemptCounts[$SeatIndexID]} -gt 0 ]]
+            then
+              WriteToLog "The prompt for the user action for seat $RunningSeat terminated incorrectly. Please see the loginmanagerdisplay log. (Attempts Left: ${UserActionAttemptCounts[$SeatIndexID]})"
+            fi
           else
             UserActionAttemptCounts[$SeatIndexID]=$MAX_UI_ATTEMPTS
             UserActionFailSkips[$SeatIndexID]=0
