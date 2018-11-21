@@ -424,6 +424,7 @@ NAMESPACE_ENTER mount --bind /run/shm "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH
 
 NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/media/shareddir
 NAMESPACE_ENTER mount --bind "$MOUNTHOME"/liveisotest/shareddir "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/media/shareddir
+NAMESPACE_ENTER mount -t tmpfs -o size=10% tmpfs "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/var/tmp/
 
 #allow all local connections to the xserver
 #xhost +LOCAL:
