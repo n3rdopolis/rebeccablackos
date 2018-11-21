@@ -2285,7 +2285,7 @@ function GetUserCredentials
         TTYSTRING=""
       fi
       WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
-      DialogWait 3 "Attempting to start the selected session..." "$1"
+      DialogWait 3 "Attempting to start the selected session..." "$1" &
       StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
     fi
   else
@@ -2824,7 +2824,7 @@ function StartAutoLogin
    else
     export AutoSessionTTY=0
   fi
-  DialogWait 3 "Attempting to start the selected session..." "$1"
+  DialogWait 3 "Attempting to start the selected session..." "$1" &
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
