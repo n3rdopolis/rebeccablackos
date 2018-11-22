@@ -56,7 +56,7 @@ APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
 echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y
+apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo usrmerge -y
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8

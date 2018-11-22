@@ -60,15 +60,15 @@ adduser --no-create-home --disabled-password --system --force-badname _apt
 apt-get install -f
 dpkg --configure -a
 
+#attempt to prevent packages from prompting for debconf
+export DEBIAN_FRONTEND=noninteractive
+
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo -y
+apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo usrmerge -y
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
 localedef -i en_US -f UTF-8 en_US.UTF-8
-
-#attempt to prevent packages from prompting for debconf
-export DEBIAN_FRONTEND=noninteractive
 
 #Create folder to hold the install logs
 mkdir -p "$PACKAGEOPERATIONLOGDIR"/Installs
