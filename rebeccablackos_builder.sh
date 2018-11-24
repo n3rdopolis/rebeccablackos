@@ -854,6 +854,9 @@ then
   echolog " "
 fi
 
+echolog "ISO sizes:"
+echolog "$(ls -lh "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso)"
+
 #Write specially logged messages to the mainlog
 echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/externallogs/mainlog.log
 
