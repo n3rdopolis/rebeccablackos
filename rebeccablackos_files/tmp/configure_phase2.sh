@@ -84,14 +84,25 @@ INSTALLS=$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')
 INSTALLS+=$'\n'
 
 #Get list of new packages to remove, compared from the previous run
-INSTALLS+=$(grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun | grep -v ::REMOVE | awk -F "#" '{print $1}' | awk -F "::" '{print $1}' | while read OLDPACKAGE
+grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun | grep -v ::REMOVE | awk -F "#" '{print $1}' | awk -F "::" '{print $1}' | while read OLDPACKAGE
 do
   AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$OLDPACKAGE$)
   if [[ $AvailableCount != 0 ]]
   then
-    echo "$OLDPACKAGE::REMOVE"
+    echo "$OLDPACKAGE" >> /tmp/INSTALLS.txt.removes
   fi
-done)
+done
+if [[ -f /tmp/INSTALLS.txt.removes ]]
+then
+  INSTALLS+=$(cat /tmp/INSTALLS.txt.removes | sort | uniq | while read PACKAGE
+  do
+    AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$PACKAGE$)
+    if [[ $AvailableCount != 0 ]]
+    then
+      echo "$PACKAGE::REMOVE"
+    fi
+  done)
+fi
 INSTALLS+=$'\n'
 
 #Clear any empty lines
@@ -177,6 +188,8 @@ Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
   echo "Removes failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+else
+  rm /tmp/INSTALLS.txt.removes
 fi
 
 
