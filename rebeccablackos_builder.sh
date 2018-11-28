@@ -855,8 +855,10 @@ then
 fi
 
 echolog "ISO sizes:"
-echolog "$(ls -lh "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso)"
-
+if [[ $(compgen -G "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso &> /dev/null; echo $?) == 0 ]]
+then
+  echolog "$(ls -lh "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso)"
+fi
 #Write specially logged messages to the mainlog
 echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/externallogs/mainlog.log
 
