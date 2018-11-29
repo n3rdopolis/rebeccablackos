@@ -2585,7 +2585,7 @@ function GetSeatCapabilityString
   then
     printf -v "$2" '%s' "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
   else
-    echo $2
+    echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
   fi
 }
 
