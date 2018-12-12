@@ -57,6 +57,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's/-Werror//g' CMakeLists.txt 
+sed -i '25i#include <boost/next_prior.hpp>' src/miral/static_display_config.cpp
+
 cmake -Wno-dev . -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DMIR_ENABLE_TESTS=OFF -DMIR_BUILD_PLATFORM_EGLSTREAM_KMS=OFF
 }
 
