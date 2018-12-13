@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2018-11-18 12:19:00.290723113 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2018-11-18 12:46:59.591703222 -0500
+--- usr/bin/waylandloginmanager	2018-12-12 20:19:47.937652399 -0500
++++ usr/bin/waylandloginmanagerkdialog	2018-12-12 20:19:43.149627929 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -404,3 +404,15 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
+@@ -3188,9 +3192,9 @@
+       fi
+     done
+ 
+-    if [[ ! -x "$(command -v zenity)" ]]
++    if [[ ! -x "$(command -v kdialog)" ]]
+     then
+-      WriteToLog "zenity is not installed"
++      WriteToLog "kdialog is not installed"
+       UIPromptAttemptsMaxedOut=1
+     fi
+ 

@@ -3188,6 +3188,12 @@ function WaylandLoginManagerMain
       fi
     done
 
+    if [[ ! -x "$(command -v zenity)" ]]
+    then
+      WriteToLog "zenity is not installed"
+      UIPromptAttemptsMaxedOut=1
+    fi
+
     #If it is declared the loginmanagerdisplay service failed for all seats, then show a text mode dialog
     if [[ $LoginManagerDisplayAttemptsMaxedOut == 1 ]]
     then
