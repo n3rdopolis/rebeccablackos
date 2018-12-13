@@ -57,24 +57,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/materialdecoration.diff
-qbs setup-toolchains --type gcc /usr/bin/g++ gcc
-qbs setup-qt /opt/bin/qmake qt5
-qbs config profiles.qt5.baseProfile gcc
-qbs resolve profile:qt5 qbs.installRoot:/ modules.lirideployment.prefix:$INSTALLDIR qbs.buildVariant:release
+mkdir build
+cd build
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DGLBINDING_ENABLED=ON -DCMAKE_BUILD_TYPE=RELEASE
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-qbs build -j $BUILD_CPU_COUNT --no-install profile:qt5
+cd build
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-qbs install --no-build -v
+cd build
+make install
 }
+
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()

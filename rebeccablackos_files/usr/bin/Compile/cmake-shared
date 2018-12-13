@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qtaccountsservice
+SOURCENAME=cmake-shared
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/lirios/qtaccountsservice
+SOURCEURL=https://github.com/lirios/cmake-shared
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=develop
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -46,13 +46,13 @@ REBUILDNEWREVISION=0
 #This is an array where the first element specifies a submodule name, and the second element specifies the revision, the third specifies the name of another submodule, the fourth element specifies its revision and so on.
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
-#SUBMODULEREVISIONS=(qbs/shared master)
 
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
 :
 }
+
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
@@ -75,7 +75,6 @@ function PackageInstallSource()
 cd build
 make install
 }
-
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
