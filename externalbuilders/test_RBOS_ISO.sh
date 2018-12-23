@@ -463,6 +463,8 @@ then
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/var/run/dbus
   #give more information in the testuser .bashrc
   echo "
+unset XCURSOR_SIZE
+unset XCURSOR_THEME
 export \$(dbus-launch)
 (. /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
 echo \"
