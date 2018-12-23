@@ -524,8 +524,12 @@ function ReadEnvironmentFile
   ParseINISegment=0
   for EnvironmentFileLine in "${EnvironmentFileArray[@]}"
   do
+    #Remove whitespace
     EnvironmentFileLine="${EnvironmentFileLine##*( )}"
     EnvironmentFileLine="${EnvironmentFileLine%%*( )}"
+
+    #Remove comments
+    EnvironmentFileLine=${EnvironmentFileLine%%#*}
 
     if [[ $ParseINISegment == 1 && $EnvironmentFileLine =~ ^[[:space:]]*"["  ]]
     then
@@ -1283,8 +1287,12 @@ function ParseWSessionFiles
     ParseINISegment=0
     for WSESSIONLINE in "${WSESSIONFILEDATA[@]}"
     do
+      #Remove whitespace
       WSESSIONLINE="${WSESSIONLINE##*( )}"
       WSESSIONLINE="${WSESSIONLINE%%*( )}"
+
+      #Remove comments
+      WSESSIONLINE=${WSESSIONLINE%%#*}
 
       if [[ $ParseINISegment == 1 && $WSESSIONLINE =~ ^[[:space:]]*"["  ]]
       then
