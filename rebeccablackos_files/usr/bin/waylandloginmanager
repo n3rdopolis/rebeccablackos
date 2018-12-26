@@ -903,6 +903,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     WriteToLog "Manually override set to use to use the framebuffer"
     if [[ $HardwareSupported != 1 ]]
     then
+      systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
       chvt 63
       $DIALOGCMD --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
@@ -918,6 +919,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
   if [[ $HardwareSupported != 1 ]]
   then
+    systemd-notify --ready &> /dev/null
     chvt 63
     if [[ $ISLIVE == 1 ]]
     then
