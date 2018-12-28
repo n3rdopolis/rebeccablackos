@@ -37,7 +37,12 @@ MaxNumberOfSeats=10
 CurrentTTY=$(fgconsole)
 
 #Dont run zenity as root
-ZENITYCMD="runuser -u $SUDO_USER -m -- zenity"
+if [[ ! -z $SUDO_USER ]]
+then
+  ZENITYCMD="runuser -u $SUDO_USER -m -- zenity"
+else
+  ZENITYCMD="zenity"
+fi
 
 NumberOfDevices=0
 DeviceList=""
