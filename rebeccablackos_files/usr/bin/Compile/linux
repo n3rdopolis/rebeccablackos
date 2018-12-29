@@ -23,7 +23,7 @@
 SOURCENAME=linux
 
 #The URL of the Source code repo
-SOURCEURL=https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.18.tar.gz
+SOURCEURL=https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.tar.gz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=ARCHIVE
@@ -61,7 +61,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-cd linux-4.18
+cd linux-4.19
 patch -p1 < /usr/share/RBOS_PATCHES/linux.diff
 cp /usr/share/RBOS_PATCHES/linux.config ./.config
 
@@ -79,7 +79,7 @@ make olddefconfig
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd linux-4.18
+cd linux-4.19
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
 make prepare
 make scripts
@@ -90,7 +90,7 @@ make -C /lib/modules/$CURRENTKERNELVERSION/build M=$(pwd) modules
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd linux-4.18
+cd linux-4.19
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
 KERNELVERSION=$(cat include/config/kernel.release)
 cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
