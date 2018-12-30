@@ -663,8 +663,15 @@ function TerminateJobPID
   fi
 }
 
-function SetNonRootUsers
+#Function that stores common configuration, for the waylandloginmanager running as a service, and for waylandloginmanager running for the shutdowndialog
+function SetCommonConfig
 {
+  ######################################################
+  export WESTON_FBDEV_SEAT_AWARE=1
+  export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
+  export MAX_UI_ATTEMPTS=5
+  ######################################################
+
   #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
   export LOGINMANAGERDISPLAYUSER=waylandloginmanager
   #User that the su test in AuthenticateUser user runs as
@@ -676,7 +683,7 @@ function SetNonRootUsers
 #Function that takes no arguments that does the first steps in setting up the environment, and detecting hardware support, and previous instances for starting up the login manager
 function PrepareLoginManager
 {
-  SetNonRootUsers
+  SetCommonConfig
   export XDG_CONFIG_HOME=/etc/loginmanagerdisplay/
   #Get the UID of the $LOGINMANAGERDISPLAYUSER
   export LOGINMANAGERDISPLAYUID=$(id $LOGINMANAGERDISPLAYUSER -u)
@@ -837,12 +844,6 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
-
-  ######################################################
-  export WESTON_FBDEV_SEAT_AWARE=1
-  export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
-  export MAX_UI_ATTEMPTS=5
-  ######################################################
 
   #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
   MinimumTTY=7
@@ -2317,7 +2318,7 @@ function LeavePrompt
     SetFallbackEnvironmentVariables $1
     SessionPromptThreshold=1
   else
-    SetNonRootUsers
+    SetCommonConfig
     ZENITYCMD=zenity
     SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
     SessionPromptThreshold=2
