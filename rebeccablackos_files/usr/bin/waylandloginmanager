@@ -667,7 +667,6 @@ function TerminateJobPID
 function SetCommonConfig
 {
   ######################################################
-  export WESTON_FBDEV_SEAT_AWARE=1
   export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
   export MAX_UI_ATTEMPTS=5
   ######################################################
@@ -1550,7 +1549,7 @@ function ChooseSessionType
     SeatSupportedBackendsString+="KMS "
     SeatDefaultBackendType=KMS
   fi
-  if [[ $SeatSupportsKMS != 0 || ($SeatSupportsFB != 0 && $WESTON_FBDEV_SEAT_AWARE == 1 ) ]]
+  if [[ $SeatSupportsKMS != 0 || $SeatSupportsFB != 0 ]]
   then
     SeatSupportedBackends+=(WL)
     SeatSupportedBackendsString+="WL "
@@ -2549,7 +2548,7 @@ function GetSeatCapabilityString
   #Determine the backend to use
   WESTONBACKEND=0
   WESTONUSEPIXMAN=0
-  if [[ $WESTON_FBDEV_SEAT_AWARE == 1 && $SeatSupportsFB != 0 ]]
+  if [[ $SeatSupportsFB != 0 ]]
   then
     WESTONBACKEND=FB
   else
