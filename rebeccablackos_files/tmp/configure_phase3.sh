@@ -148,7 +148,7 @@ function PostInstallActions
   #Create a package with all the menu items.
   cd /tmp
   rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
-  checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
   cp *.deb "/srcbuild/buildoutput/"
   cd $OLDPWD
 
