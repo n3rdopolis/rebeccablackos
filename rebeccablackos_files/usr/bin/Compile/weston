@@ -56,19 +56,19 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-libunwind --with-cairo=image --enable-tablet-shell --enable-clients --enable-demo-clients-install --enable-rdp-compositor --enable-screen-sharing --enable-libinput-backend --with-xserver-path=$INSTALLDIR/bin/Xwayland --enable-remoting
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make -i
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install -i
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
@@ -87,6 +87,7 @@ cp /"$SOURCEDIR"/"$SOURCENAME"/config.h $INSTALLDIR/include/weston
 chmod -s $INSTALLDIR/bin/weston
 
 }
+
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
 RunDownloadAndOrBuild
