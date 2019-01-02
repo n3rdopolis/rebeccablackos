@@ -2619,6 +2619,13 @@ function StartLoginManagerDisplay
   LOGINMANAGERDISPLAYSTATUS=0
   SeatUseMultiSessionConfig=1
 
+  #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
+  if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
+  then
+    DoStartLoginManagerDisplay=0
+    return
+  fi
+
   #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it. This only would concern seats that are not seat0
   if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
   then
@@ -2644,13 +2651,6 @@ function StartLoginManagerDisplay
         fi
       fi
     fi
-  fi
-
-  #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
-  if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
-  then
-    DoStartLoginManagerDisplay=0
-    return
   fi
 
   #Handle the seat hardware information
