@@ -328,8 +328,13 @@ then
   then
     BITNESSCOMMAND=linux64
   else
-    echo "Unknown chroot failure, detecting the target systems bitness"
-    exit
+    if [[ $XALIVE == 0 ]]
+    then
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+    else
+      echo "Unknown chroot failure, detecting the target systems bitness"
+    fi
+    mountisoexit
   fi
 
   #Test if the target is still in a usable state
