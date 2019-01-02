@@ -2090,15 +2090,22 @@ function StartUserSession
   RunSession=1
   if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && "$USERSEAT" != seat0 ]]
   then
-    SeatCanMultiSession=$(loginctl show-seat "$USERSEAT" -p CanMultiSession --value 2>/dev/null)
-    SeatSessions=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null))
+    IFS=$'\n'
+    SeatStatusProperties=($(loginctl show-seat "$USERSEAT" -p CanMultiSession -p Sessions --value 2>/dev/null))
+    unset IFS
+
+    SeatCanMultiSession="${SeatStatusProperties[0]}"
+    SeatSessions="${SeatStatusProperties[1]}"
     SeatSessionsCount=${#SeatSessions[@]}
-    SeatSessionType=$(loginctl show-session ${SeatSessions[@]} -p Class --value 2>/dev/null)
+    SeatSessionType=$(loginctl show-session ${SeatSessions[0]} -p Class --value 2>/dev/null)
     if [[ $SeatCanMultiSession != "yes" ]]
     then
       if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
       then
-        loginctl kill-session ${SeatSessions[@]} 2>/dev/null
+        if [[ $SeatSessionsCount == 1 ]]
+        then
+          loginctl kill-session ${SeatSessions[0]} 2>/dev/null
+        fi
       else
         RunSession=0
       fi
@@ -2615,8 +2622,12 @@ function StartLoginManagerDisplay
   #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it. This only would concern seats that are not seat0
   if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $CurrentSeat != "seat0" ]]
   then
-    SeatCanMultiSession=$(loginctl show-seat "$CurrentSeat" -p CanMultiSession --value 2>/dev/null)
-    SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
+    IFS=$'\n'
+    SeatStatusProperties=($(loginctl show-seat "$CurrentSeat" -p CanMultiSession -p Sessions --value 2>/dev/null))
+    unset IFS
+
+    SeatCanMultiSession="${SeatStatusProperties[0]}"
+    SeatSessions="${SeatStatusProperties[1]}"
     if [[ $SeatCanMultiSession != "yes" ]]
     then
       SeatUseMultiSessionConfig=0
