@@ -2466,7 +2466,10 @@ function LeavePrompt
   elif [[ $ACTION == "Logoff" ]]
   then
     ecryptfs-umount-private
-    waylandloginmanager --sendcommand Change
+    if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
+    then
+      waylandloginmanager --sendcommand Change
+    fi
     loginctl terminate-session $XDG_SESSION_ID
     sleep 3
     disown
