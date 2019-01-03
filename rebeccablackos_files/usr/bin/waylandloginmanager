@@ -3256,7 +3256,9 @@ function WaylandLoginManagerMain
       fi
     done
 
-    if [[ ! -x "$(command -v zenity)" ]]
+    command -v zenity > /dev/null
+    CommandResult=$?
+    if [[ $CommandResult != 0 ]]
     then
       WriteToLog "zenity is not installed"
       UIPromptAttemptsMaxedOut=1
