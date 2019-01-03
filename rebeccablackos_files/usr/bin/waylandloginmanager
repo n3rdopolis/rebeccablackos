@@ -1220,6 +1220,12 @@ function DisplayServerWait
 {
   GetStartedSeatIndex $1
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
+
+  while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" ]]
+  do
+    $SLEEPCMD 1
+  done
+
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   command -v weston-info &> /dev/null
   WestonInfoResult=$?
