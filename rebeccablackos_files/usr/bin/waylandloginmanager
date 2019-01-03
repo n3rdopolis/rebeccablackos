@@ -1163,6 +1163,20 @@ function ReadRegister
           then
             loginctl lock-session $SessionID 2> /dev/null
           fi
+          if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 ]]
+          then
+              GetStartedSeatIndex $SessionSeatID
+              if [[ -e /proc/$SessionPID/stat ]]
+              then
+                read -a PidStats < /proc/$SessionPID/stat
+                PidStartTime=${PidStats[21]}
+              else
+                PidStartTime=0
+              fi
+
+              LoginManagerDisplayPIDs[$ReturnSeatIndex]=$SessionPID
+              LoginManagerDisplayStartTimes[$ReturnSeatIndex]=$PidStartTime
+          fi
         else
           WriteToLog "Session failed to start"
           SessionStartFailed=1
@@ -2097,10 +2111,10 @@ function StartUserSession
     SeatCanMultiSession="${SeatStatusProperties[0]}"
     SeatSessions="${SeatStatusProperties[1]}"
     SeatSessionsCount=${#SeatSessions[@]}
-    SeatSessionType=$(loginctl show-session ${SeatSessions[0]} -p Class --value 2>/dev/null)
+    SeatSessionService=$(loginctl show-session ${SeatSessions[0]} -p Service --value 2>/dev/null)
     if [[ $SeatCanMultiSession != "yes" ]]
     then
-      if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionType == "greeter") ]]
+      if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionService == "waylandloginmanager-loginmanagerdisplay") ]]
       then
         if [[ $SeatSessionsCount == 1 ]]
         then
@@ -2111,6 +2125,7 @@ function StartUserSession
       fi
     fi
   fi
+  #This won't affect the whole script, just this scope, because it's a new thread.
   unset ONLY_CAN_MULTISESSION_SESSION_SWITCH
 
   if [[ $RunSession == 1 ]]
@@ -2611,6 +2626,8 @@ function StartLoginManagerDisplay
 {
   #Information about the seat
   CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
+  SeatIndexID=$ReturnSeatIndex
   SeatStartCount=${LoginManagerDisplayAttemptCounts[$SeatIndexID]}
   SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
   SeatUsePixman=${LoginManagerDisplayPixmanFlags[$SeatIndexID]}
@@ -2620,7 +2637,15 @@ function StartLoginManagerDisplay
   SeatUseMultiSessionConfig=1
 
   #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
-  if [[ -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
+  if [[ -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat ]]
+  then
+    read -a PidStats < /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat
+    PidStartTime=${PidStats[21]}
+  else
+    PidStartTime=0
+  fi
+
+  if [[ $PidStartTime == ${LoginManagerDisplayStartTimes[$SeatIndexID]} && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
   then
     DoStartLoginManagerDisplay=0
     return
@@ -2738,8 +2763,17 @@ function StartLoginManagerDisplay
 
       NewLoginManagerDisplayPID=${NewLoginManagerDisplayInfo[0]}
       NewLoginManagerDisplaySession=${NewLoginManagerDisplayInfo[1]}
+      if [[ -e /proc/$NewLoginManagerDisplayPID/stat ]]
+      then
+        read -a PidStats < /proc/$NewLoginManagerDisplayPID/stat
+        PidStartTime=${PidStats[21]}
+      else
+        PidStartTime=0
+      fi
+
       LoginManagerDisplayPIDs[$SeatIndexID]=$NewLoginManagerDisplayPID
       LoginManagerDisplaySessions[$SeatIndexID]=$NewLoginManagerDisplaySession
+      LoginManagerDisplayStartTimes[$SeatIndexID]=$PidStartTime
 
       if [[ ! -z $NewLoginManagerDisplaySession ]]
       then
@@ -2969,6 +3003,7 @@ function WaylandLoginManagerMain
   LastDebugPIDs=()
   LoginManagerDisplaySessions=()
   LoginManagerDisplayPIDs=()
+  LoginManagerDisplayStartTimes=()
 
   #Arrays about the seats, what hardware is supported
   #and how many times something related to the seat failed
@@ -3148,8 +3183,17 @@ function WaylandLoginManagerMain
         IFS=@
         LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
         unset IFS
+        if [[ -e /proc/${LoginManagerDisplayInfo[0]}/stat ]]
+        then
+          read -a PidStats < /proc/${LoginManagerDisplayInfo[0]}/stat
+          PidStartTime=${PidStats[21]}
+        else
+          PidStartTime=0
+        fi
+
         LoginManagerDisplayPIDs[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
         LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[1]}
+        LoginManagerDisplayStartTimes[$SeatIndexID]=$PidStartTime
       fi
       StartLoginManagerDisplay $RunningSeat
 
