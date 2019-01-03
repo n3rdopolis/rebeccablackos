@@ -91,6 +91,11 @@
      #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
 
+     #wlmrestrictseatmultisession=1
+     #to only allow 1 session on seats where logind reports CanMultiSession=no
+     #The default is to allow.
+     #Specifing the option on the kernel command line overrides the config file
+
 #/usr/libexec/wayland_login_helpers/*
   #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/weston.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
   #These are optional as the waylandloginmanager displays a selection list with the same commands as well
@@ -667,9 +672,11 @@ function TerminateJobPID
 function SetCommonConfig
 {
   ######################################################
-  export ONLY_CAN_MULTISESSION_SESSION_SWITCH=0
   export MAX_UI_ATTEMPTS=5
   ######################################################
+
+  #If only 1 session should be allowed on seats where logind reports CanMultiSession=no (default is to allow)
+  GetConfigKey wlmrestrictseatmultisession "" 0 1 ONLY_CAN_MULTISESSION_SESSION_SWITCH
 
   #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
   export LOGINMANAGERDISPLAYUSER=waylandloginmanager
