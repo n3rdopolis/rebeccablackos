@@ -3023,6 +3023,12 @@ function WaylandLoginManagerMain
   #loop 'forever'
   while [ 1 ]
   do
+    if [[ ! -d /proc/1 && ! -f /proc/stat ]]
+    then
+      WriteToLog "The /proc file system is not mounted. Exiting."
+      exit 1
+    fi
+
     #Detect all seats, and add them to the array.
     if [[ $SECONDS -gt 60 ]]
     then
