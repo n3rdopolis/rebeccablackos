@@ -2716,7 +2716,7 @@ function StartLoginManagerDisplay
       ResetTTYMode $LOGINMANAGERDISPLAYTTY
       SetTTYModeGraphics $LOGINMANAGERDISPLAYTTY
     else
-      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempt $SeatStartCount)"
+      WriteToLog "Starting the loginmanagerdisplay for seat $CurrentSeat (Attempts left: $SeatStartCount)"
     fi
     if [[ -x "$DEFAULTWAYLANDSERVER" ]]
     then
