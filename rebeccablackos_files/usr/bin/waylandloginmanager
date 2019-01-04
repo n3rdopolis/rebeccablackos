@@ -2772,24 +2772,18 @@ function StartLoginManagerDisplay
         ((TRYCOUNT++))
       done
       #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
-      NewLoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $CurrentSeat)
+      NewLoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo 0 $CurrentSeat)
       IFS=@
       NewLoginManagerDisplayInfo=($NewLoginManagerDisplayInfo)
       unset IFS
 
       NewLoginManagerDisplayPID=${NewLoginManagerDisplayInfo[0]}
       NewLoginManagerDisplaySession=${NewLoginManagerDisplayInfo[1]}
-      if [[ -e /proc/$NewLoginManagerDisplayPID/stat ]]
-      then
-        read -a PidStats < /proc/$NewLoginManagerDisplayPID/stat
-        PidStartTime=${PidStats[21]}
-      else
-        PidStartTime=0
-      fi
+      NewLoginManagerDisplayPIDStartTime=${NewLoginManagerDisplayInfo[2]}
 
       LoginManagerDisplayPIDs[$SeatIndexID]=$NewLoginManagerDisplayPID
       LoginManagerDisplaySessions[$SeatIndexID]=$NewLoginManagerDisplaySession
-      LoginManagerDisplayStartTimes[$SeatIndexID]=$PidStartTime
+      LoginManagerDisplayStartTimes[$SeatIndexID]=$NewLoginManagerDisplayPIDStartTime
 
       if [[ ! -z $NewLoginManagerDisplaySession ]]
       then
@@ -2826,14 +2820,25 @@ function StartLoginManagerDisplay
   LoginManagerDisplayAttemptCounts[$SeatIndexID]=$SeatStartCount
 }
 
-#This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
+#This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 2 arguments,
+#the first is if it's a first run or not. 1 = first run, 0 = not first run
+#The second is the seat.
 function GetLoginManagerDisplayInfo
 {
-  GetStartedSeatIndex $1
+  GetInfoAsFirstRun=$1
+  GetStartedSeatIndex $2
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$SeatFileName".service -p MainPID --value 2>/dev/null)
+
+  #If this is the first run, and this is running in script multisession mode, and there is no LOGINMANAGERDISPLAYPID
+  #Then the LOGINMANAGERDISPLAYPID could have been overridden by a running session. (0 is returned for MainPID for an empty service by systemctl)
+  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $GetInfoAsFirstRun == 1 && $LOGINMANAGERDISPLAYPID == 0 ]]
+  then
+    LOGINMANAGERDISPLAYPID=$(systemctl show *-*-"$SeatFileName".service -p MainPID --value 2>/dev/null)
+  fi
+
   IFS=" "
   #Get all logind sessions
   WLMLOGINDSESSIONS=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null ))
@@ -2848,7 +2853,15 @@ function GetLoginManagerDisplayInfo
       break
     fi
   done
-  echo "$LOGINMANAGERDISPLAYPID@$REGISTERDISPLAYSESSION"
+
+  if [[ -e /proc/$LOGINMANAGERDISPLAYPID/stat ]]
+  then
+    read -a PidStats < /proc/$LOGINMANAGERDISPLAYPID/stat
+    LOGINMANAGERDISPLAYPIDSTARTTIME=${PidStats[21]}
+  else
+    LOGINMANAGERDISPLAYPIDSTARTTIME=0
+  fi
+  echo "$LOGINMANAGERDISPLAYPID@$REGISTERDISPLAYSESSION@$LOGINMANAGERDISPLAYPIDSTARTTIME"
 }
 
 #This function sets fallback environment variables such as LIBGL_ALWAYS_SOFTWARE if it is specified for the seat
@@ -3201,21 +3214,14 @@ function WaylandLoginManagerMain
       #Start the loginmanagerdisplay
       if [[ $LoginManagerFirstLoop == 1 ]]
       then
-        LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $RunningSeat)
+        LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo 1 $RunningSeat)
         IFS=@
         LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
         unset IFS
-        if [[ -e /proc/${LoginManagerDisplayInfo[0]}/stat ]]
-        then
-          read -a PidStats < /proc/${LoginManagerDisplayInfo[0]}/stat
-          PidStartTime=${PidStats[21]}
-        else
-          PidStartTime=0
-        fi
 
         LoginManagerDisplayPIDs[$SeatIndexID]=${LoginManagerDisplayInfo[0]}
         LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[1]}
-        LoginManagerDisplayStartTimes[$SeatIndexID]=$PidStartTime
+        LoginManagerDisplayStartTimes[$SeatIndexID]=${LoginManagerDisplayInfo[2]}
       fi
       StartLoginManagerDisplay $RunningSeat
 
