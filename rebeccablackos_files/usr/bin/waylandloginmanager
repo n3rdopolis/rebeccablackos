@@ -2355,6 +2355,7 @@ function LeavePrompt
   else
     SetCommonConfig
     ZENITYCMD=zenity
+    #Can't rely on SeatMultiSessionStatuses here, since this can be used outside of the service.
     SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
     SessionPromptThreshold=2
 
@@ -2663,7 +2664,7 @@ function StartLoginManagerDisplay
     PidStartTime=0
   fi
 
-  if [[ $PidStartTime == ${LoginManagerDisplayStartTimes[$SeatIndexID]} && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
+  if [[ $PidStartTime == ${LoginManagerDisplayStartTimes[$SeatIndexID]} && -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]} && ! -z ${LoginManagerDisplayPIDs[$SeatIndexID]} ]]
   then
     DoStartLoginManagerDisplay=0
     return
@@ -2833,9 +2834,13 @@ function GetLoginManagerDisplayInfo
 
   #If this is the first run, and this is running in script multisession mode, and there is no LOGINMANAGERDISPLAYPID
   #Then the LOGINMANAGERDISPLAYPID could have been overridden by a running session. (0 is returned for MainPID for an empty service by systemctl)
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $SeatCanMultiSession == 0 && $GetInfoAsFirstRun == 1 && $LOGINMANAGERDISPLAYPID == 0 ]]
+  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $SeatCanMultiSession == 0 && $GetInfoAsFirstRun == 1 && ( $LOGINMANAGERDISPLAYPID == 0 || -z $LOGINMANAGERDISPLAYPID ) ]]
   then
     LOGINMANAGERDISPLAYPID=$(systemctl show *-*-"$SeatFileName".service -p MainPID --value 2>/dev/null)
+  fi
+  if [[ -z $LOGINMANAGERDISPLAYPID ]]
+  then
+    LOGINMANAGERDISPLAYPID=0
   fi
 
   IFS=" "
