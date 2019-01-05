@@ -3024,6 +3024,7 @@ function WaylandLoginManagerMain
   StartedSeats=()
 
   #Arrays about running helper processes
+  SeatMultiSessionStatuses=()
   LastUserActionPIDs=()
   LastSwitchPIDs=()
   LastLoginPIDs=()
@@ -3128,6 +3129,7 @@ function WaylandLoginManagerMain
           fi
           GetSeatCapabilityString $RunningSeat SeatCapabilityArr
           SeatCapabilityArr=($SeatCapabilityArr)
+          SeatMultiSessionStatuses[$StartIndex/2]=$CanMultiSession
           UserActionAttemptCounts[$StartIndex/2]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$StartIndex/2]=0
           SeatCreationDates[$StartIndex/2]=$SeatCreationDate
@@ -3181,6 +3183,7 @@ function WaylandLoginManagerMain
           LoginManagerDisplayAttemptCounts[$ChangeIndex]=$MAX_UI_ATTEMPTS
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
+          SeatMultiSessionStatuses[$ChangeIndex]=-1
           StartedSeats[$(($StartIndex+1))]=-1
           TerminateJobPID ${LastUserActionPIDs[$StartIndex/2]} 15 1
           unset LastUserActionPIDs[$StartIndex/2]
