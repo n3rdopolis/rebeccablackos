@@ -822,7 +822,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   trap '' 2
 
   #Array that contains the time stamps of the creation date of the seats
-  SeatCreationDates=()
+  SeatCreationStrings=()
 
   #Attempt to import fast user switching data from a crashed WaylandLoginManager
   if [[ -e /run/waylandloginmanager/sessiondata ]]
@@ -1089,7 +1089,7 @@ function GetNextTTY
 #Export session data so the waylandloginmanager has user switching data in case of a reload
 function ExportSessionData
 {
-  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs SeatCreationDates 2>/dev/null)
+  EXPORTSTRING=$(declare -p AllSessions AllSessionTTYs AllSessionPIDs AllSessionUsers AllSessionIDs AllSeatIDs SeatCreationStrings 2>/dev/null)
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
@@ -3090,10 +3090,29 @@ function WaylandLoginManagerMain
         done
         #Detect the age of the seat, by the date stamp of the last entry logged for the seat
         #As of now, this is the best way to get the creation time of a seat, since the attribute is not presented
-        SeatCreationDate=$(journalctl  -b _HOSTNAME=$HOSTNAME _MACHINE_ID=$MACHINE_ID SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')
-        OldSeatCreationDate=${SeatCreationDates[$StartIndex]}
-        #If the seat is new, detected to have been removed in the past, or if the seat date is different, (removed and readded before the detection interval)
-        if [[ $IncludeSeat == 1 || ${SeatMultiSessionStatuses[$StartIndex]} == -1 || $SeatCreationDate != $OldSeatCreationDate ]]
+        SeatCreationString="$(journalctl  -b _HOSTNAME=$HOSTNAME _MACHINE_ID=$MACHINE_ID SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')@$RunningSeat"
+        SeatStringMismatch=0
+        if [[ $LoginManagerFirstLoop == 1 ]]
+        then
+          #SeatCreationStrings is exported for waylandloginmanager reloads, and reimported
+          #It is not a guarantee that the array will be in the same order after the reload
+          for OldSeatCreationString in ${SeatCreationStrings[@]}
+          do
+            #If a seat with the same name was seen, but with a different date
+            if [[ $OldSeatCreationString == *@$RunningSeat && $OldSeatCreationString != $SeatCreationString ]]
+            then
+              SeatStringMismatch=1
+            fi
+          done
+        else
+          #Less strict matching if this not the first loop.
+          if [[ $SeatCreationString != ${SeatCreationStrings[$StartIndex]} && ! -z ${SeatCreationStrings[$StartIndex]} ]]
+          then
+            SeatStringMismatch=1
+          fi
+        fi
+        #If the seat is new, detected to have been removed in the past, or if the seat string is different, (removed and readded before the detection interval)
+        if [[ $IncludeSeat == 1 || ${SeatMultiSessionStatuses[$StartIndex]} == -1 || $SeatStringMismatch == 1 ]]
         then
           #Determine and store if this seat is multisession compatible
           HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
@@ -3120,7 +3139,7 @@ function WaylandLoginManagerMain
             SeatFileName=$RunningSeat
           fi
           SeatFileNames[$StartIndex]=$SeatFileName
-          if [[ $SeatCreationDate != $OldSeatCreationDate && ! -z $OldSeatCreationDate ]]
+          if [[ $SeatStringMismatch == 1 ]]
           then
             systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
             rm /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName &> /dev/null
@@ -3130,7 +3149,7 @@ function WaylandLoginManagerMain
           SeatMultiSessionStatuses[$StartIndex]=$CanMultiSession
           UserActionAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$StartIndex]=0
-          SeatCreationDates[$StartIndex]=$SeatCreationDate
+          SeatCreationStrings[$StartIndex]=$SeatCreationString
           LoginManagerDisplayBackends[$StartIndex]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex]=${SeatCapabilityArr[2]}
@@ -3181,6 +3200,7 @@ function WaylandLoginManagerMain
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           SeatMultiSessionStatuses[$StartIndex]=-1
+          SeatCreationStrings[$StartIndex]=0
           TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
           unset LastUserActionPIDs[$StartIndex]
         fi
