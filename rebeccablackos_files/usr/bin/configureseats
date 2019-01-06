@@ -266,13 +266,28 @@ do
 done
 
 #Generate a list of session seats for the Zenity dialogs for selection
-unset SessionSeatList
-SessionSeatList="seat0"
+unset SessionSeatArray
+
+SessionSeatArray=($(loginctl list-seats --no-legend | sort))
 for (( CurrentSeat=1; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
 do
-  SessionSeatList+="|"
-  SessionSeatList+="seat$CurrentSeat"
+  IncludeSeat=1
+  for SessionSeat in "${SessionSeatArray[@]}"
+  do
+    if [[ "seat$CurrentSeat" == $SessionSeat ]]
+    then
+      IncludeSeat=0
+      break
+    fi
+  done
+  if [[ $IncludeSeat == 1 ]]
+  then
+    SessionSeatArray+=("seat$CurrentSeat")
+  fi
 done
+IFS="|"
+SessionSeatList=${SessionSeatArray[*]}
+unset IFS
 
 
 #Go through each probed input device and prompt for a the seata to add the device to
