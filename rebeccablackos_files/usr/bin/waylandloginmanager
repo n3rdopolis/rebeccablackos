@@ -3233,6 +3233,18 @@ function WaylandLoginManagerMain
       #Start the loginmanagerdisplay
       if [[ $LoginManagerFirstLoop == 1 ]]
       then
+
+        #The SeatCreationStrings array might have more elements than needed if the service was restarted.
+        #Blank out elements that exceed the number of elements in RunningSeats
+        RunningSeatsCount=${#StartedSeats[@]}
+        SeatCreationStringsCount=${#SeatCreationStrings[@]}
+        for (( ResetIndex=$RunningSeatsCount ; ResetIndex<$SeatCreationStringsCount ; ResetIndex++ ))
+        do
+          SeatCreationStrings[$ResetIndex]=0
+        done
+        #Export the Session Data
+        ExportSessionData
+
         LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo 1 $RunningSeat)
         IFS=@
         LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
