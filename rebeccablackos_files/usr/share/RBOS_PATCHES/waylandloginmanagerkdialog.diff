@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2019-01-05 12:04:46.863097557 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2019-01-05 12:11:04.502310895 -0500
+--- usr/bin/waylandloginmanager	2019-01-13 23:10:28.030870139 -0500
++++ usr/bin/waylandloginmanagerkdialog	2019-01-13 23:15:11.388266598 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -330,7 +330,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2517,7 +2516,7 @@
+@@ -2514,7 +2513,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -339,7 +339,7 @@
    fi
  }
  
-@@ -2899,7 +2898,7 @@
+@@ -2896,7 +2895,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -348,7 +348,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2924,7 +2923,7 @@
+@@ -2921,7 +2920,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -357,7 +357,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2958,19 +2957,24 @@
+@@ -2955,19 +2954,24 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -388,7 +388,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2978,12 +2982,12 @@
+@@ -2975,12 +2979,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -404,7 +404,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3280,11 +3284,11 @@
+@@ -3309,11 +3313,11 @@
        fi
      done
  

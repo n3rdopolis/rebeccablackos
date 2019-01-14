@@ -2486,9 +2486,6 @@ function LeavePrompt
       waylandloginmanager --sendcommand Change
     fi
     loginctl terminate-session $XDG_SESSION_ID
-    sleep 3
-    disown
-    nohup fuser -k -15 "/dev/tty$(loginctl show-session $XDG_SESSION_ID| grep VTNr| awk -F = '{print $2}')" >/dev/null 2>&1 &
     RESULT=$?
   #For all other actions, use logind dbus commands
   elif [[ $ACTION == "Shutdown" ]]
