@@ -728,6 +728,9 @@ fi
 #Create a date string for unique log folder names
 ENDDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
+#Create a folder contain the revisions files
+mkdir -p ""$BUILDLOCATION"/revisions_history"
+
 #Create a folder for the log files with the date string
 mkdir -p ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 
@@ -735,7 +738,7 @@ mkdir -p ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/* ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH""
 rm ""$BUILDLOCATION"/logs/latest-"$BUILDARCH"" 2>/dev/null
 ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""
-cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" 
+cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/revisions_history/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH"_"$ENDDATE".txt" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
 
 #allow the user to actually read the iso   
