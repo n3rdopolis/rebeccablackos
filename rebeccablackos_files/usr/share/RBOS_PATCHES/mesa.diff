@@ -1,0 +1,78 @@
+diff --git a/src/egl/drivers/dri2/platform_surfaceless.c b/src/egl/drivers/dri2/platform_surfaceless.c
+index f9809561611..1ce7af88884 100644
+--- a/src/egl/drivers/dri2/platform_surfaceless.c
++++ b/src/egl/drivers/dri2/platform_surfaceless.c
+@@ -36,6 +36,7 @@
+ #include "egl_dri2.h"
+ #include "egl_dri2_fallbacks.h"
+ #include "loader.h"
++#include "util/debug.h"
+ 
+ static __DRIimage*
+ surfaceless_alloc_image(struct dri2_egl_display *dri2_dpy,
+@@ -357,7 +358,7 @@ dri2_initialize_surfaceless(_EGLDriver *drv, _EGLDisplay *disp)
+    dri2_dpy->fd = -1;
+    disp->DriverData = (void *) dri2_dpy;
+ 
+-   if (!disp->Options.ForceSoftware) {
++   if (!env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false)) {
+       driver_loaded = surfaceless_probe_device(disp, false);
+       if (!driver_loaded)
+          _eglLog(_EGL_WARNING,
+diff --git a/src/egl/drivers/dri2/platform_wayland.c b/src/egl/drivers/dri2/platform_wayland.c
+index 34e09d7ec16..17886b091f9 100644
+--- a/src/egl/drivers/dri2/platform_wayland.c
++++ b/src/egl/drivers/dri2/platform_wayland.c
+@@ -42,6 +42,7 @@
+ #include "egl_dri2.h"
+ #include "egl_dri2_fallbacks.h"
+ #include "loader.h"
++#include "util/debug.h"
+ #include "util/u_vector.h"
+ #include "eglglobals.h"
+ 
+@@ -2076,7 +2077,7 @@ dri2_initialize_wayland(_EGLDriver *drv, _EGLDisplay *disp)
+ {
+    EGLBoolean initialized = EGL_FALSE;
+ 
+-   if (!disp->Options.ForceSoftware)
++   if (!env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false))
+       initialized = dri2_initialize_wayland_drm(drv, disp);
+ 
+    if (!initialized)
+diff --git a/src/egl/drivers/dri2/platform_x11.c b/src/egl/drivers/dri2/platform_x11.c
+index 4684c9f0825..c83d28aa68b 100644
+--- a/src/egl/drivers/dri2/platform_x11.c
++++ b/src/egl/drivers/dri2/platform_x11.c
+@@ -1538,7 +1538,7 @@ dri2_initialize_x11(_EGLDriver *drv, _EGLDisplay *disp)
+ {
+    EGLBoolean initialized = EGL_FALSE;
+ 
+-   if (!disp->Options.ForceSoftware) {
++   if (!env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false)) {
+ #ifdef HAVE_DRI3
+       if (!env_var_as_boolean("LIBGL_DRI3_DISABLE", false))
+          initialized = dri2_initialize_x11_dri3(drv, disp);
+diff --git a/src/egl/main/egldriver.c b/src/egl/main/egldriver.c
+index b20652ed8c1..952b738d787 100644
+--- a/src/egl/main/egldriver.c
++++ b/src/egl/main/egldriver.c
+@@ -44,8 +44,6 @@
+ #include "egldriver.h"
+ #include "egllog.h"
+ 
+-#include "util/debug.h"
+-
+ static mtx_t _eglModuleMutex = _MTX_INITIALIZER_NP;
+ static _EGLDriver *_eglDriver;
+ 
+@@ -89,8 +87,7 @@ _eglMatchDriver(_EGLDisplay *dpy)
+    assert(!dpy->Initialized);
+ 
+    /* set options */
+-   dpy->Options.ForceSoftware =
+-      env_var_as_boolean("LIBGL_ALWAYS_SOFTWARE", false);
++   dpy->Options.ForceSoftware = EGL_FALSE;
+ 
+    best_drv = _eglMatchAndInitialize(dpy);
+    if (!best_drv && !dpy->Options.ForceSoftware) {
