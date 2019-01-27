@@ -63,17 +63,10 @@ function PackagePrepareBuild()
 {
 cd linux-4.19
 patch -p1 < /usr/share/RBOS_PATCHES/linux.diff
-cp /usr/share/RBOS_PATCHES/linux.config ./.config
 
-if [[ $TARGETBITSIZE == 32 ]]
-then
-  ARCHCONFIGSTRING="# CONFIG_64BIT is not set\nCONFIG_X86_32=y\n# CONFIG_X86_64 is not set\nCONFIG_OUTPUT_FORMAT=\"elf32-i386\"\nCONFIG_ARCH_DEFCONFIG=\"arch/x86/configs/i386_defconfig\""
-elif [[ $TARGETBITSIZE == 64 ]]
-then
-  ARCHCONFIGSTRING="CONFIG_64BIT=y\n# CONFIG_X86_32 is not set\nCONFIG_X86_64=y\nCONFIG_OUTPUT_FORMAT=\"elf64-x86-64\"\nCONFIG_ARCH_DEFCONFIG=\"arch/x86/configs/x86_64_defconfig\""
-fi
-sed -i "s|@@@ARCH_PLACEHOLD@@@|$ARCHCONFIGSTRING|g" ./.config
 make olddefconfig
+sed -i '/CONFIG_DRM_VKMS/c\CONFIG_DRM_VKMS=m' .config
+sed -i '/CONFIG_DRM_UDL/c\CONFIG_DRM_UDL=m' .config
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -82,9 +75,11 @@ function PackageCompileSource()
 cd linux-4.19
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
 make prepare
+make modules_prepare
 make scripts
-cd drivers/gpu/drm/udl/
-make -C /lib/modules/$CURRENTKERNELVERSION/build M=$(pwd) modules
+
+make -C . M=drivers/gpu/drm/udl/
+make -C . M=drivers/gpu/drm/vkms/
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
@@ -93,7 +88,12 @@ function PackageInstallSource()
 cd linux-4.19
 CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
 KERNELVERSION=$(cat include/config/kernel.release)
+
+mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/
+mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/
+
 cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
+cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/vkms.ko
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
