@@ -128,7 +128,12 @@ function RunDownloadAndOrBuild
 
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
+  #Create home directory for the subcommand's $HOME folder, and standard home directories
   mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local"
+  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.cache"
+  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.config"
+
   mkdir -p "$BUILDLOGDIR/$SOURCENAME"
   mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   mkdir -p "/$SOURCEDIR"/buildhome/cargocache
@@ -807,6 +812,9 @@ function MakeAndInstall()
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
     $NONROOTCOMMAND "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
     PackageCompileSourceResult=$?
+
+    #Set the owner of the HOME directory for building the pacakge to root, as the non-root owner can cause some install scripts to stop, because the UIDs don't match
+    chown -R root:root "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
 
     #Create a script file that will be called by checkinstall, or just called if no .deb files are being made. It exports the current build scripts PackageInstallSource and PackagePostInstall functions to the script.
