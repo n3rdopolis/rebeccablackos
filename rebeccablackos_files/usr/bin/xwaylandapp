@@ -19,6 +19,7 @@
 #This script is for starting applications with toolkits that support X11 and wayland as xwaylandapps.
 #bring these to the defaults for this X11 
 export QT_QPA_PLATFORM=xcb
+export IRR_DEVICE_TYPE=x11
 unset COGL_RENDERER
 unset CLUTTER_BACKEND
 export GDK_BACKEND=x11

@@ -43,6 +43,7 @@ export QT_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/plugins:/opt/lib/plugins/
 export QT_QPA_PLATFORM=wayland-egl
 export ELM_DISPLAY=wl
 export ELM_ACCEL=none
+export IRR_DEVICE_TYPE=wayland
 export ECORE_EVAS_ENGINE=wayland_shm
 export SDL_VIDEODRIVER=wayland
 export GST_GL_WINDOW=wayland
