@@ -29,7 +29,7 @@ SOURCEURL=git://code.qt.io/qt/qtwayland.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.13
+SOURCEREVISION=5.12
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -75,7 +75,7 @@ make install
 function PackagePostInstall()
 {
 # Workaround to install generated private headers.
-QtWaylandVersion=$(ls -d ./include/QtWaylandClient/5.*| awk -F / '{print $4}')
+QtWaylandVersion=$(ls -d ./include/QtWaylandClient/5.* | awk -F / '{print $NF}')
 cp ./src/client/qwayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 cp ./src/client/wayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
 
