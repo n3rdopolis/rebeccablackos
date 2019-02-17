@@ -459,6 +459,7 @@ FOO
     log_msg "Copying your kernel and initrd for the livecd"
     cp /boot/vmlinuz-$KERNELVERSION $WORKDIR/ISOTMP/casper/vmlinuz
     mv /boot/initrd.img-$KERNELVERSION $WORKDIR/ISOTMP/casper/initrd.gz
+    touch /boot/initrd.img-$KERNELVERSION
     if [ ! -f $WORKDIR/ISOTMP/casper/vmlinuz ]; then
         log_msg "Missing valid kernel. Exiting"
         exit 1
