@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/calamares/calamares.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=3.1.x-stable
+SOURCEREVISION=v3.2.4
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -66,11 +66,6 @@ sed -i "s|^Exec=*|Exec=xhost +SI:localuser:root; wlsudo calamares -style oxygen\
 sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
 sed -i 's/Name=Calamares/Name=Install RebeccaBlackOS/g' calamares.desktop
 sed -i '/pkexec/d' calamares.desktop
-sed -ie "s/  - kdm/  - kdm\n  - waylandloginmanager/g" src/modules/displaymanager/displaymanager.conf
-
-
-git checkout a2a6d2f2439f400cfa149ff0b36e2e68b2cb171e src/modules/displaymanager/main.py
-patch -p1 < /usr/share/RBOS_PATCHES/calamares.diff
 
 mkdir build
 cd build
@@ -89,6 +84,12 @@ function PackageInstallSource()
 {
 cd build
 make install
+mkdir -p $INSTALLDIR/share/calamares/modules
+find "$SOURCEDIR"/"$SOURCENAME"/src/modules/ |grep "\.conf$" | while read FILE
+do
+  cp "$FILE" $INSTALLDIR/share/calamares/modules/
+done
+cp "$SOURCEDIR"/"$SOURCENAME"/settings.conf $INSTALLDIR/share/calamares/
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
