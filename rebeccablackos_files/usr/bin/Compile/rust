@@ -65,7 +65,6 @@ LLVMPATH=$(ls  -d /usr/lib/llvm-* |tail -1)
 LLVMVER=$(echo $LLVMPATH | awk -F - '{print $2}')
 cp /usr/share/RBOS_PATCHES/rust.diff rust.diff
 sed -i "s/LLVM-3.9/LLVM-$LLVMVER/g" rust.diff
-patch -p1 < rust.diff
 ./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --llvm-root=$LLVMPATH --enable-fast-make --enable-optimize --disable-manage-submodules --release-channel=stable --disable-docs
 }
 
