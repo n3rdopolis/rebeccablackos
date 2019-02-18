@@ -318,8 +318,9 @@ apt-get purge $REMOVEDEVPGKS -y | tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archd
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=""
 REMOVEDEVPGKSPROPOSED=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial autoconf texinfo rustc gcc-7 g++-7 clang linux-headers-"*")
-for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKS[@]}; Iterator++ ))
+for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKSPROPOSED[@]}; Iterator++ ))
 do
+  PACKAGE=${REMOVEDEVPGKSPROPOSED[Iterator]}
   AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$PACKAGE$)
   if [[ $AvailableCount != 0 ]]
   then
