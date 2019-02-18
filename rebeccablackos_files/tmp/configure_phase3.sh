@@ -269,6 +269,9 @@ function PostInstallActions
 }
 PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
 
+#Generate a list of all valid packages off the apt cache into a quickly parseable format, to test if a package name is valid.
+apt-cache search . | awk '{print $1}' > /tmp/AVAILABLEPACKAGES.txt
+
 #clean apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
@@ -295,9 +298,6 @@ echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #Create a log folder for the remove operations
 mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
-
-#Generate a list of all valid packages off the apt cache into a quickly parseable format, to test if a package name is valid.
-apt-cache search . | awk '{print $1}' > /tmp/AVAILABLEPACKAGES.txt
 
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v python-dbus-dev | grep -v dpkg-dev)
