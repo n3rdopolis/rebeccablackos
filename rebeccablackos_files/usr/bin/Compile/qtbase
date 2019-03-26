@@ -29,7 +29,7 @@ SOURCEURL=git://code.qt.io/qt/qtbase
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.12
+SOURCEREVISION=5.13
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -58,7 +58,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size
+../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -feature-accessibility -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
