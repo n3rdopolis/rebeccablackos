@@ -99,14 +99,14 @@ libmm-dev::PART
 libmm-glib-dev::PART
 libgtk2.0-0::PART
 libgtk2.0-dev::PART
-libmariadbclient18::PART
+libmariadb3::PART
+libmariadb-dev::PART
 libmariadbclient-dev::PART
 libsqlite3-dev::PART
-libmariadb-dev-compat::PART
 default-libmysqld-dev::PART
 libmariadbd19::PART
 libxapian-dev::PART
-libleveldb1v5::PART
+libleveldb1d::PART
 libleveldb-dev::PART
 busybox::PART
 linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
