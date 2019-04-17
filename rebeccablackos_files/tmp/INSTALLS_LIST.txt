@@ -101,6 +101,7 @@ libgtk2.0-0::PART
 libgtk2.0-dev::PART
 libmariadb3::PART
 libmariadb-dev::PART
+libmariadb-dev-compat::PART
 libmariadbclient-dev::PART
 libsqlite3-dev::PART
 default-libmysqld-dev::PART
@@ -113,6 +114,8 @@ linux-image-$DEBIAN_ARCH::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-image-686-pae::FULL::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
 linux-headers-$DEBIAN_ARCH::PART::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH != i386
 linux-headers-686-pae::PART::$DEBIAN_DISTRO == Debian, $DEBIAN_ARCH == i386
+systemtap::PART
+systemtap-sdt-dev::PART
 thermald::FULL
 libomxil-bellagio0::PART
 libomxil-bellagio-dev::PART
