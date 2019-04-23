@@ -18,6 +18,7 @@
 
 #This script is for calling enlightenment nested under a Wayland session. It also brings up a dialog stating usage information about Enlightenment
 . /usr/bin/wlruntime_vars
+export XDG_CURRENT_DESKTOP=enlightenment
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
   export E_WL_FORCE=wl

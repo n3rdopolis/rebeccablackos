@@ -20,6 +20,7 @@
 . /usr/bin/wlruntime_vars
 
 RANDOMNUMBER=$RANDOM
+export XDG_CURRENT_DESKTOP=kde
 ServerID=wayland-$RANDOMNUMBER
 export $(dbus-launch)
 #unset DISPLAY

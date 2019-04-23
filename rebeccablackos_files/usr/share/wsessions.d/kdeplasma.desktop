@@ -15,5 +15,7 @@ CompositorFBArguments=--framebuffer --libinput
 CompositorDisplayArgument=--socket=
 SessionArgument=
 AdditionalArguments=--xwayland --exit-with-session=/opt/libexec/startplasma
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=kde
 
 
