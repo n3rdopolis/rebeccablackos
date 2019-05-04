@@ -225,9 +225,11 @@ function CleanupGIT()
   cd "$SOURCENAME"
   $NONROOTCOMMAND git submodule foreach --recursive git reset --hard
   $NONROOTCOMMAND git submodule foreach --recursive git clean -fdx
+  $NONROOTCOMMAND git submodule foreach --recursive git gc --auto
   $NONROOTCOMMAND git clean -fdx
   $NONROOTCOMMAND git reset --hard
   $NONROOTCOMMAND git clean -fdx
+  $NONROOTCOMMAND git gc --auto
 }
 
 #Function to download git repos
