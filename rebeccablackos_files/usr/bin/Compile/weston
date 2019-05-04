@@ -57,8 +57,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #Workaround https://gitlab.freedesktop.org/wayland/weston/issues/179
-git revert -n 9bf4f371632567a6abc8d4303fb5021ac7547c86
-git revert -n 8747f95682b3a52664353aa8c5e047d075e14149
+#git revert -n 9bf4f371632567a6abc8d4303fb5021ac7547c86
+#git revert -n 8747f95682b3a52664353aa8c5e047d075e14149
 
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel build
 }
