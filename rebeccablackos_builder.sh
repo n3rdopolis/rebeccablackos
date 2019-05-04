@@ -653,6 +653,28 @@ PREPARE_ENDTIME=$(date +%s)
 #Create a log folder for the phase logs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs
 
+#Force buildcore to redownload cargo if the control file is gone
+if [[ ! -e "$BUILDLOCATION"/DontResetCargoDownload"$BUILDARCH" ]]
+then
+
+  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo ]]
+  then
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo
+  fi
+
+  if [[ ! -z $(ls "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu.tar.gz &>/dev/null) ]]
+  then
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu.tar.gz
+  fi
+
+  if [[ ! -z $(ls "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu &>/dev/null) ]]
+  then
+    rm -r "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu
+  fi
+
+  touch "$BUILDLOCATION"/DontResetCargoDownload"$BUILDARCH"
+fi
+
 BUILD_RUNNING=1
 #run the build scripts
 if [[ $RUN_PHASE_0 == 1 ]]
