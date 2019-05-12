@@ -1,0 +1,22 @@
+[Desktop Entry]
+Enabled=1
+DebugSession=1
+Type=WSession
+Name=Debug Weston
+Comment=Weston in Debug Mode
+CompositorExec=/opt/bin/weston
+CompositorSupportsKMS=1
+CompositorSupportsFB=1
+CompositorSupportsWL=0
+CompositorKMSArguments=--backend=drm-backend.so
+CompositorFBArguments=--backend=fbdev-backend.so
+CompositorWLArguments=--backend=wayland-backend.so
+CompositorDisplayArgument=--socket=
+CompositorKMSSeatAware=1
+CompositorKMSSeatArgument=--seat=
+CompositorFBSeatAware=1
+CompositorFBSeatArgument=--seat=
+SessionArgument=--debug
+AdditionalArguments=--xwayland
+NeedsFile=/opt/bin/weston
+
