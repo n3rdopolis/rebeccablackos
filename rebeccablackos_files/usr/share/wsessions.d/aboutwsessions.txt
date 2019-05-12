@@ -13,6 +13,9 @@ Enabled:
 A wsession file must also have an key Enabled=1 so that it shows up on the list. See line 2 in the example
 It also must have CompositorSupports(BACKEND)=1 for each backend it supports.
 
+DebugSession:
+if DebugSession is set to 1, then this session will only appear if the wlmdebug or wlmdebuginsecure options have been passed
+
 Type:
 There must be a key Type=WSession file, so that the .desktop file is known to be a .wsession file. See line 3 in the example
 
@@ -87,26 +90,27 @@ An example:
 ----------------------------------------------
 01.|    [Desktop Entry]
 02.|    Enabled=1
-03.|    Type=WSession
-04.|    Name=Default Weston Desktop Shell
-05.|    Comment=The Weston Desktop Environment
-06.|    CompositorExec=/opt/bin/weston
-07.|    CompositorSupportsKMS=1
-08.|    CompositorSupportsFB=1
-09.|    CompositorSupportsWL=0
-10.|    CompositorKMSArguments=--backend=drm-backend.so
-11.|    CompositorFBArguments=--backend=fbdev-backend.so
-12.|    CompositorDisplayArgument=--socket=
-13.|    SessionArgument=--modules=xwayland.so,cms-colord.so
-14.|    AdditionalArguments=--log=$HOME/weston.log
-15.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
-16.|    NeedsFile=/opt/bin/weston
-17.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
-18.|    IsFallbackSession=0
-19.|    CompositorKMSSeatAware=1
-20.|    CompositorFBSeatAware=0
-21.|    CompositorSeatArgument=--seat
-22.|    CompositorKMSSeatArgument=--seat
+03.|    DebugSession=1
+04.|    Type=WSession
+05.|    Name=Default Weston Desktop Shell
+06.|    Comment=The Weston Desktop Environment
+07.|    CompositorExec=/opt/bin/weston
+08.|    CompositorSupportsKMS=1
+09.|    CompositorSupportsFB=1
+10.|    CompositorSupportsWL=0
+11.|    CompositorKMSArguments=--backend=drm-backend.so
+12.|    CompositorFBArguments=--backend=fbdev-backend.so
+13.|    CompositorDisplayArgument=--socket=
+14.|    SessionArgument=--modules=xwayland.so,cms-colord.so
+15.|    AdditionalArguments=--log=$HOME/weston.log
+16.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
+17.|    NeedsFile=/opt/bin/weston
+18.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+19.|    IsFallbackSession=0
+20.|    CompositorKMSSeatAware=1
+21.|    CompositorFBSeatAware=0
+22.|    CompositorSeatArgument=--seat
+23.|    CompositorKMSSeatArgument=--seat
 ----------------------------------------------
 
 Arguments are passed in the following order to CompositorExec: BackendArguments SessionArgument CompositorSeatArgument AdditionalArguments CompositorDisplayArgument

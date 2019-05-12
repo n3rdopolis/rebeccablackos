@@ -1291,7 +1291,7 @@ function ParseWSessionFiles
       DesktopFileDataArray+=${Iterator}"#"
     done
     readarray -t DesktopFileDataArray <<< "$DesktopFileDataArray"
-    DesktopFileDataArray[11]="011#$WSESSIONFILE"
+    DesktopFileDataArray[12]="012#$WSESSIONFILE"
 
     #Build the initial array for the NeedsFile list
     NeedsFileArray=()
@@ -1396,6 +1396,8 @@ function ParseWSessionFiles
           ChangeArrayElement=9;;
         EnvironmentFile)
           ChangeArrayElement=10;;
+        DebugSession)
+          ChangeArrayElement=11;;
       esac
 
       if [[ $ChangeArrayElement != -1 ]]
@@ -1695,7 +1697,8 @@ function ChooseSessionType
     AdditionalArguments=${DesktopFileDataArray[8]:4}
     CompositorExec=${DesktopFileDataArray[9]:4}
     EnvironmentFile=${DesktopFileDataArray[10]:4}
-    WSessionFilePath=${DesktopFileDataArray[11]:4}
+    DebugSession=${DesktopFileDataArray[11]:4}
+    WSessionFilePath=${DesktopFileDataArray[12]:4}
 
     if [[ ! -x $WSessionFilePath ]]
     then
@@ -1758,9 +1761,21 @@ function ChooseSessionType
       CompositorSeatArgument=""
     fi
 
+    if [[ $wlmdebug == 1 ]]
+    then
+      ExcludeDebugSession=0
+    else
+      if [[ $DebugSession == 1 ]]
+      then
+        ExcludeDebugSession=1
+      else
+        ExcludeDebugSession=0
+      fi
+    fi
+
     #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
-    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 ]]
+    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 && $ExcludeDebugSession != 1 ]]
     then
       if [[ $FirstRunNotRan == 0 ]]
       then
