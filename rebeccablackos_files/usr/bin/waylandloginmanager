@@ -1761,7 +1761,7 @@ function ChooseSessionType
       CompositorSeatArgument=""
     fi
 
-    if [[ $wlmdebug == 1 ]]
+    if [[ $wlmdebug != 0 ]]
     then
       ExcludeDebugSession=0
     else
