@@ -29,6 +29,8 @@ OVERVIEW:
 How to use the ISO:
   Burn it, (or put it in a VM), reboot, set the BIOS to boot from the CD if it does not already, boot from the CD. Once it boots you can use the live system.
 
+  The live user "beccaholic" has no password
+
   The ISO is built with Remastersys, which makes it compatible with unetbootin, and the USB Startup creator. It is also a hybrid ISO, so it can boot raw from
   a flash drive.
 
