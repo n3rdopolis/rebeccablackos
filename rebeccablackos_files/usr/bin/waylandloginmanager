@@ -81,6 +81,14 @@
      #The default is to allow.
      #Specifing the option on the kernel command line overrides the config file
 
+     #neverpasswd-autologinuser-{$SEAT}=1
+     #to allow the autologin user to not need a password ever on a seat, or
+     #neverpasswd-autologinuser=1
+     #to allow the autologin user to not need a password ever globally
+     #this is not read form the kernel command line, however this option is set to
+     #enabled when detected as a livecd. This option applies to logging in as the
+     #autologin user, after the first autologin session has already been started.
+
      #Auto session selection only takes place during autologin
      #It is automatically set by the last manual session selection for the user on the seat.
      #defaultwsession=Unquoted Session Name
@@ -2312,19 +2320,36 @@ function GetUserCredentials
   fi
   if [[ $SessionTTY -ne -1 ]]
   then
-    #Prompt for the users password
-    USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
-    CancelOrOK=$?
-    #Abort if the user selected cancel on the zenity dialog
-    if [[ $CancelOrOK != 0 ]]
+    #By default the WaylandLoginManager only gives the autologin user one shot.
+    #This option (also set in LiveCD mode), makes it so that user set to be the autologin-user never gets prompted for a password
+    #This is NOT default when installed.
+    GetConfigKey neverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
+
+    if [[ $ISLIVE == 1 ]]
     then
-      exit 0
+      AutoLoginUserNoPassword=1
     fi
-    #send the password to an AuthenticateUser function with stdin
-    echo $USERPASSWORD | AuthenticateUser "$1"
-    #get the result from AuthenticateUser in the pipe, (and not the echo command)
-    passwordresult=${PIPESTATUS[1]}
-    unset USERPASSWORD
+
+    GetConfigKey autologin-user "$1" ":" 0 SEATAUTOLOGINUSER
+    if [[ $LOGINUSER == $SEATAUTOLOGINUSER && $AutoLoginUserNoPassword == 1 ]]
+    then
+      passwordresult=0
+    else
+      #Prompt for the users password
+      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
+      CancelOrOK=$?
+      #Abort if the user selected cancel on the zenity dialog
+      if [[ $CancelOrOK != 0 ]]
+      then
+        exit 0
+      fi
+
+      #send the password to an AuthenticateUser function with stdin
+      echo $USERPASSWORD | AuthenticateUser "$1"
+      #get the result from AuthenticateUser in the pipe, (and not the echo command)
+      passwordresult=${PIPESTATUS[1]}
+      unset USERPASSWORD
+    fi
     if [[ $passwordresult != 0 ]]
     then
       $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
