@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2019-05-11 22:03:13.006402136 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2019-05-11 22:03:49.434649518 -0400
+--- usr/bin/waylandloginmanager	2019-05-19 10:09:39.491454159 -0400
++++ usr/bin/waylandloginmanagerkdialog	2019-05-19 10:10:10.644219243 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -12,7 +12,7 @@
  
  
  #It depends on the line
-@@ -97,7 +97,7 @@
+@@ -105,7 +105,7 @@
       #to override setting any default sessions for a user, when the global one is set.
  
  #/usr/libexec/wayland_login_helpers/*
@@ -21,7 +21,7 @@
    #These are optional as the waylandloginmanager displays a selection list with the same commands as well
  #/etc/loginmanagerdisplay/weston.ini
    #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/wayland_login_helpers to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
-@@ -678,7 +678,7 @@
+@@ -686,7 +686,7 @@
    #If only 1 session should be allowed on seats where logind reports CanMultiSession=no (default is to allow)
    GetConfigKey wlmobeystrictseats "" 0 1 ONLY_CAN_MULTISESSION_SESSION_SWITCH
  
@@ -30,7 +30,7 @@
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that the su test in AuthenticateUser user runs as
    export PROBETESTUSER=waylandloginmanager
-@@ -738,6 +738,12 @@
+@@ -746,6 +746,12 @@
      exit 1
    fi
  
@@ -43,7 +43,7 @@
    #Prepare logging for the loginmanagerdisplay
  
    #Older versions of the waylandloginmanager used to log to /var/log/waylandloginmanager , now /var/log/waylandloginmanager is a folder
-@@ -844,7 +850,8 @@
+@@ -852,7 +858,8 @@
    export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
@@ -53,7 +53,7 @@
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston)
    #Specify where wsession files are found
-@@ -862,7 +869,7 @@
+@@ -870,7 +877,7 @@
    #Determine if this is running on a live instance, if booted with casper
    GetConfigKey boot=casper "" 0 2 ISLIVE
  
@@ -62,7 +62,7 @@
    TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
    WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
    DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
-@@ -1203,23 +1210,14 @@
+@@ -1211,23 +1218,14 @@
    done
  }
  
@@ -88,7 +88,7 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1830,7 +1828,7 @@
+@@ -1838,7 +1836,7 @@
        done
        if [[ $WSESSIONNUMBER == -1 ]]
        then
@@ -97,7 +97,7 @@
          WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
          return 1
        fi
-@@ -1845,13 +1843,16 @@
+@@ -1853,13 +1851,16 @@
          then
            WSESSIONPICKLIST+=$'\n'
          fi
@@ -118,7 +118,7 @@
        CancelOrOK=$?
        if [[ $CancelOrOK != 0 ]]
        then
-@@ -1867,7 +1868,7 @@
+@@ -1875,7 +1876,7 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
@@ -127,7 +127,7 @@
      WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
-@@ -1925,7 +1926,7 @@
+@@ -1933,7 +1934,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -136,7 +136,7 @@
  
  $BACKENDSTRING
  
-@@ -1951,12 +1952,6 @@
+@@ -1959,12 +1960,6 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -149,7 +149,7 @@
    RunningSeatSessions=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null))
    while [[ $NumberOfSessions -ge 0 ]]
    do
-@@ -1979,11 +1974,7 @@
+@@ -1987,11 +1982,7 @@
          then
            SessionList+=$'\n'
          fi
@@ -162,7 +162,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -1994,19 +1985,17 @@
+@@ -2002,19 +1993,17 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -188,7 +188,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2035,7 +2024,7 @@
+@@ -2043,7 +2032,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -197,7 +197,7 @@
        fi
      fi
    fi
-@@ -2268,26 +2257,30 @@
+@@ -2276,26 +2265,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -236,7 +236,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2295,9 +2288,9 @@
+@@ -2303,9 +2296,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -248,20 +248,20 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2313,9 +2306,9 @@
-   if [[ $SessionTTY -ne -1 ]]
-   then
-     #Prompt for the users password
--    USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
-+    USERPASSWORD=$( $KDIALOGCMD --title="Password" --password "Type Password for $LOGINUSER" 2>/dev/null )
-     CancelOrOK=$?
--    #Abort if the user selected cancel on the zenity dialog
-+    #Abort if the user selected cancel on the dialog
-     if [[ $CancelOrOK != 0 ]]
-     then
-       exit 0
-@@ -2327,7 +2320,7 @@
-     unset USERPASSWORD
+@@ -2336,9 +2329,9 @@
+       passwordresult=0
+     else
+       #Prompt for the users password
+-      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
++      USERPASSWORD=$( $KDIALOGCMD --title="Password" --password "Type Password for $LOGINUSER" 2>/dev/null )
+       CancelOrOK=$?
+-      #Abort if the user selected cancel on the zenity dialog
++      #Abort if the user selected cancel on the dialog
+       if [[ $CancelOrOK != 0 ]]
+       then
+         exit 0
+@@ -2352,7 +2345,7 @@
+     fi
      if [[ $passwordresult != 0 ]]
      then
 -      $ZENITYCMD --warning --text="Invalid password for $LOGINUSER, or username invalid" 2>/dev/null
@@ -269,7 +269,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2350,13 +2343,13 @@
+@@ -2375,13 +2368,13 @@
        StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
      fi
    else
@@ -285,7 +285,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2369,7 +2362,7 @@
+@@ -2394,7 +2387,7 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -294,7 +294,7 @@
      #Can't rely on SeatMultiSessionStatuses here, since this can be used outside of the service.
      SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
      SessionPromptThreshold=2
-@@ -2408,7 +2401,7 @@
+@@ -2433,7 +2426,7 @@
    unset RunningSessions
    unset RunningLoginManagerDisplaySessions
  
@@ -303,7 +303,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2464,9 +2457,15 @@
+@@ -2489,9 +2482,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -321,7 +321,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2480,7 +2479,7 @@
+@@ -2505,7 +2504,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -330,7 +330,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2529,7 +2528,7 @@
+@@ -2554,7 +2553,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -339,7 +339,7 @@
    fi
  }
  
-@@ -2911,7 +2910,7 @@
+@@ -2936,7 +2935,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -348,7 +348,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2936,7 +2935,7 @@
+@@ -2961,7 +2960,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -357,7 +357,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2970,19 +2969,24 @@
+@@ -2995,19 +2994,24 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -388,7 +388,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2990,12 +2994,12 @@
+@@ -3015,12 +3019,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -404,7 +404,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3324,11 +3328,11 @@
+@@ -3349,11 +3353,11 @@
        fi
      done
  
