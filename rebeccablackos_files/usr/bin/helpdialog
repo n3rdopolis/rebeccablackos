@@ -18,14 +18,17 @@
 
 #This script is used within Wayland sessions, to tell the user about keybindings for the session type.
 
-zenity --title="Welcome" --no-wrap --info --text="This is a third party fan made distribution!
+DefaultHelpText="This is a third party fan made distribution!
 
 ===========================================
 Built: $(cat /etc/builddate)
 ==========================================="
 
 
-zenity --title="Help" --no-wrap --info --text 'Weston Key Bindings:
+
+if [[ $SessionName =~ "Default Weston" ]]
+then
+SessionHelpText="Weston Key Bindings:
 Note: The super key on most keyboards is the Windows logo key.
 Note: The middle mouse button is usually pressing the scroll button on most mice.
 
@@ -52,14 +55,13 @@ Brighten the display (under native Weston): Super key + F10
 Switch workspaces: Super key + up arrow/down arrow (or Super key + workspace Function # key)
 By default there are 2 workspaces
 
-Exit Weston: ctrl key + alt key + backspace' 
+Exit Weston: ctrl key + alt key + backspace}
 
 
-if [[ $SessionName =~ "Default Weston" ]]
-then
-  zenity --title="Help" --no-wrap --info --text 'To launch programs:
-Click on the "RBOS" Icon on the top for the Application menu. Be sure to check 
-for the Wayland programs under "Applications"!
+
+To launch programs:
+Click on the \"RBOS\" Icon on the top for the Application menu. Be sure to check 
+for the Wayland programs under \"Applications\"!
 
 Click on the Desktop icon for viewing the contents of the Desktop folder
 
@@ -83,18 +85,15 @@ Click on the lightbulb icon for battery info
 The I icon launches these help dialogs 
 
 Click on the red X icon for shutdown options
-'
-
+"
 fi
-
 
 
 
 if [[ $SessionName =~ "Liri" ]]
 then
-
-  zenity --title="Help" --ellipsize --info --text="
-
+SessionHelpText="
+Help with Liri:
 Show Menu:              Super key + space
 Expose:                 Super key + s
 Switch Windows:         Super key + Tab
@@ -108,3 +107,15 @@ Logoff Screen:          CTRL + ALT + Delete
 "
 
 fi
+
+if [[ $SessionName =~ "Sway" ]]
+then
+SessionHelpText="
+Help with Sway:
+Terminal:		 Super key + enter
+"
+
+fi
+echo -ne "$DefaultHelpText
+
+$SessionHelpText"|zenity --text-info --width=550 --height=500 --title=Help &>/dev/null
