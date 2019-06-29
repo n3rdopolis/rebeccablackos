@@ -1,0 +1,17 @@
+diff --git a/src/egl/drivers/dri2/platform_drm.c b/src/egl/drivers/dri2/platform_drm.c
+index 42d79da7b02..ffbaff1211c 100644
+--- a/src/egl/drivers/dri2/platform_drm.c
++++ b/src/egl/drivers/dri2/platform_drm.c
+@@ -685,9 +685,9 @@ dri2_initialize_drm(_EGLDriver *drv, _EGLDisplay *disp)
+    struct gbm_device *gbm;
+    const char *err;
+ 
+-   /* Not supported yet */
+-   if (disp->Options.ForceSoftware)
+-      return EGL_FALSE;
++   ///* Not supported yet */
++   //if (disp->Options.ForceSoftware)
++   //   return EGL_FALSE;
+ 
+    dri2_dpy = calloc(1, sizeof *dri2_dpy);
+    if (!dri2_dpy)
