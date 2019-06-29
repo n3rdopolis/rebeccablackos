@@ -200,6 +200,7 @@ function UserSessionWorker
   then
     WLM_USE_SOFTWARE=1
     export LIBGL_ALWAYS_SOFTWARE=1
+    export GBM_ALWAYS_SOFTWARE=1
   else
     WLM_USE_SOFTWARE=0
   fi
@@ -2792,6 +2793,10 @@ function StartLoginManagerDisplay
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=LIBGL_ALWAYS_SOFTWARE=$LIBGL_ALWAYS_SOFTWARE "
       fi
+      if [[ ! -z $GBM_ALWAYS_SOFTWARE ]]
+      then
+        LOGINMANAGERDISPLAYENVSTRING+=" --setenv=GBM_ALWAYS_SOFTWARE=$GBM_ALWAYS_SOFTWARE "
+      fi
       if [[ ! -z $vblank_mode ]]
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
@@ -2916,8 +2921,10 @@ function SetFallbackEnvironmentVariables
   if [[ $SetFallbackSoftware == 1 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
+    export GBM_ALWAYS_SOFTWARE=1
   else
     unset LIBGL_ALWAYS_SOFTWARE
+    unset GBM_ALWAYS_SOFTWARE
   fi
 
   if [[ $SetFallbackVblank == 1 ]]
