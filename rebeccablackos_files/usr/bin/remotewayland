@@ -25,7 +25,7 @@ then
   konsole -e $0
   
 else
-  Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Host Name       : " 1 1 "" 1 20 90 0 0  "User Name       :"  2 1   ""  2 20  90 0 0  "Command         :"      4 1    ""  4 20  90 0 0 --stdout  2>/dev/tty))
+  Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "" 1 20 90 0 0  "Host Name       :"  2 1   ""  2 20  90 0 0  "Command         :"      4 1    ""  4 20  90 0 0 --stdout  2>/dev/tty))
 
   waypipe ssh -C "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
   
