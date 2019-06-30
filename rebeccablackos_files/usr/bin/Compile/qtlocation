@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qtwebkit
+SOURCENAME=qtlocation
 
 #The URL of the Source code repo
-SOURCEURL=git://code.qt.io/qt/qtwebkit
+SOURCEURL=git://code.qt.io/qt/qtlocation
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.212
+SOURCEREVISION=5.13
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -56,8 +56,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#patch -f -p1 < /usr/share/RBOS_PATCHES/qtwebkit.diff
-sed -i '/(private_tests)/g' Tools/qmake/mkspecs/features/default_pre.prf
 qmake
 }
 
