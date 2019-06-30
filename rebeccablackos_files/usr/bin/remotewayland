@@ -1,0 +1,34 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This file is for launching wayland programs remotely.
+
+
+if [[ $RemoteWaylandTerminal != 1 ]]
+then
+  export RemoteWaylandTerminal=1
+  konsole -e $0
+  
+else
+  Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Host Name       : " 1 1 "" 1 20 90 0 0  "User Name       :"  2 1   ""  2 20  90 0 0  "Command         :"      4 1    ""  4 20  90 0 0 --stdout  2>/dev/tty))
+
+  waypipe ssh -C "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
+  
+  read -p "Press Enter to close..."
+fi
+
