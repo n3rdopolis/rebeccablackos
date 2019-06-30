@@ -188,6 +188,9 @@ function PostInstallActions
   systemctl disable lightdm.service
   systemctl disable gdm.service
 
+  #Don't run ssh by default
+  systemctl disable ssh.service
+
   #Enable networkmanager
   systemctl enable NetworkManager.service
 
