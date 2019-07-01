@@ -38,9 +38,11 @@ function ParseHostsCfg()
     RemoteConnection=($RemoteConnectionLine)
     unset IFS
 
+    IFS=$'\n'
     RemoteUsers+=("${RemoteConnection[0]}")
     RemoteHosts+=("${RemoteConnection[1]}")
     RemoteCommands+=("${RemoteConnection[2]}")
+    unset IFS
 
     ((ConnectionCount++))
   done
@@ -77,7 +79,9 @@ else
   ParseHostsCfg
   ChooseConnection
 
+  IFS=$'\n'
   Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0  "Command         :"      4 1    "$ProposedCommand"  4 20  90 0 0 --stdout  2>/dev/tty))
+  unset IFS
 
   if [[ ("${Parameters[0]}" != "$ProposedUser") || ("${Parameters[1]}" != "$ProposedHost") || ("${Parameters[2]}" != "$ProposedCommand") ]]
   then
