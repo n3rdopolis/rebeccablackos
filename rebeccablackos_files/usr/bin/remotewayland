@@ -18,14 +18,75 @@
 
 #This file is for launching wayland programs remotely.
 
+mkdir -p ~/.config/remotewayland/
+touch ~/.config/remotewayland/connections.cfg
+
+
+function ParseHostsCfg()
+{
+  IFS=$'\n'
+  RemoteConnectionLines=($(cat ~/.config/remotewayland/connections.cfg))
+  unset IFS
+
+  ConnectionCount=0
+  RemoteUsers=()
+  RemoteHosts=()
+  RemoteCommands=()
+  for RemoteConnectionLine in "${RemoteConnectionLines[@]}"
+  do
+    IFS=$'\t'
+    RemoteConnection=($RemoteConnectionLine)
+    unset IFS
+
+    RemoteUsers+=("${RemoteConnection[0]}")
+    RemoteHosts+=("${RemoteConnection[1]}")
+    RemoteCommands+=("${RemoteConnection[2]}")
+
+    ((ConnectionCount++))
+  done
+}
+
+
+function ChooseConnection()
+{
+  ConnectionsString=()
+  for ((ConnectionItr=0 ; ConnectionItr < $ConnectionCount ; ConnectionItr++))
+  {
+    ConnectionsString+=($ConnectionItr)
+    ConnectionsString+=("As ${RemoteUsers[$ConnectionItr]} on ${RemoteHosts[$ConnectionItr]} : run \"${RemoteCommands[$ConnectionItr]}\"")
+    ConnectionsString+=(off)
+  }
+  ProposedUser=""
+  ProposedHost=""
+  ProposedCommand=""
+  SelectedConnection=$(dialog --no-cancel --radiolist "Select a Connection" 20 110 20 -1 "New Connection..." on  "${ConnectionsString[@]}" --stdout 2>/dev/tty)
+  if [[ $SelectedConnection -ne -1 ]]
+  then
+    ProposedUser=${RemoteUsers[$SelectedConnection]}
+    ProposedHost=${RemoteHosts[$SelectedConnection]}
+    ProposedCommand=${RemoteCommands[$SelectedConnection]}
+  fi
+}
 
 if [[ $RemoteWaylandTerminal != 1 ]]
 then
   export RemoteWaylandTerminal=1
   konsole -e $0
-  
+
 else
-  Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "" 1 20 90 0 0  "Host Name       :"  2 1   ""  2 20  90 0 0  "Command         :"      4 1    ""  4 20  90 0 0 --stdout  2>/dev/tty))
+  ParseHostsCfg
+  ChooseConnection
+
+  Parameters=($(dialog --no-cancel --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0  "Command         :"      4 1    "$ProposedCommand"  4 20  90 0 0 --stdout  2>/dev/tty))
+
+  if [[ ("${Parameters[0]}" != "$ProposedUser") || ("${Parameters[1]}" != "$ProposedHost") || ("${Parameters[2]}" != "$ProposedCommand") ]]
+  then
+    dialog --yesno  "Do you want to save \"${Parameters[2]}\" as user \"${Parameters[0]}\" on \"${Parameters[0]}\"?" 10 90
+    if [[ $? == 0 ]]
+    then
+      echo "${Parameters[0]}"$'\t'"${Parameters[1]}"$'\t'"${Parameters[2]}"$'\t' >> ~/.config/remotewayland/connections.cfg
+    fi
+  fi
 
   waypipe ssh -C "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
   
