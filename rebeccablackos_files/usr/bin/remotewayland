@@ -95,7 +95,7 @@ else
     clear
   fi
 
-  waypipe ssh -C "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
+  waypipe ssh -XC "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
   
   read -p "Press Enter to close..."
 fi
