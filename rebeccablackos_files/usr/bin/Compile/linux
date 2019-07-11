@@ -69,7 +69,7 @@ sed -i '/CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
 sed -i '/CONFIG_DRM_UDL[ =]/c\CONFIG_DRM_UDL=m' .config
 
 echo "Building $BUILDARCH modules"...
-if [[ $BUILDARCH == i386 ]]
+if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
 then
   sed -i '/CONFIG_64BIT[ =]/c\# CONFIG_64BIT is not set' .config
   sed -i '/CONFIG_X86_32[ =]/c\CONFIG_X86_32=y' .config
@@ -84,6 +84,7 @@ then
   sed -i '/CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf64-x86-64"' .config
   sed -i '/CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"' .config
 else
+  echo "$BUILDARCH not supported"
   rm .config
 fi
 }
