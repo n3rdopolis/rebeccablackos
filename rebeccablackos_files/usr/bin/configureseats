@@ -418,7 +418,7 @@ udevadm control --reload-rules
 
 
 #Notify each input device about the change with udev, instead of doing a full trigger on all devices on the system
-for (( CurrentSeat=1; CurrentSeat<5; CurrentSeat++ ))
+for (( Itr=1; Itr<5; Itr++ ))
 do
   udevadm trigger --subsystem-match=input
   udevadm trigger --subsystem-match=drm
