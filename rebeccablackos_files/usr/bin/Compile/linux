@@ -65,35 +65,65 @@ cd linux-4.19
 patch -p1 < /usr/share/RBOS_PATCHES/linux.diff
 
 make olddefconfig
-sed -i '/CONFIG_DRM_VKMS/c\CONFIG_DRM_VKMS=m' .config
-sed -i '/CONFIG_DRM_UDL/c\CONFIG_DRM_UDL=m' .config
+sed -i '/CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
+sed -i '/CONFIG_DRM_UDL[ =]/c\CONFIG_DRM_UDL=m' .config
+
+echo "Building $BUILDARCH modules"...
+if [[ $BUILDARCH == i386 ]]
+then
+  sed -i '/CONFIG_64BIT[ =]/c\# CONFIG_64BIT is not set' .config
+  sed -i '/CONFIG_X86_32[ =]/c\CONFIG_X86_32=y' .config
+  sed -i '/CONFIG_X86_64[ =]/c\# CONFIG_X86_64 is not set' .config
+  sed -i '/CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf32-i386"' .config
+  sed -i '/CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"' .config
+elif [[ $BUILDARCH == amd64 ]]
+then
+  sed -i '/CONFIG_64BIT[ =]/c\CONFIG_64BIT=y' .config
+  sed -i '/CONFIG_X86_32[ =]/c\# CONFIG_X86_32 is not set' .config
+  sed -i '/CONFIG_X86_64[ =]/c\CONFIG_X86_64=y' .config
+  sed -i '/CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf64-x86-64"' .config
+  sed -i '/CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"' .config
+else
+  rm .config
+fi
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
 cd linux-4.19
-CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
-make prepare
-make modules_prepare
-make scripts
+if [[ -e .config ]]
+then
+  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+  echo "prepare..."
+  yes "" | make prepare
+  echo "modules_prepare..."
+  yes "" | make modules_prepare
+  echo "scripts..."
+  yes "" | make scripts
 
-make -C . M=drivers/gpu/drm/udl/
-make -C . M=drivers/gpu/drm/vkms/
+  echo "udl..."
+  make -C . M=drivers/gpu/drm/udl/
+  echo "vkms..."
+  make -C . M=drivers/gpu/drm/vkms/
+fi
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
 cd linux-4.19
-CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
-KERNELVERSION=$(cat include/config/kernel.release)
+if [[ -e .config ]]
+then
+  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+  KERNELVERSION=$(cat include/config/kernel.release)
 
-mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/
-mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/
+  mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/
+  mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/
 
-cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
-cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/vkms.ko
+  cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
+  cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/vkms.ko
+fi
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
