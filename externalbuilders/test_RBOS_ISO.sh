@@ -347,6 +347,10 @@ then
     else
       echo "Failed to enter the running target system. This should not happen."
     fi
+    if [[ ! -z $ROOTPID ]]
+    then
+      kill -9 $ROOTPID
+    fi
     mountisoexit
   fi
 
