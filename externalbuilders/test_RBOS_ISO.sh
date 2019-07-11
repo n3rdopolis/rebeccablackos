@@ -441,6 +441,13 @@ NAMESPACE_ENTER mount -t tmpfs -o size=10% tmpfs "$MOUNTHOME"/liveisotest/$MOUNT
 #allow testuser to access the system
 #setfacl -m u:$SUDO_UID:rwx /dev/dri/card*
 
+if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
+then
+  touch "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
+
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint dbus-daemon --system --fork
+fi
+
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
@@ -489,13 +496,6 @@ Please be aware of which terminal you are typing in, especially with more experi
 
 Exercise caution. Even some paticular commands run in here can effect your real system.\"" | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/home/livetest/.bashrc > /dev/null
   echo 'cd $(eval echo ~$LOGNAME)' | NAMESPACE_ENTER tee -a "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/home/livetest/.bashrc > /dev/null
-fi
-  
-if [[ ! -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
-then
-  touch "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
-
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint dbus-daemon --system --fork
 fi
 
 #Foward the users XDG_RUNTIME_DIR for pulseaudio
