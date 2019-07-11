@@ -102,9 +102,11 @@ then
   PATCHLEVEL=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^PATCHLEVEL = " | sed 's/ = /=/g' | awk -F = '{print $2}')
   SUBLEVEL=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^SUBLEVEL = " | sed 's/ = /=/g' | awk -F = '{print $2}')
   NAME=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^NAME = " | sed 's/ = /=/g' | awk -F = '{print $2}')
-  
+
+  cp /usr/src/linux-headers-${CURRENTKERNELVERSIONFULL}/Module.symvers .
+
   sed -i 'VERSION = /c\VERSION = $VERSION' Makefile
-  sed -i '/PATCHLEVEL = /c\PATCHLEVEL = $/PATCHLEVEL' Makefile
+  sed -i '/PATCHLEVEL = /c\PATCHLEVEL = $PATCHLEVEL' Makefile
   sed -i 'SUBLEVEL = /c\SUBLEVEL = $SUBLEVEL' Makefile
   sed -i 'NAME = /c\NAME = $NAME' Makefile
 
