@@ -95,7 +95,19 @@ function PackageCompileSource()
 cd linux-4.19
 if [[ -e .config ]]
 then
-  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+  CURRENTKERNELVERSIONFULL=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
+  
+  VERSION=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^VERSION = " | sed 's/ = /=/g' | awk -F = '{print $2}')
+  PATCHLEVEL=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^PATCHLEVEL = " | sed 's/ = /=/g' | awk -F = '{print $2}')
+  SUBLEVEL=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^SUBLEVEL = " | sed 's/ = /=/g' | awk -F = '{print $2}')
+  NAME=$(cat /usr/src/linux-headers-${CURRENTKERNELVERSION}-common/Makefile | grep "^NAME = " | sed 's/ = /=/g' | awk -F = '{print $2}')
+  
+  sed -i 'VERSION = /c\VERSION = $VERSION' Makefile
+  sed -i '/PATCHLEVEL = /c\PATCHLEVEL = $/PATCHLEVEL' Makefile
+  sed -i 'SUBLEVEL = /c\SUBLEVEL = $SUBLEVEL' Makefile
+  sed -i 'NAME = /c\NAME = $NAME' Makefile
+
   echo "prepare..."
   yes "" | make prepare
   echo "modules_prepare..."
@@ -116,14 +128,18 @@ function PackageInstallSource()
 cd linux-4.19
 if [[ -e .config ]]
 then
-  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+
+  CURRENTKERNELVERSIONFULL=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
+  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
+  
+
   KERNELVERSION=$(cat include/config/kernel.release)
 
-  mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/
-  mkdir -p /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/
+  mkdir -p /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/udl/
+  mkdir -p /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/
 
-  cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/udl/udl.ko
-  cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSION/kernel/drivers/gpu/drm/vkms/vkms.ko
+  cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/udl/udl.ko
+  cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/vkms.ko
 fi
 }
 
