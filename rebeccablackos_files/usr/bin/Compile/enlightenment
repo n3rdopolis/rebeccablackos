@@ -60,7 +60,7 @@ function PackagePrepareBuild()
 sed -i '/QT_QPA_PLATFORMTHEME/d' src/bin/e_main.c
 sed -i '/QT_STYLE_OVERRIDE/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwl-fb=true -Dwl-drm=true -Dwl-x11=true -Dxwayland=true -Dwl-desktop-shell=true -Dwayland=true -Dxwayland-bin=$INSTALLDIR/bin/Xwayland build
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwl-fb=true -Dwl-drm=true -Dwl-x11=true -Dxwayland=true -Dwl-desktop-shell=true -Dwl=true -Dxwayland-bin=$INSTALLDIR/bin/Xwayland build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
