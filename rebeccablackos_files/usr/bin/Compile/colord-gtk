@@ -57,19 +57,19 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-daemon
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
