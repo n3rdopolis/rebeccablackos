@@ -61,7 +61,7 @@ function PackagePrepareBuild()
 #git revert -n 8747f95682b3a52664353aa8c5e047d075e14149
 #patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
 
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel build
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel -Dpipewire=true build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
