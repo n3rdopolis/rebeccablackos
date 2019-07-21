@@ -71,6 +71,20 @@ function ChooseConnection()
   fi
 }
 
+function StartRemoteCommand()
+{
+  RemoteHost="$1"
+  RemoteUser="$2"
+  RemoteCommand="$3"
+
+  SessionID=$(date +\%s)
+  mkdir -p $XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser
+
+  waypipe -s "$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client &
+  ssh -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC waypipe --control "/tmp/waypipecontrol-$SessionID" -s "/tmp/waypipeserver-$SessionID" server -- $RemoteCommand
+
+}
+
 if [[ $RemoteWaylandTerminal != 1 ]]
 then
   export RemoteWaylandTerminal=1
@@ -98,8 +112,9 @@ else
     clear
   fi
 
-  waypipe ssh -XC "${Parameters[0]}"@"${Parameters[1]}" "${Parameters[2]}"
-  
+  StartRemoteCommand "${Parameters[1]}" "${Parameters[0]}" "${Parameters[2]}"
+
   read -p "Press Enter to close..."
 fi
+
 
