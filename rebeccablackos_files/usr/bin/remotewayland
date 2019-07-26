@@ -82,7 +82,7 @@ function StartRemoteCommand()
 
   waypipe -s "$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client &
   echo "
-    systemd-run --wait --user --unit=waypipeserver-$SessionID waypipe --control "/tmp/waypipecontrol-$SessionID" -s "/tmp/waypipeserver-$SessionID" server -- $RemoteCommand
+    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "/tmp/waypipecontrol-$SessionID" -s "/tmp/waypipeserver-$SessionID" server -- $RemoteCommand
     sleep inf
   " | ssh -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
 
