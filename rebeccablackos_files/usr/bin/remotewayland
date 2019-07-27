@@ -86,7 +86,7 @@ function StartRemoteCommand()
   SessionID=$(date +\%s)
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
 
-  waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client &
+  systemd-run --setenv=DISPLAY="$DISPLAY" --setenv=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" --user --unit=waypipeclient-$SessionID waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client 
   echo "
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME"
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME"
