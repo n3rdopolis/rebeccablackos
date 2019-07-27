@@ -61,7 +61,13 @@ function ChooseConnection()
   ProposedUser=""
   ProposedHost=""
   ProposedCommand=""
-  SelectedConnection=$(dialog --no-cancel --radiolist "Select a Connection" 20 110 20 -1 "New Connection..." on  "${ConnectionsString[@]}" --stdout 2>/dev/tty)
+  SelectedConnection=$(dialog --radiolist "Select a Connection" 20 110 20 -1 "New Connection..." on  "${ConnectionsString[@]}" --stdout 2>/dev/tty)
+  DialogReturn=$?
+  if [[ $DialogReturn != 0 ]]
+  then
+    read -p "Selection canceled. Press Enter to close..."
+    exit
+  fi
   clear
   if [[ $SelectedConnection -ne -1 ]]
   then
@@ -78,13 +84,17 @@ function StartRemoteCommand()
   RemoteCommand="$3"
 
   SessionID=$(date +\%s)
-  mkdir -p $XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser
+  mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
 
-  waypipe -s "$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client &
+  waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client &
   echo "
-    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "/tmp/waypipecontrol-$SessionID" -s "/tmp/waypipeserver-$SessionID" server -- $RemoteCommand
+    mkdir -p "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME"
+    mkdir -p "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME"
+    ln -s "/tmp/waypipeserver-$SessionID" "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID"
+
+    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- $RemoteCommand
     sleep inf
-  " | ssh -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
+  " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
 
 }
 
@@ -101,7 +111,7 @@ else
   ChooseConnection
 
   IFS=$'\n'
-  Parameters=($(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0  "Command         :"      4 1    "$ProposedCommand"  4 20  90 0 0 --stdout  2>/dev/tty))
+  Parameters=($(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0  "Command         :"      3 1    "$ProposedCommand"  3 20  90 0 0 --stdout  2>/dev/tty))
   DialogReturn=$?
   unset IFS
   clear
