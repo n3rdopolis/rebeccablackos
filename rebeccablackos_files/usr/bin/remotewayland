@@ -24,15 +24,17 @@ touch ~/.config/remotewayland/connections.cfg
 
 function ParseHostsCfg()
 {
+  RemoteConnectionLines=$(cat ~/.config/remotewayland/connections.cfg)
+
   IFS=$'\n'
-  RemoteConnectionLines=($(cat ~/.config/remotewayland/connections.cfg))
+  UniqueServersUserLines=($(echo "$RemoteConnectionLines" | awk -F $'\t' '{print $1"\t"$2}' |sort -u))
   unset IFS
 
   ConnectionCount=0
   RemoteUsers=()
   RemoteHosts=()
   RemoteCommands=()
-  for RemoteConnectionLine in "${RemoteConnectionLines[@]}"
+  for RemoteConnectionLine in "${UniqueServersUserLines[@]}"
   do
     IFS=$'\t'
     RemoteConnection=($RemoteConnectionLine)
@@ -41,7 +43,10 @@ function ParseHostsCfg()
     IFS=$'\n'
     RemoteUsers+=("${RemoteConnection[0]}")
     RemoteHosts+=("${RemoteConnection[1]}")
-    RemoteCommands+=("${RemoteConnection[2]}")
+    unset IFS
+
+    IFS=$'\t'
+    RemoteCommands+=($(echo "$RemoteConnectionLines" | awk -v UserName="${RemoteConnection[0]}" -v ServerName="${RemoteConnection[1]}" '{if ($1 == UserName && $2 == ServerName) print $3}'))
     unset IFS
 
     ((ConnectionCount++))
@@ -55,7 +60,7 @@ function ChooseConnection()
   for ((ConnectionItr=0 ; ConnectionItr < $ConnectionCount ; ConnectionItr++))
   {
     ConnectionsString+=($ConnectionItr)
-    ConnectionsString+=("As ${RemoteUsers[$ConnectionItr]} on ${RemoteHosts[$ConnectionItr]} : run \"${RemoteCommands[$ConnectionItr]}\"")
+    ConnectionsString+=("As ${RemoteUsers[$ConnectionItr]} on ${RemoteHosts[$ConnectionItr]}")
     ConnectionsString+=(off)
   }
   ProposedUser=""
@@ -69,12 +74,45 @@ function ChooseConnection()
     exit
   fi
   clear
-  if [[ $SelectedConnection -ne -1 ]]
+  if [[ $SelectedConnection != -1 ]]
   then
     ProposedUser=${RemoteUsers[$SelectedConnection]}
     ProposedHost=${RemoteHosts[$SelectedConnection]}
-    ProposedCommand=${RemoteCommands[$SelectedConnection]}
   fi
+
+
+  IFS=$'\n'
+  ConnectionParameters=($(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0 --stdout  2>/dev/tty))
+  DialogReturn=$?
+  unset IFS
+  clear
+
+  if [[ ("${ConnectionParameters[0]}" == "") || ("${ConnectionParameters[1]}" == "") || ($DialogReturn != 0) ]]
+  then
+    read -p "Username, or host name cannot be empty, or selection canceled. Press Enter to close..."
+    exit
+  fi
+
+  IFS=$'\n'
+  PreviousCommands=(${RemoteCommands[$SelectedConnection]})
+  unset IFS
+
+  CommandCount=${#PreviousCommands[@]}
+  CommandsString=()
+
+  for ((CommandItr=0 ; CommandItr < $CommandCount ; CommandItr++))
+  {
+    CommandsString+=($CommandItr)
+    CommandsString+=("${PreviousCommands[$CommandItr]}")
+    CommandsString+=(off)
+  }
+  SelectedCommand=$(dialog --radiolist "Select a command to run on $ProposedHost as $ProposedUser :" 20 110 20 -1 "New Command..." on  "${CommandsString[@]}" --stdout 2>/dev/tty)
+  if [[ $SelectedCommand == -1 ]]
+  then
+    ProposedCommand=${PreviousCommands[$SelectedCommand]}
+  fi
+  ConnectionParameters[3]=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
+
 }
 
 function StartRemoteCommand()
@@ -86,11 +124,17 @@ function StartRemoteCommand()
   SessionID=$(date +\%s)
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
 
+  PreviousSessions=($(cat "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"))
   systemd-run --setenv=DISPLAY="$DISPLAY" --setenv=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" --user --unit=waypipeclient-$SessionID waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client 
+
+  echo $SessionID >> "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"
+
   echo "
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME"
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME"
     ln -s "/tmp/waypipeserver-$SessionID" "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID"
+    PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
+    echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
     systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- $RemoteCommand
     sleep inf
@@ -110,29 +154,18 @@ else
   ParseHostsCfg
   ChooseConnection
 
-  IFS=$'\n'
-  Parameters=($(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "User Name       : " 1 1 "$ProposedUser" 1 20 90 0 0  "Host Name       :"  2 1   "$ProposedHost"  2 20  90 0 0  "Command         :"      3 1    "$ProposedCommand"  3 20  90 0 0 --stdout  2>/dev/tty))
-  DialogReturn=$?
-  unset IFS
-  clear
 
-  if [[ ("${Parameters[0]}" == "") || ("${Parameters[1]}" == "") || ("${Parameters[2]}" == "") || ($DialogReturn != 0) ]]
+  if [[ ("${ConnectionParameters[0]}" != "$ProposedUser") || ("${ConnectionParameters[1]}" != "$ProposedHost") || ("${ConnectionParameters[2]}" != "$ProposedCommand") ]]
   then
-    read -p "Username, host name, or commands cannot be empty, or selection canceled. Press Enter to close..."
-    exit
-  fi
-
-  if [[ ("${Parameters[0]}" != "$ProposedUser") || ("${Parameters[1]}" != "$ProposedHost") || ("${Parameters[2]}" != "$ProposedCommand") ]]
-  then
-    dialog --yesno  "Do you want to save \"${Parameters[2]}\" as user \"${Parameters[0]}\" on \"${Parameters[0]}\"?" 10 90
+    dialog --yesno  "Do you want to save \"${ConnectionParameters[2]}\" as user \"${ConnectionParameters[0]}\" on \"${ConnectionParameters[0]}\"?" 10 90
     if [[ $? == 0 ]]
     then
-      echo "${Parameters[0]}"$'\t'"${Parameters[1]}"$'\t'"${Parameters[2]}"$'\t' >> ~/.config/remotewayland/connections.cfg
+      echo "${ConnectionParameters[0]}"$'\t'"${ConnectionParameters[1]}"$'\t'"${ConnectionParameters[2]}"$'\t' >> ~/.config/remotewayland/connections.cfg
     fi
     clear
   fi
 
-  StartRemoteCommand "${Parameters[1]}" "${Parameters[0]}" "${Parameters[2]}"
+  StartRemoteCommand "${ConnectionParameters[1]}" "${ConnectionParameters[0]}" "${ConnectionParameters[2]}"
 
   read -p "Press Enter to close..."
 fi
