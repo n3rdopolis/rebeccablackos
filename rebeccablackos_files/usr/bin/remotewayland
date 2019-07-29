@@ -59,15 +59,19 @@ function ChooseConnection()
   ConnectionsString=()
   for ((ConnectionItr=0 ; ConnectionItr < $ConnectionCount ; ConnectionItr++))
   {
-    ConnectionsString+=($ConnectionItr)
-    ConnectionsString+=("As ${RemoteUsers[$ConnectionItr]} on ${RemoteHosts[$ConnectionItr]}")
-    ConnectionsString+=(off)
+    if [[ ! -z ${RemoteUsers[$ConnectionItr]} && ! -z ${RemoteHosts[$ConnectionItr]} ]]
+    then
+      ConnectionsString+=($ConnectionItr)
+      ConnectionsString+=("As ${RemoteUsers[$ConnectionItr]} on ${RemoteHosts[$ConnectionItr]}")
+      ConnectionsString+=(off)
+    fi
   }
   ProposedUser=""
   ProposedHost=""
   ProposedCommand=""
   SelectedConnection=$(dialog --radiolist "Select a Connection" 20 110 20 -1 "New Connection..." on  "${ConnectionsString[@]}" --stdout 2>/dev/tty)
   DialogReturn=$?
+  clear
   if [[ $DialogReturn != 0 ]]
   then
     read -p "Selection canceled. Press Enter to close..."
@@ -106,13 +110,22 @@ function ChooseConnection()
     CommandsString+=("${PreviousCommands[$CommandItr]}")
     CommandsString+=(off)
   }
-  SelectedCommand=$(dialog --radiolist "Select a command to run on $ProposedHost as $ProposedUser :" 20 110 20 -1 "New Command..." on  "${CommandsString[@]}" --stdout 2>/dev/tty)
-  if [[ $SelectedCommand == -1 ]]
+  SelectedCommand=$(dialog --radiolist "Select a command to run on $ProposedHost as $ProposedUser :" 20 110 20
+  -1 "New Command..." on  "${CommandsString[@]}" --stdout 2>/dev/tty)
+  DialogReturn=$?
+  clear
+  if [[ $DialogReturn != 0 ]]
+  then
+    read -p "Selection canceled. Press Enter to close..."
+    exit
+  fi
+
+  if [[ $SelectedCommand != -1 ]]
   then
     ProposedCommand=${PreviousCommands[$SelectedCommand]}
   fi
-  ConnectionParameters[3]=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
-
+  ConnectionParameters[2]=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
+  clear
 }
 
 function StartRemoteCommand()
