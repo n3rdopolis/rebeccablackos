@@ -110,22 +110,30 @@ function ChooseConnection()
     CommandsString+=("${PreviousCommands[$CommandItr]}")
     CommandsString+=(off)
   }
-  SelectedCommand=$(dialog --radiolist "Select a command to run on $ProposedHost as $ProposedUser :" 20 110 20
-  -1 "New Command..." on  "${CommandsString[@]}" --stdout 2>/dev/tty)
+  IFS=$'\n'
+  SelectedCommandNumbers=($(dialog --output-separator $'\n' --checklist "Select a command to run on $ProposedHost as $ProposedUser :" 20 110 20 -1 "New Command..." off  "${CommandsString[@]}" --stdout 2>/dev/tty))
   DialogReturn=$?
+  unset IFS
   clear
   if [[ $DialogReturn != 0 ]]
   then
     read -p "Selection canceled. Press Enter to close..."
     exit
   fi
+  ManualCommand=""
+  SelectedCommands=""
 
-  if [[ $SelectedCommand != -1 ]]
-  then
-    ProposedCommand=${PreviousCommands[$SelectedCommand]}
-  fi
-  ConnectionParameters[2]=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
-  clear
+  for SelectedCommandNumber in "${SelectedCommandNumbers[@]}"
+  do
+    if [[ $SelectedCommandNumber == -1 ]]
+    then
+      ManualCommand=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
+      SelectedCommands+="$ManualCommand &"$'\n'
+      clear
+    else
+      SelectedCommands+="${PreviousCommands[$SelectedCommandNumber]} &"$'\n'
+    fi
+  done
 }
 
 function StartRemoteCommand()
@@ -142,14 +150,21 @@ function StartRemoteCommand()
 
   echo $SessionID >> "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"
 
+
+  #The Remote Server, (that is running the commands) will save the socket info based
+  #On the the user and host that started it, that is why HOSTNAME and LOGNAME are not dynamic
   echo "
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME"
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME"
-    ln -s "/tmp/waypipeserver-$SessionID" "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID"
+    ln -s "/tmp/waypipeserver-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID"
     PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
-    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- $RemoteCommand
+    echo "$SelectedCommands" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+
+    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s \"$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+
     sleep inf
   " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
 
@@ -168,17 +183,17 @@ else
   ChooseConnection
 
 
-  if [[ ("${ConnectionParameters[0]}" != "$ProposedUser") || ("${ConnectionParameters[1]}" != "$ProposedHost") || ("${ConnectionParameters[2]}" != "$ProposedCommand") ]]
+  if [[ ("${ConnectionParameters[0]}" != "$ProposedUser") || ("${ConnectionParameters[1]}" != "$ProposedHost") || ("$ManualCommand" != "") ]]
   then
-    dialog --yesno  "Do you want to save \"${ConnectionParameters[2]}\" as user \"${ConnectionParameters[0]}\" on \"${ConnectionParameters[0]}\"?" 10 90
+    dialog --yesno  "Do you want to save \"$ManualCommand\" as user \"${ConnectionParameters[0]}\" on \"${ConnectionParameters[0]}\"?" 10 90
     if [[ $? == 0 ]]
     then
-      echo "${ConnectionParameters[0]}"$'\t'"${ConnectionParameters[1]}"$'\t'"${ConnectionParameters[2]}"$'\t' >> ~/.config/remotewayland/connections.cfg
+      echo "${ConnectionParameters[0]}"$'\t'"${ConnectionParameters[1]}"$'\t'"$ManualCommand"$'\t' >> ~/.config/remotewayland/connections.cfg
     fi
     clear
   fi
 
-  StartRemoteCommand "${ConnectionParameters[1]}" "${ConnectionParameters[0]}" "${ConnectionParameters[2]}"
+  StartRemoteCommand "${ConnectionParameters[1]}" "${ConnectionParameters[0]}" "$ManualCommand"
 
   read -p "Press Enter to close..."
 fi
