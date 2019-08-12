@@ -140,7 +140,7 @@ function StartRemoteCommand()
 {
   RemoteHost="$1"
   RemoteUser="$2"
-  RemoteCommand="$3"
+  RemoteCommands="$3"
 
   SessionID=$(date +\%s)
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
@@ -160,10 +160,10 @@ function StartRemoteCommand()
     PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
-    echo "$SelectedCommands" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    echo "$RemoteCommands" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
-    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s \"$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
     sleep inf
   " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
@@ -193,7 +193,7 @@ else
     clear
   fi
 
-  StartRemoteCommand "${ConnectionParameters[1]}" "${ConnectionParameters[0]}" "$ManualCommand"
+  StartRemoteCommand "${ConnectionParameters[1]}" "${ConnectionParameters[0]}" "$SelectedCommands"
 
   read -p "Press Enter to close..."
 fi
