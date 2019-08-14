@@ -121,7 +121,8 @@ function ChooseConnection()
     exit
   fi
   ManualCommand=""
-  SelectedCommands=""
+  ManualCommandEntered=0
+  SelectedCommands="#! /bin/bash"$'\n'
 
   for SelectedCommandNumber in "${SelectedCommandNumbers[@]}"
   do
@@ -129,11 +130,18 @@ function ChooseConnection()
     then
       ManualCommand=$(dialog  --title " Remote Wayland Launch "  --mixedform "Enter the following options to begin:" 15 100 0  "Command       : " 1 1 "$ProposedCommand" 1 20 90 0 0 --stdout  2>/dev/tty)
       SelectedCommands+="$ManualCommand &"$'\n'
+      ManualCommandEntered=1
       clear
     else
       SelectedCommands+="${PreviousCommands[$SelectedCommandNumber]} &"$'\n'
     fi
   done
+  if [[ ($ManualCommandEntered == 1 && $ManualCommand == "") || "${#SelectedCommandNumbers[@]}" == 0 ]]
+  then
+    read -p "Selected commands cannot be empty. Press Enter to close..."
+    exit
+  fi
+  SelectedCommands+="sleep inf"$'\n'
 }
 
 function StartRemoteCommand()
@@ -141,6 +149,7 @@ function StartRemoteCommand()
   RemoteHost="$1"
   RemoteUser="$2"
   RemoteCommands="$3"
+  printf -v RemoteCommandsEscaped "%q" "$RemoteCommands"
 
   SessionID=$(date +\%s)
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
@@ -160,12 +169,11 @@ function StartRemoteCommand()
     PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
-    echo "$RemoteCommands" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    eval \"echo $RemoteCommandsEscaped\" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
     systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
-    sleep inf
   " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
 
 }
