@@ -1,0 +1,31 @@
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index 54f8b1cd..79e9147f 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -975,6 +975,7 @@ draw_view(struct weston_view *ev, struct weston_output *output,
+ 	if (ensure_surface_buffer_is_ready(gr, gs) < 0)
+ 		goto out;
+ 
++	/*
+ 	if (ev->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED &&
+ 	    ev->surface->desired_protection > output->current_protection) {
+ 		tmp_shader = gs->shader;
+@@ -985,6 +986,7 @@ draw_view(struct weston_view *ev, struct weston_output *output,
+ 		gs->color[3] = 1.0;
+ 		gs->shader = &gr->solid_shader;
+ 	}
++	*/
+ 
+ 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+ 
+@@ -1060,8 +1062,10 @@ draw_view(struct weston_view *ev, struct weston_output *output,
+ out:
+ 	pixman_region32_fini(&repaint);
+ 
++	/*
+ 	if (shader_replaced)
+ 		gs->shader = tmp_shader;
++	*/
+ }
+ 
+ static void

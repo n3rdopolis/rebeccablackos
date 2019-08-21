@@ -56,10 +56,11 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
+
 #Workaround https://gitlab.freedesktop.org/wayland/weston/issues/179
 #git revert -n 9bf4f371632567a6abc8d4303fb5021ac7547c86
-#git revert -n 8747f95682b3a52664353aa8c5e047d075e14149
-#patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
+#git revert -n 8747f95682b3a52664353aa8c5e047d075e14149\
 
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel -Dpipewire=true build
 }
