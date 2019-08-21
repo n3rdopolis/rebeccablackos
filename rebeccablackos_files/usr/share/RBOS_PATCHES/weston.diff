@@ -1,3 +1,18 @@
+diff --git a/libweston/content-protection.c b/libweston/content-protection.c
+index 63aa7337..98ef8d72 100644
+--- a/libweston/content-protection.c
++++ b/libweston/content-protection.c
+@@ -59,8 +59,10 @@ weston_protected_surface_send_event(struct protected_surface *psurface,
+ 	if (!p_resource)
+ 		return;
+ 	/* No event to be sent to client, in case of enforced mode */
++	/*
+ 	if (psurface->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED)
+ 		return;
++	*/
+ 	protection_type = (enum weston_protected_surface_type) protection;
+ 	weston_protected_surface_send_status(p_resource, protection_type);
+ 
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
 index 54f8b1cd..79e9147f 100644
 --- a/libweston/renderer-gl/gl-renderer.c
