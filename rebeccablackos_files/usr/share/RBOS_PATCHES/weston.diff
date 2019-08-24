@@ -1,3 +1,19 @@
+diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
+index 58d26ea1..02239290 100644
+--- a/libweston/backend-drm/fb.c
++++ b/libweston/backend-drm/fb.c
+@@ -497,9 +497,11 @@ drm_fb_get_from_view(struct drm_output_state *state, struct weston_view *ev)
+ 	if (!drm_view_transform_supported(ev, &output->base))
+ 		return NULL;
+ 
++	/*
+ 	if (ev->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED &&
+ 	    ev->surface->desired_protection > output->base.current_protection)
+ 		return NULL;
++	*/
+ 
+ 	if (!buffer)
+ 		return NULL;
 diff --git a/libweston/content-protection.c b/libweston/content-protection.c
 index 63aa7337..98ef8d72 100644
 --- a/libweston/content-protection.c
