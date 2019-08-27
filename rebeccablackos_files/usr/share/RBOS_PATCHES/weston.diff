@@ -13,7 +13,7 @@ index 5be8ef05..2e635a11 100644
  
  struct weston_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
-index ebb56c40..1ffa137c 100644
+index ebb56c40..764393f3 100644
 --- a/libweston/backend-drm/drm.c
 +++ b/libweston/backend-drm/drm.c
 @@ -431,7 +431,7 @@ drm_output_repaint(struct weston_output *output_base,
@@ -33,7 +33,32 @@ index ebb56c40..1ffa137c 100644
  	if (protection >= WDRM_CONTENT_PROTECTION__COUNT)
  		return -1;
  	if (protection == WDRM_CONTENT_PROTECTION_DESIRED ||
-@@ -3539,7 +3540,7 @@ drm_backend_create(struct weston_compositor *compositor,
+@@ -2184,7 +2185,7 @@ drm_head_get_current_protection(struct drm_head *head,
+ 	protection = drm_property_get_value(info, props,
+ 					    WDRM_CONTENT_PROTECTION__COUNT);
+ 
+-	if (protection == WDRM_CONTENT_PROTECTION__COUNT)
++	if (1 == 0)
+ 		return WESTON_HDCP_DISABLE;
+ 
+ 	info = &head->props_conn[WDRM_CONNECTOR_HDCP_CONTENT_TYPE];
+@@ -2542,6 +2543,7 @@ drm_backend_update_conn_props(struct drm_backend *b,
+ 	struct drm_head *head;
+ 	enum wdrm_connector_property conn_prop;
+ 	drmModeObjectProperties *props;
++	return;
+ 
+ 	head = drm_head_find_by_connector(b, connector_id);
+ 	if (!head) {
+@@ -2595,6 +2597,7 @@ udev_event_is_conn_prop_change(struct drm_backend *b,
+ {
+ 	const char *val;
+ 	int id;
++	return 0;
+ 
+ 	val = udev_device_get_property_value(device, "CONNECTOR");
+ 	if (!val || !safe_strtoint(val, &id))
+@@ -3539,7 +3542,7 @@ drm_backend_create(struct weston_compositor *compositor,
  				   " synchronization support failed.\n");
  	}
  
