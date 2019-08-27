@@ -1,62 +1,189 @@
-diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
-index 58d26ea1..02239290 100644
---- a/libweston/backend-drm/fb.c
-+++ b/libweston/backend-drm/fb.c
-@@ -497,9 +497,11 @@ drm_fb_get_from_view(struct drm_output_state *state, struct weston_view *ev)
- 	if (!drm_view_transform_supported(ev, &output->base))
- 		return NULL;
+diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
+index 5be8ef05..2e635a11 100644
+--- a/include/libweston/libweston.h
++++ b/include/libweston/libweston.h
+@@ -112,7 +112,8 @@ enum weston_mode_aspect_ratio {
  
-+	/*
- 	if (ev->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED &&
- 	    ev->surface->desired_protection > output->base.current_protection)
- 		return NULL;
-+	*/
+ enum weston_surface_protection_mode {
+ 	WESTON_SURFACE_PROTECTION_MODE_RELAXED,
+-	WESTON_SURFACE_PROTECTION_MODE_ENFORCED
++	WESTON_SURFACE_PROTECTION_MODE_ENFORCED,
++	WESTON_SURFACE_PROTECTION_MODE_LIE
+ };
  
- 	if (!buffer)
- 		return NULL;
-diff --git a/libweston/content-protection.c b/libweston/content-protection.c
-index 63aa7337..98ef8d72 100644
---- a/libweston/content-protection.c
-+++ b/libweston/content-protection.c
-@@ -59,8 +59,10 @@ weston_protected_surface_send_event(struct protected_surface *psurface,
- 	if (!p_resource)
- 		return;
- 	/* No event to be sent to client, in case of enforced mode */
-+	/*
- 	if (psurface->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED)
- 		return;
-+	*/
- 	protection_type = (enum weston_protected_surface_type) protection;
- 	weston_protected_surface_send_status(p_resource, protection_type);
+ struct weston_mode {
+diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
+index ebb56c40..1ffa137c 100644
+--- a/libweston/backend-drm/drm.c
++++ b/libweston/backend-drm/drm.c
+@@ -431,7 +431,7 @@ drm_output_repaint(struct weston_output *output_base,
+ 	if (output_base->allow_protection)
+ 		state->protection = output_base->desired_protection;
+ 	else
+-		state->protection = WESTON_HDCP_DISABLE;
++		state->protection = output_base->desired_protection;
  
-diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
-index 54f8b1cd..79e9147f 100644
---- a/libweston/renderer-gl/gl-renderer.c
-+++ b/libweston/renderer-gl/gl-renderer.c
-@@ -975,6 +975,7 @@ draw_view(struct weston_view *ev, struct weston_output *output,
- 	if (ensure_surface_buffer_is_ready(gr, gs) < 0)
- 		goto out;
+ 	drm_output_render(state, damage);
+ 	scanout_state = drm_output_state_get_plane(state,
+@@ -2144,6 +2144,7 @@ get_weston_protection_from_drm(enum wdrm_content_protection_state protection,
+ 			       enum weston_hdcp_protection *weston_protection)
  
-+	/*
- 	if (ev->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED &&
- 	    ev->surface->desired_protection > output->current_protection) {
- 		tmp_shader = gs->shader;
-@@ -985,6 +986,7 @@ draw_view(struct weston_view *ev, struct weston_output *output,
- 		gs->color[3] = 1.0;
- 		gs->shader = &gr->solid_shader;
+ {
++	return 0;
+ 	if (protection >= WDRM_CONTENT_PROTECTION__COUNT)
+ 		return -1;
+ 	if (protection == WDRM_CONTENT_PROTECTION_DESIRED ||
+@@ -3539,7 +3540,7 @@ drm_backend_create(struct weston_compositor *compositor,
+ 				   " synchronization support failed.\n");
  	}
-+	*/
  
- 	glBlendFunc(GL_ONE, GL_ONE_MINUS_SRC_ALPHA);
+-	if (b->atomic_modeset)
++	//if (b->atomic_modeset)
+ 		if (weston_compositor_enable_content_protection(compositor) < 0)
+ 			weston_log("Error: initializing content-protection "
+ 				   "support failed.\n");
+diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
+index 527768cb..bbf95843 100644
+--- a/libweston/backend-drm/kms.c
++++ b/libweston/backend-drm/kms.c
+@@ -880,6 +880,7 @@ drm_head_set_hdcp_property(struct drm_head *head,
+ 	enum wdrm_hdcp_content_type drm_cp_type;
+ 	struct drm_property_enum_info *enum_info;
+ 	uint64_t prop_val;
++	return;
  
-@@ -1060,8 +1062,10 @@ draw_view(struct weston_view *ev, struct weston_output *output,
- out:
- 	pixman_region32_fini(&repaint);
+ 	get_drm_protection_from_weston(protection, &drm_protection,
+ 				       &drm_cp_type);
+diff --git a/libweston/backend-fbdev/fbdev.c b/libweston/backend-fbdev/fbdev.c
+index ae289cc0..24054164 100644
+--- a/libweston/backend-fbdev/fbdev.c
++++ b/libweston/backend-fbdev/fbdev.c
+@@ -935,6 +935,11 @@ fbdev_backend_create(struct weston_compositor *compositor,
  
-+	/*
- 	if (shader_replaced)
- 		gs->shader = tmp_shader;
-+	*/
+ 	weston_setup_vt_switch_bindings(compositor);
+ 
++	//This is here to turn on the protocol ONLY, so that the clients can be lied to that HDCP is on
++	if (weston_compositor_enable_content_protection(compositor) < 0)
++			weston_log("Error: initializing content-protection "
++				   "support failed.\n");
++
+ 	if (pixman_renderer_init(compositor) < 0)
+ 		goto out_launcher;
+ 
+diff --git a/libweston/backend-headless/headless.c b/libweston/backend-headless/headless.c
+index 2d019ee5..151da752 100644
+--- a/libweston/backend-headless/headless.c
++++ b/libweston/backend-headless/headless.c
+@@ -257,6 +257,11 @@ headless_output_create(struct weston_compositor *compositor, const char *name)
+ 	output->base.enable = headless_output_enable;
+ 	output->base.attach_head = NULL;
+ 
++	//This is here to turn on the protocol ONLY, so that the clients can be lied to that HDCP is on
++	if (weston_compositor_enable_content_protection(compositor) < 0)
++			weston_log("Error: initializing content-protection "
++				   "support failed.\n");
++
+ 	weston_compositor_add_pending_output(&output->base, compositor);
+ 
+ 	return &output->base;
+diff --git a/libweston/backend-rdp/rdp.c b/libweston/backend-rdp/rdp.c
+index 109c20ba..5452f06a 100644
+--- a/libweston/backend-rdp/rdp.c
++++ b/libweston/backend-rdp/rdp.c
+@@ -1422,6 +1422,11 @@ rdp_backend_create(struct weston_compositor *compositor,
+ 			goto err_output;
+ 	}
+ 
++	//This is here to turn on the protocol ONLY, so that the clients can be lied to that HDCP is on
++	if (weston_compositor_enable_content_protection(compositor) < 0)
++			weston_log("Error: initializing content-protection "
++				   "support failed.\n");
++
+ 	ret = weston_plugin_api_register(compositor, WESTON_RDP_OUTPUT_API_NAME,
+ 					 &api, sizeof(api));
+ 
+diff --git a/libweston/backend-wayland/wayland.c b/libweston/backend-wayland/wayland.c
+index dd4c1cca..5a2948a9 100644
+--- a/libweston/backend-wayland/wayland.c
++++ b/libweston/backend-wayland/wayland.c
+@@ -2883,6 +2883,11 @@ weston_backend_init(struct weston_compositor *compositor,
+ 		return 0;
+ 	}
+ 
++	//This is here to turn on the protocol ONLY, so that the clients can be lied to that HDCP is on
++	if (weston_compositor_enable_content_protection(compositor) < 0)
++			weston_log("Error: initializing content-protection "
++				   "support failed.\n");
++
+ 	ret = weston_plugin_api_register(compositor, WESTON_WINDOWED_OUTPUT_API_NAME,
+ 					 &windowed_api, sizeof(windowed_api));
+ 
+diff --git a/libweston/backend-x11/x11.c b/libweston/backend-x11/x11.c
+index e6227737..ec359d3e 100644
+--- a/libweston/backend-x11/x11.c
++++ b/libweston/backend-x11/x11.c
+@@ -1891,6 +1891,11 @@ x11_backend_create(struct weston_compositor *compositor,
+ 				     x11_backend_handle_event, b);
+ 	wl_event_source_check(b->xcb_source);
+ 
++	//This is here to turn on the protocol ONLY, so that the clients can be lied to that HDCP is on
++	if (weston_compositor_enable_content_protection(compositor) < 0)
++			weston_log("Error: initializing content-protection "
++				   "support failed.\n");
++
+ 	if (compositor->renderer->import_dmabuf) {
+ 		if (linux_dmabuf_setup(compositor) < 0)
+ 			weston_log("Error: initializing dmabuf "
+diff --git a/libweston/compositor.c b/libweston/compositor.c
+index f7263649..8e4a38bb 100644
+--- a/libweston/compositor.c
++++ b/libweston/compositor.c
+@@ -485,7 +485,7 @@ weston_surface_state_init(struct weston_surface_state *state)
+ 	state->acquire_fence_fd = -1;
+ 
+ 	state->desired_protection = WESTON_HDCP_DISABLE;
+-	state->protection_mode = WESTON_SURFACE_PROTECTION_MODE_RELAXED;
++	state->protection_mode = WESTON_SURFACE_PROTECTION_MODE_LIE;
  }
  
  static void
+@@ -570,7 +570,7 @@ weston_surface_create(struct weston_compositor *compositor)
+ 
+ 	surface->desired_protection = WESTON_HDCP_DISABLE;
+ 	surface->current_protection = WESTON_HDCP_DISABLE;
+-	surface->protection_mode = WESTON_SURFACE_PROTECTION_MODE_RELAXED;
++	surface->protection_mode = WESTON_SURFACE_PROTECTION_MODE_LIE;
+ 
+ 	return surface;
+ }
+@@ -7343,7 +7343,7 @@ weston_compositor_shutdown(struct weston_compositor *ec)
+  * \ingroup compositor
+  */
+ WL_EXPORT void
+-weston_compositor_exit_with_code(struct weston_compositor *compositor, 
++weston_compositor_exit_with_code(struct weston_compositor *compositor,
+ 				 int exit_code)
+ {
+ 	if (compositor->exit_code == EXIT_SUCCESS)
+diff --git a/libweston/content-protection.c b/libweston/content-protection.c
+index 63aa7337..bdd9978e 100644
+--- a/libweston/content-protection.c
++++ b/libweston/content-protection.c
+@@ -146,7 +146,7 @@ set_enforce_mode(struct wl_client *client, struct wl_resource *resource)
+ 		return;
+ 
+ 	psurface->surface->pending.protection_mode =
+-		WESTON_SURFACE_PROTECTION_MODE_ENFORCED;
++		WESTON_SURFACE_PROTECTION_MODE_LIE;
+ }
+ 
+ static void
+@@ -168,7 +168,7 @@ set_relax_mode(struct wl_client *client, struct wl_resource *resource)
+ 		return;
+ 
+ 	psurface->surface->pending.protection_mode =
+-		WESTON_SURFACE_PROTECTION_MODE_RELAXED;
++		WESTON_SURFACE_PROTECTION_MODE_LIE;
+ }
+ 
+ static const struct weston_protected_surface_interface protected_surface_implementation = {
