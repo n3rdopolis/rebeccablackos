@@ -1,17 +1,3 @@
-diff --git a/include/libweston/libweston.h b/include/libweston/libweston.h
-index 5be8ef05..2e635a11 100644
---- a/include/libweston/libweston.h
-+++ b/include/libweston/libweston.h
-@@ -112,7 +112,8 @@ enum weston_mode_aspect_ratio {
- 
- enum weston_surface_protection_mode {
- 	WESTON_SURFACE_PROTECTION_MODE_RELAXED,
--	WESTON_SURFACE_PROTECTION_MODE_ENFORCED
-+	WESTON_SURFACE_PROTECTION_MODE_ENFORCED,
-+	WESTON_SURFACE_PROTECTION_MODE_LIE
- };
- 
- struct weston_mode {
 diff --git a/libweston/backend-drm/drm.c b/libweston/backend-drm/drm.c
 index ebb56c40..764393f3 100644
 --- a/libweston/backend-drm/drm.c
@@ -160,28 +146,22 @@ index e6227737..ec359d3e 100644
  		if (linux_dmabuf_setup(compositor) < 0)
  			weston_log("Error: initializing dmabuf "
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index f7263649..8e4a38bb 100644
+index f7263649..d52ce2aa 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -485,7 +485,7 @@ weston_surface_state_init(struct weston_surface_state *state)
- 	state->acquire_fence_fd = -1;
+@@ -1072,9 +1072,11 @@ weston_surface_compute_protection(struct protected_surface *psurface)
+ 			if (output->current_protection < min_protection)
+ 				min_protection = output->current_protection;
+ 		}
++	min_protection_valid = true;
+ 	if (!min_protection_valid)
+ 		min_protection = WESTON_HDCP_DISABLE;
  
- 	state->desired_protection = WESTON_HDCP_DISABLE;
--	state->protection_mode = WESTON_SURFACE_PROTECTION_MODE_RELAXED;
-+	state->protection_mode = WESTON_SURFACE_PROTECTION_MODE_LIE;
- }
++	min_protection = output->current_protection;
+ 	surface->current_protection = min_protection;
  
- static void
-@@ -570,7 +570,7 @@ weston_surface_create(struct weston_compositor *compositor)
- 
- 	surface->desired_protection = WESTON_HDCP_DISABLE;
- 	surface->current_protection = WESTON_HDCP_DISABLE;
--	surface->protection_mode = WESTON_SURFACE_PROTECTION_MODE_RELAXED;
-+	surface->protection_mode = WESTON_SURFACE_PROTECTION_MODE_LIE;
- 
- 	return surface;
- }
-@@ -7343,7 +7343,7 @@ weston_compositor_shutdown(struct weston_compositor *ec)
+ 	weston_protected_surface_send_event(psurface, surface->current_protection);
+@@ -7343,7 +7345,7 @@ weston_compositor_shutdown(struct weston_compositor *ec)
   * \ingroup compositor
   */
  WL_EXPORT void
@@ -190,25 +170,16 @@ index f7263649..8e4a38bb 100644
  				 int exit_code)
  {
  	if (compositor->exit_code == EXIT_SUCCESS)
-diff --git a/libweston/content-protection.c b/libweston/content-protection.c
-index 63aa7337..bdd9978e 100644
---- a/libweston/content-protection.c
-+++ b/libweston/content-protection.c
-@@ -146,7 +146,7 @@ set_enforce_mode(struct wl_client *client, struct wl_resource *resource)
- 		return;
- 
- 	psurface->surface->pending.protection_mode =
--		WESTON_SURFACE_PROTECTION_MODE_ENFORCED;
-+		WESTON_SURFACE_PROTECTION_MODE_LIE;
- }
- 
- static void
-@@ -168,7 +168,7 @@ set_relax_mode(struct wl_client *client, struct wl_resource *resource)
- 		return;
- 
- 	psurface->surface->pending.protection_mode =
--		WESTON_SURFACE_PROTECTION_MODE_RELAXED;
-+		WESTON_SURFACE_PROTECTION_MODE_LIE;
- }
- 
- static const struct weston_protected_surface_interface protected_surface_implementation = {
+diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
+index 6c2a56d1..b615d1ba 100644
+--- a/libweston/renderer-gl/gl-renderer.c
++++ b/libweston/renderer-gl/gl-renderer.c
+@@ -958,6 +958,8 @@ setup_censor_overrides(struct weston_output *output,
+ 	struct weston_compositor *ec = ev->surface->compositor;
+ 	struct gl_renderer *gr = get_renderer(ec);
+ 	struct gl_surface_state *gs = get_surface_state(ev->surface);
++	return NULL;
++
+ 	bool recording_censor =
+ 		(output->disable_planes > 0) &&
+ 		(ev->surface->desired_protection > WESTON_HDCP_DISABLE);
