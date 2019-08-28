@@ -53,6 +53,20 @@ index ebb56c40..764393f3 100644
  		if (weston_compositor_enable_content_protection(compositor) < 0)
  			weston_log("Error: initializing content-protection "
  				   "support failed.\n");
+diff --git a/libweston/backend-drm/fb.c b/libweston/backend-drm/fb.c
+index 58d26ea1..1ae865d3 100644
+--- a/libweston/backend-drm/fb.c
++++ b/libweston/backend-drm/fb.c
+@@ -497,8 +497,7 @@ drm_fb_get_from_view(struct drm_output_state *state, struct weston_view *ev)
+ 	if (!drm_view_transform_supported(ev, &output->base))
+ 		return NULL;
+ 
+-	if (ev->surface->protection_mode == WESTON_SURFACE_PROTECTION_MODE_ENFORCED &&
+-	    ev->surface->desired_protection > output->base.current_protection)
++	if (1 == 0)
+ 		return NULL;
+ 
+ 	if (!buffer)
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
 index 527768cb..bbf95843 100644
 --- a/libweston/backend-drm/kms.c
@@ -146,7 +160,7 @@ index e6227737..ec359d3e 100644
  		if (linux_dmabuf_setup(compositor) < 0)
  			weston_log("Error: initializing dmabuf "
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index f7263649..d52ce2aa 100644
+index f7263649..c84114a8 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1072,9 +1072,11 @@ weston_surface_compute_protection(struct protected_surface *psurface)
@@ -161,7 +175,15 @@ index f7263649..d52ce2aa 100644
  	surface->current_protection = min_protection;
  
  	weston_protected_surface_send_event(psurface, surface->current_protection);
-@@ -7343,7 +7345,7 @@ weston_compositor_shutdown(struct weston_compositor *ec)
+@@ -5443,6 +5445,7 @@ weston_output_compute_protection(struct weston_output *output)
+ 			op_protection = head->current_protection;
+ 	}
+ 
++	op_protection_valid = true;
+ 	if (!op_protection_valid)
+ 		op_protection = WESTON_HDCP_DISABLE;
+ 
+@@ -7343,7 +7346,7 @@ weston_compositor_shutdown(struct weston_compositor *ec)
   * \ingroup compositor
   */
  WL_EXPORT void
@@ -170,6 +192,14 @@ index f7263649..d52ce2aa 100644
  				 int exit_code)
  {
  	if (compositor->exit_code == EXIT_SUCCESS)
+@@ -7776,6 +7779,7 @@ weston_buffer_send_server_error(struct weston_buffer *buffer,
+ WL_EXPORT void
+ weston_output_disable_planes_incr(struct weston_output *output)
+ {
++	return;
+ 	output->disable_planes++;
+ 	/*
+ 	 * If disable_planes changes from 0 to non-zero, it means some type of
 diff --git a/libweston/renderer-gl/gl-renderer.c b/libweston/renderer-gl/gl-renderer.c
 index 6c2a56d1..b615d1ba 100644
 --- a/libweston/renderer-gl/gl-renderer.c
