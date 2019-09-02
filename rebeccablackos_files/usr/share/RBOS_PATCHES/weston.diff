@@ -173,7 +173,7 @@ index e6227737..ec359d3e 100644
  		if (linux_dmabuf_setup(compositor) < 0)
  			weston_log("Error: initializing dmabuf "
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index f7263649..9176529c 100644
+index f7263649..383e0f90 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -1075,7 +1075,7 @@ weston_surface_compute_protection(struct protected_surface *psurface)
@@ -185,6 +185,17 @@ index f7263649..9176529c 100644
  
  	weston_protected_surface_send_event(psurface, surface->current_protection);
  }
+@@ -2644,8 +2644,8 @@ weston_output_repaint(struct weston_output *output, void *repaint_data)
+ 			 * reducing the protection for existing surfaces.
+ 			 */
+ 			if (ev->surface->desired_protection > highest_requested)
+-				highest_requested =
+-						ev->surface->desired_protection;
++				ev->surface->desired_protection =
++						highest_requested;
+ 		}
+ 	}
+ 
 @@ -5443,6 +5443,7 @@ weston_output_compute_protection(struct weston_output *output)
  			op_protection = head->current_protection;
  	}
