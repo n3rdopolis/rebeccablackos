@@ -155,6 +155,16 @@ function StartRemoteCommand()
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
 
   PreviousSessions=($(cat "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"))
+  ReconnectCommands=""
+  ReconnectArguments=""
+  for PreviousSession in "${PreviousSessions[@]}"
+  do
+    ReconnectCommands+="ln -s "/tmp/waypipeserver-\$PreviousSession-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-\$PreviousSession-$SessionID""$'\n'
+    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-\$PreviousSession-$SessionID"$'\n'
+    ReconnectArguments+="-R \"/tmp/waypipeserver-$PreviousSession-$SessionID\":\"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$PreviousSession\" "
+  done
+  printf -v ReconnectCommandsEscaped "%q" "$ReconnectCommands"
+
   systemd-run --setenv=DISPLAY="$DISPLAY" --setenv=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" --user --unit=waypipeclient-$SessionID waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client 
 
   echo $SessionID >> "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"
@@ -169,12 +179,14 @@ function StartRemoteCommand()
     PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
-    eval \"echo $RemoteCommandsEscaped\" > "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    eval \"echo $RemoteCommandsEscaped\" >  "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    eval \"echo ReconnectCommandsEscaped >> "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
     systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
-  " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" -t "$RemoteUser"@"$RemoteHost" -XC
+  " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" $ReconnectArguments -t "$RemoteUser"@"$RemoteHost" -XC
 
 }
 
