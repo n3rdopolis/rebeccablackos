@@ -136,11 +136,7 @@ function ChooseConnection()
       SelectedCommands+="${PreviousCommands[$SelectedCommandNumber]} &"$'\n'
     fi
   done
-  if [[ ($ManualCommandEntered == 1 && $ManualCommand == "") || "${#SelectedCommandNumbers[@]}" == 0 ]]
-  then
-    read -p "Selected commands cannot be empty. Press Enter to close..."
-    exit
-  fi
+
   SelectedCommands+="sleep inf"$'\n'
 }
 
@@ -159,11 +155,20 @@ function StartRemoteCommand()
   ReconnectArguments=""
   for PreviousSession in "${PreviousSessions[@]}"
   do
-    ReconnectCommands+="ln -s "/tmp/waypipeserver-\$PreviousSession-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-\$PreviousSession-$SessionID""$'\n'
-    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-\$PreviousSession-$SessionID"$'\n'
+    ReconnectCommands+="ln -s "/tmp/waypipeserver-$PreviousSession-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$PreviousSession-$SessionID""$'\n'
+    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$PreviousSession-$SessionID"$'\n'
     ReconnectArguments+="-R \"/tmp/waypipeserver-$PreviousSession-$SessionID\":\"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$PreviousSession\" "
   done
   printf -v ReconnectCommandsEscaped "%q" "$ReconnectCommands"
+
+  if [[ ($ManualCommandEntered == 1 && $ManualCommand == "") || "${#SelectedCommandNumbers[@]}" == 0 ]]
+  then
+    if [[ ${#PreviousSessions[@]} == 0 ]]
+    then
+      read -p "Selected commands cannot be empty. Press Enter to close..."
+      exit
+    fi
+  fi
 
   systemd-run --setenv=DISPLAY="$DISPLAY" --setenv=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" --user --unit=waypipeclient-$SessionID waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client 
 
@@ -180,7 +185,7 @@ function StartRemoteCommand()
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
     eval \"echo $RemoteCommandsEscaped\" >  "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
-    eval \"echo ReconnectCommandsEscaped >> "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    eval \"echo $ReconnectCommandsEscaped\" >> "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
 
