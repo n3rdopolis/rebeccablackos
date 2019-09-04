@@ -46,7 +46,7 @@ function ParseHostsCfg()
     unset IFS
 
     IFS=$'\t'
-    RemoteCommands+=($(echo "$RemoteConnectionLines" | awk -v UserName="${RemoteConnection[0]}" -v ServerName="${RemoteConnection[1]}" '{if ($1 == UserName && $2 == ServerName) print $3}'))
+    RemoteCommands+=($(echo "$RemoteConnectionLines" | awk -F $'\t' -v UserName="${RemoteConnection[0]}" -v ServerName="${RemoteConnection[1]}" '{if ($1 == UserName && $2 == ServerName) print $3}'))
     unset IFS
 
     ((ConnectionCount++))
