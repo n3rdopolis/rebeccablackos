@@ -137,7 +137,6 @@ function ChooseConnection()
     fi
   done
 
-  SelectedCommands+="sleep inf"$'\n'
 }
 
 function StartRemoteCommand()
@@ -150,14 +149,20 @@ function StartRemoteCommand()
   SessionID=$(date +\%s)
   mkdir -p "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser"
 
-  PreviousSessions=($(cat "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"))
+  if [[ -f "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions" ]]
+  then
+    PreviousSessions=($(cat "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"))
+  else
+    PreviousSessions=()
+  fi
+
   ReconnectCommands=""
   ReconnectArguments=""
   for PreviousSession in "${PreviousSessions[@]}"
   do
     ReconnectCommands+="ln -s "/tmp/waypipeserver-$PreviousSession-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$PreviousSession-$SessionID""$'\n'
-    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$PreviousSession-$SessionID"$'\n'
-    ReconnectArguments+="-R \"/tmp/waypipeserver-$PreviousSession-$SessionID\":\"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$PreviousSession\" "
+    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$PreviousSession /tmp/waypipeserver-$PreviousSession-$SessionID"$'\n'
+    ReconnectArguments+="-R /tmp/waypipeserver-$PreviousSession-$SessionID:$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$PreviousSession "
   done
   printf -v ReconnectCommandsEscaped "%q" "$ReconnectCommands"
 
@@ -180,16 +185,18 @@ function StartRemoteCommand()
   echo "
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME"
     mkdir -p "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME"
+    mkdir -p "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME"
     ln -s "/tmp/waypipeserver-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID"
     PreviousSessions=(\$(cat "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"))
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
-    eval \"echo $RemoteCommandsEscaped\" >  "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
-    eval \"echo $ReconnectCommandsEscaped\" >> "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    eval \"echo $RemoteCommandsEscaped\" >  "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
+    eval \"echo $ReconnectCommandsEscaped\" >> "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
+    echo "sleep inf" >> "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
 
-    chmod +x "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    chmod +x "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
 
-    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/script_$SessionID"
+    systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
     sleep inf
   " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" $ReconnectArguments -t "$RemoteUser"@"$RemoteHost" -XC
 
