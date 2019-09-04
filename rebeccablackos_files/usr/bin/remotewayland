@@ -197,7 +197,7 @@ function StartRemoteCommand()
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
 
     systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
-    sleep inf
+    journalctl -f --user-unit waypipeserver-$SessionID
   " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" $ReconnectArguments -t "$RemoteUser"@"$RemoteHost" -XC
 
 }
