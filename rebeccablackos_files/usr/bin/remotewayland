@@ -177,9 +177,6 @@ function StartRemoteCommand()
 
   systemd-run --setenv=DISPLAY="$DISPLAY" --setenv=WAYLAND_DISPLAY="$WAYLAND_DISPLAY" --user --unit=waypipeclient-$SessionID waypipe -s "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" client 
 
-  echo $SessionID >> "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"
-
-
   #The Remote Server, (that is running the commands) will save the socket info based
   #On the the user and host that started it, that is why HOSTNAME and LOGNAME are not dynamic
   echo "
@@ -198,7 +195,9 @@ function StartRemoteCommand()
 
     systemd-run --user --unit=waypipeserver-$SessionID waypipe --control "$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$SessionID" -s "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$SessionID" server -- "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
     journalctl -f --user-unit waypipeserver-$SessionID
-  " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" $ReconnectArguments -t "$RemoteUser"@"$RemoteHost" -XC
+  " | ssh -T -R "/tmp/waypipeserver-$SessionID":"$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$SessionID" $ReconnectArguments -t "$RemoteUser"@"$RemoteHost" -XC &
+  echo $SessionID >> "$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/Sessions"
+  wait
 
 }
 
