@@ -42,9 +42,6 @@ else
 fi
 
 MOUNTISO=$(readlink -f "$1")
-MOUNTISOPATH=$(dirname "$MOUNTISO")
-MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
-NEWISO="${MOUNTISOPATH}/${MOUNTISONAME}_nonfree.iso"
 
 FIRMWARESELECT="$2"
 
@@ -259,6 +256,9 @@ then
   fi
 fi
 echo "Using ISO file: $MOUNTISO"
+MOUNTISOPATH=$(dirname "$MOUNTISO")
+MOUNTISONAME=$(basename -s ".iso" "$MOUNTISO")
+NEWISO="${MOUNTISOPATH}/${MOUNTISONAME}_nonfree.iso"
 
 #Create the PID and Mount namespaces, pid 1 to sleep forever
 unshare -f --pid --mount --mount-proc sleep infinity &
