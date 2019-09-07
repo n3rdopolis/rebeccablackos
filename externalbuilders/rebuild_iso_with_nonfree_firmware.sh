@@ -204,7 +204,8 @@ firmware-myricom
 firmware-netxen
 firmware-realtek
 firmware-ti-connectivity
-firmware-zd1211"
+firmware-zd1211
+broadcom-sta-dkms"
 
 FIRMWAREUILIST=""
 
