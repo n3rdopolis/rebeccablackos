@@ -144,6 +144,9 @@
 #Function that is run to start user sessions while running as the user (when started with the --usersession argument)
 function UserSessionWorker
 {
+  #prevent the WaylandLoginManager from being killed with CTRL+C
+  trap '' 2
+
   #Enable job control
   set -m
 
