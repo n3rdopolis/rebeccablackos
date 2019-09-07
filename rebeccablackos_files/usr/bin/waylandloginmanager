@@ -3134,7 +3134,12 @@ function WaylandLoginManagerMain
         done
         #Detect the age of the seat, by the date stamp of the last entry logged for the seat
         #As of now, this is the best way to get the creation time of a seat, since the attribute is not presented
-        SeatCreationString="$(journalctl  -b _HOSTNAME=$HOSTNAME _MACHINE_ID=$MACHINE_ID SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')@$RunningSeat"
+        if [[ $RunningSeat != seat0 ]]
+        then
+          SeatCreationString="$(journalctl  -b _HOSTNAME=$HOSTNAME _MACHINE_ID=$MACHINE_ID SEAT_ID=$RunningSeat _SYSTEMD_UNIT=systemd-logind.service -o short-unix 2>/dev/null | tail -1 | awk  '{print $1}')@$RunningSeat"
+        else
+          SeatCreationString="seat0@seat0"
+        fi
         SeatStringMismatch=0
         if [[ $LoginManagerFirstLoop == 1 ]]
         then
