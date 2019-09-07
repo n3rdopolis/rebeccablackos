@@ -105,42 +105,6 @@ then
 
 fi
 
-
-#Try to determine the package manager.
-if [[ -f $(which apt-get) ]]
-then
-  INSTALLCOMMAND="apt-get install"
-elif [[ -f $(which yum) ]]
-then
-  INSTALLCOMMAND="yum install"
-elif [[ -f $(which pacman) ]]
-then
-  INSTALLCOMMAND="pacman -S"
-elif [[ -f $(which zypper) ]]
-then
-  INSTALLCOMMAND="zypper in"
-elif [[ -f $(which up2date) ]]
-then
-  INSTALLCOMMAND="up2date -i"
-elif [[ -f $(which urpmi) ]]
-then
-  INSTALLCOMMAND="urpmi"
-else
-  echo "Cant find a install utility."
-  exit
-fi
-
-
-if ! type dialog &> /dev/null
-then
-  $INSTALLCOMMAND dialog
-fi
-
-if ! type zenity &> /dev/null
-then
-  $INSTALLCOMMAND zenity
-fi
-
 function mountisoexit() 
 {
 if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
