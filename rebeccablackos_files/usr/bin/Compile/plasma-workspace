@@ -84,8 +84,6 @@ then
     mkdir -p $INSTALLDIR/libexec/
     ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma $INSTALLDIR/libexec/startplasma
 fi
-# TODO remove this workaround
-rm $INSTALLDIR/share/dbus-1/services/org.kde.plasma.Notifications.service
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
