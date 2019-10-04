@@ -79,10 +79,10 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-if [[ -e $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma ]]
+if [[ -e $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma-waylandsession ]]
 then
     mkdir -p $INSTALLDIR/libexec/
-    ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma $INSTALLDIR/libexec/startplasma
+    ln -s $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/libexec/startplasma-waylandsession $INSTALLDIR/libexec/startplasma-waylandsession
 fi
 }
 
