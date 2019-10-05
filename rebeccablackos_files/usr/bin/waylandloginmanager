@@ -3735,6 +3735,9 @@ then
 elif [[ $1 == "--shutdowndialog" ]]
 then
   LeavePrompt
+elif [[ $1 == "--logoff" ]]
+then
+  loginctl terminate-session $XDG_SESSION_ID
 else
   echo "waylandloginmanager: incorrect usage"
   echo "Useful options:"
