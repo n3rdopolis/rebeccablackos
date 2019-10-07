@@ -667,17 +667,20 @@ iso (){
     if [[ $BUILDEFI == 1 ]]
     then
       log_msg "Creating GRUB images for EFI boot"
+
       #Create the config file
       echo "search --set=root --label $LIVECDLABEL"                      > ./grub.cfg
-#      echo "set gfxmode=auto"                                           >> ./grub.cfg
-#      echo "insmod all_video"                                           >> ./grub.cfg
-#      echo "insmod gfxterm"                                             >> ./grub.cfg
-#      echo "insmod png"                                                 >> ./grub.cfg
-#      echo "terminal_output gfxterm"                                    >> ./grub.cfg
-#      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
-#      echo "set color_normal=white/black"                               >> ./grub.cfg
-#      echo "set gfxpayload=keep"                                        >> ./grub.cfg
+      echo "set gfxmode=auto"                                           >> ./grub.cfg
+      echo "insmod all_video"                                           >> ./grub.cfg
+      echo "insmod gfxterm"                                             >> ./grub.cfg
+      echo "insmod png"                                                 >> ./grub.cfg
+      echo "terminal_output gfxterm"                                    >> ./grub.cfg
+      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
+      echo "set color_normal=white/black"                               >> ./grub.cfg
+      echo "set gfxpayload=keep"                                        >> ./grub.cfg
+      echo "syslinux_source (\$root)/isolinux/isolinux.bin"             >> ./grub.cfg
       echo "syslinux_configfile (\$root)/isolinux/isolinux.cfg"         >> ./grub.cfg
+      #grub-syslinux2cfg -i $WORKDIR/ISOTMP/isolinux/isolinux.cfg -T $WORKDIR/ISOTMP/ >> ./grub.cfg
 
       #Build each supported EFI image
       IMAGESIZE=0
