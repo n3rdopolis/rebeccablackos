@@ -880,6 +880,9 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
   TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
 
+  command -v zenity > /dev/null
+  ZenityCommandFoundResult=$?
+
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
   ProbeFilesExist "/dev/dri/card[0-9]*" KMSFileProbe
@@ -3364,9 +3367,7 @@ function WaylandLoginManagerMain
       fi
     done
 
-    command -v zenity > /dev/null
-    CommandResult=$?
-    if [[ $CommandResult != 0 ]]
+    if [[ $ZenityCommandFoundResult != 0 ]]
     then
       WriteToLog "zenity is not installed"
       UIPromptAttemptsMaxedOut=1
@@ -3518,15 +3519,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     COMMAND=${COMMANDDATA[0]}
     SEATARG=${COMMANDDATA[1]}
 
-    if [[ $COMMAND != "" && $COMMAND != "DetectSeats" && $COMMAND != "ReadRegister" ]]
-    then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
-    else
-      if [[ $COMMAND == "ReadRegister" || $COMMAND == "DetectSeats" ]]
-      then
-        WriteToLog "received command $COMMAND"
-      fi
-    fi
     #If a seat is specified, and it is not running, ignore the command
     if [[ ! -z $SEATARG ]]
     then
@@ -3549,9 +3541,14 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         COMMAND=""
       fi
     fi
-    #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
-    if [[ $COMMAND == "Switch" ]]
+    #If the command is empty, do nothing
+    if [[ -z $COMMAND ]]
     then
+      :
+    #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
+    elif [[ $COMMAND == "Switch" ]]
+    then
+      WriteToLog "received command $COMMAND for seat $SEATARG"
       if [[ $SeatCanMultiSession == 1 ]]
       then
         LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
@@ -3579,6 +3576,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
+      WriteToLog "received command $COMMAND for seat $SEATARG"
       if [[ $SeatCanMultiSession == 1 ]]
       then
         LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
@@ -3594,6 +3592,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
     then
+      WriteToLog "received command $COMMAND for seat $SEATARG"
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLoginPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3609,6 +3608,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
     then
+      WriteToLog "received command $COMMAND for seat $SEATARG"
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLeavePIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3624,14 +3624,17 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #if the command is ReadRegister, then attempt to read the loginmanager_register FIFO, and register any data sent to that FIFO.
     elif [[ $COMMAND == "ReadRegister" ]]
     then
+      WriteToLog "received command $COMMAND"
       ReadRegister
     #If the command id DetectSeats, then inventory seats on the next loop
     elif [[ $COMMAND == "DetectSeats" ]]
     then
+      WriteToLog "received command $COMMAND"
       DoDetectSeats=1
     #If it recives a Info command, then bring up a info dialog and start a info job, only if there isn't another info job running
     elif [[ $COMMAND == "Info" ]]
     then
+      WriteToLog "received command $COMMAND for seat $SEATARG"
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastInfoPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3649,6 +3652,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $wlmdebuginsecure == 1 ]]
       then
+        WriteToLog "received command $COMMAND for seat $SEATARG"
         if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastDebugPIDs[$SeatIndexID]}([[:space:]]|$) || $wlmdebuginsecure == 1  ]]
         then
           DiagnosticTerminal "$SEATARG" &
@@ -3660,10 +3664,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       else
         WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebuginsecure not passed to the kernel."
       fi
-    #if the command is empty, then execute bash's built in null command
-    elif [[ $COMMAND == "" ]]
-      then
-      :
     #if the command is unknown, then log that.
     else
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
