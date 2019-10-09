@@ -29,7 +29,7 @@ menu color title 1;37;44 #c0ffffff #00000000 std
 
 
 label live
-  menu label Startup normally
+  menu label Startup in native graphics mode
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt loglevel=3 splash vt.global_cursor_default=0 --
 TEXT HELP
@@ -42,7 +42,7 @@ ENDTEXT
 MENU SEPARATOR
 
 label liveforcesw
-  menu label Startup forcing software rendering
+  menu label Fallback native graphics with software renderer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt loglevel=3 splash vt.global_cursor_default=0 wlmforceswrender --
 TEXT HELP
@@ -55,7 +55,7 @@ ENDTEXT
 
 
 label livefbdefault
-  menu label Startup forcing to a default sized framebuffer
+  menu label Fallback with framebuffer mode (automatic size)
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt loglevel=3 splash vt.global_cursor_default=0 wlmforceswrender wlmforcefbdev --
 TEXT HELP
@@ -69,7 +69,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb342
-  menu label Startup with attempting a 640x480(x32) framebuffer
+  menu label Fallback attempting a 640x480(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x342 --
 TEXT HELP
@@ -83,7 +83,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb343
-  menu label Startup with attempting a 800x600(x32) framebuffer
+  menu label Fallback attempting a 800x600(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x343 --
 TEXT HELP
@@ -97,7 +97,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb344
-  menu label Startup with attempting a 1024x768(x32) framebuffer *
+  menu label Fallback attempting a 1024x768(x32) framebuffer *
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x344 --
 TEXT HELP
@@ -112,7 +112,7 @@ ENDTEXT
 
 
 label livefb345
-  menu label Startup with attempting a 1280x1024(x32) framebuffer
+  menu label Fallback attempting a 1280x1024(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x345 --
 TEXT HELP
@@ -126,7 +126,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb37A
-  menu label Startup with attempting a 1280x800(x32) framebuffer
+  menu label Fallback attempting a 1280x800(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x37A --
 TEXT HELP
@@ -140,7 +140,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb380
-  menu label Startup with attempting a 1400x900(x32) framebuffer
+  menu label Fallback attempting a 1400x900(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x380 --
 TEXT HELP
@@ -154,7 +154,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb347
-  menu label Startup with attempting a 1600x1200(x32) framebuffer
+  menu label Fallback attempting a 1600x1200(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x347 --
 TEXT HELP
@@ -168,7 +168,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb392
-  menu label Startup with attempting a 1920x1080(x32) framebuffer
+  menu label Fallback attempting a 1920x1080(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x392 --
 TEXT HELP
@@ -182,7 +182,7 @@ Live user name is 'beccaholic' with no password
 ENDTEXT
 
 label livefb38C
-  menu label Startup with attempting a 2560x1600(x32) framebuffer
+  menu label Fallback attempting a 2560x1600(x32) framebuffer
   kernel /casper/vmlinuz
   append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt loglevel=3 vga=0x38C --
 TEXT HELP
