@@ -158,8 +158,11 @@ but may allow more hardware to work."
   fi
 fi
 
-FIRMWARELIST="atmel-firmware
+FIRMWARELIST="firmware-amd-graphics
+atmel-firmware
 firmware-atheros
+firmware-b43-installer
+firmware-b43legacy-installer
 firmware-bnx2
 firmware-bnx2x
 firmware-brcm80211
