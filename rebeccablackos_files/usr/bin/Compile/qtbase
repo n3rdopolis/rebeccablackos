@@ -58,7 +58,13 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -feature-accessibility -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
+then
+  ARCHARGS="-no-sse3 -no-ssse3 -no-sse4.1 -no-sse4.2 -no-avx -no-avx2 -no-avx512"
+else
+  ARCHARGS=""
+fi
+../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -feature-accessibility -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size $ARCHARGS
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
