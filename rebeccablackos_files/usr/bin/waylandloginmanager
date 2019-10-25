@@ -750,6 +750,12 @@ function PrepareLoginManager
     exit 1
   fi
 
+  #Create home folder
+  mkdir -p /run/waylandloginmanager/home
+  export HOME=/run/waylandloginmanager/home
+  chmod 700 /run/waylandloginmanager/home
+  chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/home
+
   #Prepare logging for the loginmanagerdisplay
 
   #Older versions of the waylandloginmanager used to log to /var/log/waylandloginmanager , now /var/log/waylandloginmanager is a folder
