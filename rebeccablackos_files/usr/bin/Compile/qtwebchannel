@@ -58,7 +58,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-qmake -r CONFIG+=release ..
+qmake CONFIG+=release ..
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
