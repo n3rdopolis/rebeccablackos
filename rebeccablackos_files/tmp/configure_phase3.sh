@@ -110,7 +110,7 @@ chmod 777 /tmp
 
 #workaround for Debian not including legacy systemd files
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-echo -e "daemon\nid128\njournal\nlogin" | while read LIBRARY
+echo -e "daemon\nid128\njournal\nlogin" | while read -r LIBRARY
 do
   if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
   then
@@ -220,14 +220,14 @@ function PostInstallActions
   (. /usr/bin/build_vars; fc-cache)
 
   mkdir -p /usr/share/polkit-1/actions/
-  find /opt/share/polkit-1/actions/ -type f | while read FILE;
+  find /opt/share/polkit-1/actions/ -type f | while read -r FILE;
   do
     FILENAME=$(basename $FILE)
     ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
   done
 
   mkdir -p /usr/share/polkit-1/rules.d/
-  find /opt/share/polkit-1/rules.d -type f | while read FILE;
+  find /opt/share/polkit-1/rules.d -type f | while read -r FILE;
   do
     FILENAME=$(basename $FILE)
     ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
@@ -259,7 +259,7 @@ function PostInstallActions
   #Uninstall the upstream kernel if there is a custom built kernel installed
   if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
   then
-    dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
+    dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read -r PACKAGE
     do
       apt-get purge $PACKAGE -y
       #Force initramfs utilites to include the overlay filesystem
