@@ -1176,7 +1176,7 @@ function ReadRegister
         SessionID=${ArraySessionData[4]}
         SessionSeatID=${ArraySessionData[5]}
         SessionDoLock=${ArraySessionData[6]}
-        if [[ ! -z $SessionTTY && ! -z $SessionPID && ! -z $SessionUser && ! -z $SessionID ]]
+        if [[ ! -z $SessionTTY && ( ! -z $SessionPID && $SessionPID != 0 ) && ! -z $SessionUser && ( ! -z $SessionID && $SessionID != 0 ) ]]
         then
           AllSessionTTYs+=("$SessionTTY")
           AllSessionPIDs+=("$SessionPID")
