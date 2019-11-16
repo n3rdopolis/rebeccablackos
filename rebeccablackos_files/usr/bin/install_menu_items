@@ -23,7 +23,7 @@ mkdir -p /etc/xdg/menus/applications-merged
 
 MENUPATH=/usr/share/RBOS_MENU
 #for each desktop file
-while read DESKTOPFILE
+while read -r DESKTOPFILE
 do
   echo "DesktopFile: $MENUPATH$DESKTOPFILE"
 
