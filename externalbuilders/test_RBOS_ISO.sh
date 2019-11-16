@@ -198,7 +198,7 @@ then
   if [[ $MOUNTORUSEANSWER == 0 ]]
   then
     RUNNINGISOLIST=""
-    while read RUNFILE
+    while read -r RUNFILE
     do
       if [[ $RUNNINGISOLIST != "" ]]
       then
@@ -211,7 +211,7 @@ then
     if [[ $XALIVE == 0 ]]
     then
       RUNNINGISOUILIST=""
-      while read RUNNINGISO
+      while read -r RUNNINGISO
       do
         if [[ $RUNNINGISOUILIST != "" ]]
         then
@@ -225,7 +225,7 @@ then
 
     else
       RUNNINGISOUILIST=()
-      while read RUNNINGISO
+      while read -r RUNNINGISO
       do
         RUNNINGISOUILIST+=("$RUNNINGISO")
         RUNNINGISOUILIST+=(" ")

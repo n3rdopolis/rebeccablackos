@@ -183,13 +183,13 @@ if [ -z $FIRMWARESELECT ]
 then
   if [[ $XALIVE != 0 ]]
   then
-    while read FIRMWARE
+    while read -r FIRMWARE
     do
       FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
     done < <(echo "$FIRMWARELIST")
     FIRMWARESELECT=$(dialog --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
   else
-    while read FIRMWARE
+    while read -r FIRMWARE
     do
       if [[ $FIRMWAREUILIST != "" ]]
       then
@@ -340,7 +340,7 @@ NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/isorebuild/unionmountpoint/etc/
 NAMESPACE_ENTER sed -i 's/main/main non-free/g' "$MOUNTHOME"/isorebuild/unionmountpoint/etc/apt/sources.list
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get update
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y firmware-misc-nonfree firmware-linux-nonfree
-echo "$FIRMWARESELECT" | while read FIRMWARE
+echo "$FIRMWARESELECT" | while read -r FIRMWARE
 do
   NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y $FIRMWARE
 done
