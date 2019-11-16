@@ -85,7 +85,7 @@ function PackageInstallSource()
 cd build
 make install
 mkdir -p $INSTALLDIR/share/calamares/modules
-find "$SOURCEDIR"/"$SOURCENAME"/src/modules/ |grep "\.conf$" | while read FILE
+find "$SOURCEDIR"/"$SOURCENAME"/src/modules/ |grep "\.conf$" | while read -r FILE
 do
   cp "$FILE" $INSTALLDIR/share/calamares/modules/
 done

@@ -79,7 +79,7 @@ ninja -C build install
 function PackagePostInstall()
 {
 #Install the screen capture utils
-find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read CLIENT
+find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read -r CLIENT
 do
 cp "$CLIENT" /$INSTALLDIR/bin
 done

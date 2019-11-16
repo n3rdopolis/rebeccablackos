@@ -73,7 +73,7 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cat debian/*.install |grep -v grub-install/grub-install | while read LINE
+cat debian/*.install |grep -v grub-install/grub-install | while read -r LINE
 do 
 echo "DOING $LINE"
   FILECOPY=($LINE)
