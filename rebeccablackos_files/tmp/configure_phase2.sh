@@ -84,7 +84,7 @@ INSTALLS=$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}')
 INSTALLS+=$'\n'
 
 #Get list of new packages to remove, compared from the previous run
-grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun | grep -v ::REMOVE | awk -F "#" '{print $1}' | awk -F "::" '{print $1}' | while read OLDPACKAGE
+grep -Fxv -f /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun | grep -v ::REMOVE | awk -F "#" '{print $1}' | awk -F "::" '{print $1}' | while read -r OLDPACKAGE
 do
   AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$OLDPACKAGE$)
   if [[ $AvailableCount != 0 ]]
@@ -94,7 +94,7 @@ do
 done
 if [[ -f /tmp/INSTALLS.txt.removes ]]
 then
-  INSTALLS+=$(cat /tmp/INSTALLS.txt.removes | sort | uniq | while read PACKAGE
+  INSTALLS+=$(cat /tmp/INSTALLS.txt.removes | sort | uniq | while read -r PACKAGE
   do
     AvailableCount=$(cat /tmp/AVAILABLEPACKAGES.txt | grep -c ^$PACKAGE$)
     if [[ $AvailableCount != 0 ]]
@@ -118,7 +118,7 @@ fi
 PART_PACKAGES=""
 FULL_PACKAGES=""
 REMOVE_PACKAGES=""
-while read PACKAGEINSTRUCTION
+while read -r PACKAGEINSTRUCTION
 do
   PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
   METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )
@@ -210,7 +210,7 @@ then
   CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9]'\.'[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
 fi
 
-dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read PACKAGE
+dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read -r PACKAGE
 do
   apt-get purge $PACKAGE -y 
 done

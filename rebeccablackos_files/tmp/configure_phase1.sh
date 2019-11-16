@@ -75,7 +75,7 @@ export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 #Process the install list into INSTALLS.txt
 INSTALLS_LIST=$(sed 's/^ *//;s/ *$//' /tmp/INSTALLS_LIST.txt )
 INSTALLS_LIST+=$'\n'
-echo "$INSTALLS_LIST" | sed 's/::/@/g' | perl -pe 's/\$(\w+)/$ENV{$1}/g' | while read LINE
+echo "$INSTALLS_LIST" | sed 's/::/@/g' | perl -pe 's/\$(\w+)/$ENV{$1}/g' | while read -r LINE
 do
   IFS=@
   #Get all the major elements of the line
@@ -141,7 +141,7 @@ fi
 #DOWNLOAD THE PACKAGES SPECIFIED
 PART_PACKAGES=""
 FULL_PACKAGES=""
-while read PACKAGEINSTRUCTION
+while read -r PACKAGEINSTRUCTION
 do
   PACKAGE=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $1}' )
   METHOD=$(echo $PACKAGEINSTRUCTION | awk -F "::" '{print $2}' )

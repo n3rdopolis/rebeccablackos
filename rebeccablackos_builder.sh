@@ -626,7 +626,7 @@ then
 fi
 
 #Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt
-cat "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt | while read RESETPACKAGE
+cat "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt | while read -r RESETPACKAGE
 do
   #Dont allow path tampering, stop at the first / for path.
   IFS=/
