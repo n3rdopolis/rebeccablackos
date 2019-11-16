@@ -176,7 +176,7 @@ function UserSessionWorker
 
   #Cleanup old log files
   LOGFILECOUNT=0
-  ls -t ~/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read LOGFILE
+  ls -t ~/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read -r LOGFILE
   do
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT > 4 ]]
@@ -1150,7 +1150,7 @@ function ReadRegister
 {
   #get the data from loginmanager_register
   exec 1001<> /run/waylandloginmanager/loginmanager_register
-  RegisterDataLines=$(while read -n 100 -t .01 data <&1001; do echo $data; done)
+  RegisterDataLines=$(while read -r -n 100 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
   IFS=$'\r'
   RegisterDataLines=($RegisterDataLines)
@@ -1196,7 +1196,7 @@ function ReadRegister
               GetStartedSeatIndex $SessionSeatID
               if [[ -e /proc/$SessionPID/stat ]]
               then
-                read -a PidStats < /proc/$SessionPID/stat
+                read -r -a PidStats < /proc/$SessionPID/stat
                 PidStartTime=${PidStats[21]}
               else
                 PidStartTime=0
@@ -1831,7 +1831,7 @@ function ChooseSessionType
   then
     WSESSIONARRAY=()
     WSESSIONARRAYELEMENT=0
-    while read LINE
+    while read -r LINE
     do
       WSESSIONARRAY[$WSESSIONARRAYELEMENT]="$LINE"
       ((WSESSIONARRAYELEMENT++))
@@ -2078,7 +2078,7 @@ function StartUserSession
 
 
   #unset most varaibles, except PATH and WAYLAND_HOST and WAYLAND_GUEST
-  while read var
+  while read -r var
   do 
     unset "$var" &> /dev/null
   done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$|^ONLY_CAN_MULTISESSION_SESSION_SWITCH$" )
@@ -2087,7 +2087,7 @@ function StartUserSession
   WSESSIONSTRING="$( echo -n "$5" | perl -pe 's/\$(\w+)/$ENV{$1}/g')"
   WSESSIONDATA=()
   WSESSIONARGUMENTELEMENT=0
-  while read LINE
+  while read -r LINE
   do
     WSESSIONDATA[$WSESSIONARGUMENTELEMENT]="$LINE"
     ((WSESSIONARGUMENTELEMENT++))
@@ -2309,7 +2309,7 @@ function GetUserCredentials
   #sort the list
   USERLIST=$(echo "$USERLIST" | sort |uniq)
   #go through each line of users found, to handle the display of the real name (passwd gecos feild)
-  while read USER
+  while read -r USER
   do
     IFS=":"
     #handle the line as an array, with two elements
@@ -2741,7 +2741,7 @@ function StartLoginManagerDisplay
   #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
   if [[ -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat ]]
   then
-    read -a PidStats < /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat
+    read -r -a PidStats < /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat
     PidStartTime=${PidStats[21]}
   else
     PidStartTime=0
@@ -2947,7 +2947,7 @@ function GetLoginManagerDisplayInfo
 
   if [[ -e /proc/$LOGINMANAGERDISPLAYPID/stat ]]
   then
-    read -a PidStats < /proc/$LOGINMANAGERDISPLAYPID/stat
+    read -r -a PidStats < /proc/$LOGINMANAGERDISPLAYPID/stat
     LOGINMANAGERDISPLAYPIDSTARTTIME=${PidStats[21]}
   else
     LOGINMANAGERDISPLAYPIDSTARTTIME=0
@@ -3456,7 +3456,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       do
         if [[ $FailSeat == seat0 ]]
         then
-          read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+          read -r -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
           ActiveSystemTTY=${ActiveSystemTTY:3}
           if [[ $FailedSessionTTY == $ActiveSystemTTY ]]
           then
@@ -3483,7 +3483,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #And also attempt to unlock the TTY, if applicable
     if [[ $NotRunningSessions != 0 ]]
     then
-      read -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+      read -r -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
       ActiveSystemTTY=${ActiveSystemTTY:3}
 
       #Create temporary arrays
@@ -3551,7 +3551,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 288 bytes at a time.
     #32 for the command, 1 for the delimiter, and 255 for the max logind seat name size
-    read -n 288 -t 1 COMMANDDATA <&1000
+    read -r -n 288 -t 1 COMMANDDATA <&1000
     IFS=@
     COMMANDDATA=($COMMANDDATA)
     unset IFS
