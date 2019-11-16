@@ -257,7 +257,7 @@ function DownloadGIT()
       SOURCEREVISION=$(git rev-parse --abbrev-ref HEAD)
   fi
   find .git |grep index.lock|
-  while read LOCKFILE
+  while read -r LOCKFILE
   do
     rm "$LOCKFILE"
   done
@@ -487,7 +487,7 @@ function CleanupARCHIVE()
 {
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  find | grep -v ./SOURCEFILE$ | grep -v ./SOURCEURL | sort -r | while read FILE
+  find | grep -v ./SOURCEFILE$ | grep -v ./SOURCEURL | sort -r | while read -r FILE
   do
     rm -rf $FILE
   done
@@ -530,7 +530,7 @@ function DownloadTOMLData()
 {
 
   #Handle Cargo files for any potential rust programs
-  find | grep /Cargo.toml$ | while read CARGOFILE
+  find | grep /Cargo.toml$ | while read -r CARGOFILE
   do
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
@@ -566,9 +566,9 @@ function DownloadSource()
 
   #count the number of non-empty debs for this package
   DEBFILECONTENTCOUNT=0
-  while read DEBFILE
+  while read -r DEBFILE
   do
-    while read LINE
+    while read -r LINE
     do
      LINEARRAY=($LINE)
      if [[ ${LINEARRAY[5]} != "./usr/share/buildcore_revisions/buildresults/$SOURCENAME" ]]
@@ -708,7 +708,7 @@ function PrepareBuild()
   BUILD_CORE_FORCE_GCC_VERSION=$(. /usr/bin/build_vars &>/dev/null; echo $BUILD_CORE_FORCE_GCC_VERSION)
   if [[ ! -z $BUILD_CORE_FORCE_GCC_VERSION ]]
   then
-    ls /usr/bin/*-$BUILD_CORE_FORCE_GCC_VERSION | while read FILE
+    ls /usr/bin/*-$BUILD_CORE_FORCE_GCC_VERSION | while read -r FILE
     do
       TARGET=${FILE//-[0-9]*/}
       IFS="/"
@@ -758,9 +758,9 @@ function MakeAndInstall()
 
   #count the number of non-empty debs for this package
   DEBFILECONTENTCOUNT=0
-  while read DEBFILE
+  while read -r DEBFILE
   do
-    while read LINE
+    while read -r LINE
     do
      LINEARRAY=($LINE)
      if [[ ${LINEARRAY[5]} != "./usr/share/buildcore_revisions/buildresults/$SOURCENAME" ]]
@@ -858,7 +858,7 @@ function MakeAndInstall()
 
     #Create a script that will be called by checkinstall to build a second deb, with smaller binaries for the smaller ISO
     echo "#! /bin/bash
-    dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | grep -v '^/\.\$' | while read FILE
+    dpkg -L "$PACKAGESOURCENAME"-"$PACKAGESUFFIX" | grep -v '^/\.\$' | while read -r FILE
     do
       if [[ -e \"\$FILE\" ]]
       then
@@ -909,7 +909,7 @@ function MakeAndInstall()
       fi
 
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
-      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |grep -e '\.so$' -e '\.so\.' |while read SOFILE
+      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |grep -e '\.so$' -e '\.so\.' |while read -r SOFILE
       do 
         SOFILE=$(basename "$SOFILE")
         IFS="."
@@ -921,7 +921,7 @@ function MakeAndInstall()
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       echo "Evaluating dependancies, this might take some time..."
-      DEPENDS=$(find "$DEPENDSEARCHROOT" -type f -executable | while read FILE
+      DEPENDS=$(find "$DEPENDSEARCHROOT" -type f -executable | while read -r FILE
       do
         FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
         if [[ $FILETYPE == application ]]
@@ -938,7 +938,7 @@ function MakeAndInstall()
           fi
           echo "---------------------------------------------------------" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
-      done | sort | uniq | grep -v ^$ | while read LIBRARY
+      done | sort | uniq | grep -v ^$ | while read -r LIBRARY
       do
         echo $LIBRARY >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         if [[ -e "$LIBRARY" ]]
