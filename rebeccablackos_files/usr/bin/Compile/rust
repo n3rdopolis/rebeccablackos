@@ -73,7 +73,7 @@ function PackageCompileSource()
 {
 unset SUDO_USER
 cd rustc-1.22.0-src/
-#http://www.linuxfromscratch.org/blfs/view/svn/general/rust.html
+#https://www.linuxfromscratch.org/blfs/view/svn/general/rust.html
 cat <<EOF > config.toml
 # see src/bootstrap/config.toml.example for more possible options
 [llvm]
