@@ -1176,7 +1176,7 @@ function ReadRegister
         SessionID=${ArraySessionData[4]}
         SessionSeatID=${ArraySessionData[5]}
         SessionDoLock=${ArraySessionData[6]}
-        if [[ ! -z $SessionTTY && ( ! -z $SessionPID && $SessionPID != 0 ) && ! -z $SessionUser && ( ! -z $SessionID && $SessionID != 0 ) ]]
+        if [[ $SessionTTY != -1 && $SessionPID != -1 && ! -z $SessionUser && $SessionID != -1 ]]
         then
           AllSessionTTYs+=("$SessionTTY")
           AllSessionPIDs+=("$SessionPID")
@@ -2216,6 +2216,31 @@ function StartUserSession
 
     #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
     loginctl activate $LOGINDSESSION &>/dev/null
+
+    if [[ -z $USERSESSIONTTY ]]
+    then
+      USERSESSIONTTY=-1
+    fi
+    if [[ -z $USERSESSIONPID ]]
+    then
+      USERSESSIONPID=-1
+    fi
+    if [[ -z $USERREGISTERDISPLAYNAME ]]
+    then
+      USERREGISTERDISPLAYNAME=" "
+    fi
+    if [[ -z $LOGINDSESSION ]]
+    then
+      LOGINDSESSION=-1
+    fi
+    if [[ -z $USERSEAT ]]
+    then
+      USERSEAT=-1
+    fi
+    if [[ -z $STARTLOCKED ]]
+    then
+      STARTLOCKED=-1
+    fi
 
     #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
     SendSelfRegisterData "NEWSESSION"$'\n'"$USERSESSIONTTY"$'\n'"$USERSESSIONPID"$'\n'"$USERREGISTERDISPLAYNAME"$'\n'"$LOGINDSESSION"$'\n'"$USERSEAT"$'\n'"$STARTLOCKED"
