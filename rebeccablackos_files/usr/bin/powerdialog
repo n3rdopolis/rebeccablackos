@@ -31,7 +31,7 @@ fi
 
 BatteryCount=0
 unset BatteryString
-while read Battery
+while read -r Battery
 do
   MaxPower=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_full)
   CurrentState=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_now)
@@ -45,5 +45,6 @@ zenity --title="Battery Status" --no-wrap --info --text="
 Battery Status as of $SampleDate
 
 Plugged In: $ACStatusString
+Total Batteries: $BatteryCount
 
 $BatteryString"
