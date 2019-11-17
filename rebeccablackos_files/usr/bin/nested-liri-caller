@@ -24,7 +24,7 @@ export WAYLAND_GUEST=wayland-$RANDOM
 if [[ ! -z $WAYLAND_DISPLAY ]]
 then
   unset DISPLAY
-  liri-session -- -platform wayland
+  liri-session --no-systemd -- -platform wayland
 else
-  liri-session -- -platform xcb
+  liri-session --no-systemd -- -platform xcb
 fi
