@@ -165,6 +165,12 @@ function PostInstallActions
   ln -s /usr/share/icons/oxygen/base/64x64 /usr/share/icons/oxygen/64x64
   ln -s /usr/share/icons/oxygen/base/128x128 /usr/share/icons/oxygen/128x128
   ln -s /usr/share/icons/oxygen/base/256x256 /usr/share/icons/oxygen/256x256
+  
+  #Install any systemd-user sessions from /opt to where systemd can see them
+  find /opt/lib/systemd/user/* | while read -r FILE
+  do
+    ln -s $FILE /lib/systemd/user/
+  done
 
   #Set the plymouth themes
   if [[ $DEBIAN_DISTRO == Ubuntu ]]
