@@ -31,7 +31,7 @@ unset CLUTTER_INPUT_BACKEND
 
 #Workaround Xwayland scaling bug
 DPI=$(xdpyinfo |grep "dots per inch" | grep -Eo '*[0-9,-]*' | head -1)
-if [[ $DPI <= 96 ]]
+if [[ $DPI -lt 96 ]]
 then
   export QT_FONT_DPI=96
 fi
