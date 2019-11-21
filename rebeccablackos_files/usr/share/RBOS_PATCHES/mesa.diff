@@ -15,19 +15,4 @@ index 42d79da7b02..ffbaff1211c 100644
  
     dri2_dpy = calloc(1, sizeof *dri2_dpy);
     if (!dri2_dpy)
-
-
-    
-diff --git a/include/EGL/eglext.h b/include/EGL/eglext.h
-index 4e9c0dcf997..69cdf9135db 100644
---- a/include/EGL/eglext.h
-+++ b/include/EGL/eglext.h
-@@ -37,6 +37,8 @@ extern "C" {
- */
- 
- #include <EGL/eglplatform.h>
-+#include <EGL/eglextchromium.h>
-+#include <EGL/eglmesaext.h>
- 
- #define EGL_EGLEXT_VERSION 20190808
  
