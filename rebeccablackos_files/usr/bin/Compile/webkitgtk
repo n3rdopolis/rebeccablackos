@@ -57,6 +57,20 @@ mv webkitgtk*/* .
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -p1 <<EOF
+--- a/Source/WebKit/UIProcess/gtk/WaylandCompositor.cpp   2019-09-17 04:05:25.000000000 -0400
++++ b/Source/WebKit/UIProcess/gtk/WaylandCompositor.cpp   2019-11-23 10:35:34.428565347 -0500
+@@ -31,6 +31,7 @@
+ #include "WebKitWaylandServerProtocol.h"
+ #include <EGL/egl.h>
+ #include <EGL/eglext.h>
++#include <EGL/eglmesaext.h>
+ #include <WebCore/GLContext.h>
+ #include <WebCore/PlatformDisplayWayland.h>
+ #include <WebCore/Region.h>
+
+EOF
+
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DUSE_LIBHYPHEN=OFF -DENABLE_X11_TARGET=OFF
