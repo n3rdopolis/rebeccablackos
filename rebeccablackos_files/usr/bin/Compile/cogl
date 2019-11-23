@@ -29,7 +29,7 @@ SOURCEURL=http://gitlab.gnome.org/Gnome/cogl.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=cogl-1.22
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/1.15 1.14/1.16 1.15 1.14/g' autogen.sh
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-wayland-egl-platform=yes --enable-wayland-egl-server=yes --enable-gl --enable-kms-egl-platform=yes  --enable-xlib-egl-platform=yes --enable-maintainer-flags=no
 }
 
