@@ -454,61 +454,87 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
 
+RAMDISKED_TEMP_FOLDERS=0
+TOTAL_TEMP_FOLDERS=0
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
 
 RAMDISKSIZE=$STORAGESIZE_PADDING
 #Determine the size of the ram disk, determine if enough free ram for base in ramdisk
+((TOTAL_TEMP_FOLDERS++))
 RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_TMPBASEBUILD))
+OPTIMAL_FREE_RAM=$((RAMDISKSIZE+STORAGESIZE_TMPBASEBUILD))
 if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
+  echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for base temporary folders."
+  ((RAMDISKED_TEMP_FOLDERS++))
   RAMDISK_FOR_BASE=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  echolog "Not enough free RAM to use a ramdisk for base temporary folders."
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPBASEBUILD))
   RAMDISKTESTSIZE=$RAMDISKSIZE
 fi
 
 #Determine if enough free RAM for srcbuild_overlay in ramdisk
+((TOTAL_TEMP_FOLDERS++))
 RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPSRCBUILDOVERLAY))
+OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMPSRCBUILDOVERLAY))
 if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
+  echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for srcbuild overlay"
+  ((RAMDISKED_TEMP_FOLDERS++))
   RAMDISK_FOR_SRCBUILD=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  echolog "Not enough free RAM to use a ramdisk for srcbuild overlay."
   RAMDISKTESTSIZE=$RAMDISKSIZE
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
 fi
 
 #Determine if enough free RAM for phase3 in ramdisk
+((TOTAL_TEMP_FOLDERS++))
 RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPPHASE3))
+OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMPPHASE3))
 if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
+  echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for phase 3"
+  ((RAMDISKED_TEMP_FOLDERS++))
   RAMDISK_FOR_PHASE3=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  echolog "Not enough free RAM to use a ramdisk for phase 3."
   RAMDISKTESTSIZE=$RAMDISKSIZE
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPPHASE3))
 fi
 
 if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
-
+  ((TOTAL_TEMP_FOLDERS++))
   RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_PHASE1))
+  OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_PHASE1))
   if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
   then
+    echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for phase 1"
+    ((RAMDISKED_TEMP_FOLDERS++))
     RAMDISK_FOR_PHASE1=1
     RAMDISKSIZE=$RAMDISKTESTSIZE
   else
+    echolog "Not enough free RAM to use a ramdisk for phase 2."
     RAMDISKTESTSIZE=$RAMDISKSIZE
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE1))
   fi
 
+  ((TOTAL_TEMP_FOLDERS++))
   RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_PHASE2-STORAGESIZE_PHASE1))
+  OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_PHASE2-STORAGESIZE_PHASE1))
   if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
   then
+    echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for phase 2"
+    ((RAMDISKED_TEMP_FOLDERS++))
     RAMDISK_FOR_PHASE2=1
     RAMDISKSIZE=$RAMDISKTESTSIZE
   else
+    echolog "Not enough free RAM to use a ramdisk for phase 2."
     RAMDISKTESTSIZE=$RAMDISKSIZE
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
     ((STORAGESIZE_TOTALSIZE-=STORAGESIZE_PHASE1))
@@ -517,12 +543,17 @@ then
 fi
 
 #Determine if enough free RAM for Remastersys in ramdisk
+((TOTAL_TEMP_FOLDERS++))
 RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_TMPREMASTERSYS))
+OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMPREMASTERSYS))
 if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
 then
+  echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for remastersys"
+  ((RAMDISKED_TEMP_FOLDERS++))
   RAMDISK_FOR_REMASTERSYS=1
   RAMDISKSIZE=$RAMDISKTESTSIZE
 else
+  echolog "Not enough free RAM to use a ramdisk for remastersys."
   RAMDISKTESTSIZE=$RAMDISKSIZE
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
 fi
@@ -536,7 +567,8 @@ then
   echolog "The script will now abort."
   faillog "free space: $FREEDISKSPACE"
 else
-  echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB\n"
+  echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB"
+  echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed.\n"
 fi
 
 #Mount the ramdisk
