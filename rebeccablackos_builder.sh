@@ -537,6 +537,7 @@ then
     echolog "Not enough free RAM to use a ramdisk for phase 2."
     RAMDISKTESTSIZE=$RAMDISKSIZE
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_PHASE2))
+    #If this is snapshot, the phase 1 is temporary, and deleted once it completes all downloads, in favor of phase 2
     ((STORAGESIZE_TOTALSIZE-=STORAGESIZE_PHASE1))
   fi
 
