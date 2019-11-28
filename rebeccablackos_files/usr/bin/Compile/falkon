@@ -57,6 +57,22 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -p1 <<EOF
+diff --git a/src/plugins/VerticalTabs/verticaltabsplugin.cpp b/src/plugins/VerticalTabs/verticaltabsplugin.cpp
+index c1cfac4f..0a97ae0f 100644
+--- a/src/plugins/VerticalTabs/verticaltabsplugin.cpp
++++ b/src/plugins/VerticalTabs/verticaltabsplugin.cpp
+@@ -29,6 +29,7 @@
+ #include "networkmanager.h"
+ #include "../config.h"
+ 
++#include <QFile>
+ #include <QSettings>
+ 
+ VerticalTabsPlugin::VerticalTabsPlugin()
+
+EOF
+
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)

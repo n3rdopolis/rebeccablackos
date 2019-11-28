@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/add_definitions(-DKF_DISABLE_DEPRECATED_BEFORE_AND_AT=0x060000)//g' CMakeLists.txt
 patch -f -p1 < /usr/share/RBOS_PATCHES/kde-cli-tools.diff
 mkdir build
 cd build
