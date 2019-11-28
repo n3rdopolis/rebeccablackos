@@ -1,8 +1,8 @@
 diff --git a/src/egl/drivers/dri2/platform_drm.c b/src/egl/drivers/dri2/platform_drm.c
-index 42d79da7b02..ffbaff1211c 100644
+index d0ab172d659..a72f1eb1e76 100644
 --- a/src/egl/drivers/dri2/platform_drm.c
 +++ b/src/egl/drivers/dri2/platform_drm.c
-@@ -685,9 +685,9 @@ dri2_initialize_drm(_EGLDriver *drv, _EGLDisplay *disp)
+@@ -695,9 +695,9 @@ dri2_initialize_drm(_EGLDriver *drv, _EGLDisplay *disp)
     struct gbm_device *gbm;
     const char *err;
  
@@ -15,4 +15,12 @@ index 42d79da7b02..ffbaff1211c 100644
  
     dri2_dpy = calloc(1, sizeof *dri2_dpy);
     if (!dri2_dpy)
+@@ -735,7 +735,7 @@ dri2_initialize_drm(_EGLDriver *drv, _EGLDisplay *disp)
+    dev = _eglAddDevice(dri2_dpy->fd, false);
+    if (!dev) {
+       err = "DRI2: failed to find EGLDevice";
+-      goto cleanup;
++      //goto cleanup;
+    }
  
+    disp->Device = dev;
