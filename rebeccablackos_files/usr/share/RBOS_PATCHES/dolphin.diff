@@ -1,0 +1,69 @@
+diff --git a/src/global.h b/src/global.h
+index d1a3f4f52..f5bfa9ebd 100644
+--- a/src/global.h
++++ b/src/global.h
+@@ -20,6 +20,7 @@
+ #ifndef GLOBAL_H
+ #define GLOBAL_H
+ 
++#include <QWidget>
+ #include <QList>
+ #include <QUrl>
+ 
+diff --git a/src/kitemviews/kstandarditem.h b/src/kitemviews/kstandarditem.h
+index ad3452d77..22e322bc5 100644
+--- a/src/kitemviews/kstandarditem.h
++++ b/src/kitemviews/kstandarditem.h
+@@ -26,6 +26,7 @@
+ #include <QHash>
+ #include <QObject>
+ #include <QVariant>
++#include <QSet>
+ 
+ class KStandardItemModel;
+ 
+diff --git a/src/search/dolphinsearchbox.cpp b/src/search/dolphinsearchbox.cpp
+index ee7cbe628..69b30442a 100644
+--- a/src/search/dolphinsearchbox.cpp
++++ b/src/search/dolphinsearchbox.cpp
+@@ -34,6 +34,7 @@
+ #include <Baloo/IndexerConfig>
+ #endif
+ 
++#include <QWidget>
+ #include <QButtonGroup>
+ #include <QDir>
+ #include <QFontDatabase>
+@@ -45,6 +46,8 @@
+ #include <QTimer>
+ #include <QToolButton>
+ #include <QUrlQuery>
++#include <QShowEvent>
++#include <QKeyEvent>
+ 
+ DolphinSearchBox::DolphinSearchBox(QWidget* parent) :
+     QWidget(parent),
+diff --git a/src/settings/settingspagebase.h b/src/settings/settingspagebase.h
+index 2bc1dfaaa..c7be2a8ea 100644
+--- a/src/settings/settingspagebase.h
++++ b/src/settings/settingspagebase.h
+@@ -21,6 +21,7 @@
+ #ifndef SETTINGSPAGEBASE_H
+ #define SETTINGSPAGEBASE_H
+ 
++#include <QShowEvent>
+ #include <QWidget>
+ 
+ /**
+diff --git a/src/views/draganddrophelper.cpp b/src/views/draganddrophelper.cpp
+index d437b877e..951e8e31a 100644
+--- a/src/views/draganddrophelper.cpp
++++ b/src/views/draganddrophelper.cpp
+@@ -26,6 +26,7 @@
+ #include <QDBusConnection>
+ #include <QDBusMessage>
+ #include <QMimeData>
++#include <QDropEvent>
+ 
+ QHash<QUrl, bool> DragAndDropHelper::m_urlListMatchesUrlCache;
+ 
