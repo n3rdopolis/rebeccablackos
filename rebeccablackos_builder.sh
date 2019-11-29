@@ -569,7 +569,7 @@ then
   faillog "free space: $FREEDISKSPACE"
 else
   echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB"
-  echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed.\n"
+  echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM, $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed.\n"
 fi
 
 #Mount the ramdisk
