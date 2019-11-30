@@ -57,7 +57,10 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i '/autotests/d' CMakeLists.txt 
-sed -i 's/defaultWallpaperTheme=Next/defaultWallpaperTheme=RBOS_Desktop/g'  src/desktoptheme/air/metadata.desktop.cmake
+sed -i 's/defaultWallpaperTheme=Elarun/defaultWallpaperTheme=RBOS_Desktop/g' src/desktoptheme/air/metadata.desktop.cmake
+sed -i '/defaultWidth=2560/d' src/desktoptheme/air/metadata.desktop.cmake
+sed -i '/defaultHeight=1600/d' src/desktoptheme/air/metadata.desktop.cmake
+
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) 
