@@ -2883,6 +2883,7 @@ function StartLoginManagerDisplay
             ((TRYCOUNT++))
           done
           systemd-notify --ready &> /dev/null
+          plymouth --wait &> /dev/null
         fi
       else
         #If the first loginmanagerdisplay fails to start on the first attempt
