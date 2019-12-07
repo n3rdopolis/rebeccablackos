@@ -2722,13 +2722,12 @@ function GetSeatCapabilityString
   fi
 }
 
-#This calls the loginmanagerdisplay_(seat) weston sessions. It takes 1 argument, the seat
+#This calls the loginmanagerdisplay_(seat) weston sessions. It takes 2 arguments, the seat, and the seat index ID
 function StartLoginManagerDisplay
 {
   #Information about the seat
   CurrentSeat=$1
-  GetStartedSeatIndex $CurrentSeat
-  SeatIndexID=$ReturnSeatIndex
+  SeatIndexID=$2
   SeatCanMultiSession=${SeatMultiSessionStatuses[$SeatIndexID]}
   SeatStartCount=${LoginManagerDisplayAttemptCounts[$SeatIndexID]}
   SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
@@ -3349,7 +3348,7 @@ function WaylandLoginManagerMain
         LoginManagerDisplaySessions[$SeatIndexID]=${LoginManagerDisplayInfo[1]}
         LoginManagerDisplayStartTimes[$SeatIndexID]=${LoginManagerDisplayInfo[2]}
       fi
-      StartLoginManagerDisplay $RunningSeat
+      StartLoginManagerDisplay $RunningSeat $SeatIndexID
 
       #Set default values for the element for this seat in the fail info arrays if they are not set
       if [[ -z ${UserActionAttemptCounts[$SeatIndexID]} ]]
