@@ -1193,17 +1193,17 @@ function ReadRegister
           fi
           if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 ]]
           then
-              GetStartedSeatIndex $SessionSeatID
-              if [[ -e /proc/$SessionPID/stat ]]
-              then
-                read -r -a PidStats < /proc/$SessionPID/stat
-                PidStartTime=${PidStats[21]}
-              else
-                PidStartTime=0
-              fi
+            GetStartedSeatIndex $SessionSeatID
+            if [[ -e /proc/$SessionPID/stat ]]
+            then
+              read -r -a PidStats < /proc/$SessionPID/stat
+              PidStartTime=${PidStats[21]}
+            else
+              PidStartTime=0
+            fi
 
-              LoginManagerDisplayPIDs[$ReturnSeatIndex]=$SessionPID
-              LoginManagerDisplayStartTimes[$ReturnSeatIndex]=$PidStartTime
+            LoginManagerDisplayPIDs[$ReturnSeatIndex]=$SessionPID
+            LoginManagerDisplayStartTimes[$ReturnSeatIndex]=$PidStartTime
           fi
         else
           WriteToLog "Session failed to start"
