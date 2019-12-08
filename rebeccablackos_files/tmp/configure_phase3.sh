@@ -202,6 +202,9 @@ function PostInstallActions
 
   #Enable networkmanager
   systemctl enable NetworkManager.service
+  
+  #enable acpid
+  systemctl enable acpid.service
 
   #Create the user for the waylandloginmanager
   adduser --no-create-home --home=/etc/loginmanagerdisplay --shell=/bin/bash --disabled-password --system --group waylandloginmanager
