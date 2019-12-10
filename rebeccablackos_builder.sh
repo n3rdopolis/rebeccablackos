@@ -19,9 +19,28 @@
 #This function retrives the PID, and some of the child PIDs, to eventually get the pid 1 of the namespace for the build
 function GetJobPIDs
 {
-  PYTHONPID=$(pgrep -oP $SUBSHELLPID 2>/dev/null)
-  UNSHAREPID=$(pgrep -oP $PYTHONPID 2>/dev/null)
-  ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+  if [[ -d /proc/$SUBSHELLPID ]]
+  then
+    PYTHONPID=$(pgrep -oP $SUBSHELLPID 2>/dev/null)
+  else
+    ROOTPID=-1
+    return
+  fi
+
+  if [[ -d /proc/$PYTHONPID ]]
+  then
+    UNSHAREPID=$(pgrep -oP $PYTHONPID 2>/dev/null)
+  else
+    ROOTPID=-1
+    return
+  fi
+
+  if [[ -d /proc/$UNSHAREPID ]]
+  then
+    ROOTPID=$(pgrep -oP $UNSHAREPID 2>/dev/null)
+  else
+    ROOTPID=-1
+  fi
 }
 
 #This function takes the same arguments as echo, behaves like echo, except all the text is saved in a variable to be written to a log later
@@ -76,13 +95,13 @@ function setup_buildprocess
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
-  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
+  trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" && $ROOTPID != -1 ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
   #Handle when the script is resumed
-  trap 'if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -CONT $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -CONT --nslist pid --ns $ROOTPID ""; fi' 18
+  trap 'if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -CONT $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" && $ROOTPID != -1 ]]; then pkill -CONT --nslist pid --ns $ROOTPID ""; fi' 18
 
   #Stop the background process that the script is waiting on when CTRL+Z is sent
-  trap 'echo "CTRL+Z pressed, pausing..."; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]]; then kill -STOP $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -STOP --nslist pid --ns $ROOTPID ""; fi' 20
+  trap 'echo "CTRL+Z pressed, pausing..."; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" && $ROOTPID != -1 ]]; then kill -STOP $SUBSHELLPID; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" ]]; then pkill -STOP --nslist pid --ns $ROOTPID ""; fi' 20
 }
 
 #Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
@@ -102,7 +121,7 @@ function NAMESPACE_EXECUTE {
   #Create the PID and Mount namespaces to start the command in
   ($PYTHONCOMMAND -c 'import pty, sys; from signal import signal, SIGPIPE, SIG_DFL; signal(SIGPIPE,SIG_DFL); pty.spawn(sys.argv[1:])' bash -c "stty cols 80 rows 24; exec unshare $UNSHAREFLAGS "$@"" |& tee "$LOGFILE" ) &
   SUBSHELLPID=$!
-  
+
   #Get the PID of the unshared process, which is pid 1 for the namespace, wait at the very most 1 minute for the process to start, 120 attempts with half 1 second intervals.
   #Abort if not started in 1 minute
   for (( element = 0 ; element < 120 ; element++ ))
@@ -119,8 +138,12 @@ function NAMESPACE_EXECUTE {
     faillog "The main namespace process failed to start, in 1 minute. This should not take that long"
   fi
 
+
   #Wait for the PID to complete
-  read < <(tail -f /dev/null --pid=$UNSHAREPID)
+  if [[ $ROOTPID != -1 ]]
+  then
+    read < <(tail -f /dev/null --pid=$UNSHAREPID)
+  fi
   unset SUBSHELLPID
   unset PYTHONPID
   unset UNSHAREPID
