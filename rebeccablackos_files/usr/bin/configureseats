@@ -44,216 +44,251 @@ else
   ZENITYCMD="zenity"
 fi
 
-DeviceExcludeString=^$
-NumberOfDevices=0
-DeviceList=""
-#Get all input devices from udev, and store attributes into an array
-while read -r Device
-do
-  DeviceExcludeString+=\|$Device
-  #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a transciver that multiple wireless devices can register with, will appear as "Mouse / Keyboard"
-  unset DeviceType
 
-  #get properties of the device
-  DeviceProperties=$(udevadm info --query=property  --path=$Device)
-  IFS=$'\n'
-  DeviceProperties=($DeviceProperties)
-  unset IFS
+#Initial value of the device filter, where devices that are found, are not listed again
+function ResetExcludedDevices
+{
+  DeviceExcludeString=^$
+}
+ResetExcludedDevices
 
-  unset DEV_ID_SEAT DEV_WL_SEAT DEV_ID_INPUT DEV_ID_INPUT_MOUSE DEV_ID_INPUT_TOUCHSCREEN DEV_ID_INPUT_TOUCHPAD DEV_ID_INPUT_KEYBOARD DEV_DEVPATH DEV_ID_SERIAL DEV_ID_PATH DEV_DEVNAME DEV_SUBSYSTEM
-  for DeviceProperty in ${DeviceProperties[@]}
+
+#Command to enumerate device files, used to collect or exclude devices
+function EnumerateDeviceFiles
+{
+  find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $DeviceExcludeString
+}
+
+#Get all devices attached at this point, and add them to DeviceExcludeString
+function ExcludeCurrentDevices
+{
+  while read -r Device
   do
-    IFS="="
-    DeviceProperty=($DeviceProperty)
+    DeviceExcludeString+=\|$Device
+  done < <(EnumerateDeviceFiles)
+}
+
+#Collect all non-excluded device info
+function CollectDeviceInfo
+{
+  NumberOfDevices=0
+  DeviceList=""
+  unset DevicePaths
+  unset DeviceDisplayNames
+  unset DeviceNames
+  unset DeviceConnections
+  unset DeviceSessionSeatIDs
+  unset DeviceWLSeatIDs
+  unset DeviceTypes
+  unset DeviceInputTypeFlags
+  #Get all input devices from udev, and store attributes into an array
+  while read -r Device
+  do
+    DeviceExcludeString+=\|$Device
+    #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a transciver that multiple wireless devices can register with, will appear as "Mouse / Keyboard"
+    unset DeviceType
+
+    #get properties of the device
+    DeviceProperties=$(udevadm info --query=property  --path=$Device)
+    IFS=$'\n'
+    DeviceProperties=($DeviceProperties)
     unset IFS
-    case ${DeviceProperty[0]} in
-      ID_SEAT)
-        DEV_ID_SEAT=${DeviceProperty[1]}
-        ;;
-      WL_SEAT)
-        DEV_WL_SEAT=${DeviceProperty[1]}
-        ;;
-      ID_INPUT)
-        DEV_ID_INPUT=${DeviceProperty[1]}
-        ;;
-      ID_INPUT_MOUSE)
-        DEV_ID_INPUT_MOUSE=${DeviceProperty[1]}
-        ;;
-      ID_INPUT_TOUCHSCREEN)
-        DEV_ID_INPUT_TOUCHSCREEN=${DeviceProperty[1]}
-        ;;
-      ID_INPUT_TOUCHPAD)
-        DEV_ID_INPUT_TOUCHPAD=${DeviceProperty[1]}
-        ;;
-      ID_INPUT_KEYBOARD)
-        DEV_ID_INPUT_KEYBOARD=${DeviceProperty[1]}
-        ;;
-      DEVPATH)
-        DEV_DEVPATH=${DeviceProperty[1]}
-        ;;
-      ID_FOR_SEAT)
-        DEV_ID_FOR_SEAT=${DeviceProperty[1]}
-        ;;
-      ID_SERIAL)
-        DEV_ID_SERIAL=${DeviceProperty[1]}
-        ;;
-      ID_PATH)
-        DEV_ID_PATH=${DeviceProperty[1]}
-        ;;
-      DEVNAME)
-        DEV_DEVNAME=${DeviceProperty[1]}
-        ;;
-      SUBSYSTEM)
-        DEV_SUBSYSTEM=${DeviceProperty[1]}
-        ;;
-    esac
-  done
 
-  DeviceSessionSeatID=$DEV_ID_SEAT
-  DeviceWLSeatID=$DEV_WL_SEAT
-  IsDeviceInput=$DEV_ID_INPUT
-  IsDeviceMouse=$DEV_ID_INPUT_MOUSE
-  IsDeviceTouchscreen=$DEV_ID_INPUT_TOUCHSCREEN
-  IsDeviceTouchpad=$DEV_ID_INPUT_TOUCHPAD
-  IsDeviceKeyboard=$DEV_ID_INPUT_KEYBOARD
-  if [[ $IsDeviceInput == 1 ]]
-  then
-    IsDeviceInput=1
-    DeviceConnection=$DEV_ID_PATH
-    DeviceName=$DEV_ID_SERIAL
-    DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
-  else
-    IsDeviceInput=0
-    DeviceConnection=$(echo $DEV_ID_FOR_SEAT |sed -e 's/^drm//g' -e 's/^graphics//g')
-    DeviceName=$DEV_DEVNAME
-    DeviceSubsystem=$DEV_SUBSYSTEM
-    if [[ $DeviceSubsystem == "drm" ]]
-    then
-      DeviceType="KMS Graphics Card"
-    fi
-    if [[ $DeviceSubsystem == "graphics" ]]
-    then
-      DeviceType="Frame Buffer"
-    fi
-    if [[ $DeviceSubsystem == "sound" ]]
-    then
-      DeviceType="Sound Card"
-    fi
-    DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
-    DeviceDisplayName+=" $Device"
-  fi
-  #if the device doesn't have a serial ID, which usually tells the make and model, then display it as 'generic' to the user
-  if [[ -z $DeviceDisplayName ]]
-  then
-    DeviceDisplayName=$(echo $DeviceName| sed 's/[^0-9a-zA-Z_ -]*//g')
-    if [[ $DeviceDisplayName == "noserial" ]]
-    then
-      DeviceDisplayName="Generic"
-    fi
-  fi
+    unset DEV_ID_SEAT DEV_WL_SEAT DEV_ID_INPUT DEV_ID_INPUT_MOUSE DEV_ID_INPUT_TOUCHSCREEN DEV_ID_INPUT_TOUCHPAD DEV_ID_INPUT_KEYBOARD DEV_DEVPATH DEV_ID_SERIAL DEV_ID_PATH DEV_DEVNAME DEV_SUBSYSTEM
+    for DeviceProperty in ${DeviceProperties[@]}
+    do
+      IFS="="
+      DeviceProperty=($DeviceProperty)
+      unset IFS
+      case ${DeviceProperty[0]} in
+        ID_SEAT)
+          DEV_ID_SEAT=${DeviceProperty[1]}
+          ;;
+        WL_SEAT)
+          DEV_WL_SEAT=${DeviceProperty[1]}
+          ;;
+        ID_INPUT)
+          DEV_ID_INPUT=${DeviceProperty[1]}
+          ;;
+        ID_INPUT_MOUSE)
+          DEV_ID_INPUT_MOUSE=${DeviceProperty[1]}
+          ;;
+        ID_INPUT_TOUCHSCREEN)
+          DEV_ID_INPUT_TOUCHSCREEN=${DeviceProperty[1]}
+          ;;
+        ID_INPUT_TOUCHPAD)
+          DEV_ID_INPUT_TOUCHPAD=${DeviceProperty[1]}
+          ;;
+        ID_INPUT_KEYBOARD)
+          DEV_ID_INPUT_KEYBOARD=${DeviceProperty[1]}
+          ;;
+        DEVPATH)
+          DEV_DEVPATH=${DeviceProperty[1]}
+          ;;
+        ID_FOR_SEAT)
+          DEV_ID_FOR_SEAT=${DeviceProperty[1]}
+          ;;
+        ID_SERIAL)
+          DEV_ID_SERIAL=${DeviceProperty[1]}
+          ;;
+        ID_PATH)
+          DEV_ID_PATH=${DeviceProperty[1]}
+          ;;
+        DEVNAME)
+          DEV_DEVNAME=${DeviceProperty[1]}
+          ;;
+        SUBSYSTEM)
+          DEV_SUBSYSTEM=${DeviceProperty[1]}
+          ;;
+      esac
+    done
 
-  #if the device has no configured WL_SEAT value, then weston sees it as it being under the default seat
-  if [[ -z $DeviceWLSeatID ]]
-  then
-    DeviceWLSeatID="default"
-  fi
-
-  #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
-  if [[ -z $DeviceSessionSeatID ]]
-  then
-    DeviceSessionSeatID="seat0"
-  fi
-
-  #if the device is reported as a mouse, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
-  if [[ -z $IsDeviceMouse ]]
-  then
-    IsDeviceMouse=0
-  else
-    if [[ ! -z $DeviceType ]]
+    DeviceSessionSeatID=$DEV_ID_SEAT
+    DeviceWLSeatID=$DEV_WL_SEAT
+    IsDeviceInput=$DEV_ID_INPUT
+    IsDeviceMouse=$DEV_ID_INPUT_MOUSE
+    IsDeviceTouchscreen=$DEV_ID_INPUT_TOUCHSCREEN
+    IsDeviceTouchpad=$DEV_ID_INPUT_TOUCHPAD
+    IsDeviceKeyboard=$DEV_ID_INPUT_KEYBOARD
+    if [[ $IsDeviceInput == 1 ]]
     then
-      DeviceType+=" / "
-    fi
-    DeviceType+="Mouse"
-  fi
-
-  #if the device is reported as a touchscreen, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
-  if [[ -z $IsDeviceTouchscreen ]]
-  then
-    IsDeviceTouchscreen=0
-  else
-    if [[ ! -z $DeviceType ]]
-    then
-      DeviceType+=" / "
-    fi
-  DeviceType+="Touchscreen"
-  fi
-
-  #if the device is reported as a touchpad (as in a laptop touchpad), then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
-  if [[ -z $IsDeviceTouchpad ]]
-  then
-    IsDeviceTouchpad=0
-  else
-    if [[ ! -z $DeviceType ]]
-    then
-      DeviceType+=" / "
-    fi
-  DeviceType+="Touchpad"
-  fi
-
-  #if the device is reported as a keyboard, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
-  if [[ -z $IsDeviceKeyboard ]]
-  then
-    IsDeviceKeyboard=0
-  else
-    if [[ ! -z $DeviceType ]]
-    then
-      DeviceType+=" / "
-    fi
-  DeviceType+="Keyboard"
-  fi
-
-  #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat, or udev multiseat.
-  DeviceConnectionDuplicate=0
-  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
-  do
-    DeviceDuplicateTest=${DeviceConnections[$CurrentDeviceNumber]}
-    if [[ $DeviceDuplicateTest == $DeviceConnection ]]
-    then
-      DeviceConnectionDuplicate=1
-      if [[ $IsDeviceInput == 0 ]]
+      IsDeviceInput=1
+      DeviceConnection=$DEV_ID_PATH
+      DeviceName=$DEV_ID_SERIAL
+      DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "ATTRS{name}" {print $0}' | cut -d = -f2- | tail -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
+    else
+      IsDeviceInput=0
+      DeviceConnection=$(echo $DEV_ID_FOR_SEAT |sed -e 's/^drm//g' -e 's/^graphics//g')
+      DeviceName=$DEV_DEVNAME
+      DeviceSubsystem=$DEV_SUBSYSTEM
+      if [[ $DeviceSubsystem == "drm" ]]
       then
-        DeviceTypes[$CurrentDeviceNumber]+="/$DeviceType"
-        DeviceDisplayNames[$CurrentDeviceNumber]+=", $Device"
+        DeviceType="KMS Graphics Card"
+      fi
+      if [[ $DeviceSubsystem == "graphics" ]]
+      then
+        DeviceType="Frame Buffer"
+      fi
+      if [[ $DeviceSubsystem == "sound" ]]
+      then
+        DeviceType="Sound Card"
+      fi
+      DeviceDisplayName=$(udevadm info -q all --attribute-walk --path=$Device | sed -re '/=/!d' -e "s/^ *([a-zA-Z0-9])/\1/g" -e 's/==/=/g' -e 's/"//g' | awk -F ' *= *' '$1 == "DRIVERS" {print $0}' | cut -d = -f2- | head -1 | sed 's/[^0-9a-zA-Z_ -]*//g')
+      DeviceDisplayName+=" $Device"
+    fi
+    #if the device doesn't have a serial ID, which usually tells the make and model, then display it as 'generic' to the user
+    if [[ -z $DeviceDisplayName ]]
+    then
+      DeviceDisplayName=$(echo $DeviceName| sed 's/[^0-9a-zA-Z_ -]*//g')
+      if [[ $DeviceDisplayName == "noserial" ]]
+      then
+        DeviceDisplayName="Generic"
       fi
     fi
+
+    #if the device has no configured WL_SEAT value, then weston sees it as it being under the default seat
+    if [[ -z $DeviceWLSeatID ]]
+    then
+      DeviceWLSeatID="default"
+    fi
+
+    #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
+    if [[ -z $DeviceSessionSeatID ]]
+    then
+      DeviceSessionSeatID="seat0"
+    fi
+
+    #if the device is reported as a mouse, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
+    if [[ -z $IsDeviceMouse ]]
+    then
+      IsDeviceMouse=0
+    else
+      if [[ ! -z $DeviceType ]]
+      then
+        DeviceType+=" / "
+      fi
+      DeviceType+="Mouse"
+    fi
+
+    #if the device is reported as a touchscreen, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
+    if [[ -z $IsDeviceTouchscreen ]]
+    then
+      IsDeviceTouchscreen=0
+    else
+      if [[ ! -z $DeviceType ]]
+      then
+        DeviceType+=" / "
+      fi
+    DeviceType+="Touchscreen"
+    fi
+
+    #if the device is reported as a touchpad (as in a laptop touchpad), then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
+    if [[ -z $IsDeviceTouchpad ]]
+    then
+      IsDeviceTouchpad=0
+    else
+      if [[ ! -z $DeviceType ]]
+      then
+        DeviceType+=" / "
+      fi
+    DeviceType+="Touchpad"
+    fi
+
+    #if the device is reported as a keyboard, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
+    if [[ -z $IsDeviceKeyboard ]]
+    then
+      IsDeviceKeyboard=0
+    else
+      if [[ ! -z $DeviceType ]]
+      then
+        DeviceType+=" / "
+      fi
+    DeviceType+="Keyboard"
+    fi
+
+    #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat, or udev multiseat.
+    DeviceConnectionDuplicate=0
+    for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+    do
+      DeviceDuplicateTest=${DeviceConnections[$CurrentDeviceNumber]}
+      if [[ $DeviceDuplicateTest == $DeviceConnection ]]
+      then
+        DeviceConnectionDuplicate=1
+        if [[ $IsDeviceInput == 0 ]]
+        then
+          DeviceTypes[$CurrentDeviceNumber]+="/$DeviceType"
+          DeviceDisplayNames[$CurrentDeviceNumber]+=", $Device"
+        fi
+      fi
+    done
+    if [[ ! -z $DeviceType && $DeviceConnectionDuplicate == 0 ]]
+    then
+      ((NumberOfDevices++))
+      DevicePaths[$NumberOfDevices]=$Device
+      DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
+      DeviceNames[$NumberOfDevices]=$DeviceName
+      DeviceConnections[$NumberOfDevices]=$DeviceConnection
+      DeviceSessionSeatIDs[$NumberOfDevices]=$DeviceSessionSeatID
+      DeviceWLSeatIDs[$NumberOfDevices]=$DeviceWLSeatID
+      DeviceTypes[$NumberOfDevices]=$DeviceType
+      DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
+     fi
+
+  done < <(EnumerateDeviceFiles)
+
+  #Get a list of all devices for the main form
+  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+  do
+    if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
+    then
+      DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceWLSeatIDs[$CurrentDeviceNumber]}"
+    else
+      DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]}"
+    fi
+    DeviceList+=$'\n'
   done
-  if [[ ! -z $DeviceType && $DeviceConnectionDuplicate == 0 ]]
-  then
-    ((NumberOfDevices++))
-    DevicePaths[$NumberOfDevices]=$Device
-    DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
-    DeviceNames[$NumberOfDevices]=$DeviceName
-    DeviceConnections[$NumberOfDevices]=$DeviceConnection
-    DeviceSessionSeatIDs[$NumberOfDevices]=$DeviceSessionSeatID
-    DeviceWLSeatIDs[$NumberOfDevices]=$DeviceWLSeatID
-    DeviceTypes[$NumberOfDevices]=$DeviceType
-    DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
-   fi
-
-done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $DeviceExcludeString )
-
-#Get a list of all devices for the main form
-for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
-do
-  if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
-  then
-    DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceWLSeatIDs[$CurrentDeviceNumber]}"
-  else
-    DeviceList+="$CurrentDeviceNumber:     ${DeviceTypes[$CurrentDeviceNumber]}      ${DeviceDisplayNames[$CurrentDeviceNumber]}      (Connected to: ${DeviceConnections[$CurrentDeviceNumber]})     ${DeviceSessionSeatIDs[$CurrentDeviceNumber]}"
-  fi
-  DeviceList+=$'\n'
-done
-
+}
+CollectDeviceInfo
 
 #Create the config file
 touch /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
