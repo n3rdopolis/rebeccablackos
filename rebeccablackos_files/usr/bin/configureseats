@@ -44,11 +44,13 @@ else
   ZENITYCMD="zenity"
 fi
 
+DeviceExcludeString=^$
 NumberOfDevices=0
 DeviceList=""
 #Get all input devices from udev, and store attributes into an array
 while read -r Device
 do
+  DeviceExcludeString+=\|$Device
   #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a transciver that multiple wireless devices can register with, will appear as "Mouse / Keyboard"
   unset DeviceType
 
@@ -238,7 +240,7 @@ do
     DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
    fi
 
-done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*")
+done < <(find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $DeviceExcludeString )
 
 #Get a list of all devices for the main form
 for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
