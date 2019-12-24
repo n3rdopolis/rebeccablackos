@@ -415,7 +415,7 @@ fi
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal window that will come up after this dialog when you want to unmount the ISO image" 2>/dev/null
+  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog when you want to unmount the ISO image" 2>/dev/null
 else
   echo "
 Type exit to go back to your system"
