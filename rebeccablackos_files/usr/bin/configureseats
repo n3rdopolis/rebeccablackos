@@ -54,18 +54,25 @@ function ResetExcludedDevices
 
 
 #Command to enumerate device files, used to collect or exclude devices
+#It takes 1 argument, the string to exclude
 function EnumerateDeviceFiles
 {
-  find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $DeviceExcludeString
+  find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $1
 }
 
 #Get all devices attached at this point, and add them to DeviceExcludeString
-function ExcludeCurrentDevices
+function GetExcludeCurrentDevices
 {
+  ProposeDeviceExcludeString=^$
   while read -r Device
   do
-    DeviceExcludeString+=\|$Device
-  done < <(EnumerateDeviceFiles)
+    ProposeDeviceExcludeString+=\|$Device
+  done < <(EnumerateDeviceFiles ^$)
+  if [[ $FirstLoop == 1 ]]
+  then
+    FirstLoop=0
+    FirstProposeDeviceExcludeString=$ProposeDeviceExcludeString
+  fi
 }
 
 #Collect all non-excluded device info
@@ -84,6 +91,7 @@ function CollectDeviceInfo
   #Get all input devices from udev, and store attributes into an array
   while read -r Device
   do
+    NewDevicesFound=1
     DeviceExcludeString+=\|$Device
     #Handle the display of the device type to the user. Some devices report themselves as multiple types such as a transciver that multiple wireless devices can register with, will appear as "Mouse / Keyboard"
     unset DeviceType
@@ -248,7 +256,7 @@ function CollectDeviceInfo
 
     #if DeviceType exits, then add to the arrays. DeviceType only exists if the device is an input device, or graphics device. All other devices reported by udev, it will be empty and ignored. These devices are the only ones that concern weston multiseat, or udev multiseat.
     DeviceConnectionDuplicate=0
-    for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+    for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
     do
       DeviceDuplicateTest=${DeviceConnections[$CurrentDeviceNumber]}
       if [[ $DeviceDuplicateTest == $DeviceConnection ]]
@@ -274,10 +282,10 @@ function CollectDeviceInfo
       DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
      fi
 
-  done < <(EnumerateDeviceFiles)
+  done < <(EnumerateDeviceFiles $DeviceExcludeString)
 
   #Get a list of all devices for the main form
-  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
   do
     if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
     then
@@ -299,7 +307,7 @@ function ModifyConfig
   #Generate a list of wayland seats for the Zenity dialogs for selection
   unset WLSeatList
   WLSeatList="default"
-  for (( CurrentSeat=1; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
+  for (( CurrentSeat=1; CurrentSeat<MaxNumberOfSeats; CurrentSeat++ ))
   do
     WLSeatList+="|"
     WLSeatList+="seat$CurrentSeat"
@@ -309,7 +317,7 @@ function ModifyConfig
   unset SessionSeatArray
 
   SessionSeatArray=($(loginctl list-seats --no-legend | sort))
-  for (( CurrentSeat=1; CurrentSeat<$MaxNumberOfSeats; CurrentSeat++ ))
+  for (( CurrentSeat=1; CurrentSeat<MaxNumberOfSeats; CurrentSeat++ ))
   do
     IncludeSeat=1
     for SessionSeat in "${SessionSeatArray[@]}"
@@ -331,7 +339,7 @@ function ModifyConfig
 
 
   #Go through each probed input device and prompt for a the seata to add the device to
-  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=$NumberOfDevices; CurrentDeviceNumber++ ))
+  for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
   do
     unset NewWLSeatNumber
     unset NewSessionSeatNumber
@@ -408,25 +416,27 @@ function ModifyConfig
     fi
     sleep .3
     echo $(($CurrentDeviceNumber*100/$NumberOfDevices))
-  done | $ZENITYCMD --no-cancel --auto-close --percentage=0 --progress --text "The changes made here will effect all users, as well as the loginmanager. 
-Multipointer is not supported by all Wayland servers.
+  done | $ZENITYCMD --no-cancel --auto-close --percentage=0 --progress --text "The changes made here will impact all users, as well as the login greeter. 
+Multipointer is not supported by all Wayland servers like it is on Weston. 
 
 This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
    -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
-      on one physical computer
+      on one physical computer.
 
    -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus, but within one session
-        There can be multiple Wayland Seats per Session Seats. (To enable multipointer on a needed Session Seat)
+        There can be multiple Wayland Seats per Session Seat. This is what enables Multipointer.
 
-Input are remembered by the device's internal name, usually containing the make and model, and the port they are plugged into.
+Input are remembered by:
+   1. The device's internal name, usually containing the make and model.
+   2. The port they are plugged into.
 
 In order for the configuration to work each time you plug your devices,  you need to plug them into the same port, 
-(otherwise they will default to the default seat)
+(otherwise they will default to the default seats)
 
 If you wish to return one to the default, The default seat for Session seats is 'seat0', and the default Seat 
 for Wayland pointers is 'default', 
 
-Please note that some devices have multiple internal components, and sometimes register themselves more than once.
+Please note that some devices have multiple internal components, and sometimes appear as 'different' devices
 
 Devices:
         Device Type,      Device Name      Device Connection,      Session Seat, Wayland Seat
@@ -439,14 +449,19 @@ Device Progress:
 
   if [[ ${PIPESTATUS[0]} != 0 ]]
   then
-    $ZENITYCMD --title="Multipointer and Seat Configuration" --info --text "Configuration aborted"
-    exit
+    ConfigAborted=1
+    DeviceExcludeString=$FirstProposeDeviceExcludeString
+    $ZENITYCMD --title="Multipointer and Seat Configuration" --info --text "Configuration aborted" 2>/dev/null
+    return
   fi
 }
-ModifyConfig
 
 function CommitChanges
 {
+  if [[ $ConfigAborted == 1 ]]
+  then
+    return
+  fi
   #tell the user that their session is going to 'flicker' as the tty is switched in and out so that the display server is forced to see the new Udev config (this works for weston)
   $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
 
@@ -492,10 +507,209 @@ Your sessions will not be terminated. You will need to switch back into them wit
   done
 }
 
-ResetExcludedDevices
-CollectDeviceInfo
-ModifyConfig
-CommitChanges
+function HelpDialog
+{
+echo "
+INTRODUCTION
+============
+
+What is a seat? 
+---------------
+A seat is a combination of devices on a computer that belong 
+to 1 user. Most computers have 1 seat each. However this
+software allows you to configure multiple seats.
+
+What is a Session Seat?
+-----------------------
+A session seat is a group of hardware, needing a different 
+video card each to work, along with input devices, such as a 
+keyboard or mouse.These devices belong to different sessions,
+allowing each user to have independant control over their own
+session each. If such a configuration was set up in a manor
+that the cables and computer were well hidden such a setup
+could appear to the unwitting eye as two (or more) computers,
+where all seats are really being run on one.
+
+A USB graphics card is usually suitable for the multiple
+graphics card requirement, as long as the driver is supported.
+
+What is a Wayland Seat?
+-----------------------
+A wayland seat is a group of hardware within a session seat 
+that are shared within a session, to where, when supported by
+a  given desktop environment, allows you to have multiple
+pointers on one session, along with their keyboards and mice. 
+This type of configuration allows for better collaboration,
+with two users sharing a session. It is also possible to 
+have session seats, with multiple wayland seats, to where each
+independant session also has multiple pointers.
+
+You do not need a special graphics configuration for wayland 
+seats.
+
+ABOUT THIS UTILITY
+==================
+This utility simplifies the configuration of the seats. 
+Typically one could edit the configuration by editing udev
+config files manually. This utility assists in creating 
+and editing all seat config, and storing it in the file
+/etc/udev/rules.d/72-weston_seats_and_udev_seats
+
+Devices, and their configured seat values are stored by 
+the name that the device presents itself as (if availible)
+and the connection.
+
+This utility handles the configuration for input devices
+and for video and sound cards
+
+Input Devices can be assignged to session seats, and 
+wayland seats, identified in the config by their
+ID_SERIAL and ID_PATH properties
+
+Output devices (like video and sound cards) can only be
+assigned to session seats, identified by their ID_FOR_SEAT
+propeties.
+
+
+USING THIS UTILITY
+==================
+This utility has 3 different ways to select how the wizard 
+goes through your devices. However the wizard is similar for
+all 3. It bests tries to describe the current device, and 
+prompts the session and wayland seat the device should belong
+to. Leaving a feild blank accepts the current seats the device
+is assigned to.
+
+DEVICE LISTING METHODS
+======================
+The three methods for enumerating devices are
+
+Configure All Devices
+---------------------
+This lists all devices that are attached when this option is 
+selected. Most users will likely use this one.
+
+Configure Newly Attached Devices
+--------------------------------
+This only lists devices attached after the wizard was started,
+and from before this option is selected and confirmed. It is best
+for if a large number of devices is already configured, and only
+one new device needs to be added.
+
+Configure Sets of Devices As They Are Connected
+-------------------------
+This is similar to the prior method, it prompts if you want to 
+change the seat assosiation for devices attached before the 
+wizard was started or not, and then it prompts to attach devices
+scanning for new ones each time.
+This is best for setting up a computer with a large number of 
+seats, and a large number of similar devices. One could use this
+to say attach a USB hub with a mouse, keyboard, USB video card
+configure it for a seat. 
+Then attach a second USB hub with a similar mouse, keyboard, USB
+video card, where the devices would otherwise appear to be very
+similar in the listing when doing them all at once.
+
+"|$ZENITYCMD --text-info --font=mono --width=550 --height=600 2>/dev/null
+}
+
+function MainDialog
+{
+SelectedOption=$(echo "1
+Configure All Devices
+2
+Configure Newly Attached Devices
+3
+Configure Sets of Devices As They Are Connected
+4
+Show Detailed Help
+5
+Quit"| $ZENITYCMD --height 580 --list --hide-column 1 --print-column 1 --column=selectionnumber --column=option --hide-header --title="Multipointer and Seat Configuration" --text "Select device configuration mode.
+
+'Configure All Devices' lists all devices currently attached to be configured.
+      If all devices are currently attached, and there are not configured at all for any seat layouts yet, this option is likely desired.
+
+'Configure Newly Attached Devices' prompts when to plug in new devices, then only runs the config for devices plugged in after the wizard starts.
+     This option is best for adding a few newly attached devices, when there are already devices configured for seat layouts.
+
+'Configure Sets of Devices As They Are Connected' works similar to 'Configure Newly Attached Devices', with the addition that it prompts for new devices until you it quits.
+     This option is best for adding large amounts of similar devices, for many seats.
+     Devices can be incrementally added, so that they are not mixed up amonst each other.
+
+'Show Detailed Help' shows more details on how to use this wizard
+
+'Quit' Exits this wizard
+" 2>/dev/null)
+}
+
+FirstLoop=1
+#Main wizard dialog
+while [ 1 ]
+do
+  NewDevicesFound=0
+  ConfigAborted=0
+  GetExcludeCurrentDevices
+  MainDialog
+  if [[ $SelectedOption == 1 ]]
+  then
+    ResetExcludedDevices
+    CollectDeviceInfo
+    ModifyConfig
+    CommitChanges
+  elif [[ $SelectedOption == 2 ]]
+  then
+    DeviceExcludeString=$ProposeDeviceExcludeString
+    CollectDeviceInfo
+    if [[ $NewDevicesFound == 0 ]]
+    then
+      $ZENITYCMD --info --text "No new devices were detected/plugged in" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+    else
+      ModifyConfig
+      CommitChanges
+    fi
+  elif [[ $SelectedOption == 3 ]]
+  then
+    $ZENITYCMD --question --text "Include devices that have already been connected before this wizard started?" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+    ZENITYANSWER=$?
+    if [[ $ZENITYANSWER == 1 ]]
+    then
+      DeviceExcludeString=$ProposeDeviceExcludeString
+    else
+      ResetExcludedDevices
+    fi
+    while [ 1 ]
+    do
+      CollectDeviceInfo
+      if [[ $NumberOfDevices == 0 ]]
+      then
+        $ZENITYCMD --info --text "No new devices were detected/plugged in" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+      else
+        ModifyConfig
+      fi
+      if [[ $ConfigAborted == 1 ]]
+      then
+        break
+      fi
+      $ZENITYCMD --question --text "Add more devices to configure? If so, plug them in now, and select 'yes'" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+      ZENITYANSWER=$?
+      if [[ $ZENITYANSWER == 1 ]]
+      then
+       if [[ $NewDevicesFound == 1 ]]
+       then
+         CommitChanges
+       fi
+       break
+      fi
+    done
+  elif [[ $SelectedOption == 4 ]]
+  then
+    HelpDialog
+  else
+    exit
+  fi
+done
+
+
 
 #chvt 63
 #sleep .1
