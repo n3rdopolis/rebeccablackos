@@ -1135,7 +1135,7 @@ function SendSelfRegisterData
   do
     $SLEEPCMD 1
   done
-  echo "$SENDDATA"$'\r' > /run/waylandloginmanager/loginmanager_register &
+  echo -n "$SENDDATA"$'\n'$'\r' > /run/waylandloginmanager/loginmanager_register &
   SendSelfCommand ReadRegister
 }
 
@@ -1150,7 +1150,7 @@ function ReadRegister
 {
   #get the data from loginmanager_register
   exec 1001<> /run/waylandloginmanager/loginmanager_register
-  RegisterDataLines=$(while read -r -n 100 -t .01 data <&1001; do echo $data; done)
+  RegisterDataLines=$(while read -r -n 288 -t .01 data <&1001; do echo $data; done)
   exec 1001>&-
   IFS=$'\r'
   RegisterDataLines=($RegisterDataLines)
@@ -1166,7 +1166,7 @@ function ReadRegister
     RegisterType=${ArraySessionData[0]}
     if [[ ! -z $RegisterData ]]
     then
-      WriteToLog "received register data: ${RegisterData//$'\n'/\n}"
+      WriteToLog "received register data: ${RegisterData//$'\n'/\\n}"
       if [[ $RegisterType == NEWSESSION ]]
       then
         #Add the session data to the arrays that store info about the sessions.
