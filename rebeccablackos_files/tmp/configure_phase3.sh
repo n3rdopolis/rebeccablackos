@@ -132,7 +132,7 @@ fi
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 
 #Set default user groups
-printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo dip lpadmin sambashare systemd-journald"\n" >> /etc/adduser.conf
+printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo floppy audio video scanner netdev dip lpadmin sambashare systemd-journald"\n" >> /etc/adduser.conf
 
 #workaround so that all PAM files are stored in the proper place
 mkdir -p /opt/etc
