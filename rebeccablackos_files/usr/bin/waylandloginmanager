@@ -29,8 +29,17 @@
 #or pass wlmglobalfbpermissions to the kernel
 
 #It also requires /etc/pam.d/waylandloginmanager
+#and /etc/pam.d/waylandloginmanager-loginmanagerdisplay
 
 #It needs a user account called waylandloginmanager
+#or /usr/lib/sysusers.d/waylandloginmanager.conf
+
+#and /etc/loginmanagerdisplay/loginmanagerdisplay-noswitch.ini
+#and /etc/loginmanagerdisplay/loginmanagerdisplay-switch.ini
+#for the greeter
+
+#and /lib/udev/rules.d/70-uaccess-fbdev.rules
+#for fbdev permissions
 
 #Weston 5.0 or greater is required for multiseat support
 
