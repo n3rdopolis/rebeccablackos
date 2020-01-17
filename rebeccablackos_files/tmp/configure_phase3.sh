@@ -155,8 +155,16 @@ function PostInstallActions
   cd $OLDPWD
 
   #Set the cursor theme
-  #update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-  update-alternatives --set x-cursor-theme /etc/X11/cursors/core.theme # TODO remove, set back to oxy-white when https://bugreports.qt.io/browse/QTBUG-78652 is complete
+  TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
+  
+  # TODO remove, set back to oxy-white on all systems when https://bugreports.qt.io/browse/QTBUG-78652 is complete
+  TARGETBITSIZE=$(getconf LONG_BIT)
+  if [[ $TARGETBITSIZE == 32 ]]
+  then
+    update-alternatives --set x-cursor-theme /etc/X11/cursors/core.theme 
+  else
+    update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+  fi
 
   #Oxygen-Icons moved all the folders for icon sizes into a base folder, create symlinks for the old path
   ln -s /usr/share/icons/oxygen/base/8x8 /usr/share/icons/oxygen/8x8
