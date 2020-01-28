@@ -602,7 +602,12 @@ function DownloadSource()
       if [[ $DownloadRepoResult != 0 ]]
       then
         echo $SOURCENAME >> "$BUILDLOGDIR/faileddownloads"
-        touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+        #a.root-servers.net
+        $NONROOTCOMMAND nslookup 198.41.0.4 198.41.0.4 &> /dev/null
+        if [[ $? == 0 ]]
+        then
+          touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+        fi
       else
         if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" ]]
         then
