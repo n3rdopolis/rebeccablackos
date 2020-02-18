@@ -159,7 +159,9 @@ SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 #Begin config options
 HOMELOCATION=$HOME
-export BUILDLOCATION="$HOMELOCATION"/RBOS_Build_Files
+OLDBUILDROOT=$HOME
+BUILDROOT=/var/cache
+BUILDFOLDERNAME=RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
 export BUILDFRIENDLYNAME=RebeccaBlackOS
 
@@ -181,6 +183,15 @@ STORAGESIZE_PHASE2=$((4 * $GIGABYTE ))
 STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
 STORAGESIZE_SRCBUILD=$((26 * $GIGABYTE ))
 #End config options
+
+#Move to /var/cache if an existing build folder exists. With systemd-homed and the problems caused by UIDs moved in a migrated home directory, it's best to store in /var/cache
+if [[ -d "$OLDBUILDROOT"/$BUILDFOLDERNAME && ! -d "$BUILDROOT"/$BUILDFOLDERNAME ]]
+then
+  echolog "Moving "$OLDBUILDROOT"/$BUILDFOLDERNAME to "$BUILDROOT"/$BUILDFOLDERNAME"
+  mv "$OLDBUILDROOT"/$BUILDFOLDERNAME "$BUILDROOT"/$BUILDFOLDERNAME
+fi
+
+export BUILDLOCATION="$BUILDROOT"/$BUILDFOLDERNAME
 
 #make a folder containing the live cd tools in the users local folder
 mkdir -p "$BUILDLOCATION"
@@ -583,11 +594,11 @@ else
 fi
 
 #get the size of the users home file system.
-FREEDISKSPACE=$(df --output=avail $HOMELOCATION | tail -1)
+FREEDISKSPACE=$(df --output=avail $BUILDLOCATION | tail -1)
 #if there is less than the required amount of space, then exit.
 if [[ $FREEDISKSPACE -le $STORAGESIZE_TOTALSIZE ]]
 then
-  echolog "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $HOMELOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
+  echolog "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $BUILDLOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
   echolog "The script will now abort."
   faillog "free space: $FREEDISKSPACE"
 else
