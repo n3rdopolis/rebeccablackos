@@ -338,6 +338,9 @@ fi
 
 #Determine how much space is in use by the ISOs already, and take that value away from the space allocated towards the output ISO, and append it
 CURRENT_ISOOUT=$(du -c "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso 2>/dev/null | tail -1 | awk '{print $1}')
+((STORAGESIZE_TOTALSIZE_OUTPUT=(STORAGESIZE_ISOOUT-CURRENT_ISOOUT)))
+
+#ISOs will be built in the build location, and moved out into the destination directory. Account for the temporary space used
 ((STORAGESIZE_TOTALSIZE+=(STORAGESIZE_ISOOUT-CURRENT_ISOOUT)))
 
 echolog "Starting the build process..."
@@ -593,18 +596,32 @@ else
   ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
 fi
 
-#get the size of the users home file system.
-FREEDISKSPACE=$(df --output=avail $BUILDLOCATION | tail -1)
+#get the size of the build location
+FREEDISKSPACE_BUILDSPACE=$(df --output=avail $BUILDLOCATION | tail -1)
 #if there is less than the required amount of space, then exit.
-if [[ $FREEDISKSPACE -le $STORAGESIZE_TOTALSIZE ]]
+if [[ $FREEDISKSPACE_BUILDSPACE -le $STORAGESIZE_TOTALSIZE ]]
 then
   echolog "You have less then $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $BUILDLOCATION | tail -1) for $BUILDLOCATION. Please free up some space."
   echolog "The script will now abort."
-  faillog "free space: $FREEDISKSPACE"
+  faillog "free space: $FREEDISKSPACE_BUILDSPACE"
 else
-  echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space: $(( ((FREEDISKSPACE+1023) /1024 + 1023) /1024 ))GB"
+  echolog -e "\n\nFree RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed for build: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space for build: $(( ((FREEDISKSPACE_BUILDSPACE+1023) /1024 + 1023) /1024 ))GB"
   echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM, $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed.\n"
 fi
+
+
+#get the size of the output location
+FREEDISKSPACE_OUTPUT=$(df --output=avail $HOMELOCATION | tail -1)
+#if there is less than the required amount of space, then exit.
+if [[ $FREEDISKSPACE_OUTPUT -le $STORAGESIZE_TOTALSIZE_OUTPUT ]]
+then
+  echolog "You have less then $(( ((STORAGESIZE_TOTALSIZE_OUTPUT+1023) /1024 + 1023) /1024 ))GB of free space on the filesystem $(df --output=target $HOMELOCATION | tail -1) for $HOMELOCATION. Please free up some space."
+  echolog "The script will now abort."
+  faillog "free space: $FREEDISKSPACE_OUTPUT"
+else
+  echolog -e "\nFree disk space needed for ISO output: $(( ((STORAGESIZE_TOTALSIZE_OUTPUT+1023) /1024 + 1023) /1024 ))GB, Free disk space for ISO output: $(( ((FREEDISKSPACE_OUTPUT+1023) /1024 + 1023) /1024 ))GB"
+fi
+
 
 #Mount the ramdisk
 mount --make-rprivate /
