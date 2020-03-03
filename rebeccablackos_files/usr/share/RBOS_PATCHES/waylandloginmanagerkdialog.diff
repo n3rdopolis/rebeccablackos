@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-02-24 18:28:25.419721479 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2020-02-24 18:29:13.012264229 -0500
+--- usr/bin/waylandloginmanager	2020-03-03 07:09:31.413624065 -0500
++++ usr/bin/waylandloginmanagerkdialog	2020-03-03 07:10:31.638370833 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -10,7 +10,7 @@
 -#It depends on zenity kbd, weston, and expect
 +#It depends on kdialog kbd, weston, and expect
  
- #User sessions can have /etc/wlprofile or ~/.wlprofile (similar to xprofile only for Wayland)
+ #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
  
 @@ -115,7 +115,7 @@
       #to override setting any default sessions for a user, when the global one is set.

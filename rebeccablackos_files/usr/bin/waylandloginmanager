@@ -22,7 +22,7 @@
 
 #It depends on zenity kbd, weston, and expect
 
-#User sessions can have /etc/wlprofile or ~/.wlprofile (similar to xprofile only for Wayland)
+#User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
 
 #It depends on the line
 #SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
@@ -175,14 +175,14 @@ function UserSessionWorker
     ReadEnvironmentFile "$EnvironmentFile"
   fi
   
-  #instead of .xprofile handle .wlprofile files
+  #instead of .xprofile handle ~/.local/wlprofile files
   if [[ -x /etc/wlprofile ]]
   then
     . /etc/wlprofile &> /dev/null
   fi
-  if [[ -x ~/.wlprofile ]]
+  if [[ -x ~/.local/wlprofile ]]
   then
-    . ~/.wlprofile &> /dev/null
+    . ~/.local/wlprofile &> /dev/null
   fi
 
   #Create a folder for the logs
