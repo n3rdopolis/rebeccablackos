@@ -188,7 +188,7 @@ function UserSessionWorker
   #Create a folder for the logs
   if [[ ! -e ~/.cache/wlsessionlogs ]]
   then
-    mkdir -f ~/.cache/wlsessionlogs
+    mkdir -p ~/.cache/wlsessionlogs
   fi
 
   #Create a /tmp/.X11-unix/ folder, don't assume it exists
