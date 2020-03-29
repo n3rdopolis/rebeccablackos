@@ -127,8 +127,8 @@
 #Log Files:
   #/var/log/waylandloginmanager/waylandloginmanager.log : this is the main log for the waylandloginmanager
   #/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
-  #~/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
-  #~/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
+  #~/.cache/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
+  #~/.cache/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
   #/run/waylandloginmanager/pidfile: an empty file waylandloginmanager attempts to open with file descriptor #1023 to assist with locking
@@ -186,9 +186,9 @@ function UserSessionWorker
   fi
 
   #Create a folder for the logs
-  if [[ ! -e ~/wlsessionlogs ]]
+  if [[ ! -e ~/.cache/wlsessionlogs ]]
   then
-    mkdir ~/wlsessionlogs
+    mkdir -f ~/.cache/wlsessionlogs
   fi
 
   #Create a /tmp/.X11-unix/ folder, don't assume it exists
@@ -196,7 +196,7 @@ function UserSessionWorker
 
   #Cleanup old log files
   LOGFILECOUNT=0
-  ls -t ~/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read -r LOGFILE
+  ls -t ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read -r LOGFILE
   do
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT > 4 ]]
@@ -208,8 +208,8 @@ function UserSessionWorker
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
-  export WLM_SESSION_LOG="$HOME"/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  export WLM_HOST_LOG="$HOME"/wlsessionlogs/waylandhost_${WLM_SEAT}.log
+  export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
+  export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
   unset WLM_SEAT
   echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
@@ -289,7 +289,7 @@ function UserSessionWorker
     unset WAYLAND_GUEST
   fi
 
-  #Execute the Wayland server, and log it to $HOME/wlsessionlogs/waylandsession_${SEAT}_${DATESTAMP}.log
+  #Execute the Wayland server, and log it to $HOME/.cache/wlsessionlogs/waylandsession_${SEAT}_${DATESTAMP}.log
   dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
   GuestServerPID=$!
 
