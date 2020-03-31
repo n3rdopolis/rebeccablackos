@@ -209,7 +209,6 @@ function UserSessionWorker
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
   export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
   unset WLM_SEAT
   echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
@@ -251,6 +250,7 @@ function UserSessionWorker
 
   if [[ $BackendType == WL ]]
   then
+    export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
     if [[ $DefaultBackendType == FB ]]
     then
       HostBackendArgument="--backend=fbdev-backend.so"
