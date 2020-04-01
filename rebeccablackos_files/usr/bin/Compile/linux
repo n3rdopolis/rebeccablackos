@@ -62,7 +62,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cd linux-4.19
-patch -p1 < /usr/share/RBOS_PATCHES/linux.diff
 
 make olddefconfig
 sed -i '/CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
