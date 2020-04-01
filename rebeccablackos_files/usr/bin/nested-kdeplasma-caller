@@ -24,4 +24,5 @@ export XDG_CURRENT_DESKTOP=kde
 ServerID=wayland-$RANDOMNUMBER
 export $(dbus-launch)
 #unset DISPLAY
-kwin_wayland --xwayland --socket=$ServerID /opt/libexec/startplasma
+#unset WAYLAND_DISPLAY
+kwin_wayland --xwayland --x11-display=$DISPLAY --socket=$ServerID /opt/libexec/startplasma-waylandsession
