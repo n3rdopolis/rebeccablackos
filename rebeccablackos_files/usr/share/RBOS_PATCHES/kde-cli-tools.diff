@@ -1,8 +1,8 @@
 diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
-index ee89561..7a15b1a 100644
+index af23222..8a88b37 100644
 --- a/kioclient/kioclient.cpp
 +++ b/kioclient/kioclient.cpp
-@@ -32,6 +32,9 @@
+@@ -34,6 +34,9 @@
  #include <KAboutData>
  #include <KLocalizedString>
  
@@ -12,7 +12,16 @@ index ee89561..7a15b1a 100644
  #include <QDBusConnection>
  #include <QCommandLineParser>
  #include <QFileDialog>
-@@ -324,6 +327,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+@@ -63,6 +66,8 @@ static QList<QUrl> makeUrls(const QStringList& urlArgs)
+ static void usage()
+ {
+     puts(i18n("\nSyntax:\n").toLocal8Bit().constData());
++    puts(i18n("  kioclient5 appmenu\n"
++              "            # Opens an application launcher.\n\n").toLocal8Bit().constData());
+     puts(i18n("  kioclient5 openProperties 'url'\n"
+               "            # Opens a properties menu\n\n").toLocal8Bit().constData());
+     puts(i18n("  kioclient5 exec 'url' ['mimetype']\n"
+@@ -356,6 +361,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
      }
