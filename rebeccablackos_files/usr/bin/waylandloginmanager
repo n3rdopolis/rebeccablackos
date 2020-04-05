@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, mounting of ecryptfs home directories, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
+#This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 
@@ -2575,10 +2575,9 @@ function LeavePrompt
   then
     waylandloginmanager --sendcommand Switch
     RESULT=$?
-  #If the request is logoff, then unmount ecryptfs, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
+  #If the request is logoff, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
-    ecryptfs-umount-private
     if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
     then
       waylandloginmanager --sendcommand Change
