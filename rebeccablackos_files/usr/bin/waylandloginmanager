@@ -2820,13 +2820,13 @@ function StartLoginManagerDisplay
 #This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
 function GetLoginManagerDisplayInfo
 {
-  GetStartedSeatIndex $1
+  LoginManagerDisplaySeat=$1
+  GetStartedSeatIndex "$LoginManagerDisplaySeat"
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
 
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$SeatFileName".service -p MainPID --value 2>/dev/null)
-
   if [[ -z $LOGINMANAGERDISPLAYPID ]]
   then
     LOGINMANAGERDISPLAYPID=0
@@ -2834,7 +2834,7 @@ function GetLoginManagerDisplayInfo
 
   IFS=" "
   #Get all logind sessions
-  WLMLOGINDSESSIONS=($(loginctl show-seat "$2" -p Sessions --value 2>/dev/null ))
+  WLMLOGINDSESSIONS=($(loginctl show-seat "$LoginManagerDisplaySeat" -p Sessions --value 2>/dev/null ))
   unset IFS
   #Go thorugh each logind session, see the one where the main pid matches the pid of the loginmanagerdisplay
   for WLMLOGINDSESSION in "${WLMLOGINDSESSIONS[@]}"
