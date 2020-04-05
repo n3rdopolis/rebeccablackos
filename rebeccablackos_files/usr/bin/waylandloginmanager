@@ -2399,8 +2399,7 @@ function LeavePrompt
     ZENITYCMD=zenity
     SessionPromptThreshold=2
 
-    ACTIONSTRING="Switch User"$'\n'"Switch User"
-    ACTIONSTRING+="Logoff"$'\n'"Logoff Session"
+    ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
   fi
 
   #Get the number of running sessions

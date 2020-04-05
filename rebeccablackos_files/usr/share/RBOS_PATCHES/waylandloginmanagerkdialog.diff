@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-04-04 23:46:20.261347802 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2020-04-04 23:53:39.392045092 -0400
+--- usr/bin/waylandloginmanager	2020-04-05 14:35:50.477517002 -0400
++++ usr/bin/waylandloginmanagerkdialog	2020-04-05 14:37:46.494390919 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -289,8 +289,8 @@
 +    KDIALOGCMD=kdialog
      SessionPromptThreshold=2
  
-     ACTIONSTRING="Switch User"$'\n'"Switch User"
-@@ -2426,7 +2413,7 @@
+     ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
+@@ -2425,7 +2412,7 @@
    unset RunningSessions
    unset RunningLoginManagerDisplaySessions
  
@@ -299,7 +299,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2482,9 +2469,15 @@
+@@ -2481,9 +2468,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -317,7 +317,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2498,7 +2491,7 @@
+@@ -2497,7 +2490,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -326,7 +326,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2543,7 +2536,7 @@
+@@ -2542,7 +2535,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -335,7 +335,7 @@
    fi
  }
  
-@@ -2891,7 +2884,7 @@
+@@ -2890,7 +2883,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -344,7 +344,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2916,7 +2909,7 @@
+@@ -2915,7 +2908,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -353,7 +353,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2950,15 +2943,20 @@
+@@ -2949,15 +2942,20 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -380,7 +380,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2966,12 +2964,12 @@
+@@ -2965,12 +2963,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -396,7 +396,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3300,9 +3298,9 @@
+@@ -3299,9 +3297,9 @@
        fi
      done
  
