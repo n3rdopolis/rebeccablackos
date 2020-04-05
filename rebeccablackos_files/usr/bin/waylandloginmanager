@@ -35,8 +35,7 @@
 #It needs a user account called waylandloginmanager
 #or /usr/lib/sysusers.d/waylandloginmanager.conf
 
-#and /etc/loginmanagerdisplay/loginmanagerdisplay-noswitch.ini
-#and /etc/loginmanagerdisplay/loginmanagerdisplay-switch.ini
+#and /etc/loginmanagerdisplay/loginmanagerdisplay.ini
 #for the greeter
 
 #and /lib/udev/rules.d/70-uaccess-fbdev.rules
@@ -86,11 +85,6 @@
      #to disable using the framebuffer globally.
      #Specifing the option on the kernel command line overrides the config file
 
-     #wlmobeystrictseats=1
-     #to only allow 1 session on seats where logind reports CanMultiSession=no
-     #The default is to allow.
-     #Specifing the option on the kernel command line overrides the config file
-
      #neverpasswd-autologinuser-{$SEAT}=1
      #to allow the autologin user to not need a password ever on a seat, or
      #neverpasswd-autologinuser=1
@@ -115,9 +109,9 @@
      #to override setting any default sessions for a user, when the global one is set.
 
 #/usr/libexec/wayland_login_helpers/*
-  #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/weston.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
+  #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/loginmanagerdisplay.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
   #These are optional as the waylandloginmanager displays a selection list with the same commands as well
-#/etc/loginmanagerdisplay/weston.ini
+#/etc/loginmanagerdisplay/loginmanagerdisplay.ini
   #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/wayland_login_helpers to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
   #The mainform makes this reqirement optional
 #/usr/share/wsessions.d/*
@@ -699,9 +693,6 @@ function SetCommonConfig
   export MAX_UI_ATTEMPTS=5
   ######################################################
 
-  #If only 1 session should be allowed on seats where logind reports CanMultiSession=no (default is to allow)
-  GetConfigKey wlmobeystrictseats "" 0 1 ONLY_CAN_MULTISESSION_SESSION_SWITCH
-
   #User that the zenity dialogs and the loginmanagerdisplay (weston instance for the waylandloginmanager runs as
   export LOGINMANAGERDISPLAYUSER=waylandloginmanager
   #User that the su test in AuthenticateUser user runs as
@@ -1202,20 +1193,6 @@ function ReadRegister
           if [[ $SessionDoLock == 1 && $ISLIVE != 1 ]]
           then
             loginctl lock-session $SessionID 2> /dev/null
-          fi
-          if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 ]]
-          then
-            GetStartedSeatIndex $SessionSeatID
-            if [[ -e /proc/$SessionPID/stat ]]
-            then
-              read -r -a PidStats < /proc/$SessionPID/stat
-              PidStartTime=${PidStats[21]}
-            else
-              PidStartTime=0
-            fi
-
-            LoginManagerDisplayPIDs[$ReturnSeatIndex]=$SessionPID
-            LoginManagerDisplayStartTimes[$ReturnSeatIndex]=$PidStartTime
           fi
         else
           WriteToLog "Session failed to start"
@@ -1943,13 +1920,6 @@ function ShowInfo
   else
     SEATSTRING="This Login Manager Display is for seat $1"
   fi
-  SeatCanMultiSession=${SeatMultiSessionStatuses[$ReturnSeatIndex]}
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == 1 ]]
-  then
-    SWITCHSTRING=$'\n'"The arrow icon brings up a prompt to switch between running sessions"
-  else
-    SWITCHSTRING=""
-  fi
   GetStartedSeatIndex $1
   SeatIndexID=$ReturnSeatIndex
   SeatDefaultBackendType=${LoginManagerDisplayBackends[$SeatIndexID]}
@@ -1972,7 +1942,8 @@ $BACKENDSTRING
 
 $SEATSTRING
 
-The key icon brings up a login prompt$SWITCHSTRING
+The key icon brings up a login prompt
+The arrow icon brings up a prompt to switch between running sessions
 The red X icon brings up a shutdown prompt
 The i icon shows this help prompt" &> /dev/null
 
@@ -2093,7 +2064,7 @@ function StartUserSession
   while read -r var
   do 
     unset "$var" &> /dev/null
-  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$|^ONLY_CAN_MULTISESSION_SESSION_SWITCH$" )
+  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" )
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONSTRING="$( echo -n "$5" | perl -pe 's/\$(\w+)/$ENV{$1}/g')"
@@ -2169,34 +2140,7 @@ function StartUserSession
     OutputArgs=""
   fi
 
-  #If multisession is not supported
   RunSession=1
-  SeatCanMultiSession=${SeatMultiSessionStatuses[$ReturnSeatIndex]}
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $SeatCanMultiSession == 0 ]]
-  then
-    IFS=$'\n'
-    SeatStatusProperties=($(loginctl show-seat "$USERSEAT" -p CanMultiSession -p Sessions --value 2>/dev/null))
-    unset IFS
-
-    SeatCanMultiSession="${SeatStatusProperties[0]}"
-    SeatSessions="${SeatStatusProperties[1]}"
-    SeatSessionsCount=${#SeatSessions[@]}
-    SeatSessionService=$(loginctl show-session ${SeatSessions[0]} -p Service --value 2>/dev/null)
-    if [[ $SeatCanMultiSession != 1 ]]
-    then
-      if [[ $SeatSessionsCount == 0 || ( $SeatSessionsCount == 1 && $SeatSessionService == "waylandloginmanager-loginmanagerdisplay") ]]
-      then
-        if [[ $SeatSessionsCount == 1 ]]
-        then
-          loginctl kill-session ${SeatSessions[0]} 2>/dev/null
-        fi
-      else
-        RunSession=0
-      fi
-    fi
-  fi
-  #This won't affect the whole script, just this scope, because it's a new thread.
-  unset ONLY_CAN_MULTISESSION_SESSION_SWITCH
 
   if [[ $RunSession == 1 ]]
   then
@@ -2453,18 +2397,9 @@ function LeavePrompt
   else
     SetCommonConfig
     ZENITYCMD=zenity
-    #Can't rely on SeatMultiSessionStatuses here, since this can be used outside of the service.
-    SeatCanMultiSession=$(loginctl show-seat $XDG_SEAT -p CanMultiSession --value)
     SessionPromptThreshold=2
 
-    if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
-    then
-      ACTIONSTRING="Switch User"$'\n'"Switch User"
-    fi
-    if [[ ! -z $ACTIONSTRING ]]
-    then
-      ACTIONSTRING+=$'\n'
-    fi
+    ACTIONSTRING="Switch User"$'\n'"Switch User"
     ACTIONSTRING+="Logoff"$'\n'"Logoff Session"
   fi
 
@@ -2578,10 +2513,7 @@ function LeavePrompt
   #If the request is logoff, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
-    if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
-    then
-      waylandloginmanager --sendcommand Change
-    fi
+    waylandloginmanager --sendcommand Change
     loginctl terminate-session $XDG_SESSION_ID
     RESULT=$?
   #For all other actions, use logind dbus commands
@@ -2739,14 +2671,12 @@ function StartLoginManagerDisplay
   #Information about the seat
   CurrentSeat=$1
   SeatIndexID=$2
-  SeatCanMultiSession=${SeatMultiSessionStatuses[$SeatIndexID]}
   SeatStartCount=${LoginManagerDisplayAttemptCounts[$SeatIndexID]}
   SeatWestonBackend=${LoginManagerDisplayBackends[$SeatIndexID]}
   SeatUsePixman=${LoginManagerDisplayPixmanFlags[$SeatIndexID]}
   SeatFileName=${SeatFileNames[$SeatIndexID]}
   DoStartLoginManagerDisplay=1
   LOGINMANAGERDISPLAYSTATUS=0
-  SeatUseMultiSessionConfig=1
 
   #Detect if the socket for the loginmanagerdisplay exists, and if the service is running
   if [[ -e /proc/${LoginManagerDisplayPIDs[$SeatIndexID]}/stat ]]
@@ -2761,28 +2691,6 @@ function StartLoginManagerDisplay
   then
     DoStartLoginManagerDisplay=0
     return
-  fi
-
-  #If the seat can't multisession, and the loginmanagerdisplay for this seat is stopped, don't try to start it. This only would concern seats that are not seat0
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $SeatCanMultiSession != 1 ]]
-  then
-    SeatSessions=$(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null)
-    if [[ $SeatCanMultiSession != 1 ]]
-    then
-      SeatUseMultiSessionConfig=0
-      #The Autologin prompt starts before the loginmanagerdisplay
-      if [[ ! -z "$SeatSessions" && ( ! -z ${LastLoginPIDs[$SeatIndexID]} && -e /proc/${LastLoginPIDs[$SeatIndexID]}) ]]
-      then
-        SeatStartCount=$MAX_UI_ATTEMPTS
-        DoStartLoginManagerDisplay=0
-      else
-        if [[ ! -z "$SeatSessions" ]]
-        then
-          SeatStartCount=$MAX_UI_ATTEMPTS
-          DoStartLoginManagerDisplay=0
-        fi
-      fi
-    fi
   fi
 
   #Handle the seat hardware information
@@ -2836,12 +2744,6 @@ function StartLoginManagerDisplay
       else
         OutputArgs=""
       fi
-      if [[ $SeatUseMultiSessionConfig == 1 ]]
-      then
-        WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-switch.ini"
-      else
-        WESTONCONFIG="$XDG_CONFIG_HOME/loginmanagerdisplay-noswitch.ini"
-      fi
       SetFallbackEnvironmentVariables $CurrentSeat
       LOGINMANAGERDISPLAYENVSTRING=""
       if [[ ! -z $LIBGL_ALWAYS_SOFTWARE ]]
@@ -2856,7 +2758,7 @@ function StartLoginManagerDisplay
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
       fi
-      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$WESTONCONFIG" &>/dev/null
+      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
@@ -2867,7 +2769,7 @@ function StartLoginManagerDisplay
         ((TRYCOUNT++))
       done
       #Get the logind session of the weston instance running loginmanagerdisplay, and have it register to the main 'thread'
-      NewLoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo 0 $CurrentSeat)
+      NewLoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $CurrentSeat)
       IFS=@
       NewLoginManagerDisplayInfo=($NewLoginManagerDisplayInfo)
       unset IFS
@@ -2916,26 +2818,16 @@ function StartLoginManagerDisplay
   LoginManagerDisplayAttemptCounts[$SeatIndexID]=$SeatStartCount
 }
 
-#This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 2 arguments,
-#the first is if it's a first run or not. 1 = first run, 0 = not first run
-#The second is the seat.
+#This function determines the PID, and the systemd session of the loginmanagerdisplay, it takes 1 argument, the seat.
 function GetLoginManagerDisplayInfo
 {
-  GetInfoAsFirstRun=$1
-  GetStartedSeatIndex $2
+  GetStartedSeatIndex $1
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-  SeatCanMultiSession=${SeatMultiSessionStatuses[$ReturnSeatIndex]}
 
   #Get the pid of loginmanagerdisplay
   unset REGISTERDISPLAYSESSION
   LOGINMANAGERDISPLAYPID=$(systemctl show wlm-loginmanagerdisplay_"$SeatFileName".service -p MainPID --value 2>/dev/null)
 
-  #If this is the first run, and this is running in script multisession mode, and there is no LOGINMANAGERDISPLAYPID
-  #Then the LOGINMANAGERDISPLAYPID could have been overridden by a running session. (0 is returned for MainPID for an empty service by systemctl)
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 1 && $SeatCanMultiSession == 0 && $GetInfoAsFirstRun == 1 && ( $LOGINMANAGERDISPLAYPID == 0 || -z $LOGINMANAGERDISPLAYPID ) ]]
-  then
-    LOGINMANAGERDISPLAYPID=$(systemctl show *-*-"$SeatFileName".service -p MainPID --value 2>/dev/null)
-  fi
   if [[ -z $LOGINMANAGERDISPLAYPID ]]
   then
     LOGINMANAGERDISPLAYPID=0
@@ -3059,11 +2951,7 @@ function UserActionDialog
   #wait for the loginmanagerdisplay
   DisplayServerWait "$1"
   ActionMenu="Login\nLogin...\n"
-  SeatCanMultiSession=$(loginctl show-seat "$1" -p CanMultiSession --value 2>/dev/null)
-  if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $SeatCanMultiSession == "yes" ]]
-  then
-    ActionMenu+="Switch\nSwitch User...\n"
-  fi
+  ActionMenu+="Switch\nSwitch User...\n"
   ActionMenu+="Leave\nShutdown...\nInfo\nHelp..."
   if [[ $wlmdebuginsecure == 1 ]]
   then
@@ -3122,9 +3010,11 @@ function WaylandLoginManagerMain
   MainLoopMinutes=0
   DoDetectSeats=1
   StartedSeats=()
-
+  
+  #Value is 1 for new seats, when a seat is removed, it is set to 0. This is for tracking if a seat is recreated.
+  SeatInitializationStatuses=()
+  
   #Arrays about running helper processes
-  SeatMultiSessionStatuses=()
   LastUserActionPIDs=()
   LastSwitchPIDs=()
   LastLoginPIDs=()
@@ -3217,19 +3107,12 @@ function WaylandLoginManagerMain
           fi
         fi
         #If the seat is new, detected to have been removed in the past, or if the seat string is different, (removed and readded before the detection interval)
-        if [[ $IncludeSeat == 1 || ${SeatMultiSessionStatuses[$StartIndex]} == -1 || $SeatStringMismatch == 1 ]]
+        if [[ $IncludeSeat == 1 || ${SeatInitializationStatuses[$StartIndex]} == 0 || $SeatStringMismatch == 1 ]]
         then
-          #Determine and store if this seat is multisession compatible
-          HasMultiSession=$(loginctl show-seat $RunningSeat -p CanMultiSession --value 2>/dev/null)
-          if [[ $ONLY_CAN_MULTISESSION_SESSION_SWITCH == 0 || $HasMultiSession == "yes" ]]
-          then
-            CanMultiSession=1
-          else
-            CanMultiSession=0
-          fi
-          WriteToLog "New seat $RunningSeat , multisession support is $CanMultiSession"
-          #Each seat is worth two array elements, the first is the seat name, the second is if it supports multisession
-          if [[ ${SeatMultiSessionStatuses[$StartIndex]} == -1 ]]
+
+          WriteToLog "New seat $RunningSeat"
+
+          if [[ ${SeatInitializationStatuses[$StartIndex]} == 0 ]]
           then
             TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
           else
@@ -3251,7 +3134,7 @@ function WaylandLoginManagerMain
           fi
           GetSeatCapabilityString $RunningSeat SeatCapabilityArr
           SeatCapabilityArr=($SeatCapabilityArr)
-          SeatMultiSessionStatuses[$StartIndex]=$CanMultiSession
+          SeatInitializationStatuses[$StartIndex]=1
           UserActionAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
           UserActionFailSkips[$StartIndex]=0
           SeatCreationStrings[$StartIndex]=$SeatCreationString
@@ -3296,7 +3179,7 @@ function WaylandLoginManagerMain
           fi
         done
         #Reset the fail count info for this seat in the arrays, it's possible the seat could be recreated
-        if [[ $SeatRemoved == 1 && ${SeatMultiSessionStatuses[$StartIndex]} != -1 ]]
+        if [[ $SeatRemoved == 1 && ${SeatInitializationStatuses[$StartIndex]} != 0 ]]
         then
           SeatFileName=${SeatFileNames[$StartIndex]}
           UserActionAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
@@ -3304,7 +3187,7 @@ function WaylandLoginManagerMain
           LoginManagerDisplayAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
-          SeatMultiSessionStatuses[$StartIndex]=-1
+          SeatInitializationStatuses[$StartIndex]=0
           SeatCreationStrings[$StartIndex]=0
           TerminateJobPID ${LastUserActionPIDs[$StartIndex]} 15 1
           unset LastUserActionPIDs[$StartIndex]
@@ -3350,7 +3233,7 @@ function WaylandLoginManagerMain
         #Export the Session Data
         ExportSessionData
 
-        LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo 1 $RunningSeat)
+        LoginManagerDisplayInfo=$(GetLoginManagerDisplayInfo $RunningSeat)
         IFS=@
         LoginManagerDisplayInfo=($LoginManagerDisplayInfo)
         unset IFS
@@ -3479,12 +3362,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         fi
         GetStartedSeatIndex $FailSeat
         SeatIndexID=$ReturnSeatIndex
-        SeatCanMultiSession=${SeatMultiSessionStatuses[$SeatIndexID]}
-        if [[ $SeatCanMultiSession == 1 ]]
-        then
-          WriteToLog "Switching back to the loginmanagerdisplay for seat $FailSeat as a session failed to start"
-          loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
-        fi
+        WriteToLog "Switching back to the loginmanagerdisplay for seat $FailSeat as a session failed to start"
+        loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
       done
     fi
     unset FailedSessionTTY
@@ -3523,9 +3402,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         else
           GetStartedSeatIndex $RunningSeatID
           SeatIndexID=$ReturnSeatIndex
-          SeatCanMultiSession=${SeatMultiSessionStatuses[$SeatIndexID]}
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-          if [[ $RunningSeatID != "seat0" && $SeatCanMultiSession == 1 ]]
+          if [[ $RunningSeatID != "seat0" ]]
           then
             WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
@@ -3581,7 +3459,6 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
         if [[ $SEATARG == $RunningSeat ]]
         then
           SeatIsRunning=1
-          SeatCanMultiSession=${SeatMultiSessionStatuses[$SeatIndexID]}
           break
         fi
       done
@@ -3599,45 +3476,35 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     elif [[ $COMMAND == "Switch" ]]
     then
       WriteToLog "received command $COMMAND for seat $SEATARG"
-      if [[ $SeatCanMultiSession == 1 ]]
+      LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
+      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
+      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
       then
-        LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
-        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
-        if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
+        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+      fi
+      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastSwitchPIDs[$SeatIndexID]}([[:space:]]|$) ]]
+      then
+        if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
         then
-          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
-          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
+          TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
+          UserActionFailSkips[$SeatIndexID]=1
         fi
-        if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastSwitchPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-        then
-          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
-          then
-            TerminateJobPID ${LastUserActionPIDs[$SeatIndexID]} 15 1
-            UserActionFailSkips[$SeatIndexID]=1
-          fi
-          SwitchUserDialog "$SEATARG" &
-          LastSwitchPIDs[$SeatIndexID]=$!
-        else
-          WriteToLog "A handler for the Switch command is already open"
-        fi
+        SwitchUserDialog "$SEATARG" &
+        LastSwitchPIDs[$SeatIndexID]=$!
       else
-        WriteToLog "$SEATARG does not support switching the session"
+        WriteToLog "A handler for the Switch command is already open"
       fi
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
       WriteToLog "received command $COMMAND for seat $SEATARG"
-      if [[ $SeatCanMultiSession == 1 ]]
+      LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
+      ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
+      if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
       then
-        LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
-        ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
-        if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
-        then
-          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
-          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
-        fi
-      else
-        WriteToLog "$SEATARG does not support switching the session"
+        loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
+        loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
       fi
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
