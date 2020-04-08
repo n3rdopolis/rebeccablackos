@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-04-05 14:35:50.477517002 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2020-04-05 14:37:46.494390919 -0400
+--- usr/bin/waylandloginmanager	2020-04-08 19:44:51.253116248 -0400
++++ usr/bin/waylandloginmanagerkdialog	2020-04-08 19:49:07.063756111 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -30,7 +30,7 @@
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that the su test in AuthenticateUser user runs as
    export PROBETESTUSER=waylandloginmanager
-@@ -865,7 +865,8 @@
+@@ -874,7 +874,8 @@
    export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
@@ -40,7 +40,7 @@
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston)
    #Specify where wsession files are found
-@@ -883,14 +884,14 @@
+@@ -892,7 +893,7 @@
    #Determine if this is running on a live instance, if booted with casper
    GetConfigKey boot=casper "" 0 2 ISLIVE
  
@@ -48,8 +48,10 @@
 +  KDIALOGCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- kdialog"
    TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
    WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
-   DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
-   TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+   if [[ $seat0HasTTYs == 1 ]]
+@@ -904,8 +905,8 @@
+     TTYWIZARDCMD=true
+   fi
  
 -  command -v zenity > /dev/null
 -  ZenityCommandFoundResult=$?
@@ -58,7 +60,7 @@
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
    GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
-@@ -1213,23 +1214,14 @@
+@@ -1237,23 +1238,14 @@
    done
  }
  
@@ -84,7 +86,7 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1848,7 +1840,7 @@
+@@ -1872,7 +1864,7 @@
        done
        if [[ $WSESSIONNUMBER == -1 ]]
        then
@@ -93,7 +95,7 @@
          WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
          return 1
        fi
-@@ -1863,13 +1855,16 @@
+@@ -1887,13 +1879,16 @@
          then
            WSESSIONPICKLIST+=$'\n'
          fi
@@ -114,7 +116,7 @@
        CancelOrOK=$?
        if [[ $CancelOrOK != 0 ]]
        then
-@@ -1885,7 +1880,7 @@
+@@ -1909,7 +1904,7 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
@@ -123,7 +125,7 @@
      WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
-@@ -1936,7 +1931,7 @@
+@@ -1960,7 +1955,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -132,7 +134,7 @@
  
  $BACKENDSTRING
  
-@@ -1963,12 +1958,6 @@
+@@ -1987,12 +1982,6 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -145,7 +147,7 @@
    RunningSeatSessions=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null))
    while [[ $NumberOfSessions -ge 0 ]]
    do
-@@ -1991,11 +1980,7 @@
+@@ -2015,11 +2004,7 @@
          then
            SessionList+=$'\n'
          fi
@@ -158,7 +160,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -2006,19 +1991,17 @@
+@@ -2030,19 +2015,17 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -184,7 +186,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2047,7 +2030,7 @@
+@@ -2071,7 +2054,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -193,7 +195,7 @@
        fi
      fi
    fi
-@@ -2278,26 +2261,30 @@
+@@ -2302,26 +2285,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -232,7 +234,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2305,9 +2292,9 @@
+@@ -2329,9 +2316,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -244,7 +246,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2338,9 +2325,9 @@
+@@ -2362,9 +2349,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -256,7 +258,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2354,7 +2341,7 @@
+@@ -2378,7 +2365,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -265,7 +267,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2377,13 +2364,13 @@
+@@ -2401,13 +2388,13 @@
        StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
      fi
    else
@@ -281,7 +283,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2396,7 +2383,7 @@
+@@ -2420,7 +2407,7 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -290,7 +292,7 @@
      SessionPromptThreshold=2
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
-@@ -2425,7 +2412,7 @@
+@@ -2449,7 +2436,7 @@
    unset RunningSessions
    unset RunningLoginManagerDisplaySessions
  
@@ -299,7 +301,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2481,9 +2468,15 @@
+@@ -2505,9 +2492,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -317,7 +319,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2497,7 +2490,7 @@
+@@ -2521,7 +2514,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -326,7 +328,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2542,7 +2535,7 @@
+@@ -2566,7 +2559,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -335,7 +337,7 @@
    fi
  }
  
-@@ -2890,7 +2883,7 @@
+@@ -2914,7 +2907,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -344,7 +346,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2915,7 +2908,7 @@
+@@ -2939,7 +2932,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -353,7 +355,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2949,15 +2942,20 @@
+@@ -2973,15 +2966,20 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -380,7 +382,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2965,12 +2963,12 @@
+@@ -2989,12 +2987,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -396,7 +398,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3299,9 +3297,9 @@
+@@ -3323,9 +3321,9 @@
        fi
      done
  
