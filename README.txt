@@ -87,12 +87,6 @@ BOOT OPTIONS:
                                         rbos-failedboot as it's for more advanced users
 
             wlmdebuginsecure:           This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
-            
-            wlmobeystrictseats:         Force the WaylandLoginManager to obey the CanMultiSession attributes on logind seats. While non-seat0 seats will report
-                                        that they cannot "multisession" it is actually possible to start multiple sessions and switch beteween them, which the
-                                        Wayland does by default. This option changes that. It can also be specified in the config file. Multiseat usually 
-                                        requires additional config, unless you are using qemu, with "pci-bridge-seat" devices, which creates seats
-                                        automatically, even for a live cd.
 
 
       When installed, and you are unable to use a UI, you can use the commands:
