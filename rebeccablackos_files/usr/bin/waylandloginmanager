@@ -842,6 +842,15 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   #prevent the WaylandLoginManager from being killed with CTRL+C
   trap '' 2
 
+  #Seat0 is the only seat with TTYs, but if CONFIG_VT=no then there are no TTYs
+  seat0CanTTY=$(loginctl show-seat seat0 -p CanTTY --value)
+  if [[ $seat0CanTTY == "yes" ]]
+  then
+    seat0HasTTYs=1
+  else
+    seat0HasTTYs=0
+  fi
+
   #Array that contains the time stamps of the creation date of the seats
   SeatCreationStrings=()
 
@@ -886,8 +895,14 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
-  DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
-  TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+  if [[ $seat0HasTTYs == 1 ]]
+  then
+    DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
+    TTYWIZARDCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty"
+  else
+    DIALOGCMD=true
+    TTYWIZARDCMD=true
+  fi
 
   command -v zenity > /dev/null
   ZenityCommandFoundResult=$?
@@ -936,7 +951,10 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     then
       systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
-      chvt 63
+      if [[ $seat0HasTTYs == 1 ]]
+      then
+        chvt 63
+      fi
       $DIALOGCMD --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -951,7 +969,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   if [[ $HardwareSupported != 1 ]]
   then
     systemd-notify --ready &> /dev/null
-    chvt 63
+    if [[ $seat0HasTTYs == 1 ]]
+    then
+      chvt 63
+    fi
     if [[ $ISLIVE == 1 ]]
     then
       WriteToLog "ERROR: No supportable hardware found"
@@ -985,27 +1006,30 @@ Will now reboot." 20 50 --no-cancel
     RUNNINGWLMCOUNT=0
   fi
   unset LoginManagerDisplayFileProbe
-  OLDSEAT0WLMPID=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p MainPID --value 2>/dev/null)
-  if [[ $RUNNINGWLMCOUNT != 0 ]]
+
+  if [[ $seat0HasTTYs == 1 ]]
   then
-    if [[ $OLDSEAT0WLMPID != 0 ]]
+    OLDSEAT0WLMPID=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p MainPID --value 2>/dev/null)
+    if [[ $RUNNINGWLMCOUNT != 0 ]]
     then
-      LOGINMANAGERDISPLAYTTY=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p TTYPath --value | sed 's|/dev/tty||g')
+      if [[ $OLDSEAT0WLMPID != 0 ]]
+      then
+        LOGINMANAGERDISPLAYTTY=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p TTYPath --value | sed 's|/dev/tty||g')
+      else
+        LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
+      fi
+      systemd-notify --ready &> /dev/null
     else
       LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
     fi
-    systemd-notify --ready &> /dev/null
-  else
-    LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
-  fi
 
-  MinimumTTY=$LOGINMANAGERDISPLAYTTY
-  if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
-  then
-    WriteToLog "ERROR: Not Enough TTYs for login manager display!"
-    exit 1
+    MinimumTTY=$LOGINMANAGERDISPLAYTTY
+    if [[ $LOGINMANAGERDISPLAYTTY -eq -1 ]]
+    then
+      WriteToLog "ERROR: Not Enough TTYs for login manager display!"
+      exit 1
+    fi
   fi
-
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
   GetConfigKey wlmdebug "" 0 2 wlmdebug
@@ -1914,7 +1938,7 @@ function ShowInfo
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $1
-  if [[ $1 == seat0 ]]
+  if [[ $1 == seat0 && $seat0HasTTYs == 1 ]]
   then
     SEATSTRING="This Login Manager Display for seat seat0 is running on tty: $LOGINMANAGERDISPLAYTTY"
   else
@@ -2040,7 +2064,7 @@ function SwitchUserDialog
       if [[ $ChangeSessionState == active || $ChangeSessionState == online ]]
       then
         #Only seat0 supports TTYs
-        if [[ "$1" == "seat0" ]]
+        if [[ "$1" == "seat0" && $seat0HasTTYs == 1  ]]
         then
           chvt $ChangeSessionTTY &>/dev/null &
         fi
@@ -2117,7 +2141,7 @@ function StartUserSession
 
 
   #Call the server with the arguments specified by the selected session
-  if [[ "$USERSEAT" == seat0 ]]
+  if [[ "$USERSEAT" == seat0 && $seat0HasTTYs == 1  ]]
   then
     TTYSTRING=" on tty $USERSESSIONTTY"
   else
@@ -2127,7 +2151,7 @@ function StartUserSession
   systemctl stop "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" &> /dev/null
   systemctl reset-failed "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" &> /dev/null
   #Only seat0 supports TTYs
-  if [[ "$USERSEAT" == seat0 ]]
+  if [[ "$USERSEAT" == seat0 && $seat0HasTTYs == 1 ]]
   then
     #Reset the contents of the tty
     echo -n -e '\e[3J' > /dev/tty$USERSESSIONTTY
@@ -2314,7 +2338,7 @@ function GetUserCredentials
     fi
   fi
   #get the TTY to start the session on, only for seat0
-  if [[ "$1" == "seat0" ]]
+  if [[ "$1" == "seat0"  && $seat0HasTTYs == 1 ]]
   then
     export SessionTTY=$(GetNextTTY)
   else
@@ -2366,7 +2390,7 @@ function GetUserCredentials
       fi
 
       #if the password and username is correct, start the session
-      if [[ $1 == seat0 ]]
+      if [[ $1 == seat0 && $seat0HasTTYs == 1 ]]
       then
         TTYSTRING="on TTY $SessionTTY"
       else
@@ -2720,7 +2744,7 @@ function StartLoginManagerDisplay
       unset PIXMANARGS
     fi
 
-    if [[ "$CurrentSeat" == seat0 ]]
+    if [[ "$CurrentSeat" == seat0  && $seat0HasTTYs == 1 ]]
     then
       WriteToLog "Starting the loginmanagerdisplay on tty $LOGINMANAGERDISPLAYTTY for seat $CurrentSeat (Attempts left: $SeatStartCount)"
       #Reset the contents of the tty
@@ -2736,7 +2760,7 @@ function StartLoginManagerDisplay
     then
       systemctl stop wlm-loginmanagerdisplay_$SeatFileName &> /dev/null
       systemctl reset-failed wlm-loginmanagerdisplay_$SeatFileName &> /dev/null
-      if [[ $CurrentSeat == seat0 ]]
+      if [[ $CurrentSeat == seat0  && $seat0HasTTYs == 1 ]]
       then
         chvt $LOGINMANAGERDISPLAYTTY &>/dev/null &
         OutputArgs="-p TTYPath=/dev/tty"$LOGINMANAGERDISPLAYTTY" -p StandardOutput=null -p StandardError=null -p StandardInput=tty"
@@ -2897,7 +2921,7 @@ function StartAutoLogin
     exit 0
   fi
   #get the TTY to start the autologin session on, only for seat0
-  if [[ "$1" == seat0 ]]
+  if [[ "$1" == seat0 && $seat0HasTTYs == 1 ]]
   then
     export AutoSessionTTY=$(GetNextTTY)
    else
@@ -2907,7 +2931,7 @@ function StartAutoLogin
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
-    if [[ "$1" == seat0 ]]
+    if [[ "$1" == seat0 && $seat0HasTTYs == 1 ]]
     then
       WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
     else
@@ -3310,7 +3334,10 @@ function WaylandLoginManagerMain
     then
       systemd-notify --ready &> /dev/null
       WriteToLog "ERROR: Maximum restarts of the loginmanagerdisplay has been reached for every seat"
-      chvt 63
+      if [[ $seat0HasTTYs == 1 ]]
+      then
+        chvt 63
+      fi
       $DIALOGCMD --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -3323,7 +3350,10 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $UIPromptAttemptsMaxedOut == 1 ]]
     then
       WriteToLog "The prompt for the user action terminated incorrectly too many times in a row for every seat."
-      chvt 63
+      if [[ $seat0HasTTYs == 1 ]]
+      then
+        chvt 63
+      fi
       $DIALOGCMD --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
 Will show a menu with a few options for diagnosis." 20 50 --no-cancel
@@ -3347,7 +3377,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       SessionStartFailed=0
       for FailSeat in "${FailedSessionSeat[@]}"
       do
-        if [[ $FailSeat == seat0 ]]
+        if [[ $FailSeat == seat0  && $seat0HasTTYs == 1 ]]
         then
           read -r -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
           ActiveSystemTTY=${ActiveSystemTTY:3}
@@ -3372,8 +3402,11 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #And also attempt to unlock the TTY, if applicable
     if [[ $NotRunningSessions != 0 ]]
     then
-      read -r -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
-      ActiveSystemTTY=${ActiveSystemTTY:3}
+      if [[ $seat0HasTTYs == 1 ]]
+      then
+        read -r -t 4 -n5 ActiveSystemTTY < /sys/class/tty/tty0/active
+        ActiveSystemTTY=${ActiveSystemTTY:3}
+      fi
 
       #Create temporary arrays
       NewAllSessionTTYs=()
@@ -3402,7 +3435,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
           GetStartedSeatIndex $RunningSeatID
           SeatIndexID=$ReturnSeatIndex
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
-          if [[ $RunningSeatID != "seat0" ]]
+          if [[ $RunningSeatID != "seat0" || $seat0HasTTYs != 1 ]]
           then
             WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
             loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
