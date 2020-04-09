@@ -85,9 +85,9 @@
      #to disable using the framebuffer globally.
      #Specifing the option on the kernel command line overrides the config file
 
-     #neverpasswd-autologinuser-{$SEAT}=1
+     #wlmneverpasswd-autologinuser-{$SEAT}=1
      #to allow the autologin user to not need a password ever on a seat, or
-     #neverpasswd-autologinuser=1
+     #wlmneverpasswd-autologinuser=1
      #to allow the autologin user to not need a password ever globally
      #this is not read form the kernel command line, however this option is set to
      #enabled when detected as a livecd. This option applies to logging in as the
@@ -2349,7 +2349,7 @@ function GetUserCredentials
     #By default the WaylandLoginManager only gives the autologin user one shot.
     #This option (also set in LiveCD mode), makes it so that user set to be the autologin-user never gets prompted for a password
     #This is NOT default when installed.
-    GetConfigKey neverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
+    GetConfigKey wlmneverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
 
     if [[ $ISLIVE == 1 ]]
     then
