@@ -58,6 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's/>= 0.114/>= 0.105/g' meson.build
+sed -i 's/12.99.3/2.0/g' subprojects/gvc/meson.build
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 

@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/12.99.3/2.0/g' subprojects/gvc/meson.build
 patch -p1 < /usr/share/RBOS_PATCHES/gnome-control-center.diff
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwayland=true build
 }
