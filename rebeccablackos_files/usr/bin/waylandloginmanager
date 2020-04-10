@@ -1259,7 +1259,8 @@ function DialogWait
 #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
 function DisplayServerWait
 {
-  GetStartedSeatIndex $1
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
 
   while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_"$SeatFileName" ]]
@@ -1920,10 +1921,11 @@ function ChooseSessionType
 #It takes 1 argument, the seat to display the terminal on
 function DiagnosticTerminal 
 {
-  GetStartedSeatIndex $1
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
+  SetFallbackEnvironmentVariables $CurrentSeat
   if [[ $wlmdebuginsecure == 1 ]]
   then
     vte -N &>/dev/null
@@ -1934,18 +1936,18 @@ function DiagnosticTerminal
 #It takes 1 argument, the seat to display the dialog on
 function ShowInfo
 {
-  GetStartedSeatIndex $1
-  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
+  SeatIndexID=$ReturnSeatIndex
+  SeatFileName=${SeatFileNames[$SeatIndexID]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
-  if [[ $1 == seat0 && $seat0HasTTYs == 1 ]]
+  SetFallbackEnvironmentVariables $CurrentSeat
+  if [[ $CurrentSeat == seat0 && $seat0HasTTYs == 1 ]]
   then
     SEATSTRING="This Login Manager Display for seat seat0 is running on tty: $LOGINMANAGERDISPLAYTTY"
   else
-    SEATSTRING="This Login Manager Display is for seat $1"
+    SEATSTRING="This Login Manager Display is for seat $CurrentSeat"
   fi
-  GetStartedSeatIndex $1
-  SeatIndexID=$ReturnSeatIndex
   SeatDefaultBackendType=${LoginManagerDisplayBackends[$SeatIndexID]}
   #If the backend type is FB, then add a string to tell the user that in the help dialog
   if [[ $SeatDefaultBackendType == "FB" ]]
@@ -1977,10 +1979,11 @@ The i icon shows this help prompt" &> /dev/null
 #It takes 1 argument, the seat to display the dialog on, and only the sessions belonging to the seat will be shown
 function SwitchUserDialog 
 {
-  GetStartedSeatIndex $1
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
+  SetFallbackEnvironmentVariables $CurrentSeat
   unset SessionList
   #get the number of registered sessions
   NumberOfSessions=${#AllSessionPIDs[@]}
@@ -1993,7 +1996,7 @@ function SwitchUserDialog
   #line 3 is the PID of the session
   #line 4 is the user name
   #line 5 is the logind session id.
-  RunningSeatSessions=($(loginctl show-seat "$1" -p Sessions --value 2>/dev/null))
+  RunningSeatSessions=($(loginctl show-seat "$CurrentSeat" -p Sessions --value 2>/dev/null))
   while [[ $NumberOfSessions -ge 0 ]]
   do
     #determine if the current session is alive, before adding it to the list
@@ -2009,7 +2012,7 @@ function SwitchUserDialog
 
     if [[ $SessionisRunning == 1 ]]
     then
-      if [[ ${AllSeatIDs[$NumberOfSessions]} == "$1" ]]
+      if [[ ${AllSeatIDs[$NumberOfSessions]} == "$CurrentSeat" ]]
       then
         if [[ ! -z $SessionList ]]
         then
@@ -2050,7 +2053,7 @@ function SwitchUserDialog
   #if the chosen session is -1 then contact the FIFO with a login prompt, otherwise switch to the selected session
   if [[ $ChangeSession == "-1" ]]
   then
-    SendSelfCommand Login "$1"
+    SendSelfCommand Login "$CurrentSeat"
   else 
     #if a session is selected, then get the PID, TTY, logind session ID with the selected Session ID as the array element number.
     if [[ $ChangeSession ]]
@@ -2064,7 +2067,7 @@ function SwitchUserDialog
       if [[ $ChangeSessionState == active || $ChangeSessionState == online ]]
       then
         #Only seat0 supports TTYs
-        if [[ "$1" == "seat0" && $seat0HasTTYs == 1  ]]
+        if [[ "$CurrentSeat" == "seat0" && $seat0HasTTYs == 1  ]]
         then
           chvt $ChangeSessionTTY &>/dev/null &
         fi
@@ -2407,12 +2410,13 @@ function GetUserCredentials
 #It takes 1 optional argument, the seat to display the dialogs on
 function LeavePrompt
 {
-  if [[ ! -z $1 ]]
+  CurrentSeat=$1
+  if [[ ! -z $CurrentSeat ]]
   then
-    GetStartedSeatIndex $1
+    GetStartedSeatIndex $CurrentSeat
     SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
     export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-    SetFallbackEnvironmentVariables $1
+    SetFallbackEnvironmentVariables $CurrentSeat
     SessionPromptThreshold=1
   else
     SetCommonConfig
@@ -2570,9 +2574,10 @@ function LeavePrompt
 #It takes 2 arguments, the seat, and second is the variable to set the string to
 function GetSeatCapabilityString
 {
+  CurrentSeat=$1
   #Detect hardware abilities, of the seat
-  LoginctlSeatStatusString=$(loginctl seat-status "$1" 2>/dev/null)
-  GetConfigKey wlmforcefbdev "$1" 0 1 wlmforcefbdev
+  LoginctlSeatStatusString=$(loginctl seat-status "$CurrentSeat" 2>/dev/null)
+  GetConfigKey wlmforcefbdev "CurrentSeat" 0 1 wlmforcefbdev
   if [[ $wlmforcefbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
@@ -2585,7 +2590,7 @@ function GetSeatCapabilityString
     SeatSupportsKMS=0
   fi
   unset wlmforcefbdev
-  GetConfigKey wlmnofbdev "$1" 0 1 wlmnofbdev
+  GetConfigKey wlmnofbdev "$CurrentSeat" 0 1 wlmnofbdev
   if [[ $wlmnofbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
@@ -2610,7 +2615,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
   #force software rendering to be enabled
-  GetConfigKey wlmforceswrender "$1" 0 1 wlmforceswrender
+  GetConfigKey wlmforceswrender "$CurrentSeat" 0 1 wlmforceswrender
   if [[ $wlmforceswrender != 0  ]]
   then
     FORCESOFTWARE=1
@@ -2621,7 +2626,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforceswrender, or configured vblank globally, or for the seat
   #force vblank to be disabled
-  GetConfigKey wlmforcevblankoff "$1" 0 1 wlmforcevblankoff
+  GetConfigKey wlmforcevblankoff "$CurrentSeat" 0 1 wlmforcevblankoff
   if [[ $wlmforcevblankoff != 0  ]]
   then
     FORCEVBLANK=1
@@ -2652,7 +2657,7 @@ function GetSeatCapabilityString
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
-  GetConfigKey wlmforcepixman "$1" 0 1 wlmforcepixman
+  GetConfigKey wlmforcepixman "$CurrentSeat" 0 1 wlmforcepixman
   if [[ $WESTONBACKEND == KMS && $wlmforcepixman != 0  ]]
   then
     WESTONUSEPIXMAN=1
@@ -2663,15 +2668,15 @@ function GetSeatCapabilityString
 
   if [[ $SeatSupportsKMS == 0 && $SeatSupportsFB == 0 ]]
   then
-    WriteToLog "No usable display hardware found on seat $1 ."
+    WriteToLog "No usable display hardware found on seat $CurrentSeat ."
   fi
   if [[ $SeatSupportsKMS != 0 && $WESTONBACKEND == KMS ]]
   then
-    WriteToLog "Kernel mode setting found for seat $1 ."
+    WriteToLog "Kernel mode setting found for seat $CurrentSeat ."
   fi
   if [[ $SeatSupportsFB != 0 ]]
   then
-    WriteToLog "Framebuffer found for seat $1 ."
+    WriteToLog "Framebuffer found for seat $CurrentSeat ."
   fi
 
 
@@ -2905,11 +2910,12 @@ function SetFallbackEnvironmentVariables
 #This fuction starts an autologin session, and takes 2 arguments, the first is the seat to start the autologin session on, the second is the autologin user
 function StartAutoLogin
 {
+  CurrentSeat=$1
   AUTOLOGINUSER=$2
-  echo "$1" >> /run/waylandloginmanager/autologinran
+  echo "$CurrentSeat" >> /run/waylandloginmanager/autologinran
   #Wait until the loginmanagerdisplay becomes availible
-  DisplayServerWait "$1"
-  ChooseSessionType "$1" "$AUTOLOGINUSER" 1
+  DisplayServerWait "$CurrentSeat"
+  ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" 1
   #Abort if the user selected cancel on the zenity dialog
   CancelOrOK=$?
   if [[ $CancelOrOK != 0 ]]
@@ -2917,7 +2923,7 @@ function StartAutoLogin
     exit 0
   fi
   #get the TTY to start the autologin session on, only for seat0
-  if [[ "$1" == seat0 && $seat0HasTTYs == 1 ]]
+  if [[ "$CurrentSeat" == seat0 && $seat0HasTTYs == 1 ]]
   then
     export AutoSessionTTY=$(GetNextTTY)
    else
@@ -2927,14 +2933,14 @@ function StartAutoLogin
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
-    if [[ "$1" == seat0 && $seat0HasTTYs == 1 ]]
+    if [[ "$CurrentSeat" == seat0 && $seat0HasTTYs == 1 ]]
     then
-      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $1"
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on TTY $AutoSessionTTY on seat $CurrentSeat"
     else
-      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $1"
+      WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $CurrentSeat"
     fi
 
-    GetConfigKey wlmneverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
+    GetConfigKey wlmneverpasswd-autologinuser "$CurrentSeat" "0" 0 AutoLoginUserNoPassword
     if [[ $ISLIVE == 1 ]]
     then
       AutoLoginUserNoPassword=1
@@ -2946,7 +2952,7 @@ function StartAutoLogin
       DoSessionLock=1
     fi
 
-    StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
+    StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
     WriteToLog "Not Enough TTYs for autologin!"
@@ -2976,12 +2982,13 @@ function SetupIPCFiles
 #It takes 1 argument, the seat.
 function UserActionDialog
 {
-  GetStartedSeatIndex $1
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
+  SetFallbackEnvironmentVariables $CurrentSeat
   #wait for the loginmanagerdisplay
-  DisplayServerWait "$1"
+  DisplayServerWait "$CurrentSeat"
   ActionMenu="Login\nLogin...\n"
   ActionMenu+="Switch\nSwitch User...\n"
   ActionMenu+="Leave\nShutdown...\nInfo\nHelp..."
@@ -2994,7 +3001,7 @@ ZENITYSTATUS=$?
   #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
   if [[ ! -z $USERACTION ]]
   then
-    SendSelfCommand $USERACTION "$1"
+    SendSelfCommand $USERACTION "$CurrentSeat"
   else
     $SLEEPCMD .1
   fi
@@ -3020,12 +3027,13 @@ function UnprivilegedFIFOFilter
 #This is so per-seat information can be stored in arrays using the same index to refer to the data per-seat
 function GetStartedSeatIndex
 {
+  CurrentSeat=$1
   ReturnSeatIndex="-1"
   StartedSeatCount=${#StartedSeats[@]}
   #Go through the StartedSeats array, untill the index matches the specified seat
   for (( StartIndex=0; StartIndex<$StartedSeatCount;  StartIndex=StartIndex+1 ))
   do
-    if [[ ${StartedSeats[$StartIndex]} == $1 ]]
+    if [[ ${StartedSeats[$StartIndex]} == $CurrentSeat ]]
     then
       ReturnSeatIndex=$StartIndex
       break
