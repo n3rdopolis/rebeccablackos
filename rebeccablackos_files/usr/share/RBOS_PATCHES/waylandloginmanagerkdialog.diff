@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-04-08 19:44:51.253116248 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2020-04-08 19:49:07.063756111 -0400
+--- usr/bin/waylandloginmanager	2020-04-10 17:06:48.864819197 -0400
++++ usr/bin/waylandloginmanagerkdialog	2020-04-10 17:07:47.509210843 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -195,7 +195,7 @@
        fi
      fi
    fi
-@@ -2302,26 +2285,30 @@
+@@ -2296,26 +2279,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -234,7 +234,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2329,9 +2316,9 @@
+@@ -2323,9 +2310,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -246,7 +246,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2362,9 +2349,9 @@
+@@ -2356,9 +2343,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -258,7 +258,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2378,7 +2365,7 @@
+@@ -2372,7 +2359,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -267,7 +267,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2401,13 +2388,13 @@
+@@ -2395,13 +2382,13 @@
        StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
      fi
    else
@@ -283,7 +283,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2420,7 +2407,7 @@
+@@ -2414,7 +2401,7 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -292,7 +292,7 @@
      SessionPromptThreshold=2
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
-@@ -2449,7 +2436,7 @@
+@@ -2443,7 +2430,7 @@
    unset RunningSessions
    unset RunningLoginManagerDisplaySessions
  
@@ -301,7 +301,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2505,9 +2492,15 @@
+@@ -2499,9 +2486,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -319,7 +319,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2521,7 +2514,7 @@
+@@ -2515,7 +2508,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -328,7 +328,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2566,7 +2559,7 @@
+@@ -2560,7 +2553,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -337,7 +337,7 @@
    fi
  }
  
-@@ -2914,7 +2907,7 @@
+@@ -2908,7 +2901,7 @@
    #Wait until the loginmanagerdisplay becomes availible
    DisplayServerWait "$1"
    ChooseSessionType "$1" "$AUTOLOGINUSER" 1
@@ -346,7 +346,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2939,7 +2932,7 @@
+@@ -2933,7 +2926,7 @@
      fi
      StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
    else
@@ -355,7 +355,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2973,15 +2966,20 @@
+@@ -2967,15 +2960,20 @@
    SetFallbackEnvironmentVariables $1
    #wait for the loginmanagerdisplay
    DisplayServerWait "$1"
@@ -382,7 +382,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2989,12 +2987,12 @@
+@@ -2983,12 +2981,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -398,7 +398,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3323,9 +3321,9 @@
+@@ -3317,9 +3315,9 @@
        fi
      done
  

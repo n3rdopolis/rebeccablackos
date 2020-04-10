@@ -2164,69 +2164,63 @@ function StartUserSession
     OutputArgs=""
   fi
 
-  RunSession=1
+  WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
-  if [[ $RunSession == 1 ]]
+  $SLEEPCMD 5
+  #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
+  USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p ExecMainPID --value 2>/dev/null)
+  #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
+  SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
+  for SESSION in "${SESSIONS[@]}"
+  do
+    SessionPid=$(loginctl show-session $SESSION -p Leader --value 2>/dev/null)
+    if [[ $SessionPid == $USERSESSIONPID ]]
+    then
+      LOGINDSESSION=$SESSION
+      break
+    fi
+  done < <(echo "$SESSIONS")
+
+  USERREGISTERDISPLAYNAME=$(getent passwd $LOGINUSER | awk -F : '{print $5}' | awk -F , '{print $1}')
+  if [[ -z $USERREGISTERDISPLAYNAME ]]
   then
-    WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
-    systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
-
-    $SLEEPCMD 5
-    #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
-    USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p ExecMainPID --value 2>/dev/null)
-    #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
-    SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
-    for SESSION in "${SESSIONS[@]}"
-    do
-      SessionPid=$(loginctl show-session $SESSION -p Leader --value 2>/dev/null)
-      if [[ $SessionPid == $USERSESSIONPID ]]
-      then
-        LOGINDSESSION=$SESSION
-        break
-      fi
-    done < <(echo "$SESSIONS")
-
-    USERREGISTERDISPLAYNAME=$(getent passwd $LOGINUSER | awk -F : '{print $5}' | awk -F , '{print $1}')
-    if [[ -z $USERREGISTERDISPLAYNAME ]]
-    then
-      USERREGISTERDISPLAYNAME=$LOGINUSER
-    else
-      USERREGISTERDISPLAYNAME="$USERREGISTERDISPLAYNAME   ($LOGINUSER)"
-    fi
-
-    #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
-    loginctl activate $LOGINDSESSION &>/dev/null
-
-    if [[ -z $USERSESSIONTTY ]]
-    then
-      USERSESSIONTTY=-1
-    fi
-    if [[ -z $USERSESSIONPID ]]
-    then
-      USERSESSIONPID=-1
-    fi
-    if [[ -z $USERREGISTERDISPLAYNAME ]]
-    then
-      USERREGISTERDISPLAYNAME=" "
-    fi
-    if [[ -z $LOGINDSESSION ]]
-    then
-      LOGINDSESSION=-1
-    fi
-    if [[ -z $USERSEAT ]]
-    then
-      USERSEAT=-1
-    fi
-    if [[ -z $STARTLOCKED ]]
-    then
-      STARTLOCKED=-1
-    fi
-
-    #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-    SendSelfRegisterData "NEWSESSION"$'\n'"$USERSESSIONTTY"$'\n'"$USERSESSIONPID"$'\n'"$USERREGISTERDISPLAYNAME"$'\n'"$LOGINDSESSION"$'\n'"$USERSEAT"$'\n'"$STARTLOCKED"
+    USERREGISTERDISPLAYNAME=$LOGINUSER
   else
-    WriteToLog "Too many sessions on $USERSEAT that does not support session switching"
+    USERREGISTERDISPLAYNAME="$USERREGISTERDISPLAYNAME   ($LOGINUSER)"
   fi
+
+  #The logind session activation is needed to enable the desktop permissions for the user. (such as udisks, and shutting down the system, and NetworkManager)
+  loginctl activate $LOGINDSESSION &>/dev/null
+
+  if [[ -z $USERSESSIONTTY ]]
+  then
+    USERSESSIONTTY=-1
+  fi
+  if [[ -z $USERSESSIONPID ]]
+  then
+    USERSESSIONPID=-1
+  fi
+  if [[ -z $USERREGISTERDISPLAYNAME ]]
+  then
+    USERREGISTERDISPLAYNAME=" "
+  fi
+  if [[ -z $LOGINDSESSION ]]
+  then
+    LOGINDSESSION=-1
+  fi
+  if [[ -z $USERSEAT ]]
+  then
+    USERSEAT=-1
+  fi
+  if [[ -z $STARTLOCKED ]]
+  then
+    STARTLOCKED=-1
+  fi
+
+  #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
+  SendSelfRegisterData "NEWSESSION"$'\n'"$USERSESSIONTTY"$'\n'"$USERSESSIONPID"$'\n'"$USERREGISTERDISPLAYNAME"$'\n'"$LOGINDSESSION"$'\n'"$USERSEAT"$'\n'"$STARTLOCKED"
+
 }
 
 #Test users credentials, by making sure the user name and password match by trying to test with su and expect.
