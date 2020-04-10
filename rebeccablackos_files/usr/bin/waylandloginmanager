@@ -1214,7 +1214,7 @@ function ReadRegister
           ((AllSessions++))
           #Export the Session data
           ExportSessionData
-          if [[ $SessionDoLock == 1 && $ISLIVE != 1 ]]
+          if [[ $SessionDoLock == 1 ]]
           then
             loginctl lock-session $SessionID 2> /dev/null
           fi
@@ -2267,10 +2267,11 @@ function AuthenticateUser
 #It takes 1 argument, the seat to display the login prompt on
 function GetUserCredentials
 {
-  GetStartedSeatIndex $1
+  CurrentSeat=$1
+  GetStartedSeatIndex $CurrentSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $1
+  SetFallbackEnvironmentVariables $CurrentSeat
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
   UIDMIN=$(grep -e "^UID_MIN" /etc/login.defs| awk '{print $2}')
@@ -2332,7 +2333,7 @@ function GetUserCredentials
     fi
   fi
   #get the TTY to start the session on, only for seat0
-  if [[ "$1" == "seat0"  && $seat0HasTTYs == 1 ]]
+  if [[ "$CurrentSeat" == "seat0"  && $seat0HasTTYs == 1 ]]
   then
     export SessionTTY=$(GetNextTTY)
   else
@@ -2343,14 +2344,14 @@ function GetUserCredentials
     #By default the WaylandLoginManager only gives the autologin user one shot.
     #This option (also set in LiveCD mode), makes it so that user set to be the autologin-user never gets prompted for a password
     #This is NOT default when installed.
-    GetConfigKey wlmneverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
+    GetConfigKey wlmneverpasswd-autologinuser "$CurrentSeat" "0" 0 AutoLoginUserNoPassword
 
     if [[ $ISLIVE == 1 ]]
     then
       AutoLoginUserNoPassword=1
     fi
 
-    GetConfigKey autologin-user "$1" ":" 0 SEATAUTOLOGINUSER
+    GetConfigKey autologin-user "$CurrentSeat" ":" 0 SEATAUTOLOGINUSER
     if [[ $LOGINUSER == $SEATAUTOLOGINUSER && $AutoLoginUserNoPassword == 1 ]]
     then
       passwordresult=0
@@ -2365,7 +2366,7 @@ function GetUserCredentials
       fi
 
       #send the password to an AuthenticateUser function with stdin
-      echo $USERPASSWORD | AuthenticateUser "$1"
+      echo $USERPASSWORD | AuthenticateUser "$CurrentSeat"
       #get the result from AuthenticateUser in the pipe, (and not the echo command)
       passwordresult=${PIPESTATUS[1]}
       unset USERPASSWORD
@@ -2377,22 +2378,23 @@ function GetUserCredentials
     else
       export USERHOME=$(eval echo ~$LOGINUSER)
       #Prompt for the session type
-      ChooseSessionType "$1" "$LOGINUSER" 0
+      ChooseSessionType "$CurrentSeat" "$LOGINUSER" 0
       if [[ $? != 0 ]]
       then
         return 0
       fi
 
       #if the password and username is correct, start the session
-      if [[ $1 == seat0 && $seat0HasTTYs == 1 ]]
+      if [[ $CurrentSeat == seat0 && $seat0HasTTYs == 1 ]]
       then
         TTYSTRING="on TTY $SessionTTY"
       else
         TTYSTRING=""
       fi
-      WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $1"
-      DialogWait 3 "Attempting to start the selected session..." "$1" &
-      StartUserSession "$SessionTTY" "$1" "$LOGINUSER" 0 "$WSESSIONDATA" &
+      WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
+      DialogWait 3 "Attempting to start the selected session..." "$CurrentSeat" &
+      DoSessionLock=0
+      StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
     fi
   else
     $ZENITYCMD --warning --text="Not Enough TTYs!" 2>/dev/null
@@ -2931,7 +2933,20 @@ function StartAutoLogin
     else
       WriteToLog "Starting Autologin session for $AUTOLOGINUSER on seat $1"
     fi
-    StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" 1 "$WSESSIONDATA" &
+
+    GetConfigKey wlmneverpasswd-autologinuser "$1" "0" 0 AutoLoginUserNoPassword
+    if [[ $ISLIVE == 1 ]]
+    then
+      AutoLoginUserNoPassword=1
+    fi
+    if [[ $AutoLoginUserNoPassword == 1 ]]
+    then
+      DoSessionLock=0
+    else
+      DoSessionLock=1
+    fi
+
+    StartUserSession "$AutoSessionTTY" "$1" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
   else
     $ZENITYCMD --warning --text="Not Enough TTYs for autologin!" 2>/dev/null
     WriteToLog "Not Enough TTYs for autologin!"
