@@ -1216,7 +1216,7 @@ function ReadRegister
           ExportSessionData
           if [[ $SessionDoLock == 1 ]]
           then
-            loginctl lock-session $SessionID 2> /dev/null
+            (sleep 30; loginctl lock-session $SessionID 2> /dev/null) &
           fi
         else
           WriteToLog "Session failed to start"
@@ -2577,7 +2577,7 @@ function GetSeatCapabilityString
   CurrentSeat=$1
   #Detect hardware abilities, of the seat
   LoginctlSeatStatusString=$(loginctl seat-status "$CurrentSeat" 2>/dev/null)
-  GetConfigKey wlmforcefbdev "CurrentSeat" 0 1 wlmforcefbdev
+  GetConfigKey wlmforcefbdev "$CurrentSeat" 0 1 wlmforcefbdev
   if [[ $wlmforcefbdev == 0  ]]
   then
     if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
