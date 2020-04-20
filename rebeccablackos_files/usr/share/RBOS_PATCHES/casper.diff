@@ -1,12 +1,13 @@
 === modified file 'scripts/casper-bottom/15autologin'
 --- scripts/casper-bottom/15autologin	2015-03-26 00:29:17 +0000
 +++ scripts/casper-bottom/15autologin	2015-08-07 02:28:49 +0000
-@@ -92,4 +92,8 @@
+@@ -92,4 +92,9 @@
  EOF
  fi
  
 +if [ -x /root/usr/bin/waylandloginmanager ]; then
 +    echo "autologin-user=$USERNAME" >> /root/etc/waylandloginmanager.conf
++    echo "wlmlivemode=1" >> /root/etc/waylandloginmanager.conf
 +fi
 +
  log_end_msg

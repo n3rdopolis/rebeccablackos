@@ -890,7 +890,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   fi
 
   #Determine if this is running on a live instance, if booted with casper
-  GetConfigKey boot=casper "" 0 2 ISLIVE
+  GetConfigKey wlmlivemode "" 0 0 LiveCDMode
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
@@ -973,7 +973,7 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       chvt 63
     fi
-    if [[ $ISLIVE == 1 ]]
+    if [[ $LiveCDMode == 1 ]]
     then
       WriteToLog "ERROR: No supportable hardware found"
       $DIALOGCMD --msgbox "No Kernel Mode Setting, or Framebuffer device found.
@@ -2278,7 +2278,7 @@ function GetUserCredentials
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
   UIDMIN=$(grep -e "^UID_MIN" /etc/login.defs| awk '{print $2}')
-  if [[ $ISLIVE == 1 ]]
+  if [[ $LiveCDMode == 1 ]]
   then
     UIDMIN=999
   fi
@@ -2349,7 +2349,7 @@ function GetUserCredentials
     #This is NOT default when installed.
     GetConfigKey wlmneverpasswd-autologinuser "$CurrentSeat" "0" 0 AutoLoginUserNoPassword
 
-    if [[ $ISLIVE == 1 ]]
+    if [[ $LiveCDMode == 1 ]]
     then
       AutoLoginUserNoPassword=1
     fi
@@ -2941,7 +2941,7 @@ function StartAutoLogin
     fi
 
     GetConfigKey wlmneverpasswd-autologinuser "$CurrentSeat" "0" 0 AutoLoginUserNoPassword
-    if [[ $ISLIVE == 1 ]]
+    if [[ $LiveCDMode == 1 ]]
     then
       AutoLoginUserNoPassword=1
     fi

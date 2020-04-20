@@ -42,7 +42,7 @@
    #Specify where wsession files are found
 @@ -892,7 +893,7 @@
    #Determine if this is running on a live instance, if booted with casper
-   GetConfigKey boot=casper "" 0 2 ISLIVE
+   GetConfigKey wlmlivemode "" 0 0 LiveCDMode
  
 -  ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
 +  KDIALOGCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- kdialog"
