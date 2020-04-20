@@ -1,0 +1,12 @@
+diff --git a/src/modules/partition/gui/PartitionSplitterWidget.cpp b/src/modules/partition/gui/PartitionSplitterWidget.cpp
+index ae73ecfcd..d3df42f75 100644
+--- a/src/modules/partition/gui/PartitionSplitterWidget.cpp
++++ b/src/modules/partition/gui/PartitionSplitterWidget.cpp
+@@ -29,6 +29,7 @@
+ #include <kpmcore/core/partition.h>
+ 
+ #include <QApplication>
++#include <QPainterPath>
+ #include <QPainter>
+ #include <QMouseEvent>
+ #include <QStyleOption>
