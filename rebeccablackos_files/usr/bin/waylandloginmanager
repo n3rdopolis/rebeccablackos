@@ -2079,7 +2079,7 @@ function StartUserSession
   while read -r var
   do 
     unset "$var" &> /dev/null
-  done < <(env | awk -F = '{print $1}' | grep -Ev "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" )
+  done < <(env | awk -F = '{print $1}' | grep -aEv "^WAYLAND_HOST$|^WAYLAND_GUEST$|^PATH$|^SESSIONID$" )
 
   #save the arguments passed to StartUserSession, and put the third argument into an array
   WSESSIONSTRING="$( echo -n "$5" | perl -pe 's/\$(\w+)/$ENV{$1}/g')"
@@ -2265,12 +2265,12 @@ function GetUserCredentials
   SetFallbackEnvironmentVariables $CurrentSeat
   #Get the list of nonsystem users, in each line, there is 1 user, with two feilds, the users 'friendly' name, and then the users system login name, seperated by a :
   #this finds the range of UIDs that are user UIDs, and then finds any users with theses UIDS.
-  UIDMIN=$(grep -e "^UID_MIN" /etc/login.defs| awk '{print $2}')
+  UIDMIN=$(grep -ae "^UID_MIN" /etc/login.defs| awk '{print $2}')
   if [[ $LiveCDMode == 1 ]]
   then
     UIDMIN=999
   fi
-  UIDMAX=$(grep -e "^UID_MAX" /etc/login.defs| awk '{print $2}')
+  UIDMAX=$(grep -ae "^UID_MAX" /etc/login.defs| awk '{print $2}')
   USERLIST=$(awk -v UIDMIN=$UIDMIN -v UIDMAX=$UIDMAX -F : '{ if ($3>=UIDMIN && $3 <=UIDMAX) print $5":"$1}' /etc/passwd)
   #sort the list
   USERLIST=$(echo "$USERLIST" | sort |uniq)
@@ -3006,7 +3006,7 @@ function UnprivilegedFIFOFilter
 {
   while [ 1 ]
   do
-    runuser -u $FIFOREADERUSER -m -- bash -c "grep -Eom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+    runuser -u $FIFOREADERUSER -m -- bash -c "grep -aEom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
     $SLEEPCMD .1
   done
 }
