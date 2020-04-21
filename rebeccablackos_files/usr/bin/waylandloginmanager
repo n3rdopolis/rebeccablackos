@@ -1049,18 +1049,6 @@ Will now reboot." 20 50 --no-cancel
     wlmdebug=1
     wlmdebuginsecure=1
   fi
-  
-  #if /etc/waylandloginmanager.conf exists, use the autologin user specified in that file, if not try the lightdm config file
-  if [[ -e /etc/waylandloginmanager.conf ]]
-  then
-    chmod 755 /etc/waylandloginmanager.conf
-  else
-    if [[ -e /etc/lightdm/lightdm.conf ]]
-    then
-      AUTOLOGINUSER=$(awk -F "#" '{print $1}' /etc/lightdm/lightdm.conf | grep ^autologin-user= | awk -F = '{print $2}' | head -1 )
-      echo "autologin-user=$AUTOLOGINUSER" >> /etc/waylandloginmanager.conf
-    fi
-  fi
 
   HOSTNAME=$(hostname)
   read -r -d $'\r' MACHINE_ID 2>/dev/null </var/lib/dbus/machine-id
