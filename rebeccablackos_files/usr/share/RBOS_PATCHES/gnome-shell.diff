@@ -1,7 +1,7 @@
 diff --git a/subprojects/gvc/gvc-mixer-control.c b/subprojects/gvc/gvc-mixer-control.c
 index 21fc233..432a211 100644
---- a/gvc-mixer-control.c
-+++ b/gvc-mixer-control.c
+--- a/subprojects/gvc/gvc-mixer-control.c
++++ b/subprojects/gvc/gvc-mixer-control.c
 @@ -3316,10 +3316,10 @@ gvc_mixer_new_pa_context (GvcMixerControl *self)
                            PA_PROP_APPLICATION_VERSION,
                            PACKAGE_VERSION);
