@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qtwayland
+SOURCENAME=qt5-qtx11extras
 
 #The URL of the Source code repo
-SOURCEURL=git://code.qt.io/qt/qtwayland.git
+SOURCEURL=git://code.qt.io/qt/qtx11extras
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -35,7 +35,7 @@ SOURCEREVISION=5.15
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=1
+REBUILDNEWREVISION=0
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
@@ -56,7 +56,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-qmake CONFIG+=wayland-compositor
+qmake
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -74,16 +74,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-sed -i 's/Qt5::LinuxAccessibilitySupport//g' $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/cmake/Qt5WaylandClient/Qt5WaylandClientConfig.cmake
-sed -i 's/LinuxAccessibilitySupport//g' $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/cmake/Qt5WaylandClient/Qt5WaylandClientConfig.cmake
-
-# Workaround to install generated private headers.
-QtWaylandVersion=$(ls -d ./include/QtWaylandClient/5.* | awk -F / '{print $NF}')
-cp ./src/client/qwayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
-cp ./src/client/wayland*.h $INSTALLDIR/include/QtWaylandClient/$QtWaylandVersion/QtWaylandClient/private
-
-mkdir -p $INSTALLDIR/lib/plugins/wayland-decoration-client
-ln -s $INSTALLDIR/plugins/wayland-decoration-client/libbradient.so $INSTALLDIR/lib/plugins/wayland-decoration-client
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core

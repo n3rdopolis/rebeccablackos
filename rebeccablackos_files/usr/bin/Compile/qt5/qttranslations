@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qtbase
+SOURCENAME=qt5-qttranslations
 
 #The URL of the Source code repo
-SOURCEURL=git://code.qt.io/qt/qtbase
+SOURCEURL=git://code.qt.io/qt/qttranslations
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -56,47 +56,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-mkdir build
-cd build
-if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
-then
-  ARCHARGS="-no-sse3 -no-ssse3 -no-sse4.1 -no-sse4.2 -no-avx -no-avx2 -no-avx512"
-else
-  ARCHARGS=""
-fi
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -feature-accessibility -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size $ARCHARGS
+qmake
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
 make
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
 make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-
-mkdir "$EXTERNALBUILDHOME/wiggly"
-cd "$EXTERNALBUILDHOME/wiggly"
-qmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly
-make
-cp "$EXTERNALBUILDHOME/wiggly/wiggly" $INSTALLDIR/bin
-
-
-mkdir "$EXTERNALBUILDHOME/tetrix"
-cd "$EXTERNALBUILDHOME/tetrix"
-qmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix
-make
-cp "$EXTERNALBUILDHOME/tetrix/tetrix" $INSTALLDIR/bin
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
