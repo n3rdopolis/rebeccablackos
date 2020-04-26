@@ -249,6 +249,19 @@ function PostInstallActions
     ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
   done
 
+  mkdir -p /usr/share/dbus-1/system-services/
+  find /opt/share/dbus-1/system-services/ -type f | while read -r FILE;
+  do
+    FILENAME=$(basename $FILE)
+    ln -s "$FILE" /usr/share/dbus-1/system-services/$FILENAME
+  done
+
+  mkdir -p /usr/share/dbus-1/system.d/
+  find /opt/share/dbus-1/system.d/ -type f | while read -r FILE;
+  do
+    FILENAME=$(basename $FILE)
+    ln -s "$FILE" /usr/share/dbus-1/system.d/$FILENAME
+  done
 
   #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
   if [[ -e /usr/bin/ubiquity ]]
