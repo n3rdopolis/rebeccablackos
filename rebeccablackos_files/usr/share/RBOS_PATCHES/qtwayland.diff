@@ -1,0 +1,15 @@
+diff --git a/src/client/qwaylandinputdevice.cpp b/src/client/qwaylandinputdevice.cpp
+index e0f0c6c8..0de96f60 100644
+--- a/src/client/qwaylandinputdevice.cpp
++++ b/src/client/qwaylandinputdevice.cpp
+@@ -179,8 +179,8 @@ public:
+     void callback_done(uint32_t callback_data) override {
+         m_done = true;
+         m_fn(callback_data);
+-        if (m_autoDelete)
+-            delete this;
++        //if (m_autoDelete)
++        //    delete this;
+     }
+ private:
+     bool m_done = false;
