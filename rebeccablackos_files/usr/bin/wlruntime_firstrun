@@ -35,6 +35,6 @@ then
   mkdir -p ~/.config/weston-rdp
   cd ~/.config/weston-rdp
   winpr-makecert -n $HOSTNAME -rdp > ~/.config/rdpcrt.crt 2>/dev/null 
-  cp $HOSTNAME.key rdpcrtkey.key
+  cp ~/.config/$HOSTNAME.key ~/.config/rdpcrtkey.key
   cd $OLDPWD
 fi
