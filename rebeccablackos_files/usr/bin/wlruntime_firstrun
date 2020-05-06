@@ -34,7 +34,7 @@ if [[ ! -e ~/.config/weston-rdp/rdpcrt.crt ]]
 then
   mkdir -p ~/.config/weston-rdp
   cd ~/.config/weston-rdp
-  winpr-makecert -n $HOSTNAME -rdp > ~/.config/rdpcrt.crt 2>/dev/null 
-  cp ~/.config/$HOSTNAME.key ~/.config/rdpcrtkey.key
+  winpr-makecert -format crt -path ~/.config/weston-rdp/ > ~/.config/weston-rdp/rdpcrt.crt 2>/dev/null 
+  cp ~/.config/weston-rdp/$HOSTNAME.key ~/.config/weston-rdp/rdpcrtkey.key
   cd $OLDPWD
 fi
