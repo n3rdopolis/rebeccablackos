@@ -18,4 +18,5 @@
 
 #This script sets up a nested session with xwayland, and the default desktop shell
 . /usr/bin/wlruntime_vars
+export WLR_BACKENDS=wayland
 sway
