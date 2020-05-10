@@ -98,9 +98,7 @@ if [ -f /etc/bash_completion ] && ! shopt -oq posix; then
     . /etc/bash_completion
 fi
 
-echo 'To exit most sessions, hit CTRL-ALT-BACKSPACE, or run'
-echo 'shutdowndialog'
-echo 'and select "Log Off" '
+echo 'To exit most sessions, hit CTRL-ALT-BACKSPACE, or run wllogoff'
 echo ' '
 echo 'To run a program under xwayland, run'
 echo '   xwaylandapp programname --arguments'
