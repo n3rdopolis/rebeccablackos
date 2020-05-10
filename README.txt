@@ -14,7 +14,7 @@ OVERVIEW:
   this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea. http://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
 
   There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support
-  Wayland as well as mpv, and gstreamer. There are a few applications that don't work, but many more are starting to work.
+  Wayland as well as mpv, and gstreamer.
 
   Xwayland is also included, which allows X applications to run under a Wayland server. Xwayland is very usable except for a few bugs.
 
@@ -23,7 +23,7 @@ OVERVIEW:
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
-  It is based on Debian Buster for Tier 1 packages
+  It is based on Debian Buster for Tier 1 packages, (And Debian Bullseye for some like a newer kernel)
 
 
 How to use the ISO:
@@ -41,10 +41,10 @@ How to use the ISO:
     It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system.
 
     It requires unionfs-fuse,squashfs-tools, dialog and zenity to be installed, all of which the script tries to install automatically by trying to figure out
-    your distro's package manager. It also needs either konsole, gnome-terminal OR xterm. If none of these are installed, it tries to install Xterm.
+    your distro's package manager. It also needs either konsole, gnome-terminal OR a standard x-terminal-emulator.
  
 How to use Wayland:
-    Weston now starts automatically as the default display server. The loginmanager display, and the users session are now all Wayland sessions
+    The loginmanagerdisplay greeter is weston based, where you can select your desired wayland based desktop.
 
     Wayland programs are in /opt/bin. But there are also many availible from the application launcher menu, under "All Wayland Programs".
 
