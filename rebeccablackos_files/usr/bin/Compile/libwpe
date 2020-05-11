@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=webkitgtk
+SOURCENAME=libwpe
 
 #The URL of the Source code repo
-SOURCEURL=https://webkitgtk.org/releases/webkitgtk-2.28.2.tar.xz
+SOURCEURL=https://github.com/WebPlatformForEmbedded/libwpe
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
-REPOSITORYTYPE=ARCHIVE
+REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=
+SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,50 +50,32 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-mv webkitgtk*/* .
+:
 }
 
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -p1 <<EOF
---- a/Source/WebKit/UIProcess/gtk/WaylandCompositor.cpp   2019-09-17 04:05:25.000000000 -0400
-+++ b/Source/WebKit/UIProcess/gtk/WaylandCompositor.cpp   2019-11-23 10:35:34.428565347 -0500
-@@ -31,6 +31,7 @@
- #include "WebKitWaylandServerProtocol.h"
- #include <EGL/egl.h>
- #include <EGL/eglext.h>
-+#include <EGL/eglmesaext.h>
- #include <WebCore/GLContext.h>
- #include <WebCore/PlatformDisplayWayland.h>
- #include <WebCore/Region.h>
-
-EOF
-
-mkdir build
-cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DPORT=GTK -DUSE_LIBHYPHEN=OFF
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
-make 
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
-make install
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+: 
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
