@@ -146,7 +146,7 @@ function RunDownloadAndOrBuild
   export SAFESOURCENAME=$(for (( iterator=0; iterator < $SOURCENAMECHARS ; iterator++ ))
   do
     CHAR=$(echo -n ${SOURCENAME:$iterator:1})
-    if [[ $CHAR == [a-Z0-9-_] ]]
+    if [[ $CHAR == [-_0-9a-zA-Z] ]]
     then
       echo -n $CHAR
     else

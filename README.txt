@@ -105,7 +105,7 @@ BUILDING:
      If you need to select specific revisions of the packages, copy buildcore_revisions_(architechture).txt into /var/cache/RBOS_Build_Files . Ensure that the file
      is official, and not tampered with, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418 are fully
      compatible for the packages. Revisions files can also specify a snapshot date for the underlying Debian packages, but only since commit 5555.
-
+     Commit 6413 corrected a bash 5.0 quirk in how the function-name safe names were handled.
 
      CONTROL FILES (relative to /var/cache/RBOS_Build_Files):
         DontDownloadDebootstrapScript:                           Delete this file to force the downloaded debootstrap in RBOS_Build_Files to run again at the
