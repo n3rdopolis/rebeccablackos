@@ -607,6 +607,8 @@ function DownloadSource()
         if [[ $? == 0 ]]
         then
           touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
+        else
+          echo "Network appears to be offline. Won't force a rebuild due to download failure, as a possible cause appears to be caused due to network connectivity, not an incorrectly specified repository." | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
         fi
       else
         if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" ]]
