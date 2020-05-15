@@ -16,7 +16,7 @@ OVERVIEW:
   There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support
   Wayland as well as mpv, and gstreamer.
 
-  Xwayland is also included, which allows X applications to run under a Wayland server. Xwayland is very usable except for a few bugs.
+  Xwayland is also included, which allows X applications to run under a Wayland server.
 
   There are also other Wayland Desktop environments that are usable: Liri, Enlightenment, and Gnome Shell Wayland, Kwin, and Sway aside from the default Weston
   Desktop shell.
