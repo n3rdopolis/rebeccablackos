@@ -3512,7 +3512,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     elif [[ $COMMAND == "Switch" ]]
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
+      if [[ -z $SEATARG ]]
+      then
+        WriteToLog "received command $COMMAND with no seat specifed"
+        continue
+      else
+        WriteToLog "received command $COMMAND for seat $SEATARG"
+      fi
       LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
       ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
       if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
@@ -3535,7 +3541,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If the command is change, go back to the loginmanagerdisplay TTY, and don't do anything else. It only switches to the TTY if the TTY isn't active already.
     elif [[ $COMMAND == "Change" ]]
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
+      if [[ -z $SEATARG ]]
+      then
+        WriteToLog "received command $COMMAND with no seat specifed"
+        continue
+      else
+        WriteToLog "received command $COMMAND for seat $SEATARG"
+      fi
       LOGINMANAGERDISPLAYSESSION=${LoginManagerDisplaySessions[$SeatIndexID]}
       ACTIVESESSION=$(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null)
       if [[ $ACTIVESESSION != $LOGINMANAGERDISPLAYSESSION ]]
@@ -3546,7 +3558,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Login command, then bring up a login dialog and start a login job, only if there isn't another login job running
     elif [[ $COMMAND == "Login" ]]
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
+      if [[ -z $SEATARG ]]
+      then
+        WriteToLog "received command $COMMAND with no seat specifed"
+        continue
+      else
+        WriteToLog "received command $COMMAND for seat $SEATARG"
+      fi
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLoginPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3562,7 +3580,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Leave command, then bring up a shutdown dialog and start a shutdown job, only if there isn't another shutdown job running
     elif [[ $COMMAND == "Leave" ]] 
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
+      if [[ -z $SEATARG ]]
+      then
+        WriteToLog "received command $COMMAND with no seat specifed"
+        continue
+      else
+        WriteToLog "received command $COMMAND for seat $SEATARG"
+      fi
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLeavePIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3588,7 +3612,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     #If it recives a Info command, then bring up a info dialog and start a info job, only if there isn't another info job running
     elif [[ $COMMAND == "Info" ]]
     then
-      WriteToLog "received command $COMMAND for seat $SEATARG"
+      if [[ -z $SEATARG ]]
+      then
+        WriteToLog "received command $COMMAND with no seat specifed"
+        continue
+      else
+        WriteToLog "received command $COMMAND for seat $SEATARG"
+      fi
       if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastInfoPIDs[$SeatIndexID]}([[:space:]]|$) ]]
       then
         if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
@@ -3606,7 +3636,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     then
       if [[ $wlmdebuginsecure == 1 ]]
       then
-        WriteToLog "received command $COMMAND for seat $SEATARG"
+        if [[ -z $SEATARG ]]
+        then
+          WriteToLog "received command $COMMAND with no seat specifed"
+          continue
+        else
+          WriteToLog "received command $COMMAND for seat $SEATARG"
+        fi
         if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastDebugPIDs[$SeatIndexID]}([[:space:]]|$) || $wlmdebuginsecure == 1  ]]
         then
           DiagnosticTerminal "$SEATARG" &
@@ -3627,6 +3663,13 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
   done
 }
 
+#Function to lookup XDG_SEAT and XDG_SESSION_ID in case if the variables are unset. It needs no arguments
+function GetXDGVariables
+{
+  SESSION_OBJ_PATH=$(busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager GetSessionByPID u $$ | awk -F "\"" '{print $2}')
+  export XDG_SESSION_ID=$(busctl get-property  org.freedesktop.login1 "$SESSION_OBJ_PATH" org.freedesktop.login1.Session Id | awk -F "\"" '{print $2}')
+  export XDG_SEAT=$(busctl get-property  org.freedesktop.login1 "$SESSION_OBJ_PATH" org.freedesktop.login1.Session Seat | awk -F "\"" '{print $2}')
+}
 
 #Use bash builtin sleep if availible
 if [[ -f /usr/lib/bash/sleep ]]
@@ -3660,6 +3703,7 @@ elif [[ $1 == "--sendcommand" ]]
 then
   if [[ -z $3 ]]
   then
+    GetXDGVariables
     SEAT=$XDG_SEAT
   else
     SEAT=$3
@@ -3688,15 +3732,16 @@ then
   SetConfigKey "$2" "$3"
 elif [[ $1 == "--shutdowndialog" ]]
 then
+  GetXDGVariables
   LeavePrompt
 elif [[ $1 == "--logoff" ]]
 then
-  if [[ ! -z $XDG_SESSION_ID ]]
-  then
-    loginctl terminate-session $XDG_SESSION_ID
-  else
-    fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
-  fi
+  GetXDGVariables
+  loginctl terminate-session $XDG_SESSION_ID
+elif [[ $1 == "--switchuser" ]]
+then
+  GetXDGVariables
+  SendSelfCommand Switch $XDG_SEAT
 else
   echo "waylandloginmanager: incorrect usage"
   echo "Useful options:"
