@@ -3691,7 +3691,12 @@ then
   LeavePrompt
 elif [[ $1 == "--logoff" ]]
 then
-  loginctl terminate-session $XDG_SESSION_ID
+  if [[ ! -z $XDG_SESSION_ID ]]
+  then
+    loginctl terminate-session $XDG_SESSION_ID
+  else
+    fuser -k $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  fi
 else
   echo "waylandloginmanager: incorrect usage"
   echo "Useful options:"
