@@ -1,8 +1,17 @@
 diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
-index af23222..8a88b37 100644
+index af23222..5ccf80f 100644
 --- a/kioclient/kioclient.cpp
 +++ b/kioclient/kioclient.cpp
-@@ -34,6 +34,9 @@
+@@ -22,6 +22,8 @@
+ 
+ #include <KIO/CopyJob>
+ #include <KIO/DeleteJob>
++#include <KIO/ApplicationLauncherJob>
++#include <KIO/JobUiDelegate>
+ #include <kio/listjob.h>
+ #include <kio/transferjob.h>
+ #ifndef KIOCORE_ONLY
+@@ -34,6 +36,9 @@
  #include <KAboutData>
  #include <KLocalizedString>
  
@@ -12,16 +21,7 @@ index af23222..8a88b37 100644
  #include <QDBusConnection>
  #include <QCommandLineParser>
  #include <QFileDialog>
-@@ -63,6 +66,8 @@ static QList<QUrl> makeUrls(const QStringList& urlArgs)
- static void usage()
- {
-     puts(i18n("\nSyntax:\n").toLocal8Bit().constData());
-+    puts(i18n("  kioclient5 appmenu\n"
-+              "            # Opens an application launcher.\n\n").toLocal8Bit().constData());
-     puts(i18n("  kioclient5 openProperties 'url'\n"
-               "            # Opens a properties menu\n\n").toLocal8Bit().constData());
-     puts(i18n("  kioclient5 exec 'url' ['mimetype']\n"
-@@ -356,6 +361,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+@@ -356,6 +361,18 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
      }
@@ -31,7 +31,10 @@ index af23222..8a88b37 100644
 +      KOpenWithDialog dlg(list, i18n("Select an Application to run..."), QString(), 0);
 +      dlg.hideRunInTerminal();
 +      if (dlg.exec()) {
-+          KRun::run(*dlg.service(), list, 0);
++          KIO::ApplicationLauncherJob *job = new KIO::ApplicationLauncherJob(dlg.service());
++          job->setUrls(list);
++          job->start();
++          return m_ok;
 +      }
 +    }
  #endif
