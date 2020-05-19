@@ -680,6 +680,31 @@ then
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 fi
 
+#Create a miniature /dev so that, for instance LVM doesn't try to create a backup file
+#on the chroots
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
+mount -t tmpfs none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
+if [[ $? != 0 ]]
+then
+  faillog "Failed to create mini devtmpfs"
+fi
+#Use #http://www.linuxfromscratch.org/lfs/view/6.1/chapter06/devices.html
+#for the list of devices, permissions, and makor and minor numbers
+mknod -m 622 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/console c 5 1
+mknod -m 666 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/null c 1 3
+mknod -m 666 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/zero c 1 5
+mknod -m 666 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ptmx c 5 2
+mknod -m 666 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/tty c 5 0
+mknod -m 444 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/random c 1 8
+mknod -m 444 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/urandom c 1 9
+chown root:tty "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/console
+chown root:tty "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ptmx
+chown root:tty "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/tty
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/pts
+mount -t devpts -o gid=4,mode=620 none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/pts
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm
+mount -t tmpfs none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm
+ln -s /proc/self/fd "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/fd
 
 #Copy external builders into thier own directory, make them executable
 cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
