@@ -16,24 +16,18 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Set Dconf settings
-if [[ ! -e ~/.config/dconf/user ]]
-then
-  dconf load / < ~/.config/dconfimport.ini &>/dev/null
-fi
+#This script manages the Weston instance that acts as the proxy for Weston screen sharing
 
-#Build the KDE configuration database
-if [[ ! -e $HOME/.cache/ksycoca5 ]]
-then
-  kbuildsycoca5 &>/dev/null &
-fi
-
-#Build RDP keys for weston-share
-#Only generate the key if it doesn't exist
-if [[ ! -e ~/.config/weston-rdp/HOST.crt ]]
-then
-  mkdir -p ~/.config/weston-rdp
-  winpr-makecert -rdp -path ~/.config/weston-rdp/ -silent 2>/dev/null 
-  cp ~/.config/weston-rdp/$HOSTNAME.key ~/.config/weston-rdp/HOST.key 2>/dev/null 
-  cp ~/.config/weston-rdp/$HOSTNAME.crt ~/.config/weston-rdp/HOST.crt 2>/dev/null 
-fi
+/opt/bin/weston --no-config --xwayland --backend=rdp-backend.so --shell=fullscreen-shell.so --rdp-tls-cert=./.config/weston-rdp/HOST.crt --rdp-tls-key=./.config/weston-rdp/HOST.key & WESTONPID=$!
+rdpdialog &
+DIALOGPID=$!
+while [ 1 ]
+do
+  if [ ! -e /proc/$DIALOGPID -o ! -e /proc/$WESTONPID ]
+  then
+    kill -9 $WESTONPID
+    kill -9 $DIALOGPID
+    exit
+  fi
+  sleep 1
+done
