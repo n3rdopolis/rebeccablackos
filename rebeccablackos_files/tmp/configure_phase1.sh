@@ -52,7 +52,14 @@ if [[ -z $APTFETCHDATESECONDS ]]
 then
   APTFETCHDATESECONDS=$(date +%s)
 fi
-APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
+
+APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ 2>/dev/null)
+APTFETCHDATERESULT=$?
+if [[ $APTFETCHDATERESULT != 0 ]]
+then
+  echo "Invalid APTFETCHDATESECONDS set. Falling back"
+  APTFETCHDATESECONDS=$(date +%s)
+fi
 echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages

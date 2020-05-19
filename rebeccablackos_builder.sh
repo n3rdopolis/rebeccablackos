@@ -729,12 +729,18 @@ then
 fi
 
 #If there is a date specified in the revisions file, create the Debian snapshot sources.list for that time
+#If using a revisions file, force downloading a snapshot from the time specified
 if [[ $APTFETCHDATESECONDS == [0-9]* ]]
 then
-  #If using a revisions file, force downloading a snapshot from the time specified
-  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ)
-  DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-  sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ 2>/dev/null)
+  APTFETCHDATERESULT=$?
+  if [[ $APTFETCHDATERESULT == 0 ]]
+  then
+    DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+    sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+  else
+    echolog "Invalid APTFETCHDATESECONDS set. Falling back"
+  fi
 fi
 
 #Delete the list of pacakges specified in RestartPackageList_"$BUILDARCH".txt
