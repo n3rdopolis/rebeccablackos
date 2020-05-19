@@ -251,7 +251,8 @@ then
   "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
   ln -s /proc/"$$"/cmdline "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
 else
-  faillog "Error: Another instance is already running for $BUILDARCH"
+  LockPID=$(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile | awk -F "/" '{print $3}')
+  faillog "Error: Another instance is already running for $BUILDARCH (pid $LockPID)"
 fi
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
