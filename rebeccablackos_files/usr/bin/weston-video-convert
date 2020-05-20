@@ -17,17 +17,28 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #This script processess various output files from Weston, by calling upon some helpers to convert the output files into a playable format, or to copy screenshots into a random ID so that the next screenshot doesn't overwrite it
-export FILENAMEID=$RANDOM
 
-zenity --info --text="Converting any existing Weston screen recorded files into usable video files to $HOME/weston-screenshots.
+if [[ -e ~/capture.wcap || -e ~/capture.h264 ]]
+then
+  export FILENAMEID=$RANDOM
 
-This dialog will close 5 seconds after all jobs complete" &
-zenityjob=$!
+  zenity --info --width=500 --text="Converting any existing Weston screen recorded files into playable video files to $HOME/weston-screenshots." &
+  zenityjob=$!
 
-mkdir ~/weston-screenshots
-vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper
-vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
+  mkdir ~/weston-screenshots
+  if [[ -e ~/capture.wcap ]]
+  then
+    vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper
+  fi
+  
+  if [[ -e ~/capture.h264 ]]
+  then
+     vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
+  fi
+  kill -9 $zenityjob
+else
+  zenity --info --width=500 --text="This utility will convert any Weston recorded capture files into playable video files, however none exist right now. See the help dialog on how to initiate a screen recording"
+fi
 
 
-sleep 5
-kill -9 $zenityjob
+
