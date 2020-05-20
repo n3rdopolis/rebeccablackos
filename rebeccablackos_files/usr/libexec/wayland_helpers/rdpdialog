@@ -18,7 +18,9 @@
 
 #This script displays when a weston session is being shared with RDP.
 
-zenity --forms --text="This current session is now being shared with RDP.
+zenity --forms --text="Wayland Display:
+   $XDG_RUNTIME_DIR/$1
+is now being shared with RDP.
 
 Using an RDP client, you can connect to:
 

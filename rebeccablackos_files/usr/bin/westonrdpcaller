@@ -25,10 +25,13 @@ zenity --forms --text="A new Weston server supporting RDP connections will start
 *Please note that the RDP session will NOT be password protected." 
 
 
-/usr/libexec/wayland_helpers/rdpdialog &
-DIALOGPID=$!
+
 
 ServerID=wayland-$RANDOM
+
+/usr/libexec/wayland_helpers/rdpdialog $ServerID &
+DIALOGPID=$!
+
 cd ~
 weston --socket=$ServerID --xwayland --backend=rdp-backend.so --rdp-tls-cert=./.config/weston-rdp/HOST.crt --rdp-tls-key=./.config/weston-rdp/HOST.key &
 WESTONPID=$!
