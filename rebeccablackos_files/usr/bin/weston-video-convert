@@ -28,22 +28,6 @@ mkdir ~/weston-screenshots
 vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper
 vte -c /usr/libexec/wayland_helpers/weston-video-convert-helper-264
 
-NewFileName=weston-screenshot
-FileNumber=1
-if [[ -e ~/weston-screenshots/"$NewFileName".png ]]
-then
-  while [[ -e ~/weston-screenshots/$NewFileName-$FileNumber.png ]]
-  do
-    ((FileNumber++))
-  done
-  NewFileName=$NewFileName-$FileNumber.png
-else
-  NewFileName=weston-screenshot.png
-fi
-
-
-cp ~/wayland-screenshot.png ~/weston-screenshots/$NewFileName
-
 
 sleep 5
 kill -9 $zenityjob
