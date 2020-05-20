@@ -19,7 +19,7 @@
 #This script processess various output files from Weston, by calling upon some helpers to convert the output files into a playable format, or to copy screenshots into a random ID so that the next screenshot doesn't overwrite it
 export FILENAMEID=$RANDOM
 
-zenity --info --text="Converting any weston screen capture data, such as screenshots, and video capture into usable formats (if needed) into $HOME/weston-screenshots.
+zenity --info --text="Converting any existing Weston screen recorded files into usable video files to $HOME/weston-screenshots.
 
 This dialog will close 5 seconds after all jobs complete" &
 zenityjob=$!
