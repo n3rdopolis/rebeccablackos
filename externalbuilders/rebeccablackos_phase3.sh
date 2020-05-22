@@ -41,7 +41,6 @@ fi
 #mounting critical fses on chrooted fs with bind 
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
-mount --rbind /sys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/sys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
@@ -51,6 +50,9 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
+
+#Hide /proc/modules as some debian packages call lsmod during install, which could lead to different results
+mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 
 #if there is enough ram, use the ramdisk as the upperdir, if not, use a path on the same filesystem as the upperdir
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
