@@ -706,6 +706,9 @@ mount -t devpts -o gid=4,mode=620 none "$BUILDLOCATION"/build/"$BUILDARCH"/minid
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm
 mount -t tmpfs none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm
 ln -s /proc/self/fd "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/fd
+ln -s /proc/self/fd/0 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stdin
+ln -s /proc/self/fd/1 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stdout
+ln -s /proc/self/fd/2 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stderr
 
 #Copy external builders into thier own directory, make them executable
 cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
