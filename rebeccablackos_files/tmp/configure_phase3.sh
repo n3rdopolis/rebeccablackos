@@ -249,6 +249,13 @@ function PostInstallActions
     ln -s "$FILE" /usr/share/dbus-1/system-services/$FILENAME
   done
 
+  mkdir -p /etc/dbus-1/system.d/
+  find /opt/etc/dbus-1/system.d/ -type f | while read -r FILE;
+  do
+    FILENAME=$(basename $FILE)
+    ln -s "$FILE" /etc/dbus-1/system.d/$FILENAME
+  done
+
   mkdir -p /usr/share/dbus-1/system.d/
   find /opt/share/dbus-1/system.d/ -type f | while read -r FILE;
   do
