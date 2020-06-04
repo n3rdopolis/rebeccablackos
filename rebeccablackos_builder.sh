@@ -778,19 +778,10 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs
 if [[ ! -e "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH" ]]
 then
 
-  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo ]]
+  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache ]]
   then
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo
-  fi
-
-  if [[ ! -z $(ls "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu.tar.gz &>/dev/null) ]]
-  then
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu.tar.gz
-  fi
-
-  if [[ ! -z $(ls "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu &>/dev/null) ]]
-  then
-    rm -r "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache/cargo-nightly-*-unknown-linux-gnu
+    echolog "Deleting downloaded Cargo files..."
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/cargocache
   fi
 
   touch "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH"
