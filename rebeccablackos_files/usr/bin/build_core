@@ -534,7 +534,7 @@ function DownloadTOMLData()
   do
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    "$CARGO_HOME"/cargo fetch --manifest-path "$CARGOFILE"
+    cargo fetch --manifest-path "$CARGOFILE"
   done
 }
 
@@ -623,35 +623,36 @@ function DownloadSource()
     #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
 
     #Ensure only one instace of the cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
-    SLEEPTIME=$(( (RANDOM%10)+1 ))
-    sleep 0.$SLEEPTIME
-    ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
-    CARGOLOCKRESULT=$?
-    while [[ $CARGOLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/cargocache/lockfile" ]]
-    do
-      ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
-      CARGOLOCKRESULT=$?
-      sleep 1
-    done
+    #SLEEPTIME=$(( (RANDOM%10)+1 ))
+    #sleep 0.$SLEEPTIME
+    #ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
+    #CARGOLOCKRESULT=$?
+    #while [[ $CARGOLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/cargocache/lockfile" ]]
+    #do
+    #  ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
+    #  CARGOLOCKRESULT=$?
+    #  sleep 1
+    #done
+
+    #if [[ ! -f "$CARGO_HOME"/cargo && ! -z $TOMLFILES ]]
+    #then
+    #  ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/cargocache/lockfile"
+    #  DEBIAN_ARCH=$(dpkg --print-architecture)
+    #  if [[ $DEBIAN_ARCH == i386 ]]
+    #  then
+    #    CARGOFILENAME=cargo-nightly-i686-unknown-linux-gnu
+    #  fi
+    #  if [[ $DEBIAN_ARCH == amd64 ]]
+    #  then
+    #    CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
+    #  fi
+    #  $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz"
+    #  tar -xzf "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz" -C "/$SOURCEDIR/buildhome/cargocache"
+    #  cp "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo" "$CARGO_HOME"
+    #  rm "/$SOURCEDIR/buildhome/cargocache/lockfile"
+    #fi
 
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
-    if [[ ! -f "$CARGO_HOME"/cargo && ! -z $TOMLFILES ]]
-    then
-      ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/cargocache/lockfile"
-      DEBIAN_ARCH=$(dpkg --print-architecture)
-      if [[ $DEBIAN_ARCH == i386 ]]
-      then
-        CARGOFILENAME=cargo-nightly-i686-unknown-linux-gnu
-      fi
-      if [[ $DEBIAN_ARCH == amd64 ]]
-      then
-        CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
-      fi
-      $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz"
-      tar -xzf "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz" -C "/$SOURCEDIR/buildhome/cargocache"
-      cp "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo" "$CARGO_HOME"
-      rm "/$SOURCEDIR/buildhome/cargocache/lockfile"
-    fi
 
     #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
     echo "#! /bin/bash
