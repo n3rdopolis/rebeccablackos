@@ -79,8 +79,8 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp wayfire.ini.default /etc/skel/.config/wayfire.ini
-sed -i 's/tilix/konsole/g' /etc/skel/.config/wayfire.ini
+cp wayfire.ini /etc/skel/.config/wayfire.ini
+sed -i 's/wofi/konsole/g' /etc/skel/.config/wayfire.ini
 sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire.ini
 sed -i 's|wf-background|swaybg -i /usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png -o "*"|g' /etc/skel/.config/wayfire.ini
 }
