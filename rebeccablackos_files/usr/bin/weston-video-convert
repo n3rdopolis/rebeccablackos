@@ -37,7 +37,7 @@ then
   fi
   kill -9 $zenityjob
 else
-  zenity --info --width=500 --text="This utility will convert any Weston recorded capture files into playable video files, however none exist right now. See the help dialog on how to initiate a screen recording"
+  zenity --info --width=500 --text="This utility will convert any Weston recorded capture files into playable video files, however none exist right now. Press Super+R to initiate and end a screen recording session with Weston. Note that Weston does not provide graphical feedback when user-intiated screen recording is active."
 fi
 
 
