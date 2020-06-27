@@ -417,9 +417,9 @@ function ModifyConfig
     sleep .3
     echo $(($CurrentDeviceNumber*100/$NumberOfDevices))
   done | $ZENITYCMD --no-cancel --auto-close --percentage=0 --progress --text "The changes made here will impact all users, as well as the login greeter. 
-Multipointer is not supported by all Wayland servers like it is on Weston. 
+Multipointer is not supported by all Wayland desktops like it is on Weston. 
 
-This will allow you to configure what seats devices belong to, for Wayland, and for sessions.
+This will allow pointers and seats to be associated with devices.
    -  Session 'Seats' are a grouping of a graphics device, and input devices for side-by-side user sessions
       on one physical computer.
 
@@ -468,7 +468,7 @@ function CommitChanges
 Press OK to apply all the changes. This will switch user to the loginmanager display.
 This is to signal the display server to detect the new changes, and the waylandloginmanager to detect new seats.
 
-Your sessions will not be terminated. You will need to switch back into them with Switch User" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+Your sessions will not be terminated, but they will need to be switched back into with Switch User" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
 
   #Reload the new configuration into udev
   udevadm control --reload-rules
@@ -517,7 +517,7 @@ What is a seat?
 ---------------
 A seat is a combination of devices on a computer that belong 
 to 1 user. Most computers have 1 seat each. However this
-software allows you to configure multiple seats.
+wizard allows multiple seats to be configured.
 
 What is a Session Seat?
 -----------------------
@@ -537,15 +537,14 @@ What is a Wayland Seat?
 -----------------------
 A wayland seat is a group of hardware within a session seat 
 that are shared within a session, to where, when supported by
-a  given desktop environment, allows you to have multiple
+a  given desktop environment, allows there to be multiple
 pointers on one session, along with their keyboards and mice. 
 This type of configuration allows for better collaboration,
 with two users sharing a session. It is also possible to 
 have session seats, with multiple wayland seats, to where each
 independant session also has multiple pointers.
 
-You do not need a special graphics configuration for wayland 
-seats.
+A special graphics configuration for wayland seats/pointers is not needed.
 
 ABOUT THIS UTILITY
 ==================
@@ -574,7 +573,7 @@ propeties.
 USING THIS UTILITY
 ==================
 This utility has 3 different ways to select how the wizard 
-goes through your devices. However the wizard is similar for
+goes through all devices. However the wizard is similar for
 all 3. It bests tries to describe the current device, and 
 prompts the session and wayland seat the device should belong
 to. Leaving a feild blank accepts the current seats the device
@@ -598,8 +597,8 @@ one new device needs to be added.
 
 Configure Sets of Devices As They Are Connected
 -------------------------
-This is similar to the prior method, it prompts if you want to 
-change the seat assosiation for devices attached before the 
+This is similar to the prior method, it prompts if it is desired to 
+change the seat association for devices attached before the 
 wizard was started or not, and then it prompts to attach devices
 scanning for new ones each time.
 This is best for setting up a computer with a large number of 
@@ -627,14 +626,14 @@ Show Detailed Help
 Quit"| $ZENITYCMD --height 580 --list --hide-column 1 --print-column 1 --column=selectionnumber --column=option --hide-header --title="Multipointer and Seat Configuration" --text "Select device configuration mode.
 
 'Configure All Devices' lists all devices currently attached to be configured.
-      If all devices are currently attached, and there are not configured at all for any seat layouts yet, this option is likely desired.
+      If all the desired devices are currently attached, and there are not configured at all for any seat layouts yet, this option is likely desired.
 
 'Configure Newly Attached Devices' prompts when to plug in new devices, then only runs the config for devices plugged in after the wizard starts.
      This option is best for adding a few newly attached devices, when there are already devices configured for seat layouts.
 
-'Configure Sets of Devices As They Are Connected' works similar to 'Configure Newly Attached Devices', with the addition that it prompts for new devices until you it quits.
+'Configure Sets of Devices As They Are Connected' works similar to 'Configure Newly Attached Devices', with the addition that it prompts for new devices until this wizard is closed.
      This option is best for adding large amounts of similar devices, for many seats.
-     Devices can be incrementally added, so that they are not mixed up amonst each other.
+     Devices can be incrementally added, so that they are not mixed up among each other.
 
 'Show Detailed Help' shows more details on how to use this wizard
 
