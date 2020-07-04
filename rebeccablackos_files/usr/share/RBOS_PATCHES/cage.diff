@@ -1,0 +1,15 @@
+diff --git a/output.c b/output.c
+index d6e34aa..3ff8b57 100644
+--- a/output.c
++++ b/output.c
+@@ -232,9 +232,7 @@ scan_out_primary_view(struct cg_output *output)
+ 		return false;
+ 	}
+ 
+-	if (!wlr_output_attach_buffer(wlr_output, surface->buffer)) {
+-		return false;
+-	}
++	wlr_output_attach_buffer(wlr_output, &surface->buffer->base);
+ 
+ 	return wlr_output_commit(wlr_output);
+ }
