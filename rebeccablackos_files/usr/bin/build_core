@@ -76,7 +76,12 @@ then
   export REBUILDNEWREVISION
 fi
 
-export NONROOTUSER=nobody
+getent passwd build_core &> /dev/null
+if [[ $? != 0 ]]
+then
+  adduser --no-create-home --disabled-password --system  build_core
+fi
+export NONROOTUSER=build_core
 export NONROOTGROUP=nogroup
 export SOURCEDIR=/srcbuild
 export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
