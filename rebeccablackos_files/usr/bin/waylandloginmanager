@@ -2416,26 +2416,25 @@ function LeavePrompt
 
   #Get the number of running sessions
   RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
-  RunningLoginManagerDisplaySessions=($(loginctl show-user -p Sessions $LOGINMANAGERDISPLAYUSER --value 2>/dev/null))
+  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
+  RunningSessionItr=0
   RunningSessionCount=0
   for RunningSession in "${RunningSessions[@]}"
   do
     Include=1
-    for RunningLoginManagerDisplaySession in "${RunningLoginManagerDisplaySessions[@]}"
-    do
-      if [[ $RunningSession == $RunningLoginManagerDisplaySession ]]
-      then
-        Include=0
-        break
-      fi
-    done
+    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
+    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
+    then
+      Include=0
+    fi
     if [[ $Include == 1 ]]
     then
       ((RunningSessionCount++))
     fi
+    ((RunningSessionItr++))
   done
   unset RunningSessions
-  unset RunningLoginManagerDisplaySessions
+  unset RunningSessionTypes
 
   #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
   CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
