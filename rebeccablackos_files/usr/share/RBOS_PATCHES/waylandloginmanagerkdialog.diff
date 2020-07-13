@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-04-21 18:23:11.022769799 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2020-04-21 18:25:05.907628763 -0400
+--- usr/bin/waylandloginmanager	2020-07-13 19:30:39.986435598 -0400
++++ usr/bin/waylandloginmanagerkdialog	2020-07-13 19:30:51.990017333 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -283,7 +283,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2408,7 +2395,7 @@
+@@ -2409,7 +2396,7 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -294,7 +294,7 @@
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
 @@ -2437,7 +2424,7 @@
    unset RunningSessions
-   unset RunningLoginManagerDisplaySessions
+   unset RunningSessionTypes
  
 -  #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
 +  #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.

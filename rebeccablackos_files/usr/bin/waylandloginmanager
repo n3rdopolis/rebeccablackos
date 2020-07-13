@@ -2399,6 +2399,7 @@ function GetUserCredentials
 function LeavePrompt
 {
   CurrentSeat=$1
+  #If the prompt is on the loginmanagerdisplay, all sessions need to be warned about. If called from a user session, only warn if there is one or more in addition. 
   if [[ ! -z $CurrentSeat ]]
   then
     GetStartedSeatIndex $CurrentSeat
