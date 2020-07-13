@@ -1,0 +1,81 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This runs a graphical terminal full screen to connect to the tmux sessions that run the login prompt
+
+. /usr/bin/wlruntime_vars &> /dev/null
+
+EmulatedTTY=$1
+
+which tmux &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "tmux not installed"
+  exit 1
+fi
+
+which alacritty &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "alacritty not installed"
+  exit 1
+fi
+
+which cage &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "cage not installed"
+  exit 1
+fi
+
+
+
+read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
+if [[ $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
+then
+  echo "vttydisable specified on the command line. Falling back to default getty"
+  exit 1
+fi
+
+
+
+
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
+
+
+#The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
+#Only start once the actual TTY is active, as otherwise it can conflict with a display server
+read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+if [[ $ActiveTTY != $EmulatedTTY ]]
+then
+  while [[ $ActiveTTY != $EmulatedTTY ]]
+  do
+    read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+    $SLEEPCMD 1
+  done
+fi
+
+cage -d -- alacritty --config-file /etc/vtty-frontend/alacritty.yml -e tmux -2 -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
+exit 0

@@ -1,0 +1,56 @@
+[Unit]
+Description=Graphical terminal for vTTY %I
+
+After=vtty-backend@.service
+After=systemd-user-sessions.service plymouth.service
+
+
+BindsTo=vtty-backend@.service
+
+ConditionPathExists=/dev/tty0
+ConditionPathExists=/dev/%i
+
+Conflicts=getty@tty1.service
+#Same as default getty service
+IgnoreOnIsolate=true
+Conflicts=rescue.service
+Before=rescue.service
+
+
+#Only way for a failure to be reported is if there is no /dev/dri/card0
+#The ttyserver always returns true
+OnFailure=getty@%i.service
+
+[Service]
+Environment=XDG_SEAT=seat0
+
+PAMName=vtty-frontend
+#Test if there is a graphics card, if not revert to text mode TTY
+ExecStartPre=/usr/bin/test -e /dev/dri/card0
+ExecStart=/usr/bin/vtty-frontend %I
+
+TTYPath=/dev/%I
+TTYReset=true
+TTYVTDisallocate=true
+Restart=always
+RestartSec=0
+
+User=vtty-frontend
+Type=simple
+
+NoNewPrivileges=true
+ProtectSystem=true
+PrivateTmp=true
+PrivateNetwork=true
+#RestrictRealtime=true
+#ProtectClock=true
+#ProtectHostname=true
+#ProtectKernelTunables=true
+#RestrictRealtime=true
+#RestrictSUIDSGID=true
+
+
+
+[Install]
+WantedBy=getty.target
+DefaultInstance=tty1

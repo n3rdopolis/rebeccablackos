@@ -88,6 +88,8 @@ BOOT OPTIONS:
 
             wlmdebuginsecure:           This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
 
+       This option is also handled, (but not by the WaylandLoginManager itself)
+            vttydisable:                This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
 
       When installed, and you are unable to use a UI, you can use the commands:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub

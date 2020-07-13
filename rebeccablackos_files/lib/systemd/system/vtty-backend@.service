@@ -1,0 +1,18 @@
+[Unit]
+Description=Session in tmux for vTTY %I
+Before=vtty-frontend@.service
+
+[Service]
+Restart=always
+RestartSec=0
+
+ExecStart=/usr/bin/vtty-backend %I
+Type=notify
+
+IgnoreSIGPIPE=false
+SendSIGHUP=true
+KillMode=process
+
+[Install]
+WantedBy=getty.target
+DefaultInstance=tty1

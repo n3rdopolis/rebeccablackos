@@ -207,6 +207,11 @@ function PostInstallActions
   #enable acpid
   systemctl enable acpid.service
 
+  #enable the virtual tty services.
+  #systemctl enable vtty-backend@.service
+  #systemctl enable vtty-frontend@.service
+  #ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
+
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
