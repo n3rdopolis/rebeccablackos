@@ -19,37 +19,73 @@
 #This runs a tmux session which acts as a fake getty
 
 EmulatedTTY=$1
-if [[ -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
+IsWorker=$2
+
+
+#This uses tmux to get the PTY of the client, and issue the clear and reset command to it, (as well as the PTY for the tmux server)
+function ResetPTYs
+{
+ tmux -S /run/vtty/$EmulatedTTY/tmuxsocket list-clients -F '#{client_tty}' | while read CLIENT_TTY
+ do
+   tput reset > $CLIENT_TTY
+   tput clear > $CLIENT_TTY
+ done
+ tput reset
+ tput clear
+}
+
+#If this script is not being called by itself as a worker, start the background tmux session
+if [[ $IsWorker != worker ]]
 then
-  tmux -S /run/vtty/$EmulatedTTY/tmuxsocket kill-session -a
+  #Terminate any running sessions on the tmux session (if any)
+  if [[ -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
+  then
+    tmux -S /run/vtty/$EmulatedTTY/tmuxsocket kill-session -a
+  fi
+
+  which tmux &> /dev/null
+  if [[ $? != 0 ]]
+  then
+    echo "tmux not installed"
+    exit 1
+  fi
+
+  mkdir -p /run/vtty/$EmulatedTTY
+  #Call this script as a worker in the tmux session
+  tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty $0 $1 worker &
+  sleep .1
+
+  #Wait for the tmux socket to be created
+  if [[ ! -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
+  then
+    while [[ ! -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
+    do
+      sleep 1
+    done
+  fi
+
+  #Grant the non-root user access
+  chmod 770 /run/vtty/$EmulatedTTY/tmuxsocket
+  chown vtty-frontend /run/vtty/$EmulatedTTY/tmuxsocket
+  systemd-notify --ready &> /dev/null
+
+  #Wait until the tmux server quits
+  TMUXPID=$(lsof | grep /run/vtty/$EmulatedTTY/tmuxsocket | awk '{print $2}')
+  tail --pid=$TMUXPID -f /dev/null
+  exit 0
+
+else
+ #If this is the worker script, unset variables, reset the PTYs, unset variables, and start the login prompt
+ trap 'ResetPTYs; login -p --' 2
+ while [ 1 ]
+ do
+   ResetPTYs
+   unset TMUX
+   unset TMUX_PANE
+   unset NOTIFY_SOCKET
+   unset INVOCATION_ID
+   unset JOURNAL_STREAM
+   login -p --
+ done
+ exit 0
 fi
-
-which tmux &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "tmux not installed"
-  exit 1
-fi
-
-mkdir -p /run/vtty/$EmulatedTTY
-tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty bash -c "unset TMUX; unset TMUX_PANE; unset NOTIFY_SOCKET; unset INVOCATION_ID; unset JOURNAL_STREAM; trap 'reset; login -p --' 2; while [ 1 ]; do reset; login -p --; done" &
-sleep .1
-
-if [[ ! -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
-then
-  while [[ ! -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
-  do
-    sleep 1
-  done
-fi
-
-
-chmod 770 /run/vtty/$EmulatedTTY/tmuxsocket
-chown vtty-frontend /run/vtty/$EmulatedTTY/tmuxsocket
-systemd-notify --ready &> /dev/null
-
-
-TMUXPID=$(lsof | grep /run/vtty/$EmulatedTTY/tmuxsocket | awk '{print $2}')
-tail --pid=$TMUXPID -f /dev/null
-exit 0
-
