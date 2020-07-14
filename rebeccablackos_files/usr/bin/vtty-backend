@@ -32,7 +32,7 @@ then
 fi
 
 mkdir -p /run/vtty/$EmulatedTTY
-tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty bash -c "trap 'reset; login -p --' 2; while [ 1 ]; do reset; login -p --; done" &
+tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty bash -c "unset TMUX; unset TMUX_PANE; unset NOTIFY_SOCKET; unset INVOCATION_ID; unset JOURNAL_STREAM; trap 'reset; login -p --' 2; while [ 1 ]; do reset; login -p --; done" &
 sleep .1
 
 if [[ ! -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
