@@ -52,7 +52,7 @@ then
 
   mkdir -p /run/vtty/$EmulatedTTY
   #Call this script as a worker in the tmux session
-  tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty $0 $1 worker &
+  tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket new-session -d -s vtty $0 $1 worker &
   sleep .1
 
   #Wait for the tmux socket to be created

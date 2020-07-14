@@ -44,7 +44,7 @@ then
 fi
 
 
-
+#if vttydisable is specified on the boot command line, fall back to legacy gettys
 read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
 if [[ $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
 then
@@ -78,6 +78,6 @@ then
 fi
 cage -d -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=9 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-titlebar -- \
-tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
+tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
 
 exit 0
