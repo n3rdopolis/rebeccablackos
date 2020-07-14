@@ -77,5 +77,5 @@ then
   done
 fi
 
-cage -d -- alacritty --config-file /etc/vtty-frontend/alacritty.yml -e tmux -2 -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
+cage -d -- alacritty --config-file /etc/vtty-frontend/alacritty.yml -e tmux -2 -f /etc/vtty-frontend/tmux.conf -Su /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
 exit 0
