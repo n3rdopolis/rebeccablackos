@@ -1,31 +1,13 @@
-diff --git a/src/app/app.cc b/src/app/app.cc
-index 7dcf940f..d7822394 100644
---- a/src/app/app.cc
-+++ b/src/app/app.cc
-@@ -65,6 +65,7 @@ public:
-         gboolean no_pty{false};
-         gboolean no_rewrap{false};
-         gboolean no_scrollbar{false};
-+        gboolean start_fullscreen{false};
-         gboolean no_shaping{false};
-         gboolean no_shell{false};
-         gboolean no_systemd_scope{false};
-@@ -531,6 +532,8 @@ public:
-                           "Disable rewrapping on resize", nullptr },
-                         { "no-scrollbar", 0, 0, G_OPTION_ARG_NONE, &no_scrollbar,
-                           "Disable scrollbar", nullptr },
-+                        { "start-fullscreen", 0, 0, G_OPTION_ARG_NONE, &start_fullscreen,
-+                          "Start Fullscreen", nullptr },
-                         { "no-shaping", 0, 0, G_OPTION_ARG_NONE, &no_shaping,
-                           "Disable Arabic shaping", nullptr },
-                         { "no-shell", 'S', 0, G_OPTION_ARG_NONE, &no_shell,
-@@ -1986,6 +1989,9 @@ vteapp_window_constructed(GObject *object)
-                 window->scrollbar = nullptr;
-         }
- 
-+        if (options.start_fullscreen)
-+		gtk_window_fullscreen(GTK_WINDOW(window));
-+
-         /* Create actions */
-         GActionEntry const entries[] = {
-                 { "copy",        window_action_copy_cb,       "s", nullptr, nullptr },
+diff --git a/src/app/window.ui b/src/app/window.ui
+index 0aea16e5..de4e7c70 100644
+--- a/src/app/window.ui
++++ b/src/app/window.ui
+@@ -100,7 +100,7 @@
+     </child>
+     <child type="titlebar">
+       <object class="GtkHeaderBar" id="headerbar1">
+-        <property name="visible">True</property>
++        <property name="visible">False</property>
+         <property name="can_focus">False</property>
+         <property name="show_close_button">True</property>
+         <property name="decoration_layout">:close</property>
