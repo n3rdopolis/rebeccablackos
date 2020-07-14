@@ -29,10 +29,10 @@ then
   exit 1
 fi
 
-which alacritty &> /dev/null
+which vte &> /dev/null
 if [[ $? != 0 ]]
 then
-  echo "alacritty not installed"
+  echo "vte not installed"
   exit 1
 fi
 
@@ -76,6 +76,8 @@ then
     $SLEEPCMD 1
   done
 fi
+cage -d -- \
+vte --no-context-menu --no-builtin-dingus --reverse --font=9 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-titlebar -- \
+tmux -2u -f /etc/vtty-frontend/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
 
-cage -d -- alacritty --config-file /etc/vtty-frontend/alacritty.yml -e tmux -2 -f /etc/vtty-frontend/tmux.conf -Su /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
 exit 0
