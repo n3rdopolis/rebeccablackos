@@ -34,6 +34,159 @@ function ResetPTYs
  tput clear
 }
 
+
+function GetFirstIPType
+{
+  if [[ $1 == 4 ]]
+  then
+    FINDCHAR="."
+  elif [[ $1 == 6 ]]
+  then
+    FINDCHAR=":"
+  else
+    return
+  fi
+
+  IPs=($(hostname -I))
+  IPText=""
+  for IP in "${IPs[@]}"
+  do
+    if [[ $IP == *$FINDCHAR* ]]
+    then
+      IPText=$IP
+      break
+    fi
+  done
+  if [[ -z $IPText ]]
+  then
+    IPText=$(hostname)
+  fi
+  echo $IPText
+}
+
+function Get_os-release_key
+{
+  KEY=$1
+  os_release_file_str=""
+  if [[ -e /etc/os-release ]]
+  then
+    os_release_file_str=$(cat /etc/os-release)
+  fi
+  if [[ -e /usr/lib/os-release ]]
+  then
+    os_release_file_str=$(cat /usr/lib/os-release)
+  fi
+  if [[ -z $os_release_file_str ]]
+  then
+    return
+  fi
+
+  cat $os_release_file | grep ^$KEY | sed "s/$KEY=//g" | head -1 | sed 's/"//g'
+}
+
+function GetUserCount
+{
+  #Get the number of running sessions
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
+  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
+  RunningSessionItr=0
+  RunningSessionCount=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    Include=1
+    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
+    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
+    then
+      Include=0
+    fi
+    if [[ $Include == 1 ]]
+    then
+      ((RunningSessionCount++))
+    fi
+    ((RunningSessionItr++))
+  done
+  unset RunningSessions
+  unset RunningSessionTypes
+  echo $RunningSessionCount
+}
+
+function Show_etc_issue
+{
+  read -r -n 16385 -d $'\r' etc_issue_file 2>/dev/null </etc/issue
+  if [[ ${#etc_issue_file} == 16385 ]]
+  then
+    return
+  fi
+
+  ect_issue_charcount=${#etc_issue_file}
+  ect_issue_text=""
+  for (( etc_issue_itr=0 ; etc_issue_itr < $ect_issue_charcount ; etc_issue_itr++ ))
+  do
+    etc_issue_char=${etc_issue_file:$etc_issue_itr:1}
+    if [[ $etc_issue_char != '\' ]]
+    then
+      ect_issue_text+="$etc_issue_char"
+    else
+      ((etc_issue_itr++))
+      if [[ $etc_issue_itr -lt $ect_issue_charcount ]]
+      then
+        etc_issue_escaped_char=${etc_issue_file:$etc_issue_itr:1}
+
+        case $etc_issue_escaped_char in
+        4)
+          ect_issue_text+="$(GetFirstIPType 4)";;
+        6)
+          ect_issue_text+="$(GetFirstIPType 6)";;
+        b)
+          ect_issue_text+="$(stty -a | head -1 | awk '{print $2}')";;
+        d)
+          #It's not ISO 8601, but that's what getty does (and two spaces before the year)
+          ect_issue_text+="$(date +"%a %b %d  %Y")";;
+        e)
+          ect_issue_text+=$'\033';;
+        s)
+          ect_issue_text+="$(uname -s)";;
+        S)
+          ect_issue_text+="$(Get_os-release_key PRETTY_NAME)";;
+        l)
+          ect_issue_text+="v${EmulatedTTY^^} (using $(tty))";;
+        m)
+          ect_issue_text+="$(arch)";;
+        n)
+          ect_issue_text+="$(hostname)";;
+        o)
+          ect_issue_text+="$(domainname)";;
+        O)
+          ect_issue_text+="$(domainname -f)";;
+        r)
+          ect_issue_text+="$(uname -r)";;
+        t)
+          ect_issue_text+="$(date +"%T")";;
+        u)
+          ect_issue_text+="$(GetUserCount)";;
+        U)
+          UserCount=$(GetUserCount)
+          if [[ $UserCount == 1 ]]
+          then
+            add_text="1 user"
+          else
+            add_text="$UserCount Users"
+          fi
+          ect_issue_text+="$add_text";;
+        v)
+          ect_issue_text+="$(uname -v)";;
+        '\')
+          ect_issue_text+='\';;
+        *)
+          ect_issue_text+="$etc_issue_escaped_char";;
+        esac
+      fi
+    fi
+  done
+
+  echo  $'\n'"${ect_issue_text}"$'\n'
+}
+
 #If this script is not being called by itself as a worker, start the background tmux session
 if [[ $IsWorker != worker ]]
 then
@@ -76,10 +229,14 @@ then
 
 else
  #If this is the worker script, unset variables, reset the PTYs, unset variables, and start the login prompt
- trap 'ResetPTYs; login -p --' 2
+ #trap 'ResetPTYs; Show_etc_issue; login -p --' 2
+
+ #standard getty doesn't respond to ctrl+c
+ trap '' 2
  while [ 1 ]
  do
    ResetPTYs
+   Show_etc_issue
    unset TMUX
    unset TMUX_PANE
    unset NOTIFY_SOCKET
