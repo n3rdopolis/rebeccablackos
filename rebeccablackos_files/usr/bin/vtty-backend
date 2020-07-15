@@ -202,7 +202,10 @@ function CreateEscapeSequence
     PrintChar="\x1b[33m"
     ;;
   esac
-  printf $PrintChar
+  if [[ ! -z $PrintChar ]]
+  then
+    printf $PrintChar
+  fi
 }
 
 function Show_etc_issue
@@ -277,7 +280,7 @@ function Show_etc_issue
           then
             ect_issue_text+=$'\033'
           else
-            ect_issue_text+=$(CreateEscapeSequence $PARAM)
+            ect_issue_text+=$(CreateEscapeSequence $etc_issue_param_value)
           fi
           ;;
         s)
