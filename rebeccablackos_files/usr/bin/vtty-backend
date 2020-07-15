@@ -64,7 +64,7 @@ function GetFirstIPType
   echo $IPText
 }
 
-function Get_os-release_key
+function Get_os_release_key
 {
   KEY=$1
   os_release_file_str=""
@@ -81,7 +81,27 @@ function Get_os-release_key
     return
   fi
 
-  cat $os_release_file | grep ^$KEY | sed "s/$KEY=//g" | head -1 | sed 's/"//g'
+  echo "$os_release_file_str" | grep ^$KEY | sed "s/$KEY=//g" | head -1 | sed 's/"//g'
+}
+
+function getinterfaceip4
+{
+  IPText=$(ip -o -f inet addr show | awk -v INTERFACE=lo '{if ($2==INTERFACE) print $4}' | head -1 | awk -F '/' '{print $1}')
+  if [[ -z $IPText ]]
+  then
+    IPText=$(hostname)
+  fi
+  echo $IPText
+}
+
+function getinterfaceip6
+{
+  IPText=$(ip -o -f inet6 addr show | awk -v INTERFACE=lo '{if ($2==INTERFACE) print $4}' | head -1 | awk -F '/' '{print $1}')
+  if [[ -z $IPText ]]
+  then
+    IPText=$(hostname)
+  fi
+  echo $IPText
 }
 
 function GetUserCount
@@ -132,11 +152,46 @@ function Show_etc_issue
       then
         etc_issue_escaped_char=${etc_issue_file:$etc_issue_itr:1}
 
+        if [[ $etc_issue_escaped_char == 4 || $etc_issue_escaped_char == 6 || $etc_issue_escaped_char == e || $etc_issue_escaped_char == S ]]
+        then
+          etc_issue_param_value=""
+          if [[ ${etc_issue_file:$(($etc_issue_itr+1)):1} == "{" ]]
+          then
+            etc_issue_param_itr=$(($etc_issue_itr+2))
+            paramcharendreached=0
+            for (( etc_issue_param_itr=$etc_issue_param_itr ; etc_issue_param_itr < $ect_issue_charcount ; etc_issue_param_itr++ ))
+            do
+              etc_issue_param_char=${etc_issue_file:$etc_issue_param_itr:1}
+              if [[ $etc_issue_param_char != "}" ]]
+              then
+                paramcharendreached=1
+                etc_issue_param_value+=$etc_issue_param_char
+              else
+                #echo "cmd $etc_issue_escaped_char param $etc_issue_param_value"
+                etc_issue_itr=$etc_issue_param_itr
+                break
+              fi
+            done
+          fi
+        fi
+
         case $etc_issue_escaped_char in
         4)
-          ect_issue_text+="$(GetFirstIPType 4)";;
+          if [[ -z $etc_issue_param_value ]]
+          then
+            ect_issue_text+="$(GetFirstIPType 4)"
+          else
+            ect_issue_text+="$(getinterfaceip4 $PARAM)"
+          fi
+          ;;
         6)
-          ect_issue_text+="$(GetFirstIPType 6)";;
+          if [[ -z $etc_issue_param_value ]]
+          then
+            ect_issue_text+="$(GetFirstIPType 6)"
+          else
+            ect_issue_text+="$(getinterfaceip6 $PARAM)"
+          fi
+          ;;
         b)
           ect_issue_text+="$(stty -a | head -1 | awk '{print $2}')";;
         d)
@@ -147,7 +202,13 @@ function Show_etc_issue
         s)
           ect_issue_text+="$(uname -s)";;
         S)
-          ect_issue_text+="$(Get_os-release_key PRETTY_NAME)";;
+          if [[ -z $etc_issue_param_value ]]
+          then
+            ect_issue_text+="$(Get_os_release_key PRETTY_NAME)"
+          else
+            ect_issue_text+="$(Get_os_release_key $etc_issue_param_value)"
+          fi
+          ;;
         l)
           ect_issue_text+="v${EmulatedTTY^^} (using $(tty))";;
         m)
