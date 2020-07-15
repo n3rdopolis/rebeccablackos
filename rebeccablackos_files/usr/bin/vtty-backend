@@ -35,6 +35,8 @@ function ResetPTYs
 }
 
 
+
+####/etc/issue functions
 function GetFirstIPType
 {
   if [[ $1 == 4 ]]
@@ -130,6 +132,79 @@ function GetUserCount
   echo $RunningSessionCount
 }
 
+#https://stackoverflow.com/questions/39473297/how-do-i-print-colored-output-with-python-3
+function CreateEscapeSequence
+{
+  EscapeSequence=$1
+  PrintChar=""
+  case $EscapeSequence in
+  black)
+    PrintChar="\033[30m"
+    ;;
+  blink)
+    PrintChar="\033[5m"
+    ;;
+  blue)
+    PrintChar="\033[34m"
+    ;;
+  bold)
+    PrintChar="\033[1m"
+    ;;
+  brown)
+    PrintChar="\033[33m"
+    ;;
+  cyan)
+    PrintChar="\033[36m"
+    ;;
+  darkgray)
+    PrintChar="\033[37m"
+    ;;
+  gray)
+    PrintChar="\033[37m"
+    ;;
+  green)
+    PrintChar="\033[32m"
+    ;;
+  halfbright)
+    PrintChar="\033[2m"
+    ;;
+  lightblue)
+    PrintChar="\x1b[94m"
+    ;;
+  lightcyan)
+    PrintChar="\x1b[96m"
+    ;;
+  lightgray)
+    PrintChar="\x1b[37m"
+    ;;
+  lightgreen)
+    PrintChar="\x1b[92m"
+    ;;
+  lightmagenta)
+    PrintChar="\x1b[95m"
+    ;;
+  lightred)
+    PrintChar="\x1b[91m"
+    ;;
+  magenta)
+    PrintChar="\033[35m"
+    ;;
+  red)
+    PrintChar="\033[31m"
+    ;;
+  reset)
+    PrintChar="\033[0m"
+    ;;
+  reverse)
+    PrintChar="\033[7m"
+    ;;
+  yellow)
+    PrintChar="\x1b[33m"
+    ;;
+  esac
+  printf $PrintChar
+}
+
 function Show_etc_issue
 {
   read -r -n 16385 -d $'\r' etc_issue_file 2>/dev/null </etc/issue
@@ -198,7 +273,13 @@ function Show_etc_issue
           #It's not ISO 8601, but that's what getty does (and two spaces before the year)
           ect_issue_text+="$(date +"%a %b %d  %Y")";;
         e)
-          ect_issue_text+=$'\033';;
+          if [[ -z $etc_issue_param_value ]]
+          then
+            ect_issue_text+=$'\033'
+          else
+            ect_issue_text+=$(CreateEscapeSequence $PARAM)
+          fi
+          ;;
         s)
           ect_issue_text+="$(uname -s)";;
         S)
@@ -247,6 +328,8 @@ function Show_etc_issue
 
   echo  $'\n'"${ect_issue_text}"$'\n'
 }
+####end /etc/issue commands
+
 
 #If this script is not being called by itself as a worker, start the background tmux session
 if [[ $IsWorker != worker ]]
