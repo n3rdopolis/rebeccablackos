@@ -42,12 +42,11 @@ NoNewPrivileges=true
 ProtectSystem=true
 PrivateTmp=true
 PrivateNetwork=true
-#RestrictRealtime=true
-#ProtectClock=true
-#ProtectHostname=true
-#ProtectKernelTunables=true
-#RestrictRealtime=true
-#RestrictSUIDSGID=true
+RestrictRealtime=true
+ProtectClock=true
+ProtectHostname=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
 
 
 
