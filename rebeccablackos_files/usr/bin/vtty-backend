@@ -329,7 +329,7 @@ function Show_etc_issue
     fi
   done
 
-  echo  $'\n'"${ect_issue_text}"
+  echo -n $'\n'"${ect_issue_text}"
 }
 ####end /etc/issue commands
 
