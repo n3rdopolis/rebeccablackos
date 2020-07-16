@@ -257,60 +257,60 @@ function Show_etc_issue
         4)
           if [[ -z $etc_issue_param_value ]]
           then
-            ect_issue_text+="$(GetFirstIPType 4)"
+            ect_issue_text+="$(GetFirstIPType 4 2>/dev/null)"
           else
-            ect_issue_text+="$(getinterfaceip4 $PARAM)"
+            ect_issue_text+="$(getinterfaceip4 $etc_issue_param_value 2>/dev/null)"
           fi
           ;;
         6)
           if [[ -z $etc_issue_param_value ]]
           then
-            ect_issue_text+="$(GetFirstIPType 6)"
+            ect_issue_text+="$(GetFirstIPType 6 2>/dev/null)"
           else
-            ect_issue_text+="$(getinterfaceip6 $PARAM)"
+            ect_issue_text+="$(getinterfaceip6 $etc_issue_param_value 2>/dev/null)"
           fi
           ;;
         b)
-          ect_issue_text+="$(stty -a | head -1 | awk '{print $2}')";;
+          ect_issue_text+="$(stty -a 2>/dev/null | head -1 | awk '{print $2}')";;
         d)
           #It's not ISO 8601, but that's what getty does (and two spaces before the year)
-          ect_issue_text+="$(date +"%a %b %d  %Y")";;
+          ect_issue_text+="$(date +"%a %b %d  %Y" 2>/dev/null)";;
         e)
           if [[ -z $etc_issue_param_value ]]
           then
             ect_issue_text+=$'\033'
           else
-            ect_issue_text+=$(CreateEscapeSequence $etc_issue_param_value)
+            ect_issue_text+=$(CreateEscapeSequence $etc_issue_param_value 2>/dev/null)
           fi
           ;;
         s)
-          ect_issue_text+="$(uname -s)";;
+          ect_issue_text+="$(uname -s 2>/dev/null)";;
         S)
           if [[ -z $etc_issue_param_value ]]
           then
-            ect_issue_text+="$(Get_os_release_key PRETTY_NAME)"
+            ect_issue_text+="$(Get_os_release_key PRETTY_NAME 2>/dev/null)"
           else
-            ect_issue_text+="$(Get_os_release_key $etc_issue_param_value)"
+            ect_issue_text+="$(Get_os_release_key $etc_issue_param_value 2>/dev/null)"
           fi
           ;;
         l)
-          ect_issue_text+="v${EmulatedTTY^^} (using $(tty))";;
+          ect_issue_text+="v${EmulatedTTY^^} (using $(tty 2>/dev/null))";;
         m)
-          ect_issue_text+="$(arch)";;
+          ect_issue_text+="$(arch 2>/dev/null)";;
         n)
-          ect_issue_text+="$(hostname)";;
+          ect_issue_text+="$(hostname 2>/dev/null)";;
         o)
-          ect_issue_text+="$(domainname)";;
+          ect_issue_text+="$(domainname 2>/dev/null)";;
         O)
-          ect_issue_text+="$(domainname -f)";;
+          ect_issue_text+="$(domainname -f 2>/dev/null)";;
         r)
-          ect_issue_text+="$(uname -r)";;
+          ect_issue_text+="$(uname -r 2>/dev/null)";;
         t)
-          ect_issue_text+="$(date +"%T")";;
+          ect_issue_text+="$(date +"%T" 2>/dev/null)";;
         u)
-          ect_issue_text+="$(GetUserCount)";;
+          ect_issue_text+="$(GetUserCount 2>/dev/null)";;
         U)
-          UserCount=$(GetUserCount)
+          UserCount=$(GetUserCount 2>/dev/null)
           if [[ $UserCount == 1 ]]
           then
             add_text="1 user"
@@ -319,7 +319,7 @@ function Show_etc_issue
           fi
           ect_issue_text+="$add_text";;
         v)
-          ect_issue_text+="$(uname -v)";;
+          ect_issue_text+="$(uname -v 2>/dev/null)";;
         '\')
           ect_issue_text+='\';;
         *)
@@ -329,7 +329,7 @@ function Show_etc_issue
     fi
   done
 
-  echo  $'\n'"${ect_issue_text}"$'\n'
+  echo  $'\n'"${ect_issue_text}"
 }
 ####end /etc/issue commands
 
