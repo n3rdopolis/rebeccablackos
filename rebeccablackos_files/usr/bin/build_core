@@ -134,14 +134,14 @@ function RunDownloadAndOrBuild
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   #Create home directory for the subcommand's $HOME folder, and standard home directories
-  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
-  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local"
-  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.cache"
-  mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.config"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.cache"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.config"
 
-  mkdir -p "$BUILDLOGDIR/$SOURCENAME"
-  mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  mkdir -p "/$SOURCEDIR"/buildhome/cargocache
+  $NONROOTCOMMAND mkdir -p "$BUILDLOGDIR/$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/cargocache
 
   #create a variable for the package name that is the source name converted to all lower case.
   export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
@@ -161,7 +161,7 @@ function RunDownloadAndOrBuild
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
 
-  mkdir -p "$EXTERNALBUILDHOME"/bin
+  $NONROOTCOMMAND mkdir -p "$EXTERNALBUILDHOME"/bin
 
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
