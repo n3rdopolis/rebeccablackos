@@ -389,6 +389,7 @@ else
    unset NOTIFY_SOCKET
    unset INVOCATION_ID
    unset JOURNAL_STREAM
+   export VTTY=$EmulatedTTY
    login -p --
  done
  exit 0
