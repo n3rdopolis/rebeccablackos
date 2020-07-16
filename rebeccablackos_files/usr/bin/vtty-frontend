@@ -76,7 +76,7 @@ then
     $SLEEPCMD 1
   done
 fi
-cage -d -- \
+cage -d -s -m last -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=9 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-titlebar -- \
 tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
 
