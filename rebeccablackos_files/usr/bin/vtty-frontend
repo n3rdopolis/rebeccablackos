@@ -76,8 +76,11 @@ then
     $SLEEPCMD 1
   done
 fi
-cage -d -s -m last -- \
+cage -d -s -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=9 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-titlebar -- \
-tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty
+tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty &
+FRONTENDPID=$!
+trap 'kill -15 $FRONTENDPID' 15
+wait $FRONTENDPID
 
 exit 0
