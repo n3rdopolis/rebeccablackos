@@ -273,8 +273,8 @@ function Show_etc_issue
         b)
           ect_issue_text+="$(stty -a 2>/dev/null | head -1 | awk '{print $2}')";;
         d)
-          #It's not ISO 8601, but that's what getty does (and two spaces before the year)
-          ect_issue_text+="$(date +"%a %b %d  %Y" 2>/dev/null)";;
+          #Date in ISO-8601.
+          ect_issue_text+="$(date +"%a %Y-%m-%d" 2>/dev/null)";;
         e)
           if [[ -z $etc_issue_param_value ]]
           then
