@@ -334,9 +334,24 @@ function Show_etc_issue
 ####end /etc/issue commands
 
 
+function DoLoginPrompt
+{
+ ResetPTYs
+ Show_etc_issue
+ unset TMUX
+ unset TMUX_PANE
+ unset NOTIFY_SOCKET
+ unset INVOCATION_ID
+ unset JOURNAL_STREAM
+ export VTTY=$EmulatedTTY
+ login -p --
+}
+
 #If this script is not being called by itself as a worker, start the background tmux session
 if [[ $IsWorker != worker ]]
 then
+  systemctl stop getty@$EmulatedTTY.service
+
   #Terminate any running sessions on the tmux session (if any)
   if [[ -e /run/vtty/$EmulatedTTY/tmuxsocket ]]
   then
@@ -375,22 +390,11 @@ then
   exit 0
 
 else
- #If this is the worker script, unset variables, reset the PTYs, unset variables, and start the login prompt
- #trap 'ResetPTYs; Show_etc_issue; login -p --' 2
+ trap 'DoLoginPrompt' 2
 
- #standard getty doesn't respond to ctrl+c
- trap '' 2
  while [ 1 ]
  do
-   ResetPTYs
-   Show_etc_issue
-   unset TMUX
-   unset TMUX_PANE
-   unset NOTIFY_SOCKET
-   unset INVOCATION_ID
-   unset JOURNAL_STREAM
-   export VTTY=$EmulatedTTY
-   login -p --
+   DoLoginPrompt
  done
  exit 0
 fi
