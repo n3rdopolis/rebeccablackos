@@ -3,7 +3,6 @@ Description=Session in tmux for vTTY %I
 Before=vtty-frontend@.service
 
 [Service]
-Environment=XDG_SEAT=seat-vtty-backend
 Restart=always
 RestartSec=0
 
