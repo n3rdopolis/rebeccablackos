@@ -25,13 +25,16 @@ fi
 
 
 TTYNumber=$1
-if [[ -z $TTYNumber ]]
+if [[ -z $TTYNumber || $TTYNumber != tty* || ! -e /dev/$TTYNumber ]]
 then
   echo "Must specfy a tty"
   echo "example"
   echo "forcelegacytty tty1"
   exit
 fi
+
+
+
 
 function ResetTTYMode
 {
