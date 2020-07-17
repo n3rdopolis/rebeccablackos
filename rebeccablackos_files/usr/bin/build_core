@@ -134,14 +134,14 @@ function RunDownloadAndOrBuild
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   #Create home directory for the subcommand's $HOME folder, and standard home directories
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local"
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.cache"
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.config"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME" 2>/dev/null
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local" 2>/dev/null
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.cache" 2>/dev/null
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.config" 2>/dev/null
 
-  $NONROOTCOMMAND mkdir -p "$BUILDLOGDIR/$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/cargocache
+  mkdir -p "$BUILDLOGDIR/$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME" 2>/dev/null
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/cargocache 2>/dev/null
 
   #create a variable for the package name that is the source name converted to all lower case.
   export PACKAGESOURCENAME="$(echo $SOURCENAME | tr [:upper:] [:lower:] | sed 's/_/-/g')"
