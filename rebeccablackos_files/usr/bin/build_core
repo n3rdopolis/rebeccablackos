@@ -544,6 +544,7 @@ function DownloadTOMLData()
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
+#debs that have had build failures will have a /usr/share/buildcore_revisions/buildresults/$SOURCENAME file in them, to mark that they need to be rebuilt
 function DownloadSource()
 {
   #If /tmp/buildcore_revisions.txt exists, then import it.
