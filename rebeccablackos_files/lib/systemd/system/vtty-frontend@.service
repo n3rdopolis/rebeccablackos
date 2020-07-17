@@ -10,7 +10,6 @@ BindsTo=vtty-backend@.service
 ConditionPathExists=/dev/tty0
 ConditionPathExists=/dev/%i
 
-#Conflicts=getty@tty1.service
 #Same as default getty service
 IgnoreOnIsolate=true
 Conflicts=rescue.service
