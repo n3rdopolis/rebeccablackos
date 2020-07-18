@@ -21,6 +21,7 @@
 . /usr/bin/wlruntime_vars &> /dev/null
 
 EmulatedTTY=$1
+export XCURSOR_THEME=core
 
 which tmux &> /dev/null
 if [[ $? != 0 ]]
