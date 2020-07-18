@@ -103,8 +103,6 @@ echo ' '
 echo 'To run a program under xwayland, run'
 echo '   xwaylandapp programname --arguments'
 echo ' '
-echo 'You also find Wayland programs under the application launcher'
-echo ' '
 echo  Yesterday was `date -d y +%A`. Today it is `date +%A`. Tomorrow is `date -d day +%A`, and `date -d "2 day" +%A` comes afterwards. | fold -s
 echo '------------------------------------------------------'
 echo 'In order to be able to run Wayland apps as root, run:'
