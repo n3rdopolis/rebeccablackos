@@ -21,6 +21,7 @@
 . /usr/bin/wlruntime_vars &> /dev/null
 
 EmulatedTTY=$1
+export HOME=/etc/vtty-config
 
 which tmux &> /dev/null
 if [[ $? != 0 ]]
