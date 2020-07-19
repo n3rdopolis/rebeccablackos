@@ -765,7 +765,15 @@ done
 echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 
 #make the imported files executable 
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+chmod 0644 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/bin
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/libexec
+chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
+find "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/ -type d | while read DIRECTORY
+do
+  chmod 0755 "$DIRECTORY"
+done
 chown  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chgrp  root  -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
