@@ -1,0 +1,14 @@
+[Unit]
+Description=Monitor and activate the active vTTY session
+After=systemd-user-sessions.service
+
+[Service]
+Restart=always
+RestartSec=0
+
+ExecStart=/usr/bin/vtty-monitor
+Type=simple
+
+[Install]
+WantedBy=getty.target
+

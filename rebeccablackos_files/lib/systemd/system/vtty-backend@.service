@@ -1,6 +1,7 @@
 [Unit]
 Description=Session in tmux for vTTY %I
 Before=vtty-frontend@.service
+#Wants=vtty-monitor.service
 
 [Service]
 Restart=always

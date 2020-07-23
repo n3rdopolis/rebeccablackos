@@ -1,0 +1,139 @@
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#Determines the active vTTY session
+
+TmuxServerPIDs=()
+TmuxServerPTYs=()
+TmuxSessionPIDs=()
+TmuxSessionIDs=()
+
+function GetVTTyLogindSession
+{
+  LogindSession=""
+  DoGetTmuxData=1
+  TTYNumber=$1
+
+  #TTY number must be valid
+  if [[ $TTYNumber -lt 1 || $TTYNumber -gt 63 ]]
+  then
+    return
+  fi
+
+  #If there is no running socket, then quit
+  if [[ ! -e /run/vtty/tty$TTYNumber/tmuxsocket ]]
+  then
+    TmuxServerPIDs[$TTYNumber]=""
+    TmuxServerPTYs[$TTYNumber]=""
+    TmuxSessionPIDs[$TTYNumber]=""
+    TmuxSessionIDs[$TTYNumber]=""
+    return
+  fi
+
+  #If the last known Tmux server was running, the PTY is the same
+  if [[ ! -z ${TmuxServerPIDs[$TTYNumber]} && -e /proc/${TmuxServerPIDs[$TTYNumber]} ]]
+  then
+    SessionPty=${TmuxServerPTYs[$TTYNumber]}
+  else
+    TmuxServerData=($(tmux -S /run/vtty/tty$TTYNumber/tmuxsocket list-panes -F '#{pid} #{pane_tty}' 2>/dev/null))
+    ServerPid=${TmuxServerData[0]}
+    SessionPty=${TmuxServerData[1]//\/dev\/}
+    TmuxServerPIDs[$TTYNumber]=$ServerPid
+    TmuxServerPTYs[$TTYNumber]=$SessionPty
+  fi
+
+  #If sessiontty is empty, then nothing is running
+  if [[ -z $SessionPty ]]
+  then
+    TmuxServerPIDs[$TTYNumber]=""
+    TmuxServerPTYs[$TTYNumber]=""
+    TmuxSessionPIDs[$TTYNumber]=""
+    TmuxSessionIDs[$TTYNumber]=""
+    return
+  fi
+
+
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'))
+  RunningSessionInfos=$(loginctl show-session -p TTY -p Leader ${RunningSessions[@]} 2>/dev/null --value | sed 's/^$/-1/g')
+
+  IFS=$'\n'
+  RunningSessionInfos=($(echo "$RunningSessionInfos"))
+  unset IFS
+
+  RunningSessionInfoCount=${#RunningSessionInfos[@]}
+  RunningSessionInfoFields=3
+  RunningSessionIDs=()
+  RunningSessionTTYs=()
+  RunningSessionPIDs=()
+  for (( RunningSessionInfoItr=0 ; RunningSessionInfoItr < $RunningSessionInfoCount ; RunningSessionInfoItr+=$RunningSessionInfoFields ))
+  do
+    RunningSessionTTYs+=(${RunningSessionInfos[$RunningSessionInfoItr]//\/dev\/})
+    RunningSessionPIDs+=(${RunningSessionInfos[$RunningSessionInfoItr+1]})
+  done
+  RunningSessionItr=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    RunningSessionTTY=${RunningSessionTTYs[$RunningSessionItr]}
+    if [[ $RunningSessionTTY == $SessionPty ]]
+    then
+      TmuxServerPTYs[$TTYNumber]=$RunningSessionTTY
+      TmuxSessionPIDs[$TTYNumber]=${RunningSessionPIDs[$RunningSessionItr]}
+      TmuxSessionIDs[$TTYNumber]=$RunningSession
+      LogindSession=$RunningSession
+      break
+    fi
+    ((RunningSessionItr++))
+  done
+
+  if [[ ! -z $2 ]]
+  then
+    printf -v "$2" '%s' "$LogindSession"
+  else
+    echo "$LogindSession"
+  fi
+}
+
+function minisleep
+{
+  read -t $1 < /proc/self/fd/0
+}
+SLEEPCMD=minisleep
+
+
+ActiveSession=""
+LastActiveSession=""
+ActiveTTY=0
+LastActiveTTY=0
+while [ 1 ]
+do
+  read ActiveTTY < /sys/devices/virtual/tty/tty0/active
+  ActiveTTYNumber=${ActiveTTY//tty/}
+  if [[ $LastActiveTTY != $ActiveTTY || -z ${TmuxSessionPIDs[$ActiveTTYNumber]} || ! -e /proc/${TmuxSessionPIDs[$ActiveTTYNumber]} ]]
+  then
+    GetVTTyLogindSession $ActiveTTYNumber ActiveSession
+    LastActiveTTY=$ActiveTTY
+  fi
+  if [[ $ActiveSession != $LastActiveSession ]]
+  then
+    if [[ ! -z $ActiveSession ]]
+    then
+      loginctl activate $ActiveSession &> /dev/null
+    fi
+    LastActiveSession=$ActiveSession
+  fi
+  $SLEEPCMD 1
+done

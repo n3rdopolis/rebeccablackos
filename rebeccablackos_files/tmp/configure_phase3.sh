@@ -210,6 +210,7 @@ function PostInstallActions
   #enable the virtual tty services.
   systemctl enable vtty-backend@.service
   systemctl enable vtty-frontend@.service
+  #systemctl enable vtty-monitor@.service  
   ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
 
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
