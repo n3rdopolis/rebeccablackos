@@ -133,6 +133,8 @@ function RunDownloadAndOrBuild
 
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
+  mkdir -p "/$SOURCEDIR"
+
   #Create home directory for the subcommand's $HOME folder, and standard home directories
   $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME" 2>/dev/null
   $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local" 2>/dev/null
@@ -168,6 +170,8 @@ function RunDownloadAndOrBuild
   setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"
   setfacl -dm mask::rwx /"$SOURCEDIR"
   setfacl -m mask::rwx /"$SOURCEDIR"
+
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR/$SOURCENAME"
 
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
