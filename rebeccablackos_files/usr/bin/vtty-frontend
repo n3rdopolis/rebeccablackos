@@ -18,6 +18,13 @@
 
 #This runs a graphical terminal full screen to connect to the tmux sessions that run the login prompt
 
+#Test if there is a graphics card, if not revert to text mode TTY
+if [[ ! -e /dev/dri/card0 ]]
+then
+  echo "No kernel mode setting found, reverting to legacy TTY mode"
+  exit 1
+fi
+
 . /usr/bin/wlruntime_vars &> /dev/null
 
 EmulatedTTY=$1

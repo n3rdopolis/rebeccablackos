@@ -24,8 +24,6 @@ OnFailure=getty@%i.service
 Environment=XDG_SEAT=seat0
 
 PAMName=vtty-frontend
-#Test if there is a graphics card, if not revert to text mode TTY
-ExecStartPre=/usr/bin/test -e /dev/dri/card0
 ExecStart=/usr/bin/vtty-frontend %I
 
 TTYPath=/dev/%I
