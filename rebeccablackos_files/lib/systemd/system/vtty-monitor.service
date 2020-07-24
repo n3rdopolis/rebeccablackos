@@ -6,7 +6,7 @@ After=systemd-user-sessions.service
 Restart=always
 RestartSec=0
 
-ExecStart=/usr/lib/vtty/vtty-monitor
+ExecStart=/usr/libexec/vtty/vtty-monitor
 Type=simple
 
 [Install]

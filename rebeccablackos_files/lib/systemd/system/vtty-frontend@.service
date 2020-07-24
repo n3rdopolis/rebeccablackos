@@ -24,7 +24,7 @@ OnFailure=getty@%i.service
 Environment=XDG_SEAT=seat0
 
 PAMName=vtty-frontend
-ExecStart=/usr/lib/vtty/vtty-frontend %I
+ExecStart=/usr/libexec/vtty/vtty-frontend %I
 
 TTYPath=/dev/%I
 TTYReset=true
