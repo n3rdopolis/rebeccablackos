@@ -54,14 +54,14 @@ then
 fi
 
 
-
-
-#sleep command that doesn't need an external binary
-function minisleep
-{
-  read -t $1 < /proc/self/fd/0
-}
-SLEEPCMD=minisleep
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
 
 
 #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt

@@ -3671,12 +3671,14 @@ function GetXDGVariables
   export XDG_SEAT=$(busctl get-property  org.freedesktop.login1 "$SESSION_OBJ_PATH" org.freedesktop.login1.Session Seat | awk -F "\"" '{print $2}')
 }
 
-#sleep command that doesn't need an external binary
-function minisleep
-{
-  read -t $1 < /proc/self/fd/0
-}
-SLEEPCMD=minisleep
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
 
 #If the waylandloginmanager is started with no arguments assume default operation. 
 #If it is started with --usersession, then perform operations to start the user session, running as the user
