@@ -89,4 +89,4 @@ FRONTENDPID=$!
 trap 'kill -15 $FRONTENDPID' 15
 wait $FRONTENDPID
 
-exit 0
+exit $?

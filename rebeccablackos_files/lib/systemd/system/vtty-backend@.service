@@ -4,7 +4,7 @@ Before=vtty-frontend@.service
 #Wants=vtty-monitor.service
 
 [Service]
-Restart=on-abnormal
+Restart=on-failure
 RestartSec=0
 
 ExecStart=/usr/bin/vtty-backend %I

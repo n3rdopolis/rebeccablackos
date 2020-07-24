@@ -387,7 +387,9 @@ then
   #Wait until the tmux server quits
   TMUXPID=$(lsof | grep /run/vtty/$EmulatedTTY/tmuxsocket | awk '{print $2}')
   tail --pid=$TMUXPID -f /dev/null
-  exit 0
+
+  wait $!
+  exit $?
 
 else
  trap 'DoLoginPrompt' 2

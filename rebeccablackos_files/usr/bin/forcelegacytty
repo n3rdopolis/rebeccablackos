@@ -55,9 +55,10 @@ systemctl stop vtty-frontend@$TTYNumber.service
 ResetTTYMode $TTYNumber
 systemctl start getty@$TTYNumber.service
 
-#CurrentTTY="tty$(fgconsole)"
-#if [[ $CurrentTTY == $TTYNumber ]]
-#then
-#  chvt 63
-#  chvt ${TTYNumber//tty/}
-#fi
+CurrentTTY="tty$(fgconsole)"
+if [[ $CurrentTTY == $TTYNumber ]]
+then
+  chvt 63
+   sleep 1
+  chvt ${TTYNumber//tty/}
+fi
