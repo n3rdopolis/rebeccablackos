@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+#Disable a vtty (until the next reboot)
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -27,6 +29,7 @@ fi
 TTYNumber=$1
 if [[ -z $TTYNumber || $TTYNumber != tty* || ! -e /dev/$TTYNumber ]]
 then
+  echo "Disables a vtty, forcing legacy mode, until the next reboot"
   echo "Must specfy a tty"
   echo "example"
   echo "forcelegacytty tty1"
@@ -52,9 +55,9 @@ systemctl stop vtty-frontend@$TTYNumber.service
 ResetTTYMode $TTYNumber
 systemctl start getty@$TTYNumber.service
 
-CurrentTTY="tty$(fgconsole)"
-if [[ $CurrentTTY == $TTYNumber ]]
-then
-  chvt 63
-  chvt ${TTYNumber//tty/}
-fi
+#CurrentTTY="tty$(fgconsole)"
+#if [[ $CurrentTTY == $TTYNumber ]]
+#then
+#  chvt 63
+#  chvt ${TTYNumber//tty/}
+#fi

@@ -31,7 +31,7 @@ ExecStart=/usr/bin/vtty-frontend %I
 TTYPath=/dev/%I
 TTYReset=true
 TTYVTDisallocate=true
-Restart=always
+Restart=on-abnormal
 RestartSec=0
 
 User=vtty-frontend
