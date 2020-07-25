@@ -11,8 +11,6 @@ ExecStart=/usr/libexec/vtty/vtty-backend %I
 Type=notify
 
 IgnoreSIGPIPE=false
-SendSIGHUP=true
-KillMode=process
 
 [Install]
 WantedBy=getty.target
