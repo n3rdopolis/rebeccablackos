@@ -18,6 +18,21 @@
 
 #Disable a vtty (until the next reboot)
 
+if [[ $1 == "--help" ]]
+then
+  echo "This utility changes the state of using vTTYs or using the the legacy TTYs."
+  echo "The default action is to toggle, and it can only impact the current TTY."
+  echo "You can specify other actions by running"
+  echo "vtty-toggle ACTION"
+  echo "The three actions are:"
+  echo "toggle   -   If using legacy TTY mode, switch to TTY, and if using vTTY, switch to legacy"
+  echo "vtty-on  -   Set vTTY on"
+  echo "vtty-off -   Set vTTY off"
+  echo "Adding the word force before the action, such as forcetoggle suppresses the prompt"
+  exit
+fi
+
+
 #Require root privlages
 if [[ $UID != 0 ]]
 then
@@ -25,18 +40,63 @@ then
   exit
 fi
 
+function GetVTTyLogindSession
+{
+  LogindSession=""
+  DoGetTmuxData=1
+  TTYNumber=$1
 
-TTYNumber=$1
-if [[ -z $TTYNumber || $TTYNumber != tty* || ! -e /dev/$TTYNumber ]]
-then
-  echo "Disables a vtty, forcing legacy mode, until the next reboot"
-  echo "Must specfy a tty"
-  echo "example"
-  echo "vtty-toggle tty1"
-  exit
-fi
+  #TTY number must be valid
+  if [[ $TTYNumber -lt 1 || $TTYNumber -gt 63 ]]
+  then
+    return
+  fi
+
+  #If there is no running socket, then quit
+  if [[ ! -e /run/vtty/tty$TTYNumber/tmuxsocket ]]
+  then
+    return
+  fi
+
+  SessionPty=$(tmux -S /run/vtty/tty$TTYNumber/tmuxsocket list-panes -F '#{pane_tty}' 2>/dev/null)
+  SessionPty=${SessionPty//\/dev\/}
+
+  #If sessiontty is empty, then nothing is running
+  if [[ -z $SessionPty ]]
+  then
+    return
+  fi
 
 
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'))
+  RunningSessionInfos=$(loginctl show-session -p TTY ${RunningSessions[@]} --value 2>/dev/null | sed 's/^$/-1/g')
+
+  IFS=$'\n'
+  RunningSessionInfos=($(echo "$RunningSessionInfos"))
+  unset IFS
+
+  RunningSessionInfoCount=${#RunningSessionInfos[@]}
+  RunningSessionInfoFields=2
+  RunningSessionIDs=()
+  RunningSessionTTYs=()
+  for (( RunningSessionInfoItr=0 ; RunningSessionInfoItr < $RunningSessionInfoCount ; RunningSessionInfoItr+=$RunningSessionInfoFields ))
+  do
+    RunningSessionTTYs+=(${RunningSessionInfos[$RunningSessionInfoItr]//\/dev\/})
+  done
+  RunningSessionItr=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    RunningSessionTTY=${RunningSessionTTYs[$RunningSessionItr]}
+    if [[ $RunningSessionTTY == $SessionPty ]]
+    then
+      LogindSession=$RunningSession
+      break
+    fi
+    ((RunningSessionItr++))
+  done
+
+  echo "$LogindSession"
+}
 
 
 function ResetTTYMode
@@ -51,14 +111,105 @@ ioctl(fd, 0x05602, buf); \
 fd.close()" &>/dev/null
 }
 
-systemctl stop vtty-frontend@$TTYNumber.service
-ResetTTYMode $TTYNumber
-systemctl start getty@$TTYNumber.service
 
-CurrentTTY="tty$(fgconsole)"
-if [[ $CurrentTTY == $TTYNumber ]]
-then
+function SwitchToGettyMode
+{
+  systemctl stop vtty-frontend@${CurrentTTY}.service
+  ResetTTYMode $CurrentTTYNumber
+  systemctl start getty@${CurrentTTY}.service
+
   chvt 63
-   sleep 1
-  chvt ${TTYNumber//tty/}
+  sleep 1
+  chvt $CurrentTTYNumber
+
+  LogindSession=$(GetVTTyLogindSession $CurrentTTYNumber)
+  loginctl terminate-session $LogindSession
+}
+
+function SwitchToVTTYMode
+{
+  systemctl start vtty-frontend@${CurrentTTY}.service
+}
+
+
+CurrentTTYNumber=$(fgconsole 2>/dev/null)
+CurrentTTY="tty$CurrentTTYNumber"
+if [[ $? != 0 ]]
+then
+  echo "Could not get the current physical TTY"
 fi
+
+
+AutoVTService=$(systemctl show autovt@tty${CurrentTTY}.service -p Id --value)
+GettyServiceState=$(systemctl is-active getty@tty${CurrentTTY}.service -p Id --value &>/dev/null; $?)
+vTTYServiceState=$(systemctl is-active vtty-frontend@tty${CurrentTTY}.service -p Id --value &>/dev/nul; $?)
+
+if [[ $AutoVTService != "vtty-frontend@tty${CurrentTTY}.service" ]]
+then
+  echo "vtty is not configured as the default autovt handler"
+  exit 1
+fi
+
+if [[ $GettyServiceState != 0 && $vTTYServiceState != 0 ]]
+then
+  echo "Neither the systemd getty handler nor the vtty handler for $CurrentTTY are active."
+  exit 1
+fi
+
+if [[ $GettyServiceState == 0 && $vTTYServiceState == 0 ]]
+then
+  echo "Both the systemd getty handler nor the vtty handler for $CurrentTTY are active. Exiting."
+  exit 1
+fi
+
+if [[ -z $1 ]]
+then
+  Action=toggle
+else
+  Action=$1
+fi
+
+
+if [[ $Action == force* ]]
+then
+  ActionType=${Action/force/}
+  Prompt=0
+else
+  ActionType=$Action
+  read -p "By running the action $Action on $CurrentTTY this will end the current session on $CurrentTTY . Continue? (Must be y or Y): " Prompt 
+  if [[ $Prompt != y && $Prompt != Y ]]
+  then
+    echo "Action not confirmed. Exiting..."
+    exit 1
+  fi
+fi
+
+
+case $ActionType in
+  toggle)
+    if [[ $GettyServiceState == 0 ]]
+    then
+      SwitchToVTTYMode
+    else
+      SwitchToGettyMode
+    fi
+    ;;
+  vtty-on)
+    if [[ $vTTYServiceState != 0 ]]
+    then
+      SwitchToVTTYMode
+    else
+      echo "vTTY mode already active for $CurrentTTY"
+      exit 1
+    fi
+    ;;
+  vtty-off)
+    if [[ $GettyServiceState != 0 ]]
+    then
+      SwitchToGettyMode
+    else
+      echo "Legacy mode already active for $CurrentTTY"
+      exit 1
+    fi
+    ;;
+esac
