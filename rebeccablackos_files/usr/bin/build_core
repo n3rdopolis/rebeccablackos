@@ -163,7 +163,7 @@ function RunDownloadAndOrBuild
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
 
-  $NONROOTCOMMAND mkdir -p "$EXTERNALBUILDHOME"/bin
+  $NONROOTCOMMAND mkdir -p "$EXTERNALBUILDHOME"/bin 2>/dev/null
 
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
@@ -171,7 +171,7 @@ function RunDownloadAndOrBuild
   setfacl -dm mask::rwx /"$SOURCEDIR"
   setfacl -m mask::rwx /"$SOURCEDIR"
 
-  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR/$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p "/$SOURCEDIR/$SOURCENAME" 2>/dev/null
 
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
