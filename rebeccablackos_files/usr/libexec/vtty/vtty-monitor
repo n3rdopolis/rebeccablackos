@@ -69,7 +69,7 @@ function GetVTTyLogindSession
 
 
   RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'))
-  RunningSessionInfos=$(loginctl show-session -p TTY -p Leader ${RunningSessions[@]} 2>/dev/null --value | sed 's/^$/-1/g')
+  RunningSessionInfos=$(loginctl show-session -p TTY -p Leader ${RunningSessions[@]} --value 2>/dev/null | sed 's/^$/-1/g')
 
   IFS=$'\n'
   RunningSessionInfos=($(echo "$RunningSessionInfos"))
