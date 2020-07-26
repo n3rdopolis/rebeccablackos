@@ -18,8 +18,24 @@
 
 #Disable a vtty (until the next reboot)
 
-if [[ $1 == "--help" ]]
-then
+
+
+function PromptUI
+{
+  if [[ $Action == force* ]]
+  then
+    Prompt=0
+  else
+    read -p "By running the action $Action on $CurrentTTY this will end the current session on $CurrentTTY . Continue? (Must be y or Y): " Prompt 
+    if [[ $Prompt != y && $Prompt != Y ]]
+    then
+      echo "Action not confirmed. Exiting..."
+      exit 1
+    fi
+  fi
+}
+function PrintHelp
+{
   echo "This utility changes the state of using vTTYs or using the the legacy TTYs."
   echo "The default action is to toggle, and it can only impact the current TTY."
   echo "You can specify other actions by running"
@@ -29,16 +45,7 @@ then
   echo "vtty-on  -   Set vTTY on"
   echo "vtty-off -   Set vTTY off"
   echo "Adding the word force before the action, such as forcetoggle suppresses the prompt"
-  exit
-fi
-
-
-#Require root privlages
-if [[ $UID != 0 ]]
-then
-  echo "Must be run as root."
-  exit
-fi
+}
 
 function GetVTTyLogindSession
 {
@@ -114,6 +121,7 @@ fd.close()" &>/dev/null
 
 function SwitchToGettyMode
 {
+  PromptUI
   systemctl stop vtty-frontend@${CurrentTTY}.service
   ResetTTYMode $CurrentTTYNumber
   systemctl start getty@${CurrentTTY}.service
@@ -128,9 +136,25 @@ function SwitchToGettyMode
 
 function SwitchToVTTYMode
 {
+  PromptUI
   systemctl start vtty-frontend@${CurrentTTY}.service
+  systemctl stop getty@${CurrentTTY}.service
 }
 
+
+if [[ $1 == "--help" ]]
+then
+  PrintHelp
+  exit
+fi
+
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
 
 CurrentTTYNumber=$(fgconsole 2>/dev/null)
 CurrentTTY="tty$CurrentTTYNumber"
@@ -140,11 +164,11 @@ then
 fi
 
 
-AutoVTService=$(systemctl show autovt@tty${CurrentTTY}.service -p Id --value)
-GettyServiceState=$(systemctl is-active getty@tty${CurrentTTY}.service -p Id --value &>/dev/null; $?)
-vTTYServiceState=$(systemctl is-active vtty-frontend@tty${CurrentTTY}.service -p Id --value &>/dev/nul; $?)
+AutoVTService=$(systemctl show autovt@${CurrentTTY}.service -p Id --value)
+GettyServiceState=$(systemctl is-active getty@${CurrentTTY}.service -p Id --value &>/dev/null; echo $?)
+vTTYServiceState=$(systemctl is-active vtty-frontend@${CurrentTTY}.service -p Id --value &>/dev/nul; echo $?)
 
-if [[ $AutoVTService != "vtty-frontend@tty${CurrentTTY}.service" ]]
+if [[ $AutoVTService != "vtty-frontend@${CurrentTTY}.service" ]]
 then
   echo "vtty is not configured as the default autovt handler"
   exit 1
@@ -169,20 +193,13 @@ else
   Action=$1
 fi
 
-
 if [[ $Action == force* ]]
 then
   ActionType=${Action/force/}
-  Prompt=0
 else
   ActionType=$Action
-  read -p "By running the action $Action on $CurrentTTY this will end the current session on $CurrentTTY . Continue? (Must be y or Y): " Prompt 
-  if [[ $Prompt != y && $Prompt != Y ]]
-  then
-    echo "Action not confirmed. Exiting..."
-    exit 1
-  fi
 fi
+
 
 
 case $ActionType in
@@ -211,5 +228,9 @@ case $ActionType in
       echo "Legacy mode already active for $CurrentTTY"
       exit 1
     fi
+    ;;
+  *)
+    echo "$ActionType is not a valid command"
+    PrintHelp
     ;;
 esac
