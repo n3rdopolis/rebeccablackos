@@ -127,6 +127,10 @@ function SwitchToGettyMode
   ResetTTYMode $CurrentTTYNumber
   systemctl start getty@${CurrentTTY}.service
 
+  chvt 63 &
+  sleep 1
+  chvt $CurrentTTYNumber &
+
   LogindSession=$(GetVTTyLogindSession $CurrentTTYNumber)
   if [[ ! -z $LogindSession ]]
   then
