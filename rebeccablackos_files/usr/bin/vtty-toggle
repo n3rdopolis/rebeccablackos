@@ -122,21 +122,22 @@ fd.close()" &>/dev/null
 function SwitchToGettyMode
 {
   PromptUI
+  touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
   systemctl stop vtty-frontend@${CurrentTTY}.service
   ResetTTYMode $CurrentTTYNumber
   systemctl start getty@${CurrentTTY}.service
 
-  chvt 63
-  sleep 1
-  chvt $CurrentTTYNumber
-
   LogindSession=$(GetVTTyLogindSession $CurrentTTYNumber)
-  loginctl terminate-session $LogindSession
+  if [[ ! -z $LogindSession ]]
+  then
+    loginctl terminate-session $LogindSession
+  fi
 }
 
 function SwitchToVTTYMode
 {
   PromptUI
+  rm /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
   systemctl start vtty-frontend@${CurrentTTY}.service
   systemctl stop getty@${CurrentTTY}.service
 }
@@ -182,8 +183,13 @@ fi
 
 if [[ $GettyServiceState == 0 && $vTTYServiceState == 0 ]]
 then
-  echo "Both the systemd getty handler nor the vtty handler for $CurrentTTY are active. Exiting."
-  exit 1
+  if [[ -e /run/vtty/${CurrentTTY}/vttyinhibit ]]
+  then
+    vTTYServiceState=0
+  else
+    systemctl stop getty@${CurrentTTY}.service
+    GettyServiceState=0
+  fi
 fi
 
 if [[ -z $1 ]]
