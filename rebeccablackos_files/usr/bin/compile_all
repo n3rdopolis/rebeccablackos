@@ -344,7 +344,6 @@ CompilePackage oxygen
 CompilePackage breeze
 CompilePackage kvantum
 CompilePackage plasma-integration
-CompilePackage xdg-desktop-portal-kde
 CompilePackage kwin
 CompilePackage libkscreen
 CompilePackage plasma-workspace
@@ -523,6 +522,11 @@ CompilePackage cage
 CompilePackage alacritty
 CompilePackage wayfire
 CompilePackage wev
+CompilePackage libportal
+CompilePackage xdg-desktop-portal
+CompilePackage xdg-desktop-portal-kde
+CompilePackage xdg-desktop-portal-gtk
+CompilePackage xdg-desktop-portal-wlr
 
 if [[ ! -e /usr/bin/ubiquity ]]
 then

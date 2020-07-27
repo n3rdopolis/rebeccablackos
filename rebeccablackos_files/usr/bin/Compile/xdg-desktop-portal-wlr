@@ -20,15 +20,15 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=weston
+SOURCENAME=xdg-desktop-portal-wlr
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.freedesktop.org/wayland/weston
+SOURCEURL=https://github.com/emersion/xdg-desktop-portal-wlr
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
 SOURCEREVISION=master
 
 #The prefix to compile and install the source code to
@@ -47,26 +47,29 @@ REBUILDNEWREVISION=1
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
 
+#VARIABLES PRESENTED
+# EXTERNALBUILDHOME : For out of tree builds 
+# INTERNALBUILDHOME : For in tree builds
+
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
 :
 }
 
+
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#Workaround https://gitlab.freedesktop.org/wayland/weston/issues/179
-#git revert -n 9bf4f371632567a6abc8d4303fb5021ac7547c86
-#git revert -n 8747f95682b3a52664353aa8c5e047d075e14149\
-
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=/opt/bin/Xwayland -Dtools=calibrator,debug,info,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dsimple-dmabuf-drm=intel -Dpipewire=false build
+echo "setcap cap_sys_ptrace=eip $INSTALLDIR/bin/sway" > "postinstall-pak"
+sed -i 's/werror=true/werror=false/g' meson.build
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-ninja -v -C build
+ninja -v -C build 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
@@ -78,20 +81,16 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-#Install the screen capture utils
-find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read -r CLIENT
-do
-cp "$CLIENT" /$INSTALLDIR/bin
-done
-
-#Install header manually as temporary workaround
-cp /"$SOURCEDIR"/"$SOURCENAME"/config.h $INSTALLDIR/include/weston
-
-#turn OFF setuid on weston
-chmod -s $INSTALLDIR/bin/weston
-
+if [[ -e $INSTALLDIR/bin/sway ]]
+then
+  mkdir -p /etc/skel/.config/sway
+  cp config $INSTALLDIR/etc/sway/config /etc/skel/.config/sway 
+  sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
+  sed -i 's\/opt/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png\g' /etc/skel/.config/sway/config
+  sed -i 's/alacritty/weston-terminal/g' /etc/skel/.config/sway/config
+  sed -i 's/dmenu_run/bemenu/g' /etc/skel/.config/sway/config
+fi
 }
-
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
 RunDownloadAndOrBuild
