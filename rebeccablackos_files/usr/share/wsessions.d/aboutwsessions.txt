@@ -97,20 +97,21 @@ An example:
 07.|    CompositorExec=/opt/bin/weston
 08.|    CompositorSupportsKMS=1
 09.|    CompositorSupportsFB=1
-10.|    CompositorSupportsWL=0
-11.|    CompositorKMSArguments=--backend=drm-backend.so
-12.|    CompositorFBArguments=--backend=fbdev-backend.so
-13.|    CompositorDisplayArgument=--socket=
-14.|    SessionArgument=--modules=xwayland.so,cms-colord.so
-15.|    AdditionalArguments=--log=$HOME/weston.log
-16.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
-17.|    NeedsFile=/opt/bin/weston
-18.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
-19.|    IsFallbackSession=0
-20.|    CompositorKMSSeatAware=1
-21.|    CompositorFBSeatAware=0
-22.|    CompositorSeatArgument=--seat
-23.|    CompositorKMSSeatArgument=--seat
+10.|    CompositorSupportsWKS=1
+11.|    CompositorSupportsWL=0
+12.|    CompositorKMSArguments=--backend=drm-backend.so
+13.|    CompositorFBArguments=--backend=fbdev-backend.so
+14.|    CompositorDisplayArgument=--socket=
+15.|    SessionArgument=--modules=xwayland.so,cms-colord.so
+16.|    AdditionalArguments=--log=$HOME/weston.log
+17.|    NeedsFile=$WESTON_PLUGIN_PATH/desktop-shell.so
+18.|    NeedsFile=/opt/bin/weston
+19.|    EnvironmentFile=/usr/share/wsessions.d/weston-debug.environment
+20.|    IsFallbackSession=0
+21.|    CompositorKMSSeatAware=1
+22.|    CompositorFBSeatAware=0
+23.|    CompositorSeatArgument=--seat
+24.|    CompositorKMSSeatArgument=--seat
 ----------------------------------------------
 
 Arguments are passed in the following order to CompositorExec: BackendArguments SessionArgument CompositorSeatArgument AdditionalArguments CompositorDisplayArgument
@@ -123,7 +124,7 @@ If EnvironmentFile is not specified within the [Desktop Entry] section of a wses
 The environment file is not executable, but *parsed* and most variables are not expanded, and has limited support for conditionals based on the backend type. See line 1 in the example
      The only variables that are expanded are XDG_SEAT and WAYLAND_DISPLAY
 
-Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted) and FB (framebuffer)
+Currently there are four case sensitive backend types KMS (Kernel Mode Setting) WKS (Wayland hosted with Kiosk Shell) WL (Wayland hosted with Fullscreen Shell) and FB (framebuffer)
 
 ----------------------------------------------
 1.|    [EnvironmentFile]
@@ -143,7 +144,7 @@ If it ends with @BACKEND, then the variable action is only performed, if the Bac
   in Line 2 of the example the variable E_WL_FORCE to be kms (export E_WL_FORCE=kms) only if the BackendType is KMS.
   in Line 5 of the example the variable GDK_BACKEND is unset irregaurdless of what the BackendType is.
 
-In Line 6 it ends with the @SOFTWARE instead of a backend (such as FB/KMS/WL). With this, software rendering is being used (wlmforceswrender), then the variable is added to the environment. 
+In Line 6 it ends with the @SOFTWARE instead of a backend (such as FB/KMS/WKS/WL). With this, software rendering is being used (wlmforceswrender), then the variable is added to the environment. 
 
 default.environment is handled by all sessions first, before the specified environment file, in the case of a need of making an environment variable avaible to all sessions.
 

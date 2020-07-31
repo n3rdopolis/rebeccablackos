@@ -41,7 +41,7 @@
 #and /lib/udev/rules.d/70-uaccess-fbdev.rules
 #for fbdev permissions
 
-#Weston 5.0 or greater is required for multiseat support
+#Weston 9.0 or greater is required for kiosk shell
 
 #as well as:
 #At least systemd v227 as it has all the ability to launch Wayland sessions with systemd-run
@@ -203,7 +203,6 @@ function UserSessionWorker
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%s)
   export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
-  unset WLM_SEAT
   echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
   ArgArray=($ArgumentString)
@@ -242,7 +241,7 @@ function UserSessionWorker
   fi
   unset wlmforcevblankoff
 
-  if [[ $BackendType == WL ]]
+  if [[ $BackendType == WKS || $BackendType == WL ]]
   then
     export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
     if [[ $DefaultBackendType == FB ]]
@@ -251,7 +250,16 @@ function UserSessionWorker
     else
       HostBackendArgument="--backend=drm-backend.so"
     fi
-    weston --no-config $PIXMANARGS --shell=fullscreen-shell.so --socket=$WAYLAND_HOST $HostBackendArgument &>> $WLM_HOST_LOG &
+
+    if [[ $BackendType == "WL" ]]
+    then
+      HostShellName=fullscreen-shell.so
+    elif [[ $BackendType == "WKS" ]]
+    then
+      HostShellName=kiosk-shell.so
+    fi
+
+    weston --no-config $PIXMANARGS --shell=$HostShellName --socket=$WAYLAND_HOST $HostBackendArgument &>> $WLM_HOST_LOG &
     HostServerPID=$!
     export WAYLAND_DISPLAY=$WAYLAND_HOST
     WaitTimes=0
@@ -282,13 +290,14 @@ function UserSessionWorker
     unset WAYLAND_HOST
     unset WAYLAND_GUEST
   fi
+  unset WLM_SEAT
 
   #Execute the Wayland server, and log it to $HOME/.cache/wlsessionlogs/waylandsession_${SEAT}_${DATESTAMP}.log
   dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
-  if [[ $BackendType == WL ]]
+  if [[ $BackendType == WKS || $BackendType == WL ]]
   then
     wait $GuestServerPID
     SessionReturnCode=$?
@@ -572,7 +581,7 @@ function ReadEnvironmentFile
     KeyName=""
     KeyValue=""
     KeyBackend=""
-    [[ $EnvironmentFileLine =~ @([A-Z]*) ]]
+    [[ $EnvironmentFileLine =~ @([A-Z0-9]*) ]]
     if [[ ! -z ${BASH_REMATCH[1]} ]]
     then
       EnvironmentFileLine=${EnvironmentFileLine%%${BASH_REMATCH[0]}}
@@ -1322,7 +1331,7 @@ function ParseWSessionFiles
 
     #Build the initial array for the backend support table
     SeatBackendArray=""
-    for BACKEND in KMS WL FB
+    for BACKEND in KMS WKS WL FB
     do
       for Iterator in {000..003}
       do
@@ -1434,22 +1443,25 @@ function ParseWSessionFiles
       fi
 
       #If the line is for a backend, determine what element to set on the backend array
-      #Each backend has a number elements each, and are always in order KMS, WL, FB
+      #Each backend has a number elements each, and are always in order KMS, WKS, WL, FB
       #The number of elements are fixed place for if it's supports the backend, arguments for the backend, if the backend supports seats, ect.
-      if [[ $KeyName =~ [a-Z]*KMS[a-Z]* || $KeyName =~ [a-Z]*WL[a-Z]* || $KeyName =~ [a-Z]*FB[a-Z]* ]]
+      if [[ $KeyName =~ [a-Z]*KMS[a-Z]* || $KeyName =~ [a-Z]*WKS[a-Z]* || $KeyName =~ [a-Z]*WL[a-Z]* || $KeyName =~ [a-Z]*FB[a-Z]* ]]
       then
-        for BACKEND in KMS WL FB
+        for BACKEND in KMS WKS WL FB
         do
           ChangeArrayOffset=-1
           if [[ $BACKEND == KMS ]]
           then
             ChangeArrayMultiplicand=0
-          elif [[ $BACKEND == WL ]]
+          elif [[ $BACKEND == WKS ]]
           then
             ChangeArrayMultiplicand=1
-          elif [[ $BACKEND == FB ]]
+          elif [[ $BACKEND == WL ]]
           then
             ChangeArrayMultiplicand=2
+          elif [[ $BACKEND == FB ]]
+          then
+            ChangeArrayMultiplicand=3
           fi
 
           if [[ $KeyName =~ CompositorSupports${BACKEND} ]]
@@ -1603,11 +1615,15 @@ function ChooseSessionType
   fi
   if [[ $SeatSupportsKMS != 0 || $SeatSupportsFB != 0 ]]
   then
+    SeatSupportedBackends+=(WKS)
+    SeatSupportedBackendsString+="WKS "
     SeatSupportedBackends+=(WL)
     SeatSupportedBackendsString+="WL "
   else
     if [[ $FB0INSEAT != 0 ]]
     then
+      SeatSupportedBackends+=(WKS)
+      SeatSupportedBackendsString+="WKS "
       SeatSupportedBackends+=(WL)
       SeatSupportedBackendsString+="WL "
     fi
@@ -1678,8 +1694,8 @@ function ChooseSessionType
           elif [[ $CurrentHandleSeat == seat0 && $BackendType != "FB" ]]
           then
             SupportsSeat=1
-          #If the wayland (fullscreen shell) backend is supported by this session, and the wayland backend is supported on this seat, then seats are supported, since the weston hosts are seat aware
-          elif [[ $BackendType == "WL" ]]
+          #If the a wayland backend, (fullscreen shell or standard) is supported by this session, and the wayland backend is supported on this seat, then seats are supported, since the weston hosts are seat aware
+          elif [[ $BackendType == "WKS" || $BackendType == "WL" ]]
           then
             SupportsSeat=1
           fi
@@ -1731,12 +1747,15 @@ function ChooseSessionType
       IsExecutable=1
     fi
 
-    if [[ ! -x $CompositorExec ]]
+    if [[ $IsExecutable != 0 ]]
     then
-      WriteToLog "Warning: $CompositorExec is not executable, the session will not be availible for selection by the user."
-      IsExecutable=0
-    else
-      IsExecutable=1
+      if [[ ! -x $CompositorExec ]]
+      then
+        WriteToLog "Warning: $CompositorExec is not executable, the session will not be availible for selection by the user."
+        IsExecutable=0
+      else
+        IsExecutable=1
+      fi
     fi
 
     if [[ -z "$EnvironmentFile" ]]
@@ -1785,7 +1804,7 @@ function ChooseSessionType
     fi
 
     #if the session supports the CompositorSeatArgument, for setting the XDG_SEAT it should use, then ammend the CurrentHandleSeat to the end of the command.
-    if [[ ! -z $CompositorSeatArgument && $BackendType != "WL" ]]
+    if [[ ! -z $CompositorSeatArgument && ($BackendType != "WKS" || $BackendType != "WL") ]]
     then
       CompositorSeatArgument="$CompositorSeatArgument$CurrentHandleSeat"
     else
