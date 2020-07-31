@@ -283,6 +283,9 @@ function PostInstallActions
   #move the import folder
   mv /usr/import /tmp
 
+  #Make the wsession files executable
+  chmod +x /usr/share/wsessions.d/*
+
   #Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
   chmod -X /lib/systemd/system/waylandloginmanager.service
   chmod -X /etc/pam.d/*
