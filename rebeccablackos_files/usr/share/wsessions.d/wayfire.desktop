@@ -6,6 +6,7 @@ Comment=Wlroots based, with Compiz/KWin like effects (Press Super+D for a launch
 CompositorExec=/opt/bin/wayfire
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
+CompositorSupportsWKS=1
 CompositorKMSSeatAware=1
 CompositorSupportsFB=0
 CompositorWLArguments=
@@ -17,3 +18,4 @@ AdditionalArguments=
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=sway
 set=WLR_BACKENDS=libinput,drm@KMS
+set=WLR_BACKENDS=wayland@WKS

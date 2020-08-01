@@ -5,6 +5,7 @@ Name=Enlightenment Desktop
 Comment=The Enlightenment Desktop
 CompositorExec=/opt/bin/enlightenment_start
 CompositorSupportsKMS=1
+CompositorSupportsWKS=1
 CompositorKMSSeatAware=1
 CompositorSupportsFB=0
 CompositorKMSArguments=
@@ -16,4 +17,5 @@ NeedsFile=/opt/bin/enlightenment
 [EnvironmentFile]
 set=E_WL_FORCE=drm@KMS
 set=E_WL_FORCE=fb@FB
+set=E_WL_FORCE=wl@WKS
 set=XDG_CURRENT_DESKTOP=enlightenment

@@ -6,6 +6,7 @@ Comment=An i3 like Wayland DE. (Press Super+Enter for a terminal)
 CompositorExec=/opt/bin/sway
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
+CompositorSupportsWKS=1
 CompositorKMSSeatAware=1
 CompositorSupportsFB=0
 CompositorWLArguments=
@@ -17,3 +18,4 @@ AdditionalArguments=
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=sway
 set=WLR_BACKENDS=libinput,drm@KMS
+set=WLR_BACKENDS=wayland@WKS
