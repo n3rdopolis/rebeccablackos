@@ -40,8 +40,7 @@ How to use the ISO:
   
     It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system.
 
-    It requires unionfs-fuse,squashfs-tools, dialog and zenity to be installed, all of which the script tries to install automatically by trying to figure out
-    your distro's package manager. It also needs either konsole, gnome-terminal OR a standard x-terminal-emulator.
+    It requires dialog or zenity to be installed, and it also needs either konsole, gnome-terminal OR a standard x-terminal-emulator.
  
 How to use Wayland:
     The loginmanagerdisplay greeter is weston based, where you can select your desired wayland based desktop.
