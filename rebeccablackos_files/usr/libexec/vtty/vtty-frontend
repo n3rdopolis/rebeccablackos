@@ -25,6 +25,18 @@ then
   exit 1
 fi
 
+function ResetTTYMode
+{
+    python3 -c "from array import array; \
+from fcntl import ioctl; \
+buf = array('h', [0]); \
+buf[0] = 0; \
+fd = open('/dev/$1', 'wb'); \
+ioctl(fd, 0x4B3A, 0); \
+ioctl(fd, 0x05602, buf); \
+fd.close()" &>/dev/null
+}
+
 . /usr/bin/wlruntime_vars &> /dev/null
 
 EmulatedTTY=$1
@@ -92,11 +104,13 @@ then
   done
 fi
 
+mkdir -p /var/log/vtty
+mkdir -p /run/user/0
+chmod 700 /run/user/0
+
+ResetTTYMode $EmulatedTTY
 cage -d -s -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
-tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty &
-FRONTENDPID=$!
-trap 'kill -15 $FRONTENDPID' 15
-wait $FRONTENDPID
+tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?

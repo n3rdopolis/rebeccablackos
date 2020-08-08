@@ -22,17 +22,17 @@ OnFailure=getty@%i.service
 
 [Service]
 Environment=XDG_SEAT=seat0
-
-PAMName=vtty-frontend
 ExecStart=/usr/libexec/vtty/vtty-frontend %I
 
 TTYPath=/dev/%I
 TTYReset=true
+StandardOutput=tty
+StandardInput=tty
 TTYVTDisallocate=true
+
 Restart=on-failure
 RestartSec=0
 
-User=vtty-frontend
 Type=simple
 
 NoNewPrivileges=true

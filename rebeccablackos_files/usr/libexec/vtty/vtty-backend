@@ -344,6 +344,7 @@ function DoLoginPrompt
  unset INVOCATION_ID
  unset JOURNAL_STREAM
  export VTTY=$EmulatedTTY
+ export XDG_VTNR=${EmulatedTTY//tty/}
  login -p --
 }
 
@@ -379,9 +380,6 @@ then
     done
   fi
 
-  #Grant the non-root user access
-  chmod 770 /run/vtty/$EmulatedTTY/tmuxsocket
-  chown vtty-frontend /run/vtty/$EmulatedTTY/tmuxsocket
   systemd-notify --ready &> /dev/null
 
   #Wait until the tmux server quits
