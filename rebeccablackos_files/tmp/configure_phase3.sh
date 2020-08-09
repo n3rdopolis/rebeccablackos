@@ -208,7 +208,6 @@ function PostInstallActions
   systemctl enable acpid.service
 
   #enable the virtual tty services.
-  systemctl enable vtty-backend@.service
   systemctl enable vtty-frontend@.service
   ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
 

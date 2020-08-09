@@ -47,65 +47,6 @@ function PrintHelp
   echo "Adding the word force before the action, such as forcetoggle suppresses the prompt"
 }
 
-function GetVTTyLogindSession
-{
-  LogindSession=""
-  DoGetTmuxData=1
-  TTYNumber=$1
-
-  #TTY number must be valid
-  if [[ $TTYNumber -lt 1 || $TTYNumber -gt 63 ]]
-  then
-    return
-  fi
-
-  #If there is no running socket, then quit
-  if [[ ! -e /run/vtty/tty$TTYNumber/tmuxsocket ]]
-  then
-    return
-  fi
-
-  SessionPty=$(tmux -S /run/vtty/tty$TTYNumber/tmuxsocket list-panes -F '#{pane_tty}' 2>/dev/null)
-  SessionPty=${SessionPty//\/dev\/}
-
-  #If sessiontty is empty, then nothing is running
-  if [[ -z $SessionPty ]]
-  then
-    return
-  fi
-
-
-  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'))
-  RunningSessionInfos=$(loginctl show-session -p TTY ${RunningSessions[@]} --value 2>/dev/null | sed 's/^$/-1/g')
-
-  IFS=$'\n'
-  RunningSessionInfos=($(echo "$RunningSessionInfos"))
-  unset IFS
-
-  RunningSessionInfoCount=${#RunningSessionInfos[@]}
-  RunningSessionInfoFields=2
-  RunningSessionIDs=()
-  RunningSessionTTYs=()
-  for (( RunningSessionInfoItr=0 ; RunningSessionInfoItr < $RunningSessionInfoCount ; RunningSessionInfoItr+=$RunningSessionInfoFields ))
-  do
-    RunningSessionTTYs+=(${RunningSessionInfos[$RunningSessionInfoItr]//\/dev\/})
-  done
-  RunningSessionItr=0
-  for RunningSession in "${RunningSessions[@]}"
-  do
-    RunningSessionTTY=${RunningSessionTTYs[$RunningSessionItr]}
-    if [[ $RunningSessionTTY == $SessionPty ]]
-    then
-      LogindSession=$RunningSession
-      break
-    fi
-    ((RunningSessionItr++))
-  done
-
-  echo "$LogindSession"
-}
-
-
 function ResetTTYMode
 {
     python3 -c "from array import array; \
@@ -130,12 +71,6 @@ function SwitchToGettyMode
   chvt 63 &
   sleep 1
   chvt $CurrentTTYNumber &
-
-  LogindSession=$(GetVTTyLogindSession $CurrentTTYNumber)
-  if [[ ! -z $LogindSession ]]
-  then
-    loginctl terminate-session $LogindSession
-  fi
 }
 
 function SwitchToVTTYMode

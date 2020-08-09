@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This runs a graphical terminal full screen to connect to the tmux sessions that run the login prompt
+#This runs a graphical terminal full screen that run the login prompt
 
 #Test if there is a graphics card, if not revert to text mode TTY
 if [[ ! -e /dev/dri/card0 ]]
@@ -41,13 +41,6 @@ fd.close()" &>/dev/null
 
 EmulatedTTY=$1
 export HOME=/etc/vtty-config
-
-which tmux &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "tmux not installed"
-  exit 1
-fi
 
 which vte &> /dev/null
 if [[ $? != 0 ]]
@@ -111,6 +104,6 @@ chmod 700 /run/user/0
 ResetTTYMode $EmulatedTTY
 cage -d -s -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
-tmux -2u -f /etc/vtty-config/tmux.conf -S /run/vtty/$EmulatedTTY/tmuxsocket attach -t vtty &> /var/log/vtty/host_${EmulatedTTY}.log
+/usr/libexec/vtty/vtty-backend $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?

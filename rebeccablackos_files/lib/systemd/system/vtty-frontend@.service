@@ -1,11 +1,7 @@
 [Unit]
 Description=Graphical terminal for vTTY %I
 
-After=vtty-backend@.service
 After=systemd-user-sessions.service plymouth.service
-
-
-BindsTo=vtty-backend@.service
 
 ConditionPathExists=/dev/tty0
 ConditionPathExists=/dev/%i
@@ -34,18 +30,6 @@ Restart=on-failure
 RestartSec=0
 
 Type=simple
-
-NoNewPrivileges=true
-ProtectSystem=true
-PrivateTmp=true
-PrivateNetwork=true
-RestrictRealtime=true
-ProtectClock=true
-ProtectHostname=true
-ProtectKernelTunables=true
-RestrictSUIDSGID=true
-
-
 
 [Install]
 WantedBy=getty.target
