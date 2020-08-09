@@ -326,7 +326,7 @@ function DoLoginPrompt
 
  export VTTY=$EmulatedTTY
  export XDG_VTNR=${EmulatedTTY//tty/}
- env -i COLORTERM=$COLORTERM XDG_SEAT=$XDG_SEAT TERM=$TERM XDG_VTNR=$XDG_VTNR VTTY=$VTTY /sbin/login -p --
+ env -i COLORTERM=$COLORTERM XDG_SEAT=$XDG_SEAT TERM=$TERM XDG_VTNR=$XDG_VTNR VTTY=$VTTY /bin/login -p --
 }
 
 trap 'DoLoginPrompt' 2
