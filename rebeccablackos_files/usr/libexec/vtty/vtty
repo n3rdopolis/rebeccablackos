@@ -41,6 +41,7 @@ fd.close()" &>/dev/null
 
 EmulatedTTY=$1
 export HOME=/etc/vtty-config
+mkdir /run/vtty/$EmulatedTTY
 
 which vte &> /dev/null
 if [[ $? != 0 ]]
