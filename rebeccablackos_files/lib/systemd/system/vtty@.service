@@ -18,7 +18,7 @@ OnFailure=getty@%i.service
 
 [Service]
 Environment=XDG_SEAT=seat0
-ExecStart=/usr/libexec/vtty/vtty-frontend %I
+ExecStart=/usr/libexec/vtty/vtty %I
 
 TTYPath=/dev/%I
 TTYReset=true

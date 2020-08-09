@@ -104,6 +104,6 @@ chmod 700 /run/user/0
 ResetTTYMode $EmulatedTTY
 cage -d -s -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
-/usr/libexec/vtty/vtty-backend $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
+/usr/libexec/vtty/vtty-login $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?
