@@ -64,13 +64,8 @@ function SwitchToGettyMode
 {
   PromptUI
   touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
-  systemctl stop vtty@${CurrentTTY}.service
-  ResetTTYMode $CurrentTTYNumber
   systemctl start getty@${CurrentTTY}.service
-
-  chvt 63 &
-  sleep 1
-  chvt $CurrentTTYNumber &
+  systemctl stop vtty@${CurrentTTY}.service
 }
 
 function SwitchToVTTYMode
