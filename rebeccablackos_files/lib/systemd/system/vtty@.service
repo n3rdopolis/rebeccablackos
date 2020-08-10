@@ -1,5 +1,5 @@
 [Unit]
-Description=Graphical terminal for vTTY %I
+Description=vTTY for %I
 Conflicts=getty@%i.service
 
 After=systemd-user-sessions.service plymouth.service
