@@ -528,10 +528,6 @@ CompilePackage xdg-desktop-portal
 CompilePackage xdg-desktop-portal-kde
 CompilePackage xdg-desktop-portal-gtk
 CompilePackage xdg-desktop-portal-wlr
-
-if [[ ! -e /usr/bin/ubiquity ]]
-then
-  CompilePackage calamares
-fi
+CompilePackage calamares
 
 wait
