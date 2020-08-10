@@ -64,16 +64,14 @@ function SwitchToGettyMode
 {
   PromptUI
   touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
-  systemctl start getty@${CurrentTTY}.service
-  systemctl stop vtty@${CurrentTTY}.service
+  systemd-run bash -c "systemctl start getty@${CurrentTTY}.service; systemctl stop vtty@${CurrentTTY}.service"
 }
 
 function SwitchToVTTYMode
 {
   PromptUI
   rm /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
-  systemctl start vtty@${CurrentTTY}.service
-  systemctl stop getty@${CurrentTTY}.service
+  systemd-run bash -c "systemctl stop getty@${CurrentTTY}.service; systemctl start vtty@${CurrentTTY}.service"
 }
 
 
