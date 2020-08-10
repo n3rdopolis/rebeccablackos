@@ -89,18 +89,14 @@ then
   done
 fi
 
-#handle vtty inhibit
-if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-then
-  while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-  do
-    $SLEEPCMD 1
-  done
-fi
-
 mkdir -p /var/log/vtty
 mkdir -p /run/user/0
 chmod 700 /run/user/0
+
+#Reset the contents of the tty
+echo -n -e '\e[3J' > /dev/$EmulatedTTY
+#Disable cursor blinking on the TTY the display server will be started on
+echo -n -e '\e[?25l' > /dev/$EmulatedTTY
 
 ResetTTYMode $EmulatedTTY
 cage -d -s -- \
