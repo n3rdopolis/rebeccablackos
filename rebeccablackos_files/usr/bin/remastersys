@@ -497,13 +497,7 @@ FOO
 
     fi
 
-    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -no-duplicates $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES 2>>$WORKDIR/remastersys.log
-
-    #WORKAROUND mksquashfs sets the permissions of the rootfs to 777 if multiple folders are specified.
-    #This appends just one folder (which does not get added to the filesystem), this just sets the permissions properly
-    mkdir $WORKDIR/emptyfolder
-    chmod 755 $WORKDIR/emptyfolder
-    mksquashfs $WORKDIR/emptyfolder $WORKDIR/ISOTMP/casper/filesystem.squashfs
+    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 -no-duplicates $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES 2>>$WORKDIR/remastersys.log
 
     sleep 1
 
