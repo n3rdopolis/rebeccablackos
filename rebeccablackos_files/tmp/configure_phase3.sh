@@ -155,8 +155,6 @@ function PostInstallActions
   cd $OLDPWD
 
   #Set the cursor theme
-  TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/workdir /usr/bin/getconf LONG_BIT)
-  
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
   #Oxygen-Icons moved all the folders for icon sizes into a base folder, create symlinks for the old path
