@@ -53,7 +53,7 @@ then
   rm -rf /usr/import/tmp
   rm -rf /usr/import/usr/import
 
-  rsync /usr/import/* -a /
+  rsync -a -- /usr/import/*  /
 
   #Make all systemd units nonexecutable
   find /etc/systemd/system /lib/systemd/system -type f | while read -r FILE

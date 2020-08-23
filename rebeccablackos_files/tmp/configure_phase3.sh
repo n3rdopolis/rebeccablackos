@@ -107,7 +107,7 @@ dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
 #copy all files
-rsync /usr/import/* -Ka /
+rsync -Ka -- /usr/import/* /
 chmod 777 /tmp
 
 #workaround for Debian not including legacy systemd files
@@ -274,7 +274,7 @@ function PostInstallActions
   fi
 
   #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-  rsync /usr/import/* -Ka /
+  rsync -Ka /usr/import/* -- /
 
   #move the import folder
   mv /usr/import /tmp
