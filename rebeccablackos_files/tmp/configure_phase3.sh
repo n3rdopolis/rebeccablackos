@@ -234,7 +234,7 @@ function PostInstallActions
   find /opt/share/polkit-1/actions/ -type f | while read -r FILE;
   do
     FILENAME=$(basename $FILE)
-    ln -s "$FILE" /usr/share/polkit-1/actions/$FILENAME
+    cp "$FILE" /usr/share/polkit-1/actions/$FILENAME
   done
 
   mkdir -p /usr/share/polkit-1/rules.d/
