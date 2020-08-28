@@ -57,6 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #patch -f -p1 < /usr/share/RBOS_PATCHES/qtwebkit.diff
+patch -f -p1 < /usr/share/RBOS_PATCHES/qt5-qtwebkit.diff
 sed -i '/(private_tests)/g' Tools/qmake/mkspecs/features/default_pre.prf
 qmake
 }
