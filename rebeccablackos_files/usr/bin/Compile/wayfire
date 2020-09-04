@@ -80,9 +80,11 @@ ninja -C build install
 function PackagePostInstall()
 {
 cp wayfire.ini /etc/skel/.config/wayfire.ini
-sed -i 's/wofi/konsole/g' /etc/skel/.config/wayfire.ini
+sed -i 's/autostart_wf_shell = true/autostart_wf_shell = false/g' /etc/skel/.config/wayfire.ini
+sed -i 's/alacritty/konsole/g' /etc/skel/.config/wayfire.ini
 sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire.ini
 sed -i 's|wf-background|swaybg -i /usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png -o "*"|g' /etc/skel/.config/wayfire.ini
+sed -i 's|^# background|background|g' /etc/skel/.config/wayfire.ini
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
