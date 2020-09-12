@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=gtk4
+SOURCENAME=gtk-doc
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.gnome.org/GNOME/gtk
+SOURCEURL=https://gitlab.gnome.org/GNOME/gtk-doc
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=gtk-doc-for-gtk4
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 sed -i '/-Werror=redundant-decls/d' meson.build
 sed -i '/-Werror=return-type/d' meson.build
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dprint-backends=none -Dgtk_doc=false build
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
