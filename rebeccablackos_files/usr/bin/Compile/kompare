@@ -57,8 +57,8 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's/add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x060000)//g' CMakeLists.txt
-sed -i 's/add_definitions(-DKF_DISABLE_DEPRECATED_BEFORE_AND_AT=0x060000)//g' CMakeLists.txt
+sed -i 's/add_definitions(-DQT_DISABLE_DEPRECATED_BEFORE=0x050F00)//g' CMakeLists.txt
+sed -i 's/add_definitions(-DKF_DISABLE_DEPRECATED_BEFORE_AND_AT=0x054700)//g' CMakeLists.txt
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
