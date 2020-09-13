@@ -5,3 +5,4 @@ then
   mkdir -p "$HOME"/.config/
   touch "$HOME"/.config/wlmfirstlogin
 fi 
+systemctl --user start pipewire.service
