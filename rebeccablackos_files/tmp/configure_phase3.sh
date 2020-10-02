@@ -138,6 +138,9 @@ printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="adm plugdev cdrom sudo floppy audio 
 mkdir -p /opt/etc
 ln -s /etc/pam.d /opt/etc/pam.d
 
+#workaround hardcoded links to /usr/bin/python in various scripts
+ln -s $(which python3) /usr/bin/python
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
