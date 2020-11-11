@@ -1,41 +1,36 @@
 diff --git a/kioclient/kioclient.cpp b/kioclient/kioclient.cpp
-index af23222..5ccf80f 100644
+index af23222..b69bdd7 100644
 --- a/kioclient/kioclient.cpp
 +++ b/kioclient/kioclient.cpp
-@@ -22,6 +22,8 @@
- 
- #include <KIO/CopyJob>
- #include <KIO/DeleteJob>
-+#include <KIO/ApplicationLauncherJob>
-+#include <KIO/JobUiDelegate>
- #include <kio/listjob.h>
+@@ -26,6 +26,7 @@
  #include <kio/transferjob.h>
  #ifndef KIOCORE_ONLY
-@@ -34,6 +36,9 @@
- #include <KAboutData>
- #include <KLocalizedString>
+ #include <KIO/JobUiDelegate>
++#include <KIO/ApplicationLauncherJob>
+ #include <KPropertiesDialog>
+ #include <KService>
+ #include <KRun>
+@@ -97,6 +98,8 @@ static void usage()
+               "            #   'url' may be a list of URLs.\n").toLocal8Bit().constData());
+     puts(i18n("            #   the short version kioclient5 rm\n"
+               "            #   is also available.\n\n").toLocal8Bit().constData());
++    puts(i18n("  kioclient5 appmenu\n"
++              "            # Opens a basic application launcher.\n\n").toLocal8Bit().constData());
  
-+#include <QtCore/qurl.h>
-+#include "kopenwithdialog.h"
-+#include <QWidget>
- #include <QDBusConnection>
- #include <QCommandLineParser>
- #include <QFileDialog>
-@@ -356,6 +361,18 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
+     puts(i18n("*** Examples:\n").toLocal8Bit().constData());
+     puts(i18n("  kioclient5 exec file:/home/weis/data/test.html\n"
+@@ -356,6 +359,15 @@ bool ClientApp::doIt(const QCommandLineParser& parser)
                               argc == 3 ? parser.positionalArguments().last() : QString(),
                               true );
      }
 +    else if ( command == QLatin1String("appmenu") )
 +    {
-+      QList<QUrl> list;
-+      KOpenWithDialog dlg(list, i18n("Select an Application to run..."), QString(), 0);
-+      dlg.hideRunInTerminal();
-+      if (dlg.exec()) {
-+          KIO::ApplicationLauncherJob *job = new KIO::ApplicationLauncherJob(dlg.service());
-+          job->setUrls(list);
-+          job->start();
-+          return m_ok;
-+      }
++      auto *job = new KIO::ApplicationLauncherJob();
++      job->setUiDelegate(new KIO::JobUiDelegate(KJobUiDelegate::AutoHandlingEnabled, nullptr));
++      connect(job, &KJob::result, this, &ClientApp::slotResult);
++      job->start();
++      qApp->exec();
++      return m_ok;
 +    }
  #endif
      else if ( command == QLatin1String("download") )
