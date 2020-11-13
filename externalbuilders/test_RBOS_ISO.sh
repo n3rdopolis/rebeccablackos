@@ -111,10 +111,10 @@ if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
+    $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
   unmountanswer=$?
   else
-    dialog --stdout --yesno "Do you want to leave the virtual images mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
+    dialog --stdout --yesno "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
     unmountanswer=$?
   fi
 
@@ -134,10 +134,10 @@ then
 
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files?" 2>/dev/null
+      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files for the $MOUNTISO image?" 2>/dev/null
       deleteanswer=$?
     else
-      dialog --stdout --yesno "Keep Temporary overlay files?" 30 30
+      dialog --stdout --yesno "Keep Temporary overlay files for the $MOUNTISO image?" 30 30
       deleteanswer=$?
     fi
     if [ $deleteanswer -eq 1 ]
@@ -270,18 +270,18 @@ then
   then
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Will now bring up a prompt for the existing system." 2>/dev/null
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Mounting the $MOUNTISO image, and starting a prompt for it. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
     else
-      echo "Will now bring up a prompt for the existing system."
-      echo "Type exit to go back to your system."
+      echo "Mounting the $MOUNTISO image, and starting a prompt for it."
+      echo "Type exit in the new prompt for the option to unmount the image."
     fi
   else
     if [[ $XALIVE == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Entering the Target system" 2>/dev/null
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Starting a prompt for the already mounted $MOUNTISO image. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
     else
-      echo "Entering the Target system"
-      echo "Type exit to go back to your system."
+      echo "Starting a prompt for the already mounted $MOUNTISO image."
+      echo "Type exit in the new prompt for the option to unmount the image."
     fi
   fi
   TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint /usr/bin/getconf LONG_BIT)
@@ -364,9 +364,9 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomo
 then
   if [[ $XALIVE == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
-    echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
+    echo "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image. Press enter."
     read a 
   fi
   rm -rf "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH
@@ -415,10 +415,10 @@ fi
 #tell the user how to exit chroot
 if [[ $XALIVE == 0 ]]
 then
-  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog when you want to unmount the ISO image" 2>/dev/null
+  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog for the option to unmount the $MOUNTISO image" 2>/dev/null
 else
   echo "
-Type exit to go back to your system"
+Type exit in the new prompt for the option to unmount the $MOUNTISO image."
 fi
 
 #Only configure the system once
