@@ -3685,9 +3685,8 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
 #Function to lookup XDG_SEAT and XDG_SESSION_ID in case if the variables are unset. It needs no arguments
 function GetXDGVariables
 {
-  SESSION_OBJ_PATH=$(busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager GetSessionByPID u $$ | awk -F "\"" '{print $2}')
-  export XDG_SESSION_ID=$(busctl get-property  org.freedesktop.login1 "$SESSION_OBJ_PATH" org.freedesktop.login1.Session Id | awk -F "\"" '{print $2}')
-  export XDG_SEAT=$(busctl get-property  org.freedesktop.login1 "$SESSION_OBJ_PATH" org.freedesktop.login1.Session Seat | awk -F "\"" '{print $2}')
+  export XDG_SESSION_ID=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Id | awk -F \" '{print $2}')
+  export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
 }
 
 #Use bash builtin sleep if availible
