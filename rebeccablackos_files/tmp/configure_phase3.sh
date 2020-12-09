@@ -85,6 +85,11 @@ export PAGER=cat
 
 #Copy the import files into the system, while creating a deb with checkinstall.
 cp /usr/import/tmp/* /tmp
+
+#copy all the files to import
+rsync -Ka -- /usr/import/* /
+chmod 777 /tmp
+
 cd /tmp
 mkdir debian
 touch debian/control
@@ -106,9 +111,6 @@ ar q waylandloginmanager-rbos.deb data.tar.gz
 dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
-#copy all files
-rsync -Ka -- /usr/import/* /
-chmod 777 /tmp
 
 #workaround for Debian not including legacy systemd files
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
@@ -276,17 +278,12 @@ function PostInstallActions
     chmod +x /usr/bin/ubiquity
   fi
 
-  #copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-  rsync -Ka /usr/import/* -- /
+  #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
+  #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
+  dpkg -i /srcbuild/buildoutput/rbos-rbos_1-$PACKAGEDATE.deb --force-overwrite
 
   #move the import folder
   mv /usr/import /tmp
-
-  #Make the wsession files executable
-  chmod +x /usr/share/wsessions.d/*.desktop
-  
-  #Make the wlprofile executable
-  chmod +x /etc/skel/.local/wlprofile
 
   #Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
   chmod -X /lib/systemd/system/waylandloginmanager.service
@@ -379,12 +376,11 @@ apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes
 #Install the reduced packages
 compile_all installsmallpackage 
 
-#copy all files again to ensure that the SVN versions are not overwritten by a checkinstalled version
-rsync /tmp/import/* -Ka /
 
-#Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
-chmod -X /lib/systemd/system/waylandloginmanager.service
-chmod -X /etc/pam.d/*
+#Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
+#The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
+dpkg -i /srcbuild/buildoutput/rbos-rbos_1-$PACKAGEDATE.deb --force-overwrite
+
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe

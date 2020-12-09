@@ -46,6 +46,11 @@ cp -a /usr/import/lib/* /lib
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 
+#Make the wlprofile executable
+chmod +x /etc/skel/.local/wlprofile
+
+#Make the wsession files executable
+chmod +x /usr/share/wsessions.d/*.desktop
 
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
