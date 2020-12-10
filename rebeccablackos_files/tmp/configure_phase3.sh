@@ -280,7 +280,7 @@ function PostInstallActions
 
   #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
   #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-  dpkg -i /srcbuild/buildoutput/rbos-rbos_1-$PACKAGEDATE.deb --force-overwrite
+  dpkg --force-overwrite -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
   #move the import folder
   mv /usr/import /tmp
@@ -379,7 +379,7 @@ compile_all installsmallpackage
 
 #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
 #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-dpkg -i /srcbuild/buildoutput/rbos-rbos_1-$PACKAGEDATE.deb --force-overwrite
+dpkg --force-overwrite -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
 
 #Reset the utilites back to the way they are supposed to be.
