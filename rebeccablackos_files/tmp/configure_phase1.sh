@@ -63,7 +63,8 @@ fi
 echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo usrmerge -y
+apt-get install aptitude git bzr subversion mercurial wget rustc curl dselect locales acl sudo cargo usrmerge -y
+apt-get dist-upgrade -y --no-install-recommends
 
 #perl outputs complaints if a locale isn't generated
 locale-gen en_US.UTF-8
