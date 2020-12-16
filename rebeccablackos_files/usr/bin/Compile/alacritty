@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/jwilm/alacritty/
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=v0.3.3
+SOURCEREVISION=v0.6.0
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -77,7 +77,7 @@ mkdir -p $INSTALLDIR/bin
 mkdir -p $INSTALLDIR/share/pixmaps/
 cp target/release/alacritty $INSTALLDIR/bin
 cp extra/logo/alacritty-term.svg $INSTALLDIR/share/pixmaps/Alacritty.svg
-desktop-file-install extra/linux/alacritty.desktop
+desktop-file-install extra/linux/Alacritty.desktop
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
