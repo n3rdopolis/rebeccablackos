@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 export CFLAGS="-O2" 
 export CXXFLAGS="-O2"
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=true -Dgles2=true -Dplatforms=x11,wayland -Dgallium-drivers=swrast,nouveau,svga,r300,r600,radeonsi,virgl,iris -Ddri-drivers=r100,r200,nouveau,i915,i965 -Dosmesa=gallium -Dgallium-xa=true -Dgbm=true -Dshared-glapi=true -Dllvm=true  -Dshared-llvm=true -Dvulkan-drivers=intel,amd -Dllvm=true build 
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=true -Dgles2=true -Dplatforms=x11,wayland -Dgallium-drivers=swrast,nouveau,svga,r300,r600,radeonsi,virgl,iris -Ddri-drivers=r100,r200,nouveau,i915,i965 -Dosmesa=true -Dgallium-xa=true -Dgbm=true -Dshared-glapi=true -Dllvm=true  -Dshared-llvm=true -Dvulkan-drivers=intel,amd -Dllvm=true build 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
