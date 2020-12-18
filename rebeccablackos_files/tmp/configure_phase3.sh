@@ -46,15 +46,8 @@ function RedirectFile {
 
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
-if [[ $DEBIAN_DISTRO == Ubuntu ]]
-then
-  dpkg-divert --local --rename --add /lib/plymouth/ubuntu_logo.png
-  cp /usr/import/lib/plymouth/ubuntu_logo.png /usr/share/plymouth/ubuntu_logo.png
-elif [[ $DEBIAN_DISTRO == Debian ]]
-then
-  dpkg-divert --local --rename --add /usr/share/plymouth/debian-logo.png
-  cp /usr/import/lib/plymouth/ubuntu_logo.png /usr/share/plymouth/debian-logo.png
-fi
+cp /usr/import/lib/plymouth/boot_logo.png /usr/share/plymouth/themes/spinfinity/watermark.png
+
 dpkg-divert --local --rename --add /usr/lib/os-release
 mv /usr/lib/os-release.rbos /usr/lib/os-release
 
