@@ -56,30 +56,34 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-mkdir build
-cd build
 if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
-  ARCHARGS="-no-sse3 -no-ssse3 -no-sse4.1 -no-sse4.2 -no-avx -no-avx2 -no-avx512"
+  ARCHARGS="-DFEATURE_avx=OFF -DFEATURE_avx2=OFF -DFEATURE_avx512bw=OFF -DFEATURE_avx512cd=OFF -DFEATURE_avx512dq=OFF -DFEATURE_avx512er=OFF -DFEATURE_avx512f=OFF -DFEATURE_avx512ifma=OFF -DFEATURE_avx512pf=OFF -DFEATURE_avx512vbmi=OFF -DFEATURE_avx512vl=OFF -DFEATURE_sse3=OFF -DFEATURE_sse4_1=OFF -DFEATURE_sse4_2=OFF -DFEATURE_ssse3=OFF"
 else
   ARCHARGS=""
 fi
-../configure -confirm-license  -opensource -qpa wayland -egl -prefix $INSTALLDIR -libdir $INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -release -feature-accessibility -dbus -system-sqlite -no-warnings-are-errors -no-separate-debug-info -nomake tests -nomake examples -libinput -optimize-size $ARCHARGS
+
+
+mkdir build
+cd build
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_ARCHDATADIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/qt6 -DINSTALL_DATADIR=share/qt6 -DINSTALL_INCLUDEDIR=include/qt6 -DINSTALL_MKSPECSDIR=lib/qt6/mkspecs -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples \
+-DQT_FEATURE_journald=ON -DQT_FEATURE_openssl_linked=ON -DQT_QPA_DEFAULT_PLATFORM=wayland -DWARNINGS_ARE_ERRORS=OFF -DFEATURE_separate_debug_info=OFF -DQT_BUILD_TESTS=OFF -DFEATURE_optimize_size=ON -DFEATURE_system_sqlite=ON -DFEATURE_dbus=ON -DFEATURE_accessibility=ON $ARCHARGS
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
 cd build
-cmake --build . --parallel $BUILD_CPU_COUNT
+make
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
 cd build
-cmake --install .
+make install
 }
+
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
