@@ -85,6 +85,14 @@ cmake --install .
 function PackagePostInstall()
 {
 
+
+mkdir "$EXTERNALBUILDHOME/mainwindow"
+cd "$EXTERNALBUILDHOME/mainwindow"
+cmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/mainwindows/mainwindow
+make
+cp "$EXTERNALBUILDHOME/mainwindow/mainwindow" $INSTALLDIR/bin/mainwindow6
+
+
 mkdir "$EXTERNALBUILDHOME/wiggly"
 cd "$EXTERNALBUILDHOME/wiggly"
 cmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly
