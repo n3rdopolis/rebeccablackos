@@ -964,9 +964,9 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
       then
         chvt 63
       fi
-      $DIALOGCMD --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
+      $DIALOGCMD --no-cancel --msgbox "The wlmforcefbdev overide is set, but no framebuffer device is found!
 
-Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+Will show a menu with a few options for diagnosis." 20 50
       $TTYWIZARDCMD rbos-failedboot
       exit 0
     fi
@@ -985,22 +985,22 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
     if [[ $LiveCDMode == 1 ]]
     then
       WriteToLog "ERROR: No supportable hardware found"
-      $DIALOGCMD --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      $DIALOGCMD --no-cancel --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for a display server to work.
 
-You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50 --no-cancel
+You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50
     else 
-      $DIALOGCMD --msgbox "No Kernel Mode Setting, or Framebuffer device found.
+      $DIALOGCMD --no-cancel --msgbox "No Kernel Mode Setting, or Framebuffer device found.
 
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for Weston to work.
+This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for a display server to work.
 
-Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50 --no-cancel
+Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50
       $TTYWIZARDCMD rbos-add-framebuffer
     fi
-    $DIALOGCMD --msgbox "Can not start Weston.
+    $DIALOGCMD --no-cancel --msgbox "Can not start the loginmanagerdisplay greeter.
 
-Will now reboot." 20 50 --no-cancel
+Will now reboot." 20 50
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     exit 1
   fi
@@ -3362,9 +3362,9 @@ function WaylandLoginManagerMain
       then
         chvt 63
       fi
-      $DIALOGCMD --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
+      $DIALOGCMD --no-cancel --msgbox "The maximum number of restart attempts for the loginmanagerdisplay for each seat has been reached.
 
-Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+Will show a menu with a few options for diagnosis." 20 50
 
       $TTYWIZARDCMD rbos-failedboot
       exit 1
@@ -3378,9 +3378,9 @@ Will show a menu with a few options for diagnosis." 20 50 --no-cancel
       then
         chvt 63
       fi
-      $DIALOGCMD --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
+      $DIALOGCMD --no-cancel --msgbox "The prompt for the user action terminated incorrectly too many times in a row for every seat.
 
-Will show a menu with a few options for diagnosis." 20 50 --no-cancel
+Will show a menu with a few options for diagnosis." 20 50
       $TTYWIZARDCMD rbos-failedboot
       exit 1
     fi
