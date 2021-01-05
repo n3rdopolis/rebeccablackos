@@ -903,7 +903,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
 
   ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
   TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
-  WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
+  WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
   if [[ $seat0HasTTYs == 1 ]]
   then
     DIALOGCMD="systemd-run --unit="wlm-ttydialog" --wait -p CollectMode=inactive-or-failed -p TTYPath=/dev/tty63 -p User="$LOGINMANAGERDISPLAYUSER" -p StandardOutput=tty -p StandardError=tty -p StandardInput=tty dialog"
@@ -1266,11 +1266,11 @@ function DisplayServerWait
   done
 
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  command -v weston-info &> /dev/null
-  WestonInfoResult=$?
-  if [[ $WestonInfoResult == 0 ]]
+  command -v wayland-info &> /dev/null
+  WaylandInfoCommandExists=$?
+  if [[ $WaylandInfoCommandExists == 0 ]]
   then
-    while [[ $($WESTONINFOCMD &>/dev/null; echo $?) != 0 ]]
+    while [[ $($WAYLANDINFOCMD &>/dev/null; echo $?) != 0 ]]
     do
       $SLEEPCMD 1
     done

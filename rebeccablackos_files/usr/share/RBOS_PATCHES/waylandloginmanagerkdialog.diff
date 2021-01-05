@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2020-07-31 18:23:40.271191633 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2020-07-31 18:25:19.671646550 -0400
+--- usr/bin/waylandloginmanager	2021-01-04 22:59:08.713203933 -0500
++++ usr/bin/waylandloginmanagerkdialog	2021-01-04 23:03:43.334476406 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -47,7 +47,7 @@
 -  ZENITYCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- zenity"
 +  KDIALOGCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- kdialog"
    TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
-   WESTONINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- weston-info"
+   WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
    if [[ $seat0HasTTYs == 1 ]]
 @@ -913,8 +914,8 @@
      TTYWIZARDCMD=true
