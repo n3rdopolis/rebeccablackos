@@ -23,13 +23,13 @@
 SOURCENAME=cage
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/Hjdskes/cage
+SOURCEURL=https://github.com/jbeich/cage
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=master
+SOURCEREVISION=wlroots-0.13
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -54,8 +54,7 @@ REBUILDNEWREVISION=1
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-git fetch origin pull/174/head:wlroots-0.13
-git checkout wlroots-0.13 
+git revert -n cb0c967255a63b08cd9504b2080d75ada04021e0
 }
 
 
