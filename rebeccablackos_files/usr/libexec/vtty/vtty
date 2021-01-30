@@ -99,6 +99,7 @@ echo -n -e '\e[3J' > /dev/$EmulatedTTY
 echo -n -e '\e[?25l' > /dev/$EmulatedTTY
 
 ResetTTYMode $EmulatedTTY
+export WLR_RENDERER_ALLOW_SOFTWARE=1
 cage -d -s -- \
 vte --no-context-menu --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
 /usr/libexec/vtty/vtty-login $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
