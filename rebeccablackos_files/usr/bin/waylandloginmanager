@@ -159,6 +159,19 @@ function UserSessionWorker
   export XDG_SESSION_TYPE=wayland
   . /usr/bin/wlruntime_vars &> /dev/null
 
+  #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
+  #force software rendering to be enabled
+  GetConfigKey wlmforceswrender "$XDG_SEAT" 0 1 wlmforceswrender
+  if [[ $wlmforceswrender != 0  ]]
+  then
+    WLM_USE_SOFTWARE=1
+    export LIBGL_ALWAYS_SOFTWARE=1
+    export GBM_ALWAYS_SOFTWARE=1
+  else
+    WLM_USE_SOFTWARE=0
+  fi
+  unset wlmforceswrender
+
   if [[ -e /usr/share/wsessions.d/default.environment ]]
   then
     ReadEnvironmentFile /usr/share/wsessions.d/default.environment
@@ -207,19 +220,6 @@ function UserSessionWorker
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
   ArgArray=($ArgumentString)
   unset IFS
-
-  #if the user booted with wlmforceswrender, or configured software rendering globally, or for the seat
-  #force software rendering to be enabled
-  GetConfigKey wlmforceswrender "$XDG_SEAT" 0 1 wlmforceswrender
-  if [[ $wlmforceswrender != 0  ]]
-  then
-    WLM_USE_SOFTWARE=1
-    export LIBGL_ALWAYS_SOFTWARE=1
-    export GBM_ALWAYS_SOFTWARE=1
-  else
-    WLM_USE_SOFTWARE=0
-  fi
-  unset wlmforceswrender
 
   #if the user booted with wlmforcepixman, or configured to use pixman globally, or for the seat
   #force pixman to be enabled
