@@ -23,7 +23,7 @@
 SOURCENAME=linux
 
 #The URL of the Source code repo
-SOURCEURL=https://cdn.kernel.org/pub/linux/kernel/v4.x/linux-4.19.tar.gz
+SOURCEURL=https://cdn.kernel.org/pub/linux/kernel/v5.x/linux-5.10.tar.gz
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=ARCHIVE
@@ -61,11 +61,10 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-cd linux-4.19
+cd linux-5.10
 
 make olddefconfig
 sed -i '/CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
-sed -i '/CONFIG_DRM_UDL[ =]/c\CONFIG_DRM_UDL=m' .config
 
 echo "Building $BUILDARCH modules"...
 sed -i '/CONFIG_MODVERSIONS[ =]/cCONFIG_MODVERSIONS=y' .config
@@ -93,7 +92,7 @@ fi
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd linux-4.19
+cd linux-5.10
 if [[ -e .config ]]
 then
   CURRENTKERNELVERSIONFULL=$(basename $(readlink /vmlinuz) |cut -d '-' -f 2-)
@@ -124,8 +123,6 @@ then
   echo "scripts..."
   yes "" | make scripts
 
-  echo "udl..."
-  make -C . M=drivers/gpu/drm/udl/
   echo "vkms..."
   make -C . M=drivers/gpu/drm/vkms/
 fi
@@ -134,7 +131,7 @@ fi
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd linux-4.19
+cd linux-5.10
 if [[ -e .config ]]
 then
 
@@ -144,10 +141,8 @@ then
 
   KERNELVERSION=$(cat include/config/kernel.release)
 
-  mkdir -p /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/udl/
   mkdir -p /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/
 
-  cp ./drivers/gpu/drm/udl/udl.ko /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/udl/udl.ko
   cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/vkms.ko
 fi
 }
