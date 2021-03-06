@@ -29,7 +29,7 @@ SOURCEURL=git://code.qt.io/qt/qtwebengine
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.15.2
+SOURCEREVISION=5.15
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -56,13 +56,13 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#sed -i 's/&& features.webengine-nodejs//g' src/buildtools/configure.json
+sed -i 's/&& features.webengine-nodejs//g' src/buildtools/configure.json
 patch -p1 < /usr/share/RBOS_PATCHES/qt5-qtwebengine.diff
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/build/config/compiler/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/perfetto/gn/standalone/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/openscreen/src/build/config/BUILD.gn
 
-qmake CONFIG+=release WEBENGINE_CONFIG+=reduce_binary_size WEBENGINE_CONFIG+=use_system_ffmpeg #WEBENGINE_CONFIG-=nodejs WEBENGINE_CONFIG-=nodejs10
+qmake CONFIG+=release WEBENGINE_CONFIG+=reduce_binary_size WEBENGINE_CONFIG+=use_system_ffmpeg WEBENGINE_CONFIG-=nodejs WEBENGINE_CONFIG-=nodejs10
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

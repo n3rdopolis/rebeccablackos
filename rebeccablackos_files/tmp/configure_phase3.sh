@@ -309,6 +309,21 @@ rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/lib/apt/lists/*
 rm -rf /var/lib/dlocate/*
 
+#Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done wi$
+REMOVEDEVPGKS=""
+REMOVEDEVPGKSPROPOSED=(nodejs)
+for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKSPROPOSED[@]}; Iterator++ ))
+do
+  PACKAGE=${REMOVEDEVPGKSPROPOSED[Iterator]}
+  AvailableCount=$(dpkg --get-selections | awk '{print $1}' | awk -F : '{print $1}' | grep -c ^$PACKAGE$)
+  if [[ $AvailableCount != 0 ]]
+  then
+    REMOVEDEVPGKS+="$PACKAGE "
+  fi
+done
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purges.log
+
+
 
 #start the remastersys job
 remastersys dist
