@@ -860,6 +860,16 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
     seat0HasTTYs=0
   fi
 
+  WestonFBDev=$(weston --help |& grep fbdev-backend.so -c)
+  if [[ $WestonFBDev -gt 0 ]]
+  then
+    WestonSupportsFBDev=1
+  else
+    WriteToLog "Installed version of Weston does not support does not have a framebuffer backend. Framebuffer backend support for the loginmanagerdisplay and the weston host will not work."
+    WestonSupportsFBDev=0
+  fi
+  unset WestonFBDev
+
   #Array that contains the time stamps of the creation date of the seats
   SeatCreationStrings=()
 
@@ -1613,7 +1623,10 @@ function ChooseSessionType
     SeatSupportedBackendsString+="KMS "
     SeatDefaultBackendType=KMS
   fi
-  if [[ $SeatSupportsKMS != 0 || $SeatSupportsFB != 0 ]]
+  #If Weston doesn't support a framebuffer backend, other desktop environments still might.
+  #If there is no kernel mode setting support on a seat, and it supports framebuffers, and Weston is missing framebuffer support
+  #Weston can't be used to run nested sessions
+  if [[ $SeatSupportsKMS != 0 || ($SeatSupportsFB != 0 && $WestonSupportsFBDev == 1) ]]
   then
     SeatSupportedBackends+=(WKS)
     SeatSupportedBackendsString+="WKS "
@@ -2600,7 +2613,7 @@ function GetSeatCapabilityString
   GetConfigKey wlmnofbdev "$CurrentSeat" 0 1 wlmnofbdev
   if [[ $wlmnofbdev == 0  ]]
   then
-    if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] ]]
+    if [[ "$LoginctlSeatStatusString" =~ /graphics/fb[0-9]*[[:space:]] && $WestonSupportsFBDev == 1 ]]
     then
       SeatSupportsFB=1
     else
