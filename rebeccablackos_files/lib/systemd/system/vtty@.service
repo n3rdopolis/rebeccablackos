@@ -14,7 +14,7 @@ Conflicts=rescue.service
 Before=rescue.service
 
 
-#Only way for a failure to be reported is if there is no /dev/dri/card0
+#Only way for a failure to be reported is if there is no /dev/dri/card(X) device
 #The ttyserver always returns true
 OnFailure=getty@%i.service
 
