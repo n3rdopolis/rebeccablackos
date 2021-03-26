@@ -44,7 +44,7 @@
 #Weston 9.0 or greater is required for kiosk shell
 
 #as well as:
-#At least systemd v227 as it has all the ability to launch Wayland sessions with systemd-run
+#At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
 
 #/etc/waylandloginmanager.conf
   #Otherwise it uses /etc/lightdm/lightdm.conf . The supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
@@ -197,9 +197,6 @@ function UserSessionWorker
   then
     mkdir -p ~/.cache/wlsessionlogs
   fi
-
-  #Create a /tmp/.X11-unix/ folder, don't assume it exists
-  mkdir /tmp/.X11-unix/
 
   #Cleanup old log files
   LOGFILECOUNT=0
@@ -2188,7 +2185,7 @@ function StartUserSession
   fi
 
   WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
-  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+  systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths=/tmp/.X11-unix/ -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
   $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
@@ -2802,7 +2799,7 @@ function StartLoginManagerDisplay
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
       fi
-      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
+      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths=/tmp/.X11-unix/ -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
