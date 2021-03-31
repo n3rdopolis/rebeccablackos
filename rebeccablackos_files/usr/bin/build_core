@@ -504,11 +504,10 @@ function CleanupARCHIVE()
 #Function to download archives
 function DownloadARCHIVE()
 {
+  rm "$SOURCENAME/SOURCEFILE"
   OLDSOURCEURL=$(cat "$SOURCENAME/SOURCEURL")
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
-    rm "$SOURCENAME/SOURCEFILE"
-
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
