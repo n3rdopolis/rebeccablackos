@@ -23,13 +23,13 @@
 SOURCENAME=linux-kernel
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.com/linux-kernel/stable/-/archive/linux-5.10.y/stable-linux-5.10.y.tar.gz
+SOURCEURL=https://gitlab.com/linux-kernel/stable
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
-REPOSITORYTYPE=ARCHIVE
+REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=
+SOURCEREVISION=linux-5.10.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
