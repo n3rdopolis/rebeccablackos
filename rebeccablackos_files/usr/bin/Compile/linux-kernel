@@ -110,7 +110,6 @@ function PackageInstallSource()
 {
 cd stable-linux-5.10.y
 make install
-make headers_install
 make modules_install
 echo simplekms > /etc/modules-load.d/simplekms.conf 
 }
