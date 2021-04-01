@@ -181,7 +181,7 @@ STORAGESIZE_BUILDOUTPUT=$((2 * $GIGABYTE ))
 STORAGESIZE_PHASE1=$((2 * $GIGABYTE ))
 STORAGESIZE_PHASE2=$((4 * $GIGABYTE ))
 STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
-STORAGESIZE_SRCBUILD=$((26 * $GIGABYTE ))
+STORAGESIZE_SRCBUILD=$((28 * $GIGABYTE ))
 #End config options
 
 #Move to /var/cache if an existing build folder exists. With systemd-homed and the problems caused by UIDs moved in a migrated home directory, it's best to store in /var/cache
