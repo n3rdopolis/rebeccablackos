@@ -61,7 +61,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-cd stable-linux-5.10.y
 patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-1-9-drm-format-helper-Pass-destination-pitch-to-drm_fb_memcpy_dstclip.txt
 patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-2-9-drm-format-helper-Add-blitter-functions.txt 
 patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-3-9-drm-Add-simplekms-driver.txt
@@ -101,14 +100,12 @@ echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $Ke
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd stable-linux-5.10.y
 make -j$BUILD_CPU_COUNT
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd stable-linux-5.10.y
 make install
 make modules_install
 echo simplekms > /etc/modules-load.d/simplekms.conf 
