@@ -19,8 +19,6 @@
 #This runs a graphical terminal full screen that run the login prompt
 
 #Test if there is a graphics card, if not revert to text mode TTY
-compgen -G '/dev/dri/card[0-9]*' 2>/dev/null
-
 if ! compgen -G '/dev/dri/card[0-9]*' >/dev/null
 then
   echo "No kernel mode setting found, reverting to legacy TTY mode"
