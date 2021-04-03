@@ -79,9 +79,6 @@ BOOT OPTIONS:
 
             wlmforcepixman:             Force the Login Manager's display, and the hosts for any fullscreen-shell supporing session to use Pixman
 
-            wlmforcevblankoff:          Force all user sessions, and the Login Manager's display to be started with the environment variable vblank_mode=0
-                                        to disable vblank which might have problems on some hardware.
-
             wlmdebug:                   Force more sysrq trigger options to be availible, then the more secure default. This option is not settable from
                                         rbos-failedboot as it's for more advanced users
 
@@ -93,7 +90,6 @@ BOOT OPTIONS:
       When installed, and you are unable to use a UI, you can use the commands:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
-            rbos-force-vblankoff: Wizard for setting wlmforcevblankoff option to the kernel commandline with grub
 
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
