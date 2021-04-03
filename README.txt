@@ -94,7 +94,6 @@ BOOT OPTIONS:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
             rbos-force-vblankoff: Wizard for setting wlmforcevblankoff option to the kernel commandline with grub
-            rbos-install-vbox: This wizard will install Virtualbox drivers for you.
 
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
