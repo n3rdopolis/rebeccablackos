@@ -67,12 +67,6 @@
      #to force using pixman globally.
      #Specifing the option on the kernel command line overrides the config file
 
-     #wlmforcevblankoff-{$SEAT}=1
-     #to force vblank off on a seat or
-     #wlmforcevblankoff=1
-     #to force vblank off globally.
-     #Specifing the option on the kernel command line overrides the config file
-
      #wlmforcefbdev-{$SEAT}=1
      #to force framebuffer on a seat or
      #wlmforcefbdev=1
@@ -228,15 +222,6 @@ function UserSessionWorker
     export PIXMANARGS=""
   fi
   unset wlmforcepixman
-
-  #if the user booted with wlmforcevblankoff, or configured vblank globally, or for the seat
-  #force vblank to be disabled
-  GetConfigKey wlmforcevblankoff "$XDG_SEAT" 0 1 wlmforcevblankoff
-  if [[ $wlmforcevblankoff != 0  ]]
-  then
-    export vblank_mode=0
-  fi
-  unset wlmforcevblankoff
 
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
@@ -2641,17 +2626,6 @@ function GetSeatCapabilityString
   fi
   unset wlmforceswrender
 
-  #if the user booted with wlmforceswrender, or configured vblank globally, or for the seat
-  #force vblank to be disabled
-  GetConfigKey wlmforcevblankoff "$CurrentSeat" 0 1 wlmforcevblankoff
-  if [[ $wlmforcevblankoff != 0  ]]
-  then
-    FORCEVBLANK=1
-  else
-    FORCEVBLANK=0
-  fi
-  unset wlmforcevblankoff
-
   #Determine the backend to use
   WESTONBACKEND=0
   WESTONUSEPIXMAN=0
@@ -2700,9 +2674,9 @@ function GetSeatCapabilityString
   #Return the seat compatibility info
   if [[ ! -z $2 ]]
   then
-    printf -v "$2" '%s' "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
+    printf -v "$2" '%s' "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE"
   else
-    echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE $FORCEVBLANK"
+    echo "$WESTONBACKEND $WESTONUSEPIXMAN $FORCESOFTWARE"
   fi
 }
 
@@ -2794,10 +2768,6 @@ function StartLoginManagerDisplay
       if [[ ! -z $GBM_ALWAYS_SOFTWARE ]]
       then
         LOGINMANAGERDISPLAYENVSTRING+=" --setenv=GBM_ALWAYS_SOFTWARE=$GBM_ALWAYS_SOFTWARE "
-      fi
-      if [[ ! -z $vblank_mode ]]
-      then
-        LOGINMANAGERDISPLAYENVSTRING+=" --setenv=vblank_mode=$vblank_mode "
       fi
       systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths=/tmp/.X11-unix/ -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
@@ -2906,7 +2876,6 @@ function SetFallbackEnvironmentVariables
   GetStartedSeatIndex $1
   SeatIndexIDFallback=$ReturnSeatIndex
   SetFallbackSoftware=${SeatForceSWRenderFlags[$SeatIndexIDFallback]}
-  SetFallbackVblank=${SeatForceVblankFlags[$SeatIndexIDFallback]}
   if [[ $SetFallbackSoftware == 1 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
@@ -2916,12 +2885,6 @@ function SetFallbackEnvironmentVariables
     unset GBM_ALWAYS_SOFTWARE
   fi
 
-  if [[ $SetFallbackVblank == 1 ]]
-  then
-    export vblank_mode=0
-  else
-    unset vblank_mode
-  fi
 }
 
 #This fuction starts an autologin session, and takes 2 arguments, the first is the seat to start the autologin session on, the second is the autologin user
@@ -3090,7 +3053,6 @@ function WaylandLoginManagerMain
   LoginManagerDisplayBackends=()
   LoginManagerDisplayPixmanFlags=()
   SeatForceSWRenderFlags=()
-  SeatForceVblankFlags=()
   SeatFileNames=()
 
 
@@ -3198,7 +3160,6 @@ function WaylandLoginManagerMain
           LoginManagerDisplayBackends[$StartIndex]=${SeatCapabilityArr[0]}
           LoginManagerDisplayPixmanFlags[$StartIndex]=${SeatCapabilityArr[1]}
           SeatForceSWRenderFlags[$StartIndex]=${SeatCapabilityArr[2]}
-          SeatForceVblankFlags[$StartIndex]=${SeatCapabilityArr[3]}
           LoginManagerDisplayAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
           if [[ -f /run/waylandloginmanager/autologinran ]]
           then
