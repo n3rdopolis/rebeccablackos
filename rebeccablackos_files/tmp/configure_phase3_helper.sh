@@ -52,10 +52,12 @@ chmod +x /etc/skel/.local/wlprofile
 #Make the wsession files executable
 chmod +x /usr/share/wsessions.d/*.desktop
 
+#Make any initramfs script executable
+chmod -R +x /usr/share/initramfs-tools/
+
 if [[ $DEBIAN_DISTRO == Debian ]]
 then
   cp -a /lib/plymouth/themes/rebeccablackos-text/ /usr/share/plymouth/themes
-  echo FRAMEBUFFER=y >> /etc/initramfs-tools/conf.d/splash
 fi
 
 #Configure python to use modules in /opt

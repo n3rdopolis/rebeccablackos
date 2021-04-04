@@ -108,7 +108,6 @@ function PackageInstallSource()
 {
 make install
 make modules_install
-echo simplekms > /etc/modules-load.d/simplekms.conf 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
