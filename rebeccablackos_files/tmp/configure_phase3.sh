@@ -174,8 +174,6 @@ function PostInstallActions
   #Set the plymouth themes
   if [[ $DEBIAN_DISTRO == Ubuntu ]]
   then
-    update-alternatives --install /lib/plymouth/themes/text.plymouth text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth 100
-    update-alternatives --set text.plymouth /lib/plymouth/themes/rebeccablackos-text/rebeccablackos-text.plymouth
     update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
   elif [[ $DEBIAN_DISTRO == Debian ]]
   then

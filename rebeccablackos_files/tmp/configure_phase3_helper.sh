@@ -55,11 +55,6 @@ chmod +x /usr/share/wsessions.d/*.desktop
 #Make any initramfs script executable
 chmod -R +x /usr/share/initramfs-tools/
 
-if [[ $DEBIAN_DISTRO == Debian ]]
-then
-  cp -a /lib/plymouth/themes/rebeccablackos-text/ /usr/share/plymouth/themes
-fi
-
 #Configure python to use modules in /opt
 echo "/opt/lib/python2.7/site-packages" > "/usr/lib/python2.7/dist-packages/optpkgs.pth"
 PYTHON3DIRS=$(find /usr/lib/python3* -maxdepth 0 -printf "%f\n")
