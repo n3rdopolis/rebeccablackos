@@ -320,7 +320,7 @@ do
   fi
 done
 apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purges.log
-
+apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 
 #start the remastersys job
