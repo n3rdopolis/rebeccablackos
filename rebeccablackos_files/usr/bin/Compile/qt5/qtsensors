@@ -23,13 +23,13 @@
 SOURCENAME=qt5-qtsensors
 
 #The URL of the Source code repo
-SOURCEURL=git://code.qt.io/qt/qtsensors
+SOURCEURL=https://invent.kde.org/qt/qt/qtsensors
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=5.15
+SOURCEREVISION=kde/5.15
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
