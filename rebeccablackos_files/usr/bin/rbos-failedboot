@@ -36,7 +36,7 @@ fi
 #Ask the user what to do
 while [[ $Option != 5 && $Option != 6 && $Option != 7 ]]
 do
-  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the display manager log..." on 1 "View the main log..." off 2 "Change Framebuffer Size" off 3 "Force or unforce the Framebuffer" off 4 "Force or unforce software rendering" off 5 "Restart the system" off 6 "Exit this menu" off 7 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
+  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the display manager log..." on 1 "View the main log..." off 2 "Force or unforce software rendering" off 3 "Force or unforce the Framebuffer backend" off 4 "Change Framebuffer Size" off 5 "Restart the system" off 6 "Exit this menu" off 7 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
     sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
@@ -45,18 +45,18 @@ do
     sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/waylandloginmanager.log 500 500
   elif [[ $Option == 2 ]]
   then
+    rbos-force-softwarerendering
+  elif [[ $Option == 3 ]]
+  then
+    rbos-force-framebuffer
+  elif [[ $Option == 4 ]]
+  then
     if [[ $ISLIVE != 1 ]]
     then
       rbos-add-framebuffer
     else
       sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change framebuffer options select a different boot option" 20 50
     fi
-  elif [[ $Option == 3 ]]
-  then
-    rbos-force-framebuffer
-  elif [[ $Option == 4 ]]
-  then
-    rbos-force-softwarerendering
   elif [[ $Option == 5 ]]
   then
     sudo -E -u $DIALOGUSER dialog --msgbox "Will now restart..." 20 50
