@@ -94,7 +94,7 @@ fi
 make olddefconfig
 
 KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
-echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > "../postinstall-pak"
+echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
