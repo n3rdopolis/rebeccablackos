@@ -71,8 +71,6 @@ if [ "$LIVECDLABEL" = "" ]; then
     LIVECDLABEL="Custom Live CD"
 fi
 
-CDBOOTTYPE="ISOLINUX"
-
 if [ "$LIVECDURL" = "" ]; then
     LIVECDURL="http://www.remastersys.com"
 fi
@@ -311,6 +309,7 @@ update-rc.d remastersys-firstboot defaults
     # check and see if they have a custom isolinux already setup. eg. they copied over 
     # the isolinux folder from their original livecd or made a custom one for their distro
 
+    # Maintain isolinux.cfg compatibility for unetbootin
     if [ ! -f /etc/remastersys/customisolinux/isolinux.cfg ]; then
         log_msg "Creating isolinux setup for the live system"
         ISOLINUXFILE=$(find /usr -name 'isolinux.bin' | head -1)
@@ -326,6 +325,17 @@ update-rc.d remastersys-firstboot defaults
         cp /etc/remastersys/customisolinux/* $WORKDIR/ISOTMP/isolinux/ &> /dev/null
 
     fi
+
+    #Copy Grub files
+    mkdir -p $WORKDIR/ISOTMP/boot/grub
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/fonts
+    cp /usr/share/grub/unicode.pf2 $WORKDIR/ISOTMP/boot/grub/fonts/unicode.pf2
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/i386-pc/
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/i386-efi/
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/x86_64-efi/
+    cp /usr/lib/grub/i386-pc/*.mod $WORKDIR/ISOTMP/boot/grub/i386-pc/
+    cp /usr/lib/grub/i386-efi/*.mod $WORKDIR/ISOTMP/boot/grub/i386-efi/
+    cp /usr/lib/grub/x86_64-efi/*.mod $WORKDIR/ISOTMP/boot/grub/x86_64-efi/
 
     log_msg "Checking the ARCH of the system and setting the README.diskdefines file"
     ARCH=$(dpkg --print-architecture)
@@ -454,6 +464,7 @@ FOO
     # make a new initial ramdisk including the casper scripts
     log_msg "Creating a new initial ramdisk for the live system"
     mkinitramfs -o /boot/initrd.img-$KERNELVERSION $KERNELVERSION
+    mkdir /var/lib/initramfs-tools/
     sha1sum /boot/initrd.img-$KERNELVERSION > /var/lib/initramfs-tools/$KERNELVERSION
 
     log_msg "Copying your kernel and initrd for the livecd"
@@ -657,31 +668,20 @@ iso (){
     then
       BUILDEFI=1
     fi
-    
+
+    #Copy the config file for grub
+    sed -e 's/__LIVECDLABEL__/'"$LIVECDLABEL"'/g' /etc/remastersys/grub/grub.cfg > $WORKDIR/ISOTMP/boot/grub/grub.cfg
+
     if [[ $BUILDEFI == 1 ]]
     then
       log_msg "Creating GRUB images for EFI boot"
-
-      #Create the config file
-      echo "search --set=root --label $LIVECDLABEL"                      > ./grub.cfg
-      echo "set gfxmode=auto"                                           >> ./grub.cfg
-      echo "insmod all_video"                                           >> ./grub.cfg
-      echo "insmod gfxterm"                                             >> ./grub.cfg
-      echo "insmod png"                                                 >> ./grub.cfg
-      echo "terminal_output gfxterm"                                    >> ./grub.cfg
-      echo "loadfont (memdisk)/boot/grub/fonts/unicode.pf2"             >> ./grub.cfg
-      echo "set color_normal=white/black"                               >> ./grub.cfg
-      echo "set gfxpayload=keep"                                        >> ./grub.cfg
-      echo "syslinux_source (\$root)/isolinux/isolinux.bin"             >> ./grub.cfg
-      echo "syslinux_configfile (\$root)/isolinux/isolinux.cfg"         >> ./grub.cfg
-      #grub-syslinux2cfg -i $WORKDIR/ISOTMP/isolinux/isolinux.cfg -T $WORKDIR/ISOTMP/ >> ./grub.cfg
 
       #Build each supported EFI image
       IMAGESIZE=0
       for (( i=0; i<${#INSTALLEDGRUBEFIARCHES[@]}; i++ ))
       do
         EFIFILENAME=boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi
-        grub-mkstandalone -o $EFIFILENAME -O ${INSTALLEDGRUBEFIARCHES[$i]}-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=./grub.cfg"
+        grub-mkstandalone -o $EFIFILENAME -O ${INSTALLEDGRUBEFIARCHES[$i]}-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
         (( IMAGESIZE+=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  )) ))
       done
 
@@ -706,6 +706,18 @@ iso (){
       cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
     fi
     
+    log_msg "Creating GRUB images for MBR boot"
+    #Create the MBR bootloader
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/
+    grub-mkstandalone \
+      -O i386-pc-eltorito \
+      -o $WORKDIR/ISOTMP/boot/grub/eltorito.img \
+      --install-modules="linux16 linux normal iso9660 biosdisk memdisk search tar ls" \
+      --modules="linux16 linux normal iso9660 biosdisk search" \
+      --locales="" \
+      --fonts="" \
+      "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
+
     # Step 8 - Make md5sum.txt for the files on the livecd - this is used during the
     # checking function of the livecd
     log_msg "Creating md5sum.txt for the livecd/dvd"
@@ -722,24 +734,16 @@ iso (){
 
     # Step 9 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR"
+    #https://bazaar.launchpad.net/~ubuntu-cdimage/debian-cd/ubuntu/view/head:/tools/boot/groovy/boot-amd64 for xorriso command. Hybrid boot is now handled here
     if [[ $BUILDEFI == 1 ]]
     then
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -eltorito-alt-boot -e boot/EFI/grub.efi -no-emul-boot -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -append_partition 2 0xef boot/EFI/grub.efi -appended_part_as_gpt --mbr-force-bootable -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
     else
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -cache-inodes -J -l -b isolinux/isolinux.bin -c isolinux/boot.cat -no-emul-boot -boot-load-size 4 -boot-info-table -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 1>>$WORKDIR/remastersys.log
     fi
     if [ ! -f $WORKDIR/$CUSTOMISO ]; then
         log_msg "The iso was not created. There was a problem. Exiting"
         exit 1
-    fi
-    
-    # Make the iso hybrid so it can be simply dd copied to a usb flash drive.
-    log_msg "Making $CUSTOMISO a hybrid iso"
-    if [[ $BUILDEFI == 1 ]]
-    then
-      isohybrid -u $WORKDIR/$CUSTOMISO
-    else
-      isohybrid $WORKDIR/$CUSTOMISO
     fi
 
     # create the md5 sum file so the user doesn't have to - this is good so the iso
