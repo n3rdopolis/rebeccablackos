@@ -23,7 +23,7 @@ OVERVIEW:
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
-  It is based on Debian Buster for Tier 1 packages, (And Debian Bullseye for some like a newer kernel)
+  It is based on Debian Bullseye for Tier 1 packages.
 
 
 How to use the ISO:
