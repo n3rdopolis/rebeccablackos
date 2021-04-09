@@ -91,6 +91,26 @@ BOOT OPTIONS:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
 
+CHANGING THE RESOLUTION ON SIMPLE HARDWARE
+      Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not until recently, and the emulated 'vmware' device in QEMU
+      VMs would not have mode setting support. With this hardware, you would get at most a framebuffer device. However the bootloader also has to initialize
+      a framebuffer for the kernel.
+
+      A kernel mode setting driver, simplekms has been cherry-picked and is built. This allows mode setting on many more platforms that would only support
+      framebuffers, which means that even mode setting only Wayland desktops can run on these devices (with software rendering). Pending the 
+      simplekms/simpledrm driver actually being merged into the mainline kernel, many of the fallbacks, such as using framebuffer backends, using Weston hosts
+      to nest sessions, and the custom framebuffer permissons could soon start to become not as favored.
+
+      What sets the resolution for this is not the kernel, but the bootloader. To ensure maximum support, it attempts 1024x768, and then 800x600 then 640x480
+      It is possible to change this if you want to attempt a higher resolution.
+
+      For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
+      resolution, and hit "CTRL+X"
+
+      For installed, edit /etc/default/grub and observe the "GRUB_GFXMODE=1024x768,800x600,640x480,auto" line. Add your custom resolution comma separated
+      after the = sign first, It is recommended to keep the fallback resolution in case if it fails to set your desired one.
+      "GRUB_GFXMODE=1920x1080,1024x768,800x600,640x480,auto"
+
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
           svn co svn://svn.code.sf.net/p/rebeccablackos/code/
