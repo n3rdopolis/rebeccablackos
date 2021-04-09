@@ -102,7 +102,7 @@ ResetTTYMode $EmulatedTTY
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 export WLR_SESSION=direct
 cage -d -s -- \
-vte --no-context-menu --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
+vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
 /usr/libexec/vtty/vtty-login $EmulatedTTY &>> /var/log/vtty/host_${EmulatedTTY}.log
 $Return=$?
 echo $Return >> /var/log/vtty/host_${EmulatedTTY}.log
