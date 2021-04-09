@@ -705,9 +705,12 @@ iso (){
       mkdir -p $WORKDIR/ISOTMP/boot/EFI/
       cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
     fi
-    
-    log_msg "Creating GRUB images for MBR boot"
-    #Create the MBR bootloader
+
+    #Create a file with the name of the Live CD
+    #touch $WORKDIR/ISOTMP/$LIVECDLABEL
+
+    log_msg "Creating GRUB images for live boot"
+    #Create the live bootloader
     mkdir -p $WORKDIR/ISOTMP/boot/grub/
     grub-mkstandalone \
       -O i386-pc-eltorito \
@@ -717,6 +720,19 @@ iso (){
       --locales="" \
       --fonts="" \
       "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
+
+    #Create a chainloadable GRUB image
+    #Use as boot.img kernel
+    #cp /usr/lib/grub/i386-pc/lnxboot.img $WORKDIR/ISOTMP/boot/grub/boot.img
+    #use core.img as initrd
+    #grub-mkstandalone \
+    #  -O i386-pc \
+    #  -o $WORKDIR/ISOTMP/boot/grub/core.img \
+    #  --install-modules="part_gpt part_msdos nativedisk linux16 linux normal iso9660 biosdisk memdisk search tar ls fat ntfs ext2" \
+    #  --modules="part_gpt part_msdos nativedisk linux16 linux normal iso9660 biosdisk memdisk search tar ls fat ntfs ext2" \
+    #  --locales="" \
+    #  --fonts="" \
+    #  "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
 
     # Step 8 - Make md5sum.txt for the files on the livecd - this is used during the
     # checking function of the livecd
