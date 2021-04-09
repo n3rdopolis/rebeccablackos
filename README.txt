@@ -31,8 +31,8 @@ How to use the ISO:
 
   The live user "beccaholic" has no password
 
-  The ISO is built with Remastersys, which makes it compatible with unetbootin, and the USB Startup creator. It is also a hybrid ISO, so it can boot raw from
-  a flash drive.
+  The ISO is built with Remastersys, which makes it compatible with the USB Startup creator. It is also a hybrid ISO, so it can boot raw from a flash drive,
+  where the ISO has been written with dd. Unetbootin will also work, but is not as recommended as it uses syslinux with its own defaults, and no splash.
 
   You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script
   executable, and run the script from a terminal, and pass the path to the ISO file as an argument. You can usually do this by dragging the iso onto the
