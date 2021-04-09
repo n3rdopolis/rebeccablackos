@@ -91,7 +91,7 @@ BOOT OPTIONS:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
 
-CHANGING THE RESOLUTION ON SIMPLE HARDWARE
+CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
       Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not until recently, and the emulated 'vmware' device in QEMU
       VMs would not have mode setting support. With this hardware, you would get at most a framebuffer device. However the bootloader also has to initialize
       a framebuffer for the kernel.
