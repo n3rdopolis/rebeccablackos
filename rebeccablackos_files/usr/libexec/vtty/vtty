@@ -100,7 +100,7 @@ echo -n -e '\e[?25l' > /dev/$EmulatedTTY
 
 ResetTTYMode $EmulatedTTY
 export WLR_RENDERER_ALLOW_SOFTWARE=1
-export WLR_SESSION=direct
+export LIBSEAT_BACKEND=seatd
 cage -d -s -- \
 vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
 /usr/libexec/vtty/vtty-login $EmulatedTTY &>> /var/log/vtty/host_${EmulatedTTY}.log

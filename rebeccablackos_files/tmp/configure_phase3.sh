@@ -205,6 +205,9 @@ function PostInstallActions
   systemctl enable vtty@.service
   ln -s /usr/lib/systemd/system/vtty@.service /etc/systemd/system/autovt@.service
 
+  #enable the seatd service
+  systemctl enable seatd.service
+
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
