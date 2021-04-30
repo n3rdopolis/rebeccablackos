@@ -87,6 +87,13 @@ BOOT OPTIONS:
        This option is also handled, (but not by the WaylandLoginManager itself)
             vttydisable:                This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
 
+       This option is handled early in initramfs:
+            simplekms.forceload:        This forces the simplekmsdriver to be loaded, even if there is an existing /dev/dri/card0 device.
+                                        This option is only applicable for hardware with multiple video cards, where the primary video card
+                                        does not have support by a Linux modesetting driver, and generic modesetting support is needed.
+                                        the driver gtes loaded if there are no supported video cards by default, but a secondary one will,
+                                        without this option, be detected as the 'primary'.
+
       When installed, and you are unable to use a UI, you can use the commands:
             rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub

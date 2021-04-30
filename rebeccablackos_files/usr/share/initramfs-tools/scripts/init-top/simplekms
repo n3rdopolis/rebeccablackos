@@ -1,0 +1,25 @@
+#!/bin/sh
+
+PREREQ="udev"
+prereqs()
+{
+        echo "$PREREQ"
+}
+case $1 in
+# get pre-requisites
+prereqs)
+        prereqs
+        exit 0
+        ;;
+esac
+
+if [ ! -e /dev/dri/card0 ]
+then
+	modprobe simplekms
+fi
+
+cmdlinecount=$(grep -c '\bsimplekms.forceload\b' /proc/cmdline)
+if [ $cmdlinecount -gt 0 ]
+then
+	modprobe simplekms
+fi
