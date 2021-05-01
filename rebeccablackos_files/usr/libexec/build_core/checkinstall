@@ -2229,6 +2229,11 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	       #if this is a *.so* file and we don't have to strip it, then filter 'em
 		   continue
 	       fi
+	       if [ "`file $f | grep -v 'Linux kernel'`" = "" ]; then
+	       #Ignore kernel files
+		   echogn "IGNOREKERNEL"
+		   continue
+	       fi
 	       if [ "`file $f | sed -n -e 's/^\(.*\):[  ]*ELF.*, not stripped/\1/p'`" = "" ]; then
 		   continue
 	       fi
