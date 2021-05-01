@@ -76,13 +76,22 @@ then
   export REBUILDNEWREVISION
 fi
 
-getent passwd build_core &> /dev/null
+
+export NONROOTUSER=build_core
+export NONROOTGROUP=build_core
+
+getent group $NONROOTGROUP &> /dev/null
 if [[ $? != 0 ]]
 then
-  adduser --no-create-home --disabled-password --system --uid 65533 build_core
+  addgroup --system --gid 65533 $NONROOTGROUP
 fi
-export NONROOTUSER=build_core
-export NONROOTGROUP=nogroup
+
+getent passwd $NONROOTUSER &> /dev/null
+if [[ $? != 0 ]]
+then
+  adduser --no-create-home --disabled-password --system --uid 65533 $NONROOTUSER --ingroup $NONROOTGROUP
+fi
+
 export SOURCEDIR=/srcbuild
 export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
 if [[ -z $REBUILDNEWREVISION ]]
