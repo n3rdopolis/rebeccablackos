@@ -880,12 +880,20 @@ function MakeAndInstall()
       if [[ -e \"\$FILE\" ]]
       then
         FILETYPE=\$(file -b  \"\$FILE\" 2>/dev/null)
-        if [[ \"\$FILE\" != $INSTALLDIR/include/* ]] && ! [[ \"\$FILETYPE\" == \"current ar archive\" && \"\$FILE\" == *.a ]]
+        #Don't modify kernel files, they become unbootable
+        #Exclude initrds as they get built by a post package install script, and the placeholder that gets installed by the primary package, by the time the SmallCheckinstall
+        #runs, it's larger, as it's not the placeholder, but the one that was built because of the package trigger
+        if [[ \"\$FILE\" != $INSTALLDIR/include/* ]] && ! [[ \"\$FILETYPE\" == \"current ar archive\" && \"\$FILE\" == *.a ]] && [[ \"\$FILE\" != /boot/initrd.img* ]]
         then
           FILELINKPATH=\$(readlink -f \"\$FILE\")
           if [[ \"\$FILE\" == \"\$FILELINKPATH\" ]]
           then
-            strip -x \"\$FILE\" &>/dev/null
+            if [[ \"\$FILETYPE\" != *\"Linux kernel\"* ]]
+            then
+              strip -x \"\$FILE\" &>/dev/null
+            else
+              touch \"\$FILE\" &>/dev/null
+            fi
             touch \"\$FILE\" &>/dev/null
           else
             FILELINKDEST=\$(readlink \"\$FILE\")
@@ -1001,7 +1009,7 @@ function MakeAndInstall()
     
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=yes --stripso=yes --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
+      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
