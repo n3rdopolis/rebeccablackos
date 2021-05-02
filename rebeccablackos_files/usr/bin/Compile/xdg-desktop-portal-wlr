@@ -81,15 +81,7 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-if [[ -e $INSTALLDIR/bin/sway ]]
-then
-  mkdir -p /etc/skel/.config/sway
-  cp config $INSTALLDIR/etc/sway/config /etc/skel/.config/sway 
-  sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
-  sed -i 's\/opt/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png\g' /etc/skel/.config/sway/config
-  sed -i 's/alacritty/weston-terminal/g' /etc/skel/.config/sway/config
-  sed -i 's/dmenu_run/bemenu/g' /etc/skel/.config/sway/config
-fi
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
