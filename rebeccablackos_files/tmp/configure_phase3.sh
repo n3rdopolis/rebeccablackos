@@ -208,6 +208,11 @@ function PostInstallActions
   #enable the seatd service
   systemctl enable seatd.service
 
+  #Ensure that pulse is not muted by default
+  echo "### Do not mute by default" >> /etc/pulse/default.pa
+  echo "set-sink-mute 0 0" >> /etc/pulse/default.pa
+  echo "set-sink-volume 0 32768" >> /etc/pulse/default.pa
+
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
