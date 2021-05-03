@@ -74,7 +74,7 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-VTEVERSION=$(basename /opt/include/vte-*)
+VTEVERSION=$(basename $INSTALLDIR/include/vte-*)
 ln -s $INSTALLDIR/bin/$VTEVERSION $INSTALLDIR/bin/vte
 }
 
