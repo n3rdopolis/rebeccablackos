@@ -92,8 +92,8 @@ echo "DOING $LINE"
   done
 done
 rm /usr/share/initramfs-tools/scripts/casper-bottom/41apt_cdrom
-sed -i 's|/root/opt/share/autostart/trackerd.desktop|/opt/etc/xdg/autostart/tracker-store.desktop|g' /usr/share/initramfs-tools/scripts/casper-bottom/36disable_trackerd
-sed -i 's|/usr/|/opt/|g' /usr/share/initramfs-tools/scripts/casper-bottom/34disable_kde_services
+sed -i "s|/root$INSTALLDIR/share/autostart/trackerd.desktop|$INSTALLDIR/etc/xdg/autostart/tracker-store.desktop|g" /usr/share/initramfs-tools/scripts/casper-bottom/36disable_trackerd
+sed -i "s|/usr/|$INSTALLDIR/|g" /usr/share/initramfs-tools/scripts/casper-bottom/34disable_kde_services
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
