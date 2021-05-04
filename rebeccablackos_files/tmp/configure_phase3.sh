@@ -208,6 +208,10 @@ function PostInstallActions
   #enable the seatd service
   systemctl enable seatd.service
 
+  #Enable pipewire services
+  systemctl --global enable pipewire.service
+  systemctl --global enable pipewire-media-session.service
+
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
