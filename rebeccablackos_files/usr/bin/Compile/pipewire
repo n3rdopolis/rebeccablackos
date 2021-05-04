@@ -58,6 +58,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's/ExecStart=/ExecStart=dbus-launch /g' src/daemon/systemd/user/pipewire.service.in
+sed -i 's/ExecStart=/ExecStart=dbus-launch /g' src/daemon/systemd/user/pipewire-media-session.service.in
+sed -i 's/ExecStart=/ExecStart=dbus-launch /g' src/daemon/systemd/user/pipewire-pulse.service.in
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 

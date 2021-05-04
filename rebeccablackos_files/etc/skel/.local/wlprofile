@@ -6,3 +6,4 @@ then
   touch "$HOME"/.config/wlmfirstlogin
 fi 
 systemctl --user start pipewire.service
+systemctl --user start pipewire-media-session.service
