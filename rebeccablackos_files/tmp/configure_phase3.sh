@@ -209,7 +209,7 @@ function PostInstallActions
   systemctl enable seatd.service
 
   #Enable pipewire services
-  systemctl --global enable pipewire.service
+  systemctl --global enable pipewire.socket
   systemctl --global enable pipewire-media-session.service
 
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
