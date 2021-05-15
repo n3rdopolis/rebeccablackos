@@ -882,7 +882,7 @@ LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
 
-  #set MinimumTTY to be 7. this causes the first TTY to try to put the WaylandLoginManager on as tty8.
+  #set MinimumTTY to be 7.
   MinimumTTY=7
   #default the number of sessions registered to be 0 if unset
   if [[ -z $AllSessions ]]
@@ -1097,10 +1097,9 @@ function GetNextTTY
   TTYNotInLogind=0
   TTYNotInUse=0
   CalcTTY=$MinimumTTY
-  #cycle through all ttys, stopping at tty63, as tty63 is 'reserved' by the waylandloginmanager as the tty to switch to in between sessions, as there is issues switching directly between two Weston servers.
-  while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 62) || $TTYNotInLogind -gt 0 ]]
+  while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 64) || $TTYNotInLogind -gt 0 ]]
   do
-    ((CalcTTY++))
+    #Returns 1 when NOT in use.
     fuser -s /dev/tty$CalcTTY &>/dev/null
     TTYNotInUse=$?
     TTYNotInLogind=0
@@ -1111,6 +1110,10 @@ function GetNextTTY
         ((TTYNotInLogind++))
       fi
     done
+    if [[ $TTYNotInUse -ne 1 ]]
+    then
+      ((CalcTTY++))
+    fi
   done
 
   if [[ $TTYNotInUse -ne 1 ]]
