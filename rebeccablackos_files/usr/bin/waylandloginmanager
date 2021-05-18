@@ -2824,10 +2824,9 @@ function StartLoginManagerDisplay
       echo "The DEFAULTWAYLANDSERVER, $DEFAULTWAYLANDSERVER is not executable, or does not exist." >> /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log
     fi
   fi
-  if [[ $SeatStartCount == -1 ]]
+  if [[ $SeatStartCount == -1 && $LOGINMANAGERDISPLAYSTATUS != 1 ]]
   then
     WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
-    (( SeatStartCount-- ))
   fi
   LoginManagerDisplayAttemptCounts[$SeatIndexID]=$SeatStartCount
 }
