@@ -2718,9 +2718,9 @@ function StartLoginManagerDisplay
   elif [[ $SeatWestonBackend == FB ]]
   then
     WESTONBACKENDSTRING="fbdev-backend.so"
-  elif [[ $SeatWestonBackend == "" ]]
+  elif [[ $SeatWestonBackend == "" || $SeatWestonBackend == 0 ]]
   then
-    WriteToLog "No backend found for $CurrentSeat ."
+    DoStartLoginManagerDisplay=0
     SeatStartCount=-1
     LOGINMANAGERDISPLAYSTATUS=1
   fi
@@ -2731,7 +2731,6 @@ function StartLoginManagerDisplay
   fi
   if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount -ge 0 && $DoStartLoginManagerDisplay == 1 ]]
   then
-
     if [[ $SeatUsePixman == 1 ]]
     then
       PIXMANARGS="--use-pixman"
@@ -2828,6 +2827,7 @@ function StartLoginManagerDisplay
   if [[ $SeatStartCount == -1 ]]
   then
     WriteToLog "Maximum attempts to start the loginmanagerdisplay for $CurrentSeat has been reached"
+    (( SeatStartCount-- ))
   fi
   LoginManagerDisplayAttemptCounts[$SeatIndexID]=$SeatStartCount
 }
