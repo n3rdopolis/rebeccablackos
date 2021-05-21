@@ -64,14 +64,14 @@ function SwitchToGettyMode
 {
   PromptUI
   touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
-  systemd-run bash -c "systemctl start getty@${CurrentTTY}.service; systemctl stop vtty@${CurrentTTY}.service"
+  systemd-run bash -c "systemctl start getty@${CurrentTTY}.service; systemctl stop vtty-frontend@${CurrentTTY}.service"
 }
 
 function SwitchToVTTYMode
 {
   PromptUI
   rm /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
-  systemd-run bash -c "systemctl stop getty@${CurrentTTY}.service; systemctl start vtty@${CurrentTTY}.service"
+  systemd-run bash -c "systemctl stop getty@${CurrentTTY}.service; systemctl start vtty-frontend@${CurrentTTY}.service"
 }
 
 
@@ -99,11 +99,11 @@ fi
 
 AutoVTService=$(systemctl show autovt@${CurrentTTY}.service -p Id --value)
 GettyServiceState=$(systemctl is-active getty@${CurrentTTY}.service -p Id --value &>/dev/null; echo $?)
-vTTYServiceState=$(systemctl is-active vtty@${CurrentTTY}.service -p Id --value &>/dev/nul; echo $?)
+vTTYServiceState=$(systemctl is-active vtty-frontend@${CurrentTTY}.service -p Id --value &>/dev/null; echo $?)
 
-if [[ $AutoVTService != "vtty@${CurrentTTY}.service" ]]
+if [[ $AutoVTService != "vtty-frontend@${CurrentTTY}.service" ]]
 then
-  echo "vtty is not configured as the default autovt handler"
+  echo "vtty-frontend is not configured as the default autovt handler"
   exit 1
 fi
 
