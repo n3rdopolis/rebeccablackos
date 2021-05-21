@@ -21,7 +21,18 @@
 EmulatedTTY=$1
 PTYPath=$(tty)
 
-ClientPTYSize=($(stty size))
-stty -F /run/vtty/$EmulatedTTY/serverpty rows ${ClientPTYSize[0]} cols ${ClientPTYSize[1]}
+function PtyResizeEvent
+{
+  ClientPTYSize=($(stty size))
+  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
+}
+#Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
+trap PtyResizeEvent WINCH
 
-socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy
+PtyResizeEvent
+socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
+sleep inf &
+while [ 1 ]
+do
+  wait $!
+done

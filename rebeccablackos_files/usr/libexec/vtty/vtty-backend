@@ -48,6 +48,15 @@ mkdir -p /var/log/vtty
 chown vtty:vtty /var/log/vtty
 chmod 744 /var/log/vtty
 
+#Create the FIFO to where resize commands will be sent
+if [[ -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
+then
+  rm /run/vtty/$EmulatedTTY/ptycommandproxy
+fi
+mkfifo -m 200 /run/vtty/$EmulatedTTY/ptycommandproxy
+chown vtty /run/vtty/$EmulatedTTY/ptycommandproxy
+exec 1000<>/run/vtty/$EmulatedTTY/ptycommandproxy
+
 #Start the socat server
 if [[ -e /run/vtty/$EmulatedTTY/socatproxy ]]
 then
@@ -67,8 +76,20 @@ then
 fi
 
 systemd-notify --ready &> /dev/null
+#Accept commands from the connection to manage the PTY (currently only the size)
+while [ 1 ]
+do
+  #12 chars should be enough 's 9999 9999' more than enough
+  read -r -n 12 COMMANDDATA <&1000
+  COMMANDDATA=($COMMANDDATA)
 
-#Wait until the socat server quits
-tail --pid=$SOCATPID -f /dev/null
+  #s for size, then number of rows, then number of cols
+  if [[ ${COMMANDDATA[0]} -eq "s" ]]
+  then
+    XSize=${COMMANDDATA[1]}
+    YSize=${COMMANDDATA[2]}
+    stty -F /run/vtty/$EmulatedTTY/loginpty rows $XSize cols $YSize
+  fi
 
-exit $?
+done
+exit 0
