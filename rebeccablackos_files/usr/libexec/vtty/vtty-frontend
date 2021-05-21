@@ -1,0 +1,115 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This runs a graphical terminal full screen to connect to the socat socket where the login process is running
+
+#Test if there is a graphics card, if not revert to text mode TTY
+if ! compgen -G '/dev/dri/card[0-9]*' >/dev/null
+then
+  echo "No kernel mode setting found, reverting to legacy TTY mode"
+  exit 1
+fi
+
+
+function ResetTTYMode
+{
+    python3 -c "from array import array; \
+from fcntl import ioctl; \
+buf = array('h', [0]); \
+buf[0] = 0; \
+fd = open('/dev/$1', 'wb'); \
+ioctl(fd, 0x4B3A, 0); \
+ioctl(fd, 0x05602, buf); \
+fd.close()" &>/dev/null
+}
+
+. /usr/bin/wlruntime_vars &> /dev/null
+
+EmulatedTTY=$1
+
+which socat &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "socat not installed"
+  exit 1
+fi
+
+which vte &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "vte not installed"
+  exit 1
+fi
+
+which cage &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "cage not installed"
+  exit 1
+fi
+
+
+#if vttydisable is specified on the boot command line, fall back to legacy gettys
+read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
+if [[ $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
+then
+  echo "vttydisable specified on the command line. Falling back to default getty"
+  exit 1
+fi
+
+
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
+
+
+#The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
+#Only start once the actual TTY is active, as otherwise it can conflict with a display server
+read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+if [[ $ActiveTTY != $EmulatedTTY ]]
+then
+  while [[ $ActiveTTY != $EmulatedTTY ]]
+  do
+    read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+    $SLEEPCMD 1
+  done
+fi
+
+#handle vtty inhibit
+if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+then
+  while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+  do
+    $SLEEPCMD 1
+  done
+fi
+
+
+ResetTTYMode $EmulatedTTY
+
+export WLR_RENDERER_ALLOW_SOFTWARE=1
+cage -d -s -- \
+vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
+/usr/libexec/vtty/vtty-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
+
+exit $?

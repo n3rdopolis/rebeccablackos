@@ -317,16 +317,27 @@ function Show_etc_issue
 }
 ####end /etc/issue commands
 
+#Allow the vtty user to set the size of the server PTY to be the same as the client PTY, and have a fixed referral point to send the command
+PTYPath=$(tty)
+if [[ -e /run/vtty/$EmulatedTTY/serverpty ]]
+then
+  rm /run/vtty/$EmulatedTTY/serverpty
+fi
+ln -s $PTYPath /run/vtty/$EmulatedTTY/serverpty
+
 
 function DoLoginPrompt
 {
+ export TERM=xterm-256color
  tput reset
  tput clear
  Show_etc_issue
 
+ unset NOTIFY_SOCKET
+ unset INVOCATION_ID
+ unset JOURNAL_STREAM
  export VTTY=$EmulatedTTY
- export XDG_VTNR=${EmulatedTTY//tty/}
- env -i COLORTERM=$COLORTERM XDG_SEAT=$XDG_SEAT TERM=$TERM XDG_VTNR=$XDG_VTNR VTTY=$VTTY /bin/login -p --
+ env -i COLORTERM=truecolor XDG_SEAT=seat-vtty TERM=$TERM VTTY=$VTTY /bin/login -p --
 }
 
 trap 'DoLoginPrompt' 2
@@ -334,5 +345,9 @@ trap 'DoLoginPrompt' 2
 while [ 1 ]
 do
   DoLoginPrompt
+  if [[ ! -e $PTYPath ]]
+  then
+    exit 1
+  fi
 done
 exit 0
