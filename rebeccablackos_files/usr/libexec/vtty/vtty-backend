@@ -46,7 +46,7 @@ chmod 700 /run/vtty/$EmulatedTTY
 #Make the logging folder
 mkdir -p /var/log/vtty
 chown vtty:vtty /var/log/vtty
-chmod 744 /var/log/vtty
+chmod 755 /var/log/vtty
 
 #Create the FIFO to where resize commands will be sent
 if [[ -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
