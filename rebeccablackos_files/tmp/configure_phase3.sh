@@ -202,8 +202,8 @@ function PostInstallActions
   systemctl enable acpid.service
 
   #enable the virtual tty services.
-  systemctl enable vtty@.service
-  ln -s /usr/lib/systemd/system/vtty@.service /etc/systemd/system/autovt@.service
+  systemctl enable vtty-frontend@.service
+  ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
 
   #enable the seatd service
   systemctl enable seatd.service
