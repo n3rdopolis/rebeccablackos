@@ -59,6 +59,7 @@ then
   echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
 fi
 echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
+echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
 
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
