@@ -18,7 +18,7 @@
 
 #Disable or reenable a vty
 
-function GetVTTyLogindSession
+function GetVTTYLogindSession
 {
   CurrentTTY=$1
   LogindSession=""
@@ -117,7 +117,7 @@ function SwitchToGettyMode
   touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
   systemd-run bash -c "systemctl start getty@${CurrentTTY}.service; systemctl stop vtty-frontend@${CurrentTTY}.service"
 
-  LogindSession=$(GetVTTyLogindSession $CurrentTTY)
+  LogindSession=$(GetVTTYLogindSession $CurrentTTY)
   if [[ ! -z $LogindSession ]]
   then
     loginctl terminate-session $LogindSession
