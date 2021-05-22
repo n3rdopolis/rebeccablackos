@@ -16,8 +16,59 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#Disable a vtty (until the next reboot)
+#Disable or reenable a vty
 
+function GetVTTyLogindSession
+{
+  CurrentTTY=$1
+  LogindSession=""
+
+  #If there is no running socket, then quit
+  if [[ ! -e /run/vtty/${CurrentTTY}/loginpty ]]
+  then
+    return
+  fi
+
+  SessionPty=$(readlink /run/vtty/${CurrentTTY}/loginpty 2>/dev/null)
+  SessionPty=${SessionPty//\/dev\/}
+
+  #If sessiontty is empty, then nothing is running
+  if [[ -z $SessionPty ]]
+  then
+    return
+  fi
+
+
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null | awk '{print $1}'))
+  RunningSessionInfos=$(loginctl show-session -p TTY ${RunningSessions[@]} --value 2>/dev/null | sed 's/^$/-1/g')
+
+  IFS=$'\n'
+  RunningSessionInfos=($(echo "$RunningSessionInfos"))
+  unset IFS
+
+  RunningSessionInfoCount=${#RunningSessionInfos[@]}
+  RunningSessionInfoFields=2
+  RunningSessionIDs=()
+  #These could also be PTYs, not just standard TTYs
+  RunningSessionTTYs=()
+  for (( RunningSessionInfoItr=0 ; RunningSessionInfoItr < $RunningSessionInfoCount ; RunningSessionInfoItr+=$RunningSessionInfoFields ))
+  do
+    RunningSessionTTYs+=(${RunningSessionInfos[$RunningSessionInfoItr]//\/dev\/})
+  done
+  RunningSessionItr=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    RunningSessionTTY=${RunningSessionTTYs[$RunningSessionItr]}
+    if [[ $RunningSessionTTY == $SessionPty ]]
+    then
+      LogindSession=$RunningSession
+      break
+    fi
+    ((RunningSessionItr++))
+  done
+
+  echo "$LogindSession"
+}
 
 
 function PromptUI
@@ -65,6 +116,12 @@ function SwitchToGettyMode
   PromptUI
   touch /run/vtty/${CurrentTTY}/vttyinhibit 2>/dev/null
   systemd-run bash -c "systemctl start getty@${CurrentTTY}.service; systemctl stop vtty-frontend@${CurrentTTY}.service"
+
+  LogindSession=$(GetVTTyLogindSession $CurrentTTY)
+  if [[ ! -z $LogindSession ]]
+  then
+    loginctl terminate-session $LogindSession
+  fi
 }
 
 function SwitchToVTTYMode
