@@ -31,7 +31,6 @@ trap PtyResizeEvent WINCH
 
 PtyResizeEvent
 socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
-sleep inf &
 while [ 1 ]
 do
   wait $!
