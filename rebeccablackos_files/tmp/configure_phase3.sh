@@ -209,6 +209,10 @@ function PostInstallActions
   #Enable pipewire services
   systemctl --global enable pipewire.socket
   systemctl --global enable pipewire-media-session.service
+  #TODO https://gitlab.freedesktop.org/pipewire/pipewire/-/issues/1233 for 32 bit
+  #It works on 64 bit
+  #systemctl --global disable pulseaudio.socket
+  #systemctl --global enable pipewire-pulse.socket
 
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
