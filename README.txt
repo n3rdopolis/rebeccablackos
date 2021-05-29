@@ -1,5 +1,5 @@
 LICENSE:
-  The build script are all under GPL v2, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/
+  The build script are all under GPL v2+, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES
   or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ or rebeccablacklinux/rebeccablackos_files/usr/import/
   Some diffs are for software that is under a different Open Source license, for example Calamares is GPLv3
   
