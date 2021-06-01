@@ -210,19 +210,19 @@ echolog "Build script for "$BUILDFRIENDLYNAME". The build process requires no us
 export BUILDARCH=$(echo $1| awk -F = '{print $2}')
 if [[ -z "$BUILDARCH" ]]
 then
-  echolog "Select Arch. Enter 1 for i386, 2 for amd64, 3 for custom. Default=i386."
+  echolog "Select Arch. Enter 1 for amd64, 2 for i386, 3 for custom. Default=amd64"
   echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
   read archselect
   if [[ $archselect == 2 ]]
   then
-    export BUILDARCH=amd64
+    export BUILDARCH=i386
   elif [[ $archselect == 3 ]]
   then
     echolog "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
     read BUILDARCH
     export BUILDARCH
   else
-    export BUILDARCH=i386
+    export BUILDARCH=amd64
   fi
   SKIPPROMPT=0
 else 
