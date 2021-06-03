@@ -27,7 +27,6 @@ Environment=XDG_SEAT=seat0
 PAMName=vtty
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %I
-Conflicts=getty@%i.service
 
 TTYPath=/dev/%I
 TTYReset=true
