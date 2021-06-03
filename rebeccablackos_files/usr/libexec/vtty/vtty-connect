@@ -21,6 +21,15 @@
 EmulatedTTY=$1
 PTYPath=$(tty)
 
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
+
 function PtyResizeEvent
 {
   ClientPTYSize=($(stty size))
@@ -34,4 +43,5 @@ socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
 while [ 1 ]
 do
   wait $!
+  $SLEEPCMD .1
 done
