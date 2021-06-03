@@ -20,305 +20,22 @@
 
 EmulatedTTY=$1
 
-####/etc/issue functions
-function GetFirstIPType
-{
-  if [[ $1 == 4 ]]
-  then
-    FINDCHAR="."
-  elif [[ $1 == 6 ]]
-  then
-    FINDCHAR=":"
-  else
-    return
-  fi
-
-  IPs=($(hostname -I))
-  IPText=""
-  for IP in "${IPs[@]}"
-  do
-    if [[ $IP == *$FINDCHAR* ]]
-    then
-      IPText=$IP
-      break
-    fi
-  done
-  if [[ -z $IPText ]]
-  then
-    IPText=$(hostname)
-  fi
-  echo $IPText
-}
-
-function Get_os_release_key
-{
-  KEY=$1
-  os_release_file_str=""
-  if [[ -e /etc/os-release ]]
-  then
-    os_release_file_str=$(cat /etc/os-release)
-  fi
-  if [[ -e /usr/lib/os-release ]]
-  then
-    os_release_file_str=$(cat /usr/lib/os-release)
-  fi
-  if [[ -z $os_release_file_str ]]
-  then
-    return
-  fi
-
-  echo "$os_release_file_str" | grep ^$KEY | sed "s/$KEY=//g" | head -1 | sed 's/"//g'
-}
-
-function getinterfaceip4
-{
-  IPText=$(ip -o -f inet addr show | awk -v INTERFACE=lo '{if ($2==INTERFACE) print $4}' | head -1 | awk -F '/' '{print $1}')
-  if [[ -z $IPText ]]
-  then
-    IPText=$(hostname)
-  fi
-  echo $IPText
-}
-
-function getinterfaceip6
-{
-  IPText=$(ip -o -f inet6 addr show | awk -v INTERFACE=lo '{if ($2==INTERFACE) print $4}' | head -1 | awk -F '/' '{print $1}')
-  if [[ -z $IPText ]]
-  then
-    IPText=$(hostname)
-  fi
-  echo $IPText
-}
-
-function GetUserCount
-{
-  #Get the number of running sessions
-  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
-  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
-  RunningSessionItr=0
-  RunningSessionCount=0
-  for RunningSession in "${RunningSessions[@]}"
-  do
-    Include=1
-    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
-    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
-    then
-      Include=0
-    fi
-    if [[ $Include == 1 ]]
-    then
-      ((RunningSessionCount++))
-    fi
-    ((RunningSessionItr++))
-  done
-  unset RunningSessions
-  unset RunningSessionTypes
-  echo $RunningSessionCount
-}
-
-#https://stackoverflow.com/questions/39473297/how-do-i-print-colored-output-with-python-3
-function CreateEscapeSequence
-{
-  EscapeSequence=$1
-  PrintChar=""
-  case $EscapeSequence in
-  black)
-    PrintChar="\033[30m"
-    ;;
-  blink)
-    PrintChar="\033[5m"
-    ;;
-  blue)
-    PrintChar="\033[34m"
-    ;;
-  bold)
-    PrintChar="\033[1m"
-    ;;
-  brown)
-    PrintChar="\033[33m"
-    ;;
-  cyan)
-    PrintChar="\033[36m"
-    ;;
-  darkgray)
-    PrintChar="\033[37m"
-    ;;
-  gray)
-    PrintChar="\033[37m"
-    ;;
-  green)
-    PrintChar="\033[32m"
-    ;;
-  halfbright)
-    PrintChar="\033[2m"
-    ;;
-  lightblue)
-    PrintChar="\x1b[94m"
-    ;;
-  lightcyan)
-    PrintChar="\x1b[96m"
-    ;;
-  lightgray)
-    PrintChar="\x1b[37m"
-    ;;
-  lightgreen)
-    PrintChar="\x1b[92m"
-    ;;
-  lightmagenta)
-    PrintChar="\x1b[95m"
-    ;;
-  lightred)
-    PrintChar="\x1b[91m"
-    ;;
-  magenta)
-    PrintChar="\033[35m"
-    ;;
-  red)
-    PrintChar="\033[31m"
-    ;;
-  reset)
-    PrintChar="\033[0m"
-    ;;
-  reverse)
-    PrintChar="\033[7m"
-    ;;
-  yellow)
-    PrintChar="\x1b[33m"
-    ;;
-  esac
-  if [[ ! -z $PrintChar ]]
-  then
-    printf $PrintChar
-  fi
-}
-
-function Show_etc_issue
-{
-  read -r -n 16385 -d $'\r' etc_issue_file 2>/dev/null </etc/issue
-  if [[ ${#etc_issue_file} == 16385 ]]
-  then
-    return
-  fi
-
-  ect_issue_charcount=${#etc_issue_file}
-  ect_issue_text=""
-  for (( etc_issue_itr=0 ; etc_issue_itr < $ect_issue_charcount ; etc_issue_itr++ ))
-  do
-    etc_issue_char=${etc_issue_file:$etc_issue_itr:1}
-    if [[ $etc_issue_char != '\' ]]
-    then
-      ect_issue_text+="$etc_issue_char"
-    else
-      ((etc_issue_itr++))
-      if [[ $etc_issue_itr -lt $ect_issue_charcount ]]
-      then
-        etc_issue_escaped_char=${etc_issue_file:$etc_issue_itr:1}
-
-        if [[ $etc_issue_escaped_char == 4 || $etc_issue_escaped_char == 6 || $etc_issue_escaped_char == e || $etc_issue_escaped_char == S ]]
-        then
-          etc_issue_param_value=""
-          if [[ ${etc_issue_file:$(($etc_issue_itr+1)):1} == "{" ]]
-          then
-            etc_issue_param_itr=$(($etc_issue_itr+2))
-            paramcharendreached=0
-            for (( etc_issue_param_itr=$etc_issue_param_itr ; etc_issue_param_itr < $ect_issue_charcount ; etc_issue_param_itr++ ))
-            do
-              etc_issue_param_char=${etc_issue_file:$etc_issue_param_itr:1}
-              if [[ $etc_issue_param_char != "}" ]]
-              then
-                paramcharendreached=1
-                etc_issue_param_value+=$etc_issue_param_char
-              else
-                #echo "cmd $etc_issue_escaped_char param $etc_issue_param_value"
-                etc_issue_itr=$etc_issue_param_itr
-                break
-              fi
-            done
-          fi
-        fi
-
-        case $etc_issue_escaped_char in
-        4)
-          if [[ -z $etc_issue_param_value ]]
-          then
-            ect_issue_text+="$(GetFirstIPType 4 2>/dev/null)"
-          else
-            ect_issue_text+="$(getinterfaceip4 $etc_issue_param_value 2>/dev/null)"
-          fi
-          ;;
-        6)
-          if [[ -z $etc_issue_param_value ]]
-          then
-            ect_issue_text+="$(GetFirstIPType 6 2>/dev/null)"
-          else
-            ect_issue_text+="$(getinterfaceip6 $etc_issue_param_value 2>/dev/null)"
-          fi
-          ;;
-        b)
-          ect_issue_text+="$(stty -a 2>/dev/null | head -1 | awk '{print $2}')";;
-        d)
-          #Date in ISO-8601.
-          ect_issue_text+="$(date +"%a %Y-%m-%d" 2>/dev/null)";;
-        e)
-          if [[ -z $etc_issue_param_value ]]
-          then
-            ect_issue_text+=$'\033'
-          else
-            ect_issue_text+=$(CreateEscapeSequence $etc_issue_param_value 2>/dev/null)
-          fi
-          ;;
-        s)
-          ect_issue_text+="$(uname -s 2>/dev/null)";;
-        S)
-          if [[ -z $etc_issue_param_value ]]
-          then
-            ect_issue_text+="$(Get_os_release_key PRETTY_NAME 2>/dev/null)"
-          else
-            ect_issue_text+="$(Get_os_release_key $etc_issue_param_value 2>/dev/null)"
-          fi
-          ;;
-        l)
-          ect_issue_text+="v${EmulatedTTY^^} (using $(tty 2>/dev/null))";;
-        m)
-          ect_issue_text+="$(arch 2>/dev/null)";;
-        n)
-          ect_issue_text+="$(hostname 2>/dev/null)";;
-        o)
-          ect_issue_text+="$(domainname 2>/dev/null)";;
-        O)
-          ect_issue_text+="$(domainname -f 2>/dev/null)";;
-        r)
-          ect_issue_text+="$(uname -r 2>/dev/null)";;
-        t)
-          ect_issue_text+="$(date +"%T" 2>/dev/null)";;
-        u)
-          ect_issue_text+="$(GetUserCount 2>/dev/null)";;
-        U)
-          UserCount=$(GetUserCount 2>/dev/null)
-          if [[ $UserCount == 1 ]]
-          then
-            add_text="1 user"
-          else
-            add_text="$UserCount Users"
-          fi
-          ect_issue_text+="$add_text";;
-        v)
-          ect_issue_text+="$(uname -v 2>/dev/null)";;
-        '\')
-          ect_issue_text+='\';;
-        *)
-          ect_issue_text+="$etc_issue_escaped_char";;
-        esac
-      fi
-    fi
-  done
-
-  echo -n $'\n'"${ect_issue_text}"
-}
-####end /etc/issue commands
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
 
 #Create a static name for the PTY that this is running as
 PTYPath=$(tty)
+IFS="/"
+PTYPathArray=($PTYPath)
+unset IFS
+PTYNumber=${PTYPathArray[-1]}
+
 if [[ -e /run/vtty/$EmulatedTTY/loginpty ]]
 then
   rm /run/vtty/$EmulatedTTY/loginpty
@@ -328,16 +45,16 @@ ln -s $PTYPath /run/vtty/$EmulatedTTY/loginpty
 
 function DoLoginPrompt
 {
- export TERM=xterm-256color
- tput reset
- tput clear
- Show_etc_issue
+  export TERM=xterm-256color
+  tput reset
+  tput clear
 
- unset NOTIFY_SOCKET
- unset INVOCATION_ID
- unset JOURNAL_STREAM
- export VTTY=$EmulatedTTY
- env -i COLORTERM=truecolor XDG_SEAT=seat-vtty TERM=$TERM VTTY=$VTTY /bin/login -p --
+  unset NOTIFY_SOCKET
+  unset INVOCATION_ID
+  unset JOURNAL_STREAM
+  export VTTY=$EmulatedTTY
+  echo "v${VTTY} backed by $PTYPath"
+  env -i COLORTERM=truecolor XDG_SEAT=seat-vtty TERM=$TERM VTTY=$VTTY setsid /sbin/agetty -o '-p -- \u' --noclear --keep-baud --nonewline pts/$PTYNumber $TERM
 }
 
 trap 'DoLoginPrompt' 2
@@ -349,5 +66,6 @@ do
   then
     exit 1
   fi
+  $SLEEPCMD .1
 done
 exit 0
