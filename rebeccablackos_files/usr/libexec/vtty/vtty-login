@@ -54,6 +54,13 @@ function DoLoginPrompt
   unset JOURNAL_STREAM
   export VTTY=$EmulatedTTY
   echo "v${VTTY} backed by $PTYPath"
+
+  #Clear the clipboard
+  if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
+  then
+    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver /opt/bin/wl-copy ""
+  fi
+
   env -i COLORTERM=truecolor XDG_SEAT=seat-vtty TERM=$TERM VTTY=$VTTY setsid /sbin/agetty -o '-p -- \u' --noclear --keep-baud --nonewline pts/$PTYNumber $TERM
 }
 

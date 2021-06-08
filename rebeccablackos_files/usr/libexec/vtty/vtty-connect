@@ -38,6 +38,12 @@ function PtyResizeEvent
 #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
 trap PtyResizeEvent WINCH
 
+if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
+then
+  rm /run/vtty/$EmulatedTTY/waylandserver
+fi
+ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
+
 PtyResizeEvent
 socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
 while [ 1 ]
