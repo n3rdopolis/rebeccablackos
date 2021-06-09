@@ -1,5 +1,5 @@
 
-ENV{MAJOR}=="", GOTO="detectseats_events_end"
+ENV{MAJOR}=="", GOTO="wlm-detectseats_events_end"
 
 ACTION=="remove", SUBSYSTEM=="graphics", RUN+="/usr/bin/waylandloginmanager --udevtrigger"
 ACTION=="add", SUBSYSTEM=="graphics", RUN+="/usr/bin/waylandloginmanager --udevtrigger"
@@ -7,4 +7,4 @@ ACTION=="add", SUBSYSTEM=="graphics", RUN+="/usr/bin/waylandloginmanager --udevt
 ACTION=="remove", SUBSYSTEM=="drm", RUN+="/usr/bin/waylandloginmanager --udevtrigger"
 ACTION=="add", SUBSYSTEM=="drm", RUN+="/usr/bin/waylandloginmanager --udevtrigger"
 
-LABEL="detectseats_events_end"
+LABEL="wlm-detectseats_events_end"
