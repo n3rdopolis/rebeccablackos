@@ -110,6 +110,6 @@ ResetTTYMode $EmulatedTTY
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 cage -d -s -- \
 vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=underline --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- \
-/usr/libexec/vtty/vtty-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
+/usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?

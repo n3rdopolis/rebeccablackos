@@ -64,7 +64,7 @@ if [[ -e /run/vtty/$EmulatedTTY/socatproxy ]]
 then
   rm /run/vtty/$EmulatedTTY/socatproxy
 fi
-socat exec:"/usr/libexec/vtty/vtty-login $EmulatedTTY",pty,stderr,setsid,sigint,sane unix-listen:/run/vtty/$EmulatedTTY/socatproxy,reuseaddr,fork,su=$VTTYUSER,user=$VTTYUSER,group=$VTTYUSER,mode=0700 &
+socat exec:"/usr/libexec/vtty/vtty-be-login $EmulatedTTY",pty,stderr,setsid,sigint,sane unix-listen:/run/vtty/$EmulatedTTY/socatproxy,reuseaddr,fork,su=$VTTYUSER,user=$VTTYUSER,group=$VTTYUSER,mode=0700 &
 SOCATPID=$!
 $SLEEPCMD .1
 
