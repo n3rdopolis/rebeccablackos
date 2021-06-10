@@ -86,7 +86,7 @@ do
   COMMANDDATA=($COMMANDDATA)
 
   #s for size, then number of rows, then number of cols
-  if [[ ${COMMANDDATA[0]} -eq "s" ]]
+  if [[ ${COMMANDDATA[0]} == "s" ]]
   then
     XSize=${COMMANDDATA[1]}
     YSize=${COMMANDDATA[2]}
