@@ -209,12 +209,9 @@ function PostInstallActions
   #Enable pipewire services
   systemctl --global enable pipewire.socket
   systemctl --global enable pipewire-media-session.service
-  if [[ $BUILDARCH == "amd64" ]]
-  then
-    systemctl --global disable pulseaudio.service
-    systemctl --global disable pulseaudio.socket
-    systemctl --global enable pipewire-pulse.socket
-  fi
+  systemctl --global disable pulseaudio.service
+  systemctl --global disable pulseaudio.socket
+  systemctl --global enable pipewire-pulse.socket
 
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
