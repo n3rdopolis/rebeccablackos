@@ -6,6 +6,7 @@ Before=vtty-frontend@.service
 Restart=on-failure
 RestartSec=0
 
+EnvironmentFile=-/run/vtty/sessionenvfiles/%I
 ExecStart=/usr/libexec/vtty/vtty-backend %I
 Type=notify
 
