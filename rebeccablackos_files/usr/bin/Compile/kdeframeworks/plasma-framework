@@ -56,6 +56,24 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -p1 <<EOF
+diff --git a/src/declarativeimports/core/CMakeLists.txt b/src/declarativeimports/core/CMakeLists.txt
+index 816f8fda7..5546804db 100644
+--- a/src/declarativeimports/core/CMakeLists.txt
++++ b/src/declarativeimports/core/CMakeLists.txt
+@@ -58,7 +58,8 @@ if(HAVE_X11)
+ endif()
+ 
+ if(HAVE_EGL)
+-    target_link_libraries(corebindingsplugin OpenGL::EGL)
++    target_link_libraries(corebindingsplugin GL)
++    target_link_libraries(corebindingsplugin EGL)
+ endif()
+ 
+ if (${Qt5Gui_OPENGL_IMPLEMENTATION} STREQUAL "GLESv2")
+ 
+EOF
+
 sed -i '/autotests/d' CMakeLists.txt 
 sed -i 's/defaultWallpaperTheme=Elarun/defaultWallpaperTheme=RBOS_Desktop/g' src/desktoptheme/air/metadata.desktop.cmake
 sed -i '/defaultWidth=2560/d' src/desktoptheme/air/metadata.desktop.cmake
