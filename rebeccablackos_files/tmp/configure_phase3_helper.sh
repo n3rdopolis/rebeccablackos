@@ -40,9 +40,6 @@ cp -a /usr/import/etc/skel/* /etc/skel
 
 mkdir -p /etc/skel/Desktop
 
-mkdir -p /lib
-cp -a /usr/import/lib/* /lib
-
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 

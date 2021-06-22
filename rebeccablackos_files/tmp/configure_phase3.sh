@@ -169,13 +169,13 @@ function PostInstallActions
   #Install any systemd-user sessions from /opt to where systemd can see them
   find /opt/lib/systemd/user/* | while read -r FILE
   do
-    ln -s $FILE /lib/systemd/user/
+    ln -s $FILE /usr/lib/systemd/user/
   done
 
   #Set the plymouth themes
   if [[ $DEBIAN_DISTRO == Ubuntu ]]
   then
-    update-alternatives --set default.plymouth /lib/plymouth/themes/spinfinity/spinfinity.plymouth
+    update-alternatives --set default.plymouth /usr/lib/plymouth/themes/spinfinity/spinfinity.plymouth
   elif [[ $DEBIAN_DISTRO == Debian ]]
   then
     /usr/sbin/plymouth-set-default-theme spinfinity
@@ -285,7 +285,7 @@ function PostInstallActions
   mv /usr/import /tmp
 
   #Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
-  chmod -X /lib/systemd/system/waylandloginmanager.service
+  chmod -X /usr/lib/systemd/system/waylandloginmanager.service
   chmod -X /etc/pam.d/*
   
   #Add nls modules to the initramfs
