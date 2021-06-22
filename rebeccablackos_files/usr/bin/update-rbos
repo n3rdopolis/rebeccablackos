@@ -56,7 +56,7 @@ then
   rsync -a -- /usr/import/*  /
 
   #Make all systemd units nonexecutable
-  find /etc/systemd/system /lib/systemd/system -type f | while read -r FILE
+  find /etc/systemd/system /usr/lib/systemd/system -type f | while read -r FILE
   do
     chmod -X "$FILE"
   done
