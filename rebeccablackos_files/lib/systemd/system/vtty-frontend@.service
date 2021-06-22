@@ -1,0 +1,40 @@
+[Unit]
+Description=Graphical terminal for vTTY %I
+
+After=vtty-backend@.service
+After=systemd-user-sessions.service plymouth.service
+
+
+BindsTo=vtty-backend@.service
+
+#Same as default getty service
+IgnoreOnIsolate=true
+Conflicts=rescue.service
+Before=rescue.service
+
+
+#This only considers failure if starting the vTTY display server is impossible
+#such as no /dev/dri/card(X) device, or an executable is missing
+#when that happens, it fails back to the legacy console
+OnFailure=getty@%i.service
+
+[Service]
+Environment=XDG_SEAT=seat0
+PAMName=vtty
+
+ExecStart=/usr/libexec/vtty/vtty-frontend %I
+
+Restart=on-failure
+RestartSec=0
+
+Type=simple
+User=vtty
+
+NoNewPrivileges=true
+ProtectSystem=true
+PrivateTmp=true
+PrivateNetwork=true
+RestrictRealtime=true
+ProtectHostname=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
