@@ -141,9 +141,9 @@ then
 
   KERNELVERSION=$(cat include/config/kernel.release)
 
-  mkdir -p /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/
+  mkdir -p /usr/lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/
 
-  cp ./drivers/gpu/drm/vkms/vkms.ko /lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/vkms.ko
+  cp ./drivers/gpu/drm/vkms/vkms.ko /usr/lib/modules/$CURRENTKERNELVERSIONFULL/kernel/drivers/gpu/drm/vkms/vkms.ko
 fi
 }
 
