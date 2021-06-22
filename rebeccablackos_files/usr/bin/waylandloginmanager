@@ -38,7 +38,7 @@
 #and /etc/loginmanagerdisplay/loginmanagerdisplay.ini
 #for the greeter
 
-#and /lib/udev/rules.d/70-uaccess-fbdev.rules
+#and /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
 #for fbdev permissions
 
 #Weston 9.0 or greater is required for kiosk shell
@@ -817,7 +817,7 @@ session         optional        pam_systemd.so type=wayland
       sed -i 's/type=wayland/type=wayland class=greeter/g' /etc/pam.d/waylandloginmanager-loginmanagerdisplay
     fi
 
-    if [[ ! -e /lib/udev/rules.d/70-uaccess-fbdev.rules ]]
+    if [[ ! -e /usr/lib/udev/rules.d/70-uaccess-fbdev.rules ]]
     then
       echo "ACTION=="remove", GOTO="uaccess_fbdev_end"
 ENV{MAJOR}=="", GOTO="uaccess_fbdev_end"
@@ -826,7 +826,7 @@ ENV{MAJOR}=="", GOTO="uaccess_fbdev_end"
 # Framebuffer devices
 SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
 
-LABEL="uaccess_fbdev_end"" > /lib/udev/rules.d/70-uaccess-fbdev.rules
+LABEL="uaccess_fbdev_end"" > /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
     fi
   fi
 
