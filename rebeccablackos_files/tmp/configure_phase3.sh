@@ -46,7 +46,7 @@ function RedirectFile {
 
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
-cp /usr/import/lib/plymouth/boot_logo.png /usr/share/plymouth/themes/spinfinity/watermark.png
+cp /usr/import/usr/lib/plymouth/boot_logo.png /usr/share/plymouth/themes/spinfinity/watermark.png
 
 dpkg-divert --local --rename --add /usr/lib/os-release
 mv /usr/lib/os-release.rbos /usr/lib/os-release
