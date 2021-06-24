@@ -19,7 +19,7 @@ Before=rescue.service
 OnFailure=getty@%i.service
 
 [Service]
-Environment=XDG_SEAT=seat0
+EnvironmentFile=-/run/vtty/sessionenvfiles/%I
 PAMName=vtty
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %I
