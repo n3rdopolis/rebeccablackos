@@ -87,7 +87,7 @@ then
   cp config $INSTALLDIR/etc/sway/config /etc/skel/.config/sway 
   sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
   sed -i 's\/opt/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png\g' /etc/skel/.config/sway/config
-  sed -i 's/alacritty/vte/g' /etc/skel/.config/sway/config
+  sed -i 's/foot/vte/g' /etc/skel/.config/sway/config
   sed -i 's/dmenu_run/bemenu/g' /etc/skel/.config/sway/config
 fi
 }
