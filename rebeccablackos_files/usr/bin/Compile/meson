@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/mesonbuild/meson
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+SOURCEREVISION=0.58.1
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -69,7 +69,9 @@ function PackageCompileSource()
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
- python3 setup.py install --prefix=/opt
+python3 setup.py install --prefix=/opt
+cp ./meson.py $INSTALLDIR/bin/meson
+cp -R ./mesonbuild /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
