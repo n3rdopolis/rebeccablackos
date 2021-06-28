@@ -82,28 +82,31 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
-
-#The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
-#Only start once the actual TTY is active, as otherwise it can conflict with a display server
-read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-if [[ $ActiveTTY != $EmulatedTTY ]]
+#Only handle special vTTY inhibit cases if there are traditional TTYs on the seat
+SeatCanTTY=$(loginctl show-seat $XDG_SEAT -p CanTTY --value)
+if [[ $SeatCanTTY == yes ]]
 then
-  while [[ $ActiveTTY != $EmulatedTTY ]]
-  do
-    read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-    $SLEEPCMD 1
-  done
-fi
+  #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
+  #Only start once the actual TTY is active, as otherwise it can conflict with a display server
+  read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+  if [[ $ActiveTTY != $EmulatedTTY ]]
+  then
+    while [[ $ActiveTTY != $EmulatedTTY ]]
+    do
+      read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+      $SLEEPCMD 1
+    done
+  fi
 
-#handle vtty inhibit
-if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-then
-  while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-  do
-    $SLEEPCMD 1
-  done
+  #handle vtty inhibit
+  if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+  then
+    while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
 fi
-
 
 ResetTTYMode $EmulatedTTY
 
