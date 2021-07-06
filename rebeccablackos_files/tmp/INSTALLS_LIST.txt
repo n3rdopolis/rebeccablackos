@@ -543,6 +543,18 @@ grub-efi-amd64-bin::FULL::$DEBIAN_ARCH == i386
 grub-efi-ia32-bin::FULL::$DEBIAN_ARCH == amd64
 grub-efi-amd64-bin::FULL::$DEBIAN_ARCH == amd64
 firmware-amd-graphics::PART
+firmware-misc-nonfree::PART
+firmware-atheros::PART
+firmware-brcm80211::PART
+firmware-cavium::PART
+firmware-intel-sound::PART
+firmware-libertas::PART
+firmware-linux-free::PART
+firmware-netxen::PART
+firmware-qcom-soc::PART
+firmware-qlogic::PART
+firmware-realtek::PART
+firmware-ti-connectivity::PART
 grub-pc-bin::FULL
 grub-pc::FULL
 live-config::PART
