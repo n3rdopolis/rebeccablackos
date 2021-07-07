@@ -18,5 +18,5 @@
 
 #This script manages the Weston instance that acts as the proxy for Weston screen sharing
 
-XDG_CURRENT_DESKTOP=KDE kded5&
+XDG_CURRENT_DESKTOP=KDE xwaylandapp kded5&
 plasmawindowed "$1"
