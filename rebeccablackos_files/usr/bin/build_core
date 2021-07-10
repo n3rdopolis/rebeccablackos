@@ -171,6 +171,7 @@ function RunDownloadAndOrBuild
   done)
   export EXTERNALBUILDHOME="$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   export INTERNALBUILDHOME="$SOURCEDIR"/"$SOURCENAME"
+  export PYTHONPYCACHEPREFIX=$EXTERNALBUILDHOME
 
   $NONROOTCOMMAND mkdir -p "$EXTERNALBUILDHOME"/bin 2>/dev/null
 
