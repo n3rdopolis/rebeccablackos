@@ -144,6 +144,12 @@ function RunDownloadAndOrBuild
 
   mkdir -p "/$SOURCEDIR"
 
+  #Set ACL permissions to allow a non root user account manage the source repos
+  setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
+  setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"
+  setfacl -dm mask::rwx /"$SOURCEDIR"
+  setfacl -m mask::rwx /"$SOURCEDIR"
+
   #Create home directory for the subcommand's $HOME folder, and standard home directories
   $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME" 2>/dev/null
   $NONROOTCOMMAND mkdir -p "/$SOURCEDIR"/buildhome/config/"$SOURCENAME/.local" 2>/dev/null
@@ -175,11 +181,6 @@ function RunDownloadAndOrBuild
 
   $NONROOTCOMMAND mkdir -p "$EXTERNALBUILDHOME"/bin 2>/dev/null
 
-  #Set ACL permissions to allow a non root user account manage the source repos
-  setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
-  setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"
-  setfacl -dm mask::rwx /"$SOURCEDIR"
-  setfacl -m mask::rwx /"$SOURCEDIR"
 
   $NONROOTCOMMAND mkdir -p "/$SOURCEDIR/$SOURCENAME" 2>/dev/null
 
