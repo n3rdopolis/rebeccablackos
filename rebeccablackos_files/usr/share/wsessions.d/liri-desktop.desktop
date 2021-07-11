@@ -8,7 +8,7 @@ CompositorSupportsWL=1
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 CompositorWLArguments=--no-systemd -- -platform wayland
-CompositorKMSArguments=--no-systemd
+CompositorKMSArguments=--no-systemd -- -platform liri -plugin libinput
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
@@ -16,5 +16,8 @@ AdditionalArguments=
 NeedsFile=/opt/libexec/liri-shell
 CompositorKMSSeatAware=1
 [EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=liri
 set=QT_QPA_PLATFORM=eglfs@KMS
+set=QT_QPA_EGLFS_ALWAYS_SET_MODE=1@KMS
+set=QT_QPA_EGLFS_KMS_ATOMIC=1@KMS
 set=QT_WAYLAND_SHELL_INTEGRATION=fullscreen-shell@WL
