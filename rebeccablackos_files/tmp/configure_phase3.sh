@@ -216,7 +216,7 @@ function PostInstallActions
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
-  ldconfig
+  (. /usr/bin/build_vars; ldconfig)
 
   #common postinstall actions
   echo "Post Install action: glib-compile-schemas"
