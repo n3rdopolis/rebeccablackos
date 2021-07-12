@@ -216,23 +216,23 @@ function PostInstallActions
   #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
   echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
-  (. /usr/bin/build_vars; ldconfig)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
   #common postinstall actions
   echo "Post Install action: glib-compile-schemas"
-  (. /usr/bin/build_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
   echo "Post Install action: update-desktop-database"
-  (. /usr/bin/build_vars; update-desktop-database /opt/share/applications)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-desktop-database /opt/share/applications)
   echo "Post Install action: gtk-query-immodules-3.0"
-  (. /usr/bin/build_vars; gtk-query-immodules-3.0 --update-cache)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gtk-query-immodules-3.0 --update-cache)
   echo "Post Install action: update-icon-caches"
-  (. /usr/bin/build_vars; update-icon-caches /opt/share/icons/*)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-icon-caches /opt/share/icons/*)
   echo "Post Install action: gio-querymodules"
-  (. /usr/bin/build_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
   echo "Post Install action: gdk-pixbuf-query-loaders"
-  (. /usr/bin/build_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
   echo "Post Install action: fc-cache"
-  (. /usr/bin/build_vars; fc-cache)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
 
   mkdir -p /usr/share/polkit-1/actions/
   find /opt/share/polkit-1/actions/ -type f | while read -r FILE;
@@ -405,6 +405,9 @@ RevertFile /usr/sbin/invoke-rc.d
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 rm /etc/dpkg/dpkg.cfg.d/force-confold
 rm /etc/dpkg/dpkg.cfg.d/force-confdef
+
+#Rebuild the library cache
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
 #start the remastersys job
 remastersys dist
