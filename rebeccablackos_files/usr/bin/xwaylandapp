@@ -28,6 +28,7 @@ unset SDL_VIDEODRIVER
 unset ECORE_EVAS_ENGINE
 unset GST_GL_WINDOW
 unset CLUTTER_INPUT_BACKEND
+unset MOZ_ENABLE_WAYLAND
 
 #Workaround Xwayland scaling bug
 DPI=$(xdpyinfo |grep "dots per inch" | grep -Eo '*[0-9,-]*' | head -1)
