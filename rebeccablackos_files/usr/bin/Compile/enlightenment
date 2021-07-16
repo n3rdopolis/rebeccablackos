@@ -62,6 +62,7 @@ sed -i '/QT_STYLE_OVERRIDE/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
 sed -i 's/do_gl = do_vsync = 1;/do_gl = do_vsync = 0;/g' src/modules/wizard/page_150.c
 sed -i 's/do_gl = 1/do_gl = 0/g' src/modules/wizard/page_150.c
+patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwl-fb=true -Dwl-drm=true -Dwl-x11=true -Dxwayland=true -Dwl-desktop-shell=true -Dwl=true -Dxwayland-bin=$INSTALLDIR/bin/Xwayland build
 }
 
