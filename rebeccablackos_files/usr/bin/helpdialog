@@ -29,50 +29,43 @@ Built: $(cat /etc/builddate)
 if [[ $SessionName =~ "Default Weston" ]]
 then
 SessionHelpText="Weston Key Bindings:
-Note: The super key on most keyboards is the Windows logo key.
-Note: The middle mouse button is usually pressing the scroll button on most mice.
+Note: The 'Super Key' on most keyboards is the Windows logo key.
 
-Zoom the display in and out: Super key + Page Up/Page Down
+Zoom the display in and out: Super Key + Page Up/Page Down
 
-Terminate Active Application: Super key + K
-Move Window: Super key + left mouse button
-Resize Window: Super key + Shift key + right mouse button
-Switch Windows: Super key + tab
-Change Window opacity: Super key + alt key + scroll wheel
-Rotate Window: Super key + middle mouse button (press scroll wheel)
-Expose: Super key (press and release)
-Share Weston with RDP: ctrl key + alt key + S
+Terminate Active Application: Super Key + K
+Move Window: Super Key + left mouse button
+Resize Window: Super Key + Shift Key + right mouse button
+Switch Windows: Super Key + tab
+Change Window opacity: Super Key + Alt Key + scroll wheel
+Rotate Window: Super Key + Middle Mouse Button (press scroll wheel)
+Expose: Super Key (press and release)
+Share Weston with RDP: Ctrl Key + Alt Key + S
 
-Save a screenshot: Super key + S
-Start and stop video recording: Super key + R 
+Save a screenshot: Super Key + S
+Start and stop video recording: Super Key + R 
 Start and stop h264 video recording: Super Key + Ctrl + Space + Q
-(after recording run weston-video-convert in the panel to 
-convert the capture file to a .webm video file)
+  (After recording run weston-video-convert in the panel to 
+   convert the capture file to a .webm video file)
 
-Dim the display (under native Weston): Super key + F9
-Brighten the display (under native Weston): Super key + F10
+Switch workspaces: Super Key + Up Arrow/Down Arrow 
+(or Super Key + F1 Key to switch to workspace 1, Super Key + F2 to switch to workspace 2, etc)
+    By default there are 2 workspaces
 
-
-Switch workspaces: Super key + up arrow/down arrow (or Super key + workspace Function # key)
-By default there are 2 workspaces
-
-Exit Weston: ctrl key + alt key + backspace}
+Exit Weston: Ctrl Key + Alt Key + Backspace}
 
 
 
-To launch programs:
-Click on the \"RBOS\" Icon on the top for the Application menu. Be sure to check 
-for the Wayland programs under \"Applications\"!
-
-Click on the Desktop icon for viewing the contents of the Desktop folder
+The Panel Icons:
+Click on the \"RBOS\" Icon on the top for the Application menu.
 
 Click on the File Manager icon for the file manager
 
 Click on the Globe icon for the Web Browser
 
-Click on the Terminal icon for a Wayland Terminal with Wayland variables
+Click on the Terminal icon for a Terminal
 
-Click on the Xorg logo for an application launcher to start programs using xwayland
+Click on the Xorg logo for an application launcher to start programs with their X11 backends.
 
 Click the Speaker icon to adjust the volume
 
@@ -95,15 +88,15 @@ if [[ $SessionName =~ "Liri" ]]
 then
 SessionHelpText="
 Help with Liri:
-Show Menu:              Super key + space
-Expose:                 Super key + s
-Switch Windows:         Super key + Tab
-Show Desktop:           Super key + d
+Show Menu:              Super Key + Space
+Expose:                 Super Key + S
+Switch Windows:         Super Key + Tab
+Show Desktop:           Super Key + D
 
-Previous workspace:     Super key + left arrow
-Next workspace:         Super key + right arrow
+Previous workspace:     Super Key + Left Arrow
+Next workspace:         Super Key + Right Arrow
 
-Lock Screen:            Super key + l
+Lock Screen:            Super Key + L
 Logoff Screen:          CTRL + ALT + Delete
 "
 
@@ -113,7 +106,7 @@ if [[ $SessionName =~ "Sway" ]]
 then
 SessionHelpText="
 Help with Sway:
-Terminal:		 Super key + enter
+Terminal:		 Super Key + Enter
 "
 
 fi
