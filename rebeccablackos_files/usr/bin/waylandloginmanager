@@ -87,8 +87,11 @@
      #enabled when detected as a livecd. This option applies to logging in as the
      #autologin user, after the first autologin session has already been started.
 
-     #Auto session selection only takes place during autologin
-     #It is automatically set by the last manual session selection for the user on the seat.
+     #Auto session selection only takes place during autologin, if enabled with:
+     #
+     #defaultwsessionautoselect=1
+     #
+     #When enabled, it is automatically set by the last manual session selection for the user on the seat.
      #defaultwsession=Unquoted Session Name
      #to force a wsession (based off the Name= key)
      #to be the default session
@@ -1857,7 +1860,14 @@ function ChooseSessionType
     done <<< "$WSESSIONLIST"
     WSESSIONCOUNT=$((${#WSESSIONARRAY[@]}/10))
 
-    GetConfigKey defaultwsession "-$SessionUser" ":" 0 GETDEFAULTWSESSION
+    GetConfigKey defaultwsessionautoselect "" 0 0 AUTOWSESSIONSELECT
+    if [[ $AUTOWSESSIONSELECT == 1 ]]
+    then
+      WSESSIONKEY=":"
+    else
+      WSESSIONKEY="::"
+    fi
+    GetConfigKey defaultwsession "-$SessionUser" "$WSESSIONKEY" 0 GETDEFAULTWSESSION
     GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
     if [[ $IsAutologin == 1 ]]
     then
