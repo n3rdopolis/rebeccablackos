@@ -16,7 +16,5 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script manages the Weston instance that acts as the proxy for Weston screen sharing
-
-XDG_CURRENT_DESKTOP=KDE xwaylandapp kded5&
+kded5&
 plasmawindowed "$1"
