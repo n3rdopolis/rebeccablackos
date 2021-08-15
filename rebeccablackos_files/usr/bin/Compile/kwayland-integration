@@ -57,32 +57,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -p1 <<EOF
-diff --git a/src/windowsystem/windowsystem.cpp b/src/windowsystem/windowsystem.cpp
-index b1d72d7..e1db0f7 100644
---- a/src/windowsystem/windowsystem.cpp
-+++ b/src/windowsystem/windowsystem.cpp
-@@ -46,11 +46,18 @@ void WindowSystem::activateWindow(WId win, long int time)
- 
- void WindowSystem::forceActiveWindow(WId win, long int time)
- {
-+    return;
-     activateWindow(win, time);
- }
- 
- void WindowSystem::requestToken(QWindow *window, uint32_t serial, const QString &app_id)
- {
-+    if (app_id == "")
-+    {
-+        Q_EMIT KWindowSystem::self()->xdgActivationTokenArrived(serial, {});
-+        return;
-+    }
-+
-     Surface *surface = Surface::fromWindow(window);
-     wl_surface *wlSurface = surface ? static_cast<wl_surface*>(*surface) : nullptr;
-     auto waylandWindow = window ? dynamic_cast<QtWaylandClient::QWaylandWindow *>(window->handle()) : nullptr;
-
-EOF
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release  #-DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
