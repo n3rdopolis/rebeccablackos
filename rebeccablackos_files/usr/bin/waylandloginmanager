@@ -845,16 +845,6 @@ LABEL="uaccess_fbdev_end"" > /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
     seat0HasTTYs=0
   fi
 
-  WestonFBDev=$(weston --help |& grep fbdev-backend.so -c)
-  if [[ $WestonFBDev -gt 0 ]]
-  then
-    WestonSupportsFBDev=1
-  else
-    WriteToLog "Installed version of Weston does not support does not have a framebuffer backend. Framebuffer backend support for the loginmanagerdisplay and the weston host will not work."
-    WestonSupportsFBDev=0
-  fi
-  unset WestonFBDev
-
   #Array that contains the time stamps of the creation date of the seats
   SeatCreationStrings=()
 
@@ -884,6 +874,16 @@ LABEL="uaccess_fbdev_end"" > /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
   export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
+
+  WestonFBDev=$(weston --help |& grep fbdev-backend.so -c)
+  if [[ $WestonFBDev -gt 0 ]]
+  then
+    WestonSupportsFBDev=1
+  else
+    WriteToLog "Installed version of Weston does not support does not have a framebuffer backend. Framebuffer backend support for the loginmanagerdisplay and the weston host will not work."
+    WestonSupportsFBDev=0
+  fi
+  unset WestonFBDev
 
   #set MinimumTTY to be 7.
   MinimumTTY=7
