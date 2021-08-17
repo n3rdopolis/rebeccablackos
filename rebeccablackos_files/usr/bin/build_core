@@ -255,8 +255,8 @@ function CleanupGIT()
 #Function to download git repos
 function DownloadGIT()
 {
-  git config --global core.askpass /bin/true
-  OLDSOURCEURL=$(git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
+  $NONROOTCOMMAND git config --global core.askpass /bin/true
+  OLDSOURCEURL=$($NONROOTCOMMAND git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
@@ -272,9 +272,12 @@ function DownloadGIT()
   $NONROOTCOMMAND git clone $SOURCEURL $SOURCENAME
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
-  if [[ -z $SOURCEREVISION ]]
-    then
-      SOURCEREVISION=$(git rev-parse --abbrev-ref HEAD)
+  if [[ -z $SOURCEREVISION || $SOURCEREVISION == "git:defaultbranch" ]]
+  then
+    $NONROOTCOMMAND git remote set-head origin --auto
+    ORIGINNAME=$($NONROOTCOMMAND git remote)
+    REMOTEBRANCH=$($NONROOTCOMMAND git rev-parse --abbrev-ref origin/HEAD)
+    SOURCEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
   fi
   find .git |grep index.lock|
   while read -r LOCKFILE
@@ -294,7 +297,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION
   GitCheckoutResult=$?
-  git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
+  $NONROOTCOMMAND git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
   $NONROOTCOMMAND git submodule sync --recursive
   $NONROOTCOMMAND git submodule deinit -f .
   $NONROOTCOMMAND git submodule update --recursive --force --init
