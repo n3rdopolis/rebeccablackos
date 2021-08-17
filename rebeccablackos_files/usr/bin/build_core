@@ -322,7 +322,10 @@ function DownloadGIT()
     cd $MODULENAME
     if [[ -z $MODULEREVISION ]]
     then
-      MODULEREVISION=$(git rev-parse --abbrev-ref HEAD)
+      $NONROOTCOMMAND git remote set-head origin --auto
+      ORIGINNAME=$($NONROOTCOMMAND git remote)
+      REMOTEBRANCH=$($NONROOTCOMMAND git rev-parse --abbrev-ref origin/HEAD)
+      MODULEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
     fi
     $NONROOTCOMMAND git checkout -f $MODULEREVISION 
     $NONROOTCOMMAND git reset --hard
@@ -342,7 +345,7 @@ function DownloadGIT()
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-  SOURCEREVISION_EXPORT=$(svnversion .)
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND svnversion .)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
@@ -360,7 +363,7 @@ function CleanupSVN()
 #Function to download svn repos
 function DownloadSVN()
 {
-  OLDSOURCEURL=$(svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
+  OLDSOURCEURL=$($NONROOTCOMMAND svn info "$SOURCENAME" | grep "^URL: " | awk '{print $2}')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
@@ -393,7 +396,7 @@ function DownloadSVN()
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-  SOURCEREVISION_EXPORT=$(bzr version-info | grep revno | awk '{print $2}')
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND bzr version-info | grep revno | awk '{print $2}')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
@@ -446,7 +449,7 @@ function DownloadBZR()
 #function to get the version of HG repos
 function GetVersionHG()
 {
-  SOURCEREVISION_EXPORT=$(hg --debug id -i | sed 's/+//g')
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND hg --debug id -i | sed 's/+//g')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
@@ -464,7 +467,7 @@ function CleanupHG()
 #Function to download hg repos
 function DownloadHG()
 {
-  OLDSOURCEURL=$(hg paths -R "$SOURCENAME" default)
+  OLDSOURCEURL=$($NONROOTCOMMAND hg paths -R "$SOURCENAME" default)
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
@@ -548,6 +551,7 @@ function DownloadARCHIVE()
 }
 
 #Function to go through all toml files in the PWD, and fetch the dependancies they need
+#This is exported, and run in the non-root generated packagedownloadscript script
 function DownloadTOMLData()
 {
 
@@ -846,7 +850,7 @@ function MakeAndInstall()
     $NONROOTCOMMAND "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
     PackageCompileSourceResult=$?
 
-    #Set the owner of the HOME directory for building the pacakge to root, as the non-root owner can cause some install scripts to stop, because the UIDs don't match
+    #Set the owner of the HOME directory for building the pacakge to root, as the non-root owner can cause some install scripts to stop, because the UIDs don't match, since the packages are compiled with the non-root user.
     chown -R root:root "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
 
