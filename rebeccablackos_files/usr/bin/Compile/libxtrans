@@ -28,8 +28,8 @@ SOURCEURL=https://gitlab.freedesktop.org/xorg/lib/libxtrans
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=master
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt

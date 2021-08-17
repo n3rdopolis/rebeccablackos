@@ -28,7 +28,7 @@ SOURCEURL=https://gitlab.collabora.com/alf/wine.git/
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'master', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
 SOURCEREVISION=wayland
 
 #The prefix to compile and install the source code to
