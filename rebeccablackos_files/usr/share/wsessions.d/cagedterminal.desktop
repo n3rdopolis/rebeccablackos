@@ -1,0 +1,23 @@
+[Desktop Entry]
+Enabled=1
+Type=WSession
+Name=Fullscreen Terminal
+Comment=A fullscreen terminal that looks like a TTY under Cage
+CompositorExec=/opt/bin/cage
+CompositorSupportsWL=0
+CompositorSupportsKMS=1
+CompositorSupportsWKS=0
+CompositorKMSSeatAware=1
+CompositorSupportsFB=0
+CompositorWLArguments=
+CompositorKMSArguments=
+CompositorFBArguments=
+CompositorDisplayArgument=
+SessionArgument=
+AdditionalArguments=-d -s -- vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=block --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations -- bash -l
+NeedsFile=/opt/bin/vte
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=sway
+set=WLR_BACKENDS=libinput,drm@KMS
+set=WLR_BACKENDS=wayland@WKS
+set=WLR_RENDERER_ALLOW_SOFTWARE=1
