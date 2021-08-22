@@ -1,13 +1,18 @@
 diff --git a/libweston/backend-drm/kms.c b/libweston/backend-drm/kms.c
-index 2a6b0d12..939361cc 100644
+index 2a6b0d12..84a46138 100644
 --- a/libweston/backend-drm/kms.c
 +++ b/libweston/backend-drm/kms.c
-@@ -1271,6 +1271,8 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
+@@ -1271,6 +1271,13 @@ drm_pending_state_apply(struct drm_pending_state *pending_state)
  		if (ret != 0) {
  			weston_log("Couldn't apply state for output %s\n",
  				   output->base.name);
-+                        weston_output_repaint_failed(&output->base);
-+                        output->state_cur = drm_output_state_alloc(output, NULL);
++			weston_output_repaint_failed(&output->base);
++			output->state_cur = drm_output_state_alloc(output, NULL);
++			b->state_invalid = true;
++			if (!b->use_pixman) {
++				drm_output_fini_egl(output);
++				drm_output_init_egl(output, b);
++			}
  		}
  	}
  
@@ -27,7 +32,7 @@ index b9afb2c0..3ae59a6c 100644
  weston_output_mode_set_native(struct weston_output *output,
  			      struct weston_mode *mode,
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 5ba909f4..247100b8 100644
+index 5ba909f4..657a2401 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3215,6 +3215,15 @@ out:
@@ -38,9 +43,9 @@ index 5ba909f4..247100b8 100644
 +WL_EXPORT void
 +weston_output_repaint_failed(struct weston_output *output)
 +{
-+	weston_log("Clearing repaint status.");
-+        assert(output->repaint_status == REPAINT_AWAITING_COMPLETION);
-+        output->repaint_status=0;
++	weston_log("Clearing repaint status.\n");
++	assert(output->repaint_status == REPAINT_AWAITING_COMPLETION);
++	output->repaint_status=0;
 +}
 +
  static void
