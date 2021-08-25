@@ -1,6 +1,6 @@
 [Unit]
 Description=Session proxy runner for vTTY %I
-Before=vtty-frontend-vt@.service
+Before=vtty-frontend@.service
 
 [Service]
 Restart=on-failure

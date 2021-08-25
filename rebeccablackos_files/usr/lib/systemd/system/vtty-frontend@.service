@@ -7,6 +7,10 @@ After=systemd-user-sessions.service plymouth.service
 
 BindsTo=vtty-backend@.service
 
+ConditionPathExists=/dev/tty0
+ConditionPathExists=/dev/%i
+ConditionPathExists=!/run/vtty/%i/vttyinhibit
+
 #Same as default getty service
 IgnoreOnIsolate=true
 Conflicts=rescue.service
@@ -19,10 +23,16 @@ Before=rescue.service
 OnFailure=getty@%i.service
 
 [Service]
-EnvironmentFile=-/run/vtty/sessionenvfiles/%I
+Environment=XDG_SEAT=seat0
 PAMName=vtty
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %I
+
+TTYPath=/dev/%I
+TTYReset=true
+StandardOutput=tty
+StandardInput=tty
+TTYVTDisallocate=true
 
 Restart=on-failure
 RestartSec=0
@@ -38,3 +48,9 @@ RestrictRealtime=true
 ProtectHostname=true
 ProtectKernelTunables=true
 RestrictSUIDSGID=true
+
+
+
+[Install]
+WantedBy=getty.target
+DefaultInstance=tty1

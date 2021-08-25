@@ -203,8 +203,8 @@ function PostInstallActions
   systemctl enable acpid.service
 
   #enable the virtual tty services.
-  systemctl enable vtty-frontend-vt@.service
-  ln -s /usr/lib/systemd/system/vtty-frontend-vt@.service /etc/systemd/system/autovt@.service
+  systemctl enable vtty-frontend@.service
+  ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
 
   #Enable pipewire services
   systemctl --global enable pipewire.socket
