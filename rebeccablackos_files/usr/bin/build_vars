@@ -49,6 +49,7 @@ export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
 export ACLOCAL_PATH=$INSTALLDIR/share/aclocal:/usr/share/aclocal
+export ACLOCAL_FLAGS="-I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
 export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/
