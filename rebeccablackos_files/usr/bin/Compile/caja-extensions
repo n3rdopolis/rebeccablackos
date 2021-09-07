@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=cairomm
+SOURCENAME=caja-extensions
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.freedesktop.org/cairo/cairomm
+SOURCEURL=https://github.com/mate-desktop/caja-extensions
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=cairomm-1-12
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -47,6 +47,10 @@ REBUILDNEWREVISION=0
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
 
+#VARIABLES PRESENTED
+# EXTERNALBUILDHOME : For out of tree builds 
+# INTERNALBUILDHOME : For in tree builds
+
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
@@ -57,13 +61,13 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
@@ -75,7 +79,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-: 
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
