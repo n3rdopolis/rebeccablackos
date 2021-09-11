@@ -32,7 +32,7 @@ index b9afb2c0..3ae59a6c 100644
  weston_output_mode_set_native(struct weston_output *output,
  			      struct weston_mode *mode,
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 5ba909f4..657a2401 100644
+index 3fa1b8d0..26ef54bd 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
 @@ -3215,6 +3215,15 @@ out:
@@ -45,7 +45,7 @@ index 5ba909f4..657a2401 100644
 +{
 +	weston_log("Clearing repaint status.\n");
 +	assert(output->repaint_status == REPAINT_AWAITING_COMPLETION);
-+	output->repaint_status=0;
++	output->repaint_status = REPAINT_NOT_SCHEDULED;
 +}
 +
  static void
