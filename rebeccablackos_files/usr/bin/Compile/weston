@@ -75,18 +75,8 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-#Install the screen capture utils
-find /"$SOURCEDIR"/"$SOURCENAME"/wcap -executable | while read -r CLIENT
-do
-cp "$CLIENT" /$INSTALLDIR/bin
-done
-
-#Install header manually as temporary workaround
-cp /"$SOURCEDIR"/"$SOURCENAME"/config.h $INSTALLDIR/include/weston
-
 #turn OFF setuid on weston
 chmod -s $INSTALLDIR/bin/weston
-
 }
 
 
