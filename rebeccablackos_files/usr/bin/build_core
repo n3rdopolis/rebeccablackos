@@ -272,6 +272,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git clone $SOURCEURL $SOURCENAME
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
+  $NONROOTCOMMAND git remote update origin --prune
   if [[ -z $SOURCEREVISION || $SOURCEREVISION == "git:defaultbranch" ]]
   then
     $NONROOTCOMMAND git remote set-head origin --auto
@@ -320,6 +321,7 @@ function DownloadGIT()
 
     $NONROOTCOMMAND mkdir -p $MODULENAME
     cd $MODULENAME
+    $NONROOTCOMMAND git remote update origin --prune
     if [[ -z $MODULEREVISION ]]
     then
       $NONROOTCOMMAND git remote set-head origin --auto
