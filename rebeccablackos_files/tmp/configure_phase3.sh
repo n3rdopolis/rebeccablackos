@@ -306,6 +306,10 @@ function PostInstallActions
   #Create a /opt/var/log folder
   mkdir /opt/var/log
 
+  #Replace X symlink
+  dpkg-divert --no-rename /usr/bin/X
+  ln -s /opt/bin/X /usr/bin/X
+
   #save the build date of the CD.
   echo "$(date)" > /etc/builddate
 }
