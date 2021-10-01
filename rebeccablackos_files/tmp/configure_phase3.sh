@@ -303,6 +303,8 @@ function PostInstallActions
     done
   fi
 
+  #Create a /opt/var/log folder
+  mkdir /opt/var/log
 
   #save the build date of the CD.
   echo "$(date)" > /etc/builddate
