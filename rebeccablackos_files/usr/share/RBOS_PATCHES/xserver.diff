@@ -1,0 +1,19 @@
+diff --git a/hw/xfree86/common/xf86platformBus.c b/hw/xfree86/common/xf86platformBus.c
+index 0e0a995ac..a449ec290 100644
+--- a/hw/xfree86/common/xf86platformBus.c
++++ b/hw/xfree86/common/xf86platformBus.c
+@@ -557,8 +557,13 @@ xf86platformProbeDev(DriverPtr drvp)
+             }
+             else {
+                 /* for non-seat0 servers assume first device is the master */
+-                if (ServerIsNotSeat0())
++                if (ServerIsNotSeat0()) {
+                     break;
++                } else {
++                    /* for no busid, assume it's a falback device, such as simpledrm */
++                    if (!xf86_platform_devices[j].attribs->busid)
++                        break;
++                }
+ 
+                 if (xf86IsPrimaryPlatform(&xf86_platform_devices[j]))
+                     break;
