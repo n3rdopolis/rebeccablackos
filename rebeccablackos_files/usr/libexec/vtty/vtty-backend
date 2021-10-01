@@ -37,6 +37,7 @@ which socat &> /dev/null
 if [[ $? != 0 ]]
 then
   echo "socat not installed"
+  systemd-notify ERRNO=1
   exit 1
 fi
 

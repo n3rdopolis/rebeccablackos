@@ -46,6 +46,7 @@ which socat &> /dev/null
 if [[ $? != 0 ]]
 then
   echo "socat not installed"
+  systemd-notify ERRNO=1
   exit 1
 fi
 
@@ -53,6 +54,7 @@ which vte &> /dev/null
 if [[ $? != 0 ]]
 then
   echo "vte not installed"
+  systemd-notify ERRNO=1
   exit 1
 fi
 
@@ -60,6 +62,7 @@ which cage &> /dev/null
 if [[ $? != 0 ]]
 then
   echo "cage not installed"
+  systemd-notify ERRNO=1
   exit 1
 fi
 
