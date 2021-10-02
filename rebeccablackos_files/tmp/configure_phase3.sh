@@ -308,7 +308,7 @@ function PostInstallActions
 
   #Replace X symlink
   dpkg-divert --no-rename /usr/bin/X
-  ln -s /opt/bin/X /usr/bin/X
+  ln -s /opt/bin/Xorg /usr/bin/X
 
   #save the build date of the CD.
   echo "$(date)" > /etc/builddate
