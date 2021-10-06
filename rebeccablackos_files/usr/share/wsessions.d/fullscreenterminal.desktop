@@ -14,7 +14,7 @@ CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=-d -s -- vte --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=block --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations --sixel -- bash -l
+AdditionalArguments=-d -s -- vte_nodbus --no-builtin-dingus --reverse --font=10 --no-hyperlink --cursor-shape=block --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations --sixel -- bash -l
 NeedsFile=/opt/bin/vte
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=sway

@@ -76,6 +76,11 @@ function PackagePostInstall()
 {
 VTEVERSION=$(basename $INSTALLDIR/include/vte-*)
 ln -s $INSTALLDIR/bin/$VTEVERSION $INSTALLDIR/bin/vte
+
+echo '#! /bin/bash' > $INSTALLDIR/bin/vte_nodbus
+echo 'export DBUS_SESSION_BUS_ADDRESS=/dev/null' >> $INSTALLDIR/bin/vte_nodbus
+echo 'exec vte $@' >> $INSTALLDIR/bin/vte_nodbus
+chmod +x $INSTALLDIR/bin/vte_nodbus
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
