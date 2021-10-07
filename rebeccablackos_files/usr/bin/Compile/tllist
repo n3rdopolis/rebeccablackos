@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=alacritty
+SOURCENAME=tllist
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/jwilm/alacritty/
+SOURCEURL=https://codeberg.org/dnkl/tllist
 
-#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
+#The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
-#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=v0.6.0
+#The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -47,10 +47,6 @@ REBUILDNEWREVISION=0
 #If there are spaces in the submodule your are specifing, you will need to enclose the name in single quotes
 #This is only applicable to git repositories with submodules
 
-#VARIABLES PRESENTED
-# EXTERNALBUILDHOME : For out of tree builds 
-# INTERNALBUILDHOME : For in tree builds
-
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
@@ -61,29 +57,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-:
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cargo build --release
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-mkdir -p $INSTALLDIR/bin
-mkdir -p $INSTALLDIR/share/pixmaps/
-cp target/release/alacritty $INSTALLDIR/bin
-cp extra/logo/alacritty-term.svg $INSTALLDIR/share/pixmaps/Alacritty.svg
-desktop-file-install extra/linux/Alacritty.desktop
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp build/rootston/rootston $INSTALLDIR/bin
+: 
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
