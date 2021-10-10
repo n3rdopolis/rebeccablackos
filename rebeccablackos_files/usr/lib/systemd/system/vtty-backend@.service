@@ -2,6 +2,9 @@
 Description=Session proxy runner for vTTY %I
 Before=vtty-frontend@.service
 
+ConditionPathExists=/dev/tty0
+ConditionPathExists=/dev/%i
+
 [Service]
 Restart=on-failure
 RestartSec=0
