@@ -68,16 +68,16 @@ BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu,
       or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes
       5 times.)
+            wlmforceswrender:           Force all user sessions, and the Login Manager's display to be started with the environment variable
+                                        LIBGL_ALWAYS_SOFTWARE=1 to force software rendering
+
+            wlmforcepixman:             Force the Login Manager's display, and the hosts for any fullscreen or kiosk shell supporing session to use Pixman
+
             wlmforcefbdev:              Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel
                                         mode setting is availible.
 
             wlmnofbdev:                 Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even if framebuffers
                                         are availible.
-
-            wlmforceswrender:           Force all user sessions, and the Login Manager's display to be started with the environment variable
-                                        LIBGL_ALWAYS_SOFTWARE=1 to force software rendering
-
-            wlmforcepixman:             Force the Login Manager's display, and the hosts for any fullscreen-shell supporing session to use Pixman
 
             wlmdebug:                   Force more sysrq trigger options to be availible, then the more secure default. This option is not settable from
                                         rbos-failedboot as it's for more advanced users
@@ -95,7 +95,6 @@ BOOT OPTIONS:
                                         without this option, be detected as the 'primary'.
 
       When installed, and you are unable to use a UI, you can use the commands:
-            rbos-force-framebuffer: Wizard for setting wlmforcefbdev option to the kernel commandline with grub
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
 
 CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
