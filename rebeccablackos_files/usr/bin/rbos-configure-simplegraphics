@@ -1,0 +1,134 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020, 2021 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This script configures GRUB to pass a vga= argument to the kernel specified by the user. It tells the user what vga value gives what resolution
+
+
+DIALOGUSER=daemon
+export LANG=en_US.UTF-8
+
+#Require root privlages
+if [[ $UID != 0 ]]
+then
+  echo "Must be run as root."
+  exit
+fi
+
+ConfigFile="/etc/default/grub.d/zz-graphicsconfig"
+DefaultFallbackResolutions="1024x768,800x600,640x480"
+DefaultResolution="auto"
+
+WorkingResolutions=()
+IFS=$'\n'
+WorkingResolutions+=("Leave Unchanged")
+WorkingResolutions+=("Auto Detect")
+unset IFS
+DetectedWorkingResolutions=($(/usr/sbin/hwinfo --framebuffer 2>/dev/null | grep "^  Mode " | awk '{print $3}' | sort -n | uniq))
+
+#hwinfo tends to fail on real hardware.
+if [[ ${#DetectedWorkingResolutions[@]} == 0 ]]
+then
+  ResolutionListComment="a list of possibly supported, but also possibly unsupported resolutions, as the list could not be detected automatically."
+  WorkingResolutions+=(320x200 640x400 640x480 800x600 1024x768 1152x864 1280x1024 1280x720 1280x768 1280x800 1280x960 1400x1050 1440x900 1600x1200 1680x1050 1920x1080 1920x1200 2560x1600)
+else
+  ResolutionListComment="all reported as supported by your BIOS/Graphics hardware"
+  WorkingResolutions+=(${DetectedWorkingResolutions[@]})
+fi
+
+IFS=$'\n'
+WorkingResolutionArguments=()
+WorkingResolutionCount=0
+for WorkingResolution in ${WorkingResolutions[@]}
+do
+  WorkingResolutionArguments+=($WorkingResolutionCount)
+  WorkingResolutionArguments+=($WorkingResolution)
+  if [[ $WorkingResolutionCount == 0 ]]
+  then
+    WorkingResolutionArguments+=("on")
+  else
+    WorkingResolutionArguments+=("off")
+  fi
+  ((WorkingResolutionCount++))
+done
+unset IFS
+
+#Only the simplekms/simpledrm driver is handled by this
+CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
+if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
+then
+  sudo -E -u $DIALOGUSER dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility. Will now exit." 7 60
+  exit
+fi
+
+if [[ ! -e $ConfigFile ]]
+then
+  echo "GRUB_GFXPAYLOAD_LINUX=keep" > $ConfigFile
+  echo "GRUB_GFXMODE=$DefaultResolution,$DefaultFallbackResolutions" >> $ConfigFile
+fi
+
+#Find out the current vga= configuration if specified
+CurrentOption=$(cat $ConfigFile | grep GRUB_GFXMODE | awk -F = '{print $2}')
+CurrentOption="${CurrentOption##*( )}"
+CurrentOption="${CurrentOption%%*( )}"
+if [[ -z $CurrentOption || $CurrentOption == "auto" ]]
+then
+  CurrentOption="Auto Detect"
+fi
+
+#Tell the user what the script does
+sudo -E -u $DIALOGUSER dialog  --msgbox "Your system uses a fallback graphics driver. You can change the resolution that the bootloader provides to the fallback driver with this utility." 7 60
+
+SelectedResolutionIndex=$(sudo -E -u $DIALOGUSER dialog --radiolist "Select a resolution you wish to have the bootloader provide to the fallback driver.
+
+The listed resolutions: $ResolutionListComment
+
+Current option is $CurrentOption" 30 60 25 "${WorkingResolutionArguments[@]}" --stdout 2>/dev/tty)
+OKSelected=$?
+
+if [[ $OKSelected == 0 && $SelectedResolutionIndex != 0 ]]
+then
+  #Don't set to the autodetect display string
+  if [[ $SelectedResolutionIndex == 1 ]]
+  then
+    SelectedResolution=auto
+  else
+    SelectedResolution=${WorkingResolutions[$SelectedResolutionIndex]}
+  fi
+
+  sed -i '/GRUB_GFXMODE=/d' $ConfigFile
+  echo "GRUB_GFXMODE=$SelectedResolution,$DefaultFallbackResolutions" >> $ConfigFile
+
+
+  #update the grub configs, and ask the user to restart now or later
+  update-grub
+  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
+
+Restart now?" 7 60
+  OKSelected=$?
+
+  #if the user opted to restart, then restart
+  if [[ $OKSelected == 0 ]]
+  then
+    reboot
+  fi
+fi
+
+
+
+
+
