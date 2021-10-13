@@ -146,13 +146,19 @@ then
   exit
 fi
 
+if [[ ! -e /dev/tty0 ]]
+then
+  echo "No TTYs Detected."
+  exit
+fi
+
 CurrentTTYNumber=$(fgconsole 2>/dev/null)
-CurrentTTY="tty$CurrentTTYNumber"
 if [[ $? != 0 ]]
 then
   echo "Could not get the current physical TTY"
+  exit
 fi
-
+CurrentTTY="tty$CurrentTTYNumber"
 
 AutoVTService=$(systemctl show autovt@${CurrentTTY}.service -p Id --value)
 GettyServiceState=$(systemctl is-active getty@${CurrentTTY}.service -p Id --value &>/dev/null; echo $?)
