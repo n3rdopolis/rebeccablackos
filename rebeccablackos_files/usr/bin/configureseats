@@ -33,9 +33,6 @@ set +H
 #Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
-#get the current tty so the script knows what TTY to switch back to
-CurrentTTY=$(fgconsole)
-
 #Dont run zenity as root
 if [[ ! -z $SUDO_USER ]]
 then
@@ -707,9 +704,3 @@ do
     exit
   fi
 done
-
-
-
-#chvt 63
-#sleep .1
-#chvt $CurrentTTY
