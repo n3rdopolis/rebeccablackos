@@ -1,15 +1,3 @@
-diff --git a/os/utils.c b/os/utils.c
-index 92a66e81a..c9a8e7367 100644
---- a/os/utils.c
-+++ b/os/utils.c
-@@ -681,6 +681,7 @@ ProcessCommandLine(int argc, char *argv[])
-                     ErrorF("Failed to disable listen for %s transport",
-                            defaultNoListenList[i]);
-     }
-+    SeatId = getenv("XDG_SEAT");
- 
-     for (i = 1; i < argc; i++) {
-         /* call ddx first, so it can peek/override if it wants */
 diff --git a/hw/xfree86/common/xf86Init.c b/hw/xfree86/common/xf86Init.c
 index 2a0cfc361..361781e0e 100644
 --- a/hw/xfree86/common/xf86Init.c
