@@ -315,17 +315,36 @@ STARTTIME=$(date +%s)
 PREPARE_STARTTIME=$(date +%s)
 
 #prepare debootstrap
-if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
+if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
+  if [[ ! -z $SUDO_USER ]]
+  then
+    WGETCOMMAND="sudo -u $SUDO_USER wget"
+  else
+    WGETCOMMAND="wget"
+  fi
   echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   rm -rf "$BUILDLOCATION"/debootstrap/*
-  rm "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
-  mkdir -p "$BUILDLOCATION"/debootstrap
-  DEBOOTSTRAPURL=$(wget  -O -  http://packages.debian.org/source/sid/debootstrap 2>/dev/null|grep .tar.gz | awk -F \" '{print $2}')
-  wget "$DEBOOTSTRAPURL" -O "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz
-  tar xaf "$BUILDLOCATION"/debootstrap/debootstrap.tar.gz -C "$BUILDLOCATION"/debootstrap --strip 1
-  make -C "$BUILDLOCATION"/debootstrap/ devices.tar.gz
+  mkdir "$BUILDLOCATION"/debootstrap/keyrings
+  DEBURLS=$($WGETCOMMAND -O - https://httpredir.debian.org/debian/indices/files/components/suite-unstable.list.gz 2>/dev/null | gzip -d | grep '\.deb$' |grep -E /debootstrap/\|/debian-archive-keyring/)
+  DEBOOTSTRAPURL=$(echo "$DEBURLS" | grep /debootstrap/ | sed 's/^.//g')
+  ARCHIVEKEYURL=$(echo "$DEBURLS" | grep /debian-archive-keyring/ | sed 's/^.//g')
+
+  $WGETCOMMAND -O - https://httpredir.debian.org/debian/$DEBOOTSTRAPURL 2>/dev/null > "$BUILDLOCATION"/debootstrap/debootstrap.deb
+  $WGETCOMMAND -O - https://httpredir.debian.org/debian/$ARCHIVEKEYURL 2>/dev/null > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb
+  ar p "$BUILDLOCATION"/debootstrap/debootstrap.deb data.tar.gz data.tar.xz > "$BUILDLOCATION"/debootstrap/debootstrap.tar
+  ar p "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb data.tar.gz data.tar.xz > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar
+
+  tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap ./usr/sbin/debootstrap
+  tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/scripts
+  tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/functions
+  tar -axf "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap/keyrings ./usr/share/keyrings/debian-archive-keyring.gpg
+
+  if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/scripts || ! -e "$BUILDLOCATION"/debootstrap/functions || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg ]]
+  then
+    faillog "failed to bootstrap debootstrap"
+  fi
 fi
 
 #If debootstrap fails
@@ -883,11 +902,13 @@ ln -s ""$BUILDLOCATION"/logs/"$ENDDATE"_"$BUILDARCH"" ""$BUILDLOCATION"/logs/lat
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$BUILDLOCATION"/revisions_history/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH"_"$ENDDATE".txt" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/phase_3/usr/share/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
 
-#allow the user to actually read the iso   
-chown $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
-chgrp $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
-chmod 777 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
-
+#allow the user to actually read the iso
+if [[ ! -z $SUDO_USER ]]
+then
+  chown $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+  chgrp $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+  chmod 777 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+fi
 EXPORT_ENDTIME=$(date +%s)
 
 
