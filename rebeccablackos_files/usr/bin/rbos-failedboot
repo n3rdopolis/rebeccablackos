@@ -36,7 +36,7 @@ fi
 #Ask the user what to do
 while [[ $Option != 3 && $Option != 4 && $Option != 5 ]]
 do
-  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the greeter display manager log..." on 1 "View the waylandloginmanager log..." off 2 "Force or unforce software rendering" off 3 "Restart the system" off 4 "Exit this menu" off 5 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
+  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the greeter display manager log..." on 1 "View the waylandloginmanager log..." off 2 "Force or unforce software rendering" off 3 "Restart the system" off 4 "Exit this menu, switch to a login tty" off 5 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
     sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
