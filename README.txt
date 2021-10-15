@@ -113,9 +113,7 @@ CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
       For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
       resolution, and hit "CTRL+X"
 
-      For installed, edit /etc/default/grub and observe the "GRUB_GFXMODE=1024x768,800x600,640x480,auto" line. Add your custom resolution comma separated
-      after the = sign first, It is recommended to keep the fallback resolution in case if it fails to set your desired one.
-      "GRUB_GFXMODE=1920x1080,1024x768,800x600,640x480,auto"
+      For installed, a utility, rbos-configure-simplegraphics is provided.
 
 BUILDING: 
      Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
