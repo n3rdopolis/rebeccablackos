@@ -972,31 +972,24 @@ Will show a menu with a few options for diagnosis." 20 50
   #Depending if this is a live session or not, tell the user how to configure grub if it is installed, or to specify a boot option for the framebuffer from the menu if its live
   if [[ $HardwareSupported != 1 ]]
   then
-    systemd-notify --ready &> /dev/null
+    systemd-notify ERRNO=1 &> /dev/null
     if [[ $seat0HasTTYs == 1 ]]
     then
       chvt 63
     fi
+    WriteToLog "ERROR: No supportable hardware found"
+    $DIALOGCMD --no-cancel --msgbox "No supported graphics device found.
+
+This means your video card is not supported by any graphics driver, and your bootloader is misconfigured, preventing the fallback driver from working.
+
+Please check your bootloader config, namely the boot resolution, and if gfxpayload=keep is set." 20 50
     if [[ $LiveCDMode == 1 ]]
     then
-      WriteToLog "ERROR: No supportable hardware found"
-      $DIALOGCMD --no-cancel --msgbox "No Kernel Mode Setting, or Framebuffer device found.
-
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for a display server to work.
-
-You can select a Framebuffer boot option when you start the Live CD, to force a boot with a framebuffer device." 20 50
-    else 
-      $DIALOGCMD --no-cancel --msgbox "No Kernel Mode Setting, or Framebuffer device found.
-
-This means your video card does not support KMS, and doesn't create a framebuffer by default. either of which are needed for a display server to work.
-
-Will now start a utility to assist you in configuring your system to boot with a framebuffer device." 20 50
-      $TTYWIZARDCMD rbos-add-framebuffer
+      $TTYWIZARDCMD rbos-failedboot
+    else
+      $TTYWIZARDCMD rbos-configure-simplegraphics
+      $TTYWIZARDCMD rbos-failedboot
     fi
-    $DIALOGCMD --no-cancel --msgbox "Can not start the loginmanagerdisplay greeter.
-
-Will now reboot." 20 50
-    dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     exit 1
   fi
 
