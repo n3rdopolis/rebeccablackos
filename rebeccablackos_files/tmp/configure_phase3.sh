@@ -208,7 +208,7 @@ function PostInstallActions
 
   #Enable pipewire services
   systemctl --global enable pipewire.socket
-  systemctl --global enable pipewire-media-session.service
+  systemctl --global enable wireplumber.service
   systemctl --global disable pulseaudio.service
   systemctl --global disable pulseaudio.socket
   systemctl --global enable pipewire-pulse.socket
