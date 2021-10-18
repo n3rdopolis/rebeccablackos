@@ -53,8 +53,6 @@ do
     exit
   elif [[ $Option == 4 ]]
   then
-    mkdir -p /run/vtty/tty2
-    touch /run/vtty/tty2/vttyinhibit
     chvt 2
     exit
   elif [[ $Option == 5 ]]
