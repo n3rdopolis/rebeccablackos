@@ -110,9 +110,8 @@ CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
       What sets the resolution for this is not the kernel, but the bootloader. To ensure maximum support, it attempts 1024x768, and then 800x600 then 640x480
       It is possible to change this if you want to attempt a higher resolution.
 
-      For Live CD mode, in the boot menu, hit the 'e' key, uncomment the gfxmode= line, specify the custom resolution resolution, and hit "CTRL+X". Not all 
-      resolutions are supported. You can verify if the resolution is supported with grub's videoinfo command, otherwise it will fall back to the auto detected
-      one.
+      For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
+      resolution, and hit "CTRL+X"
 
       For installed, a utility, rbos-configure-simplegraphics is provided.
 
