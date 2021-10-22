@@ -29,8 +29,8 @@ then
   exit
 fi
 
-ConfigFile="/etc/default/grub.d/zz-graphicsconfig"
-DefaultFallbackResolutions="1024x768,800x600,640x480"
+ConfigFile="/etc/default/grub"
+DefaultFallbackResolutions="auto,1024x768,800x600,640x480"
 DefaultResolution="auto"
 
 WorkingResolutions=()
