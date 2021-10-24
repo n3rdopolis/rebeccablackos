@@ -26,6 +26,9 @@ fi
 #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
 
 #Copy select files into place, that are suitable for distribution.
+#Make any initramfs script executable
+chmod -R +x /usr/import/usr/share/initramfs-tools/
+
 mkdir -p /usr/bin
 cp -a /usr/import/usr/bin/* /usr/bin
 
@@ -48,9 +51,6 @@ chmod +x /etc/skel/.local/wlprofile
 
 #Make the wsession files executable
 chmod +x /usr/share/wsessions.d/*.desktop
-
-#Make any initramfs script executable
-chmod -R +x /usr/share/initramfs-tools/
 
 #Configure python to use modules in /opt
 echo "/opt/lib/python2.7/site-packages" > "/usr/lib/python2.7/dist-packages/optpkgs.pth"
