@@ -284,10 +284,6 @@ function PostInstallActions
   #move the import folder
   mv /usr/import /tmp
 
-  #Don't allow waylandloginmanager.service and pam files to be executable, unit files dont need to be executable
-  chmod -X /usr/lib/systemd/system/waylandloginmanager.service
-  chmod -X /etc/pam.d/*
-  
   #Add nls modules to the initramfs
   echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
   chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules

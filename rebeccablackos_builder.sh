@@ -783,12 +783,16 @@ do
 done
 echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 
-#make the imported files executable 
+#make needed imported files executable
 chmod 0644 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/bin
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/libexec
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/initramfs-tools/
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
+chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.local/wlprofile
+chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/wsessions.d/*.desktop
+
 find "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/ -type d | while read DIRECTORY
 do
   chmod 0755 "$DIRECTORY"
