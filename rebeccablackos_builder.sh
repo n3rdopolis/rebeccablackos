@@ -326,6 +326,7 @@ then
   echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   rm -rf "$BUILDLOCATION"/debootstrap/*
+  mkdir "$BUILDLOCATION"/debootstrap
   mkdir "$BUILDLOCATION"/debootstrap/keyrings
   DEBURLS=$($WGETCOMMAND -O - https://httpredir.debian.org/debian/indices/files/components/suite-unstable.list.gz 2>/dev/null | gzip -d | grep '\.deb$' |grep -E /debootstrap/\|/debian-archive-keyring/)
   DEBOOTSTRAPURL=$(echo "$DEBURLS" | grep /debootstrap/ | sed 's/^.//g')
