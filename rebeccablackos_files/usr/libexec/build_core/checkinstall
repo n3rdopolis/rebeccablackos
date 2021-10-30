@@ -501,13 +501,9 @@ function copy_dir_hierarchy {
 # TODO better detection, right now, it tests using the path in a namespace
 function checkcanoverlayaslower
 {
-  #Use a user namespace, only if the user isn't the root user
-  if [[ $UID == 0 ]]
-  then
-    unshare -m mount -t overlay overlay -o lowerdir="$1:$1"  /tmp/ &>/dev/null
-  else
-    unshare -rm mount -t overlay overlay -o lowerdir="$1:$1"  /tmp/ &>/dev/null
-  fi
+  #Use a user namespace, test using the given directory, and a newly mounted tmpfs
+  unshare -m bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o lowerdir="$1:/tmp"  /tmp/" &>/dev/null
+
   overlaytestresult=$?
   if [[ $overlaytestresult == 0 ]]
   then
