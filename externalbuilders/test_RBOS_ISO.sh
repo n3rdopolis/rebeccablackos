@@ -23,6 +23,13 @@ function NAMESPACE_ENTER {
   nsenter --mount --pid --target $ROOTPID "$@"
 }
 
+if [[ -f $(which dialog) ]]
+then
+  DIALOGCOMMAND="sudo -u $SUDO_USER dialog"
+else
+  DIALOGCOMMAND=""
+fi
+
 if [[ -f $(which zenity) ]]
 then
   ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
@@ -45,7 +52,27 @@ MOUNTISO=$(readlink -f "$1")
 MOUNTISOPATHHASH=( $(echo -n "$MOUNTISO" | sha1sum ))
 MOUNTISOPATHHASH=isotestdir_${MOUNTISOPATHHASH[0]}
 
+
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+  if [[ $WAYLAND_DISPLAY == */* ]]
+  then
+    WLALIVE=$(test -e $WAYLAND_DISPLAY; echo $?)
+  else
+    WLALIVE=$(test -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY; echo $?)
+  fi
+else
+  WLALIVE=1
+fi
+
+if [[ $XALIVE == 0 || $WLALIVE == 0 ]]
+then
+  DOUIFALLBACK=0
+else
+  DOUIFALLBACK=1
+fi
+
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
@@ -62,7 +89,7 @@ export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 
 #Determine the terminal to use
-if [[ $XALIVE == 0 ]]
+if [[ $DOUIFALLBACK == 0 ]]
 then
   unset DBUS_SESSION_BUS_ADDRESS
   if [[ -f $(which konsole) ]]
@@ -83,10 +110,16 @@ fi
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
-    XALIVE=1
+    if [[ $DIALOGCOMMAND == "" ]]
+    then
+      echo "fallback dialog utility not installed as well. Please install dialog if Zenity cannot be installed"
+      exit
+    else
+      DOUIFALLBACK=1
+    fi
   fi
 fi
 
@@ -94,7 +127,7 @@ fi
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $TERMCOMMAND "bash -c \"sudo -E "$0" "$MOUNTISO" 2>/dev/null\""
     exit
@@ -109,12 +142,12 @@ function mountisoexit()
 {
 if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
   unmountanswer=$?
   else
-    dialog --stdout --yesno "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
+    $DIALOGCOMMAND --stdout --yesno "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
     unmountanswer=$?
   fi
 
@@ -132,12 +165,12 @@ then
     rm "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/namespacepid1
     rm "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online
 
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files for the $MOUNTISO image?" 2>/dev/null
       deleteanswer=$?
     else
-      dialog --stdout --yesno "Keep Temporary overlay files for the $MOUNTISO image?" 30 30
+      $DIALOGCOMMAND --stdout --yesno "Keep Temporary overlay files for the $MOUNTISO image?" 30 30
       deleteanswer=$?
     fi
     if [ $deleteanswer -eq 1 ]
@@ -152,7 +185,7 @@ exit
 }
 
 
-if [[ $XALIVE == 0 ]]
+if [[ $DOUIFALLBACK == 0 ]]
 then
   $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will call a chroot shell from an iso.
 
@@ -185,12 +218,12 @@ then
   then
     MOUNTORUSEANSWER=1
   else
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
       MOUNTORUSEANSWER=$?
     else
-      dialog --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 20 60
+      $DIALOGCOMMAND --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 20 60
       MOUNTORUSEANSWER=$?
     fi
   fi
@@ -208,7 +241,7 @@ then
       RUNNINGISOLIST+="$RUNISO"
     done < <(find "$MOUNTHOME"/liveisotest/isotestdir_*/firstrun)
 
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       RUNNINGISOUILIST=""
       while read -r RUNNINGISO
@@ -231,17 +264,17 @@ then
         RUNNINGISOUILIST+=(" ")
         RUNNINGISOUILIST+=(0)
       done < <(echo "$RUNNINGISOLIST")
-      MOUNTISO=$(dialog --radiolist "Select Mounted ISO:" 40 100 40 "${RUNNINGISOUILIST[@]}" --stdout)
+      MOUNTISO=$($DIALOGCOMMAND --radiolist "Select Mounted ISO:" 40 100 40 "${RUNNINGISOUILIST[@]}" --stdout)
 
     fi
   else
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
       MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
     else
-      dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
-      MOUNTISO=$(dialog --fselect "$MOUNTHOME"/ 20 60 --stdout)
+      $DIALOGCOMMAND --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
+      MOUNTISO=$($DIALOGCOMMAND --fselect "$MOUNTHOME"/ 20 60 --stdout)
     fi
   fi
 fi
@@ -268,7 +301,7 @@ then
 
   if [[ -z "$MOUNTISO" ]]
   then
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Mounting the $MOUNTISO image, and starting a prompt for it. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
     else
@@ -276,7 +309,7 @@ then
       echo "Type exit in the new prompt for the option to unmount the image."
     fi
   else
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Starting a prompt for the already mounted $MOUNTISO image. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
     else
@@ -292,7 +325,7 @@ then
   then
     BITNESSCOMMAND=linux64
   else
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
     else
@@ -305,7 +338,7 @@ then
   NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint sudo -u livetest true
   if [[ $? != 0 ]]
   then
-    if [[ $XALIVE == 0 ]]
+    if [[ $DOUIFALLBACK == 0 ]]
     then
       $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Failed to enter the running target system. This should not happen."
     else
@@ -362,7 +395,7 @@ NAMESPACE_ENTER mount -o loop "$MOUNTISO" "$MOUNTHOME"/liveisotest/$MOUNTISOPATH
 #if the iso doesn't have a squashfs image
 if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomount/casper/filesystem.squashfs; echo $? ) != 0  ]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
@@ -413,7 +446,7 @@ then
 fi
 
 #tell the user how to exit chroot
-if [[ $XALIVE == 0 ]]
+if [[ $DOUIFALLBACK == 0 ]]
 then
   $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog for the option to unmount the $MOUNTISO image" 2>/dev/null
 else
