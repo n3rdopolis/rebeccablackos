@@ -769,6 +769,7 @@ function createtraslationmounts
 
   done
   unset IFS
+  #Get the list of folders that had to be created in the overlay to be able to simulate the mount point structure
   find "${TMP_DIR}/TRANSL/" > "${TMP_DIR}/TRANSLFOLDERLIST"
 
   pivot_root "${TMP_DIR}/workdir" "${TMP_DIR}/workdir/${TMP_DIR}/uniondirs"
@@ -2146,10 +2147,10 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 
 	if [[ $USEOVERLAYFS == 1 ]]
 	then
-		#Clean up created mount pont folders, if empty
+		#In the overlay, clean up folders that were created to simulate the mount point structure
 		while read TRANSLFOLDER
 		do
-			rm -d "$TRANSLFOLDER"
+			rm -d "$TRANSLFOLDER" 2> /dev/null
 		done < <(cat "${TMP_DIR}/TRANSLFOLDERLIST" | sort -r | grep -v "^${TMP_DIR}/TRANSL/$")
 		rsync -am $EXCLUDESTRING "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
