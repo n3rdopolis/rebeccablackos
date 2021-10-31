@@ -40,12 +40,7 @@ trap trapint 2
 
 CHECKINSTALL_VERSION=1.7.0
 
-#
-#   We exclude as many "dangerous" directories as possible from translation.
-# installwatch excludes itself some directories, but we put them all here,
-# to be explicit.
-#
-IEXCLUDE="${DIRECTORIO_FUENTE},/dev,/proc,/tmp,/var/tmp,/sys,/run"
+
 
 # locate the file or directory that the parameter corresponds to;
 # always prints absolute path
@@ -80,6 +75,12 @@ DIRECTORIO_FUENTE=`pwd`
 PKG_BASENAME="`basename "$DIRECTORIO_FUENTE"`"
 SPEC_PATH=${PKG_BASENAME}.spec
 
+#
+#   We exclude as many "dangerous" directories as possible from translation.
+# installwatch excludes itself some directories, but we put them all here,
+# to be explicit.
+#
+IEXCLUDE="${DIRECTORIO_FUENTE},/dev,/proc,/tmp,/var/tmp,/sys,/run"
 #############################################################################
                            # Function definitions #
                            ########################
@@ -572,7 +573,7 @@ function getmountmap
 
   if [[ $EXCLUDECOUNT == 0 ]]
   then
-    EXCLUDES=(/proc /sys /dev /run /tmp)
+    EXCLUDES=(/proc /sys /dev /run /tmp /var/tmp)
   fi
   MOUNT_MAP_OUTPUT=""
 
@@ -768,6 +769,7 @@ function createtraslationmounts
 
   done
   unset IFS
+  find "${TMP_DIR}/TRANSL/" > "${TMP_DIR}/TRANSLFOLDERLIST"
 
   pivot_root "${TMP_DIR}/workdir" "${TMP_DIR}/workdir/${TMP_DIR}/uniondirs"
   MOUNTRESULT=$?
@@ -2142,48 +2144,58 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 
 	cd /
 
-	( cat /${TMP_DIR}/newfiles | while read i; do 
-	      if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
-	      echo ".${i}"
-	   fi
-	done ) > /${TMP_DIR}/newfiles-tar
+	if [[ $USEOVERLAYFS == 1 ]]
+	then
+		#Clean up created mount pont folders, if empty
+		while read TRANSLFOLDER
+		do
+			rm -d "$TRANSLFOLDER"
+		done < <(cat "${TMP_DIR}/TRANSLFOLDERLIST" | sort -r | grep -v "^${TMP_DIR}/TRANSL/$")
+		rsync -am $EXCLUDESTRING "${TRANSLROOT}"/* "${BUILD_DIR}"
+	else
+	    ( cat /${TMP_DIR}/newfiles | while read i; do 
+	          if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
+	          echo ".${i}"
+	       fi
+	    done ) > /${TMP_DIR}/newfiles-tar
 
-        # Here it gets tricky: we need to copy all new files to our build dir,
-        # keeping permissions as they are for parents directories as well as for
-        # the files themselves. If the parents or the file are symlinks, we
-        # dereference them only if they were not modified by the installation
-        # script. 
-        NEWFILES="${TMP_DIR}/modified"
-        LOGFILE="/${TMP_DIR}/checkinstall.log"
+            # Here it gets tricky: we need to copy all new files to our build dir,
+            # keeping permissions as they are for parents directories as well as for
+            # the files themselves. If the parents or the file are symlinks, we
+            # dereference them only if they were not modified by the installation
+            # script. 
+            NEWFILES="${TMP_DIR}/modified"
+            LOGFILE="/${TMP_DIR}/checkinstall.log"
 
- 	cat /${TMP_DIR}/newfiles-tar | while read file; do
-            parents=`list_parents ${file} | sed s/^\.//`
-            for p in $parents; do
-            # We have to remove the ./ at the beginning
-		truep=`echo ${p} | sed s/^\.//`
-                # Parent has been modified: do _not_ dereference
-		grep "${truep}$" "${NEWFILES}" &>/dev/null
-		if [ $? -eq 0 ]; then
-                    $TAR --no-recursion -C "${TRANSLROOT}" -cpf - $p \
-			| $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
-		else
-                    # Parent wasn't touched by the install script: dereference
-                    $TAR --no-recursion -C "${TRANSLROOT}" -cphf - $p \
-			| $TAR -f - -xvpC "${BUILD_DIR}"  >> $LOGFILE 2>&1
-		fi
-            done
-            truefile=`echo ${file} | sed 's/^\.//'`
-            # No recursion here: if $file is a directory, then the files created
-            # in it will follow.
-            grep "${truefile}$" "${NEWFILES}" &>/dev/null
-            if [ $? -eq 0 ]; then
-		$TAR --no-recursion -C "${TRANSLROOT}" -cpf - "$file" \
-                    | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
-            else 
-		$TAR --no-recursion -C "${TRANSLROOT}" -cphf - "$file" \
-                    | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
-            fi
-	done
+ 	    cat /${TMP_DIR}/newfiles-tar | while read file; do
+                parents=`list_parents ${file} | sed s/^\.//`
+                for p in $parents; do
+                # We have to remove the ./ at the beginning
+		    truep=`echo ${p} | sed s/^\.//`
+                    # Parent has been modified: do _not_ dereference
+		    grep "${truep}$" "${NEWFILES}" &>/dev/null
+		    if [ $? -eq 0 ]; then
+                        $TAR --no-recursion -C "${TRANSLROOT}" -cpf - $p \
+			    | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+		    else
+                        # Parent wasn't touched by the install script: dereference
+                        $TAR --no-recursion -C "${TRANSLROOT}" -cphf - $p \
+			    | $TAR -f - -xvpC "${BUILD_DIR}"  >> $LOGFILE 2>&1
+		    fi
+                done
+                truefile=`echo ${file} | sed 's/^\.//'`
+                # No recursion here: if $file is a directory, then the files created
+                # in it will follow.
+                grep "${truefile}$" "${NEWFILES}" &>/dev/null
+                if [ $? -eq 0 ]; then
+		    $TAR --no-recursion -C "${TRANSLROOT}" -cpf - "$file" \
+                        | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+                else 
+		    $TAR --no-recursion -C "${TRANSLROOT}" -cphf - "$file" \
+                        | $TAR -f - -xvpC "${BUILD_DIR}" >> $LOGFILE 2>&1
+                fi
+	    done
+	fi
 
 	okfail
 
