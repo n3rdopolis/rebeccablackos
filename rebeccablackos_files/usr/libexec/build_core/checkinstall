@@ -503,7 +503,12 @@ function copy_dir_hierarchy {
 function checkcanoverlayaslower
 {
   #Use a user namespace, test using the given directory, and a newly mounted tmpfs
-  unshare -m bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o lowerdir="$1:/tmp"  /tmp/" &>/dev/null
+  if [[ $UID == 0 ]]
+  then
+    unshare -m bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o lowerdir="$1:/tmp"  /tmp/" &>/dev/null
+  else
+    unshare -rm bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o lowerdir="$1:/tmp"  /tmp/" &>/dev/null
+  fi
 
   overlaytestresult=$?
   if [[ $overlaytestresult == 0 ]]
