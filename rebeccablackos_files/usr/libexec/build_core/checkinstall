@@ -743,7 +743,7 @@ function createtraslationmounts
         fi
       fi
     else
-      if [[ -d "$MOUNTSOURCE" ]]
+      if [[ -d "${TMP_DIR}/workdir/$MOUNTSOURCE" ]]
       then
         mkdir -p "${TMP_DIR}/TRANSL/$MOUNTSOURCE"
         mkdir -p "${TMP_DIR}/TRANSL/$MOUNTDEST"
