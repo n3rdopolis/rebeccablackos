@@ -26,6 +26,13 @@ function NAMESPACE_ENTER {
   nsenter --mount --target $ROOTPID --pid --target $ROOTPID "$@"
 }
 
+if [[ -f $(which dialog) ]]
+then
+  DIALOGCOMMAND="sudo -u $SUDO_USER dialog"
+else
+  DIALOGCOMMAND=""
+fi
+
 if [[ -f $(which zenity) ]]
 then
   ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
@@ -46,6 +53,25 @@ MOUNTISO=$(readlink -f "$1")
 FIRMWARESELECT="$2"
 
 XALIVE=$(xprop -root>/dev/null 2>&1; echo $?)
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+  if [[ $WAYLAND_DISPLAY == */* ]]
+  then
+    WLALIVE=$(test -e $WAYLAND_DISPLAY; echo $?)
+  else
+    WLALIVE=$(test -e $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY; echo $?)
+  fi
+else
+  WLALIVE=1
+fi
+
+if [[ $XALIVE == 0 || $WLALIVE == 0 ]]
+then
+  DOUIFALLBACK=0
+else
+  DOUIFALLBACK=1
+fi
+
 HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
 if [[ $HASOVERLAYFS == 0 ]]
 then
@@ -72,7 +98,7 @@ export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 
 #Determine the terminal to use
-if [[ $XALIVE == 0 ]]
+if [[ $DOUIFALLBACK == 0 ]]
 then
   unset DBUS_SESSION_BUS_ADDRESS
   if [[ -f $(which konsole) ]]
@@ -93,17 +119,23 @@ fi
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
 if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
-    XALIVE=1
+    if [[ $DIALOGCOMMAND == "" ]]
+    then
+      echo "fallback dialog utility not installed as well. Please install dialog if Zenity cannot be installed"
+      exit
+    else
+      DOUIFALLBACK=1
+    fi
   fi
 fi
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     RUNCOMMAND="sudo -E \\\"$0\\\" \\\"$MOUNTISO\\\" \\\"$FIRMWARESELECT\\\""
     $TERMCOMMAND "bash -c \"$RUNCOMMAND 2>/dev/null\""
@@ -132,7 +164,7 @@ then
   "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
   ln -s /proc/"$$"/cmdline "$MOUNTHOME"/isorebuild/lockfile
 else
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Another instance is already running" 2>/dev/null
   else
@@ -143,7 +175,7 @@ fi
 
 if [[ ! $2 ]]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
@@ -181,13 +213,13 @@ FIRMWAREUILIST=""
 
 if [ -z $FIRMWARESELECT ]
 then
-  if [[ $XALIVE != 0 ]]
+  if [[ $DOUIFALLBACK != 0 ]]
   then
     while read -r FIRMWARE
     do
       FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
     done < <(echo "$FIRMWARELIST")
-    FIRMWARESELECT=$(dialog --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
+    FIRMWARESELECT=$($DIALOGCOMMAND --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
   else
     while read -r FIRMWARE
     do
@@ -219,13 +251,13 @@ mkdir -p "$MOUNTHOME"/isorebuild/unionmountpoint
 if [ -z "$MOUNTISO" ]
 then 
 
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
     MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
   else
-    dialog --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
-    MOUNTISO=$(dialog --fselect "$MOUNTHOME"/ 20 60 --stdout)
+    $DIALOGCOMMAND --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
+    MOUNTISO=$($DIALOGCOMMAND --fselect "$MOUNTHOME"/ 20 60 --stdout)
   fi
 fi
 echo "Using ISO file: $MOUNTISO"
@@ -265,7 +297,7 @@ NAMESPACE_ENTER mount -o loop "${MOUNTISO}" "$MOUNTHOME"/isorebuild/isomount
 #if the iso doesn't have a squashfs image
 if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/isorebuild/isomount/casper/filesystem.squashfs; echo $? ) != 0  ]
 then
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
   else
@@ -286,7 +318,7 @@ REMASTERSYS_STATUS=$(NAMESPACE_ENTER ls "$MOUNTHOME"/isorebuild/squashfsmount/us
 
 if [[ $REMASTERSYS_STATUS == 0 ]]
 then 
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
   else
@@ -353,14 +385,14 @@ NAMESPACE_ENTER mv "$MOUNTHOME"/isorebuild/unionmountpoint/home/remastersys/rema
 if [[ -e "$NEWISO" ]]
 then
   chown $SUDO_USER:$SUDO_GID "$NEWISO"
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
   else
     echo "ISO creation successful! $NEWISO has been created."
   fi
 else 
-  if [[ $XALIVE == 0 ]]
+  if [[ $DOUIFALLBACK == 0 ]]
   then
     $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation Failed!" 2>/dev/null
   else
