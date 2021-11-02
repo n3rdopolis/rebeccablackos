@@ -707,6 +707,14 @@ function createtraslationmounts
     >&2 echo "Failed to make all mounts private"
   fi
 
+  #Create empty excluded folders under TRANSL
+  #The workaround to delete empty subfolder trees under TRANSL if it was created to recreate a folder under a mount structure
+  #Use the same workaround here, so that an empty /tmp doesn't get created
+  for EXCLUDE in ${EXCLUDES[@]}
+  do
+    mkdir -p "${TMP_DIR}/TRANSL/$EXCLUDE"
+  done
+
   #Go through each mount, and create an overlayfs, or bind it in, or create a bind mount, based on an existing bind mount
   IFS=$'\n'
   for MAPPEDMOUNT in $MAPPEDMOUNTS
@@ -763,15 +771,20 @@ function createtraslationmounts
     fi
 
   done
-  unset IFS
 
-  #Create empty excluded folders under TRANSL
-  #The workaround to delete empty subfolder trees under TRANSL if it was created to recreate a folder under a mount structure
-  #Use the same workaround here, so that an empty /tmp doesn't get created
-  for EXCLUDE in ${EXCLUDES[@]}
+  #Remount all overlayfs filesystems to account for folders being created in the /TRANL/ upperdir
+  #Overlayfs does not expect items to be created in the upperdir, and can cause problems
+  #but these problems go away after a remount
+  for MAPPEDMOUNT in $MAPPEDMOUNTS
   do
-    mkdir -p "${TMP_DIR}/TRANSL/$EXCLUDE"
+    eval "$MAPPEDMOUNT"
+    if [[ $ISBIND == 0 ]]
+    then
+      mount -o remount "${TMP_DIR}/workdir/$MOUNTDEST"
+    fi
   done
+
+  unset IFS
 
   #Get the list of folders that had to be created in the overlay to be able to simulate the mount point structure
   find "${TMP_DIR}/TRANSL/" > "${TMP_DIR}/TRANSLFOLDERLIST"
