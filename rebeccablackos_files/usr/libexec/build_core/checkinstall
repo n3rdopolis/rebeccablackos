@@ -85,6 +85,18 @@ IEXCLUDE="${DIRECTORIO_FUENTE},/dev,/proc,/tmp,/var/tmp,/sys,/run"
                            # Function definitions #
                            ########################
 
+
+IFS=,
+EXCLUDES+=($IEXCLUDE)
+EXCLUDES+=($EXCLUDE)
+unset IFS
+EXCLUDECOUNT=${#EXCLUDES[@]}
+
+if [[ $EXCLUDECOUNT == 0 ]]
+then
+  EXCLUDES=(/proc /sys /dev /run /tmp /var/tmp)
+fi
+
 # Enable alias expansion in command substitution
 shopt -s expand_aliases 
 
@@ -570,16 +582,6 @@ function getmountmap
 
   FSES=$(findmnt -vUrno MAJ:MIN,FSROOT,TARGET,ID  | sed -e "s|$CHROOTPATH|/|g" -e "s|//|/|g" | sort -k4,4n --stable)
 
-  IFS=,
-  EXCLUDES+=($IEXCLUDE)
-  EXCLUDES+=($EXCLUDE)
-  unset IFS
-  EXCLUDECOUNT=${#EXCLUDES[@]}
-
-  if [[ $EXCLUDECOUNT == 0 ]]
-  then
-    EXCLUDES=(/proc /sys /dev /run /tmp /var/tmp)
-  fi
   MOUNT_MAP_OUTPUT=""
 
   FILE_IS_BIND_MOUNTED=0
@@ -774,6 +776,15 @@ function createtraslationmounts
 
   done
   unset IFS
+
+  #Create empty excluded folders under TRANSL
+  #The workaround to delete empty subfolder trees under TRANSL if it was created to recreate a folder under a mount structure
+  #Use the same workaround here, so that an empty /tmp doesn't get created
+  for EXCLUDE in ${EXCLUDES[@]}
+  do
+    mkdir -p "${TMP_DIR}/TRANSL/$EXCLUDE"
+  done
+
   #Get the list of folders that had to be created in the overlay to be able to simulate the mount point structure
   find "${TMP_DIR}/TRANSL/" > "${TMP_DIR}/TRANSLFOLDERLIST"
 
@@ -1886,6 +1897,7 @@ EOF
 #Setup a union mount, if supported
 if [ $USEOVERLAYFS -eq 1 ]
 then
+declare -p EXCLUDES >> ${TMP_SCRIPT}
 declare -p FILESYSTEMMAP >> ${TMP_SCRIPT}
 declare -f createtraslationmounts >> ${TMP_SCRIPT}
 echo 'createtraslationmounts < <(echo "$FILESYSTEMMAP")
@@ -2157,7 +2169,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 		do
 			rm -d "$TRANSLFOLDER" 2> /dev/null
 		done < <(cat "${TMP_DIR}/TRANSLFOLDERLIST" | sort -r | grep -v "^${TMP_DIR}/TRANSL/$")
-		rsync -am $EXCLUDESTRING "${TRANSLROOT}"/* "${BUILD_DIR}"
+		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
 	    ( cat /${TMP_DIR}/newfiles | while read i; do 
 	          if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
