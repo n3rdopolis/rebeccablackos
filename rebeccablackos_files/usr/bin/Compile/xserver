@@ -58,7 +58,6 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's/simpledrm/simplekms/g' hw/xfree86/common/xf86platformBus.c
-patch -p1 < /usr/share/RBOS_PATCHES/xserver.diff
 sed -i "s/subdir('test')//g" meson.build
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxorg=true -Dxephyr=false -Dxwayland=true -Dglamor=true -Dxnest=false -Dxvfb=false -Dxwin=false build
 }
