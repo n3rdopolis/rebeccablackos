@@ -15,11 +15,11 @@ esac
 
 if [ ! -e /dev/dri/card0 ]
 then
-	modprobe simplekms
+	modprobe simpledrm
 fi
 
-cmdlinecount=$(grep -c '\bsimplekms.forceload\b' /proc/cmdline)
+cmdlinecount=$(grep -c '\bsimpledrm.forceload\b' /proc/cmdline)
 if [ $cmdlinecount -gt 0 ]
 then
-	modprobe simplekms
+	modprobe simpledrm
 fi
