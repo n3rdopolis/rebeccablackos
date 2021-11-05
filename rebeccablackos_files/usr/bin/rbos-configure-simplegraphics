@@ -67,7 +67,7 @@ do
 done
 unset IFS
 
-#Only the simplekms/simpledrm driver is handled by this
+#Only the simpledrm driver is handled by this
 CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
 if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
 then
