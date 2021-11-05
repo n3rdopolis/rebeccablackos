@@ -325,9 +325,9 @@ then
   fi
   echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
-  mkdir "$BUILDLOCATION"/debootstrap
+  mkdir -p "$BUILDLOCATION"/debootstrap
   rm -rf "$BUILDLOCATION"/debootstrap/*
-  mkdir "$BUILDLOCATION"/debootstrap/keyrings
+  mkdir -p "$BUILDLOCATION"/debootstrap/keyrings
   DEBURLS=$($WGETCOMMAND -O - https://httpredir.debian.org/debian/indices/files/components/suite-unstable.list.gz 2>/dev/null | gzip -d | grep '\.deb$' |grep -E /debootstrap/\|/debian-archive-keyring/)
   DEBOOTSTRAPURL=$(echo "$DEBURLS" | grep /debootstrap/ | sed 's/^.//g')
   ARCHIVEKEYURL=$(echo "$DEBURLS" | grep /debian-archive-keyring/ | sed 's/^.//g')
@@ -336,8 +336,9 @@ then
   $WGETCOMMAND -O - https://httpredir.debian.org/debian/$ARCHIVEKEYURL 2>/dev/null > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb
 
   TARNAME=$(ar t "$BUILDLOCATION"/debootstrap/debootstrap.deb |grep 'data\.tar\.')
-
   ar p "$BUILDLOCATION"/debootstrap/debootstrap.deb $TARNAME > "$BUILDLOCATION"/debootstrap/debootstrap.tar
+  
+  TARNAME=$(ar t "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb |grep 'data\.tar\.')
   ar p "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb $TARNAME > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar
 
   tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap ./usr/sbin/debootstrap
