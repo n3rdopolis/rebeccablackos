@@ -88,7 +88,7 @@ BOOT OPTIONS:
             vttydisable:                This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
 
        This option is handled early in initramfs:
-            simplekms.forceload:        This forces the simplekmsdriver to be loaded, even if there is an existing /dev/dri/card0 device.
+            simpledrm.forceload:        This forces the simpledrm driver to be loaded, even if there is an existing /dev/dri/card0 device.
                                         This option is only applicable for hardware with multiple video cards, where the primary video card
                                         does not have support by a Linux modesetting driver, and generic modesetting support is needed.
                                         the driver gtes loaded if there are no supported video cards by default, but a secondary one will,
@@ -99,16 +99,12 @@ BOOT OPTIONS:
 
 CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
       Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not until recently, and the emulated 'vmware' device in QEMU
-      VMs would not have mode setting support. With this hardware, you would get at most a framebuffer device. However the bootloader also has to initialize
-      a framebuffer for the kernel.
+      VMs would not have mode setting support. Before simpledrm, to start most Wayland sessions on hardware that did not have its own modesetting driver
+      required falling back to using the framebuffer device, where many of them do not support this fallback.
 
-      A kernel mode setting driver, simplekms has been cherry-picked and is built. This allows mode setting on many more platforms that would only support
-      framebuffers, which means that even mode setting only Wayland desktops can run on these devices (with software rendering). Pending the 
-      simplekms/simpledrm driver actually being merged into the mainline kernel, many of the fallbacks, such as using framebuffer backends, using Weston hosts
-      to nest sessions, and the custom framebuffer permissons could soon start to become not as favored.
-
-      What sets the resolution for this is not the kernel, but the bootloader. To ensure maximum support, it attempts 1024x768, and then 800x600 then 640x480
-      It is possible to change this if you want to attempt a higher resolution.
+      The bootloader is where the video memory for this driver is prepared, before the kernel starts, which is why the resolution for hardware that 
+      requires simpledrm must be configured in the bootloader. Grub tries its best to detect your resolution, with one that is supported by both your BIOS
+      and your monitor. The resolution can be customised, especially on VMs which may tend to default to a smaller screen size.
 
       For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
       resolution, and hit "CTRL+X"
