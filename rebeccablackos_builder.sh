@@ -334,8 +334,11 @@ then
 
   $WGETCOMMAND -O - https://httpredir.debian.org/debian/$DEBOOTSTRAPURL 2>/dev/null > "$BUILDLOCATION"/debootstrap/debootstrap.deb
   $WGETCOMMAND -O - https://httpredir.debian.org/debian/$ARCHIVEKEYURL 2>/dev/null > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb
-  ar p "$BUILDLOCATION"/debootstrap/debootstrap.deb data.tar.gz data.tar.xz > "$BUILDLOCATION"/debootstrap/debootstrap.tar
-  ar p "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb data.tar.gz data.tar.xz > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar
+
+  TARNAME=$(ar t "$BUILDLOCATION"/debootstrap/debootstrap.deb |grep 'data\.tar\.')
+
+  ar p "$BUILDLOCATION"/debootstrap/debootstrap.deb $TARNAME > "$BUILDLOCATION"/debootstrap/debootstrap.tar
+  ar p "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb $TARNAME > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar
 
   tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap ./usr/sbin/debootstrap
   tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/scripts
