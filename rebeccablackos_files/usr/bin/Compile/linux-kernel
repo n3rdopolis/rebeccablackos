@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-5.10.y
+SOURCEREVISION=linux-5.14.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -61,15 +61,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-1-9-drm-format-helper-Pass-destination-pitch-to-drm_fb_memcpy_dstclip.txt
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-2-9-drm-format-helper-Add-blitter-functions.txt 
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-3-9-drm-Add-simplekms-driver.txt
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-4-9-drm-simplekms-Add-fbdev-emulation.txt 
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-5-9-drm-simplekms-Initialize-framebuffer-data-from-device-tree-node.txt 
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-6-9-drm-simplekms-Acquire-clocks-from-DT-device-node.txt 
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-7-9-drm-simplekms-Acquire-regulators-from-DT-device-node.txt
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-8-9-drm-Add-infrastructure-for-platform-devices.txt 
-patch -p1 < /usr/share/RBOS_PATCHES/linux-kernel/PATCH-9-9-drm-simplekms-Acquire-memory-aperture-for-framebuffer.txt
 cp /usr/share/RBOS_PATCHES/linux-kernel/config .config
 if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
 then
