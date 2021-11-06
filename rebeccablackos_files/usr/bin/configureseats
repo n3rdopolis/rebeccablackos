@@ -317,7 +317,7 @@ function ModifyConfig
   #Generate a list of session seats for the Zenity dialogs for selection
   unset SessionSeatArray
 
-  SessionSeatArray=($(loginctl list-seats --no-legend | sort))
+  SessionSeatArray=($(loginctl list-seats --no-legend | grep -v seat-vtty | sort))
   for (( CurrentSeat=1; CurrentSeat<MaxNumberOfSeats; CurrentSeat++ ))
   do
     IncludeSeat=1
