@@ -899,7 +899,12 @@ function MakeAndInstall()
     do
       if [[ -e \"\$FILE\" ]]
       then
-        FILETYPE=\$(file -b  \"\$FILE\" 2>/dev/null)
+        if [[ \"\$FILE\" != $INSTALLDIR/share/* ]]
+        then
+          FILETYPE=\$(file -b  \"\$FILE\" 2>/dev/null)
+        else
+          FILETYPE=nonexecutable
+        fi
         #Don't modify kernel files, they become unbootable
         #Exclude initrds as they get built by a post package install script, and the placeholder that gets installed by the primary package, by the time the SmallCheckinstall
         #runs, it's larger, as it's not the placeholder, but the one that was built because of the package trigger
@@ -910,7 +915,12 @@ function MakeAndInstall()
           then
             if [[ \"\$FILETYPE\" != *\"Linux kernel\"* ]]
             then
-              strip -x \"\$FILE\" &>/dev/null
+              if [[ \"\$FILE\" != $INSTALLDIR/share/* ]]
+              then
+                strip -x \"\$FILE\" &>/dev/null
+              else
+                touch \"\$FILE\" &>/dev/null
+              fi
             else
               touch \"\$FILE\" &>/dev/null
             fi
