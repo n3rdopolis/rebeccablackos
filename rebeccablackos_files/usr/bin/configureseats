@@ -33,6 +33,10 @@ set +H
 #Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
+#get the current session ID and seat id
+export XDG_SESSION_ID=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Id | awk -F \" '{print $2}')
+export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
+
 #Dont run zenity as root
 if [[ ! -z $SUDO_USER ]]
 then
