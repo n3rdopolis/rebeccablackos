@@ -58,7 +58,6 @@ function PackagePrepareBuild()
 {
 sed -e '/^MODULE_VERSION/s/5.*/5.15.2/' -i .qmake.conf
 sed -i 's/&& features.webengine-nodejs//g' src/buildtools/configure.json
-patch -p1 < /usr/share/RBOS_PATCHES/qt5-qtwebengine.diff
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/build/config/compiler/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/perfetto/gn/standalone/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/openscreen/src/build/config/BUILD.gn
