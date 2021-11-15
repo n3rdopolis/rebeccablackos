@@ -708,7 +708,7 @@ fi
 #Create a miniature /dev so that, for instance LVM doesn't try to create a backup file
 #on the chroots
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
-mount -t tmpfs none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
+mount -t tmpfs -o size=5M none "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
 if [[ $? != 0 ]]
 then
   faillog "Failed to create mini devtmpfs"
