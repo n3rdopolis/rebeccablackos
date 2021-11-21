@@ -27,7 +27,8 @@ OVERVIEW:
 
 
 How to use the ISO:
-  Burn it, (or put it in a VM), reboot, set the BIOS to boot from the CD if it does not already, boot from the CD. Once it boots you can use the live system.
+  Burn it, (or put it in a VM), reboot, set the BIOS to boot from the DVD if it does not already, boot from the DVD. Once it boots you can use the live system.
+  The ISOs can also be used on a flash drive
 
   The live user "rebestie" has no password
 
