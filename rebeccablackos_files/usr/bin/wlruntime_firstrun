@@ -22,12 +22,6 @@ then
   dconf load / < ~/.config/dconfimport.ini &>/dev/null
 fi
 
-#Build the KDE configuration database
-if [[ ! -e $HOME/.cache/ksycoca5 ]]
-then
-  kbuildsycoca5 &>/dev/null &
-fi
-
 #Build RDP keys for weston-share
 #Only generate the key if it doesn't exist
 if [[ ! -e ~/.config/weston-rdp/HOST.crt ]]
