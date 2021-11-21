@@ -76,6 +76,8 @@ function PackageInstallSource()
 {
 cd build
 make install
+cp ./src/plugins/platforms/eglfs/*.so* $INSTALLDIR/lib
+cp ./src/plugins/platforms/eglfs/deviceintegration/eglfs_kms_support/*.so* $INSTALLDIR/lib
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
