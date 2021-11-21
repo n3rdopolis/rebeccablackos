@@ -64,6 +64,14 @@ PROBLEMS:
       "randomness", so some programs that rely on getrandom() will hang. One workaround is to randomly mash the keyboard for a few seconds, as keyboards are
       among devices used.
 
+      Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
+
+      Sometimes the TaskManager plasmoid in KDE (The active window list) doesn't work. 
+      The workaround is to remove ./cache/ksycoca5*
+      and then run
+      plasmashell --replace
+      in krunner
+
 BOOT OPTIONS:
       The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu,
       or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes
