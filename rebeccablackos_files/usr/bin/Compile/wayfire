@@ -54,7 +54,7 @@ REBUILDNEWREVISION=1
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-wget https://github.com/WayfireWM/wayfire/commit/c377130fd204be47ec5940d4514f99ae873931c5.diff -O wayfire.diff
+:
 }
 
 
