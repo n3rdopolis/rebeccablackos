@@ -62,6 +62,6 @@ export KDE_SESSION_VERSION=5
 export GS_LIB="$HOME/.fonts"
 export XCURSOR_PATH="/opt/share/icons:$HOME/.icons:/usr/share/icons:/usr/share/piximaps:/usr/X11R6/lib/X11/icons"
 #export QT_WAYLAND_DECORATION=material
-export PYTHONPATH=/opt/lib/python3.5/site-packages/
+export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/
 export _JAVA_AWT_WM_NONREPARENTING=1
 export MOZ_ENABLE_WAYLAND=1
