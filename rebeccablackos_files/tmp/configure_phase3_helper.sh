@@ -45,9 +45,9 @@ cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 
 #Configure python to use modules in /opt
 echo "/opt/lib/python2.7/site-packages" > "/usr/lib/python2.7/dist-packages/optpkgs.pth"
+echo "/opt/lib/python3/dist-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
 PYTHON3DIRS=$(find /usr/lib/python3* -maxdepth 0 -printf "%f\n")
 for PYTHON3DIR in $PYTHON3DIRS
 do
-echo "/opt/lib/python3/dist-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
 echo "/opt/lib/$PYTHON3DIR/site-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
 done
