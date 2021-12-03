@@ -3,18 +3,18 @@ Enabled=1
 Type=WSession
 Name=KDE Plasma
 Comment=The KDE Desktop
-CompositorExec=/opt/bin/kwin_wayland
+CompositorExec=/opt/bin/startplasma-wayland
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
 CompositorKMSSeatAware=1
-CompositorSupportsFB=1
-CompositorFBSeatAware=1
-CompositorWLArguments=--windowed
-CompositorKMSArguments=--drm
-CompositorFBArguments=--framebuffer
-CompositorDisplayArgument=--socket=
+CompositorSupportsFB=0
+CompositorFBSeatAware=0
+CompositorWLArguments=
+CompositorKMSArguments=
+CompositorFBArguments=
+CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=--xwayland --exit-with-session=/opt/libexec/startplasma-waylandsession
+AdditionalArguments=
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=KDE
 set=KWIN_COMPOSE=Q@SOFTWARE
