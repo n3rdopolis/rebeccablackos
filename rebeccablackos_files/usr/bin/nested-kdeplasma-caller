@@ -19,10 +19,9 @@
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
 
-RANDOMNUMBER=$RANDOM
+
 export XDG_CURRENT_DESKTOP=KDE
-ServerID=wayland-$RANDOMNUMBER
 export $(dbus-launch)
 #unset DISPLAY
 #unset WAYLAND_DISPLAY
-kwin_wayland --xwayland --x11-display=$DISPLAY --socket=$ServerID /opt/libexec/startplasma-waylandsession
+startplasma-wayland
