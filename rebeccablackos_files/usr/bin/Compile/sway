@@ -88,6 +88,7 @@ then
   sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
   sed -i 's\/opt/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png\g' /etc/skel/.config/sway/config
   sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/sway/config
+  sed -i 's/alacritty/foot/g' /etc/skel/.config/sway/config
 fi
 }
 
