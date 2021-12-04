@@ -10,6 +10,7 @@ ENV{MAJOR}=="", GOTO="uaccess_fbdev_end"
 
 
 # Framebuffer devices
-SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
+#Uncomment next line to enable uaccess permissions on /dev/fbx devices
+#SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
 
 LABEL="uaccess_fbdev_end"
