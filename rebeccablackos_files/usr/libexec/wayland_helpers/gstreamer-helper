@@ -17,5 +17,5 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 #Present a dialog to prompt for a file to open with gstreamer
-OPENFILE=$(zenity --file-selection | grep -v 'startup message: remove:')
+OPENFILE=$(kdialog --getopenfilename)
 /opt/bin/gst-launch-1.0 playbin video-sink=glimagesink uri=file://$OPENFILE
