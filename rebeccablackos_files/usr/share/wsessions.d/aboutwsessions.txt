@@ -58,16 +58,16 @@ This specifies how the compositor is specified what to use for WAYLAND_DISPLAY i
 
 
 Compositor(BACKEND)SeatAware:
-This determines if a paticular backend supported by the compositor is seat aware. (As in, will start on something other than seat0 properly)
+This determines if a particular backend supported by the compositor is seat aware. (As in, will start on something other than seat0 properly)
 The option for hosted (WL) sessions if specified in this file is ignored, as the Display server that is the host is concerned about that detail.
 See Lines 19 and 20 as examples
 
 CompositorSeatArgument:
-This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it deosn't need any variables. It only appends it if CompositorSeatArgument is specified. This is ignored when using the WL backend (running hosted)
+This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it doesn't need any variables. It only appends it if CompositorSeatArgument is specified. This is ignored when using the WL backend (running hosted)
 See line 21 as example
 
 Compositor(BACKEND)SeatArgument:
-This specifies how the compositor is specified as to what XDG_SEAT it is started on, similar to CompositorSeatArgument for a paticular backend. This overrides CompositorSeatArgument if it is set.
+This specifies how the compositor is specified as to what XDG_SEAT it is started on, similar to CompositorSeatArgument for a particular backend. This overrides CompositorSeatArgument if it is set.
 (CompositorWLSeatArgument would be ignored, as the WL backend means that it is not directly concerned about the hardware)
 See line 22 as example. (It CAN be different from what is specified in line 21)
 
@@ -80,10 +80,10 @@ Any other arguments that should be passed to the server, but are more generic, f
 
 NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example
 
-EnvironmentFile: this is documentated in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
+EnvironmentFile: this is documented in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
 
 IsFallbackSession:
-This specifies if the current session is a fallback session, so that the session can be handled in a paticular way. See line 18 in the example
+This specifies if the current session is a fallback session, so that the session can be handled in a particular way. See line 18 in the example
 ----------------------------------------------
 
 An example:
