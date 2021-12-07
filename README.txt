@@ -46,7 +46,7 @@ How to use the ISO:
 How to use Wayland:
     The loginmanagerdisplay greeter is weston based, where you can select your desired wayland based desktop.
 
-    Wayland programs are in /opt/bin. But there are also many availible from the application launcher menu, under "All Wayland Programs".
+    Wayland programs are in /opt/bin. But there are also many available from the application launcher menu, under "All Wayland Programs".
 
     Pressing the "I" icon in the panel (in the default Weston shell) will give you information on key bindings, and opening a terminal will instantly display
     instructions for more advanced usage.
@@ -67,14 +67,8 @@ PROBLEMS:
 
       Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
 
-      Sometimes the TaskManager plasmoid in KDE (The active window list) doesn't work. 
-      The workaround is to remove ./cache/ksycoca5*
-      and then run
-      plasmashell --replace
-      in krunner
-
 BOOT OPTIONS:
-      The WaylandLoginManager responds when paticular strings are passed to the kernel command line. These options are made availible by the live CD boot menu,
+      The WaylandLoginManager responds when particular strings are passed to the kernel command line. These options are made available by the live CD boot menu,
       or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes
       5 times.)
             wlmforceswrender:           Force all user sessions, and the Login Manager's display to be started with the environment variable
@@ -86,9 +80,9 @@ BOOT OPTIONS:
                                         mode setting is availible.
 
             wlmnofbdev:                 Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even if framebuffers
-                                        are availible.
+                                        are available.
 
-            wlmdebug:                   Force more sysrq trigger options to be availible, then the more secure default. This option is not settable from
+            wlmdebug:                   Force more sysrq trigger options to be available, then the more secure default. This option is not settable from
                                         rbos-failedboot as it's for more advanced users
 
             wlmdebuginsecure:           This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
@@ -113,7 +107,7 @@ CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
 
       The bootloader is where the video memory for this driver is prepared, before the kernel starts, which is why the resolution for hardware that 
       requires simpledrm must be configured in the bootloader. Grub tries its best to detect your resolution, with one that is supported by both your BIOS
-      and your monitor. The resolution can be customised, especially on VMs which may tend to default to a smaller screen size.
+      and your monitor. The resolution can be customized, especially on VMs which may tend to default to a smaller screen size.
 
       For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
       resolution, and hit "CTRL+X"
@@ -149,8 +143,8 @@ BUILDING:
                                                                  respective architechture, and cause it to start from scratch.
         DontRestartCargoDownload(architechture):                 Force build_core to download of a new cargo nightly binary build.
         build/(architechture)/buildoutput/control/(packagename): Delete these files to specify a specific package to rebuild.
-        buildcore_revisions_(architechture).txt:                 Add a revisions file into this path, to specify paticular packages, as described above
+        buildcore_revisions_(architechture).txt:                 Add a revisions file into this path, to specify particular packages, as described above
         RestartPackageList_(architechture).txt:                  Add in the list of packages (as in the files in build/(architechture)/buildoutput/control/ ).
-                                                                 One per each line. For batch resetting paticular packages
+                                                                 One per each line. For batch resetting particular packages
         DontForceSnapshotBuild(architechture):                   Delete this file only after the first run is complete, before the next build. This forces
                                                                  temporary chroots to be built
