@@ -33,7 +33,7 @@ CompositorSupports(BACKEND):
 Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 7, 8, and 9 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
-  Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manger.
+  Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manager.
 
   Currently, the backend selection preference is to check KMS, then WL, then lastly FB.
 
