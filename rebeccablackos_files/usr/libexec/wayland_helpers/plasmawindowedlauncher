@@ -17,4 +17,18 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 kded5 &
-plasmawindowed "$1"
+if [[ -z "$1" ]]
+then
+  PlasmoidListText=""
+  IFS=$'\n'
+  PlasmoidList=($(kpackagetool5 -l -t Plasma/Applet -g | tail -n +2 | sort))
+  unset IFS
+  for Plasmoid in "${PlasmoidList[@]}"
+  do
+    PlasmoidListText+="$Plasmoid $Plasmoid off "
+  done
+  SelectedPlasmoid=$(kdialog --title "Nested Plasmoid Selection" --radiolist "Select a plasmoid to launch in a window" $PlasmoidListText)
+else
+  SelectedPlasmoid="$1"
+fi
+plasmawindowed "$SelectedPlasmoid"
