@@ -41,10 +41,10 @@ do
   BatteryString+=$'\n'
 done < <(find /sys/class/power_supply/BAT*)
 
-zenity --title="Battery Status" --no-wrap --info --text="
+kdialog --msgbox "
 Battery Status as of $SampleDate
 
 Plugged In: $ACStatusString
 Total Batteries: $BatteryCount
 
-$BatteryString"
+$BatteryString" --title="Battery Status"
