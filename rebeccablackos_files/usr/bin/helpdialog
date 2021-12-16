@@ -110,6 +110,6 @@ Terminal:		 Super Key + Enter
 "
 
 fi
-echo -ne "$DefaultHelpText
+kdialog --msgbox "$DefaultHelpText
 
-$SessionHelpText"|zenity --text-info --width=550 --height=500 --title=Help &>/dev/null
+$SessionHelpText" --title=Help &>/dev/null
