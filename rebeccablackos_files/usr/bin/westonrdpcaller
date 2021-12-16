@@ -20,9 +20,9 @@
 
 cd ~
 
-zenity --forms --title="RDP Sharing" --text="A new Weston server supporting RDP connections will start the background. 
+kdialog --msgbox "A new Weston server supporting RDP connections will start the background. 
 
-*Please note that the RDP session will NOT be password protected." 
+*Please note that the RDP session will NOT be password protected." --title="RDP Sharing"
 
 
 
@@ -36,7 +36,7 @@ cd ~
 weston --socket=$ServerID --xwayland --backend=rdp-backend.so --rdp-tls-cert=./.config/weston-rdp/HOST.crt --rdp-tls-key=./.config/weston-rdp/HOST.key &
 WESTONPID=$!
 
-#Wait until the zenity form dies, or until the remote enabled weston dies
+#Wait until the dialog process dies, or until the remote enabled weston dies
 while [ 1 ]
 do
   #If either the weston server dies, or the dialog dies, terminate both, and exit

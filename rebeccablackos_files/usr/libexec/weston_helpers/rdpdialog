@@ -18,7 +18,7 @@
 
 #This script displays when a weston session is being shared with RDP.
 
-zenity --forms --title="RDP Sharing" --text="Wayland Display:
+kdialog --msgbox "Wayland Display:
    $XDG_RUNTIME_DIR/$1
 is now being shared with RDP.
 
@@ -35,4 +35,4 @@ If using freerdp, you might need to pass the option /cert-ignore
 
 Close this dialog to terminate the Weston RDP server.
 
-Otherwise, leave this dialog open"
+Otherwise, leave this dialog open" --title="RDP Sharing"
