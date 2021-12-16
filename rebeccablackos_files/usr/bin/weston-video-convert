@@ -22,8 +22,8 @@ if [[ -e ~/capture.wcap || -e ~/capture.h264 ]]
 then
   export FILENAMEID=$RANDOM
 
-  zenity --info --width=500 --text="Converting any existing Weston screen recorded files into playable video files to $HOME/weston-screenshots." &
-  zenityjob=$!
+  kdialog --msgbox "Converting any existing Weston screen recorded files into playable video files to $HOME/weston-screenshots." &
+  dialogjob=$!
 
   mkdir ~/weston-screenshots
   if [[ -e ~/capture.wcap ]]
@@ -35,9 +35,9 @@ then
   then
      konsole -e /usr/libexec/weston_helpers/weston-video-convert-helper-264
   fi
-  kill -9 $zenityjob
+  kill -9 $dialogjob
 else
-  zenity --info --width=500 --text="This utility will convert any Weston recorded capture files into playable video files, however none exist right now. Press Super+R to initiate and end a screen recording session with Weston. Note that Weston does not provide graphical feedback when user-intiated screen recording is active."
+  kdialog --msgbox "This utility will convert any Weston recorded capture files into playable video files, however none exist right now. Press Super+R to initiate and end a screen recording session with Weston. Note that Weston does not provide graphical feedback when user-intiated screen recording is active."
 fi
 
 
