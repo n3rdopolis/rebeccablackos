@@ -18,4 +18,6 @@ SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland --use-pixman
 IsFallbackSession=1
 NeedsFile=/opt/bin/weston
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=Weston
 

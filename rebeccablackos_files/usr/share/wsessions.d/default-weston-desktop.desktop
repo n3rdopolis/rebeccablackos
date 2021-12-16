@@ -18,4 +18,6 @@ CompositorFBSeatArgument=--seat=
 SessionArgument=--modules=screen-share.so
 AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=Weston
 
