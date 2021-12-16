@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script uses zenity to act as a graphical sudo prompt in Wayland. It also preserves Wayland variables
+#This script uses kdialog to act as a graphical sudo prompt in Wayland. It also preserves Wayland variables
 
 #Set to root's $HOME instead of the users, so that applications don't create root owned files in the users directory. This is the same behaviour as kdesudo
 
