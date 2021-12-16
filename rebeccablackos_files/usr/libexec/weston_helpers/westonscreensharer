@@ -19,7 +19,7 @@
 #This script manages the Weston instance that acts as the proxy for Weston screen sharing
 
 /opt/bin/weston --no-config --xwayland --backend=rdp-backend.so --shell=fullscreen-shell.so --rdp-tls-cert=./.config/weston-rdp/HOST.crt --rdp-tls-key=./.config/weston-rdp/HOST.key & WESTONPID=$!
-/usr/libexec/wayland_helpers/rdpdialog $WAYLAND_DISPLAY &
+/usr/libexec/weston_helpers/rdpdialog $WAYLAND_DISPLAY &
 DIALOGPID=$!
 while [ 1 ]
 do

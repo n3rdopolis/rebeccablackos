@@ -29,7 +29,7 @@ zenity --forms --title="RDP Sharing" --text="A new Weston server supporting RDP 
 
 ServerID=wayland-$RANDOM
 
-/usr/libexec/wayland_helpers/rdpdialog $ServerID &
+/usr/libexec/weston_helpers/rdpdialog $ServerID &
 DIALOGPID=$!
 
 cd ~

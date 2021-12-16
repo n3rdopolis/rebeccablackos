@@ -28,12 +28,12 @@ then
   mkdir ~/weston-screenshots
   if [[ -e ~/capture.wcap ]]
   then
-    konsole -e /usr/libexec/wayland_helpers/weston-video-convert-helper
+    konsole -e /usr/libexec/weston_helpers/weston-video-convert-helper
   fi
   
   if [[ -e ~/capture.h264 ]]
   then
-     konsole -e /usr/libexec/wayland_helpers/weston-video-convert-helper-264
+     konsole -e /usr/libexec/weston_helpers/weston-video-convert-helper-264
   fi
   kill -9 $zenityjob
 else
