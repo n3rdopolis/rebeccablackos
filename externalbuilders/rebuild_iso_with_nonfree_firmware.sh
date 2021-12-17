@@ -28,14 +28,21 @@ function NAMESPACE_ENTER {
 
 if [[ -f $(which dialog) ]]
 then
-  DIALOGCOMMAND="sudo -u $SUDO_USER dialog"
+  DIALOGCOMMAND="runuser -u $SUDO_USER -m -- dialog"
 else
   DIALOGCOMMAND=""
 fi
 
+if [[ -f $(which kdialog) ]]
+then
+  KDIALOGCOMMAND="runuser -u $SUDO_USER -m -- kdialog"
+else
+  KDIALOGCOMMAND=""
+fi
+
 if [[ -f $(which zenity) ]]
 then
-  ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
+  ZENITYCOMMAND="runuser -u $SUDO_USER -m -- zenity"
 else
   ZENITYCOMMAND=""
 fi
@@ -72,19 +79,6 @@ else
   DOUIFALLBACK=1
 fi
 
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  else
-    echo "Building without overlayfs is no longer supported"
-    exit 1
-  fi
-fi
-
 
 #Determine the size of the ram disk
 FREERAM=$(grep MemAvailable: /proc/meminfo | awk '{print $2}')
@@ -116,12 +110,11 @@ then
   fi
 fi
 
-#Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
-if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
+if [[ $TERMCOMMAND == "" || ( $ZENITYCOMMAND == "" && $KDIALOGCOMMAND == "" ) ]]
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
+    echo "Zenity or Kdialog, along with a Terminal emulator not found, please install Zenity (or kdialog), and a terminal emulator"
     if [[ $DIALOGCOMMAND == "" ]]
     then
       echo "fallback dialog utility not installed as well. Please install dialog if Zenity cannot be installed"
@@ -129,6 +122,39 @@ then
     else
       DOUIFALLBACK=1
     fi
+  fi
+fi
+
+if [[ $DOUIFALLBACK == 0 ]]
+then
+  if [[ $KDIALOGCOMMAND != "" ]]
+  then
+    UIDIALOGTYPE=kdialog
+  else
+    UIDIALOGTYPE=zenity
+  fi
+fi
+
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  else
+    if [[ $DOUIFALLBACK == 0 ]]
+    then
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Building without overlayfs is no longer supported" 2>/dev/null
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Building without overlayfs is no longer supported" 2>/dev/null
+      fi
+    else
+      echo "Building without overlayfs is no longer supported"
+    fi
+    exit 1
   fi
 fi
 
@@ -166,7 +192,12 @@ then
 else
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Another instance is already running" 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "Another instance is already running" 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Another instance is already running" 2>/dev/null
+    fi
   else
     echo "Another instance is already running"
   fi
@@ -177,10 +208,18 @@ if [[ ! $2 ]]
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
 and don't have the same freedoms as the rest of the rest of the packages on these ISOs,
 but may allow more hardware to work." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will remaster the specified ISO, to install non-free firmware packages
+While there is no cost for these packages, these packages are closed source,
+and don't have the same freedoms as the rest of the rest of the packages on these ISOs,
+but may allow more hardware to work." 2>/dev/null
+    fi
   else
     echo "This will remaster the specified ISO, to install non-free firmware packages
 While there is no cost for these packages, these packages are closed source,
@@ -221,18 +260,27 @@ then
     done < <(echo "$FIRMWARELIST")
     FIRMWARESELECT=$($DIALOGCOMMAND --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
   else
-    while read -r FIRMWARE
-    do
-      if [[ $FIRMWAREUILIST != "" ]]
-      then
-        FIRMWAREUILIST+=$'\n'$'\n'
-      else
-        FIRMWAREUILIST+=$'\n'
-      fi
-      FIRMWAREUILIST+="$FIRMWARE"
-    done < <(echo "$FIRMWARELIST")
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      while read -r FIRMWARE
+      do
+        FIRMWAREUILIST+="$FIRMWARE $FIRMWARE off "
+      done < <(echo "$FIRMWARELIST")
+      FIRMWARESELECT=$($KDIALOGCOMMAND --checklist "Select Firmware:" $FIRMWAREUILIST 2>/dev/null | sed 's/"//g')
+    else
+      while read -r FIRMWARE
+      do
+        if [[ $FIRMWAREUILIST != "" ]]
+        then
+          FIRMWAREUILIST+=$'\n'$'\n'
+        else
+          FIRMWAREUILIST+=$'\n'
+        fi
+        FIRMWAREUILIST+="$FIRMWARE"
+      done < <(echo "$FIRMWARELIST")
 
-    FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+      FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+    fi
   fi
 fi
 FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
@@ -253,8 +301,14 @@ then
 
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
-    MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+      MOUNTISO=$($KDIALOGCOMMAND --getopenfilename 2>/dev/null)
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+      MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+    fi
   else
     $DIALOGCOMMAND --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
     MOUNTISO=$($DIALOGCOMMAND --fselect "$MOUNTHOME"/ 20 60 --stdout)
@@ -282,7 +336,17 @@ do
 done
 if [[ -z $ROOTPID ]]
 then
-  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+  if [[ $DOUIFALLBACK == 0 ]]
+  then
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "The main namespace process failed to start, in 1 minute. This should not take that long" 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "The main namespace process failed to start, in 1 minute. This should not take that long" 2>/dev/null
+    fi
+  else
+    echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+  fi
   exit
 fi
 
@@ -299,7 +363,12 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/isorebuild/isomount/casper/filesyst
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    fi
   else
     echo "Invalid CDROM image. Not an Ubuntu or Casper based image. Press enter."
     read a 
@@ -320,7 +389,12 @@ if [[ $REMASTERSYS_STATUS == 0 ]]
 then 
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO not prepared to rebuild itself (no remastersys binary) Exiting..." 2>/dev/null
+    fi
   else
     echo "ISO not prepared to rebuild itself (no remastersys binary) Exiting..."
   fi
@@ -387,16 +461,26 @@ then
   chown $SUDO_USER:$SUDO_GID "$NEWISO"
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "ISO creation successful! $NEWISO has been created." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation successful! $NEWISO has been created." 2>/dev/null
+    fi
   else
     echo "ISO creation successful! $NEWISO has been created."
   fi
 else 
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation Failed!" 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "ISO creation Failed." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "ISO creation Failed." 2>/dev/null
+    fi
   else
-    echo "ISO creation Failed!"
+    echo "ISO creation Failed."
   fi
 fi
 
