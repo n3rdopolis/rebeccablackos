@@ -25,14 +25,21 @@ function NAMESPACE_ENTER {
 
 if [[ -f $(which dialog) ]]
 then
-  DIALOGCOMMAND="sudo -u $SUDO_USER dialog"
+  DIALOGCOMMAND="runuser -u $SUDO_USER -m -- dialog"
 else
   DIALOGCOMMAND=""
 fi
 
+if [[ -f $(which kdialog) ]]
+then
+  KDIALOGCOMMAND="runuser -u $SUDO_USER -m -- kdialog"
+else
+  KDIALOGCOMMAND=""
+fi
+
 if [[ -f $(which zenity) ]]
 then
-  ZENITYCOMMAND="sudo -u $SUDO_USER zenity"
+  ZENITYCOMMAND="runuser -u $SUDO_USER -m -- zenity"
 else
   ZENITYCOMMAND=""
 fi
@@ -73,18 +80,6 @@ else
   DOUIFALLBACK=1
 fi
 
-HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-if [[ $HASOVERLAYFS == 0 ]]
-then
-  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-  if [[ $HASOVERLAYFSMODULE == 0 ]]
-  then
-    HASOVERLAYFS=1
-  else 
-    echo "Running without overlayfs is no longer supported"
-    exit 1
-  fi
-fi
 export HOME=$(eval echo ~$SUDO_USER)
 MOUNTHOME="$HOME"
 
@@ -108,11 +103,11 @@ then
 fi
 
 #Fallback to terminal mode if zenity or (gnome terminal/konsole/x-terminal-emulator) is not installed or configured
-if [[ $TERMCOMMAND == "" || $ZENITYCOMMAND == "" ]]
+if [[ $TERMCOMMAND == "" || ( $ZENITYCOMMAND == "" && $KDIALOGCOMMAND == "" ) ]]
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    echo "Zentity or Terminal emulator not found, please install Zenity, and a terminal emulator"
+    echo "Zenity or Kdialog, along with a Terminal emulator not found, please install Zenity (or kdialog), and a terminal emulator"
     if [[ $DIALOGCOMMAND == "" ]]
     then
       echo "fallback dialog utility not installed as well. Please install dialog if Zenity cannot be installed"
@@ -123,6 +118,38 @@ then
   fi
 fi
 
+if [[ $DOUIFALLBACK == 0 ]]
+then
+  if [[ $KDIALOGCOMMAND != "" ]]
+  then
+    UIDIALOGTYPE=kdialog
+  else
+    UIDIALOGTYPE=zenity
+  fi
+fi
+
+HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
+if [[ $HASOVERLAYFS == 0 ]]
+then
+  HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
+  if [[ $HASOVERLAYFSMODULE == 0 ]]
+  then
+    HASOVERLAYFS=1
+  else
+    if [[ $DOUIFALLBACK == 0 ]]
+    then
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Building without overlayfs is no longer supported"
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Building without overlayfs is no longer supported" 2>/dev/null
+      fi
+    else
+      echo "Building without overlayfs is no longer supported"
+    fi
+    exit 1
+  fi
+fi
 
 #Determine how the script should run itself as root, with kdesudo if it exists, with gksudo if it exists, or just sudo
 if [[ $UID != 0 || -z $SUDO_USER ]]
@@ -144,8 +171,14 @@ if [[ -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/online ]]
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
-  unmountanswer=$?
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --yesno "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
+      unmountanswer=$?
+    else
+      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 2>/dev/null
+      unmountanswer=$?
+    fi
   else
     $DIALOGCOMMAND --stdout --yesno "Do you want to leave the virtual image for $MOUNTISO mounted? If you answer no, the programs you opened from the image, or programs accessing files on the image will be terminated" 30 30
     unmountanswer=$?
@@ -167,8 +200,14 @@ then
 
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files for the $MOUNTISO image?" 2>/dev/null
-      deleteanswer=$?
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --yesno "Keep Temporary overlay files for the $MOUNTISO image?" 2>/dev/null
+        deleteanswer=$?
+      else
+        $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text "Keep Temporary overlay files for the $MOUNTISO image?" 2>/dev/null
+        deleteanswer=$?
+      fi
     else
       $DIALOGCOMMAND --stdout --yesno "Keep Temporary overlay files for the $MOUNTISO image?" 30 30
       deleteanswer=$?
@@ -187,11 +226,20 @@ exit
 
 if [[ $DOUIFALLBACK == 0 ]]
 then
-  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will call a chroot shell from an iso.
+  if [[ $UIDIALOGTYPE == kdialog ]]
+  then
+    $KDIALOGCOMMAND --msgbox "This will call a chroot shell from an iso.
 
-  The password for the test user is the same password as the sudo users.
+The password for the test user is the same password as the sudo users.
 
-  The folder "$MOUNTHOME"/liveisotest/shareddir will be mounted in the target as /media/shareddir" 2>/dev/null
+The folder "$MOUNTHOME"/liveisotest/shareddir will be mounted in the target as /media/shareddir" 2>/dev/null
+  else
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "This will call a chroot shell from an iso.
+
+The password for the test user is the same password as the sudo users.
+
+The folder "$MOUNTHOME"/liveisotest/shareddir will be mounted in the target as /media/shareddir" 2>/dev/null
+  fi
 else
   echo "This will call a chroot shell from an iso.
 
@@ -220,8 +268,14 @@ then
   else
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
-      MOUNTORUSEANSWER=$?
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 2>/dev/null
+        MOUNTORUSEANSWER=$?
+      else
+        $ZENITYCOMMAND --question $ZENITYELLIPSIZE --text="Mount a new ISO, or enter an existing mounted session?" --cancel-label="New ISO" --ok-label="Enter Running Session" 2> /dev/null
+        MOUNTORUSEANSWER=$?
+      fi
     else
       $DIALOGCOMMAND --yes-label "Enter Running Session" --no-label "New ISO" --yesno "Mount a new ISO, or enter an existing mounted session?" 20 60
       MOUNTORUSEANSWER=$?
@@ -243,19 +297,30 @@ then
 
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      RUNNINGISOUILIST=""
-      while read -r RUNNINGISO
-      do
-        if [[ $RUNNINGISOUILIST != "" ]]
-        then
-          RUNNINGISOUILIST+=$'\n'$'\n'
-        else
-          RUNNINGISOUILIST+=$'\n'
-        fi
-        RUNNINGISOUILIST+="$RUNNINGISO"
-      done < <(echo "$RUNNINGISOLIST")
-      MOUNTISO=$(echo "$RUNNINGISOUILIST" | $ZENITYCOMMAND --list --text="Select Mounted ISO:" --radiolist  --hide-header --column=check --column=ISO --width=400 2>/dev/null)
-
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        RUNNINGISOUILIST=()
+        while read -r RUNNINGISO
+        do
+          RUNNINGISOUILIST+=("$RUNNINGISO")
+          RUNNINGISOUILIST+=("$RUNNINGISO")
+          RUNNINGISOUILIST+=(0)
+        done < <(echo "$RUNNINGISOLIST")
+        MOUNTISO=$($KDIALOGCOMMAND --radiolist "Select Mounted ISO:" "${RUNNINGISOUILIST[@]}" 2>/dev/null)
+      else
+        RUNNINGISOUILIST=""
+        while read -r RUNNINGISO
+        do
+          if [[ $RUNNINGISOUILIST != "" ]]
+          then
+            RUNNINGISOUILIST+=$'\n'$'\n'
+          else
+            RUNNINGISOUILIST+=$'\n'
+          fi
+          RUNNINGISOUILIST+="$RUNNINGISO"
+        done < <(echo "$RUNNINGISOLIST")
+        MOUNTISO=$(echo "$RUNNINGISOUILIST" | $ZENITYCOMMAND --list --text="Select Mounted ISO:" --radiolist  --hide-header --column=check --column=ISO --width=400 2>/dev/null)
+      fi
     else
       RUNNINGISOUILIST=()
       while read -r RUNNINGISO
@@ -270,8 +335,14 @@ then
   else
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
-      MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+        MOUNTISO=$($KDIALOGCOMMAND --getopenfilename 2>/dev/null)
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "No ISO specified as an argument. Please select one in the next dialog." 2>/dev/null
+        MOUNTISO=$($ZENITYCOMMAND --file-selection 2>/dev/null)
+      fi
     else
       $DIALOGCOMMAND --msgbox "File navigation: To navigate directories, select them with the cursor, and press space twice. To go back, go into the text area of the path, and press backspace. To select a file, select it with the cursor, and press space"  20 60
       MOUNTISO=$($DIALOGCOMMAND --fselect "$MOUNTHOME"/ 20 60 --stdout)
@@ -303,7 +374,12 @@ then
   then
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Mounting the $MOUNTISO image, and starting a prompt for it. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Mounting the $MOUNTISO image, and starting a prompt for it. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Mounting the $MOUNTISO image, and starting a prompt for it. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      fi
     else
       echo "Mounting the $MOUNTISO image, and starting a prompt for it."
       echo "Type exit in the new prompt for the option to unmount the image."
@@ -311,7 +387,12 @@ then
   else
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Starting a prompt for the already mounted $MOUNTISO image. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Starting a prompt for the already mounted $MOUNTISO image. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Starting a prompt for the already mounted $MOUNTISO image. Type exit in the new prompt for the option to unmount the $MOUNTISO image." 2>/dev/null
+      fi
     else
       echo "Starting a prompt for the already mounted $MOUNTISO image."
       echo "Type exit in the new prompt for the option to unmount the image."
@@ -327,7 +408,12 @@ then
   else
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+      fi
     else
       echo "Unknown chroot failure, detecting the target systems bitness"
     fi
@@ -340,7 +426,12 @@ then
   then
     if [[ $DOUIFALLBACK == 0 ]]
     then
-      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Failed to enter the running target system. This should not happen."
+      if [[ $UIDIALOGTYPE == kdialog ]]
+      then
+        $KDIALOGCOMMAND --msgbox "Failed to enter the running target system. This should not happen."
+      else
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Failed to enter the running target system. This should not happen."
+      fi
     else
       echo "Failed to enter the running target system. This should not happen."
     fi
@@ -380,7 +471,17 @@ do
 done
 if [[ -z $ROOTPID ]]
 then
-  echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+  if [[ $DOUIFALLBACK == 0 ]]
+  then
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "The main namespace process failed to start, in 1 minute. This should not take that long" 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "The main namespace process failed to start, in 1 minute. This should not take that long" 2>/dev/null
+    fi
+  else
+    echo "The main namespace process failed to start, in 1 minute. This should not take that long"
+  fi
   exit
 fi
 echo $ROOTPID > "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/namespacepid1
@@ -397,7 +498,12 @@ if [ $( NAMESPACE_ENTER test -f "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/isomo
 then
   if [[ $DOUIFALLBACK == 0 ]]
   then
-    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      $KDIALOGCOMMAND --msgbox "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    else
+      $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image." 2>/dev/null
+    fi
   else
     echo "$MOUNTISO is an invalid CDROM image. Not an Ubuntu or Casper based image. Exiting and unmounting the image. Press enter."
     read a 
@@ -448,7 +554,12 @@ fi
 #tell the user how to exit chroot
 if [[ $DOUIFALLBACK == 0 ]]
 then
-  $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog for the option to unmount the $MOUNTISO image" 2>/dev/null
+  if [[ $UIDIALOGTYPE == kdialog ]]
+  then
+    $KDIALOGCOMMAND --msgbox "Type exit into the terminal prompt that will appear after this dialog for the option to unmount the $MOUNTISO image" 2>/dev/null
+  else
+    $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Type exit into the terminal prompt that will appear after this dialog for the option to unmount the $MOUNTISO image" 2>/dev/null
+  fi
 else
   echo "
 Type exit in the new prompt for the option to unmount the $MOUNTISO image."
