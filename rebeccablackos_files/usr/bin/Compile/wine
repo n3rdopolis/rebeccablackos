@@ -63,10 +63,10 @@ function PackagePrepareBuild()
 {
 if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
 then
-  ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+  ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests
 elif [[ $BUILDARCH == amd64 ]]
 then
-  ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-win64
+  ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests --enable-win64
 else
   echo "$BUILDARCH not supported"
 fi
