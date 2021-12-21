@@ -60,6 +60,13 @@ function PackagePrepareBuild()
 sed -i '/QT_QPA_PLATFORMTHEME/d' src/bin/e_main.c
 sed -i '/QT_STYLE_OVERRIDE/d' src/bin/e_main.c
 sed -i '/e_comp_canvas_resize/d' src/modules/wl_wl/e_mod_main.c
+
+#Don't install larger wallpapers to keep smaller ISO size
+#The ones after the second blank line are the larger ones
+sed -i '0,/^$/{/^$/d;}' data/backgrounds/meson.build
+sed -i '/^$/,/^             ],/{/^$/!{/^             ],/!d;};}' data/backgrounds/meson.build
+
+
 #sed -i 's/do_gl = do_vsync = 1;/do_gl = do_vsync = 0;/g' src/modules/wizard/page_150.c
 #sed -i 's/do_gl = 1/do_gl = 0/g' src/modules/wizard/page_150.c
 patch -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
