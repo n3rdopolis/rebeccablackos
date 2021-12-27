@@ -1,5 +1,5 @@
 diff --git a/clients/desktop-shell.c b/clients/desktop-shell.c
-index fb53069e..ed9172e9 100644
+index fb53069e..02c1ae5c 100644
 --- a/clients/desktop-shell.c
 +++ b/clients/desktop-shell.c
 @@ -142,6 +142,7 @@ struct panel_launcher {
@@ -19,7 +19,15 @@ index fb53069e..ed9172e9 100644
  
  	return CURSOR_LEFT_PTR;
  }
-@@ -678,7 +679,7 @@ load_icon_or_fallback(const char *icon)
+@@ -579,6 +580,7 @@ panel_destroy_launcher(struct panel_launcher *launcher)
+ 	wl_array_release(&launcher->envp);
+ 
+ 	free(launcher->path);
++	free(launcher->displayname);
+ 
+ 	cairo_surface_destroy(launcher->icon);
+ 
+@@ -678,7 +680,7 @@ load_icon_or_fallback(const char *icon)
  }
  
  static void
@@ -28,7 +36,7 @@ index fb53069e..ed9172e9 100644
  {
  	struct panel_launcher *launcher;
  	char *start, *p, *eq, **ps;
-@@ -687,6 +688,7 @@ panel_add_launcher(struct panel *panel, const char *icon, const char *path)
+@@ -687,6 +689,7 @@ panel_add_launcher(struct panel *panel, const char *icon, const char *path)
  	launcher = xzalloc(sizeof *launcher);
  	launcher->icon = load_icon_or_fallback(icon);
  	launcher->path = xstrdup(path);
@@ -36,7 +44,7 @@ index fb53069e..ed9172e9 100644
  
  	wl_array_init(&launcher->envp);
  	wl_array_init(&launcher->argv);
-@@ -1447,7 +1449,7 @@ static void
+@@ -1447,7 +1450,7 @@ static void
  panel_add_launchers(struct panel *panel, struct desktop *desktop)
  {
  	struct weston_config_section *s;
@@ -45,15 +53,13 @@ index fb53069e..ed9172e9 100644
  	const char *name;
  	int count;
  
-@@ -1459,9 +1461,14 @@ panel_add_launchers(struct panel *panel, struct desktop *desktop)
+@@ -1459,9 +1462,12 @@ panel_add_launchers(struct panel *panel, struct desktop *desktop)
  
  		weston_config_section_get_string(s, "icon", &icon, NULL);
  		weston_config_section_get_string(s, "path", &path, NULL);
 +		weston_config_section_get_string(s, "displayname", &displayname, NULL);
 +		if (displayname == NULL)
-+		{
-+			displayname = basename((char *)path);
-+		}
++			displayname = xstrdup(basename(path));
  
  		if (icon != NULL && path != NULL) {
 -			panel_add_launcher(panel, icon, path);
@@ -61,6 +67,14 @@ index fb53069e..ed9172e9 100644
  			count++;
  		} else {
  			fprintf(stderr, "invalid launcher section\n");
+@@ -1469,6 +1475,7 @@ panel_add_launchers(struct panel *panel, struct desktop *desktop)
+ 
+ 		free(icon);
+ 		free(path);
++		free(displayname);
+ 	}
+ 
+ 	if (count == 0) {
 @@ -1477,7 +1484,8 @@ panel_add_launchers(struct panel *panel, struct desktop *desktop)
  		/* add default launcher */
  		panel_add_launcher(panel,
