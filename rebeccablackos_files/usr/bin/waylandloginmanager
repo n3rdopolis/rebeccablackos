@@ -41,7 +41,7 @@
 #and /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
 #for fbdev permissions
 
-#Weston 9.0 or greater is required for kiosk shell
+#Weston 10.0 or greater is required for support for launcher names in the tooltips for the loginmanagerdisplay. Weston 9.0 or greater is needed for the Kiosk Shell support, which permits some fallback. Otherwise for the multiseat functionality to work, Weston 5.0 or greater is an absolute must.
 
 #as well as:
 #At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
@@ -105,9 +105,6 @@
      #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
 
-#/usr/libexec/waylandloginmanager/*
-  #These scripts are small utilities that send the approriate commands to the waylandloginmanager's FIFO. They need to be configured in the launchers of /etc/loginmanagerdisplay/loginmanagerdisplay.ini. It's how the user interacts with the waylandloginmanager on the loginmanagerdisplay (other then the zenity dialogs)
-  #These are optional as the waylandloginmanager displays a selection list with the same commands as well
 #/etc/loginmanagerdisplay/loginmanagerdisplay.ini
   #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/waylandloginmanager to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
   #The mainform makes this reqirement optional
