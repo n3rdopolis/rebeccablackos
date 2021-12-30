@@ -24,10 +24,9 @@
 
 #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
 
-#It depends on the line
+#For framebuffer support, and the wlmforcefbdev option to work, the line
 #SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
-#in a udev rules file.
-#or pass wlmglobalfbpermissions to the kernel
+#is needed in a udev rules file. However, this is optional now as there is generic kernel mode setting now.
 
 #It also requires /etc/pam.d/waylandloginmanager
 #and /etc/pam.d/waylandloginmanager-loginmanagerdisplay
@@ -37,9 +36,6 @@
 
 #and /etc/loginmanagerdisplay/loginmanagerdisplay.ini
 #for the greeter
-
-#and /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
-#for fbdev permissions
 
 #Weston 10.0 or greater is required for support for launcher names in the tooltips for the loginmanagerdisplay. Weston 9.0 or greater is needed for the Kiosk Shell support, which permits some fallback. Otherwise for the multiseat functionality to work, Weston 5.0 or greater is an absolute must.
 
@@ -924,14 +920,6 @@ LABEL="uaccess_fbdev_end"" > /usr/lib/udev/rules.d/70-uaccess-fbdev.rules
   if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
   then
     WriteToLog "Frame buffer support found."
-    GetConfigKey wlmglobalfbpermissions "" 0 2 wlmglobalfbpermissions
-    if [[ $wlmglobalfbpermissions != 0 ]]
-    then
-      WriteToLog "WARNING: The 'wlmglobalfbpermissions' option has been passed to the kernel. This causes the waylandloginmanager to give the plugdev group and $LOGINMANAGERDISPLAYUSER access to all framebuffer device files"
-      setfacl -m "g:plugdev:rwx" /dev/fb*
-      setfacl -m "g:$LOGINMANAGERDISPLAYUSER:rwx" /dev/fb*
-    fi
-    unset wlmglobalfbpermissions
     HardwareSupported=1
   else
     WriteToLog "No framebuffer support found"
