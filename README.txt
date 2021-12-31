@@ -41,7 +41,11 @@ How to use the ISO:
   
     It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system.
 
-    It requires squashfs, and also needs dialog or zenity to be installed, and it also needs either konsole, gnome-terminal OR a standard x-terminal-emulator.
+    It requires squashfs, and also needs dialog or zenity or kdialog to be installed, and it also needs either konsole, gnome-terminal OR a standard
+    x-terminal-emulator.
+
+    Warning: It is not as isolated as a VM. This utility will still work, however when it was created, it was more focused on having nested sessions
+    of desktops that would not start on VMs, due to there being no generic modesetting.
  
 How to use Wayland:
     The loginmanagerdisplay greeter is weston based, where you can select your desired wayland based desktop.
