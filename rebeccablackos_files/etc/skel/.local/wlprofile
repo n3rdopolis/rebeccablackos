@@ -1,7 +1,7 @@
 #Execute first run scripts
 if [[ ! -e "$HOME"/.config/wlmfirstlogin ]]
 then
-  dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun &>/dev/null
+  WAYLAND_DISPLAY=/dev/null dbus-launch --exit-with-session -- /usr/bin/wlruntime_firstrun &>/dev/null
   mkdir -p "$HOME"/.config/
   touch "$HOME"/.config/wlmfirstlogin
 fi 
