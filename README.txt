@@ -1,7 +1,7 @@
 LICENSE:
   The build script are all under GPL v2+, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES
-  or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ or rebeccablacklinux/rebeccablackos_files/usr/import/
-  Some diffs are for software that is under a different Open Source license, for example Calamares is GPLv3
+  or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ Some diffs are for software that is under a different Open 
+  Source license, for example Calamares is GPLv3
   
   The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on KDE-look,
   this was documented in the commit message for commit #1985, but the file was moved, and git-svn (or git) doesn't retain the logs of moved files, on the git

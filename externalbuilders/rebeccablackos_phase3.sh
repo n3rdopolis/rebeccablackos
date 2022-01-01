@@ -75,7 +75,6 @@ rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/
 #Handle /usr/import for the creation of the deb file that contains this systems files
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
 rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
-rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import/usr/import
 
 #delete the temp folder
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/temp/

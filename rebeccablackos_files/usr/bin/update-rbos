@@ -51,7 +51,6 @@ then
   #copy the files where they belong
   cp -a /usr/share/rebeccablackos/rebeccablackos_files/* /
   rm -rf /usr/import/tmp
-  rm -rf /usr/import/usr/import
 
   rsync -a -- /usr/import/*  /
 
