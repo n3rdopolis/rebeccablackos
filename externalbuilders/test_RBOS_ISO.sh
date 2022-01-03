@@ -421,7 +421,7 @@ then
   fi
 
   #Test if the target is still in a usable state
-  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint sudo -u livetest true
+  NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint runuser -u livetest -- true
   if [[ $? != 0 ]]
   then
     if [[ $DOUIFALLBACK == 0 ]]
