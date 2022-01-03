@@ -28,21 +28,21 @@ function NAMESPACE_ENTER {
 
 if [[ -f $(which dialog) ]]
 then
-  DIALOGCOMMAND="runuser -u $SUDO_USER -m -- dialog"
+  DIALOGCOMMAND="runuser -u "$SUDO_USER" -m -- dialog"
 else
   DIALOGCOMMAND=""
 fi
 
 if [[ -f $(which kdialog) ]]
 then
-  KDIALOGCOMMAND="runuser -u $SUDO_USER -m -- kdialog"
+  KDIALOGCOMMAND="runuser -u "$SUDO_USER" -m -- kdialog"
 else
   KDIALOGCOMMAND=""
 fi
 
 if [[ -f $(which zenity) ]]
 then
-  ZENITYCOMMAND="runuser -u $SUDO_USER -m -- zenity"
+  ZENITYCOMMAND="runuser -u "$SUDO_USER" -m -- zenity"
 else
   ZENITYCOMMAND=""
 fi
