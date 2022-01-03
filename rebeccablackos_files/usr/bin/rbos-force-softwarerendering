@@ -33,10 +33,10 @@ fi
 CURRENTOPTION=$(/usr/bin/waylandloginmanager --getconfigkey wlmforceswrender "" 0 0)
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force software rendering. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it." 10 60
+runuser -u $DIALOGUSER -- dialog  --msgbox "This will assist you in configuring your system, to force software rendering. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it." 10 60
 
 #Ask the user what to do
-FORCESW=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force/unforce software rendering?
+FORCESW=$(runuser -u $DIALOGUSER -- dialog --radiolist "Would you like to force/unforce software rendering?
 Current Option: $CURRENTOPTION" 20 60 20 1 "Force Software Rendering" off 0 "Unforce Software Rendering" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 
@@ -52,5 +52,5 @@ then
   then
     /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 0
   fi
-  sudo -E -u $DIALOGUSER dialog  --msgbox "You will need to restart the waylandloginmanager service for the change to take effect" 7 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "You will need to restart the waylandloginmanager service for the change to take effect" 7 60
 fi

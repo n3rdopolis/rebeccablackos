@@ -30,19 +30,19 @@ fi
 #Ask the user what to do
 while [[ $Option != 3 && $Option != 4 && $Option != 5 ]]
 do
-  Option=$(sudo -E -u $DIALOGUSER dialog --radiolist "What would you like to do?" 20 60 20 0 "View the greeter display manager log..." on 1 "View the waylandloginmanager log..." off 2 "Force or unforce software rendering" off 3 "Restart the system" off 4 "Exit this menu, switch to a login tty" off 5 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
+  Option=$(runuser -u $DIALOGUSER -- dialog --radiolist "What would you like to do?" 20 60 20 0 "View the greeter display manager log..." on 1 "View the waylandloginmanager log..." off 2 "Force or unforce software rendering" off 3 "Restart the system" off 4 "Exit this menu, switch to a login tty" off 5 "**Restart the waylandloginmanager service**" off --stdout 2>/dev/tty)
   if [[ $Option == 0 ]]
   then
-    sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
+    runuser -u $DIALOGUSER -- dialog --textbox /var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_seat0.log 500 500
   elif [[ $Option == 1 ]]
   then
-    sudo -E -u $DIALOGUSER dialog --textbox /var/log/waylandloginmanager/waylandloginmanager.log 500 500
+    runuser -u $DIALOGUSER -- dialog --textbox /var/log/waylandloginmanager/waylandloginmanager.log 500 500
   elif [[ $Option == 2 ]]
   then
     rbos-force-softwarerendering
   elif [[ $Option == 3 ]]
   then
-    sudo -E -u $DIALOGUSER dialog --msgbox "Will now restart..." 20 50
+    runuser -u $DIALOGUSER -- dialog --msgbox "Will now restart..." 20 50
     dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.Reboot boolean:true
     exit
   elif [[ $Option == 4 ]]
@@ -57,6 +57,6 @@ do
   fi
   if [[ $Option != 3 && $Option != 4 && $Option != 5  ]]
   then
-    sudo -E -u $DIALOGUSER dialog --no-ok --no-cancel --pause "Wait..." 8 14 1
+    runuser -u $DIALOGUSER -- dialog --no-ok --no-cancel --pause "Wait..." 8 14 1
   fi
 done

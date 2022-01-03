@@ -39,10 +39,10 @@ else
 fi
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to enable or disable dpkg overwrites" 7 60
+runuser -u $DIALOGUSER -- dialog  --msgbox "This will assist you in configuring your system, to enable or disable dpkg overwrites" 7 60
 
 #Ask the user what to do
-FORCEOW=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force/unforce dpkg overwrites?
+FORCEOW=$(runuser -u $DIALOGUSER -- dialog --radiolist "Would you like to force/unforce dpkg overwrites?
 Current Option: $CURRENTOPTION" 20 60 20 1 "Enable overwrites" off 0 "Disable overwrites" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 

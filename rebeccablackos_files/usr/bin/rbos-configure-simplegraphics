@@ -32,7 +32,7 @@ fi
 FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
 if [[ $FSTYPE =~ overlay ]]
 then
-  sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change the resolution for a live CD for simple hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries." 20 50
+  runuser -u $DIALOGUSER -- dialog --msgbox "Option invalid on Live CD Mode. To change the resolution for a live CD for simple hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries." 20 50
   exit
 fi
 
@@ -78,7 +78,7 @@ unset IFS
 CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
 if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
 then
-  sudo -E -u $DIALOGUSER dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility. Will now exit." 7 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility. Will now exit." 7 60
   exit
 fi
 
@@ -98,9 +98,9 @@ then
 fi
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "Your system uses a fallback graphics driver. You can change the resolution that the bootloader provides to the fallback driver with this utility." 7 60
+runuser -u $DIALOGUSER -- dialog  --msgbox "Your system uses a fallback graphics driver. You can change the resolution that the bootloader provides to the fallback driver with this utility." 7 60
 
-SelectedResolutionIndex=$(sudo -E -u $DIALOGUSER dialog --radiolist "Select a resolution you wish to have the bootloader provide to the fallback driver.
+SelectedResolutionIndex=$(runuser -u $DIALOGUSER -- dialog --radiolist "Select a resolution you wish to have the bootloader provide to the fallback driver.
 
 The listed resolutions: $ResolutionListComment
 
@@ -123,7 +123,7 @@ then
 
   #update the grub configs, and ask the user to restart now or later
   update-grub
-  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
+  runuser -u $DIALOGUSER -- dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
   OKSelected=$?
