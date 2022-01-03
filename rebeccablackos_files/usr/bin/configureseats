@@ -40,7 +40,7 @@ export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/lo
 #Dont run zenity as root
 if [[ ! -z $SUDO_USER ]]
 then
-  ZENITYCMD="runuser -u $SUDO_USER -m -- zenity"
+  ZENITYCMD="runuser -u "$SUDO_USER" -m -- zenity"
 else
   ZENITYCMD="zenity"
 fi
