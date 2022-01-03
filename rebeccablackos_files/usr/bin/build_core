@@ -99,7 +99,7 @@ then
   REBUILDNEWREVISION=0
 fi
 export PACKAGESUFFIX=rbos
-export NONROOTCOMMAND="runuser -u $NONROOTUSER --"
+export NONROOTCOMMAND="runuser -u "$NONROOTUSER" --"
 export BUILDLOGDIR=/buildlogs/build_core
 
 if [[ -x /usr/libexec/build_core/checkinstall ]]
@@ -577,6 +577,7 @@ function DownloadSource()
   if [[ -e /tmp/buildcore_revisions.txt ]]
   then
     BASHEXE=$(which bash)
+    RUNUSEREXE=$(which runuser)
     FOLDERDATE=$(date +%s)
     mkdir /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
     chmod 700 /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
@@ -584,7 +585,7 @@ function DownloadSource()
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
     chmod 755 /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
-    sudo -u $NONROOTUSER PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION 2>&-; \declare -p SUBMODULEREVISIONS 2>&-" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
+    PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $RUNUSEREXE -u "$NONROOTUSER" -m -- $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION 2>&-; \declare -p SUBMODULEREVISIONS 2>&-" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     chmod +x /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
