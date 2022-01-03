@@ -319,7 +319,7 @@ if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/deb
 then
   if [[ ! -z $SUDO_USER ]]
   then
-    WGETCOMMAND="runuser -u $SUDO_USER -- wget"
+    WGETCOMMAND="runuser -u "$SUDO_USER" -- wget"
   else
     WGETCOMMAND="wget"
   fi
