@@ -27,12 +27,6 @@ then
   exit
 fi
 
-FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE =~ overlay ]]
-then
-  ISLIVE=1
-fi
-
 #Ask the user what to do
 while [[ $Option != 3 && $Option != 4 && $Option != 5 ]]
 do
