@@ -29,6 +29,13 @@ then
   exit
 fi
 
+FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $FSTYPE =~ overlay ]]
+then
+  sudo -E -u $DIALOGUSER dialog --msgbox "Option invalid on Live CD Mode. To change the resolution for a live CD for simple hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries." 20 50
+  exit
+fi
+
 ConfigFile="/etc/default/grub"
 DefaultFallbackResolutions="auto,1024x768,800x600,640x480"
 DefaultResolution="auto"
