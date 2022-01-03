@@ -18,6 +18,18 @@
 
 #This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
+#Detect the best Python command to use
+PYTHONTESTCOMMANDS=(python3 python2 python2.7 python)
+for PYTHONTESTCOMMAND in ${PYTHONTESTCOMMANDS[@]}
+do
+  type $PYTHONTESTCOMMAND &> /dev/null
+  if [[ $? == 0 ]]
+  then
+    export PYTHONCOMMAND=$PYTHONTESTCOMMAND
+    break
+  fi
+done
+
 #Define the command for entering the namespace now that $ROOTPID is defined
 function NAMESPACE_ENTER {
   nsenter --mount --pid --target $ROOTPID "$@"
@@ -442,7 +454,7 @@ then
     mountisoexit
   fi
 
-  script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
+  $PYTHONCOMMAND -c 'import pty, sys; from signal import signal, SIGPIPE, SIG_DFL; signal(SIGPIPE,SIG_DFL); pty.spawn(sys.argv[1:])' bash -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest"
   mountisoexit
 fi
 
@@ -622,7 +634,7 @@ TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHAS
     exit
   fi
 
-script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
+$PYTHONCOMMAND -c 'import pty, sys; from signal import signal, SIGPIPE, SIG_DFL; signal(SIGPIPE,SIG_DFL); pty.spawn(sys.argv[1:])' bash -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest"
 
 #go back to the users home folder
 cd "$MOUNTHOME"
