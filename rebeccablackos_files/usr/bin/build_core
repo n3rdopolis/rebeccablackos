@@ -99,7 +99,7 @@ then
   REBUILDNEWREVISION=0
 fi
 export PACKAGESUFFIX=rbos
-export NONROOTCOMMAND="sudo -Eu $NONROOTUSER"
+export NONROOTCOMMAND="runuser -u $NONROOTUSER --"
 export BUILDLOGDIR=/buildlogs/build_core
 
 if [[ -x /usr/libexec/build_core/checkinstall ]]
