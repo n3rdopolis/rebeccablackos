@@ -958,6 +958,7 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
       systemd-notify --ready &> /dev/null
     else
       LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
+      systemd-notify --ready &> /dev/null
     fi
 
     MinimumTTY=$LOGINMANAGERDISPLAYTTY
