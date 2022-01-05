@@ -958,7 +958,6 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
       systemd-notify --ready &> /dev/null
     else
       LOGINMANAGERDISPLAYTTY=$(GetNextTTY)
-      systemd-notify --ready &> /dev/null
     fi
 
     MinimumTTY=$LOGINMANAGERDISPLAYTTY
@@ -967,6 +966,8 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
       WriteToLog "ERROR: Not Enough TTYs for login manager display!"
       exit 1
     fi
+  else
+    systemd-notify --ready &> /dev/null
   fi
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
