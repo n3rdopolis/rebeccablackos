@@ -2974,6 +2974,8 @@ function WaylandLoginManagerMain
   LoginManagerFirstLoop=1
   SessionStartFailed=0
   MainLoopMinutes=0
+  MainLoopMinuteQuarter=0
+  LastMainLoopMinuteQuarter=0
   DoDetectSeats=1
   StartedSeats=()
   
@@ -3017,6 +3019,8 @@ function WaylandLoginManagerMain
       ((MainLoopMinutes++))
       SECONDS=0
     fi
+    MainLoopMinuteQuarter=$(($SECONDS/15))
+
     if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 120 ]]
     then
       DoDetectSeats=0
@@ -3262,7 +3266,22 @@ function WaylandLoginManagerMain
           LastUserActionPIDs[$SeatIndexID]=$!
         fi
       fi
+
+      #If a seat without TTYs has no active session unexpectedly, fall back to the loginmanagerdisplay.
+      if [[ ($RunningSeat == seat0 && $seat0HasTTYs == 0) || $RunningSeat != seat0 ]]
+      then
+        if [[ $LastMainLoopMinuteQuarter != $MainLoopMinuteQuarter ]]
+        then
+          ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
+          if [[ -z $ActiveLogindSession ]]
+          then
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID unexpectedly has no active session."
+            loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+          fi
+        fi
+      fi
     done
+    LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
 
     if [[ $ZenityCommandFoundResult != 0 ]]
     then
