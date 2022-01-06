@@ -303,7 +303,7 @@ function PostInstallActions
   mkdir /opt/var/log
 
   #Replace X symlink
-  dpkg-divert --no-rename /usr/bin/X
+  dpkg-divert --add --rename --divert /usr/bin/X.distrib /usr/bin/X
   ln -s /opt/bin/Xorg /usr/bin/X
   
   #Replace chvt with the seat aware wrapper
