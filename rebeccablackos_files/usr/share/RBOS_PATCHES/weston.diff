@@ -126,3 +126,17 @@ index 011b1942..bb53f377 100644
  
  [input-method]
  path=@libexecdir@/weston-keyboard
+diff --git a/libweston/launcher-logind.c b/libweston/launcher-logind.c
+index 3fca1dff..3d554cde 100644
+--- a/libweston/launcher-logind.c
++++ b/libweston/launcher-logind.c
+@@ -881,6 +881,9 @@ static int
+ launcher_logind_get_vt(struct weston_launcher *launcher)
+ {
+ 	struct launcher_logind *wl = wl_container_of(launcher, wl, base);
++	if (!sd_seat_can_tty(wl->seat))
++		return 0;
++
+ 	if (wl->vtnr <= 0) {
+ 		return -EINVAL;
+ 	}
