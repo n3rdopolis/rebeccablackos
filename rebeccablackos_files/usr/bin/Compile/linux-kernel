@@ -84,12 +84,16 @@ else
 fi
 make olddefconfig
 
-#sed -i 's/CONFIG_VT=y/# CONFIG_VT is not set'/g .config
-#sed -i 's/CONFIG_CONSOLE_TRANSLATIONS=y/# CONFIG_CONSOLE_TRANSLATIONS is not set'/g .config
-#sed -i 's/CONFIG_VT_CONSOLE=y/# CONFIG_VT_CONSOLE is not set'/g .config
-#sed -i 's/CONFIG_VT_CONSOLE_SLEEP=y/# CONFIG_VT_CONSOLE_SLEEP is not set'/g .config
-#sed -i 's/CONFIG_HW_CONSOLE=y/# CONFIG_HW_CONSOLE is not set'/g .config
-#sed -i 's/CONFIG_VT_HW_CONSOLE_BINDING=y/# CONFIG_VT_HW_CONSOLE_BINDING is not set'/g .config
+BUILD_CONFIGVT_N=0
+if [[ $BUILD_CONFIGVT_N == 1 ]]
+then
+  sed -i 's/CONFIG_VT=y/# CONFIG_VT is not set'/g .config
+  sed -i 's/CONFIG_CONSOLE_TRANSLATIONS=y/# CONFIG_CONSOLE_TRANSLATIONS is not set'/g .config
+  sed -i 's/CONFIG_VT_CONSOLE=y/# CONFIG_VT_CONSOLE is not set'/g .config
+  sed -i 's/CONFIG_VT_CONSOLE_SLEEP=y/# CONFIG_VT_CONSOLE_SLEEP is not set'/g .config
+  sed -i 's/CONFIG_HW_CONSOLE=y/# CONFIG_HW_CONSOLE is not set'/g .config
+  sed -i 's/CONFIG_VT_HW_CONSOLE_BINDING=y/# CONFIG_VT_HW_CONSOLE_BINDING is not set'/g .config
+fi
 
 KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
 echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
