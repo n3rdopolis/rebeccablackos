@@ -187,7 +187,7 @@ apt-get purge $REMOVE_PACKAGES -y                            2>&1 |tee -a "$PACK
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
-  echo "Removes failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+  echo "Installs Removes failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
 else
   rm /tmp/INSTALLS.txt.removes
 fi
