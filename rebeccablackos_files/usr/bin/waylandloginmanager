@@ -3269,15 +3269,18 @@ function WaylandLoginManagerMain
       fi
 
       #If a seat without TTYs has no active session unexpectedly, fall back to the loginmanagerdisplay.
-      if [[ ($RunningSeat == seat0 && $seat0HasTTYs == 0) || $RunningSeat != seat0 ]]
+      if [[ ${LoginManagerDisplayBackends[$SeatIndexID]} != "" && ${LoginManagerDisplayBackends[$SeatIndexID]} != 0 ]]
       then
-        if [[ $LastMainLoopMinuteQuarter != $MainLoopMinuteQuarter ]]
+        if [[ ($RunningSeat == seat0 && $seat0HasTTYs == 0) || $RunningSeat != seat0 ]]
         then
-          ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
-          if [[ -z $ActiveLogindSession ]]
+          if [[ $LastMainLoopMinuteQuarter != $MainLoopMinuteQuarter ]]
           then
-            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID unexpectedly has no active session."
-            loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
+            if [[ -z $ActiveLogindSession ]]
+            then
+              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat unexpectedly has no active session."
+              loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            fi
           fi
         fi
       fi
