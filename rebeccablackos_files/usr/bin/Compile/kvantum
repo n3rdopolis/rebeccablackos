@@ -56,6 +56,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's|#include <KF5/kwindowsystem_version.h>|#include <KF5/KWindowSystem/kwindowsystem_version.h>|g' Kvantum/style/blur/blurhelper.cpp
 cd Kvantum
 mkdir build
 cd build
