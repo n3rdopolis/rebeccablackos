@@ -437,6 +437,7 @@ then
     rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
+    rm "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH"
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
     touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
@@ -811,7 +812,7 @@ PREPARE_ENDTIME=$(date +%s)
 #Create a log folder for the phase logs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/externallogs
 
-#Force buildcore to redownload cargo if the control file is gone
+#Force buildcore to redownload cargocache if the control file is gone
 if [[ ! -e "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH" ]]
 then
 
@@ -822,6 +823,19 @@ then
   fi
 
   touch "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH"
+fi
+
+#Force buildcore to redownload rust if the control file is gone
+if [[ ! -e "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH" ]]
+then
+
+  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec ]]
+  then
+    echolog "Deleting downloaded version of Rust..."
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec
+  fi
+
+  touch "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH"
 fi
 
 BUILD_RUNNING=1
