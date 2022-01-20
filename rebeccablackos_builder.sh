@@ -94,6 +94,13 @@ function setup_buildprocess
   export LANG=en_US.UTF-8
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
+  if [[ ! -z $SUDO_USER ]]
+  then
+    WGETCOMMAND="runuser -u "$SUDO_USER" -- wget"
+  else
+    WGETCOMMAND="wget"
+  fi
+
   #If user presses CTRL+C, kill any namespace, remove the lock file, exit the script
   trap 'if [[ $BUILD_RUNNING == 0 ]]; then exit 2; fi; if [[ -z $ROOTPID ]]; then GetJobPIDs; fi; if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" && $ROOTPID != -1 ]]; then kill -9 $ROOTPID; rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile; echo -e "\nCTRL+C pressed, exiting..."; exit 2; fi' 2
 
@@ -317,12 +324,6 @@ PREPARE_STARTTIME=$(date +%s)
 #prepare debootstrap
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
-  if [[ ! -z $SUDO_USER ]]
-  then
-    WGETCOMMAND="runuser -u "$SUDO_USER" -- wget"
-  else
-    WGETCOMMAND="wget"
-  fi
   echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   mkdir -p "$BUILDLOCATION"/debootstrap
