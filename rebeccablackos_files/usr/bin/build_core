@@ -562,7 +562,7 @@ function DownloadTOMLData()
   do
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    cargo fetch --manifest-path "$CARGOFILE"
+    /$SOURCEDIR/buildhome/rust_exec/bin/cargo fetch --manifest-path "$CARGOFILE"
   done
 }
 
@@ -650,39 +650,47 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
-    #Download cargo bootstrap binary, to handle downloading cargo, only if the package has Cargo.toml files
-
-    #Ensure only one instace of the cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
-    #SLEEPTIME=$(( (RANDOM%10)+1 ))
-    #sleep 0.$SLEEPTIME
-    #ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
-    #CARGOLOCKRESULT=$?
-    #while [[ $CARGOLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/cargocache/lockfile" ]]
-    #do
-    #  ls $(readlink -f "/$SOURCEDIR/buildhome/cargocache/lockfile") &> /dev/null
-    #  CARGOLOCKRESULT=$?
-    #  sleep 1
-    #done
-
-    #if [[ ! -f "$CARGO_HOME"/cargo && ! -z $TOMLFILES ]]
-    #then
-    #  ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/cargocache/lockfile"
-    #  DEBIAN_ARCH=$(dpkg --print-architecture)
-    #  if [[ $DEBIAN_ARCH == i386 ]]
-    #  then
-    #    CARGOFILENAME=cargo-nightly-i686-unknown-linux-gnu
-    #  fi
-    #  if [[ $DEBIAN_ARCH == amd64 ]]
-    #  then
-    #    CARGOFILENAME=cargo-nightly-x86_64-unknown-linux-gnu
-    #  fi
-    #  $NONROOTCOMMAND wget https://static.rust-lang.org/dist/$CARGOFILENAME.tar.gz -O "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz"
-    #  tar -xzf "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME.tar.gz" -C "/$SOURCEDIR/buildhome/cargocache"
-    #  cp "/$SOURCEDIR/buildhome/cargocache/$CARGOFILENAME/cargo/bin/cargo" "$CARGO_HOME"
-    #  rm "/$SOURCEDIR/buildhome/cargocache/lockfile"
-    #fi
-
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
+
+    #Download rust/cargo
+    if [[ ! -e "/$SOURCEDIR/buildhome/rust_exec/bin/rustc" && ! -z $TOMLFILES ]]
+    then
+      #Ensure only one instace of the rust/cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
+      SLEEPTIME=$(( (RANDOM%10)+1 ))
+      sleep 0.$SLEEPTIME
+      ls $(readlink -f "/$SOURCEDIR/buildhome/rust_exec/lockfile") &> /dev/null
+      DOWNLOADLOCKRESULT=$?
+      while [[ $DOWNLOADLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/rust_exec/lockfile" ]]
+      do
+        ls $(readlink -f "/$SOURCEDIR/buildhome/rust_exec/lockfile") &> /dev/null
+        DOWNLOADLOCKRESULT=$?
+        sleep 1
+      done
+
+      mkdir -p /"$SOURCEDIR"/buildhome/rust_exec
+      mkdir -p /"$SOURCEDIR"/buildhome/rust_exec/download
+
+      ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/rust_exec/lockfile"
+
+      DEBIAN_ARCH=$(dpkg --print-architecture)
+      #Use the Beta version of Rust, as the name is stable, (there is no build named stable, as those have version numbers)
+      if [[ $DEBIAN_ARCH == amd64 ]]
+      then
+        RUSTPACKAGENAME=rust-beta-x86_64-unknown-linux-gnu
+      fi
+      if [[ $DEBIAN_ARCH == i386 ]]
+      then
+        RUSTPACKAGENAME=rust-beta-i686-unknown-linux-gnu
+      fi
+
+      $NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz > /"$SOURCEDIR"/buildhome/rust_exec/download/rust.tar.gz
+      tar -C /"$SOURCEDIR"/buildhome/rust_exec/download/ -xzf /"$SOURCEDIR"/buildhome/rust_exec/download/rust.tar.gz
+      /"$SOURCEDIR"/buildhome/rust_exec/download/$RUSTPACKAGENAME/install.sh --prefix=/ --destdir=/"$SOURCEDIR"/buildhome/rust_exec/
+      rm -rf /"$SOURCEDIR"/buildhome/rust_exec/download/
+
+
+      rm "/$SOURCEDIR/buildhome/rust_exec/lockfile"
+    fi
 
     #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
     echo "#! /bin/bash
@@ -728,7 +736,7 @@ function SetBuildVariables()
 {
   #Create build variables
   . /usr/bin/build_vars
-  export PATH="$EXTERNALBUILDHOME"/bin:$PATH
+  export PATH=/srcbuild/buildhome/rust_exec/bin/:"$EXTERNALBUILDHOME"/bin:$PATH
 }
 
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function
