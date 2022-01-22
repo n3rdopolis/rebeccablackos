@@ -18,5 +18,10 @@
 
 #This script sets up a nested session with xwayland, and the default desktop shell
 . /usr/bin/wlruntime_vars
-export WLR_BACKENDS=wayland
+if [[ ! -z $WAYLAND_DISPLAY ]]
+then
+  export WLR_BACKENDS=wayland
+else
+  export WLR_BACKENDS=x11
+fi
 sway
