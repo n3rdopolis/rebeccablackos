@@ -602,6 +602,8 @@ then
   NAMESPACE_ENTER cp "$MOUNTHOME"/.Xauthority "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/home/livetest
   NAMESPACE_ENTER chown $SUDO_UID "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/home/livetest/.Xauthority
   NAMESPACE_ENTER mkdir -p "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/var/run/dbus
+  NESTEDWAYLANDSESSIONS=$(NAMESPACE_ENTER find "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint/usr/bin/ -maxdepth 1 -name 'nested-*' -printf "%f\n" | sort)
+
   #give more information in the testuser .bashrc
   echo "
 unset XCURSOR_SIZE
@@ -610,11 +612,7 @@ export \$(dbus-launch)
 (. /usr/bin/wlruntime_vars; /usr/bin/wlruntime_firstrun)
 echo \"
 Weston Session commands:
-nested-defaultweston-caller
-nested-liri-caller
-nested-orbital-caller
-nested-enlightenment-caller
-nested-kdeplasma-caller
+$NESTEDWAYLANDSESSIONS
 
 NOTE: Any commands entered in this tab will effect the mounted system.
 Please be aware of which terminal you are typing in, especially with more experimantal/risker commands.
