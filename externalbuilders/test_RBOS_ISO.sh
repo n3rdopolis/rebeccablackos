@@ -642,7 +642,7 @@ TARGETBITSIZE=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/liveisotest/$MOUNTISOPATHHAS
 if [[ -f $(which script) ]]
 then
   script -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest" -q /dev/null
-then
+else
   $PYTHONCOMMAND -c 'import pty, sys; from signal import signal, SIGPIPE, SIG_DFL; signal(SIGPIPE,SIG_DFL); pty.spawn(sys.argv[1:])' bash -c "nsenter --mount --pid --target $ROOTPID  $BITNESSCOMMAND chroot \"$MOUNTHOME\"/liveisotest/$MOUNTISOPATHHASH/unionmountpoint su livetest"
 fi
 #go back to the users home folder
