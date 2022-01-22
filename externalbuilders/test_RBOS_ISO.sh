@@ -422,12 +422,12 @@ then
     then
       if [[ $UIDIALOGTYPE == kdialog ]]
       then
-        $KDIALOGCOMMAND --msgbox "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+        $KDIALOGCOMMAND --msgbox "Unknown chroot failure while detecting the target systems bitness" 2>/dev/null
       else
-        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure, detecting the target systems bitness" 2>/dev/null
+        $ZENITYCOMMAND --info $ZENITYELLIPSIZE --text "Unknown chroot failure while detecting the target systems bitness" 2>/dev/null
       fi
     else
-      echo "Unknown chroot failure, detecting the target systems bitness"
+      echo "Unknown chroot failure while detecting the target systems bitness"
     fi
     mountisoexit
   fi
