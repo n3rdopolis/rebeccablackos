@@ -24,4 +24,4 @@ export XDG_CURRENT_DESKTOP=KDE
 export $(dbus-launch)
 #unset DISPLAY
 #unset WAYLAND_DISPLAY
-startplasma-wayland
+kwin_wayland --xwayland plasmashell
