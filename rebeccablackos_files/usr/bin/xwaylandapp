@@ -49,10 +49,10 @@ else
     unset APPMENU_DO_LOOP
     while [ 1 ]
     do
-      kioclient5 appmenu
+      kioclient appmenu
       sleep 1
     done
   else
-    kioclient5 appmenu
+    kioclient appmenu
   fi
 fi
