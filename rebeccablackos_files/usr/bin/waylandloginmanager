@@ -828,7 +828,7 @@ function PrepareLoginManager
   then
     WestonSupportsFBDev=1
   else
-    WriteToLog "Installed version of Weston does not support does not have a framebuffer backend. Framebuffer backend support for the loginmanagerdisplay and the weston host will not work."
+    WriteToLog "Installed version of Weston does not have a framebuffer backend. The Framebuffer fallback is now disabled."
     WestonSupportsFBDev=0
   fi
   unset WestonFBDev
@@ -873,12 +873,12 @@ function PrepareLoginManager
 
   GetConfigKey wlmnofbdev "" 0 1 wlmnofbdev
   ProbeFilesExist "/dev/fb[0-9]*" FBFileProbe
-  if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 ]]
+  if [[ $FBFileProbe == 1 && $wlmnofbdev == 0 && $WestonSupportsFBDev == 1 ]]
   then
     WriteToLog "Frame buffer support found."
     HardwareSupported=1
   else
-    WriteToLog "No framebuffer support found"
+    WriteToLog "No framebuffer support found, or framebuffer support not in Weston"
   fi
 
   if [[ $wlmnofbdev != 0 ]]
@@ -1556,7 +1556,7 @@ function ChooseSessionType
     SeatSupportedBackends+=(WL)
     SeatSupportedBackendsString+="WL "
   else
-    if [[ $FB0INSEAT != 0 ]]
+    if [[ $FB0INSEAT != 0 && $WestonSupportsFBDev == 1 ]]
     then
       SeatSupportedBackends+=(WKS)
       SeatSupportedBackendsString+="WKS "
@@ -1564,7 +1564,7 @@ function ChooseSessionType
       SeatSupportedBackendsString+="WL "
     fi
   fi
-  if [[ $SeatSupportsFB != 0 ]]
+  if [[ $SeatSupportsFB != 0 && $WestonSupportsFBDev == 1 ]]
   then
     SeatSupportedBackends+=(FB)
     SeatSupportedBackendsString+="FB "
@@ -2581,7 +2581,7 @@ function GetSeatCapabilityString
   then
     WESTONBACKEND=FB
   else
-    if [[ $FB0INSEAT != 0 ]]
+    if [[ $FB0INSEAT != 0 && $WestonSupportsFBDev == 1 ]]
     then
       SeatSupportsFB=1
       WESTONBACKEND=FB
