@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2022-01-26 13:42:15.360688196 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2022-01-27 21:46:59.708233523 -0500
++++ usr/bin/waylandloginmanagerkdialog	2022-01-27 22:17:05.896419431 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -147,7 +147,7 @@
 -        SessionList+="${AllSessionPIDs[$NumberOfSessions]}"$'\n'
 -        SessionList+="${AllSessionUsers[$NumberOfSessions]}"$'\n'
 -        SessionList+="tty${AllSessionTTYs[$NumberOfSessions]}"
-+        SessionList+="${AllSessionIDs[$NumberOfSessions]}"$'\n'"${AllSessionIDs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
++        SessionList+="$NumberOfSessions"$'\n'"${AllSessionIDs[$NumberOfSessions]}"$'\t'"${AllSessionUsers[$NumberOfSessions]}"
        fi
      fi
      ((NumberOfSessions--))
