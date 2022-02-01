@@ -1596,6 +1596,11 @@ function ChooseSessionType
     SessionComment=${DesktopFileDataArray[2]:4}
     Type=${DesktopFileDataArray[3]:4}
 
+    if [[ -z $Type ]]
+    then
+      Type="WSession"
+    fi
+
     #Search for backends supported by the compositor, with the backends the hardware supports. Give presence to the first one found in the array of supported backend types, the best backend types are first in the array
     #Get the hardware support status
     SupportsBackend=0
@@ -1641,6 +1646,11 @@ function ChooseSessionType
             SupportsSeat=${BackendCanSeatArray[3]}
           fi
           SupportsBackend=${BackendSupportedArray[3]}
+          if [[ $BackendType ==  "KMS" && $SupportsBackend != 0 && $SupportsSeat != 0 ]]
+          then
+            SupportsBackend=1
+            SupportsSeat=1
+          fi
           if [[ $SupportsBackend == 1 && $SupportsSeat == 1 ]]
           then
             BackendArguments=${BackendArgumentArray[3]}
@@ -1674,6 +1684,11 @@ function ChooseSessionType
     EnvironmentFile=${DesktopFileDataArray[10]:4}
     DebugSession=${DesktopFileDataArray[11]:4}
     WSessionFilePath=${DesktopFileDataArray[12]:4}
+
+    if [[ -z $SessionName ]]
+    then
+      SessionName=$CompositorExec
+    fi
 
     if [[ ! -x $WSessionFilePath ]]
     then
@@ -1711,7 +1726,7 @@ function ChooseSessionType
       fi
     done
 
-    if [[ $Enabled != 1 ]]
+    if [[ $Enabled == 0 ]]
     then
       WriteToLog "Warning: $WSessionFilePath is disabled, the session will not be availible for selection by the user."
     fi
@@ -1761,7 +1776,7 @@ function ChooseSessionType
 
     #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
-    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled == 1 && $Type == "WSession" && $IsExecutable != 0 && $ExcludeDebugSession != 1 ]]
+    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled != 0 && $Type == "WSession" && $IsExecutable != 0 && $ExcludeDebugSession != 1 ]]
     then
       if [[ $FirstRunNotRan == 0 ]]
       then

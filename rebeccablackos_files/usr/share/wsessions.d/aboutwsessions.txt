@@ -10,30 +10,31 @@ It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of th
 
 The keys------------------------------
 Enabled:
-A wsession file must also have an key Enabled=1 so that it shows up on the list. See line 2 in the example
-It also must have CompositorSupports(BACKEND)=1 for each backend it supports.
+Enabled sets the session to be enabled. Enabled=1 is now assumed by default. A session can be disabled by specifying Enabled=0
 
 DebugSession:
 if DebugSession is set to 1, then this session will only appear if the wlmdebug or wlmdebuginsecure options have been passed
 
 Type:
-There must be a key Type=WSession file, so that the .desktop file is known to be a .wsession file. See line 3 in the example
+Type=WSession is assumed by default, and notes the .desktop file as a WSession type Desktop file. .desktop files that waylandloginmanager handles are now assumed to 
 
 Name:
 The Name key is the name of the wsession, in user friendly string. See line 4 in the example
+If not specified, the Name will be CompositorExec
 
 Comment:
 A short descrition of the wsession, in a user friendly string. See line 5 in the example
 
 CompositorExec:
 The path to the Wayland server binary. See line 6 in the example
+This is the most important key.
 
 
 CompositorSupports(BACKEND):
 Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 7, 8, and 9 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
-  Note that the WL backend requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manager.
+  Note that the WL or WKS backends requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manager.
 
   Currently, the backend selection preference is to check KMS, then WL, then lastly FB.
 
@@ -41,9 +42,14 @@ Currently there are three case sensitive backend types KMS (Kernel Mode Setting)
   If for example a session supports KMS and FB, and the hardware only supports FB backends, then the session will be opened with the FB backend.
   If for example a session only supports KMS, but the hardware only supports FB, then the session will not be available for selection.
   If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
+  
+  Unless specified otherwise CompositorSupportsKMS=1 is assumed to be true, while other backends are assumed to be false if not specified.
 
 Compositor(BACKEND)SeatAware:
 Similar to CompositorSupports(BACKEND), specify for each backend if it is multiseat aware. Sometimes the KMS backend would be, and the FB backend will not.
+
+The KMS backend is assumed to be seat aware, unless specified with CompositorKMSSeatAware=0
+CompositorFBSeatAware is assumed to be 0.
 
 Compositor(BACKEND)Arguments:
 If there are different arguments that need to be passed to the compositor to enable a specific backend, then the Compositor(BACKEND)Arguments line must be specified for each backend, as shown on lines 10, 11 and 12 on the example below. *These are optional*
@@ -161,3 +167,9 @@ An example of that: (With most abriged as this is documented above)
 20.|    set=var=data
 
 The order of the sections do not matter to the waylandloginmanager, but it is best that [Desktop Entry] is the first section defined, as other .desktop file parsers may not be prepared for any other section than [Desktop Entry] to be the first one defined
+
+
+A very minimal wsession file can be as shown below.
+----------------------------------------------
+01.|    [Desktop Entry]
+02.|    CompositorExec=/path/to/compositor
