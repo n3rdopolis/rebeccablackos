@@ -7,6 +7,9 @@ any variables in the keys are expanded with perl
 The wsession file must be executable, the wsession file must end in .desktop, and must start with [Desktop File] at the top line 
 It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of that folder are not probed. See line 1 in the example
 
+A user can have their own wsession files. These can be placed under $HOME/.local/share/wsessions.d/
+Sessions that are discovered from a users HOME directory are marked as such.
+
 
 The keys------------------------------
 Enabled:
@@ -170,6 +173,7 @@ The order of the sections do not matter to the waylandloginmanager, but it is be
 
 
 A very minimal wsession file can be as shown below.
+The wsession desktop file must be executable.
 ----------------------------------------------
 01.|    [Desktop Entry]
 02.|    CompositorExec=/path/to/compositor

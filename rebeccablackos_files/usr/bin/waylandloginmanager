@@ -104,9 +104,14 @@
 #/etc/loginmanagerdisplay/loginmanagerdisplay.ini
   #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/waylandloginmanager to the launcher bar, which send commands to the FIFO for weston, or at least prevent the default terminal icon from appearing in the toolbar for security reasons.
   #The mainform makes this reqirement optional
+
 #/usr/share/wsessions.d/*
   #These are .desktop files, (and .environment files as well) which describe how to start different Wayland servers or sessions
   #These files are documented in /usr/share/wsession/aboutwsessions.txt
+
+#$HOME/.local/share/wsessions.d
+  #A user can specify and create their own wsessions. See /usr/share/wsession/aboutwsessions.txt
+  #The *.desktop files must be executable.
 
 #Log Files:
   #/var/log/waylandloginmanager/waylandloginmanager.log : this is the main log for the waylandloginmanager
@@ -1215,15 +1220,32 @@ function DisplayServerWait
   fi
 }
 
-#This takes no arguments, this splits all the wsession file data into fixed arrays usable for session selection
+#This takes 1 argument, the user home dir to search for wsession files under $HOME/.local/share/wsessions.d/*.desktop.
+#this splits all the wsession file data into fixed arrays usable for session selection
 function ParseWSessionFiles
 {
+  WSessionUserHome=$1
   unset DesktopFileDataArrays
   unset NeedsFileArrays
   unset SeatBackendArrays
 
+  WSESSIONFILES=()
+  for WSESSIONFILE in "$WSESSIONSPATH"/*.desktop
+  do
+    WSESSIONFILES+=($WSESSIONFILE)
+  done
+
+  #Find user custom wsession files
+  if [[ -d "$WSessionUserHome"/.local/share/wsessions.d ]]
+  then
+    for WSESSIONFILE in "$WSessionUserHome"/.local/share/wsessions.d/*.desktop
+    do
+      WSESSIONFILES+=($WSESSIONFILE)
+    done
+  fi
+
   SeatBackendArrayElementOffset=4
-  for WSESSIONFILE in $WSESSIONSPATH/*.desktop
+  for WSESSIONFILE in "${WSESSIONFILES[@]}"
   do
     #read up to 16385 bytes from the config file, if it is 16385 bytes ignore it
     #The most accepted bytes is 16384, or 16KB, which is more than enough
@@ -1479,12 +1501,13 @@ function ParseWSessionFiles
 
 #This is called by GetUserCredentials and by StartAutoLogin. This allows the user select the session they want to use, similar to how X login managers prompt for the session before the login.
 #it exports the WSESSIONDATA variable, which contains arguments and varaibles and the command to run to start a session
-#It takes 3 arguments, the seat to show the dialogs on, the user optional user name (for reading configs for default sessions), and if this is an autologin
+#It takes 4 arguments, the seat to show the dialogs on, the  user name (for reading configs for default sessions), the user home path, and if this is an autologin
 function ChooseSessionType
 {
   CurrentHandleSeat="$1"
   SessionUser="$2"
-  IsAutologin="$3"
+  SessionUserHome="$3"
+  IsAutologin="$4"
   GetStartedSeatIndex $CurrentHandleSeat
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
@@ -1574,7 +1597,7 @@ function ChooseSessionType
     fi
   fi
 
-  ParseWSessionFiles
+  ParseWSessionFiles $SessionUserHome
 
   #Get the number of files in the array
   DesktopFileCount=${#DesktopFileDataArrays[@]}
@@ -1688,6 +1711,11 @@ function ChooseSessionType
     if [[ -z $SessionName ]]
     then
       SessionName=$CompositorExec
+    fi
+
+    if [[ ! ($WSessionFilePath =~ ^$WSESSIONSPATH) ]]
+    then
+      SessionComment="(USER SESSION) $SessionComment"
     fi
 
     if [[ ! -x $WSessionFilePath ]]
@@ -2346,7 +2374,7 @@ function GetUserCredentials
     else
       export USERHOME=$(eval echo ~$LOGINUSER)
       #Prompt for the session type
-      ChooseSessionType "$CurrentSeat" "$LOGINUSER" 0
+      ChooseSessionType "$CurrentSeat" "$LOGINUSER" "$USERHOME" 0
       if [[ $? != 0 ]]
       then
         return 0
@@ -2857,7 +2885,8 @@ function StartAutoLogin
   echo "$CurrentSeat" >> /run/waylandloginmanager/autologinran
   #Wait until the loginmanagerdisplay becomes availible
   DisplayServerWait "$CurrentSeat"
-  ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" 1
+  AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
+  ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
   #Abort if the user selected cancel on the zenity dialog
   CancelOrOK=$?
   if [[ $CancelOrOK != 0 ]]
