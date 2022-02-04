@@ -214,11 +214,13 @@ echolog "Build script for "$BUILDFRIENDLYNAME". The build process requires no us
 
 "
 
-export BUILDARCH=$(echo $1| awk -F = '{print $2}')
+export BUILDARCH=$(echo $1| grep BUILDARCH | awk -F = '{print $2}')
+export REVISIONSFILE=$2
+DONODELAY=0
 if [[ -z "$BUILDARCH" ]]
 then
   echolog "Select Arch. Enter 1 for amd64, 2 for i386, 3 for custom. Default=amd64"
-  echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument."
+  echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument. The second argument can be a path to a handled revisions file."
   read archselect
   if [[ $archselect == 2 ]]
   then
@@ -231,9 +233,13 @@ then
   else
     export BUILDARCH=amd64
   fi
-  SKIPPROMPT=0
-else 
-  SKIPPROMPT=1
+  SHOWSKIPPROMPT=0
+else
+  SHOWSKIPPROMPT=1
+fi
+if [[ ! -z "$REVISIONSFILE" ]]
+then
+  DONODELAY=1
 fi
 
 #Checkinstall needs overlayfs
@@ -260,6 +266,12 @@ then
 else
   LockPID=$(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile | awk -F "/" '{print $3}')
   faillog "Error: Another instance is already running for $BUILDARCH (pid $LockPID)"
+fi
+
+#Copy in a revisions file if specified
+if [[ ! -z "$REVISIONSFILE" ]]
+then
+  cp "$REVISIONSFILE" "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt
 fi
 
 #Create the placeholder for the revisions import, so that it's easy for the user to get the name correct. It is only used if it's more than 0 bytes
@@ -291,8 +303,8 @@ If you want to build revisions specified in a list file from a previous build, o
 
      "$BUILDLOCATION"/buildcore_revisions_"$BUILDARCH".txt 
 
-with the requested revisions file generated from a previous build, or a downloaded instance. 
-
+with the requested revisions file generated from a previous build, or a downloaded instance, or specify it as the second argument after BUILDARCH=(architecture)
+to have it copied in.
 
 You may also specify a list of pacakges in
 
@@ -309,14 +321,16 @@ RestartPackageList_amd64.txt can be used in RestartPackageList_i386.txt
 Ensure the file(s) are copied, and not moved, as they are treated as a one time control file, and deleted after the next run.
 -----------------------------------------------------------------------------------------------------------------------------"
 
-
-if [[ $SKIPPROMPT != 1 ]]
+if [[ $DONODELAY != 1 ]]
 then
-  echolog "Most users can ignore this message. Press Enter to continue..."
-  read wait
-else
-  echolog "Most users can ignore this message. The build process will start in 5 seconds"
-  sleep 5
+  if [[ $SHOWSKIPPROMPT != 1 ]]
+  then
+    echolog "Most users can ignore this message. Press Enter to continue..."
+    read wait
+  else
+    echolog "Most users can ignore this message. The build process will start in 5 seconds"
+    sleep 5
+  fi
 fi
 STARTTIME=$(date +%s)
 PREPARE_STARTTIME=$(date +%s)
