@@ -117,7 +117,7 @@ export WLR_RENDERER_ALLOW_SOFTWARE=1
 export LIBGL_ALWAYS_SOFTWARE=1
 export DBUS_SESSION_BUS_ADDRESS=/dev/null
 cage -m last -d -s -- \
-vte --no-builtin-dingus --reverse --font=9 --no-hyperlink --cursor-shape=block --blink=always --encoding=utf8 --scrollback-lines=10000 --no-scrollbar --no-decorations --sixel -- \
+foot -- \
 /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?
