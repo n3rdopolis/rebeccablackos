@@ -1,0 +1,32 @@
+diff --git a/seatd-launch/seatd-launch.c b/seatd-launch/seatd-launch.c
+index 69ca86a..1731e32 100644
+--- a/seatd-launch/seatd-launch.c
++++ b/seatd-launch/seatd-launch.c
+@@ -71,13 +71,25 @@ int main(int argc, char *argv[]) {
+ 		char pipebuf[16] = {0};
+ 		snprintf(pipebuf, sizeof pipebuf, "%d", fds[1]);
+ 
+-		char *env[2] = {NULL, NULL};
++		char *env[3] = {NULL, NULL, NULL};
++
+ 		char loglevelbuf[32] = {0};
+ 		char *cur_loglevel = getenv("SEATD_LOGLEVEL");
+ 		if (cur_loglevel != NULL) {
+ 			snprintf(loglevelbuf, sizeof loglevelbuf, "SEATD_LOGLEVEL=%s", cur_loglevel);
+-			env[0] = loglevelbuf;
++		} else {
++			snprintf(loglevelbuf, sizeof loglevelbuf, "SEATD_LOGLEVEL=%s", "silent");
++		}
++		env[0] = loglevelbuf;
++
++		char vtboundbuf[32] = {0};
++		char *cur_vtbound = getenv("SEATD_VTBOUND");
++		if (cur_vtbound != NULL) {
++			snprintf(vtboundbuf, sizeof vtboundbuf, "SEATD_VTBOUND=%s", cur_vtbound);
++		} else {
++			snprintf(vtboundbuf, sizeof vtboundbuf, "SEATD_LOGLEVEL=%s", "1");
+ 		}
++		env[1] = vtboundbuf;
+ 
+ 		char *command[] = {"seatd", "-n", pipebuf, "-s", sockpath, NULL};
+ 		execve(SEATD_INSTALLPATH, command, env);
