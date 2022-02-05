@@ -32,7 +32,7 @@ export SEATD_VTBOUND=0
 
 modprobe evdev
 
-#Fake udevd to configure the devices just enough to start a displat server
+#Fake udevd to configure the devices just enough to start a display server
 mkdir -p /run/udev/data
 find /sys/class/input/event* | while read Device
 do
