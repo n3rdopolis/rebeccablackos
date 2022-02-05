@@ -1,0 +1,66 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2022 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+
+#This calls a display server in a way that can be called as init (like a recovery console)
+
+#If this is pid1 it starts /sbin/init upon exit, or the overrideinit= option if it is passed to the kernel
+
+mkdir -p /run/user/0
+chmod 700 /run/user/0
+export XDG_RUNTIME_DIR=/run/user/0
+export XDG_SEAT=seat0
+export WLR_RENDERER_ALLOW_SOFTWARE=1
+export LIBSEAT_BACKEND=seatd
+export SEATD_VTBOUND=0
+. /usr/bin/wlruntime_vars
+
+modprobe evdev
+
+#Fake udevd to configure the devices just enough to start a displat server
+mkdir -p /run/udev/data
+find /sys/class/input/event* | while read Device
+do
+  read MAJMIN < $Device/dev
+  echo "E:ID_INPUT=1"$'\n'"E:ID_INPUT_KEY=1"$'\n'"E:ID_INPUT_KEYBOARD=1"$'\n'"E:ID_INPUT_MOUSE=1"$'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+done
+find /sys/class/drm/*/dev | while read Device
+do
+  read MAJMIN < $Device
+  echo "E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+done
+
+seatd-launch -- \
+cage -d -s -m last -- \
+foot -- \
+bash &> /dev/null
+
+
+#Remove the udevd files
+rm /run/udev/data/*
+
+#If this is pid 1 start init upon exit
+if [[ $$ == 1 ]]
+then
+  if [[ ! -z $overrideinit ]]
+  then
+    exec $overrideinit
+  else
+    exec /sbin/init
+  fi
+fi

@@ -808,6 +808,7 @@ echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 chmod 0644 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/bin
+chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/sbin
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/libexec
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/initramfs-tools/
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
