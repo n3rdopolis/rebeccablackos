@@ -33,7 +33,7 @@ export SEATD_VTBOUND=0
 modprobe evdev
 
 #Fake udevd to configure the devices just enough to start a display server
-touch /run/.rotest &> /dev/null
+touch /run/.rotest > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
   unmountrunfs=1
@@ -47,7 +47,7 @@ mkdir -p /run/udev/data
 find /sys/class/input/event* | while read Device
 do
   read MAJMIN < $Device/dev
-  echo "E:ID_INPUT=1"$'\n'"E:ID_INPUT_KEY=1"$'\n'"E:ID_INPUT_KEYBOARD=1"$'\n'"E:ID_INPUT_MOUSE=1"$'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+  echo "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
 done
 find /sys/class/drm/*/dev | while read Device
 do
