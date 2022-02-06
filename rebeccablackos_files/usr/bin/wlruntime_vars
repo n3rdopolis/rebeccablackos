@@ -19,7 +19,7 @@
 #This script sets variables for running programs as Wayland programs
 
 #Set XDG_RUNTIME_DIR if it doesn't exist
-if [[ -z $XDG_RUNTIME_DIR ]]
+if [ -z $XDG_RUNTIME_DIR ]
 then
     export XDG_RUNTIME_DIR=/run/user/$UID
 fi
