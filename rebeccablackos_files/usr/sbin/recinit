@@ -34,6 +34,8 @@ export WLR_LIBINPUT_NO_DEVICES=1
 modprobe evdev
 
 #Fake udevd to configure the devices just enough to start a display server
+
+#Ensure /run is writable
 touch /run/.rotest > /dev/null 2>&1
 if [ $? -ne 0 ]
 then
@@ -45,25 +47,32 @@ else
 fi
 
 mkdir -p /run/udev/data
-find /sys/class/input/event* | while read Device
-do
-  read MAJMIN < $Device/dev
-  echo "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
-done
-find /sys/class/drm/*/dev | while read Device
-do
-  read MAJMIN < $Device
-  echo "E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
-done
+udevfilecount=$(find /run/udev/data/ | wc -l)
+
+if [ $udevfilecount -eq 0 ]
+then
+  find /sys/class/input/event* | while read Device
+  do
+    read MAJMIN < $Device/dev
+    echo "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+  done
+  find /sys/class/drm/*/dev | while read Device
+  do
+    read MAJMIN < $Device
+    echo "E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+  done
+fi
 
 seatd-launch -- \
 cage -d -s -m last -- \
 foot -- \
 bash > /dev/null 2>&1
 
-
-#Remove the udevd files
-rm /run/udev/data/*
+if [ $udevfilecount -eq 0 ]
+then
+  #Remove the udevd files
+  rm /run/udev/data/*
+fi
 
 if [ $unmountrunfs -eq 1 ]
 then
