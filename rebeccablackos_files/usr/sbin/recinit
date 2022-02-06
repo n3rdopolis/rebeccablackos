@@ -28,7 +28,8 @@ export XDG_SEAT=seat0
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 export LIBSEAT_BACKEND=seatd
 export SEATD_VTBOUND=0
-. /usr/bin/wlruntime_vars
+export PATH=/opt/bin:$PATH
+export WLR_LIBINPUT_NO_DEVICES=1
 
 modprobe evdev
 
@@ -58,7 +59,7 @@ done
 seatd-launch -- \
 cage -d -s -m last -- \
 foot -- \
-bash &> /dev/null
+bash > /dev/null 2>&1
 
 
 #Remove the udevd files
