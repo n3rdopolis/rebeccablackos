@@ -81,7 +81,7 @@ done
 
 seatd-launch -- \
 cage -d -s -m last -- \
-foot -- \
+foot --font DejaVuSansMono -- \
 sh > /dev/null 2>&1
 
 #undo fake udev device info
