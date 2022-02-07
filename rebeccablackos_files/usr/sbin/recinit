@@ -32,6 +32,10 @@ export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
 export WLR_RENDERER=pixman
 
+if [ ! -e /dev/dri/card0 ]
+then
+  modprobe simpledrm
+fi
 modprobe evdev
 
 #Fake udevd to configure the devices just enough to start a display server
@@ -57,7 +61,11 @@ do
   then
     mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
   fi
-  echo -e "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
+  echo "E:ID_INPUT=1"       > /run/udev/data/c${MAJMIN}
+  "E:ID_INPUT_KEY=1"       >> /run/udev/data/c${MAJMIN}
+  "E:ID_INPUT_KEYBOARD=1"  >> /run/udev/data/c${MAJMIN}
+  "E:ID_INPUT_MOUSE=1"     >> /run/udev/data/c${MAJMIN}
+  "E:ID_SEAT=seat0"        >> /run/udev/data/c${MAJMIN}
 done
 
 find /sys/class/drm/*/dev | while read Device
