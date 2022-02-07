@@ -48,32 +48,62 @@ else
 fi
 
 mkdir -p /run/udev/data
-udevfilecount=$(find /run/udev/data/ | wc -l)
 
-if [ $udevfilecount -le 1 ]
-then
-  find /sys/class/input/event* | while read Device
-  do
-    read MAJMIN < $Device/dev
-    echo -e "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
-  done
-  find /sys/class/drm/*/dev | while read Device
-  do
-    read MAJMIN < $Device
-    echo "E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
-  done
-fi
+#populate fake udev device info
+find /sys/class/input/event* | while read Device
+do
+  read MAJMIN < $Device/dev
+  if [ -e /run/udev/data/c${MAJMIN} ]
+  then
+    mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
+  fi
+  echo -e "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
+done
+
+find /sys/class/drm/*/dev | while read Device
+do
+  read MAJMIN < $Device
+  if [ -e /run/udev/data/c${MAJMIN} ]
+  then
+    mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
+  fi
+  echo "E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
+done
+
 
 seatd-launch -- \
 cage -d -s -m last -- \
 foot -- \
-bash > /dev/null 2>&1
+sh > /dev/null 2>&1
 
-if [ $udevfilecount -eq 0 ]
-then
-  #Remove the udevd files
-  rm /run/udev/data/*
-fi
+#undo fake udev device info
+find /sys/class/input/event* | while read Device
+do
+  read MAJMIN < $Device
+  if [ -e /run/udev/data/c${MAJMIN} ]
+  then
+    rm /run/udev/data/c${MAJMIN}
+  fi
+  if [ -e /run/udev/data/c${MAJMIN}.old ]
+  then
+    mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
+  fi
+done
+
+find /sys/class/drm/*/dev | while read Device
+do
+  read MAJMIN < $Device
+  if [ -e /run/udev/data/c${MAJMIN} ]
+  then
+    rm /run/udev/data/c${MAJMIN}
+  fi
+  if [ -e /run/udev/data/c${MAJMIN}.old ]
+  then
+    mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
+  fi
+done
+
+
 
 if [ $unmountrunfs -eq 1 ]
 then
