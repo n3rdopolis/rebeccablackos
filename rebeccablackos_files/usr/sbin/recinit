@@ -61,7 +61,7 @@ do
   then
     mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
   fi
-  echo "E:ID_INPUT=1"       > /run/udev/data/c${MAJMIN}
+  echo "E:ID_INPUT=1"            > /run/udev/data/c${MAJMIN}
   echo "E:ID_INPUT_KEY=1"       >> /run/udev/data/c${MAJMIN}
   echo "E:ID_INPUT_KEYBOARD=1"  >> /run/udev/data/c${MAJMIN}
   echo "E:ID_INPUT_MOUSE=1"     >> /run/udev/data/c${MAJMIN}
