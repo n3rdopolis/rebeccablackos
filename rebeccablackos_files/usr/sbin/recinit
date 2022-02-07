@@ -30,6 +30,7 @@ export LIBSEAT_BACKEND=seatd
 export SEATD_VTBOUND=0
 export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
+export WLR_RENDERER=pixman
 
 modprobe evdev
 
@@ -49,12 +50,12 @@ fi
 mkdir -p /run/udev/data
 udevfilecount=$(find /run/udev/data/ | wc -l)
 
-if [ $udevfilecount -eq 0 ]
+if [ $udevfilecount -le 1 ]
 then
   find /sys/class/input/event* | while read Device
   do
     read MAJMIN < $Device/dev
-    echo "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
+    echo -e "E:ID_INPUT=1"'\n'"E:ID_INPUT_KEY=1"'\n'"E:ID_INPUT_KEYBOARD=1"'\n'"E:ID_INPUT_MOUSE=1"'\n'"E:ID_SEAT=seat0" > /run/udev/data/c$MAJMIN
   done
   find /sys/class/drm/*/dev | while read Device
   do
