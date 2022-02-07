@@ -1,0 +1,65 @@
+panic()
+{
+	local console rest IFS
+
+	if command -v chvt >/dev/null 2>&1; then
+		chvt 1
+	fi
+
+	echo "$@"
+
+	# The panic= parameter implies we should disallow console access
+	if [ -n "${panic?}" ]; then
+		delay=
+		case "${panic?}" in
+		-*[![:digit:].]*)	# invalid: wait forever
+			;;
+		-*)			# timeout < 0: reboot immediately
+			delay=0
+			;;
+		0 | *[![:digit:].]*)	# timeout = 0 or invalid: wait forever
+			;;
+		*)			# timeout > 0: seconds before rebooting
+			delay="${panic}"
+			;;
+		esac
+		if [ -n "${delay}" ]; then
+			echo "Rebooting automatically due to panic= boot argument"
+			sleep "${delay}"
+			reboot -f
+		else
+			echo "Halting automatically due to panic= boot argument"
+			halt -f
+		fi
+		exit  # in case reboot fails, force kernel panic
+	fi
+
+	run_scripts /scripts/panic
+
+	if [ ! -e /dev/tty0 ] && [ -z $norecinit ]; then
+		if command -v recinit >/dev/null 2>&1; then
+			echo "No TTYs detected. Starting user mode recovery console. pass norecinit=1 to disable"
+			export REASON="$*"
+			export PS1='(initramfs) '
+			recinit
+			return
+		fi
+	fi
+
+	# Try to use setsid, which will enable job control in the shell
+	# and paging in more
+	if command -v setsid >/dev/null 2>&1; then
+		unset IFS
+		read -r console rest </proc/consoles
+		if [ "${console}" = "tty0" ]; then
+			# Need to choose a specific VT
+			console="tty1"
+		fi
+		# We don't have 'setsid -c' so we need to setsid, open
+		# the tty, and finally exec an interactive shell
+		REASON="$*" PS1='(initramfs) ' setsid sh -c "exec sh -i <>/dev/${console} 1>&0 2>&1"
+	else
+		REASON="$*" PS1='(initramfs) ' sh -i </dev/console >/dev/console 2>&1
+	fi
+}
+

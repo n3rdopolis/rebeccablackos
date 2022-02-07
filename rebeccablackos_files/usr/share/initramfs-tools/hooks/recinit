@@ -1,0 +1,73 @@
+#!/bin/sh -e
+
+PREREQS=""
+
+prereqs() { echo "$PREREQS"; }
+
+case "$1" in
+    prereqs)
+    prereqs
+    exit 0
+    ;;
+esac
+
+. /usr/share/initramfs-tools/hook-functions
+. /usr/bin/wlruntime_vars
+manual_add_modules evdev
+
+if [ -e /opt/bin/seatd-launch ]
+then
+  copy_exec /opt/bin/seatd-launch /opt/bin/
+fi
+
+if [ -e /opt/bin/seatd ]
+then
+  copy_exec /opt/bin/seatd /opt/bin/
+fi
+
+if [ -e /opt/bin/cage ]
+then
+  copy_exec /opt/bin/cage /opt/bin/
+fi
+
+if [ -e /opt/bin/foot ]
+then
+  copy_exec /opt/bin/foot /opt/bin/
+fi
+
+if [ -e /usr/sbin/recinit ]
+then
+  copy_file script /usr/sbin/recinit
+fi
+
+if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf ]
+then
+  mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+  cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+fi
+
+if [ -e /usr/share/icons/oxy-white/cursors/ ]
+then
+  mkdir -p "${DESTDIR}/usr/share/icons/default/cursors/"
+  cp -a /usr/share/icons/oxy-white/cursors/* "${DESTDIR}/usr/share/icons/default/cursors/"
+fi
+
+if [ -e /usr/lib/locale/C.UTF-8/ ]
+then
+  mkdir -p "${DESTDIR}/usr/lib/locale/C.UTF-8/"
+  cp -a /usr/lib/locale/C.UTF-8/* "${DESTDIR}/usr/lib/locale/C.UTF-8/"
+fi
+
+if [ -e /opt/share/libinput ]
+then
+  mkdir -p "${DESTDIR}/opt/share/libinput/"
+  cp -a /opt/share/libinput/* "${DESTDIR}/opt/share/libinput/"
+fi
+
+if [ -e /opt/share/X11/xkb ]
+then
+  mkdir -p "${DESTDIR}/opt/share/X11/xkb"
+  cp -a /opt/share/X11/xkb/* "${DESTDIR}/opt/share/X11/xkb"
+fi
+
+echo ". /scripts/override/panic" >> "${DESTDIR}/scripts/functions"
