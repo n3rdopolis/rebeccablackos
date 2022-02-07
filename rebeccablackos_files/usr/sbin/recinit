@@ -61,31 +61,36 @@ fi
 
 mkdir -p /run/udev/data
 
-#populate fake udev device info
-find /sys/class/input/event* | while read Device
-do
-  read MAJMIN < $Device/dev
-  if [ -e /run/udev/data/c${MAJMIN} ]
-  then
-    mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
-  fi
-  echo "E:ID_INPUT=1"            > /run/udev/data/c${MAJMIN}
-  echo "E:ID_INPUT_KEY=1"       >> /run/udev/data/c${MAJMIN}
-  echo "E:ID_INPUT_KEYBOARD=1"  >> /run/udev/data/c${MAJMIN}
-  echo "E:ID_INPUT_MOUSE=1"     >> /run/udev/data/c${MAJMIN}
-  echo "E:ID_SEAT=seat0"        >> /run/udev/data/c${MAJMIN}
-done
+#populate fake udev device info if udev not running
+udevadm control --ping -t 1 >/dev/null 2>&1
+udevresult=$?
 
-find /sys/class/drm/*/dev | while read Device
-do
-  read MAJMIN < $Device
-  if [ -e /run/udev/data/c${MAJMIN} ]
-  then
-    mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
-  fi
-  echo "E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
-done
+if [ $udevresult -ne 0 ]
+then
+  find /sys/class/input/event* | while read Device
+  do
+    read MAJMIN < $Device/dev
+    if [ -e /run/udev/data/c${MAJMIN} ]
+    then
+      mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
+    fi
+    echo "E:ID_INPUT=1"            > /run/udev/data/c${MAJMIN}
+    echo "E:ID_INPUT_KEY=1"       >> /run/udev/data/c${MAJMIN}
+    echo "E:ID_INPUT_KEYBOARD=1"  >> /run/udev/data/c${MAJMIN}
+    echo "E:ID_INPUT_MOUSE=1"     >> /run/udev/data/c${MAJMIN}
+    echo "E:ID_SEAT=seat0"        >> /run/udev/data/c${MAJMIN}
+  done
 
+  find /sys/class/drm/*/dev | while read Device
+  do
+    read MAJMIN < $Device
+    if [ -e /run/udev/data/c${MAJMIN} ]
+    then
+      mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
+    fi
+    echo "E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
+  done
+fi
 
 seatd-launch -- \
 cage -d -s -m last -- \
@@ -93,32 +98,34 @@ foot --font DejaVuSansMono -- \
 sh > /dev/null 2>&1
 
 #undo fake udev device info
-find /sys/class/input/event* | while read Device
-do
-  read MAJMIN < $Device
-  if [ -e /run/udev/data/c${MAJMIN} ]
-  then
-    rm /run/udev/data/c${MAJMIN}
-  fi
-  if [ -e /run/udev/data/c${MAJMIN}.old ]
-  then
-    mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
-  fi
-done
+if [ $udevresult -ne 0 ]
+then
+  find /sys/class/input/event* | while read Device
+  do
+    read MAJMIN < $Device
+    if [ -e /run/udev/data/c${MAJMIN} ]
+    then
+      rm /run/udev/data/c${MAJMIN}
+    fi
+    if [ -e /run/udev/data/c${MAJMIN}.old ]
+    then
+      mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
+    fi
+  done
 
-find /sys/class/drm/*/dev | while read Device
-do
-  read MAJMIN < $Device
-  if [ -e /run/udev/data/c${MAJMIN} ]
-  then
-    rm /run/udev/data/c${MAJMIN}
-  fi
-  if [ -e /run/udev/data/c${MAJMIN}.old ]
-  then
-    mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
-  fi
-done
-
+  find /sys/class/drm/*/dev | while read Device
+  do
+    read MAJMIN < $Device
+    if [ -e /run/udev/data/c${MAJMIN} ]
+    then
+      rm /run/udev/data/c${MAJMIN}
+    fi
+    if [ -e /run/udev/data/c${MAJMIN}.old ]
+    then
+      mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
+    fi
+  done
+fi
 
 
 if [ $unmountrunfs -eq 1 ]
