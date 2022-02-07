@@ -21,9 +21,11 @@
 
 #If this is pid1 it starts /sbin/init upon exit, or the overrideinit= option if it is passed to the kernel
 
+UID=$(id -u)
 if [ $UID -ne 0 ]
 then
   echo "Must be run as root"
+  exit 1
 fi
 
 mkdir -p /run/user/0
@@ -62,10 +64,10 @@ fi
 mkdir -p /run/udev/data
 
 #populate fake udev device info if udev not running
-udevadm control --ping -t 1 >/dev/null 2>&1
-udevresult=$?
+systemctl is-active system.slice --quiet >/dev/null 2>&1
+systemd_result=$?
 
-if [ $udevresult -ne 0 ]
+if [ $systemd_result -ne 0 ]
 then
   find /sys/class/input/event* | while read Device
   do
@@ -98,7 +100,7 @@ foot --font DejaVuSansMono -- \
 sh > /dev/null 2>&1
 
 #undo fake udev device info
-if [ $udevresult -ne 0 ]
+if [ $systemd_result -ne 0 ]
 then
   find /sys/class/input/event* | while read Device
   do
