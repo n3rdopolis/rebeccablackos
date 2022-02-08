@@ -97,7 +97,7 @@ fi
 seatd-launch -- \
 cage -d -s -m last -- \
 foot --font DejaVuSansMono:size=11 -- \
-sh > /dev/null 2>&1
+sh -l > /dev/null 2>&1
 
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
