@@ -117,7 +117,7 @@ export WLR_RENDERER_ALLOW_SOFTWARE=1
 export LIBGL_ALWAYS_SOFTWARE=1
 export DBUS_SESSION_BUS_ADDRESS=/dev/null
 cage -m last -d -s -- \
-foot -- \
+foot --font DejaVuSansMono:size=11 -- \
 /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
 exit $?
