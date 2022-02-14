@@ -41,7 +41,7 @@ do
   tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
 
   cage -m last -d -s -- \
-  foot --font DejaVuSansMono:size=11 -- \
+  foot --font DejaVuSansMono:size=10.5 -- \
   /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
   CAGEPID=$!
 
