@@ -3,7 +3,7 @@ Enabled=1
 Type=WSession
 Name=Fullscreen Terminal
 Comment=A fullscreen terminal that looks like a VT under Cage
-CompositorExec=/opt/bin/cage
+CompositorExec=/usr/bin/uvtty-session
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
 CompositorSupportsWKS=0
@@ -14,8 +14,9 @@ CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=-m last -d -s -- foot --font DejaVuSansMono:size=11 -L
+AdditionalArguments=
 NeedsFile=/opt/bin/foot
+NeedsFile=/opt/bin/cage
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=sway
 set=WLR_BACKENDS=libinput,drm@KMS

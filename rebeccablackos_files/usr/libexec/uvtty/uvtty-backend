@@ -1,0 +1,123 @@
+#! /bin/bash
+#    Copyright (c) 2012, 2013, 2014, 2015, 2016, 2017, 2018, 2019, 2020 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+
+#This runs a session under socat, vtty-like server that runs as a user.
+
+UvTTYName=$1
+if [[ -z $UvTTYName ]]
+then
+  echo "Incorrect arguments passed"
+  exit 1
+fi
+
+#Use bash builtin sleep if availible
+if [[ -f /usr/lib/bash/sleep ]]
+then
+  enable -f /usr/lib/bash/sleep sleep
+  SLEEPCMD=\sleep
+else
+  SLEEPCMD=/bin/sleep
+fi
+
+which socat &> /dev/null
+if [[ $? != 0 ]]
+then
+  echo "socat not installed"
+  exit 1
+fi
+
+if [[ -z $XDG_RUNTIME_DIR ]]
+then
+  echo "XDG_RUNTIME_DIR not set"
+  exit 1
+fi
+
+#Exit if already running
+if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+then
+  echo "$UvTTYName already running"
+  exit 1
+fi
+
+#Make the proxy folder
+mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
+
+#Create the FIFO to where resize commands will be sent
+if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
+then
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+fi
+mkfifo -m 600 "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+exec 1000<>"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+
+#Start the socat server
+if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+then
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy"
+fi
+if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+then
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
+fi
+
+if [[ -z $SHELL ]]
+then
+  SHELLCMD="/bin/bash -l"
+else
+  SHELLCMD="$SHELL -l"
+fi
+
+socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700 &
+SOCATPID=$!
+$SLEEPCMD .1
+
+if [[ ! -e /proc/$SOCATPID ]]
+then
+  echo "socat proxy quit unexpectedly"
+  exit 1
+fi
+
+#Wait for the socat socket to be created
+if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+then
+  while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  do
+    $SLEEPCMD 1
+  done
+fi
+
+#Exit when the job stops
+trap 'if [[ ! -e /proc/$SOCATPID ]]; then rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy &>/dev/null; rm /run/vtty/$EmulatedTTY/ptycommandproxy &>/dev/null; exit; fi' SIGCHLD
+
+#Accept commands from the connection to manage the PTY (currently only the size)
+while [ 1 ]
+do
+  #12 chars should be enough 's 9999 9999' more than enough
+  read -t 5 -r -n 12 COMMANDDATA <&1000
+  COMMANDDATA=($COMMANDDATA)
+
+  #s for size, then number of rows, then number of cols
+  if [[ ${COMMANDDATA[0]} == "s" ]]
+  then
+    XSize=${COMMANDDATA[1]}
+    YSize=${COMMANDDATA[2]}
+    stty -F "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" rows $XSize cols $YSize
+  fi
+
+done
+exit 0
