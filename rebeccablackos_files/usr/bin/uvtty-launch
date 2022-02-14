@@ -60,6 +60,10 @@ then
 fi
 
 touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+
+#Wait before ending cage, so key press of "enter" isn't held down when the command is run
+$SLEEPCMD .3
+
 kill $CAGEPID
 
 #Wait for the cage process to end
