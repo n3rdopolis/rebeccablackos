@@ -82,7 +82,7 @@ else
   SHELLCMD="$SHELL -l"
 fi
 
-socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700 &
+socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700,fork &
 SOCATPID=$!
 $SLEEPCMD .1
 
