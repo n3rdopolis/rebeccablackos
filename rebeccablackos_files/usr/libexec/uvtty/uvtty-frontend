@@ -45,13 +45,14 @@ do
   /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
   CAGEPID=$!
 
+  mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
   echo $CAGEPID > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" 2>/dev/null
   if [[ -e /proc/$CAGEPID ]]
   then
     fg 1
   fi
 
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid"
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" &>/dev/null
 
   $SLEEPCMD 1
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
