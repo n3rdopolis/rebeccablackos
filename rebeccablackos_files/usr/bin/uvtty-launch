@@ -33,6 +33,12 @@ then
   exit 1
 fi
 
+if ! command -v $1 &> /dev/null
+then
+  echo "$0: Command '$1' not found"
+  exit 1
+fi
+
 if [[ -z $UvTTYName ]]
 then
   echo "UvTTYName variable not set. Not running under a UvTTY?"
@@ -77,5 +83,8 @@ fi
 
 #launch the program
 "$@"
+CommandResult=$?
 
 rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+
+echo $CommandResult
