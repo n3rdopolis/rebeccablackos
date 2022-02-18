@@ -36,6 +36,10 @@ panic()
 
 	run_scripts /scripts/panic
 
+	if [ ! -e /dev/dri/card0 ] ; then
+		modprobe simpledrm
+	fi
+
 	if [ ! -e /dev/tty0 ] && [ -z $norecinit ] && [ -e /dev/dri/card0 ] ; then
 		if command -v recinit >/dev/null 2>&1; then
 			echo "No TTYs detected. Starting user mode recovery console. pass norecinit=1 to disable"
