@@ -3,7 +3,9 @@ panic()
 	local console rest IFS
 
 	if command -v chvt >/dev/null 2>&1; then
-		chvt 1
+		if [ -e /dev/tty0 ]; then
+			chvt 1
+		fi
 	fi
 
 	echo "$@"
