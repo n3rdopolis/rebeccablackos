@@ -70,4 +70,10 @@ then
   cp -a /opt/share/X11/xkb/* "${DESTDIR}/opt/share/X11/xkb"
 fi
 
+if [ -e /etc/footkiosk.conf ]
+then
+  mkdir -p "${DESTDIR}/etc"
+  cp /etc/footkiosk.conf "${DESTDIR}/etc"
+fi
+
 echo ". /scripts/override/panic" >> "${DESTDIR}/scripts/functions"
