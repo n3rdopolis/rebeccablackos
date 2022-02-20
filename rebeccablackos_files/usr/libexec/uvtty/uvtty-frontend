@@ -65,3 +65,6 @@ do
   fi
 
 done
+
+#If the loop breaks, something went wrong, abort the session
+loginctl terminate-session $XDG_SESSION_ID
