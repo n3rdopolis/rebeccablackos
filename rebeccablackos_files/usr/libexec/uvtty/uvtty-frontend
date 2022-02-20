@@ -36,9 +36,13 @@ else
 fi
 
 
-while [ 1 ]
+for (( AttemptItr=0 ; AttemptItr < 5 ; AttemptItr++ ))
 do
-  tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+  then
+    AttemptItr=0
+    tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
+  fi
 
   cage -m last -d -s -- \
   foot --font DejaVuSansMono:size=10.5 -- \
