@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2022-02-01 10:07:04.159542017 -0500
-+++ usr/bin/waylandloginmanagertui	2022-02-23 08:37:50.171093810 -0500
++++ usr/bin/waylandloginmanagertui	2022-02-23 16:41:59.513660705 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -114,7 +114,7 @@
 -    ((countseconds++))
 -    $SLEEPCMD 1
 -  done | $ZENITYCMD --width=450 --title="Login Manager" --no-cancel --progress --auto-close --text="$displaystring" 2>/dev/null
-+  $UIDIALOGCMD --no-ok --no-cancel --pause "$2" 8 14 "$1" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++  $UIDIALOGCMD --title "Login Manager" --no-ok --no-cancel --pause "$2" 10 40 "$1" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
@@ -151,7 +151,7 @@
        if [[ $WSESSIONNUMBER == -1 ]]
        then
 -        $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-+        $UIDIALOGCMD --msgbox "$DEFAULTWSESSION set as default session for $SessionUser, but was not found, configured correctly, or supported by the hardware in this seat." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++        $UIDIALOGCMD --title "Session Selection" --msgbox "$DEFAULTWSESSION set as default session for $SessionUser, but was not found, configured correctly, or supported by the hardware in this seat." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
          WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
          return 1
        fi
@@ -171,7 +171,7 @@
 -      WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="Pick a Session..." --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
 -      #Abort if the user selected cancel on the zenity dialog
 +      #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
-+      WSESSIONNUMBER=$($UIDIALOGCMD --menu "Select a Wayland Desktop Environment to use" 40 90 0 -- "${WSESSIONPICKLIST[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName)
++      WSESSIONNUMBER=$($UIDIALOGCMD --title "Pick a Session..." --menu "Select a Wayland Desktop Environment to use" 40 90 0 -- "${WSESSIONPICKLIST[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName)
 +      #Abort if the user selected cancel on the dialog
        CancelOrOK=$?
        if [[ $CancelOrOK != 0 ]]
@@ -181,7 +181,7 @@
      unset WSESSIONDATA
      unset WSESSIONNUMBER
 -    $ZENITYCMD --width=500 --error --title "Session Selection" --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-+    $UIDIALOGCMD --msgbox "No sessions are installed, configured correctly, or supported by the hardware in this seat." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++    $UIDIALOGCMD --title "Session Selection" --msgbox "No sessions are installed, configured correctly, or supported by the hardware in this seat." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
      WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
@@ -190,7 +190,7 @@
  This is the optimal way to run Weston or other Wayland servers."
    fi
 -  $ZENITYCMD --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
-+  $UIDIALOGCMD --msgbox "This is a third party fan made distribution!
++  $UIDIALOGCMD --title "Information" --msgbox "This is a third party fan made distribution!
  
  $BACKENDSTRING
  
@@ -199,7 +199,7 @@
  The arrow icon brings up a prompt to switch between running sessions
  The red X icon brings up a shutdown prompt
 -The i icon shows this help prompt" &> /dev/null
-+The i icon shows this help prompt" 30 50 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++The i icon shows this help prompt" 30 60 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
  
  }
  
@@ -248,7 +248,7 @@
    unset ChangeSession
    #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
 -  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=1,3,5 --separator="\n" 2>/dev/null )
-+  ChangeSession=$($UIDIALOGCMD --menu "Select a running session to change into" 30 40 0 -- "${SessionList[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++  ChangeSession=$($UIDIALOGCMD --title "Switch User" --menu "Select a running session to change into" 30 60 0 -- "${SessionList[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
    CancelOrOK=$?
 -  #Abort if the user selected cancel on the zenity dialog
 +  #Abort if the user selected cancel on the dialog
@@ -260,7 +260,7 @@
          loginctl activate $ChangeSessionID &>/dev/null
        else
 -        $ZENITYCMD --title="Switch User" --warning --text="The selected session was not found. The session may have quit." 2>/dev/null
-+        $UIDIALOGCMD --msgbox "The selected session was not found. The session may have quit." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++        $UIDIALOGCMD --title "Switch User" --msgbox "The selected session was not found. The session may have quit." 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
        fi
      fi
    fi
@@ -295,7 +295,7 @@
  
    #present the list of the users to the system
 -  LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
-+  LOGINUSER=$($UIDIALOGCMD --menu "Select a user from the list to log into." 30 70 0 -- "${USERLISTSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++  LOGINUSER=$($UIDIALOGCMD --title "Username" --menu "Select a user from the list to log into." 30 70 0 -- "${USERLISTSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
    CancelOrOK=$?
    export LOGINUSER
 -  #Abort if the user selected cancel on the zenity dialog
@@ -308,7 +308,7 @@
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
 -    LOGINUSER=$($ZENITYCMD --title="Username" --entry --text="Enter the User Name:" 2>/dev/null)
-+    LOGINUSER=$($UIDIALOGCMD --inputbox "Enter the User Name:" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++    LOGINUSER=$($UIDIALOGCMD --title "Username" --inputbox "Enter the User Name:" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
      CancelOrOK=$?
 -    #Abort if the user selected cancel on the zenity dialog
 +    #Abort if the user selected cancel on the dialog
@@ -320,7 +320,7 @@
      else
        #Prompt for the users password
 -      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
-+      USERPASSWORD=$( $UIDIALOGCMD --insecure --passwordbox "Type Password for $LOGINUSER" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++      USERPASSWORD=$( $UIDIALOGCMD --title "Password" --insecure --passwordbox "Type Password for $LOGINUSER" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
        CancelOrOK=$?
 -      #Abort if the user selected cancel on the zenity dialog
 +      #Abort if the user selected cancel on the dialog
@@ -358,16 +358,21 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2414,7 +2377,7 @@
+@@ -2412,10 +2375,12 @@
+     export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
+     SetFallbackEnvironmentVariables $CurrentSeat
      SessionPromptThreshold=1
++    PromptAsUser=0
    else
      SetCommonConfig
 -    ZENITYCMD=zenity
-+    UIDIALOGCMD=cage -- foot -- dialog
++    UIDIALOGCMD="cage -- foot -- dialog"
      SessionPromptThreshold=2
++    PromptAsUser=1
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
-@@ -2442,7 +2405,7 @@
+   fi
+@@ -2442,7 +2407,7 @@
    unset RunningSessions
    unset RunningSessionTypes
  
@@ -376,7 +381,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2498,9 +2461,15 @@
+@@ -2498,9 +2463,20 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -386,7 +391,12 @@
 +  ACTIONSTRING=($ACTIONSTRING)
 +  unset IFS
 +
-+  ACTION=$($UIDIALOGCMD --menu "What do you want to do?" 30 40 0 -- "${ACTIONSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++  if [[ $PromptAsUser == 0 ]]
++  then
++    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "What do you want to do?" 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++  else
++    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "What do you want to do?" 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1)
++  fi
 +
    CancelOrOK=$?
 -  #Abort if the user selected cancel on the zenity dialog
@@ -394,25 +404,35 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2514,7 +2483,7 @@
+@@ -2514,7 +2490,12 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
 -  $ZENITYCMD --width=450 --title="Leave..." --question --text="Are you sure you want to ${ACTION}? $SESSIONINFO" 2>/dev/null
-+  $UIDIALOGCMD --yesno "Are you sure you want to ${ACTION}? $SESSIONINFO" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++  if [[ $PromptAsUser == 0 ]]
++  then
++    $UIDIALOGCMD --title "Leave..." --yesno "Are you sure you want to ${ACTION}? $SESSIONINFO" 10 60 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++  else
++    $UIDIALOGCMD --title "Leave..." --yesno "Are you sure you want to ${ACTION}? $SESSIONINFO" 10 60 2>&1
++  fi
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2559,7 +2528,7 @@
+@@ -2559,7 +2540,12 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
 -    $ZENITYCMD --title="Failure" --warning --text="Failed to $ACTION" 2>/dev/null
-+    $UIDIALOGCMD --msgbox "Failed to $ACTION" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++    if [[ $PromptAsUser == 0 ]]
++    then
++      $UIDIALOGCMD --title "Failure" --msgbox "Failed to $ACTION" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName
++    else
++      $UIDIALOGCMD --title "Failure" --msgbox "Failed to $ACTION" 10 40 2>&1
++    fi
    fi
  }
  
-@@ -2759,7 +2728,7 @@
+@@ -2759,7 +2745,7 @@
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=GBM_ALWAYS_SOFTWARE=$GBM_ALWAYS_SOFTWARE "
        fi
@@ -421,7 +441,7 @@
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -2887,7 +2856,7 @@
+@@ -2887,7 +2873,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -430,7 +450,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2900,7 +2869,7 @@
+@@ -2900,7 +2886,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -439,7 +459,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -2925,7 +2894,7 @@
+@@ -2925,7 +2911,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -448,7 +468,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2960,15 +2929,20 @@
+@@ -2960,15 +2946,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -470,12 +490,12 @@
 +  ActionMenu=($ActionMenu)
 +  unset IFS
 +
-+  USERACTION=$($UIDIALOGCMD --menu "Select an Action" 20 40 0 -- "${ActionMenu[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName)
++  USERACTION=$($UIDIALOGCMD --title "Login Manager" --menu "Select an Action" 20 60 0 -- "${ActionMenu[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName)
 +  DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2976,12 +2950,12 @@
+@@ -2976,12 +2967,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -491,7 +511,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3331,9 +3305,9 @@
+@@ -3331,9 +3322,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
@@ -503,43 +523,43 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3529,7 +3503,7 @@
+@@ -3529,7 +3520,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastSwitchPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastSwitchPIDs[$SeatIndexID]}$\^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3568,7 +3542,7 @@
+@@ -3568,7 +3559,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLoginPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastSwitchPIDs[$SeatIndexID]}$\^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3590,7 +3564,7 @@
+@@ -3590,7 +3581,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLeavePIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastSwitchPIDs[$SeatIndexID]}$\^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3622,7 +3596,7 @@
+@@ -3622,7 +3613,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastInfoPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastSwitchPIDs[$SeatIndexID]}$\^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3637,6 +3611,7 @@
+@@ -3637,6 +3628,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -547,7 +567,7 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3694,6 +3669,7 @@
+@@ -3694,6 +3686,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
    UnprivilegedFIFOFilter &
