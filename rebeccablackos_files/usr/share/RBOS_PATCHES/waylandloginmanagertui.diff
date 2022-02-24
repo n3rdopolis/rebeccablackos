@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-02-01 10:07:04.159542017 -0500
-+++ usr/bin/waylandloginmanagertui	2022-02-23 16:41:59.513660705 -0500
+--- usr/bin/waylandloginmanager	2022-02-24 17:05:44.670087514 -0500
++++ usr/bin/waylandloginmanagertui	2022-02-24 17:11:06.683341627 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -523,7 +523,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3529,7 +3520,7 @@
+@@ -3533,7 +3524,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -532,7 +532,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3568,7 +3559,7 @@
+@@ -3572,7 +3563,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -541,7 +541,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3590,7 +3581,7 @@
+@@ -3594,7 +3585,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -550,7 +550,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3622,7 +3613,7 @@
+@@ -3626,7 +3617,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -559,7 +559,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3637,6 +3628,7 @@
+@@ -3641,6 +3632,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -567,7 +567,7 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3694,6 +3686,7 @@
+@@ -3698,6 +3690,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
    UnprivilegedFIFOFilter &

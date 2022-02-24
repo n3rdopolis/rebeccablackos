@@ -3445,8 +3445,12 @@ Will show a menu with a few options for diagnosis." 20 50
           #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
           if [[ $RunningSeatID != "seat0" || $seat0HasTTYs != 1 ]]
           then
-            WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
-            loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            ActiveLogindSession=$(loginctl show-seat $RunningSeatID  -p ActiveSession --value)
+            if [[ -z $ActiveLogindSession ]]
+            then
+              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
+              loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            fi
           elif [[ $RunningSessionTTY == $ActiveSystemTTY ]]
           then
             if [[ ! -z $RunningSessionTTY ]]
