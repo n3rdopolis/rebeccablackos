@@ -133,15 +133,6 @@ function CompilePackage
 }
 
 #build these packages in this order.
-if [[ ! -e /usr/lib/casper ]]
-then
-  CompilePackage casper
-fi
-
-if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
-then
-  CompilePackage lupin
-fi
 
 #CompilePackage linux-modules
 CompilePackage linux-kernel
@@ -584,5 +575,16 @@ CompilePackage xdg-desktop-portal-gtk
 CompilePackage xdg-desktop-portal-wlr
 CompilePackage wine
 CompilePackage calamares
+
+
+if [[ ! -e /usr/lib/casper ]]
+then
+  CompilePackage casper
+fi
+
+if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
+then
+  CompilePackage lupin
+fi
 
 wait
