@@ -94,10 +94,12 @@ then
   done
 fi
 
-seatd-launch -- \
+seatd &
+SEATDJOB=$!
 cage -d -s -m last -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
 sh -l > /dev/null 2>&1
+kill -9 $SEATDJOB
 
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
