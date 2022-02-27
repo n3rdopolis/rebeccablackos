@@ -282,10 +282,6 @@ function PostInstallActions
 
   #move the import folder
   mv /usr/import /tmp
-
-  #Add nls modules to the initramfs
-  echo -e '#!/bin/sh\n. /usr/share/initramfs-tools/hook-functions\ncopy_modules_dir kernel/fs/nls' > /usr/share/initramfs-tools/hooks/nlsmodules
-  chmod 755 /usr/share/initramfs-tools/hooks/nlsmodules
   
   #Make the 'hidden' waylandloginmanger zenity to kdialog convert script executable
   chmod 755 /usr/share/RBOS_PATCHES/wlm-zenity-kdialog
