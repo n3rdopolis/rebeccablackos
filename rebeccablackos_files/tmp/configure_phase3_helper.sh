@@ -51,3 +51,18 @@ for PYTHON3DIR in $PYTHON3DIRS
 do
 echo "/opt/lib/$PYTHON3DIR/site-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
 done
+
+#workaround for Debian not including legacy systemd files
+export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+echo -e "daemon\nid128\njournal\nlogin" | while read -r LIBRARY
+do
+  if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
+  then
+    ln -s /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
+  fi
+done
+
+
+#Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
+echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
+echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf

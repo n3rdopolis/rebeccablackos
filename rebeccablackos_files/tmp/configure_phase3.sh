@@ -112,16 +112,6 @@ dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
 
-#workaround for Debian not including legacy systemd files
-export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-echo -e "daemon\nid128\njournal\nlogin" | while read -r LIBRARY
-do
-  if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
-  then
-    ln -s /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
-  fi
-done
-
 #Redirect grub-install if lupin isn't 1st tier
 if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
 then
@@ -210,9 +200,6 @@ function PostInstallActions
   systemctl --global disable pulseaudio.socket
   systemctl --global enable pipewire-pulse.socket
 
-  #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
-  echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
-  echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
   #common postinstall actions
