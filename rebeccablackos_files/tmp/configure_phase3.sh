@@ -46,7 +46,6 @@ function RedirectFile {
 
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
-cp /usr/import/usr/lib/plymouth/boot_logo.png /usr/share/plymouth/themes/spinfinity/watermark.png
 
 dpkg-divert --local --rename --add /usr/lib/os-release
 mv /usr/lib/os-release.rbos /usr/lib/os-release
@@ -179,15 +178,6 @@ function PostInstallActions
     ln -s $FILE /usr/lib/systemd/user/
   done
 
-  #Set the plymouth themes
-  if [[ $DEBIAN_DISTRO == Ubuntu ]]
-  then
-    update-alternatives --set default.plymouth /usr/lib/plymouth/themes/spinfinity/spinfinity.plymouth
-  elif [[ $DEBIAN_DISTRO == Debian ]]
-  then
-    /usr/sbin/plymouth-set-default-theme spinfinity
-  fi
-
   #configure /etc/issue
   echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
   setterm -cursor on >> /etc/issue
@@ -240,6 +230,8 @@ function PostInstallActions
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
   echo "Post Install action: fc-cache"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
+  echo "Post Install action: Plymouth theme"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
 
   mkdir -p /usr/share/polkit-1/actions/
   find /opt/share/polkit-1/actions/ -type f | while read -r FILE;

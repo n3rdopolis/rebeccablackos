@@ -1,0 +1,189 @@
+#!/bin/sh
+#This file has been modified from Debian's plymouth hook to suit installs under /opt
+set -e
+
+PREREQ=""
+
+prereqs()
+{
+        echo "${PREREQ}"
+}
+
+case "${1}" in
+        prereqs)
+                prereqs
+                exit 0
+                ;;
+esac
+. /usr/bin/wlruntime_vars
+. /usr/share/initramfs-tools/hook-functions
+
+THEME="$(/opt/sbin/plymouth-set-default-theme || true)"
+THEMES="/opt/share/plymouth/themes"
+
+if [ -n "${THEME}" ]
+then
+        THEME_NAME="${THEME}"
+        THEME="${THEMES}/${THEME}/${THEME}.plymouth"
+        IMAGE_DIR=$(grep "ImageDir *= *" ${THEME} | sed 's/ImageDir *= *//')
+else
+        exit 0
+fi
+
+PLUGIN_PATH="$(plymouth --get-splash-plugin-path)"
+
+case "${THEME_NAME}" in
+        text|details|tribar)
+                PLUGINS="text.so details.so"
+                ;;
+
+        *)
+                PLUGINS="text.so details.so label.so"
+                ;;
+esac
+
+MODULE="${PLUGIN_PATH}/$(sed -n 's/^ModuleName=\(.*\)/\1/p' ${THEME}).so"
+
+if [ ! -e "$MODULE" ]
+then
+        echo "W: plymouth module ($MODULE) missing, skipping plymouth."
+        exit 0
+fi
+
+# copy plugin and images for current theme
+copy_exec "${MODULE}"
+mkdir -p "${DESTDIR}/${THEMES}"
+cp -r "${THEMES}/${THEME_NAME}" "${DESTDIR}/${THEMES}"
+
+if [ -n "${IMAGE_DIR}" ] && [ "${THEMES}/${THEME_NAME}" != "${IMAGE_DIR}" ]
+then
+        cp -r "${IMAGE_DIR}" "${DESTDIR}/${THEMES}"
+fi
+
+# copy binaries and base plugins
+copy_exec /opt/bin/plymouth
+copy_exec /opt/sbin/plymouthd
+
+for PLUGIN in ${PLUGINS}
+do
+        if [ -f ${PLUGIN_PATH}/${PLUGIN} ]
+        then
+                copy_exec ${PLUGIN_PATH}/${PLUGIN}
+        else
+                echo "W: plymouth: The plugin ${PLUGIN} is missing, the selected theme might not work as expected."
+                echo "W: plymouth: You might want to install the plymouth-themes package to fix this."
+        fi
+done
+
+# copy base themes and logo
+cp -a "${THEMES}/details" "${DESTDIR}/${THEMES}"
+cp -a "${THEMES}/text" "${DESTDIR}/${THEMES}"
+
+if [ -f /etc/os-release ]
+then
+        cp /etc/os-release "${DESTDIR}/etc"
+fi
+
+case "${THEME_NAME}" in
+        text|details)
+
+                ;;
+
+        *)
+                cp /usr/lib/plymouth/boot_logo.png "${DESTDIR}/usr/share/plymouth"
+
+                # fontconfig
+                mkdir -p "${DESTDIR}/etc/fonts/conf.d"
+                cp -a /etc/fonts/fonts.conf "${DESTDIR}/etc/fonts"
+                cp -rL /etc/fonts/conf.d/60-latin.conf "${DESTDIR}/etc/fonts/conf.d"
+                mkdir -p "${DESTDIR}/var/cache/fontconfig"
+                # This is only needed because fc-cache bellow fails if the directory doesn't exist
+                mkdir -p "${DESTDIR}/usr/local/share/fonts"
+
+                # fonts-dejavu
+                if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf ]
+                then
+                        mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                fi
+                case "${THEME_NAME}" in
+                        spinner|bgrt)
+                                # ATM, this is needed by the spinner and bgrt themes
+                                if [ -e /usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf ]
+                                then
+                                        mkdir -p "${DESTDIR}/usr/share/fonts/opentype/cantarell"
+                                        cp -a /usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
+                                        cp -a /usr/share/fonts/opentype/cantarell/Cantarell-Light.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
+                                fi
+                                # We continue to the default case here
+                                ;;
+                esac
+                fc-cache -s -y "${DESTDIR}" > /dev/null 2>&1
+
+                # copy /etc/default/keyboard (needed for keymap detection)
+                if [ -e /etc/default/keyboard ]
+                then
+                        mkdir -p "${DESTDIR}/etc/default"
+                        cp /etc/default/keyboard "${DESTDIR}/etc/default"
+                fi
+
+                # for two-step
+                case "$(sed -n 's/^ModuleName=\(.*\)/\1/p' ${THEME})" in
+                        two-step)
+                                # add watermark.png
+                                logo=/usr/share/desktop-base/debian-logos/logo-text-version-64.png
+                                if [ -e $logo ]
+                                then
+                                        cp $logo "${DESTDIR}/${IMAGE_DIR}/watermark.png"
+                                fi
+                                ;;
+                esac
+                ;;
+esac
+
+# add drm modules
+if [ "$MODULES" = "dep" ]; then
+        for DRM_DEVICE in "/sys/class/drm"/*; do
+                DRM_DEVICE="$(readlink -f "$DRM_DEVICE")" \
+                        && sys_walk_mod_add "$DRM_DEVICE" \
+                        || echo "W: plymouth: couldn't include modules for '$DRM_DEVICE'"
+        done
+elif [ "$MODULES" = "list" ]; then
+        echo "W: plymouth: not including drm modules since MODULES=list"
+else
+        copy_modules_dir kernel/drivers/gpu/drm mga r128 savage sis tdfx via
+fi
+
+# copy renderers
+copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/frame-buffer.so
+copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/drm.so
+
+# copy config files
+mkdir -p "${DESTDIR}/opt/etc/plymouth"
+
+if [ -r /opt/etc/plymouth/plymouthd.conf ]
+then
+        cp -a /opt/etc/plymouth/plymouthd.conf "${DESTDIR}/opt/etc/plymouth/"
+fi
+
+cp -a /opt/share/plymouth/plymouthd.defaults "${DESTDIR}/opt/share/plymouth/"
+
+# temporarily include dummy root account lookup (#691598)
+if ! grep -qs '^root:' "${DESTDIR}/etc/passwd"
+then
+        echo "root:x:0:0:root:/root:/bin/sh" >> "${DESTDIR}/etc/passwd"
+fi
+
+if ! grep -qs '^passwd: files' "${DESTDIR}/etc/nsswitch.conf"
+then
+        echo "passwd: files" >> "${DESTDIR}/etc/nsswitch.conf"
+fi
+
+for _LIBRARY in /lib/i386-linux-gnu/libnss_files*
+do
+        if [ -e "${_LIBRARY}" ]
+        then
+                copy_exec "${_LIBRARY}"
+        fi
+done
