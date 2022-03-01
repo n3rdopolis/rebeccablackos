@@ -15,16 +15,6 @@ esac
 . /usr/bin/wlruntime_vars
 manual_add_modules evdev
 
-if [ -e /opt/bin/seatd-launch ]
-then
-  copy_exec /opt/bin/seatd-launch /opt/bin/
-fi
-
-if [ -e /opt/bin/seatd ]
-then
-  copy_exec /opt/bin/seatd /opt/bin/
-fi
-
 if [ -e /opt/bin/cage ]
 then
   copy_exec /opt/bin/cage /opt/bin/

@@ -33,7 +33,7 @@ chmod 700 /run/user/0
 export XDG_RUNTIME_DIR=/run/user/0
 export XDG_SEAT=seat0
 export WLR_RENDERER_ALLOW_SOFTWARE=1
-export LIBSEAT_BACKEND=seatd
+export LIBSEAT_BACKEND=builtin
 export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
 export WLR_RENDERER=pixman
@@ -94,12 +94,9 @@ then
   done
 fi
 
-seatd &
-SEATDJOB=$!
 cage -d -s -m last -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
 sh -l > /dev/null 2>&1
-kill -9 $SEATDJOB
 
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
