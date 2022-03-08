@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2022-03-07 22:07:46.796151056 -0500
-+++ usr/bin/waylandloginmanagertui	2022-03-07 22:07:07.220079945 -0500
++++ usr/bin/waylandloginmanagertui	2022-03-07 22:55:56.729535070 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -537,7 +537,7 @@
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastSwitchPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -E ^${LastSwitchPIDs[$SeatIndexID]}$\|^${LastLoginPIDs[$SeatIndexID]}$\|^${LastLeavePIDs[$SeatIndexID]}$\|^${LastInfoPIDs[$SeatIndexID]}$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
@@ -546,7 +546,7 @@
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLoginPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -E ^${LastSwitchPIDs[$SeatIndexID]}$\|^${LastLoginPIDs[$SeatIndexID]}$\|^${LastLeavePIDs[$SeatIndexID]}$\|^${LastInfoPIDs[$SeatIndexID]}$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
@@ -555,7 +555,7 @@
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastLeavePIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -E ^${LastSwitchPIDs[$SeatIndexID]}$\|^${LastLoginPIDs[$SeatIndexID]}$\|^${LastLeavePIDs[$SeatIndexID]}$\|^${LastInfoPIDs[$SeatIndexID]}$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
@@ -564,7 +564,7 @@
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
 -      if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastInfoPIDs[$SeatIndexID]}([[:space:]]|$) ]]
-+      if [[ $(jobs -p -r | grep -vE ^${LastUserActionPIDs[$SeatIndexID]}$\|^$FIFOFilterPID$) == "" ]]
++      if [[ $(jobs -p -r | grep -E ^${LastSwitchPIDs[$SeatIndexID]}$\|^${LastLoginPIDs[$SeatIndexID]}$\|^${LastLeavePIDs[$SeatIndexID]}$\|^${LastInfoPIDs[$SeatIndexID]}$) == "" ]]
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
