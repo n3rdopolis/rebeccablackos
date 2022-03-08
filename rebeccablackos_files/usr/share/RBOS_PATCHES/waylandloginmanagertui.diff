@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2022-02-24 17:05:44.670087514 -0500
-+++ usr/bin/waylandloginmanagertui	2022-02-24 17:11:06.683341627 -0500
++++ usr/bin/waylandloginmanagertui	2022-03-07 21:32:21.102675839 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -92,6 +92,15 @@
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
    GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
+@@ -940,7 +933,7 @@
+ 
+   ReadyNotifySent=0
+   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
+-  ProbeFilesExist "/run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_*" LoginManagerDisplayFileProbe
++  ProbeFilesExist "/run/waylandloginmanager/ptys/*" LoginManagerDisplayFileProbe
+   if [[ $LoginManagerDisplayFileProbe == 1 ]]
+   then
+     RUNNINGWLMCOUNT=$(systemctl show wlm-loginmanagerdisplay_*.service -p MainPID --value |& wc -l )
 @@ -1172,23 +1165,14 @@
    done
  }
