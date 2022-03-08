@@ -3171,8 +3171,11 @@ function WaylandLoginManagerMain
           #if autologin is specified
           if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINDONE == 0 && $SEATAUTOLOGINUSER != ':' ]]
           then
-            StartAutoLogin $RunningSeat $SEATAUTOLOGINUSER &
-            LastLoginPIDs[$StartIndex]=$!
+            if [[ ! $SeatWestonBackend == "" && ! $SeatWestonBackend == 0 ]]
+            then
+              StartAutoLogin $RunningSeat $SEATAUTOLOGINUSER &
+              LastLoginPIDs[$StartIndex]=$!
+            fi
           fi
         fi
       done
