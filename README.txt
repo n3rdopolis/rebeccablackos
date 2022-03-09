@@ -94,12 +94,16 @@ BOOT OPTIONS:
        This option is also handled, (but not by the WaylandLoginManager itself)
             vttydisable:                This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
 
-       This option is handled early in initramfs:
+            init=/sbin/recinit          Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.
+
+       These options handled early in initramfs:
             simpledrm.forceload:        This forces the simpledrm driver to be loaded, even if there is an existing /dev/dri/card0 device.
                                         This option is only applicable for hardware with multiple video cards, where the primary video card
                                         does not have support by a Linux modesetting driver, and generic modesetting support is needed.
                                         the driver gtes loaded if there are no supported video cards by default, but a secondary one will,
                                         without this option, be detected as the 'primary'.
+
+            norecinit=1                 This forces the initramfs recovery prompt to fall back to the system console, and not use the user mode terminal.
 
       When installed, and you are unable to use a UI, you can use the commands:
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
