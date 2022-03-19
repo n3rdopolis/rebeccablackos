@@ -63,6 +63,7 @@ fi
 # copy binaries and base plugins
 copy_exec /opt/bin/plymouth
 copy_exec /opt/sbin/plymouthd
+copy_exec /usr/libexec/plymouth/plymouthd-fd-escrow
 
 for PLUGIN in ${PLUGINS}
 do
