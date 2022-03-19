@@ -1,5 +1,6 @@
 #!/bin/sh
 #This file has been modified from Debian's plymouth hook to suit installs under /opt
+
 set -e
 
 PREREQ=""
@@ -15,6 +16,7 @@ case "${1}" in
                 exit 0
                 ;;
 esac
+
 . /usr/bin/wlruntime_vars
 . /usr/share/initramfs-tools/hook-functions
 
@@ -63,7 +65,7 @@ fi
 # copy binaries and base plugins
 copy_exec /opt/bin/plymouth
 copy_exec /opt/sbin/plymouthd
-copy_exec /usr/libexec/plymouth/plymouthd-fd-escrow
+copy_exec /opt/libexec/plymouth/plymouthd-fd-escrow
 
 for PLUGIN in ${PLUGINS}
 do
@@ -191,7 +193,7 @@ then
         echo "passwd: files" >> "${DESTDIR}/etc/nsswitch.conf"
 fi
 
-for _LIBRARY in /lib/i386-linux-gnu/libnss_files*
+for _LIBRARY in /lib/$DEB_HOST_MULTIARCH/libnss_files*
 do
         if [ -e "${_LIBRARY}" ]
         then
