@@ -79,6 +79,8 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
+ln -s /opt/bin/plymouth /bin/plymouth
+ln -s /opt/sbin/plymouthd /sbin/plymouthd
 mkdir -p /usr/lib/lsb/init-functions.d/
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 mkdir -p /usr/share/initramfs-tools/hooks/
@@ -91,6 +93,12 @@ cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hoo
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-premount /usr/share/initramfs-tools/scripts/init-premount
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic
+
+chmod +x /usr/lib/lsb/init-functions.d/plymouth_lsb
+chmod +x /usr/share/initramfs-tools/hooks/plymouth_hook
+chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth_init-bottom
+chmod +x /usr/share/initramfs-tools/scripts/init-premount/plymouth_init-premount
+chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth_panic
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
