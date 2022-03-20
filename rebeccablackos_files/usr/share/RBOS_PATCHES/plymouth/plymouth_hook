@@ -67,6 +67,11 @@ copy_exec /opt/bin/plymouth
 copy_exec /opt/sbin/plymouthd
 copy_exec /opt/libexec/plymouth/plymouthd-fd-escrow
 
+copy_exec /bin/plymouth
+copy_exec /usr/bin/plymouth
+copy_exec /sbin/plymouthd
+copy_exec /usr/sbin/plymouthd
+
 for PLUGIN in ${PLUGINS}
 do
         if [ -f ${PLUGIN_PATH}/${PLUGIN} ]
