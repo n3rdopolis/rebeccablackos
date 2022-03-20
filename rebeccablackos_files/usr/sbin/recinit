@@ -42,8 +42,10 @@ then
   export SEATD_VTBOUND=0
 fi
 
+SIMPLEDRM_FORCELOADAED=0
 if [ ! -e /dev/dri/card0 ]
 then
+  SIMPLEDRM_FORCELOADAED=1
   modprobe simpledrm
 fi
 modprobe evdev
@@ -128,6 +130,10 @@ then
   done
 fi
 
+if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
+then
+  rmmod simpledrm
+fi
 
 if [ $unmountrunfs -eq 1 ]
 then

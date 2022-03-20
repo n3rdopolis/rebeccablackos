@@ -38,7 +38,10 @@ panic()
 
 	run_scripts /scripts/panic
 
+	SIMPLEDRM_FORCELOADAED=0
+	DO_RETURN=0
 	if [ ! -e /dev/dri/card0 ] ; then
+		SIMPLEDRM_FORCELOADAED=1
 		modprobe simpledrm
 	fi
 
@@ -49,8 +52,18 @@ panic()
 			echo "echo \"$REASON\"" > /etc/profile
 			export PS1='(initramfs) '
 			recinit
-			return
+			DO_RETURN=1
 		fi
+	fi
+
+	if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
+	then
+		rmmod simpledrm
+	fi
+
+	if [ $DO_RETURN -eq 1 ]
+	then
+		return
 	fi
 
 	# Try to use setsid, which will enable job control in the shell
