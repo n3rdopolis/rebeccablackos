@@ -42,6 +42,7 @@ then
   export SEATD_VTBOUND=0
 fi
 
+#Load simpledrm if there is no /dev/dri/card0 device
 SIMPLEDRM_FORCELOADAED=0
 if [ ! -e /dev/dri/card0 ]
 then
@@ -130,6 +131,7 @@ then
   done
 fi
 
+#Unload simpledrm if it was loaded manually, so udev can load it in the right order later
 if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
 then
   rmmod simpledrm
