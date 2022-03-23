@@ -98,6 +98,11 @@ case "${THEME_NAME}" in
                 ;;
 
         *)
+                if [ -e /opt/lib/plymouth/boot_logo.png ]
+                then
+                  mkdir -p "${DESTDIR}/opt/share/plymouth"
+                  cp /opt/lib/plymouth/boot_logo.png "${DESTDIR}/opt/share/plymouth"
+                fi
 
                 # fontconfig
                 mkdir -p "${DESTDIR}/etc/fonts/conf.d"
