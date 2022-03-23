@@ -400,5 +400,7 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 #Rebuild the library cache
 (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
+#Reconfigue Plymouth
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
 #start the remastersys job
 remastersys dist
