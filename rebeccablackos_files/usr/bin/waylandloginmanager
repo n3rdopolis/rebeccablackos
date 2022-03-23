@@ -3169,13 +3169,16 @@ function WaylandLoginManagerMain
           fi
           GetConfigKey autologin-user "$RunningSeat" ":" 0 SEATAUTOLOGINUSER
           #if autologin is specified
-          if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINDONE == 0 && $SEATAUTOLOGINUSER != ':' ]]
+          if [[ ! ${LoginManagerDisplayBackends[$StartIndex]} == "" && ! ${LoginManagerDisplayBackends[$StartIndex]} == 0 ]]
           then
-            if [[ ! ${LoginManagerDisplayBackends[$StartIndex]} == "" && ! ${LoginManagerDisplayBackends[$StartIndex]} == 0 ]]
+            if [[ ! -z $SEATAUTOLOGINUSER && $SEATAUTOLOGINDONE == 0 && $SEATAUTOLOGINUSER != ':' ]]
             then
               StartAutoLogin $RunningSeat $SEATAUTOLOGINUSER &
               LastLoginPIDs[$StartIndex]=$!
             fi
+          else
+            UserActionAttemptCounts[$StartIndex]=-1
+            UserActionFailSkips[$StartIndex]=1
           fi
         fi
       done
@@ -3198,9 +3201,9 @@ function WaylandLoginManagerMain
         if [[ $SeatRemoved == 1 && ${SeatInitializationStatuses[$StartIndex]} != 0 ]]
         then
           SeatFileName=${SeatFileNames[$StartIndex]}
-          UserActionAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
-          UserActionFailSkips[$StartIndex]=0
-          LoginManagerDisplayAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
+          UserActionAttemptCounts[$StartIndex]=-1
+          UserActionFailSkips[$StartIndex]=1
+          LoginManagerDisplayAttemptCounts[$StartIndex]=-1
           WriteToLog "The seat ${StartedSeats[$StartIndex]} has been detected to have been removed"
           systemctl stop "wlm-loginmanagerdisplay_$SeatFileName" &> /dev/null
           SeatInitializationStatuses[$StartIndex]=0
