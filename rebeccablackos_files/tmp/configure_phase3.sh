@@ -292,7 +292,7 @@ function PostInstallActions
   ln -s /opt/bin/Xorg /usr/bin/X
   
   #Replace chvt with the seat aware wrapper
-  dpkg-divert --add --rename --divert /usr/bin/chvt.distrib /usr/bin/chvt 
+  dpkg-divert --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt 
   ln -s /usr/bin/chvt-ng /usr/bin/chvt
 
   #save the build date of the CD.
