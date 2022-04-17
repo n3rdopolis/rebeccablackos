@@ -38,11 +38,22 @@ fi
 
 function PtyResizeEvent
 {
-  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
   then
-    ClientPTYSize=($(stty size))
-    echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+    Retries=0
+    while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
+    do
+      $SLEEPCMD 1
+      ((Retries++))
+      if [[ $Retries -ge 5 ]]
+      then
+        return
+      fi
+    done
   fi
+
+  ClientPTYSize=($(stty size))
+  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 }
 #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
 trap PtyResizeEvent WINCH
