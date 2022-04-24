@@ -36,6 +36,7 @@ export WLR_RENDERER_ALLOW_SOFTWARE=1
 export LIBSEAT_BACKEND=builtin
 export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
+export WLR_NO_HARDWARE_CURSORS=1
 export WLR_RENDERER=pixman
 if [ ! -e /dev/tty0 ]
 then
