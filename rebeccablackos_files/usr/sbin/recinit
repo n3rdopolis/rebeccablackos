@@ -71,6 +71,10 @@ mkdir -p /run/udev/data
 systemctl is-active system.slice --quiet >/dev/null 2>&1
 systemd_result=$?
 
+#Get Plymouth status
+plymouth --ping
+plymouth_result=$?
+
 if [ $systemd_result -ne 0 ]
 then
   find /sys/class/input/event* | while read Device
@@ -96,6 +100,12 @@ then
     fi
     echo "E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
   done
+fi
+
+#Hide plymouth if it's running
+if [ $plymouth_result -eq 0 ]
+then
+  plymouth hide-splash
 fi
 
 cage -d -s -m last -- \
@@ -141,6 +151,12 @@ fi
 if [ $unmountrunfs -eq 1 ]
 then
   umount -lf /run
+fi
+
+#Reshow plymoth
+if [ $plymouth_result -eq 0 ]
+then
+  plymouth show-splash
 fi
 
 #If this is pid 1 start init upon exit
