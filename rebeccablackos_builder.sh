@@ -811,6 +811,7 @@ chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/bin
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/sbin
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/libexec
 chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/initramfs-tools/
+chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/grub.d/*
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.local/wlprofile
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/wsessions.d/*.desktop
