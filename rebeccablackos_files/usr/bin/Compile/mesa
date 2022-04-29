@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 export CFLAGS="-O2" 
 export CXXFLAGS="-O2"
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=enabled -Dgles2=enabled -Dplatforms=x11,wayland -Dosmesa=true -Dgallium-xa=true -Dgbm=true -Dshared-glapi=enabled -Dllvm=true  -Dshared-llvm=true -Dvulkan-drivers=intel,amd,swrast,virtio-experimental -Dllvm=true build -Dglvnd=true
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=enabled -Dgles2=enabled -Dplatforms=x11,wayland -Dosmesa=true -Dgallium-xa=true -Dgbm=true -Dshared-glapi=enabled -Dllvm=true  -Dshared-llvm=true -Dvulkan-drivers=intel,amd,swrast,virtio-experimental -Dllvm=true build -Dglvnd=true -Dvideo-codecs=h264dec,h264enc,h265dec,h265enc
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
