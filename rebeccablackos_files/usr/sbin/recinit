@@ -108,7 +108,7 @@ then
   plymouth hide-splash
 fi
 
-cage -d -s -m last -- \
+cage -d -s -m extend -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
 sh -l > /dev/null 2>&1
 
