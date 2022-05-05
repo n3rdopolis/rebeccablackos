@@ -77,9 +77,9 @@ fi
 
 if [[ -z $SHELL ]]
 then
-  SHELLCMD="/bin/bash -l"
+  SHELLCMD="/bin/bash"
 else
-  SHELLCMD="$SHELL -l"
+  SHELLCMD="$SHELL"
 fi
 
 socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700,fork &
