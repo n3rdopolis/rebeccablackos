@@ -20,16 +20,16 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=qt6-qtxmlpatterns
+SOURCENAME=qt6-qtpositioning
 
 #The URL of the Source code repo
-SOURCEURL=https://invent.kde.org/qt/qt/qtxmlpatterns
+SOURCEURL=https://invent.kde.org/qt/qt/qtpositioning
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=dev
+SOURCEREVISION=6.3
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt

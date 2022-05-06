@@ -29,7 +29,7 @@ SOURCEURL=https://invent.kde.org/qt/qt/qt5compat
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=dev
+SOURCEREVISION=6.3
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -74,7 +74,6 @@ function PackageInstallSource()
 cd build
 make install
 }
-
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
