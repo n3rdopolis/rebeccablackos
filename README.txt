@@ -13,13 +13,12 @@ OVERVIEW:
   This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only
   this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea. http://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
 
-  There are many native Wayland toolkits and libraries installed, QT, KDE Frameworks 5, GTK, EFL, Clutter and SDL has been compiled on this CD to support
-  Wayland as well as mpv, and gstreamer.
+  There are many native Wayland toolkits and libraries installed, Qt, GTK, EFL, Clutter and SDL has been compiled to support Wayland.
 
   Xwayland is also included, which allows X applications to run under a Wayland server.
 
-  There are also other Wayland Desktop environments that are usable: Liri, Enlightenment, and Gnome Shell Wayland, Kwin, and Sway aside from the default Weston
-  Desktop shell.
+  There are also other Wayland Desktop environments that are usable: Liri, Enlightenment, and Gnome Shell Wayland, Kwin, Wayfire, and Sway aside, from the
+  default Weston Desktop shell.
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
@@ -27,47 +26,40 @@ OVERVIEW:
 
 
 How to use the ISO:
-  Burn it, (or put it in a VM), reboot, set the BIOS to boot from the DVD if it does not already, boot from the DVD. Once it boots you can use the live system.
-  The ISOs can also be used on a flash drive
+  Burn the ISO, (or set it to be the CD ROM device in your favorite VM software), reboot, set the BIOS to boot from the DVD if it does not already, boot from
+  the DVD. Once it boots you can use the live system.
 
-  The live user "rebestie" has no password
+  The ISOs are also hybrid ISOs, meaning they can also be written directly to a flash drive, to be bootable without using slower optical media.
 
-  The ISO is built with Remastersys, which makes it compatible with the USB Startup creator. It is also a hybrid ISO, so it can boot raw from a flash drive,
-  where the ISO has been written with dd. Unetbootin will also work, but is not as recommended as it uses syslinux with its own defaults, and no splash.
+  The live user "rebestie" has no password.
 
-  You could also use the test_RBOS_ISO.sh to test weston on the iso without a reboot. Put the .iso into your home folder, make the test_RBOS_ISO script
-  executable, and run the script from a terminal, and pass the path to the ISO file as an argument. You can usually do this by dragging the iso onto the
-  terminal window after the path to the script, and a space. (and selecting paste text if needed)
+  The ISO is built with Remastersys, which makes it compatible with the USB Startup creator. Unetbootin will also work, but is not recommened if your target
+  computer needs SimpleDRM, as it uses syslinux instead of Grub which does not properly configure the resolution for the kernel. (See "CHANGING THE RESOLUTION
+  ON SIMPLE HARDWARE" section for more details)
+
+  You could also use the test_RBOS_ISO.sh to try software on the ISO without a reboot or a VM. Download the ISO, Download and make the test_RBOS_ISO script
+  executable, and run the script. It can be run from a terminal, or from your file manager.
+
+    It is only recommened for expert users now. Before, it was beneficial to demonstrate sessions that could run nested, and struggled to run on VMs.
   
-    It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system.
+    It will give you a shell running with your UID, the password wil be the same as your password, but within the hosted system
 
     It requires squashfs, and also needs dialog or zenity or kdialog to be installed, and it also needs either konsole, gnome-terminal OR a standard
     x-terminal-emulator.
 
-    Warning: It is not as isolated as a VM. This utility will still work, however when it was created, it was more focused on having nested sessions
-    of desktops that would not start on VMs, due to there being no generic modesetting.
+    Warning: It is not as isolated as a VM. While there are some separations to act as a play sandbox, it's not to be treated as a security sandbox.
  
 How to use Wayland:
-    The loginmanagerdisplay greeter is weston based, where you can select your desired wayland based desktop.
+    The loginmanagerdisplay greeter is Weston based.
 
-    Wayland programs are in /opt/bin. But there are also many available from the application launcher menu, under "All Wayland Programs".
+    The LiveCD is configured to auto-login. The choices presented are the desired session type to start as the default user.
 
-    Pressing the "I" icon in the panel (in the default Weston shell) will give you information on key bindings, and opening a terminal will instantly display
-    instructions for more advanced usage.
+    Most UI programs that start are set to use the Wayland backend, (unless they are started with the xwaylandapp utility)
 
 PROBLEMS:
-      A few files outside of /opt get written that may conflict with the files provided by main Debian archives. The number of files that get overwritten is
-      small, and mostly just header files. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to
+      A few files outside of /opt in packages may conflict with the files provided by main Debian archives. The number of files that get overwritten is
+      small. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to
       enable dpkg overwrites.
-
-      When virtualized, under QEMU, be sure to use either KVM32 or KVM64 as the 'emulated' processor. It appears to be caused by specifying an emulated
-      processor that reports capabilities that the host processor doesn't have, and causes failures. Selecting an emulated processor that reports CPU
-      capabilities that it doesn't have. This affects even the upstream install of Mesa, and not just the newer one provided in /opt.
-
-      Especially when virtualized, programs may hang on startup. This is due to a recent fix in the Linux Kernel that makes getrandom() block, until there is
-      enough "randomness", provided by hardware sources. On hardware that is not as complex, (like a VM) there is not enough hardware providing this
-      "randomness", so some programs that rely on getrandom() will hang. One workaround is to randomly mash the keyboard for a few seconds, as keyboards are
-      among devices used.
 
       Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
 
@@ -75,28 +67,29 @@ BOOT OPTIONS:
       The WaylandLoginManager responds when particular strings are passed to the kernel command line. These options are made available by the live CD boot menu,
       or on an installed system by running the command rbos-failedboot as root. (Which is automatically called when the login manager's display server crashes
       5 times.)
-            wlmforceswrender:           Force all user sessions, and the Login Manager's display to be started with the environment variable
-                                        LIBGL_ALWAYS_SOFTWARE=1 to force software rendering
+            wlmforceswrender:           Force all user sessions, and the WaylandLoginManager's display to be started with the environment variable
+                                        LIBGL_ALWAYS_SOFTWARE=1 to force software rendering. This also forces the WaylandLoginManager to export session-specific
+                                        variables for software rendering, if the wsession desktop file specifies such variables.
 
-            wlmforcepixman:             Force the Login Manager's display, and the hosts for any fullscreen or kiosk shell supporing session to use Pixman
+            wlmforcepixman:             Force the WaylandLoginManager's display, and the hosts for any fullscreen or kiosk shell supporing session to use the
+                                        pixman renderer. Use this if there is a problem with Mesa's software renderer.
 
-            wlmforcefbdev:              Force the WaylandLoginManager to handle the system as if though it does not support kernel mode setting, even if kernel
-                                        mode setting is availible.
+            wlmforcefbdev:              [Legacy option] Force the WaylandLoginManager to handle the system as if though it does not support kernel mode
+                                        setting, even if kernel mode setting is available.
 
-            wlmnofbdev:                 Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even if framebuffers
-                                        are available.
+            wlmnofbdev:                 [Legacy option] Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even
+                                        if framebuffers are available. (Recent versions of Weston dropped the framebuffer backend. This is redundant now.)
 
-            wlmdebug:                   Force more sysrq trigger options to be available, then the more secure default. This option is not settable from
-                                        rbos-failedboot as it's for more advanced users
+            wlmdebug:                   [Legacy option] Forces more sysrq trigger options to be available.
 
             wlmdebuginsecure:           This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
 
-       This option is also handled, (but not by the WaylandLoginManager itself)
+       These options are also handled, (but not by the WaylandLoginManager itself)
             vttydisable:                This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
 
             init=/sbin/recinit          Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.
 
-       These options handled early in initramfs:
+       These options are handled early in initramfs:
             simpledrm.forceload:        This forces the simpledrm driver to be loaded, even if there is an existing /dev/dri/card0 device.
                                         This option is only applicable for hardware with multiple video cards, where the primary video card
                                         does not have support by a Linux modesetting driver, and generic modesetting support is needed.
@@ -109,13 +102,13 @@ BOOT OPTIONS:
             rbos-force-softwarerendering: Wizard for setting wlmforceswrender option to the kernel commandline with grub
 
 CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
-      Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not until recently, and the emulated 'vmware' device in QEMU
-      VMs would not have mode setting support. Before simpledrm, to start most Wayland sessions on hardware that did not have its own modesetting driver
-      required falling back to using the framebuffer device, where many of them do not support this fallback.
+      Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not (until recently), and the emulated 'vmware' device in QEMU
+      VMs does not work quite right with the vmwgfx driver. Before simpledrm, hardware without proper modesetting support required framebuffer support.  While
+      possible, there was the problem that wayland based display servers that have framebuffer backends are rare. The
 
-      The bootloader is where the video memory for this driver is prepared, before the kernel starts, which is why the resolution for hardware that 
-      requires simpledrm must be configured in the bootloader. Grub tries its best to detect your resolution, with one that is supported by both your BIOS
-      and your monitor. The resolution can be customized, especially on VMs which may tend to default to a smaller screen size.
+      The *bootloader* is where the video memory for this driver is prepared, before the kernel starts. Grub tries its best to detect your resolution, with one
+      that is supported by both your BIOS and your monitor. However, the resolution can be customized, especially on VMs which may tend to default to a smaller
+      screen size.
 
       For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
       resolution, and hit "CTRL+X"
