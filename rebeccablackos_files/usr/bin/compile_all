@@ -19,6 +19,8 @@
 #This script calls all files in /usr/bin/Compile in the needed order. it also fowards if it was called with build-only or download-only to the scripts.
 #It also configures build_core (which is used by all of the build scripts) to create debs as they build, by turning on the BUILDCOREMAKEDEBS argument.
 
+CompilePackagesList=()
+
 MAXDOWNLOADINSTANCES=5
 MAXCLEANINSTANCES=5
 argument=$1
@@ -30,14 +32,20 @@ then
   export BUILDCORECLEANOVERLAY=1
 fi
 
+
 function CompilePackage
+{
+  CompilePackagesList+=($1)
+}
+
+function CompilePackageInList
 {
   BUILDNAME=$1
 
   #compile_all is running to download the source
   if [[ "$argument" == download-only ]]
   then
-    echo "Downloading/updating $BUILDNAME source"
+    echo "Download/Update $BUILDNAME source ($CurrentPackageNumber of $TotalPackageNumber)"
 
     #Allow more than one downloads running at a time, only downloads and clean can run more than one at a time
     #Even smalldebinstall cannot, as only one instance of dpkg can run
@@ -64,7 +72,7 @@ function CompilePackage
   if [[ "$argument" == build-only ]]
   then
     #Cleanup any files in the srcbuild_overlay from the last build
-    echo "building $BUILDNAME"
+    echo "Build $BUILDNAME ($CurrentPackageNumber of $TotalPackageNumber)"
     if [[ -x /usr/bin/Compile/$BUILDNAME ]]
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
@@ -83,7 +91,7 @@ function CompilePackage
   #Install the smaller version of the package
   if [[ "$argument" == installsmallpackage ]]
   then
-    echo "Attempting to install smaller version of $BUILDNAME"
+    echo "Attempting to install smaller version of $BUILDNAME ($CurrentPackageNumber of $TotalPackageNumber)"
     if [[ -x /usr/bin/Compile/$BUILDNAME ]]
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
@@ -97,7 +105,7 @@ function CompilePackage
   #compile_all is running to clean the source
   if [[ "$argument" == clean ]]
   then
-    echo "Cleaning $BUILDNAME"
+    echo "Cleanup $BUILDNAME ($CurrentPackageNumber of $TotalPackageNumber)"
 
     #Allow more than one cleans running at a time
     RUNJOBS=($(jobs -rp))
@@ -130,6 +138,20 @@ function CompilePackage
     fi
   fi
   
+}
+
+function CompilePackageList
+{
+  TotalPackageNumber="${#CompilePackagesList[@]}"
+  export BUILDCORETOTALPACKAGESNUMBER=$TotalPackageNumber
+  CurrentPackageNumber=0
+  for Package in "${CompilePackagesList[@]}"
+  do
+    ((CurrentPackageNumber++))
+    export BUILDCORECURRENTPACKAGENUMBER=$CurrentPackageNumber
+    CompilePackageInList "$Package"
+  done
+  wait
 }
 
 #build these packages in this order.
@@ -612,4 +634,4 @@ then
   CompilePackage lupin
 fi
 
-wait
+CompilePackageList
