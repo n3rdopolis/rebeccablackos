@@ -61,8 +61,9 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's/BackgroundStartColor=0x0073b3/BackgroundStartColor=0x000000/g' themes/spinfinity/spinfinity.plymouth.in
-sed -i 's/BackgroundEndColor=0x00457e/BackgroundEndColor=0x222222/g' themes/spinfinity/spinfinity.plymouth.in
+sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinfinity/spinfinity.plymouth.in
+sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinfinity/spinfinity.plymouth.in
+
 
 ./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk --enable-drm --enable-pango --enable-systemd-integration --with-logo=$INSTALLDIR/lib/plymouth/boot_logo.png --with-runtimedir=/run/plymouth
 }
