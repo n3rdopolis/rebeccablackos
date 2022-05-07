@@ -135,6 +135,21 @@ function RunDownloadAndOrBuild
     exit
   fi
 
+  #If this variable is not set, assume this is the only pacakge being compiled
+  if [[ -z $BUILDCORETOTALPACKAGESNUMBER ]]
+  then
+    BUILDCORETOTALPACKAGESNUMBER=1
+  fi
+
+  #If this variable is not set, assume this is the only pacakge being compiled
+  if [[ -z $BUILDCORECURRENTPACKAGENUMBER ]]
+  then
+    BUILDCORECURRENTPACKAGENUMBER=1
+  fi
+
+  TotalPackageNumber=$BUILDCORETOTALPACKAGESNUMBER
+  CurrentPackageNumber=$BUILDCORECURRENTPACKAGENUMBER
+
   export PAGER=cat
   export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
   rm -rf "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
@@ -189,7 +204,7 @@ function RunDownloadAndOrBuild
   then
     cd "$SOURCEDIR"
     SetACLPermissions
-    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s/^/$SOURCENAME: /"
+    Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s|^|Cleanup $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
     exit
   fi
 
@@ -197,7 +212,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == installsmallpackage ]]
   then
     STARTTIME=$(date +%s)
-    InstallDebFile "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
+    InstallDebFile "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall" | sed -e "s|^|Small Install $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
     ENDTIME=$(date +%s)
     echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     exit
@@ -207,14 +222,14 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then
     #Download the source using specified variables.
-    DownloadSource 2>&1 | sed -e "s/^/$SOURCENAME: /"
+    DownloadSource 2>&1 | sed -e "s|^|Download/Update $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
   fi
 
   #Build the source and install it, unless the argument passed to the build script is 'download-only'
   if [[ "$ACTION" != download-only && "$ACTION" != env-only ]]
   then
     #Start the compile or install Process
-    MakeAndInstall 2>&1 | sed -e "s/^/$SOURCENAME: /"
+    MakeAndInstall 2>&1 | sed -e "s|^|Build $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
   fi
 }
 
