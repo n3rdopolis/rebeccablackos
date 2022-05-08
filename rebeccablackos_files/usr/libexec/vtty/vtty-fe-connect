@@ -47,7 +47,7 @@ function PtyResizeEvent
   fi
 
   ClientPTYSize=($(stty size))
-  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
 }
 #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
 trap PtyResizeEvent WINCH
