@@ -25,6 +25,9 @@ fi
 
 export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
 
+#Create a log folder for the remove operations
+mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
@@ -338,9 +341,6 @@ RedirectFile /usr/sbin/invoke-rc.d
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
 echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
-
-#Create a log folder for the remove operations
-mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
 
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v dpkg-dev)
