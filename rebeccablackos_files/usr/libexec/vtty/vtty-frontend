@@ -122,4 +122,12 @@ cage -m extend -d -s -- \
 foot --config=/etc/footkiosk.conf -- \
 /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
 
-exit $?
+ReturnCode=$?
+#systemd sends SIGHUP when a service is stopped. Account for this in case systemd sends it to cage first
+#and bash runs long enough to run the command to report failure, causing the service to restart if set to stopped
+#It's unlikely, but account for SIGHUP
+if [[ $ReturnCode != 0 && $ReturnCode != 129 ]]
+then
+  systemd-notify ERRNO=1
+fi
+exit $ReturnCode
