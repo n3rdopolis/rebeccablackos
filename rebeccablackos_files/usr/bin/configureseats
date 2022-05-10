@@ -58,7 +58,7 @@ function ResetExcludedDevices
 #It takes 1 argument, the string to exclude
 function EnumerateDeviceFiles
 {
-  find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/graphics/fb[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $1
+  find /sys/class/input/input[0-9]* /sys/class/drm/card[0-9]* /sys/class/sound/card[0-9]* ! -path "*-*" | grep -Ev $1
 }
 
 #Get all devices attached at this point, and add them to DeviceExcludeString
