@@ -1097,7 +1097,7 @@ function SendSelfRegisterData
   do
     $SLEEPCMD 1
   done
-  echo -n "$SENDDATA"$'\n'$'\r' > /run/waylandloginmanager/loginmanager_register &
+  echo -n $'\u1E'"$SENDDATA"$'\u1F'$'\u1E' > /run/waylandloginmanager/loginmanager_register &
   SendSelfCommand ReadRegister
 }
 
@@ -1112,23 +1112,24 @@ function ReadRegister
 {
   #get the data from loginmanager_register
   exec 1001<> /run/waylandloginmanager/loginmanager_register
-  RegisterDataLines=$(while read -r -n 288 -t .01 data <&1001; do echo $data; done)
+  RegisterDataLines=()
+  while read -d $'\u1E' -r -n 288 -t .01 RegisterLineData <&1001
+  do
+    RegisterDataLines+=("$RegisterLineData")
+  done
   exec 1001>&-
-  IFS=$'\r'
-  RegisterDataLines=($RegisterDataLines)
-  unset IFS
 
-
+  #$'\u1E' is record separator (each row) $'\u1F' is unit separator (each field) $'\u1D'
   for RegisterData in "${RegisterDataLines[@]}"
   do
     #get the register data, and put it into an array so it can be handled
-    IFS=$'\n'
+    IFS=$'\u1F'
     ArraySessionData=($RegisterData)
     unset IFS
     RegisterType=${ArraySessionData[0]}
     if [[ ! -z $RegisterData ]]
     then
-      WriteToLog "received register data: ${RegisterData//$'\n'/\\n}"
+      WriteToLog "received register data: ${RegisterData//$'\u1F'/\\n}"
       if [[ $RegisterType == NEWSESSION ]]
       then
         #Add the session data to the arrays that store info about the sessions.
@@ -1897,7 +1898,7 @@ function ChooseSessionType
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
     if [[ $GETDEFAULTWSESSION != "::" ]]
     then
-      SendSelfRegisterData "SETCONFIGKEY"$'\n'"defaultwsession-${CurrentHandleSeat}-${SessionUser}"$'\n'"${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
+      SendSelfRegisterData "SETCONFIGKEY"$'\u1F'"defaultwsession-${CurrentHandleSeat}-${SessionUser}"$'\u1F'"${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
     fi
 
   else
@@ -2215,7 +2216,7 @@ function StartUserSession
   fi
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  SendSelfRegisterData "NEWSESSION"$'\n'"$USERSESSIONTTY"$'\n'"$USERSESSIONPID"$'\n'"$USERREGISTERDISPLAYNAME"$'\n'"$LOGINDSESSION"$'\n'"$USERSEAT"$'\n'"$STARTLOCKED"
+  SendSelfRegisterData "NEWSESSION"$'\u1F'"$USERSESSIONTTY"$'\u1F'"$USERSESSIONPID"$'\u1F'"$USERREGISTERDISPLAYNAME"$'\u1F'"$LOGINDSESSION"$'\u1F'"$USERSEAT"$'\u1F'"$STARTLOCKED"
 
 }
 
