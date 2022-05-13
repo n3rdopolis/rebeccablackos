@@ -52,5 +52,5 @@ then
   then
     /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 0
   fi
-  runuser -u $DIALOGUSER -- dialog  --msgbox "You will need to restart the waylandloginmanager service for the change to take effect" 7 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "The software rendering setting has been changed. This will take effect for new sessions. To take effect on the loginmanagerdisplay itself, the waylandloginmanager service and then the loginmanagerdisplay will need to be restarted in the given order." 9 60
 fi
