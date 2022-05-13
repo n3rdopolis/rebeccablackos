@@ -36,6 +36,8 @@ TTYVTDisallocate=true
 
 Restart=on-failure
 RestartSec=0
+StartLimitIntervalSec=30
+StartLimitBurst=3
 
 Type=simple
 User=vtty
