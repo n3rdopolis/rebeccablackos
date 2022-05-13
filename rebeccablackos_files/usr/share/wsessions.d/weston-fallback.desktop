@@ -19,5 +19,6 @@ AdditionalArguments=--xwayland --use-pixman
 IsFallbackSession=1
 NeedsFile=/opt/bin/weston
 [EnvironmentFile]
+set=LIBGL_ALWAYS_SOFTWARE=1
 #set=XDG_CURRENT_DESKTOP=Weston
 
