@@ -26,7 +26,7 @@ Built: $(cat /etc/builddate)
 
 
 
-if [[ $SessionName =~ "Default Weston" ]]
+if [[ $SessionName == *"Weston"* ]]
 then
 SessionHelpText="Weston Key Bindings:
 Note: The 'Super Key' on most keyboards is the Windows logo key.
