@@ -643,35 +643,48 @@ function MainConfig
 
     if [[ $SelectedDevice == "" ]]
     then
-      $ZENITYCMD --info --no-wrap --title="Multipointer and Seat Configuration" --text "No device was selected. Please select a device" 2>/dev/null
-      continue
+      AdditionalPromptText="No device selected, assuming save and close."$'\n'
+      SelectedDevice=-1
+    else
+      AdditionalPromptText=""
     fi
 
     #Break if user is not selecting any more devices
     if [[ $SelectedDevice == -1 ]]
     then
-      PromptText=""
-      for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
+      DeviceSortArrayString=""
+      for (( DeviceIterator=1; DeviceIterator <= $NumberOfDevices; DeviceIterator++ ))
+      do
+        if [[ $DeviceIterator != 1 ]]
+        then
+          DeviceSortArrayString+=$'\n'
+        fi
+        DeviceSortArrayString+="$DeviceIterator,${DeviceConnectTimestamps[$DeviceIterator]}"
+      done
+      DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -t "," -k 2,2 | awk -F "," '{print $1}'))
+
+      NewDeviceConfigPromptText=""
+      for DeviceElementNumber in "${DeviceSortArrayIndex[@]}"
       do
 
         #only change the seat id in udev if the user specified to do so
-        if [[ ${DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]} == 1 ]]
+        if [[ ${DeviceNewSeatConfigChangeds[$DeviceElementNumber]} == 1 ]]
         then
           ((ChangedDeviceCount++))
-          PromptText+="${DeviceTypes[$CurrentDeviceNumber]}:  ${DeviceDisplayNames[$CurrentDeviceNumber]} on ${DeviceConnections[$CurrentDeviceNumber]}"$'\n'
-          if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
+          NewDeviceConfigPromptText+="${DeviceTypes[$DeviceElementNumber]}:  ${DeviceDisplayNames[$DeviceElementNumber]} on ${DeviceConnections[$DeviceElementNumber]}"$'\n'
+          if [[ ${DeviceInputTypeFlags[$DeviceElementNumber]} == 1 ]]
           then
-            PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
-            PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     From: ${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentWLSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     To: ${DeviceNewSessionSeatIDs[$DeviceElementNumber]} / ${DeviceNewWLSeatIDs[$DeviceElementNumber]}"$'\n'
           else
-            PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}"$'\n'
-            PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     From: ${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     To: ${DeviceNewSessionSeatIDs[$DeviceElementNumber]}"$'\n'
           fi
         fi
       done
       if [[ $ChangedDeviceCount == 0 ]]
       then
-        $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without making changes?" 2>/dev/null
+        $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility without making changes?" 2>/dev/null
         Result=$?
         if [[ $Result == 0 ]]
         then
@@ -680,7 +693,7 @@ function MainConfig
           continue
         fi
       fi
-      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$PromptText" 2>/dev/null
+      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "{$AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
