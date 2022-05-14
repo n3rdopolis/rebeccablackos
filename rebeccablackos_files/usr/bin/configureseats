@@ -349,8 +349,14 @@ function DeviceSelection
     DeviceSelectionString+=${DeviceTypes[$DeviceElementNumber]}$'\n'
     DeviceSelectionString+=${DeviceNames[$DeviceElementNumber]}$'\n'
     DeviceSelectionString+=${DeviceConnections[$DeviceElementNumber]}$'\n'
-    DeviceSelectionString+="${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentWLSeatIDs[$DeviceElementNumber]}"$'\n'
-    DeviceSelectionString+="${DeviceNewSessionSeatIDs[$DeviceElementNumber]} / ${DeviceNewWLSeatIDs[$DeviceElementNumber]}"$'\n'
+    if [[ ${DeviceInputTypeFlags[$DeviceElementNumber]} == 1 ]]
+    then
+      DeviceSelectionString+="${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentWLSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewSessionSeatIDs[$DeviceElementNumber]} / ${DeviceNewWLSeatIDs[$DeviceElementNumber]}"$'\n'
+    else
+      DeviceSelectionString+="${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewSessionSeatIDs[$DeviceElementNumber]}"$'\n'
+    fi
     DeviceSelectionString+=$DeviceConnectionOrder
     ((DeviceConnectionOrder--))
   done
@@ -439,6 +445,11 @@ function ConfigureDevice
       DeviceNewSessionSeatIDs[$CurrentDeviceNumber]=$NewSessionSeatNumber
       DeviceNewWLSeatIDs[$CurrentDeviceNumber]=$NewWLSeatNumber
       DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]=1
+    else
+      #Account for the device being set to different seats, then the user setting them back
+      DeviceNewSessionSeatIDs[$CurrentDeviceNumber]=${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}
+      DeviceNewWLSeatIDs[$CurrentDeviceNumber]=${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}
+      DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]=0
     fi
   fi
 }
@@ -612,8 +623,23 @@ function MainConfig
 {
   while [ 1 ]
   do
+    ChangedDeviceCount=0
+
     SelectedDevice=$(DeviceSelection)
     Result=$?
+
+    #Exit if selected
+    if [[ $Result != 0 || $SelectedDevice == -2 ]]
+    then
+      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without saving changes?" 2>/dev/null
+      Result=$?
+      if [[ $Result == 0 ]]
+      then
+        break
+      else
+        continue
+      fi
+    fi
 
     if [[ $SelectedDevice == "" ]]
     then
@@ -621,22 +647,10 @@ function MainConfig
       continue
     fi
 
-    #Exit if selected
-    if [[ $Result != 0 && $SelectedDevice == -2 ]]
-    then
-      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without saving changes?" 2>/dev/null
-      Result=$?
-      if [[ $Result == 0 ]]
-      then
-        exit
-      fi
-    fi
-
     #Break if user is not selecting any more devices
     if [[ $SelectedDevice == -1 ]]
     then
       PromptText=""
-      ChangedDeviceCount=0
       for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
       do
 
@@ -645,8 +659,14 @@ function MainConfig
         then
           ((ChangedDeviceCount++))
           PromptText+="${DeviceTypes[$CurrentDeviceNumber]}:  ${DeviceDisplayNames[$CurrentDeviceNumber]} on ${DeviceConnections[$CurrentDeviceNumber]}"$'\n'
-          PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
-          PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
+          if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
+          then
+            PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
+            PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
+          else
+            PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}"$'\n'
+            PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]}"$'\n'
+          fi
         fi
       done
       if [[ $ChangedDeviceCount == 0 ]]
@@ -656,6 +676,8 @@ function MainConfig
         if [[ $Result == 0 ]]
         then
           break
+        else
+          continue
         fi
       fi
       $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$PromptText" 2>/dev/null
@@ -663,11 +685,20 @@ function MainConfig
       if [[ $Result == 0 ]]
       then
         break
+      else
+        continue
       fi
     fi
 
     ConfigureDevice $SelectedDevice
   done
+
+  if [[ $ChangedDeviceCount == 0 ]]
+  then
+    return 1
+  else
+    return 0
+  fi
 }
 
 
@@ -698,8 +729,13 @@ do
   then
     CollectDeviceInfo
     MainConfig
-    CommitConfigFile
-    SignalCompletion
+    Return=$?
+    #Only act if settings have been changed
+    if [[ $Return == 0 ]]
+    then
+      CommitConfigFile
+      SignalCompletion
+    fi
   elif [[ $SelectedOption == 2 ]]
   then
     HelpDialog
