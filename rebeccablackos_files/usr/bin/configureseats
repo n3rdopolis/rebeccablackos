@@ -345,7 +345,7 @@ function DeviceSelection
       DeviceSelectionString+=$'\n'
     fi
 
-    DeviceSelectionString+=$DeviceIterator$'\n'
+    DeviceSelectionString+=$DeviceElementNumber$'\n'
     DeviceSelectionString+=${DeviceTypes[$DeviceElementNumber]}$'\n'
     DeviceSelectionString+=${DeviceNames[$DeviceElementNumber]}$'\n'
     DeviceSelectionString+=${DeviceConnections[$DeviceElementNumber]}$'\n'
@@ -604,7 +604,7 @@ Leaving a field blank leaves the device assigned to the current seat info.
 For example, if a device is on seat0/default and the wayland seat is set to seat1
 the device wil be left on seat0 for the session seat.
 
-"|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=550 --height=600 2>/dev/null
+"|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
 }
 
 #Function for the main configuration wizard, it takes no arguments
@@ -614,6 +614,12 @@ function MainConfig
   do
     SelectedDevice=$(DeviceSelection)
     Result=$?
+
+    if [[ $SelectedDevice == "" ]]
+    then
+      $ZENITYCMD --info --no-wrap --title="Multipointer and Seat Configuration" --text "No device was selected. Please select a device" 2>/dev/null
+      continue
+    fi
 
     #Exit if selected
     if [[ $Result != 0 && $SelectedDevice == -2 ]]
@@ -630,22 +636,29 @@ function MainConfig
     if [[ $SelectedDevice == -1 ]]
     then
       PromptText=""
+      ChangedDeviceCount=0
       for (( CurrentDeviceNumber=1; CurrentDeviceNumber<=NumberOfDevices; CurrentDeviceNumber++ ))
       do
 
         #only change the seat id in udev if the user specified to do so
         if [[ ${DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]} == 1 ]]
         then
+          ((ChangedDeviceCount++))
           PromptText+="${DeviceTypes[$CurrentDeviceNumber]}:  ${DeviceDisplayNames[$CurrentDeviceNumber]} on ${DeviceConnections[$CurrentDeviceNumber]}"$'\n'
           PromptText+="     From: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
           PromptText+="     To: ${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]} / ${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}"$'\n'
         fi
       done
-      if [[ $PromptText == "" ]]
+      if [[ $ChangedDeviceCount == 0 ]]
       then
-        PromptText="[No changes made yet]"
+        $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without making changes?" 2>/dev/null
+        Result=$?
+        if [[ $Result == 0 ]]
+        then
+          break
+        fi
       fi
-      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility and save the following changes:"$'\n'$'\n'"$PromptText" 2>/dev/null
+      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$PromptText" 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
@@ -691,6 +704,7 @@ do
   then
     HelpDialog
   elif [[ $SelectedOption == 3 ]]
+  then
     exit
   fi
 done
