@@ -331,7 +331,7 @@ function DeviceSelection
     fi
     DeviceSortArrayString+="$DeviceIterator,${DeviceConnectTimestamps[$DeviceIterator]}"
   done
-  DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -t "," -k 2,2 | awk -F "," '{print $1}'))
+  DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -rnt "," -k 2,2 | awk -F "," '{print $1}'))
 
 
   DeviceSelectionString=""
@@ -550,14 +550,14 @@ INTRODUCTION
 What is a seat? 
 ---------------
 A seat is a combination of devices on a computer that belong 
-to 1 user. Most computers have 1 seat each. However this
-wizard allows multiple seats to be configured.
+to one user. Most computers have one seat each. However this
+wizard allows multiple seats to be configured with proper hardware.
 
 What is a Session Seat?
 -----------------------
 A session seat is a group of hardware, needing a different 
 video card each to work, along with input devices, such as a 
-keyboard or mouse.These devices belong to different sessions,
+keyboard or mouse. These devices belong to different sessions,
 allowing each user to have independant control over their own
 session each. If such a configuration was set up in a manor
 that the cables and computer were well hidden such a setup
@@ -571,7 +571,7 @@ What is a Wayland Seat?
 -----------------------
 A wayland seat is a group of hardware within a session seat 
 that are shared within a session, to where, when supported by
-a  given desktop environment, allows there to be multiple
+a given desktop environment, allows there to be multiple
 pointers on one session, along with their keyboards and mice. 
 This type of configuration allows for better collaboration,
 with two users sharing a session. It is also possible to 
@@ -600,8 +600,8 @@ wayland seats, identified in the config by their
 ID_SERIAL and ID_PATH properties
 
 Output devices (like video and sound cards) can only be
-assigned to session seats, identified by their ID_FOR_SEAT
-propeties.
+assigned to session seats, as assigning them to a wayland
+seat has no impact on how multipointer works.
 
 
 USING THIS UTILITY
@@ -610,6 +610,8 @@ The utility will present a list of devices. Select the desired devices,
 then associate them with the desired seat.
 
 The devices are sorted by the order they were connected. Newest devices are on top.
+The device detection time is queried, the utility does not have to be running when
+devices are being plugged in to get the timing.
 
 Leaving a field blank leaves the device assigned to the current seat info.
 For example, if a device is on seat0/default and the wayland seat is set to seat1
@@ -661,7 +663,7 @@ function MainConfig
         fi
         DeviceSortArrayString+="$DeviceIterator,${DeviceConnectTimestamps[$DeviceIterator]}"
       done
-      DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -t "," -k 2,2 | awk -F "," '{print $1}'))
+      DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -rnt "," -k 2,2 | awk -F "," '{print $1}'))
 
       NewDeviceConfigPromptText=""
       for DeviceElementNumber in "${DeviceSortArrayIndex[@]}"
