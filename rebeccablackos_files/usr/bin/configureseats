@@ -729,7 +729,12 @@ Quit"| $ZENITYCMD --height 380 --list --hide-column 1 --print-column 1 --column=
 'Show Detailed Help' shows more details on how to use this wizard
 
 'Quit' Exits this wizard
-" 2>/dev/null)
+")
+Return=$?
+if [[ $Return != 0 ]]
+then
+  exit
+fi
 }
 
 
