@@ -29,13 +29,6 @@ then
   exit
 fi
 
-FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
-if [[ $FSTYPE =~ overlay ]]
-then
-  runuser -u $DIALOGUSER -- dialog --msgbox "Option invalid on Live CD Mode. To change the resolution for a live CD for simple hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries." 20 50
-  exit
-fi
-
 ConfigFile="/etc/default/grub"
 DefaultFallbackResolutions="auto,1024x768,800x600,640x480"
 DefaultResolution="auto"
@@ -50,10 +43,10 @@ DetectedWorkingResolutions=($(/usr/sbin/hwinfo --framebuffer 2>/dev/null | grep 
 #hwinfo tends to fail on real hardware.
 if [[ ${#DetectedWorkingResolutions[@]} == 0 ]]
 then
-  ResolutionListComment="a list of possibly supported, but also possibly unsupported resolutions, as the list could not be detected automatically."
+  ResolutionListComment="The listed resolutions are a list of possibly supported, but also possibly unsupported resolutions, as the list could not be detected automatically."
   WorkingResolutions+=(320x200 640x400 640x480 800x600 1024x768 1152x864 1280x1024 1280x720 1280x768 1280x800 1280x960 1400x1050 1440x900 1600x1200 1680x1050 1920x1080 1920x1200 2560x1600)
 else
-  ResolutionListComment="all reported as supported by your BIOS/Graphics hardware"
+  ResolutionListComment="The listed resolutions are all reported as supported by your BIOS/Graphics hardware"
   WorkingResolutions+=(${DetectedWorkingResolutions[@]})
 fi
 
@@ -78,7 +71,28 @@ unset IFS
 CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
 if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
 then
-  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility. Will now exit." 7 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility, as a different driver is being used. Will now exit." 7 60
+  exit
+fi
+
+FSTYPE=$(df / -T | awk '{print $2}' | grep -v Type)
+if [[ $FSTYPE =~ overlay ]]
+then
+  if [[ ${#DetectedWorkingResolutions[@]} == 0 ]]
+  then
+    runuser -u $DIALOGUSER -- dialog --msgbox "This utility will not work on a live CD, as it configures the bootloader. To change the resolution for a live CD for your hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries." 20 50
+  else
+    AllResolutionsString=""
+    for Resolution in ${DetectedWorkingResolutions[@]}
+    do
+      if [[ $AllResolutionsString != "" ]]
+      then
+        AllResolutionsString+=", "
+      fi
+      AllResolutionsString+=$Resolution
+    done
+    runuser -u $DIALOGUSER -- dialog --msgbox "This utility will not work on a live CD, as it configures the bootloader. To change the resolution for a live CD for your hardware, this needs to be changed on boot. Please see README, or see the inline help when editing one of the boot entries. Supported resolutions are: $AllResolutionsString" 20 50
+  fi
   exit
 fi
 
@@ -102,7 +116,7 @@ runuser -u $DIALOGUSER -- dialog  --msgbox "Your system uses a fallback graphics
 
 SelectedResolutionIndex=$(runuser -u $DIALOGUSER -- dialog --radiolist "Select a resolution you wish to have the bootloader provide to the fallback driver.
 
-The listed resolutions: $ResolutionListComment
+$ResolutionListComment
 
 Current option is $CurrentOption" 30 60 25 "${WorkingResolutionArguments[@]}" --stdout 2>/dev/tty)
 OKSelected=$?
