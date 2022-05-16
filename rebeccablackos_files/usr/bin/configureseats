@@ -49,25 +49,25 @@ fi
 #It takes no arguments
 function PrepareSeatList
 {
-  #Generate a list of wayland seats for the Zenity dialogs for selection
-  unset WLSeatList
-  WLSeatList="default"
+  #Generate a list of logical seats for the Zenity dialogs for selection
+  unset LogicalSeatList
+  LogicalSeatList="default"
   for (( SeatIterator=1; SeatIterator<MaxNumberOfSeats; SeatIterator++ ))
   do
-    WLSeatList+="|"
-    WLSeatList+="seat$SeatIterator"
+    LogicalSeatList+="|"
+    LogicalSeatList+="seat$SeatIterator"
   done
 
-  #Generate a list of session seats for the Zenity dialogs for selection
-  unset SessionSeatArray
+  #Generate a list of physical seats for the Zenity dialogs for selection
+  unset PhysicalSeatArray
 
-  SessionSeatArray=($(loginctl list-seats --no-legend | grep -v seat-vtty | sort))
+  PhysicalSeatArray=($(loginctl list-seats --no-legend | grep -v seat-vtty | sort))
   for (( SeatIterator=1; SeatIterator<MaxNumberOfSeats; SeatIterator++ ))
   do
     IncludeSeat=1
-    for SessionSeat in "${SessionSeatArray[@]}"
+    for PhysicalSeat in "${PhysicalSeatArray[@]}"
     do
-      if [[ "seat$SeatIterator" == $SessionSeat ]]
+      if [[ "seat$SeatIterator" == $PhysicalSeat ]]
       then
         IncludeSeat=0
         break
@@ -75,19 +75,19 @@ function PrepareSeatList
     done
     if [[ $IncludeSeat == 1 ]]
     then
-      SessionSeatArray+=("seat$SeatIterator")
+      PhysicalSeatArray+=("seat$SeatIterator")
     fi
   done
-  unset SessionSeatList
-  FirstSessionSeat=1
-  for SeatElement in "${SessionSeatArray[@]}"
+  unset PhysicalSeatList
+  FirstPhysicalSeat=1
+  for SeatElement in "${PhysicalSeatArray[@]}"
   do
-    if [[ $FirstSessionSeat != 1 ]]
+    if [[ $FirstPhysicalSeat != 1 ]]
     then
-      SessionSeatList+="|"
+      PhysicalSeatList+="|"
     fi
-    SessionSeatList+=$SeatElement
-    FirstSessionSeat=0
+    PhysicalSeatList+=$SeatElement
+    FirstPhysicalSeat=0
   done
 }
 
@@ -106,14 +106,14 @@ function CollectDeviceInfo
   unset DeviceDisplayNames
   unset DeviceNames
   unset DeviceConnections
-  unset DeviceCurrentSessionSeatIDs
-  unset DeviceCurrentWLSeatIDs
+  unset DeviceCurrentPhysicalSeatIDs
+  unset DeviceCurrentLogicalSeatIDs
   unset DeviceTypes
   unset DeviceInputTypeFlags
   unset DeviceConnectTimestamps
 
-  unset DeviceNewSessionSeatIDs
-  unset DeviceNewWLSeatIDs
+  unset DeviceNewPhysicalSeatIDs
+  unset DeviceNewLogicalSeatIDs
   unset DeviceNewSeatConfigChangeds
   #Get all input devices from udev, and store attributes into an array
   while read -r Device
@@ -180,8 +180,8 @@ function CollectDeviceInfo
       esac
     done
 
-    DeviceSessionSeatID=$DEV_ID_SEAT
-    DeviceWLSeatID=$DEV_WL_SEAT
+    DevicePhysicalSeatID=$DEV_ID_SEAT
+    DeviceLogicalSeatID=$DEV_WL_SEAT
     IsDeviceInput=$DEV_ID_INPUT
     IsDeviceMouse=$DEV_ID_INPUT_MOUSE
     IsDeviceTouchscreen=$DEV_ID_INPUT_TOUCHSCREEN
@@ -224,15 +224,15 @@ function CollectDeviceInfo
     fi
 
     #if the device has no configured WL_SEAT value, then weston sees it as it being under the default seat
-    if [[ -z $DeviceWLSeatID ]]
+    if [[ -z $DeviceLogicalSeatID ]]
     then
-      DeviceWLSeatID="default"
+      DeviceLogicalSeatID="default"
     fi
 
     #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
-    if [[ -z $DeviceSessionSeatID ]]
+    if [[ -z $DevicePhysicalSeatID ]]
     then
-      DeviceSessionSeatID="seat0"
+      DevicePhysicalSeatID="seat0"
     fi
 
     #if the device is reported as a mouse, then add that to the device type string. if the device type string has a previous device type in it, prepend a / for the user
@@ -305,14 +305,14 @@ function CollectDeviceInfo
       DeviceDisplayNames[$NumberOfDevices]=$DeviceDisplayName
       DeviceNames[$NumberOfDevices]=$DeviceName
       DeviceConnections[$NumberOfDevices]=$DeviceConnection
-      DeviceCurrentSessionSeatIDs[$NumberOfDevices]=$DeviceSessionSeatID
-      DeviceCurrentWLSeatIDs[$NumberOfDevices]=$DeviceWLSeatID
+      DeviceCurrentPhysicalSeatIDs[$NumberOfDevices]=$DevicePhysicalSeatID
+      DeviceCurrentLogicalSeatIDs[$NumberOfDevices]=$DeviceLogicalSeatID
       DeviceTypes[$NumberOfDevices]=$DeviceType
       DeviceInputTypeFlags[$NumberOfDevices]=$IsDeviceInput
       DeviceConnectTimestamps[$NumberOfDevices]=$DEV_USEC_INITIALIZED
 
-      DeviceNewSessionSeatIDs[$NumberOfDevices]=$DeviceSessionSeatID
-      DeviceNewWLSeatIDs[$NumberOfDevices]=$DeviceWLSeatID
+      DeviceNewPhysicalSeatIDs[$NumberOfDevices]=$DevicePhysicalSeatID
+      DeviceNewLogicalSeatIDs[$NumberOfDevices]=$DeviceLogicalSeatID
       DeviceNewSeatConfigChangeds[$NumberOfDevices]=0
      fi
 
@@ -351,11 +351,11 @@ function DeviceSelection
     DeviceSelectionString+=${DeviceConnections[$DeviceElementNumber]}$'\n'
     if [[ ${DeviceInputTypeFlags[$DeviceElementNumber]} == 1 ]]
     then
-      DeviceSelectionString+="${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentWLSeatIDs[$DeviceElementNumber]}"$'\n'
-      DeviceSelectionString+="${DeviceNewSessionSeatIDs[$DeviceElementNumber]} / ${DeviceNewWLSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceNewLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
     else
-      DeviceSelectionString+="${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]}"$'\n'
-      DeviceSelectionString+="${DeviceNewSessionSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
     fi
     DeviceSelectionString+=$DeviceConnectionOrder
     ((DeviceConnectionOrder--))
@@ -364,23 +364,23 @@ function DeviceSelection
   DeviceSelectionString+=$'\n'-1$'\n'"[Apply Changes]"$'\n'$'\n'$'\n'$'\n'$'\n'
   DeviceSelectionString+=$'\n'-2$'\n'"[Cancel Changes]"$'\n'$'\n'$'\n'$'\n'$'\n'
 
-  echo "$DeviceSelectionString" | $ZENITYCMD --height 580 --width 800 --list --hide-column 1 --print-column 1 --column=selectionnumber --column="Type" --column="Name" --column="Connection Path" --column="Current Session/Wayland Seats" --column="New Session/Wayland Seats" --column="Connected Order" --title="Multipointer and Seat Configuration" --text="The changes made here will impact all users, as well as the login greeters. 
+  echo "$DeviceSelectionString" | $ZENITYCMD --height 580 --width 800 --list --hide-column 1 --print-column 1 --column=selectionnumber --column="Type" --column="Name" --column="Connection Path" --column="Current Physical/Logical Seats" --column="New Physical/Logical Seats" --column="Connected Order" --title="Multipointer and Seat Configuration" --text="The changes made here will impact all users, as well as the login greeters. 
 Multipointer is not supported by all Wayland desktops like it is on Weston.
 
-This will devices to be associated with session seats and wayland seats.
-   -  Session 'Seats' are a grouping containing at least of graphics device 'card', and input devices.
-      Having multiple session seats allows one computer to act as multiple workstations.
+This assist in associating devices with physical seats and logical seats.
+   -  Physical 'Seats' are a grouping containing at least of graphics device 'card', and input devices.
+      Having multiple physical seats allows one computer to act as multiple workstations.
 
-   -  Wayland 'Seats' are what belong to a separate mouse cursor and keyboard focus.
-      The more wayland seats with devices associated with them, the more pointers there will be.
+   -  Logical 'Seats' are what belong to a separate mouse cursor and keyboard focus.
+      The more logical seats with devices associated with them, the more pointers there will be.
 
-Devices are associated with the session seat first, then the wayland seat. There can be multiple session seats with multiple pointers each.
+Devices are associated with the physical seat first, then the logical seat. There can be multiple physical seats with multiple logical seats each.
 
 This utility stores the device seat association with these following attributes:
    1. The device's internal name, usually containing the make and model.
    2. The port they are plugged into. Devices will only associate with the proper seats if plugged in the same way.
 
-The default seat for Session seats is 'seat0', and the default Seat for Wayland seats is 'default',
+The default seat for physical seats is 'seat0', and the default seat for logical seats is 'default',
 
 Please note that some devices have multiple internal components, and sometimes appear as 'different' devices
 
@@ -391,26 +391,26 @@ Devices are sorted by the order they were connected, with the newest devices on 
 function ConfigureDevice
 {
   CurrentDeviceNumber=$1
-  unset NewWLSeatNumber
-  unset NewSessionSeatNumber
+  unset NewPhysicalSeatNumber
+  unset NewLogicalSeatNumber
 
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
-    NewSeatSelection=$($ZENITYCMD  --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --add-combo "Wayland Seat/Pointer" --combo-values="$WLSeatList" --text="Multipointer and Seat Configuration
+    NewSeatSelection=$($ZENITYCMD  --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --add-combo "Logical Seat" --combo-values="$LogicalSeatList" --text="Multipointer and Seat Configuration
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-    Current Session Seat: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}
-    Current Wayland Seat/Pointer: ${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
+    Current Physical Seat: ${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}
+    Current Logical Seat: ${DeviceCurrentLogicalSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
     ZenityResult=$?
   else
-    NewSeatSelection=$($ZENITYCMD --forms --add-combo "Session Seat" --combo-values="$SessionSeatList" --text="Multipointer and Seat Configuration
+    NewSeatSelection=$($ZENITYCMD --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --text="Multipointer and Seat Configuration
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
-    Current Session Seat: ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
+    Current Physical Seat: ${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
     ZenityResult=$?
   fi
 
@@ -422,33 +422,33 @@ function ConfigureDevice
   IFS="@"
   NewSeatSelection=($NewSeatSelection)
   unset IFS
-  NewSessionSeatNumber=(${NewSeatSelection[0]})
-  NewWLSeatNumber=(${NewSeatSelection[1]})
+  NewPhysicalSeatNumber=(${NewSeatSelection[0]})
+  NewLogicalSeatNumber=(${NewSeatSelection[1]})
 
   #only change the seat id in udev if the user specified to do so
   if [[ ! -z ${NewSeatSelection[0]} || ! -z ${NewSeatSelection[1]} ]]
   then
-    #If only the session seat is specified
-    if [[ -z $NewWLSeatNumber ]]
+    #If only the physical seat is specified
+    if [[ -z $NewLogicalSeatNumber ]]
     then
-      NewWLSeatNumber="${DeviceCurrentWLSeatIDs[$CurrentDeviceNumber]}"
+      NewLogicalSeatNumber="${DeviceCurrentLogicalSeatIDs[$CurrentDeviceNumber]}"
     fi
-    #If only the Wayland seat is specified
-    if [[ -z $NewSessionSeatNumber ]]
+    #If only the logical seat is specified
+    if [[ -z $NewPhysicalSeatNumber ]]
     then
-      NewSessionSeatNumber="${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}"
+      NewPhysicalSeatNumber="${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}"
     fi
 
     #Don't reconfigure if the configured seats are the same values as the current ones
-    if [[ ${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]} != $NewSessionSeatNumber || ${DeviceNewWLSeatIDs[$CurrentDeviceNumber]} != $NewWLSeatNumber ]]
+    if [[ ${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]} != $NewPhysicalSeatNumber || ${DeviceNewLogicalSeatIDs[$CurrentDeviceNumber]} != $NewLogicalSeatNumber ]]
     then
-      DeviceNewSessionSeatIDs[$CurrentDeviceNumber]=$NewSessionSeatNumber
-      DeviceNewWLSeatIDs[$CurrentDeviceNumber]=$NewWLSeatNumber
+      DeviceNewPhysicalSeatIDs[$CurrentDeviceNumber]=$NewPhysicalSeatNumber
+      DeviceNewLogicalSeatIDs[$CurrentDeviceNumber]=$NewLogicalSeatNumber
       DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]=1
     else
       #Account for the device being set to different seats, then the user setting them back
-      DeviceNewSessionSeatIDs[$CurrentDeviceNumber]=${DeviceCurrentSessionSeatIDs[$CurrentDeviceNumber]}
-      DeviceNewWLSeatIDs[$CurrentDeviceNumber]=${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}
+      DeviceNewPhysicalSeatIDs[$CurrentDeviceNumber]=${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}
+      DeviceNewLogicalSeatIDs[$CurrentDeviceNumber]=${DeviceNewLogicalSeatIDs[$CurrentDeviceNumber]}
       DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]=0
     fi
   fi
@@ -469,8 +469,8 @@ function CommitConfigFile
     if [[ ${DeviceNewSeatConfigChangeds[$CurrentDeviceNumber]} == 1 ]]
     then
 
-      NewSessionSeatNumber=${DeviceNewSessionSeatIDs[$CurrentDeviceNumber]}
-      NewWLSeatNumber=${DeviceNewWLSeatIDs[$CurrentDeviceNumber]}
+      NewPhysicalSeatNumber=${DeviceNewPhysicalSeatIDs[$CurrentDeviceNumber]}
+      NewLogicalSeatNumber=${DeviceNewLogicalSeatIDs[$CurrentDeviceNumber]}
       cat /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules > /tmp/72-weston_seats_and_udev_seats.rules.work
       if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
       then
@@ -487,13 +487,13 @@ function CommitConfigFile
             awk "!/${DeviceConnections[$CurrentDeviceNumber]//\//\\/}/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
           fi
         fi
-        echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\", ENV{WL_SEAT}=\"$NewWLSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
+        echo "ENV{ID_SERIAL}==\"${DeviceNames[$CurrentDeviceNumber]}\", ENV{ID_PATH}==\"${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewPhysicalSeatNumber\", ENV{WL_SEAT}=\"$NewLogicalSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
       else
         if [[ ! -z ${DeviceConnections[$CurrentDeviceNumber]} ]]
         then
           awk "!/\"\*${DeviceConnections[$CurrentDeviceNumber]//\//\\/}\"/" /tmp/72-weston_seats_and_udev_seats.rules.work > /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
         fi
-        echo "TAG==\"seat\", ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewSessionSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
+        echo "TAG==\"seat\", ENV{ID_FOR_SEAT}==\"*${DeviceConnections[$CurrentDeviceNumber]}\", ENV{ID_SEAT}=\"$NewPhysicalSeatNumber\"" >> /etc/udev/rules.d/72-weston_seats_and_udev_seats.rules
       fi
       rm /tmp/72-weston_seats_and_udev_seats.rules.work
     fi
@@ -553,12 +553,12 @@ A seat is a combination of devices on a computer that belong
 to one user. Most computers have one seat each. However this
 wizard allows multiple seats to be configured with proper hardware.
 
-What is a Session Seat?
+What is a Physical Seat?
 -----------------------
-A session seat is a group of hardware, needing a different 
+A physical seat is a group of hardware, needing a different 
 video card each to work, along with input devices, such as a 
 keyboard or mouse. These devices belong to different sessions,
-allowing each user to have independant control over their own
+allowing each user to have independent control over their own
 session each. If such a configuration was set up in a manor
 that the cables and computer were well hidden such a setup
 could appear to the unwitting eye as two (or more) computers,
@@ -567,18 +567,18 @@ where all seats are really being run on one.
 A USB graphics card is usually suitable for the multiple
 graphics card requirement, as long as the driver is supported.
 
-What is a Wayland Seat?
+What is a Logical Seat?
 -----------------------
-A wayland seat is a group of hardware within a session seat 
+A logical seat is a group of hardware within a physical seat 
 that are shared within a session, to where, when supported by
 a given desktop environment, allows there to be multiple
 pointers on one session, along with their keyboards and mice. 
 This type of configuration allows for better collaboration,
 with two users sharing a session. It is also possible to 
-have session seats, with multiple wayland seats, to where each
-independant session also has multiple pointers.
+have physical seats, with multiple logical seats, to where each
+independent session also has multiple pointers.
 
-A special graphics configuration for wayland seats/pointers is not needed.
+A special graphics configuration for logical seats/pointers is not needed.
 
 ABOUT THIS UTILITY
 ==================
@@ -595,12 +595,12 @@ and the connection.
 This utility handles the configuration for input devices
 and for video and sound cards
 
-Input Devices can be assignged to session seats, and 
-wayland seats, identified in the config by their
+Input Devices can be assignged to physical seats, and 
+logical seats, identified in the config by their
 ID_SERIAL and ID_PATH properties
 
 Output devices (like video and sound cards) can only be
-assigned to session seats, as assigning them to a wayland
+assigned to physical seats, as assigning them to a logical
 seat has no impact on how multipointer works.
 
 
@@ -614,8 +614,8 @@ The device detection time is queried, the utility does not have to be running wh
 devices are being plugged in to get the timing.
 
 Leaving a field blank leaves the device assigned to the current seat info.
-For example, if a device is on seat0/default and the wayland seat is set to seat1
-the device wil be left on seat0 for the session seat.
+For example, if a device is on seat0/default and the logical seat is set to seat1
+the device wil be left on seat0 for the physical seat.
 
 "|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
 }
@@ -676,11 +676,11 @@ function MainConfig
           NewDeviceConfigPromptText+="${DeviceTypes[$DeviceElementNumber]}:  ${DeviceDisplayNames[$DeviceElementNumber]} on ${DeviceConnections[$DeviceElementNumber]}"$'\n'
           if [[ ${DeviceInputTypeFlags[$DeviceElementNumber]} == 1 ]]
           then
-            NewDeviceConfigPromptText+="     From: ${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentWLSeatIDs[$DeviceElementNumber]}"$'\n'
-            NewDeviceConfigPromptText+="     To: ${DeviceNewSessionSeatIDs[$DeviceElementNumber]} / ${DeviceNewWLSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     From: ${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     To: ${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceNewLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
           else
-            NewDeviceConfigPromptText+="     From: ${DeviceCurrentSessionSeatIDs[$DeviceElementNumber]}"$'\n'
-            NewDeviceConfigPromptText+="     To: ${DeviceNewSessionSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     From: ${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
+            NewDeviceConfigPromptText+="     To: ${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
           fi
         fi
       done
