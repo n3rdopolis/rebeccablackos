@@ -58,11 +58,11 @@ do
 
   rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" &>/dev/null
 
-  $SLEEPCMD 1
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
   then
     exit
   fi
+  $SLEEPCMD 1
 
 done
 
