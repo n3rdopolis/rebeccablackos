@@ -71,7 +71,7 @@ unset IFS
 CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
 if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
 then
-  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility, as a different driver is being used. Will now exit." 7 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility, as a different driver is being used. Will now exit." 20 60
   exit
 fi
 
