@@ -26,6 +26,7 @@ fi
 
 shift
 export TERM=xterm-256color
+export WAYLAND_DISPLAY=""
 
 #Create a static name for the PTY that this is running as
 PTYPath=$(tty)
