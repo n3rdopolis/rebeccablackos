@@ -57,6 +57,33 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/^.*regular0=.*$/regular0=000000/' foot.ini
+sed -i 's/^.*regular1=.*$/regular1=b21818/' foot.ini
+sed -i 's/^.*regular2=.*$/regular2=18b218/' foot.ini
+sed -i 's/^.*regular3=.*$/regular3=b26818/' foot.ini
+sed -i 's/^.*regular4=.*$/regular4=1818b2/' foot.ini
+sed -i 's/^.*regular5=.*$/regular5=b218b2/' foot.ini
+sed -i 's/^.*regular6=.*$/regular6=18b2b2/' foot.ini
+sed -i 's/^.*regular7=.*$/regular7=b2b2b2/' foot.ini
+
+sed -i 's/^.*bright0=.*$/bright0=686868/' foot.ini
+sed -i 's/^.*bright1=.*$/bright1=ff5454/' foot.ini
+sed -i 's/^.*bright2=.*$/bright2=54ff54/' foot.ini
+sed -i 's/^.*bright3=.*$/bright3=ffff54/' foot.ini
+sed -i 's/^.*bright4=.*$/bright4=5454ff/' foot.ini
+sed -i 's/^.*bright5=.*$/bright5=ff54ff/' foot.ini
+sed -i 's/^.*bright6=.*$/bright6=54ffff/' foot.ini
+sed -i 's/^.*bright7=.*$/bright7=ffffff/' foot.ini
+
+sed -i 's/^.*dim0=.*$/dim0=000000/' foot.ini
+sed -i 's/^.*dim1=.*$/dim1=b21818/' foot.ini
+sed -i 's/^.*dim2=.*$/dim2=18b218/' foot.ini
+sed -i 's/^.*dim3=.*$/dim3=b26818/' foot.ini
+sed -i 's/^.*dim4=.*$/dim4=1818b2/' foot.ini
+sed -i 's/^.*dim5=.*$/dim5=b218b2/' foot.ini
+sed -i 's/^.*dim6=.*$/dim6=18b2b2/' foot.ini
+sed -i 's/^.*dim7=.*$/dim7=b2b2b2/' foot.ini
+
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Ddefault-terminfo=xterm-256color build
 }
 
