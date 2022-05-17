@@ -241,8 +241,8 @@
        passwordresult=0
      else
        #Prompt for the users password
--      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
-+      USERPASSWORD=$( $KDIALOGCMD --title="Password" --password "Type Password for $LOGINUSER" 2>/dev/null )
+-      USERPASSWORD=$( $ZENITYCMD --title="Login for $LOGINUSER" --password 2>/dev/null )
++      USERPASSWORD=$( $KDIALOGCMD --title="Login for $LOGINUSER" --password "Type your password" 2>/dev/null )
        CancelOrOK=$?
 -      #Abort if the user selected cancel on the zenity dialog
 +      #Abort if the user selected cancel on the dialog

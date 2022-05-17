@@ -1850,10 +1850,10 @@ function ChooseSessionType
     GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
     if [[ $IsAutologin == 1 ]]
     then
-      SessionSelectionTitleHint="Autologin: Select the session to use..."
+      SessionSelectionTitleHint="Autologin: Select the session for $SessionUser..."
       DEFAULTWSESSION="$GETDEFAULTWSESSION"
     else
-      SessionSelectionTitleHint="Select the session to use..."
+      SessionSelectionTitleHint="Select the session for $SessionUser..."
       DEFAULTWSESSION=":"
     fi
     WSESSIONNUMBER=-1
@@ -2356,7 +2356,7 @@ function GetUserCredentials
       passwordresult=0
     else
       #Prompt for the users password
-      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
+      USERPASSWORD=$( $ZENITYCMD --title="Login for $LOGINUSER" --password 2>/dev/null )
       CancelOrOK=$?
       #Abort if the user selected cancel on the zenity dialog
       if [[ $CancelOrOK != 0 ]]

@@ -332,8 +332,8 @@
        passwordresult=0
      else
        #Prompt for the users password
--      USERPASSWORD=$( $ZENITYCMD --title="Password" --password --text "Type Password for $LOGINUSER" 2>/dev/null )
-+      USERPASSWORD=$( $UIDIALOGCMD --title "Password" --insecure --passwordbox "Type Password for $LOGINUSER" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
+-      USERPASSWORD=$( $ZENITYCMD --title="Login for $LOGINUSER" --password 2>/dev/null )
++      USERPASSWORD=$( $UIDIALOGCMD --title "Login for $LOGINUSER" --insecure --passwordbox "Type your password" 10 40 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
        CancelOrOK=$?
 -      #Abort if the user selected cancel on the zenity dialog
 +      #Abort if the user selected cancel on the dialog
