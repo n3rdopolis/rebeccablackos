@@ -102,7 +102,7 @@ then
 fi
 
 #Exit when the job stops
-trap 'if [[ ! -e /proc/$SOCATPID ]]; then rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy &>/dev/null; rm /run/vtty/$EmulatedTTY/ptycommandproxy &>/dev/null; exit; fi' SIGCHLD
+trap 'if [[ ! -e /proc/$SOCATPID ]]; then rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy &>/dev/null; rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy &>/dev/null; exit; fi' SIGCHLD
 
 #Accept commands from the connection to manage the PTY (currently only the size)
 while [ 1 ]
