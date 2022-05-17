@@ -1034,7 +1034,7 @@ function GetNextTTY
   SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
   for SESSION in ${SESSIONS[@]}
   do
-    SYSTEMDTTYS+=($(loginctl show-session $SESSION -p TTY --value 2>/dev/null))
+    SYSTEMDTTYS+=($(loginctl show-session $SESSION -p VTNr --value 2>/dev/null))
   done
 
   TTYNotInLogind=0
@@ -1048,7 +1048,7 @@ function GetNextTTY
     TTYNotInLogind=0
     for SYSTEMDTTY in ${SYSTEMDTTYS[@]}
     do
-      if [[ $SYSTEMDTTY == "/dev/tty$CalcTTY" ]]
+      if [[ $SYSTEMDTTY == "$CalcTTY" ]]
       then
         ((TTYNotInLogind++))
       fi
