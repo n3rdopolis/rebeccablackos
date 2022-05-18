@@ -61,7 +61,10 @@ do
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
   then
     #Force the backend proxy command loop to run so the bash trap detects the process exiting sooner
-    echo "" > $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy
+    if [[ -e $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy ]]
+    then
+      echo "" > $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy
+    fi
     exit
   fi
   $SLEEPCMD 1

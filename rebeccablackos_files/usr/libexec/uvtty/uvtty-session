@@ -18,12 +18,22 @@
 
 UvTTYName="${XDG_SEAT}-${XDG_SESSION_ID}"
 
+#Make the proxy folder
+mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
+
 #Fall back if the seat name pushes the name longer than a the max file name length
 if [[ ${#UvTTYName} -ge 255 ]]
 then
   UvTTYName=$RANDOM
 fi
 export UvTTYName=$UvTTYName
+
+#Create the FIFO to where resize commands will be sent
+if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
+then
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+fi
+mkfifo -m 600 "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 
 /usr/libexec/uvtty/uvtty-frontend $UvTTYName &
 /usr/libexec/uvtty/uvtty-backend $UvTTYName

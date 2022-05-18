@@ -54,15 +54,7 @@ then
   exit 1
 fi
 
-#Make the proxy folder
-mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
-
-#Create the FIFO to where resize commands will be sent
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
-then
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
-fi
-mkfifo -m 600 "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+#Open the FIFO to where resize commands will be sent
 exec 1000<>"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 
 #Start the socat server
@@ -116,6 +108,19 @@ do
   then
     XSize=${COMMANDDATA[1]}
     YSize=${COMMANDDATA[2]}
+    if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+    then
+      Retries=0
+      while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+      do
+        $SLEEPCMD 1
+        ((Retries++))
+        if [[ $Retries -ge 5 ]]
+        then
+          break
+        fi
+      done
+    fi
     stty -F "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" rows $XSize cols $YSize
   fi
 
