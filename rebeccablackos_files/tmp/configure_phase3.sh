@@ -73,6 +73,11 @@ echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
 
+#Create admin groups
+addgroup --system lpadmin
+addgroup --system sambashare
+addgroup --system systemd-journald
+
 if [[ -f /tmp/APTFETCHDATE ]]
 then
   PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
