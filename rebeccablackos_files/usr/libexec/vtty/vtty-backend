@@ -91,6 +91,19 @@ do
   then
     XSize=${COMMANDDATA[1]}
     YSize=${COMMANDDATA[2]}
+    if [[ ! -e /run/vtty/$EmulatedTTY/loginpty ]]
+    then
+      Retries=0
+      while [[ ! -e /run/vtty/$EmulatedTTY/loginpty ]]
+      do
+        $SLEEPCMD 1
+        ((Retries++))
+        if [[ $Retries -ge 5 ]]
+        then
+          break
+        fi
+      done
+    fi
     stty -F /run/vtty/$EmulatedTTY/loginpty rows $XSize cols $YSize
   fi
 
