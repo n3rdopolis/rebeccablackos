@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-05-11 23:05:53.464386649 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2022-05-11 23:07:34.125172665 -0400
+--- usr/bin/waylandloginmanager	2022-05-18 12:50:22.081072411 -0400
++++ usr/bin/waylandloginmanagerkdialog	2022-05-18 12:55:42.723850677 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -389,7 +389,7 @@
  }
  
  #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3340,9 +3338,9 @@
+@@ -3341,9 +3339,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  

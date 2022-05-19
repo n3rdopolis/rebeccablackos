@@ -2992,7 +2992,8 @@ function UnprivilegedFIFOFilter
 {
   while [ 1 ]
   do
-    runuser -u $FIFOREADERUSER -m -- bash -c "grep -aEom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+    FIFOCommand=$(runuser -u $FIFOREADERUSER -m -- bash -c "grep -aEom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" 2>/dev/null)
+    echo $'\0'$FIFOCommand$'\0' > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
     $SLEEPCMD .1
   done
 }
