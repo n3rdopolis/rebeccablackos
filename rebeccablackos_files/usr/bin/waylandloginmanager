@@ -2944,6 +2944,7 @@ function SetupIPCFiles
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_listener
   mkfifo -m 200 /run/waylandloginmanager/loginmanager_register
   chown $FIFOREADERUSER /run/waylandloginmanager/loginmanager_control
+  chown $FIFOREADERUSER /run/waylandloginmanager/loginmanager_listener
   #open the main FIFO that recives commands.
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
 
@@ -2985,17 +2986,6 @@ ZENITYSTATUS=$?
     $SLEEPCMD 5
   fi
   exit $ZENITYSTATUS
-}
-
-#This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-function UnprivilegedFIFOFilter
-{
-  while [ 1 ]
-  do
-    FIFOCommand=$(runuser -u $FIFOREADERUSER -m -- bash -c "grep -aEom 3 \"^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$\" /run/waylandloginmanager/loginmanager_control" 2>/dev/null)
-    echo $'\0'$FIFOCommand$'\0' > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
-    $SLEEPCMD .1
-  done
 }
 
 #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
@@ -3492,7 +3482,7 @@ Will show a menu with a few options for diagnosis." 20 50
     fi
 
 
-    #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and lets the loop run again. It only reads 288 bytes at a time.
+    #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and assumes a null command. the timeout allows detection for when sessions quit. It only reads 288 bytes at a time.
     #32 for the command, 1 for the delimiter, and 255 for the max logind seat name size
     read -r -n 288 -t 1 COMMANDDATA <&1000
     IFS=@
@@ -3525,7 +3515,7 @@ Will show a menu with a few options for diagnosis." 20 50
     #If the command is empty, do nothing
     if [[ -z $COMMAND ]]
     then
-      :
+      continue
     #If it recives a Switch command, then go back to the loginmanagerdisplay's TTY and bring up a switch user dialog and start a switch user job, only if there isn't another switchuserdialog job running
     elif [[ $COMMAND == "Switch" ]]
     then
@@ -3676,7 +3666,7 @@ Will show a menu with a few options for diagnosis." 20 50
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
     fi
     LoginManagerFirstLoop=0
-    $SLEEPCMD .5
+
   done
 }
 
@@ -3707,7 +3697,7 @@ then
   SetupIPCFiles
 
   #Start the filter that will only send valid data to the main command FIFO
-  UnprivilegedFIFOFilter &
+  WLM_FIFO_READER=1 runuser -u $FIFOREADERUSER -m -- $0 --fifofilter &
 
   #Start the loginmanager
   WaylandLoginManagerMain
@@ -3746,6 +3736,20 @@ then
     exit 1
   fi
   SetConfigKey "$2" "$3"
+#This reads what the user send to loginmanager_control running as a limited account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
+elif [[ $1 == "--fifofilter" ]]
+then
+  #Require root privlages
+  if [[ -z $WLM_FIFO_READER ]]
+  then
+    echo "Invalid option"
+    exit 1
+  fi
+  while [ 1 ]
+  do
+    FIFOCommand=$(grep -aEom 3 "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$" /run/waylandloginmanager/loginmanager_control 2>/dev/null)
+    echo $'\0'$FIFOCommand$'\0' > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+  done
 elif [[ $1 == "--shutdowndialog" ]]
 then
   GetXDGVariables
