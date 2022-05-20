@@ -2527,12 +2527,12 @@ function LeavePrompt
   #For switch user, send the Switch command to the waylandloginmanager
   if [[ $ACTION == "Switch User" ]]
   then
-    waylandloginmanager --sendcommand Switch
+    $0 --sendcommand Switch
     RESULT=$?
   #If the request is logoff, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
-    waylandloginmanager --sendcommand Change
+    $0 --sendcommand Change
     loginctl terminate-session $XDG_SESSION_ID
     RESULT=$?
   #For all other actions, use logind dbus commands
