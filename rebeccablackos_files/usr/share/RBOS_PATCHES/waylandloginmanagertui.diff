@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-05-18 12:50:22.081072411 -0400
-+++ usr/bin/waylandloginmanagertui	2022-05-18 12:55:53.176069779 -0400
+--- usr/bin/waylandloginmanager	2022-05-19 23:17:07.069570564 -0400
++++ usr/bin/waylandloginmanagertui	2022-05-19 23:17:41.345918466 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -481,7 +481,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2963,15 +2953,20 @@
+@@ -2964,15 +2954,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -508,7 +508,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2979,12 +2974,12 @@
+@@ -2980,12 +2975,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -523,8 +523,8 @@
 +  exit $DIALOGSTATUS
  }
  
- #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3341,9 +3336,9 @@
+ #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
+@@ -3340,9 +3335,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
@@ -536,7 +536,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3543,7 +3538,7 @@
+@@ -3542,7 +3537,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -545,7 +545,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3582,7 +3577,7 @@
+@@ -3581,7 +3576,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -554,7 +554,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3604,7 +3599,7 @@
+@@ -3603,7 +3598,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -563,7 +563,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3636,7 +3631,7 @@
+@@ -3641,7 +3636,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -572,7 +572,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3651,6 +3646,7 @@
+@@ -3656,6 +3651,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -580,10 +580,10 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3708,6 +3704,7 @@
+@@ -3713,6 +3709,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
-   UnprivilegedFIFOFilter &
+   WLM_FIFO_READER=1 runuser -u $FIFOREADERUSER -m -- $0 --fifofilter &
 +  FIFOFilterPID=$!
  
    #Start the loginmanager

@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-05-18 12:50:22.081072411 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2022-05-18 12:55:42.723850677 -0400
+--- usr/bin/waylandloginmanager	2022-05-19 23:17:07.069570564 -0400
++++ usr/bin/waylandloginmanagerkdialog	2022-05-19 23:17:56.426071071 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -346,7 +346,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2963,15 +2956,20 @@
+@@ -2964,15 +2957,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -373,7 +373,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2979,12 +2977,12 @@
+@@ -2980,12 +2978,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -388,8 +388,8 @@
 +  exit $DIALOGSTATUS
  }
  
- #This part of the script is constantly running. It reads what the user send to loginmanager_control running as a service account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-@@ -3341,9 +3339,9 @@
+ #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
+@@ -3340,9 +3338,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  

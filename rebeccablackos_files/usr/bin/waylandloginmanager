@@ -3016,6 +3016,7 @@ function WaylandLoginManagerMain
   MainLoopMinuteQuarter=0
   LastMainLoopMinuteQuarter=0
   DoDetectSeats=1
+  DoDetectSeatsDeferred=0
   StartedSeats=()
   
   #Value is 1 for new seats, when a seat is removed, it is set to 0. This is for tracking if a seat is recreated.
@@ -3060,8 +3061,16 @@ function WaylandLoginManagerMain
     fi
     MainLoopMinuteQuarter=$(($SECONDS/15))
 
+    #Ensure that DoDetectSeats only runs once a minute, to reduce the possibilty of the FIFO being sent the command too many times to increase CPU load
+    if [[ $DoDetectSeatsDeferred == 1 && MainLoopMinutes -ge 1 ]]
+    then
+      DoDetectSeatsDeferred=0
+      DoDetectSeats=1
+    fi
+
     if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 120 ]]
     then
+      WriteToLog "Detecting seat configuration..."
       DoDetectSeats=0
       MainLoopMinutes=0
       #Find what seats are new
@@ -3615,7 +3624,13 @@ Will show a menu with a few options for diagnosis." 20 50
     elif [[ $COMMAND == "DetectSeats" ]]
     then
       WriteToLog "received command $COMMAND"
-      DoDetectSeats=1
+      #Only detect the seats once a minute at most to reduce the CPU from being overloaded
+      if [[ $MainLoopMinutes -lt 1 ]]
+      then
+        DoDetectSeatsDeferred=1
+      else
+        DoDetectSeats=1
+      fi
     #If it recives a Info command, then bring up a info dialog and start a info job, only if there isn't another info job running
     elif [[ $COMMAND == "Info" ]]
     then
