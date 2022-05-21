@@ -2508,6 +2508,11 @@ function LeavePrompt
   then
     exit 0
   fi
+  
+  if [[ $ACTION == ""  ]]
+  then
+    return
+  fi
 
   if [[ $ACTION != "Logoff" && $ACTION != "Switch User" && $RunningSessionCount -ge $SessionPromptThreshold ]]
   then

@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-05-19 23:17:07.069570564 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2022-05-19 23:17:56.426071071 -0400
+--- usr/bin/waylandloginmanager	2022-05-20 23:41:25.137718088 -0400
++++ usr/bin/waylandloginmanagerkdialog	2022-05-20 23:41:50.374042222 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -310,7 +310,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2517,7 +2510,7 @@
+@@ -2522,7 +2515,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -319,7 +319,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2562,7 +2555,7 @@
+@@ -2567,7 +2560,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -328,7 +328,7 @@
    fi
  }
  
-@@ -2890,7 +2883,7 @@
+@@ -2895,7 +2888,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -337,7 +337,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2928,7 +2921,7 @@
+@@ -2933,7 +2926,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -346,7 +346,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2964,15 +2957,20 @@
+@@ -2969,15 +2962,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -373,7 +373,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2980,12 +2978,12 @@
+@@ -2985,12 +2983,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -389,7 +389,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3340,9 +3338,9 @@
+@@ -3345,9 +3343,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
