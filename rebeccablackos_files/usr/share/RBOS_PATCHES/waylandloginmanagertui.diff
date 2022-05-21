@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-05-20 23:41:25.137718088 -0400
-+++ usr/bin/waylandloginmanagertui	2022-05-20 23:41:43.493954121 -0400
+--- usr/bin/waylandloginmanager	2022-05-21 17:23:36.634073888 -0400
++++ usr/bin/waylandloginmanagertui	2022-05-21 17:24:41.818863974 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -563,7 +563,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3646,7 +3641,7 @@
+@@ -3647,7 +3642,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -572,7 +572,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3661,6 +3656,7 @@
+@@ -3662,6 +3657,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -580,7 +580,7 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3718,6 +3714,7 @@
+@@ -3719,6 +3715,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
    WLM_SOCKET_FILTER=1 $0 --socketfilter &

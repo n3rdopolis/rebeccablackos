@@ -1076,7 +1076,7 @@ function ExportSessionData
   echo "${EXPORTSTRING//declare/declare -g}" > /run/waylandloginmanager/sessiondata
 }
 
-#This function sends a command to the waylandloginmanager's own loginmanager_control FIFO. It takes 2 arguments, the command to send to the command FIFO, and the relevant seat
+#This function sends a command to the waylandloginmanager's own loginmanager_control socket. It takes 2 arguments, the command to send to the command socket, and the relevant seat
 function SendSelfCommand
 {
   SENDCOMMAND=$1
@@ -2938,7 +2938,7 @@ function StartAutoLogin
   fi
 }
 
-#This function is part of the startup for the waylandloginmanager. it creates the FIFO files, giving ONLY write access to loginmanager_control for ALL users, and only write access to loginmanager_register is given to root. Any other permissions, including read is denied.
+#This function is part of the startup for the waylandloginmanager. it creates the FIFO files needed for IPC
 function SetupIPCFiles
 {
   #Create communication fifo.
@@ -2952,7 +2952,7 @@ function SetupIPCFiles
   exec 1000<> /run/waylandloginmanager/loginmanager_listener
 
   touch /run/waylandloginmanager/autologinran
-  chmod 700 /run/waylandloginmanager/autologinran
+  chmod 600 /run/waylandloginmanager/autologinran
   rm /run/waylandloginmanager/socketlock 2>/dev/null
 
   chown $FIFOREADERUSER /run/waylandloginmanager
@@ -3632,6 +3632,7 @@ Will show a menu with a few options for diagnosis." 20 50
       #Only detect the seats once a minute at most to reduce the CPU from being overloaded
       if [[ $MainLoopMinutes -lt 1 ]]
       then
+        WriteToLog "Detection of seats deferred to at least one minute since last detection"
         DoDetectSeatsDeferred=1
       else
         DoDetectSeats=1
