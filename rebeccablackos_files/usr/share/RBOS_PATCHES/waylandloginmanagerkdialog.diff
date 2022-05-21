@@ -7,8 +7,8 @@
 -#The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the zenity dialogs
 +#The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the kdialog dialogs
  
--#It depends on zenity kbd, weston, and expect
-+#It depends on kdialog kbd, weston, and expect
+-#It depends on zenity kbd, weston, socat, and expect
++#It depends on kdialog kbd, weston, socat, and expect
  
  #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
  
@@ -269,8 +269,8 @@
  }
  
  
--#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
-+#This function is called when the loginmanager_control FIFO recives the command "Leave". It brings up a dialog for handling power options for the computer.
+-#This function is called when the loginmanager_control socket recives the command "Leave". It brings up a zenity dialog for handling power options for the computer.
++#This function is called when the loginmanager_control socket recives the command "Leave". It brings up a dialog for handling power options for the computer.
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
