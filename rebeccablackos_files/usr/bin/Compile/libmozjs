@@ -56,7 +56,11 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#patch -f -p1 < /usr/share/RBOS_PATCHES/libmozjs.diff
+#https://www.linuxfromscratch.org/blfs/view/svn/general/js91.html
+if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
+then
+  sed -e '/typedef[ ]*double/s/double/long double/' -i modules/fdlibm/src/math_private.h
+fi
 export SHELL=/bin/bash
 #cd mozjs-38.0.0/js/src/
 mkdir build
