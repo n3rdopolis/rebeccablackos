@@ -57,7 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #https://www.linuxfromscratch.org/blfs/view/svn/general/js91.html
-if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
   sed -e '/typedef[ ]*double/s/double/long double/' -i modules/fdlibm/src/math_private.h
 fi

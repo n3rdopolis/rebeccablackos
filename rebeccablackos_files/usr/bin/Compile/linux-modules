@@ -69,14 +69,14 @@ sed -i '/CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
 echo "Building $BUILDARCH modules"...
 sed -i '/CONFIG_MODVERSIONS[ =]/cCONFIG_MODVERSIONS=y' .config
 
-if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
   sed -i '/^CONFIG_64BIT[ =]/c\# CONFIG_64BIT is not set' .config
   sed -i '/^CONFIG_X86_32[ =]/c\CONFIG_X86_32=y' .config
   sed -i '/^CONFIG_X86_64[ =]/c\# CONFIG_X86_64 is not set' .config
   sed -i '/^CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf32-i386"' .config
   sed -i '/^CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"' .config
-elif [[ $BUILDARCH == amd64 ]]
+elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
 then
   sed -i '/^CONFIG_64BIT[ =]/c\CONFIG_64BIT=y' .config
   sed -i '/^CONFIG_X86_32[ =]/c\# CONFIG_X86_32 is not set' .config
