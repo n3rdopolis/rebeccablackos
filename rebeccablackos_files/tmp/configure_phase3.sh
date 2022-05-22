@@ -304,7 +304,7 @@ function PostInstallActions
   ln -s /usr/bin/chvt-ng /usr/bin/chvt
 
   #save the build date of the CD.
-  echo "$(date)" > /etc/builddate
+  date -u +"%A, %Y-%M-%d %H:%M:%S %Z" > /etc/builddate
 }
 PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
 
