@@ -646,7 +646,7 @@ then
   echolog "The script will now abort."
   faillog "free space: $FREEDISKSPACE_OUTPUT"
 else
-  echolog -e "\n\nFree disk space needed for ISO output: $(( ((STORAGESIZE_TOTALSIZE_OUTPUT+1023) /1024 + 1023) /1024 ))GB, Free disk space for ISO output: $(( ((FREEDISKSPACE_OUTPUT+1023) /1024 + 1023) /1024 ))GB"
+  echolog -e "\n\nFree disk space needed for ISO output: $(( ((STORAGESIZE_TOTALSIZE_OUTPUT+1023) /1024 + 1023) /1024 ))GB, Current free disk space for ISO output: $(( ((FREEDISKSPACE_OUTPUT+1023) /1024 + 1023) /1024 ))GB"
 fi
 
 #get the size of the build location
@@ -658,8 +658,8 @@ then
   echolog "The script will now abort."
   faillog "free space: $FREEDISKSPACE_BUILDSPACE"
 else
-  echolog -e "Free RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed for build: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space for build: $(( ((FREEDISKSPACE_BUILDSPACE+1023) /1024 + 1023) /1024 ))GB"
-  echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM, $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed.\n"
+  echolog -e "Current free RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed for build: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Current free disk space for build: $(( ((FREEDISKSPACE_BUILDSPACE+1023) /1024 + 1023) /1024 ))GB"
+  echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM, $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed to be free.\n"
 fi
 
 
