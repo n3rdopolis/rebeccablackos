@@ -43,6 +43,9 @@ then
   export SEATD_VTBOUND=0
 fi
 
+#Supress warning when started from initramfs
+export LC_ALL=C.UTF-8
+
 #Load simpledrm if there is no /dev/dri/card0 device
 SIMPLEDRM_FORCELOADAED=0
 if [ ! -e /dev/dri/card0 ]
