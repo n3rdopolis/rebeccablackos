@@ -141,6 +141,9 @@ ln -s /etc/pam.d /opt/etc/pam.d
 #workaround hardcoded links to /usr/bin/python in various scripts
 ln -s $(which python3) /usr/bin/python
 
+#Configure a locale so that the initramfs doesn't have to
+update-locale LANG=en_US.UTF-8
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
