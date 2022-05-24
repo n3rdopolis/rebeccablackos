@@ -162,16 +162,6 @@ function PostInstallActions
 
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-
-  #Oxygen-Icons moved all the folders for icon sizes into a base folder, create symlinks for the old path
-  ln -s /usr/share/icons/oxygen/base/8x8 /usr/share/icons/oxygen/8x8
-  ln -s /usr/share/icons/oxygen/base/16x16 /usr/share/icons/oxygen/16x16
-  ln -s /usr/share/icons/oxygen/base/22x22 /usr/share/icons/oxygen/22x22
-  ln -s /usr/share/icons/oxygen/base/32x32 /usr/share/icons/oxygen/32x32
-  ln -s /usr/share/icons/oxygen/base/48x48 /usr/share/icons/oxygen/48x48
-  ln -s /usr/share/icons/oxygen/base/64x64 /usr/share/icons/oxygen/64x64
-  ln -s /usr/share/icons/oxygen/base/128x128 /usr/share/icons/oxygen/128x128
-  ln -s /usr/share/icons/oxygen/base/256x256 /usr/share/icons/oxygen/256x256
   
   #Install any systemd-user sessions from /opt to where systemd can see them
   find /opt/lib/systemd/user/* | while read -r FILE
