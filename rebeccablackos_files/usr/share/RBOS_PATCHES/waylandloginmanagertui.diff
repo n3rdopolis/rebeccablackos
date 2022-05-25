@@ -174,9 +174,9 @@
        do
 +        WSessionName=${WSESSIONARRAY[$((8+element*10))]}
 +        WSessionNameLength=${#WSessionName}
-+        if [[ $WSessionNameLength -gt 30 ]]
++        if [[ $WSessionNameLength -gt 28 ]]
 +        then
-+          WSessionName="${WSessionName:0:27}..."
++          WSessionName="${WSessionName:0:25}..."
 +          WSessionNameLength=${#WSessionName}
 +        fi
 +        SpacePadCount=$(( 30 - $WSessionNameLength ))
