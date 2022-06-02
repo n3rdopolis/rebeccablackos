@@ -45,7 +45,7 @@ function CompilePackageInList
   #compile_all is running to download the source
   if [[ "$argument" == download-only ]]
   then
-    echo "Download/Update $BUILDNAME source ($CurrentPackageNumber of $TotalPackageNumber)"
+    echo "Download/Update $BUILDNAME source (~$CurrentPackageNumber of $TotalPackageNumber)"
 
     #Allow more than one downloads running at a time, only downloads and clean can run more than one at a time
     #Even smalldebinstall cannot, as only one instance of dpkg can run
@@ -66,6 +66,9 @@ function CompilePackageInList
       echo "$BUILDNAME" >> /buildlogs/build_core/faileddownloads
       return
     fi
+    MULTIJOBSTATUS="~"
+  else
+    MULTIJOBSTATUS=""
   fi
 
   #compile_all is running to build the source
@@ -148,7 +151,7 @@ function CompilePackageList
   for Package in "${CompilePackagesList[@]}"
   do
     ((CurrentPackageNumber++))
-    export BUILDCORECURRENTPACKAGENUMBER=$CurrentPackageNumber
+    export BUILDCORECURRENTPACKAGENUMBER=${MULTIJOBSTATUS}${CurrentPackageNumber}
     CompilePackageInList "$Package"
   done
   wait
