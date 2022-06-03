@@ -61,10 +61,10 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-if [[ $BUILDARCH == i386 || $BUILDARCH == i686 ]]
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
   ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests
-elif [[ $BUILDARCH == amd64 ]]
+elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
 then
   ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests --enable-win64
 else
