@@ -962,6 +962,9 @@ function MakeAndInstall()
     #Make the script executable
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagereducescript"
 
+    #Update the ldconfig cache
+    ldconfig
+
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
