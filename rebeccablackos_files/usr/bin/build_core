@@ -728,6 +728,8 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "PackageDownloadSource finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PackageDownloadSource"
     rm "/$SOURCEDIR/$SOURCENAME/packagedownloadscript"
+  else
+    echo "Package $SOURCENAME is built, and not set to build new revisions. Skipping download."
   fi
 }
 
