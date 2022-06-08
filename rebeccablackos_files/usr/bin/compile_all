@@ -41,6 +41,7 @@ function CompilePackage
 function CompilePackageInList
 {
   BUILDNAME=$1
+  MULTIJOBSTATUS=""
 
   #compile_all is running to download the source
   if [[ "$argument" == download-only ]]
@@ -67,8 +68,6 @@ function CompilePackageInList
       return
     fi
     MULTIJOBSTATUS="~"
-  else
-    MULTIJOBSTATUS=""
   fi
 
   #compile_all is running to build the source
@@ -127,6 +126,7 @@ function CompilePackageInList
       echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
       return
     fi
+    MULTIJOBSTATUS="~"
   fi
   
   #compile_all is running to download and build
