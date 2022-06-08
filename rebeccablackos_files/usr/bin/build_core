@@ -311,6 +311,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git rebase -s ours
   $NONROOTCOMMAND git pull -f
   $NONROOTCOMMAND git rebase -s ours
+  $NONROOTCOMMAND git fetch --prune
   $NONROOTCOMMAND git checkout -f $SOURCEREVISION
   GitCheckoutResult=$?
   $NONROOTCOMMAND git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
@@ -350,6 +351,7 @@ function DownloadGIT()
     $NONROOTCOMMAND git rebase
     $NONROOTCOMMAND git pull -f
     $NONROOTCOMMAND git rebase -s ours
+    $NONROOTCOMMAND git fetch --prune
     git config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
     $NONROOTCOMMAND git submodule sync --recursive
     $NONROOTCOMMAND git submodule init
