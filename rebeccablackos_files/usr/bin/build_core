@@ -847,6 +847,9 @@ function MakeAndInstall()
     #Empty any possible logs inside the source folder
     rm "/$SOURCEDIR/$SOURCENAME/Logs/"*
 
+    #Update the ldconfig cache
+    ldconfig
+
     #Create a script that will be run as non root, to handle the custom configure and build options
     echo "#! /bin/bash
     mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
@@ -963,9 +966,6 @@ function MakeAndInstall()
     
     #Make the script executable
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagereducescript"
-
-    #Update the ldconfig cache
-    ldconfig
 
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
