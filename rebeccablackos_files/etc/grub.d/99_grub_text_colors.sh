@@ -25,7 +25,7 @@ fi
 
 if [ -d /etc/default/grub.d ]
 then
-  find -type f /etc/default/grub.d/* | sort | while read FILE
+  find -type f /etc/default/grub.d/* | sort | while read -r FILE
   do
     source "$FILE"
   done
