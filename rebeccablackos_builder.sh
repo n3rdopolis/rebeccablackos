@@ -816,7 +816,7 @@ chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.local/wlprofile
 chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/wsessions.d/*.desktop
 
-find "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/ -type d | while read DIRECTORY
+find "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/ -type d | while read -r DIRECTORY
 do
   chmod 0755 "$DIRECTORY"
 done
