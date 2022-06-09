@@ -80,7 +80,7 @@ plymouth_result=$?
 
 if [ $systemd_result -ne 0 ]
 then
-  find /sys/class/input/event* | while read Device
+  find /sys/class/input/event* | while read -r Device
   do
     read MAJMIN < $Device/dev
     if [ -e /run/udev/data/c${MAJMIN} ]
@@ -94,7 +94,7 @@ then
     echo "E:ID_SEAT=seat0"        >> /run/udev/data/c${MAJMIN}
   done
 
-  find /sys/class/drm/*/dev | while read Device
+  find /sys/class/drm/*/dev | while read -r Device
   do
     read MAJMIN < $Device
     if [ -e /run/udev/data/c${MAJMIN} ]
@@ -118,7 +118,7 @@ sh -l > /dev/null 2>&1
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
 then
-  find /sys/class/input/event* | while read Device
+  find /sys/class/input/event* | while read -r Device
   do
     read MAJMIN < $Device
     if [ -e /run/udev/data/c${MAJMIN} ]
@@ -131,7 +131,7 @@ then
     fi
   done
 
-  find /sys/class/drm/*/dev | while read Device
+  find /sys/class/drm/*/dev | while read -r Device
   do
     read MAJMIN < $Device
     if [ -e /run/udev/data/c${MAJMIN} ]
