@@ -85,8 +85,8 @@ if [[ -e $INSTALLDIR/bin/sway ]]
 then
   mkdir -p /etc/skel/.config/sway
   cp config $INSTALLDIR/etc/sway/config /etc/skel/.config/sway 
-  sed -i 's/usr/opt/g' /etc/skel/.config/sway/config
-  sed -i 's\/opt/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png\/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png\g' /etc/skel/.config/sway/config
+  sed -i "s|/usr|$INSTALLDIR|g" /etc/skel/.config/sway/config
+  sed -i "s|$INSTALLDIR/share/backgrounds/sway/Sway_Wallpaper_Blue_1920x1080.png|/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png|g" /etc/skel/.config/sway/config
   sed -i 's/dmenu_path | dmenu | xargs swaymsg exec --/waylandapp/g' /etc/skel/.config/sway/config
   sed -i 's/alacritty/foot/g' /etc/skel/.config/sway/config
 fi
