@@ -69,9 +69,9 @@ function PackageCompileSource()
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-python3 setup.py install --prefix=/opt
+python3 setup.py install --prefix=$INSTALLDIR --root=/ --install-layout=deb
 cp ./meson.py $INSTALLDIR/bin/meson
-cp -R ./mesonbuild /opt/lib/$(readlink /usr/bin/python3)/site-packages/
+cp -R ./mesonbuild $INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
