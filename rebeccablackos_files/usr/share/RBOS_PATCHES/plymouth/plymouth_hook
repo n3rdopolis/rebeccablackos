@@ -177,6 +177,19 @@ else
         copy_modules_dir kernel/drivers/gpu/drm $MODULES_EXCLUDE
 fi
 
+#Follow https://github.com/dracutdevs/dracut/pull/1666 for compatibility with Linux 5.17+
+#It seems to be any module that calls drm_privacy_screen_register will be needed in the initramfs
+#It seems kernel/drivers/platform/x86 is where all these drivers are
+#It seems that the called functions are listed in strings within the kernel modules
+find $MODULESDIR/kernel/drivers/platform/x86 -maxdepth 1 -type f | while read MODULE
+do
+  RESULT=$(strings $MODULE | grep ^drm_privacy_screen_register$ >/dev/null 2>/dev/null; echo $?)
+  if [ $RESULT -eq 0 ]
+  then
+    manual_add_modules "$(basename "$MODULE" .ko)"
+  fi
+done
+
 # copy renderers
 copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/frame-buffer.so
 copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/drm.so
