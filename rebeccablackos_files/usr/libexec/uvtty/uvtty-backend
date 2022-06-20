@@ -117,6 +117,7 @@ do
         ((Retries++))
         if [[ $Retries -ge 5 ]]
         then
+          echo "Timed out waiting for the symlink to the PTY being created"
           break
         fi
       done

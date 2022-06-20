@@ -41,6 +41,7 @@ function PtyResizeEvent
       ((Retries++))
       if [[ $Retries -ge 5 ]]
       then
+        echo "Timed out waiting for the ptycommandproxy fifo being created, Will not send resize command"
         return
       fi
     done
