@@ -183,8 +183,7 @@ fi
 #It seems that the called functions are listed in strings within the kernel modules
 find $MODULESDIR/kernel/drivers/platform/x86 -maxdepth 1 -type f | while read MODULE
 do
-  RESULT=$(strings $MODULE | grep ^drm_privacy_screen_register$ >/dev/null 2>/dev/null; echo $?)
-  if [ $RESULT -eq 0 ]
+  if strings "$MODULE" | grep "^drm_privacy_screen_register$" >/dev/null 2>/dev/null
   then
     manual_add_modules "$(basename "$MODULE" .ko)"
   fi
