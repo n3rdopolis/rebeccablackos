@@ -41,17 +41,17 @@ function PtyResizeEvent
       ((Retries++))
       if [[ $Retries -ge 5 ]]
       then
-        echo "Timed out waiting for the ptycommandproxy fifo being created, Will not send resize command"
         return
       fi
     done
   fi
 
+  #Wait for the terminal client to act when SIG_WINCH is sent before getting the size
+  $SLEEPCMD .3
   ClientPTYSize=($(stty size))
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
 }
-#Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
-trap PtyResizeEvent WINCH
+
 
 if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
 then
@@ -59,8 +59,12 @@ then
 fi
 ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
 
-PtyResizeEvent
 socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
+
+#Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
+trap PtyResizeEvent WINCH
+PtyResizeEvent
+
 while [ 1 ]
 do
   wait $!

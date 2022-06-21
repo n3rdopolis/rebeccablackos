@@ -47,12 +47,13 @@ function PtyResizeEvent
       ((Retries++))
       if [[ $Retries -ge 5 ]]
       then
-        echo "Timed out waiting for the ptycommandproxy fifo being created, Will not send resize command"
         return
       fi
     done
   fi
 
+  #Wait for the terminal client to act when SIG_WINCH is sent before getting the size
+  $SLEEPCMD .3
   ClientPTYSize=($(stty size))
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 }
@@ -68,12 +69,12 @@ then
   done
 fi
 
-PtyResizeEvent
 socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
 set -m
 SOCATPID=$!
 
 trap 'if [[ ! -e /proc/$SOCATPID ]]; then exit; fi' SIGCHLD
+PtyResizeEvent
 
 while [ 1 ]
 do
