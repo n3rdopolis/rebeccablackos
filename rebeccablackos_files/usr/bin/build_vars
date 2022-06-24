@@ -29,6 +29,11 @@ then
   export BUILDARCH=$(arch)
 fi
 
+if [[ -z $EXTERNALBUILDHOME ]]
+then
+  export EXTERNALBUILDHOME=/tmp
+fi
+
 
 #export BUILD_CORE_FORCE_GCC_VERSION=7
 export DESTDIR=/
@@ -47,9 +52,7 @@ export LIBRARY_PATH=$INSTALLDIR/lib
 export QT_PLUGIN_PATH=$INSTALLDIR/lib/plugins/
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
-export ACLOCAL_PATH=/tmp/aclocal:$INSTALLDIR/share/aclocal:/usr/share/aclocal
-export ACLOCAL_FLAGS="-I /tmp/aclocal"
-export ACLOCAL="aclocal -I /tmp"
+export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
 export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/:/opt/lib/python3/dist-packages/
