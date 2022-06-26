@@ -1,0 +1,43 @@
+[Unit]
+#Single user vtty for non-vt text mode processes that configure the system, such as console-conf
+Description=Graphical terminal for vTTY %I
+
+After=vtty-backend-novt@.service
+After=systemd-user-sessions.service plymouth.service display-manager.service
+
+
+BindsTo=vtty-backend-novt@.service
+
+#Same as default getty service
+IgnoreOnIsolate=true
+Conflicts=rescue.service
+Before=rescue.service
+
+[Service]
+Environment=XDG_SEAT=seat0
+PAMName=vtty
+
+ExecStart=/usr/libexec/vtty/vtty-frontend %I
+
+Restart=on-failure
+RestartSec=0
+StartLimitIntervalSec=30
+StartLimitBurst=3
+
+Type=simple
+User=vtty
+
+NoNewPrivileges=true
+ProtectSystem=true
+PrivateTmp=true
+PrivateNetwork=true
+RestrictRealtime=true
+ProtectHostname=true
+ProtectKernelTunables=true
+RestrictSUIDSGID=true
+
+
+
+[Install]
+WantedBy=multi-user.target
+DefaultInstance=getty0
