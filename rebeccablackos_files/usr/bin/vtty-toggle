@@ -172,7 +172,7 @@ fi
 
 if [[ $GettyServiceState != 0 && $vTTYServiceState != 0 ]]
 then
-  echo "Neither the systemd getty handler nor the vtty handler for $CurrentTTY are active."
+  echo "Neither the systemd getty handler nor the vtty handler for $CurrentTTY are active, or $CurrentTTY is not a vTTY."
   exit 1
 fi
 
