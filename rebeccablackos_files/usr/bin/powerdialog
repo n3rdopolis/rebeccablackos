@@ -18,33 +18,16 @@
 
 #This script displays a status on power information, such as battery percentages, and if the power is plugged in
 
-SampleDate=$(date +"%m/%d/%Y %I:%M %p")
+SampleDate=$(date +"%Y-%m-%d %I:%M %p")
 
-#Get if power supply is plugged in
-ACStatus=$(cat /sys/class/power_supply/AC/online)
-if [[ $ACStatus == 1 ]]
-then 
-  ACStatusString=Yes
-else
-  ACStatusString=No
+#Get Battery status
+BatteryString=$(acpi -V 2>/dev/null | grep ^Battery:)
+if [[ -z $BatteryString ]]
+then
+  BatteryString="No batteries detected"
 fi
-
-BatteryCount=0
-unset BatteryString
-while read -r Battery
-do
-  MaxPower=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_full)
-  CurrentState=$(cat /sys/class/power_supply/BAT$BatteryCount/charge_now)
-  BatteryCapacity=$((CurrentState * 100 / MaxPower ))
-  ((BatteryCount++))
-  BatteryString+="Battery $BatteryCount: $BatteryCapacity%"
-  BatteryString+=$'\n'
-done < <(find /sys/class/power_supply/BAT*)
 
 kdialog --msgbox "
 Battery Status as of $SampleDate
-
-Plugged In: $ACStatusString
-Total Batteries: $BatteryCount
 
 $BatteryString" --title="Battery Status"
