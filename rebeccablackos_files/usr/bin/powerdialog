@@ -21,7 +21,7 @@
 SampleDate=$(date +"%Y-%m-%d %I:%M %p")
 
 #Get Battery status
-BatteryString=$(acpi -V 2>/dev/null | grep ^Battery:)
+BatteryString=$(acpi -V 2>/dev/null | grep ^Battery)
 if [[ -z $BatteryString ]]
 then
   BatteryString="No batteries detected"
