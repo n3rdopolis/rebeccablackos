@@ -1025,7 +1025,7 @@ ioctl(fd, 0x4B3A, 1); \
 fd.close()" &>/dev/null
 }
 
-#This function is used by the WaylandLoginManager to find the next availible tty, starting from CalcTTY+1
+#This function is used by the WaylandLoginManager to find the next availible tty.
 #it prints the TTY number to stdio. takes no arguments. If it can't find an open tty, it returns -1
 function GetNextTTY
 {
@@ -1037,23 +1037,24 @@ function GetNextTTY
     SYSTEMDTTYS+=($(loginctl show-session $SESSION -p VTNr --value 2>/dev/null))
   done
 
-  TTYNotInLogind=0
+  TTYInLogindCount=0
   TTYNotInUse=0
   CalcTTY=$MinimumTTY
-  while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 64) || $TTYNotInLogind -gt 0 ]]
+  while [[ ($TTYNotInUse -ne 1 && $CalcTTY -lt 64) || $TTYInLogindCount -gt 0 ]]
   do
-    #Returns 1 when NOT in use.
     fuser -s /dev/tty$CalcTTY &>/dev/null
+    #This is true when not in use, as fuser returns 1 when it can't find a process using a file
     TTYNotInUse=$?
-    TTYNotInLogind=0
+    #Number of times the tty is associated with a session in logind, sometimes orphan ones without running processes still remain open in logind
+    TTYInLogindCount=0
     for SYSTEMDTTY in ${SYSTEMDTTYS[@]}
     do
       if [[ $SYSTEMDTTY == "$CalcTTY" ]]
       then
-        ((TTYNotInLogind++))
+        ((TTYInLogindCount++))
       fi
     done
-    if [[ $TTYNotInUse -ne 1 ]]
+    if [[ $TTYNotInUse -ne 1 || $TTYInLogindCount -ne 0 ]]
     then
       ((CalcTTY++))
     fi
