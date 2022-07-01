@@ -55,7 +55,7 @@ REBUILDNEWREVISION=0
 function PackageDownloadSource
 {
 #cherry-pick xorriso patch https://askubuntu.com/questions/1289400/remaster-installation-image-for-ubuntu-20-10
-git diff c4d66ecb1925ca957edc09326d3fa87af54b538c 396d09946e7ad8e6a71e61fbc22f55109c066c2f xorriso/iso_img.c | patch -p1
+git diff c4d66ecb1925ca957edc09326d3fa87af54b538c 396d09946e7ad8e6a71e61fbc22f55109c066c2f xorriso/iso_img.c | patch -f -p1
 }
 
 
