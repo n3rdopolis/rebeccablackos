@@ -189,6 +189,9 @@ function PostInstallActions
   
   #enable acpid
   systemctl enable acpid.service
+  
+  #enable upower
+  systemctl enable upower.service
 
   #enable the virtual tty services.
   systemctl enable vtty-frontend@.service
