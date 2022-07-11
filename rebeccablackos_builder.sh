@@ -906,7 +906,10 @@ echolog "Moving built ISO files..."
 EXPORT_STARTTIME=$(date +%s)
 #Take a snapshot of the source
 
-rm "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
+if [[ -e "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz ]]
+then
+  rm "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Source_"$BUILDARCH".tar.gz
+fi
 
 #Pack the source into a tar file, trying to always get the same filehash
 TARDATESTAMP=$(cat ""$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
