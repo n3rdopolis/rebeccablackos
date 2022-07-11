@@ -277,16 +277,8 @@ function PostInstallActions
   #Make the 'hidden' waylandloginmanger zenity to kdialog convert script executable
   chmod 755 /usr/share/RBOS_PATCHES/wlm-zenity-kdialog
 
-  #Uninstall the upstream kernel if there is a custom built kernel installed
-  if [[ $(dlocate /boot/vmlinuz |grep -c rbos ) != 0 ]]
-  then
-    dpkg --get-selections | awk '{print $1}'| grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read -r PACKAGE
-    do
-      apt-get purge $PACKAGE -y
-      #Force initramfs utilites to include the overlay filesystem
-      echo overlay >> /etc/initramfs-tools/modules
-    done
-  fi
+  #Force initramfs utilites to include the overlay filesystem
+  echo overlay >> /etc/initramfs-tools/modules
 
   #Create a /opt/var/log folder
   mkdir /opt/var/log
