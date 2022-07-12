@@ -260,6 +260,7 @@ ls $(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile) &> /dev/null
 result=$?
 if [[ $result != 0 || ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile  ]]
 then
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
   rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile &> /dev/null
   "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
   ln -s /proc/"$$"/cmdline "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
