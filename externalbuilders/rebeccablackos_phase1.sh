@@ -43,8 +43,8 @@ fi
 #Force /etc/apt/sources.list in the importdata dir to win
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/sources.list
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/*
-cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/
+rm "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/* 2>/dev/null
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/etc/apt/preferences.d/ 2>/dev/null
 #Union mount importdata and phase1
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
