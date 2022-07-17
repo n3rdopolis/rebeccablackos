@@ -1,5 +1,5 @@
 diff --git a/src/libply-splash-core/ply-device-manager.c b/src/libply-splash-core/ply-device-manager.c
-index ad1f317..fc92960 100644
+index ad1f317..4c43d3d 100644
 --- a/src/libply-splash-core/ply-device-manager.c
 +++ b/src/libply-splash-core/ply-device-manager.c
 @@ -736,7 +736,13 @@ ply_device_manager_new (const char                *default_tty,
@@ -17,17 +17,6 @@ index ad1f317..fc92960 100644
          manager->input_devices = ply_hashtable_new(ply_hashtable_string_hash, ply_hashtable_string_compare);
          manager->xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
          manager->xkb_keymap = xkb_keymap_new_from_names(manager->xkb_context, get_xkb_layout_description(), XKB_KEYMAP_COMPILE_NO_FLAGS);
-@@ -1031,6 +1037,10 @@ create_devices_from_terminals (ply_device_manager_t *manager)
- 
-         ply_trace ("checking for consoles");
- 
-+        /* Don't fall back to a serial console if the DRM backend exists and is usable */
-+        if (access (PLYMOUTH_PLUGIN_PATH "renderers/drm.so", F_OK) == 0 && ply_path_match_exists ("/dev/dri/card*"))
-+                return false;
-+
-         if (manager->flags & PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES) {
-                 has_serial_consoles = false;
-                 ply_trace ("ignoring all consoles but default console because explicitly told to.");
 diff --git a/src/libply/ply-utils.c b/src/libply/ply-utils.c
 index f457579..7d489cb 100644
 --- a/src/libply/ply-utils.c
@@ -71,7 +60,7 @@ index 7572cca..6a2db35 100644
  bool ply_file_exists (const char *file);
  bool ply_character_device_exists (const char *device);
 diff --git a/src/main.c b/src/main.c
-index daf2524..3d43e6a 100644
+index daf2524..fcb3683 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -1990,6 +1990,10 @@ initialize_environment (state_t *state)
@@ -85,3 +74,15 @@ index daf2524..3d43e6a 100644
          if (!state->default_tty) {
                  if (state->mode == PLY_BOOT_SPLASH_MODE_SHUTDOWN ||
                      state->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
+@@ -2350,6 +2354,11 @@ main (int    argc,
+         find_system_default_splash (&state);
+         find_distribution_default_splash (&state);
+ 
++        /* If there are no TTYs and the drm backend exists and is usable, don't fall back to using a serial console. */
++        if (!ply_character_device_exists ("/dev/tty0") && access (PLYMOUTH_PLUGIN_PATH "renderers/drm.so", F_OK) == 0 &&
++            ply_path_match_exists ("/dev/dri/card*"))
++                device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
++
+         if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
+             ignore_serial_consoles == true)
+                 device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
