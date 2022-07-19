@@ -111,9 +111,18 @@ then
   plymouth hide-splash
 fi
 
+#Prefer bash (if started as init). In initramfs, only sh tends to be usable, use sh as a fallback
+if command -v bash > /dev/null 2>/dev/null
+then
+  SHELLCOMMAND="bash"
+else
+  SHELLCOMMAND="sh"
+fi
+
+
 cage -d -s -m extend -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
-sh -l > /dev/null 2>&1
+$SHELLCOMMAND -l > /dev/null 2>&1
 
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
