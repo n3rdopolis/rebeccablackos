@@ -45,7 +45,7 @@ do
   fi
 
   cage -m extend -d -s -- \
-  foot --font DejaVuSansMono:size=10.5 -- \
+  foot --font DejaVuSansMono:size=9 -- \
   /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
   CAGEPID=$!
 
