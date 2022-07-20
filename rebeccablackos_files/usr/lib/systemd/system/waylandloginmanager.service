@@ -6,10 +6,10 @@ Before=getty@tty1.service plymouth.service plymouth-quit-wait.service plymouth-q
 After=systemd-user-sessions.service plymouth-deactivate.service
 
 [Service]
-#Use TTY63 to support text mode fallback if there is no kernel mode setting or framebuffer support
 Type=notify
 ExecStart=/usr/bin/waylandloginmanager
 IgnoreSIGPIPE=no
+#To enable using tty63 for debugging
 #StandardOutput=tty
 #StandardInput=tty
 #TTYPath=/dev/tty63
