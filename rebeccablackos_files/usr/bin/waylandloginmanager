@@ -2805,6 +2805,7 @@ function StartLoginManagerDisplay
             ((TRYCOUNT++))
           done
           systemd-notify --ready &> /dev/null
+          plymouth quit --retain-splash &> /dev/null
           plymouth --wait &> /dev/null
         fi
       else

@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-06-29 22:16:11.053481775 -0400
-+++ usr/bin/waylandloginmanagertui	2022-06-29 22:16:53.809808510 -0400
+--- usr/bin/waylandloginmanager	2022-07-19 23:00:49.470256372 -0400
++++ usr/bin/waylandloginmanagertui	2022-07-19 23:01:44.510978129 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -482,7 +482,7 @@
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -2896,7 +2907,7 @@
+@@ -2897,7 +2908,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -491,7 +491,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2909,7 +2920,7 @@
+@@ -2910,7 +2921,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -500,7 +500,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -2934,7 +2945,7 @@
+@@ -2935,7 +2946,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -509,7 +509,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -2970,15 +2981,20 @@
+@@ -2971,15 +2982,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -536,7 +536,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -2986,12 +3002,12 @@
+@@ -2987,12 +3003,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -552,7 +552,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3346,9 +3362,9 @@
+@@ -3347,9 +3363,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
@@ -564,7 +564,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3548,7 +3564,7 @@
+@@ -3549,7 +3565,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -573,7 +573,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3587,7 +3603,7 @@
+@@ -3588,7 +3604,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -582,7 +582,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3609,7 +3625,7 @@
+@@ -3610,7 +3626,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -591,7 +591,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3648,7 +3664,7 @@
+@@ -3649,7 +3665,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -600,7 +600,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3663,6 +3679,7 @@
+@@ -3664,6 +3680,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -608,7 +608,7 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3720,6 +3737,7 @@
+@@ -3721,6 +3738,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
    WLM_SOCKET_FILTER=1 $0 --socketfilter &
