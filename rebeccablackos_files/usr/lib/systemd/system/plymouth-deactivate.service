@@ -1,0 +1,9 @@
+[Unit]
+Description=Deactivate Plymouth Boot Screen
+After=rc-local.service plymouth-start.service systemd-user-sessions.service
+Before=plymouth-quit.service plymouth-quit-wait.service 
+
+[Service]
+ExecStart=-/opt/bin/plymouth deactivate
+Type=oneshot
+TimeoutSec=20
