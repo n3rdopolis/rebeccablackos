@@ -707,12 +707,12 @@ fi
 
 if [[ $RAMDISK_FOR_SRCBUILD == 1 && $RAMDISK_STATUS == 0 ]]
 then
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay
 fi
 if [[ $RAMDISK_FOR_PHASE3 == 1 && $RAMDISK_STATUS == 0 ]]
 then
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 "$BUILDLOCATION"/build/"$BUILDARCH"/phase_3
 fi
