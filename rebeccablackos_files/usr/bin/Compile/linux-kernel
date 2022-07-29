@@ -62,6 +62,70 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 cp /usr/share/RBOS_PATCHES/linux-kernel/config .config
+
+#Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
+sed -i '/^CONFIG_X86_SYSFB[ =]/c\CONFIG_X86_SYSFB=y' .config
+sed -i '/^CONFIG_DRM_SIMPLEDRM[ =]/c\CONFIG_DRM_SIMPLEDRM=m' .config
+sed -i '/^CONFIG_DRM_VKMS[ =]/c\CONFIG_DRM_VKMS=m' .config
+sed -i '/^CONFIG_DRM_GUD[ =]/c\CONFIG_DRM_GUD=m' .config
+
+#Disable fbdev drivers
+sed -i '/^CONFIG_FB_CIRRUS[ =]/c\# CONFIG_FB_CIRRUS is not set' .config
+sed -i '/^CONFIG_FB_PM2[ =]/c\# CONFIG_FB_PM2 is not set' .config
+sed -i '/^CONFIG_FB_PM2_FIFO_DISCONNECT[ =]/c\# CONFIG_FB_PM2_FIFO_DISCONNECT is not set' .config
+sed -i '/^CONFIG_FB_CYBER2000[ =]/c\# CONFIG_FB_CYBER2000 is not set' .config
+sed -i '/^CONFIG_FB_CYBER2000_DDC[ =]/c\# CONFIG_FB_CYBER2000_DDC is not set' .config
+sed -i '/^CONFIG_FB_ARC[ =]/c\# CONFIG_FB_ARC is not set' .config
+sed -i '/^CONFIG_FB_VGA16[ =]/c\# CONFIG_FB_VGA16 is not set' .config
+sed -i '/^CONFIG_FB_UVESA[ =]/c\# CONFIG_FB_UVESA is not set' .config
+sed -i '/^CONFIG_FB_VESA[ =]/c\# CONFIG_FB_VESA is not set' .config
+sed -i '/^CONFIG_FB_EFI[ =]/c\# CONFIG_FB_EFI is not set' .config
+sed -i '/^CONFIG_FB_N411[ =]/c\# CONFIG_FB_N411 is not set' .config
+sed -i '/^CONFIG_FB_HGA[ =]/c\# CONFIG_FB_HGA is not set' .config
+sed -i '/^CONFIG_FB_LE80578[ =]/c\# CONFIG_FB_LE80578 is not set' .config
+sed -i '/^CONFIG_FB_CARILLO_RANCH[ =]/c\# CONFIG_FB_CARILLO_RANCH is not set' .config
+sed -i '/^CONFIG_FB_MATROX[ =]/c\# CONFIG_FB_MATROX is not set' .config
+sed -i '/^CONFIG_FB_MATROX_MILLENIUM[ =]/c\# CONFIG_FB_MATROX_MILLENIUM is not set' .config
+sed -i '/^CONFIG_FB_MATROX_MYSTIQUE[ =]/c\# CONFIG_FB_MATROX_MYSTIQUE is not set' .config
+sed -i '/^CONFIG_FB_MATROX_G[ =]/c\# CONFIG_FB_MATROX_G is not set' .config
+sed -i '/^CONFIG_FB_MATROX_I2C[ =]/c\# CONFIG_FB_MATROX_I2C is not set' .config
+sed -i '/^CONFIG_FB_MATROX_MAVEN[ =]/c\# CONFIG_FB_MATROX_MAVEN is not set' .config
+sed -i '/^CONFIG_FB_RADEON[ =]/c\# CONFIG_FB_RADEON is not set' .config
+sed -i '/^CONFIG_FB_RADEON_I2C[ =]/c\# CONFIG_FB_RADEON_I2C is not set' .config
+sed -i '/^CONFIG_FB_RADEON_BACKLIGHT[ =]/c\# CONFIG_FB_RADEON_BACKLIGHT is not set' .config
+sed -i '/^CONFIG_FB_ATY128[ =]/c\# CONFIG_FB_ATY128 is not set' .config
+sed -i '/^CONFIG_FB_ATY128_BACKLIGHT[ =]/c\# CONFIG_FB_ATY128_BACKLIGHT is not set' .config
+sed -i '/^CONFIG_FB_ATY[ =]/c\# CONFIG_FB_ATY is not set' .config
+sed -i '/^CONFIG_FB_ATY_CT[ =]/c\# CONFIG_FB_ATY_CT is not set' .config
+sed -i '/^CONFIG_FB_ATY_GX[ =]/c\# CONFIG_FB_ATY_GX is not set' .config
+sed -i '/^CONFIG_FB_ATY_BACKLIGHT[ =]/c\# CONFIG_FB_ATY_BACKLIGHT is not set' .config
+sed -i '/^CONFIG_FB_S3[ =]/c\# CONFIG_FB_S3 is not set' .config
+sed -i '/^CONFIG_FB_S3_DDC[ =]/c\# CONFIG_FB_S3_DDC is not set' .config
+sed -i '/^CONFIG_FB_SAVAGE[ =]/c\# CONFIG_FB_SAVAGE is not set' .config
+sed -i '/^CONFIG_FB_SIS[ =]/c\# CONFIG_FB_SIS is not set' .config
+sed -i '/^CONFIG_FB_SIS_300[ =]/c\# CONFIG_FB_SIS_300 is not set' .config
+sed -i '/^CONFIG_FB_SIS_315[ =]/c\# CONFIG_FB_SIS_315 is not set' .config
+sed -i '/^CONFIG_FB_VIA[ =]/c\# CONFIG_FB_VIA is not set' .config
+sed -i '/^CONFIG_FB_VIA_X_COMPATIBILITY[ =]/c\# CONFIG_FB_VIA_X_COMPATIBILITY is not set' .config
+sed -i '/^CONFIG_FB_NEOMAGIC[ =]/c\# CONFIG_FB_NEOMAGIC is not set' .config
+sed -i '/^CONFIG_FB_KYRO[ =]/c\# CONFIG_FB_KYRO is not set' .config
+sed -i '/^CONFIG_FB_3DFX[ =]/c\# CONFIG_FB_3DFX is not set' .config
+sed -i '/^CONFIG_FB_3DFX_I2C[ =]/c\# CONFIG_FB_3DFX_I2C is not set' .config
+sed -i '/^CONFIG_FB_VOODOO1[ =]/c\# CONFIG_FB_VOODOO1 is not set' .config
+sed -i '/^CONFIG_FB_VT8623[ =]/c\# CONFIG_FB_VT8623 is not set' .config
+sed -i '/^CONFIG_FB_TRIDENT[ =]/c\# CONFIG_FB_TRIDENT is not set' .config
+sed -i '/^CONFIG_FB_ARK[ =]/c\# CONFIG_FB_ARK is not set' .config
+sed -i '/^CONFIG_FB_PM3[ =]/c\# CONFIG_FB_PM3 is not set' .config
+sed -i '/^CONFIG_FB_SMSCUFX[ =]/c\# CONFIG_FB_SMSCUFX is not set' .config
+sed -i '/^CONFIG_FB_UDL[ =]/c\# CONFIG_FB_UDL is not set' .config
+sed -i '/^CONFIG_FB_VIRTUAL[ =]/c\# CONFIG_FB_VIRTUAL is not set' .config
+sed -i '/^CONFIG_XEN_FBDEV_FRONTEND[ =]/c\# CONFIG_XEN_FBDEV_FRONTEND is not set' .config
+sed -i '/^CONFIG_FB_MB862XX[ =]/c\# CONFIG_FB_MB862XX is not set' .config
+sed -i '/^CONFIG_FB_MB862XX_PCI_GDC[ =]/c\# CONFIG_FB_MB862XX_PCI_GDC is not set' .config
+sed -i '/^CONFIG_FB_MB862XX_I2C[ =]/c\# CONFIG_FB_MB862XX_I2C is not set' .config
+sed -i '/^CONFIG_FB_HYPERV[ =]/c\# CONFIG_FB_HYPERV is not set' .config
+
+
 if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
   sed -i '/^CONFIG_64BIT[ =]/c\# CONFIG_64BIT is not set' .config
