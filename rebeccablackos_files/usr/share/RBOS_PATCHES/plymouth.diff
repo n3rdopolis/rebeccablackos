@@ -118,3 +118,19 @@ index daf2524..f57dfa4 100644
          if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
              ignore_serial_consoles == true)
                  device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
+diff --git a/src/main.c b/src/main.c
+index b8fbc48..b04848c 100644
+--- a/src/main.c
++++ b/src/main.c
+@@ -1518,6 +1518,10 @@ static void
+ on_escape_pressed (state_t *state)
+ {
+         ply_trace ("escape key pressed");
++
++        if (!ply_character_device_exists ("/dev/tty0"))
++                return;
++
+         if (validate_input (state, "", "\e"))
+                 toggle_between_splash_and_details (state);
+ }
+
