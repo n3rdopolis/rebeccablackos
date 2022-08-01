@@ -1,8 +1,8 @@
 diff --git a/src/libply-splash-core/ply-device-manager.c b/src/libply-splash-core/ply-device-manager.c
-index ad1f317..c133a2a 100644
+index f8008b2..0537eee 100644
 --- a/src/libply-splash-core/ply-device-manager.c
 +++ b/src/libply-splash-core/ply-device-manager.c
-@@ -736,7 +736,11 @@ ply_device_manager_new (const char                *default_tty,
+@@ -746,7 +746,11 @@ ply_device_manager_new (const char                *default_tty,
          manager->loop = NULL;
          manager->terminals = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
          manager->renderers = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
@@ -12,9 +12,9 @@ index ad1f317..c133a2a 100644
 +        } else {
 +                manager->local_console_terminal = ply_terminal_new (default_tty);
 +        }
-         manager->input_devices = ply_hashtable_new(ply_hashtable_string_hash, ply_hashtable_string_compare);
-         manager->xkb_context = xkb_context_new(XKB_CONTEXT_NO_FLAGS);
-         manager->xkb_keymap = xkb_keymap_new_from_names(manager->xkb_context, get_xkb_layout_description(), XKB_KEYMAP_COMPILE_NO_FLAGS);
+         manager->input_devices = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
+         manager->xkb_context = xkb_context_new (XKB_CONTEXT_NO_FLAGS);
+         manager->xkb_keymap = xkb_keymap_new_from_names (manager->xkb_context, get_xkb_layout_description (), XKB_KEYMAP_COMPILE_NO_FLAGS);
 diff --git a/src/libply/Makefile.am b/src/libply/Makefile.am
 index 8f0abd9..ae5d00c 100644
 --- a/src/libply/Makefile.am
@@ -96,30 +96,7 @@ index 7572cca..f984d60 100644
  bool ply_kernel_command_line_has_argument (const char *argument);
  void ply_kernel_command_line_override (const char *command_line);
 diff --git a/src/main.c b/src/main.c
-index daf2524..f57dfa4 100644
---- a/src/main.c
-+++ b/src/main.c
-@@ -1990,6 +1990,8 @@ initialize_environment (state_t *state)
-         if (!state->default_tty)
-                 if (getenv ("DISPLAY") != NULL && access (PLYMOUTH_PLUGIN_PATH "renderers/x11.so", F_OK) == 0)
-                         state->default_tty = "/dev/tty";
-+                if (ply_use_graphical_without_vts ())
-+                        state->default_tty = find_fallback_tty (state);
-         if (!state->default_tty) {
-                 if (state->mode == PLY_BOOT_SPLASH_MODE_SHUTDOWN ||
-                     state->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
-@@ -2350,6 +2352,9 @@ main (int    argc,
-         find_system_default_splash (&state);
-         find_distribution_default_splash (&state);
- 
-+        if (ply_use_graphical_without_vts ())
-+                device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
-+
-         if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
-             ignore_serial_consoles == true)
-                 device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
-diff --git a/src/main.c b/src/main.c
-index b8fbc48..b04848c 100644
+index daf2524..17d823a 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -1518,6 +1518,10 @@ static void
@@ -133,4 +110,22 @@ index b8fbc48..b04848c 100644
          if (validate_input (state, "", "\e"))
                  toggle_between_splash_and_details (state);
  }
-
+@@ -1990,6 +1994,8 @@ initialize_environment (state_t *state)
+         if (!state->default_tty)
+                 if (getenv ("DISPLAY") != NULL && access (PLYMOUTH_PLUGIN_PATH "renderers/x11.so", F_OK) == 0)
+                         state->default_tty = "/dev/tty";
++                if (ply_use_graphical_without_vts ())
++                        state->default_tty = find_fallback_tty (state);
+         if (!state->default_tty) {
+                 if (state->mode == PLY_BOOT_SPLASH_MODE_SHUTDOWN ||
+                     state->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
+@@ -2350,6 +2356,9 @@ main (int    argc,
+         find_system_default_splash (&state);
+         find_distribution_default_splash (&state);
+ 
++        if (ply_use_graphical_without_vts ())
++                device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
++
+         if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
+             ignore_serial_consoles == true)
+                 device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
