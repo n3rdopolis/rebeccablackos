@@ -177,6 +177,9 @@ else
         copy_modules_dir kernel/drivers/gpu/drm $MODULES_EXCLUDE
 fi
 
+#Add evdev module
+manual_add_modules evdev
+
 #Follow https://github.com/dracutdevs/dracut/pull/1666 for compatibility with Linux 5.17+
 #It seems to be any module that calls drm_privacy_screen_register will be needed in the initramfs
 #It seems kernel/drivers/platform/x86 is where all these drivers are
