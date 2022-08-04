@@ -14,7 +14,7 @@ Conflicts=rescue.service
 Before=rescue.service
 
 [Service]
-Environment=XDG_SEAT=seat0
+Environment=XDG_SEAT=%I
 PAMName=vtty
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %I
@@ -40,4 +40,4 @@ RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target
-DefaultInstance=getty0
+DefaultInstance=seat0
