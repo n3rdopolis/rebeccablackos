@@ -1,10 +1,8 @@
-https://gitlab.freedesktop.org/wayland/weston/-/merge_requests/16
-
 diff --git a/ivi-shell/ivi-shell.c b/ivi-shell/ivi-shell.c
-index 811a83ebc32d5e7e89342c101a234448bf533923..9df63c5f74380115fa3be62a2347c80d38dc4b45 100644
+index eb6bbbe7..9f7d12b6 100644
 --- a/ivi-shell/ivi-shell.c
 +++ b/ivi-shell/ivi-shell.c
-@@ -648,6 +648,7 @@ wet_shell_init(struct weston_compositor *compositor,
+@@ -650,6 +650,7 @@ wet_shell_init(struct weston_compositor *compositor,
  
  	ivi_layout_init_with_compositor(compositor);
  	shell_add_bindings(compositor, shell);
@@ -13,13 +11,13 @@ index 811a83ebc32d5e7e89342c101a234448bf533923..9df63c5f74380115fa3be62a2347c80d
  	return IVI_SUCCEEDED;
  
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 6e9653721a868d0c98479df648192ff85738e8fd..34d8483c3a69ab368f3dec213e772f98ba6de9c4 100644
+index 30913cbc..4dfb0f7d 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -6471,7 +6471,9 @@ weston_output_enable(struct weston_output *output)
- 	weston_output_init_zoom(output);
+@@ -7371,7 +7371,9 @@ weston_output_enable(struct weston_output *output)
+ 	if (!weston_output_placement_ok(output))
+ 		return -1;
  
- 	weston_output_init_geometry(output, x, y);
 -	weston_output_damage(output);
 +	pixman_region32_union(&c->primary_plane.damage,
 +			      &c->primary_plane.damage,
@@ -27,4 +25,3 @@ index 6e9653721a868d0c98479df648192ff85738e8fd..34d8483c3a69ab368f3dec213e772f98
  
  	wl_list_init(&output->animation_list);
  	wl_list_init(&output->feedback_list);
-
