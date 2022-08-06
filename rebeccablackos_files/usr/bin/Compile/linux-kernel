@@ -64,83 +64,87 @@ function PackagePrepareBuild()
 cp /usr/share/RBOS_PATCHES/linux-kernel/config .config
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
-sed -i '/CONFIG_X86_SYSFB[ =]/c\CONFIG_X86_SYSFB=y' .config
-sed -i '/CONFIG_DRM_SIMPLEDRM[ =]/c\CONFIG_DRM_SIMPLEDRM=m' .config
-sed -i '/CONFIG_DRM_GUD[ =]/c\CONFIG_DRM_GUD=m' .config
+#./scripts/config -e CONFIG_SYSFB
+#./scripts/config -e CONFIG_SYSFB_SIMPLEFB
+./scripts/config -e CONFIG_X86_SYSFB
+./scripts/config -m CONFIG_DRM_SIMPLEDRM
+./scripts/config -m CONFIG_DRM_GUD
 
 #Disable fbdev drivers
-sed -i '/CONFIG_FB_CIRRUS[ =]/c\# CONFIG_FB_CIRRUS is not set' .config
-sed -i '/CONFIG_FB_PM2[ =]/c\# CONFIG_FB_PM2 is not set' .config
-sed -i '/CONFIG_FB_PM2_FIFO_DISCONNECT[ =]/c\# CONFIG_FB_PM2_FIFO_DISCONNECT is not set' .config
-sed -i '/CONFIG_FB_CYBER2000[ =]/c\# CONFIG_FB_CYBER2000 is not set' .config
-sed -i '/CONFIG_FB_CYBER2000_DDC[ =]/c\# CONFIG_FB_CYBER2000_DDC is not set' .config
-sed -i '/CONFIG_FB_ARC[ =]/c\# CONFIG_FB_ARC is not set' .config
-sed -i '/CONFIG_FB_VGA16[ =]/c\# CONFIG_FB_VGA16 is not set' .config
-sed -i '/CONFIG_FB_UVESA[ =]/c\# CONFIG_FB_UVESA is not set' .config
-sed -i '/CONFIG_FB_VESA[ =]/c\# CONFIG_FB_VESA is not set' .config
-sed -i '/CONFIG_FB_EFI[ =]/c\# CONFIG_FB_EFI is not set' .config
-sed -i '/CONFIG_FB_N411[ =]/c\# CONFIG_FB_N411 is not set' .config
-sed -i '/CONFIG_FB_HGA[ =]/c\# CONFIG_FB_HGA is not set' .config
-sed -i '/CONFIG_FB_LE80578[ =]/c\# CONFIG_FB_LE80578 is not set' .config
-sed -i '/CONFIG_FB_CARILLO_RANCH[ =]/c\# CONFIG_FB_CARILLO_RANCH is not set' .config
-sed -i '/CONFIG_FB_MATROX[ =]/c\# CONFIG_FB_MATROX is not set' .config
-sed -i '/CONFIG_FB_MATROX_MILLENIUM[ =]/c\# CONFIG_FB_MATROX_MILLENIUM is not set' .config
-sed -i '/CONFIG_FB_MATROX_MYSTIQUE[ =]/c\# CONFIG_FB_MATROX_MYSTIQUE is not set' .config
-sed -i '/CONFIG_FB_MATROX_G[ =]/c\# CONFIG_FB_MATROX_G is not set' .config
-sed -i '/CONFIG_FB_MATROX_I2C[ =]/c\# CONFIG_FB_MATROX_I2C is not set' .config
-sed -i '/CONFIG_FB_MATROX_MAVEN[ =]/c\# CONFIG_FB_MATROX_MAVEN is not set' .config
-sed -i '/CONFIG_FB_RADEON[ =]/c\# CONFIG_FB_RADEON is not set' .config
-sed -i '/CONFIG_FB_RADEON_I2C[ =]/c\# CONFIG_FB_RADEON_I2C is not set' .config
-sed -i '/CONFIG_FB_RADEON_BACKLIGHT[ =]/c\# CONFIG_FB_RADEON_BACKLIGHT is not set' .config
-sed -i '/CONFIG_FB_ATY128[ =]/c\# CONFIG_FB_ATY128 is not set' .config
-sed -i '/CONFIG_FB_ATY128_BACKLIGHT[ =]/c\# CONFIG_FB_ATY128_BACKLIGHT is not set' .config
-sed -i '/CONFIG_FB_ATY[ =]/c\# CONFIG_FB_ATY is not set' .config
-sed -i '/CONFIG_FB_ATY_CT[ =]/c\# CONFIG_FB_ATY_CT is not set' .config
-sed -i '/CONFIG_FB_ATY_GX[ =]/c\# CONFIG_FB_ATY_GX is not set' .config
-sed -i '/CONFIG_FB_ATY_BACKLIGHT[ =]/c\# CONFIG_FB_ATY_BACKLIGHT is not set' .config
-sed -i '/CONFIG_FB_S3[ =]/c\# CONFIG_FB_S3 is not set' .config
-sed -i '/CONFIG_FB_S3_DDC[ =]/c\# CONFIG_FB_S3_DDC is not set' .config
-sed -i '/CONFIG_FB_SAVAGE[ =]/c\# CONFIG_FB_SAVAGE is not set' .config
-sed -i '/CONFIG_FB_SIS[ =]/c\# CONFIG_FB_SIS is not set' .config
-sed -i '/CONFIG_FB_SIS_300[ =]/c\# CONFIG_FB_SIS_300 is not set' .config
-sed -i '/CONFIG_FB_SIS_315[ =]/c\# CONFIG_FB_SIS_315 is not set' .config
-sed -i '/CONFIG_FB_VIA[ =]/c\# CONFIG_FB_VIA is not set' .config
-sed -i '/CONFIG_FB_VIA_X_COMPATIBILITY[ =]/c\# CONFIG_FB_VIA_X_COMPATIBILITY is not set' .config
-sed -i '/CONFIG_FB_NEOMAGIC[ =]/c\# CONFIG_FB_NEOMAGIC is not set' .config
-sed -i '/CONFIG_FB_KYRO[ =]/c\# CONFIG_FB_KYRO is not set' .config
-sed -i '/CONFIG_FB_3DFX[ =]/c\# CONFIG_FB_3DFX is not set' .config
-sed -i '/CONFIG_FB_3DFX_I2C[ =]/c\# CONFIG_FB_3DFX_I2C is not set' .config
-sed -i '/CONFIG_FB_VOODOO1[ =]/c\# CONFIG_FB_VOODOO1 is not set' .config
-sed -i '/CONFIG_FB_VT8623[ =]/c\# CONFIG_FB_VT8623 is not set' .config
-sed -i '/CONFIG_FB_TRIDENT[ =]/c\# CONFIG_FB_TRIDENT is not set' .config
-sed -i '/CONFIG_FB_ARK[ =]/c\# CONFIG_FB_ARK is not set' .config
-sed -i '/CONFIG_FB_PM3[ =]/c\# CONFIG_FB_PM3 is not set' .config
-sed -i '/CONFIG_FB_SMSCUFX[ =]/c\# CONFIG_FB_SMSCUFX is not set' .config
-sed -i '/CONFIG_FB_UDL[ =]/c\# CONFIG_FB_UDL is not set' .config
-sed -i '/CONFIG_FB_VIRTUAL[ =]/c\# CONFIG_FB_VIRTUAL is not set' .config
-sed -i '/CONFIG_XEN_FBDEV_FRONTEND[ =]/c\# CONFIG_XEN_FBDEV_FRONTEND is not set' .config
-sed -i '/CONFIG_FB_MB862XX[ =]/c\# CONFIG_FB_MB862XX is not set' .config
-sed -i '/CONFIG_FB_MB862XX_PCI_GDC[ =]/c\# CONFIG_FB_MB862XX_PCI_GDC is not set' .config
-sed -i '/CONFIG_FB_MB862XX_I2C[ =]/c\# CONFIG_FB_MB862XX_I2C is not set' .config
-sed -i '/CONFIG_FB_HYPERV[ =]/c\# CONFIG_FB_HYPERV is not set' .config
+./scripts/config -d CONFIG_FB_CIRRUS
+./scripts/config -d CONFIG_FB_PM2
+./scripts/config -d CONFIG_FB_PM2_FIFO_DISCONNECT
+./scripts/config -d CONFIG_FB_CYBER2000
+./scripts/config -d CONFIG_FB_CYBER2000_DDC
+./scripts/config -d CONFIG_FB_ARC
+./scripts/config -d CONFIG_FB_VGA16
+./scripts/config -d CONFIG_FB_UVESA
+./scripts/config -d CONFIG_FB_VESA
+./scripts/config -d CONFIG_FB_EFI
+./scripts/config -d CONFIG_FB_N411
+./scripts/config -d CONFIG_FB_HGA
+./scripts/config -d CONFIG_FB_LE80578
+./scripts/config -d CONFIG_FB_CARILLO_RANCH
+./scripts/config -d CONFIG_FB_MATROX
+./scripts/config -d CONFIG_FB_MATROX_MILLENIUM
+./scripts/config -d CONFIG_FB_MATROX_MYSTIQUE
+./scripts/config -d CONFIG_FB_MATROX_G
+./scripts/config -d CONFIG_FB_MATROX_I2C
+./scripts/config -d CONFIG_FB_MATROX_MAVEN
+./scripts/config -d CONFIG_FB_RADEON
+./scripts/config -d CONFIG_FB_RADEON_I2C
+./scripts/config -d CONFIG_FB_RADEON_BACKLIGHT
+./scripts/config -d CONFIG_FB_ATY128
+./scripts/config -d CONFIG_FB_ATY128_BACKLIGHT
+./scripts/config -d CONFIG_FB_ATY
+./scripts/config -d CONFIG_FB_ATY_CT
+./scripts/config -d CONFIG_FB_ATY_GX
+./scripts/config -d CONFIG_FB_ATY_BACKLIGHT
+./scripts/config -d CONFIG_FB_S3
+./scripts/config -d CONFIG_FB_S3_DDC
+./scripts/config -d CONFIG_FB_SAVAGE
+./scripts/config -d CONFIG_FB_SIS
+./scripts/config -d CONFIG_FB_SIS_300
+./scripts/config -d CONFIG_FB_SIS_315
+./scripts/config -d CONFIG_FB_VIA
+./scripts/config -d CONFIG_FB_VIA_X_COMPATIBILITY
+./scripts/config -d CONFIG_FB_NEOMAGIC
+./scripts/config -d CONFIG_FB_KYRO
+./scripts/config -d CONFIG_FB_3DFX
+./scripts/config -d CONFIG_FB_3DFX_I2C
+./scripts/config -d CONFIG_FB_VOODOO1
+./scripts/config -d CONFIG_FB_VT8623
+./scripts/config -d CONFIG_FB_TRIDENT
+./scripts/config -d CONFIG_FB_ARK
+./scripts/config -d CONFIG_FB_PM3
+./scripts/config -d CONFIG_FB_SMSCUFX
+./scripts/config -d CONFIG_FB_UDL
+./scripts/config -d CONFIG_FB_VIRTUAL
+./scripts/config -d CONFIG_XEN_FBDEV_FRONTEND
+./scripts/config -d CONFIG_FB_MB862XX
+./scripts/config -d CONFIG_FB_MB862XX_PCI_GDC
+./scripts/config -d CONFIG_FB_MB862XX_I2C
+./scripts/config -d CONFIG_FB_HYPERV
 
+#Disable debug option
+./scripts/config -d CONFIG_DEBUG_INFO_BTF
 
 if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
-  sed -i '/CONFIG_64BIT[ =]/c\# CONFIG_64BIT is not set' .config
-  sed -i '/CONFIG_X86_32[ =]/c\CONFIG_X86_32=y' .config
-  sed -i '/CONFIG_X86_64[ =]/c\# CONFIG_X86_64 is not set' .config
-  sed -i '/CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf32-i386"' .config
-  sed -i '/CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/i386_defconfig"' .config
-  sed -i '/CONFIG_X86_PAE[ =]/c\CONFIG_X86_PAE=y"' .config
+  ./scripts/config -d CONFIG_64BIT
+  ./scripts/config -e CONFIG_X86_32
+  ./scripts/config -d CONFIG_X86_64
+  ./scripts/config --set-str CONFIG_OUTPUT_FORMAT "elf32-i386"
+  ./scripts/config --set-str CONFIG_ARCH_DEFCONFIG "arch/x86/configs/i386_defconfig"
+  ./scripts/config -e CONFIG_X86_PAE
 elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
 then
-  sed -i '/CONFIG_64BIT[ =]/c\CONFIG_64BIT=y' .config
-  sed -i '/CONFIG_X86_32[ =]/c\# CONFIG_X86_32 is not set' .config
-  sed -i '/CONFIG_X86_64[ =]/c\CONFIG_X86_64=y' .config
-  sed -i '/CONFIG_OUTPUT_FORMAT[ =]/c\CONFIG_OUTPUT_FORMAT="elf64-x86-64"' .config
-  sed -i '/CONFIG_ARCH_DEFCONFIG[ =]/c\CONFIG_ARCH_DEFCONFIG="arch/x86/configs/x86_64_defconfig"' .config
-  sed -i '/CONFIG_X86_PAE[ =]/c\# CONFIG_X86_PAE is not set"' .config
+  ./scripts/config -e CONFIG_64BIT
+  ./scripts/config -d CONFIG_X86_32
+  ./scripts/config -e CONFIG_X86_64
+  ./scripts/config --set-str CONFIG_OUTPUT_FORMAT "elf64-x86-64"
+  ./scripts/config --set-str CONFIG_ARCH_DEFCONFIG "arch/x86/configs/x86_64_defconfig"
+  ./scripts/config -d CONFIG_X86_PAE
 else
   echo "$BUILDARCH not supported"
   rm .config
@@ -150,12 +154,12 @@ make olddefconfig
 BUILD_CONFIGVT_N=0
 if [[ $BUILD_CONFIGVT_N == 1 ]]
 then
-  sed -i 's/CONFIG_VT=y/# CONFIG_VT is not set'/g .config
-  sed -i 's/CONFIG_CONSOLE_TRANSLATIONS=y/# CONFIG_CONSOLE_TRANSLATIONS is not set'/g .config
-  sed -i 's/CONFIG_VT_CONSOLE=y/# CONFIG_VT_CONSOLE is not set'/g .config
-  sed -i 's/CONFIG_VT_CONSOLE_SLEEP=y/# CONFIG_VT_CONSOLE_SLEEP is not set'/g .config
-  sed -i 's/CONFIG_HW_CONSOLE=y/# CONFIG_HW_CONSOLE is not set'/g .config
-  sed -i 's/CONFIG_VT_HW_CONSOLE_BINDING=y/# CONFIG_VT_HW_CONSOLE_BINDING is not set'/g .config
+  ./scripts/config -d CONFIG_VT
+  ./scripts/config -d CONFIG_CONSOLE_TRANSLATIONS
+  ./scripts/config -d CONFIG_VT_CONSOLE
+  ./scripts/config -d CONFIG_VT_CONSOLE_SLEEP
+  ./scripts/config -d CONFIG_HW_CONSOLE
+  ./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
 fi
 
 KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
