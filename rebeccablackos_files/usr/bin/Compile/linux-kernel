@@ -61,7 +61,22 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-cp /usr/share/RBOS_PATCHES/linux-kernel/config .config
+make olddefconfig
+./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/config
+
+
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
+then
+  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/kernelarch-x86
+  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/i386
+elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
+then
+  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/kernelarch-x86
+  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/amd64
+else
+  echo "$BUILDARCH not supported"
+  rm .config
+fi
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
 #./scripts/config -e CONFIG_SYSFB
@@ -129,28 +144,6 @@ cp /usr/share/RBOS_PATCHES/linux-kernel/config .config
 #Disable debug option
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
 
-if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
-then
-  ./scripts/config -d CONFIG_64BIT
-  ./scripts/config -e CONFIG_X86_32
-  ./scripts/config -d CONFIG_X86_64
-  ./scripts/config --set-str CONFIG_OUTPUT_FORMAT "elf32-i386"
-  ./scripts/config --set-str CONFIG_ARCH_DEFCONFIG "arch/x86/configs/i386_defconfig"
-  ./scripts/config -e CONFIG_X86_PAE
-elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
-then
-  ./scripts/config -e CONFIG_64BIT
-  ./scripts/config -d CONFIG_X86_32
-  ./scripts/config -e CONFIG_X86_64
-  ./scripts/config --set-str CONFIG_OUTPUT_FORMAT "elf64-x86-64"
-  ./scripts/config --set-str CONFIG_ARCH_DEFCONFIG "arch/x86/configs/x86_64_defconfig"
-  ./scripts/config -d CONFIG_X86_PAE
-else
-  echo "$BUILDARCH not supported"
-  rm .config
-fi
-make olddefconfig
-
 BUILD_CONFIGVT_N=0
 if [[ $BUILD_CONFIGVT_N == 1 ]]
 then
@@ -161,6 +154,8 @@ then
   ./scripts/config -d CONFIG_HW_CONSOLE
   ./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
 fi
+
+make olddefconfig
 
 KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
 echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
