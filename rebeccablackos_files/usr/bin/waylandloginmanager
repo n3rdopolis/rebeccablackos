@@ -24,9 +24,9 @@
 
 #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
 
-#For framebuffer support, and the wlmforcefbdev option to work, the line
-#SUBSYSTEM=="graphics", KERNEL=="fb*", TAG+="uaccess"
-#is needed in a udev rules file. However, this is optional now as there is generic kernel mode setting now.
+#For udev to automatically notify the waylandloginmanager about new seats, the udev rules file
+#70-wlm-detectseats-events.rules
+#is needed.
 
 #It also requires /etc/pam.d/waylandloginmanager
 #and /etc/pam.d/waylandloginmanager-loginmanagerdisplay
