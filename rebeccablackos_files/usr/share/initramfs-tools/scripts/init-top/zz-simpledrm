@@ -13,13 +13,13 @@ prereqs)
         ;;
 esac
 
-if [ ! -e /dev/dri/card0 ]
-then
-	modprobe simpledrm
-fi
+#if [ ! -e /dev/dri/card0 ]
+#then
+#	modprobe simpledrm
+#fi
 
-cmdlinecount=$(grep -c '\bsimpledrm.forceload\b' /proc/cmdline)
-if [ $cmdlinecount -gt 0 ]
-then
-	modprobe simpledrm
-fi
+#cmdlinecount=$(grep -c '\bsimpledrm.forceload\b' /proc/cmdline)
+#if [ $cmdlinecount -gt 0 ]
+#then
+#	modprobe simpledrm
+#fi

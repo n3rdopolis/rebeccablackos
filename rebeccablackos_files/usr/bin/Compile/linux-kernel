@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-5.14.y
+SOURCEREVISION=linux-5.19.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -79,10 +79,11 @@ else
 fi
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
-#./scripts/config -e CONFIG_SYSFB
-#./scripts/config -e CONFIG_SYSFB_SIMPLEFB
-./scripts/config -e CONFIG_X86_SYSFB
-./scripts/config -m CONFIG_DRM_SIMPLEDRM
+./scripts/config -e CONFIG_DRM
+./scripts/config -e CONFIG_SYSFB
+./scripts/config -e CONFIG_SYSFB_SIMPLEFB
+#./scripts/config -e CONFIG_X86_SYSFB
+./scripts/config -e CONFIG_DRM_SIMPLEDRM
 ./scripts/config -m CONFIG_DRM_GUD
 
 #Disable fbdev drivers

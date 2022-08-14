@@ -47,12 +47,12 @@ fi
 export LC_ALL=C.UTF-8
 
 #Load simpledrm if there is no /dev/dri/card0 device
-SIMPLEDRM_FORCELOADAED=0
-if [ ! -e /dev/dri/card0 ]
-then
-  SIMPLEDRM_FORCELOADAED=1
-  modprobe simpledrm
-fi
+#SIMPLEDRM_FORCELOADAED=0
+#if [ ! -e /dev/dri/card0 ]
+#then
+#  SIMPLEDRM_FORCELOADAED=1
+#  modprobe simpledrm
+#fi
 modprobe evdev
 
 #Fake udevd to configure the devices just enough to start a display server
@@ -155,10 +155,10 @@ then
 fi
 
 #Unload simpledrm if it was loaded manually, so udev can load it in the right order later
-if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
-then
-  rmmod simpledrm
-fi
+#if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
+#then
+#  rmmod simpledrm
+#fi
 
 if [ $unmountrunfs -eq 1 ]
 then

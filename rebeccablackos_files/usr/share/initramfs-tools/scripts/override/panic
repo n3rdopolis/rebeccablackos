@@ -39,12 +39,12 @@ panic()
 	run_scripts /scripts/panic
 
 	#Load simpledrm if there is no /dev/dri/card0 device
-	SIMPLEDRM_FORCELOADAED=0
-	DO_RETURN=0
-	if [ ! -e /dev/dri/card0 ] ; then
-		SIMPLEDRM_FORCELOADAED=1
-		modprobe simpledrm
-	fi
+	#SIMPLEDRM_FORCELOADAED=0
+	#DO_RETURN=0
+	#if [ ! -e /dev/dri/card0 ] ; then
+	#	SIMPLEDRM_FORCELOADAED=1
+	#	modprobe simpledrm
+	#fi
 
 	if [ -z $norecinit ] && [ -e /dev/dri/card0 ] ; then
 		if command -v recinit >/dev/null 2>&1; then
@@ -58,10 +58,10 @@ panic()
 	fi
 
 	#Unload simpledrm if it was loaded manually, so udev can load it in the right order later
-	if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
-	then
-		rmmod simpledrm
-	fi
+	#if [ $SIMPLEDRM_FORCELOADAED -eq 1 ]
+	#then
+	#	rmmod simpledrm
+	#fi
 
 	if [ $DO_RETURN -eq 1 ]
 	then
