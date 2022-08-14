@@ -197,6 +197,9 @@ function PostInstallActions
   systemctl enable vtty-frontend@.service
   ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
 
+  #Enable the auto simpledrm fallback detector
+  systemctl enable auto_simpledrm_fallback.service
+  
   #Enable pipewire services
   systemctl --global enable pipewire.socket
   systemctl --global enable wireplumber.service

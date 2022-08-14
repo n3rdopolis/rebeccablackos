@@ -1,0 +1,10 @@
+[Unit]
+Description=Automatically detect the need to force fallback graphics drivers
+
+[Service]
+Type=oneshot
+ExecStart=/usr/sbin/auto_simpledrm_fallback
+RemainAfterExit=yes
+
+[Install]
+WantedBy=multi-user.target
