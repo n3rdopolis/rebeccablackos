@@ -118,6 +118,7 @@ case "${THEME_NAME}" in
                         mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                 fi
                 case "${THEME_NAME}" in
                         spinner|bgrt)
