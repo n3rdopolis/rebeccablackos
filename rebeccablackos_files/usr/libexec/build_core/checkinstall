@@ -407,13 +407,13 @@ function  dircopy() {
 
 function getparameter () {
 
-   RES=`egrep "$1" < ${SPEC_PATH} \
+   RES=`grep -E "$1" < ${SPEC_PATH} \
     | cut -f2 -d: | sed 's/^ *//g' | sed 's/ *$//g' `
    shift
-   while echo "$RES" | egrep -q '(^|[^%])%[a-zA-Z0-9]'; do
+   while echo "$RES" | grep -E -q '(^|[^%])%[a-zA-Z0-9]'; do
       VAR=`echo "$RES" | sed 's/\(^\|^.*[^%]\)%\([a-zA-Z0-9]*\).*$/\2/'`
-      egrep -q "^%define\s+$VAR\s" < ${SPEC_PATH} || break
-      VAL=`egrep "^%define\s+$VAR\s" < ${SPEC_PATH} \
+      grep -E -q "^%define\s+$VAR\s" < ${SPEC_PATH} || break
+      VAL=`grep -E "^%define\s+$VAR\s" < ${SPEC_PATH} \
 	 | awk '{ print $3 }'`
       RES=`echo "$RES" | sed 's/\(^\|[^%]\)%'"$VAR/"'\1'"$VAL/g"`
    done
@@ -466,7 +466,7 @@ function list_parents {
 # preserved up to the root. The files that were copied are displayed on stdout
 function copy_dir_hierarchy {
     deref_parents=0
-    if [ `echo "${1}" | egrep '^--deref-parents'` ]; then
+    if [ `echo "${1}" | grep -E '^--deref-parents'` ]; then
         deref_parents=1
         shift
     fi
@@ -480,7 +480,7 @@ function copy_dir_hierarchy {
     files=`list_parents ${src}`
 
     # Only use tar if there are parents
-    echo "${files}" | egrep '[^[:space:]]' >/dev/null
+    echo "${files}" | grep -E '[^[:space:]]' >/dev/null
     if [ $? -eq 0 ]; then
         if [ $deref_parents -eq 1 ]; then
             # Add the -h option to the tar command for dereferencing
@@ -1710,13 +1710,13 @@ fi
 
 
       if [ "$CK_DEBIAN" ]; then       # Check for a valid version for dpkg
-	NEWVERS=$(echo $VERSION | egrep '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
+	NEWVERS=$(echo $VERSION | grep -E '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
 	while [ "$NEWVERS" != "$VERSION" ]; do
             echo
 	    echog "*** Warning: The package version \"%s\" is not a\n*** Warning: debian policy compliant one. Please specify an alternate one" "$VERSION"
 	    if [ $ACCEPT_DEFAULT -eq 0 ] ; then
 		read VERSION
-		NEWVERS=$(echo $VERSION | egrep '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
+		NEWVERS=$(echo $VERSION | grep -E '^([[:alnum:]]+:)?[[:alnum:]]+([-:.+~][[:alnum:]]+)*(-[.[:alnum:]]+)?$' 2> /dev/null)
 	    else
 		VERSION=0
 		NEWVERS=0
@@ -2054,17 +2054,17 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	  #
 	  # Find regular files first
 	  [ $DEBUG -gt 0 ] && echo "debug: BASE_TMP_DIR: $BASE_TMP_DIR"
-	  cat /${TMP_DIR}/newfiles.tmp | egrep -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 3 | egrep -v "^(/dev|$BASE_TMP_DIR|/tmp)" | sort -u > /${TMP_DIR}/newfiles
+	  cat /${TMP_DIR}/newfiles.tmp | grep -E -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 3 | grep -E -v "^(/dev|$BASE_TMP_DIR|/tmp)" | sort -u > /${TMP_DIR}/newfiles
 
 	  # symlinks are next
-	  cat /${TMP_DIR}/newfiles.tmp | egrep -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 4 | egrep -v "^(/dev|$BASE_TMP_DIR|/tmp)" | grep -v "#success" | sort -u  >> /${TMP_DIR}/newfiles
+	  cat /${TMP_DIR}/newfiles.tmp | grep -E -v '^[-0-9][0-9]*[[:space:]]*(unlink|access)' | cut -f 4 | grep -E -v "^(/dev|$BASE_TMP_DIR|/tmp)" | grep -v "#success" | sort -u  >> /${TMP_DIR}/newfiles
           # Create another list of modified files that exclude all files the
           # install script wanted to create but did not, e.g because they already
           # existed.
-          egrep "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 3 | sort -u \
+          grep -E "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 3 | sort -u \
               >/${TMP_DIR}/modified
-          egrep "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 4 \
-              | egrep -v "#success" | sort -u >> /${TMP_DIR}/modified
+          grep -E "#success$" /${TMP_DIR}/newfiles.tmp | cut -f 4 \
+              | grep -E -v "#success" | sort -u >> /${TMP_DIR}/modified
 
 	  # OK, now we clean it up a bit
 	  mv /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles.installwatch
@@ -2084,10 +2084,10 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 
 	for exclude in `echo $EXCLUDE | awk '{ split ($0, files,","); for(i=1; files[i] != ""; i++) print files[i];}'`; do
 	   if [ -d $exclude ]; then  # If it's a directory, ignore everything below it
-	      egrep -v "^$exclude" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
+	      grep -E -v "^$exclude" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
 	   else
 	      if [ -f $exclude ]; then  # If it's a file, ignore just this one
-		 egrep -v "^$exclude$" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
+		 grep -E -v "^$exclude$" < /${TMP_DIR}/newfiles > /${TMP_DIR}/newfiles.tmp
 	      fi
 	   fi
 	   cp /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles
@@ -2376,7 +2376,7 @@ echo
 echogn "Building file list..."
 rm ${TMP_DIR}/newfiles
 cd $BUILD_DIR
-$TAR -cpf -  . | $TAR -f - -t 2>&1 | sed -e 's#^\./#/#' | egrep -v "^/$" > ${TMP_DIR}/newfiles
+$TAR -cpf -  . | $TAR -f - -t 2>&1 | sed -e 's#^\./#/#' | grep -E -v "^/$" > ${TMP_DIR}/newfiles
 okfail
 
 
@@ -2426,7 +2426,7 @@ EOF
 
  cat ${TMP_DIR}/libdirs | while read libdir; do
    (
-    echo "if ! egrep \"^/${libdir} *$\" /etc/ld.so.conf &> /dev/null; then"
+    echo "if ! grep -E \"^/${libdir} *$\" /etc/ld.so.conf &> /dev/null; then"
     echo "   echo \"Adding \"/$libdir\" to /etc/ld.so.conf\"" 
     echo "   echo /$libdir >> /etc/ld.so.conf"
     echo fi
@@ -2892,11 +2892,11 @@ if [ $REVIEW_SPEC -gt 0 ]; then
    $VISUAL "$SPEC_PATH" 
 fi
 
-BUILDROOT=`egrep '^[Bb]uild[Rr]oot' < "$SPEC_PATH" | cut -f2 -d:| sed 's/^ *//g'| sed 's/ *$//g'` # The sed commands remove leading/trailing whitespaces
+BUILDROOT=`grep -E '^[Bb]uild[Rr]oot' < "$SPEC_PATH" | cut -f2 -d:| sed 's/^ *//g'| sed 's/ *$//g'` # The sed commands remove leading/trailing whitespaces
 
 # We make sure that we have a valid RELEASE number
 
-! [ "$RELEASE" ] && RELEASE=`egrep '^Release:' < "$SPEC_PATH"|cut -f2 -d: | awk '{ for (i=1;substr ($0,i,1) ~ /[[:blank:]]/ ;i++); print substr ($0,i); }'`
+! [ "$RELEASE" ] && RELEASE=`grep -E '^Release:' < "$SPEC_PATH"|cut -f2 -d: | awk '{ for (i=1;substr ($0,i,1) ~ /[[:blank:]]/ ;i++); print substr ($0,i); }'`
 
 [ $DEBUG -gt 0 ] && echo "debug: BUILDROOT=$BUILDROOT"
 
@@ -3014,7 +3014,7 @@ cd "$DIRECTORIO_FUENTE"
 
 mkdir $BUILD_DIR/DEBIAN
 
-cat << EOF | sed "s/ $//" | egrep ": " >> $BUILD_DIR/DEBIAN/control
+cat << EOF | sed "s/ $//" | grep -E ": " >> $BUILD_DIR/DEBIAN/control
 Package: $PKG_BASENAME
 Priority: extra
 Section: $(echo $PKG_GROUP | tr '\n' ' ')
@@ -3030,7 +3030,7 @@ Description: $SUMMARY
 EOF
 
 # Add the description
-cat "$DIRECTORIO_FUENTE/description-pak"| egrep -v "$SUMMARY|^[ 	]*$" | while read line; do
+cat "$DIRECTORIO_FUENTE/description-pak"| grep -E -v "$SUMMARY|^[ 	]*$" | while read line; do
    echo " "$line >> $BUILD_DIR/DEBIAN/control
 done
 
