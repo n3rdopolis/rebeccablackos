@@ -1,3 +1,16 @@
+diff --git a/configure.ac b/configure.ac
+index 34a2f2c..179808a 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -13,7 +13,7 @@ AM_PROG_CC_C_O
+ AC_HEADER_STDC
+ AC_C_CONST
+ 
+-AM_INIT_AUTOMAKE([dist-xz no-dist-gzip subdir-objects])
++AM_INIT_AUTOMAKE([dist-xz no-dist-gzip subdir-objects foreign])
+ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
+ AM_MAINTAINER_MODE([enable])
+ 
 diff --git a/src/libply-splash-core/ply-device-manager.c b/src/libply-splash-core/ply-device-manager.c
 index d5b3498..bbfaa95 100644
 --- a/src/libply-splash-core/ply-device-manager.c
