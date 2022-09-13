@@ -1,21 +1,8 @@
-diff --git a/configure.ac b/configure.ac
-index 34a2f2c..179808a 100644
---- a/configure.ac
-+++ b/configure.ac
-@@ -13,7 +13,7 @@ AM_PROG_CC_C_O
- AC_HEADER_STDC
- AC_C_CONST
- 
--AM_INIT_AUTOMAKE([dist-xz no-dist-gzip subdir-objects])
-+AM_INIT_AUTOMAKE([dist-xz no-dist-gzip subdir-objects foreign])
- m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])])
- AM_MAINTAINER_MODE([enable])
- 
 diff --git a/src/libply-splash-core/ply-device-manager.c b/src/libply-splash-core/ply-device-manager.c
-index d5b3498..bbfaa95 100644
+index 40d3334d..40b27f8a 100644
 --- a/src/libply-splash-core/ply-device-manager.c
 +++ b/src/libply-splash-core/ply-device-manager.c
-@@ -381,7 +381,9 @@ create_devices_for_udev_device (ply_device_manager_t *manager,
+@@ -385,7 +385,9 @@ create_devices_for_udev_device (ply_device_manager_t *manager,
                          ply_terminal_t *terminal = NULL;
  
                          if (!manager->local_console_managed)
@@ -27,7 +14,7 @@ index d5b3498..bbfaa95 100644
                          created = create_devices_for_terminal_and_renderer_type (manager,
                                                                                   device_path,
 diff --git a/src/main.c b/src/main.c
-index daf2524..dc76291 100644
+index 3a987873..d4e4ad84 100644
 --- a/src/main.c
 +++ b/src/main.c
 @@ -156,6 +156,7 @@ static void on_quit (state_t       *state,
