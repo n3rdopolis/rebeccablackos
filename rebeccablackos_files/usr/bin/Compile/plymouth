@@ -84,7 +84,11 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp /usr/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
+cp /usr/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
+
+ln -s $INSTALLDIR/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
+rm $INSTALLDIR/share/plymouth/themes/spinfinity/header-image.png
+
 ln -s $INSTALLDIR/bin/plymouth /bin/plymouth
 ln -s $INSTALLDIR/sbin/plymouthd /sbin/plymouthd
 mkdir -p /usr/lib/lsb/init-functions.d/
