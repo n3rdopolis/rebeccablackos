@@ -169,25 +169,25 @@ do
 
 done < <(echo -n "$INSTALLS")
 
-apt-get --no-install-recommends install $PART_PACKAGES -y    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/PART_Installs.log
+apt-get --no-install-recommends install $PART_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/PART_Installs.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
-  echo "Partial Installs failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+  echo "Partial Installs failed: $PART_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
 fi
 
-apt-get install $FULL_PACKAGES -y                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/FULL_Installs.log
+apt-get install $FULL_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/FULL_Installs.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
-  echo "Full Installs failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+  echo "Full Installs failed: $FULL_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
 fi
 
-apt-get purge $REMOVE_PACKAGES -y                            2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/REMOVE_Uninstalls.log
+apt-get purge $REMOVE_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/REMOVE_Uninstalls.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
-  echo "Installs Removes failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
+  echo "Installs Removes failed: $REMOVE_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
 else
   rm /tmp/INSTALLS.txt.removes
 fi
@@ -196,7 +196,7 @@ fi
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun
 
 #install updates
-apt-get dist-upgrade -y --no-install-recommends                         2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
+apt-get dist-upgrade -y --no-install-recommends 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/dist-upgrade.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -216,7 +216,7 @@ do
 done
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove -y                                           2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
+apt-get --purge autoremove -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -227,14 +227,14 @@ fi
 ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
 if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
 then
-  aptitude purge ?obsolete -y                                          2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  aptitude purge ?obsolete -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
   Result=${PIPESTATUS[0]}
   if [[ $Result != 0 ]]
   then
    echo "APT purge failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/failedpackages.log
   fi
 else
-  echo        "Not purging older packages, because apt-get update failed"    2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
+  echo        "Not purging older packages, because apt-get update failed" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_obsolete.log
 fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
