@@ -66,7 +66,7 @@ sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinfi
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 
 
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk --enable-drm --enable-pango --enable-systemd-integration --with-logo=$INSTALLDIR/lib/plymouth/boot_logo.png --runstatedir=/run/plymouth
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk --enable-drm --enable-pango --enable-systemd-integration --with-logo=$INSTALLDIR/share/plymouth/boot_logo.png --runstatedir=/run/plymouth
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -84,7 +84,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp /usr/lib/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
+cp /usr/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
 ln -s $INSTALLDIR/bin/plymouth /bin/plymouth
 ln -s $INSTALLDIR/sbin/plymouthd /sbin/plymouthd
 mkdir -p /usr/lib/lsb/init-functions.d/
