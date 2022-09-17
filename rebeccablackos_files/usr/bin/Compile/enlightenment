@@ -69,7 +69,6 @@ sed -i '/^$/,/^             ],/{/^$/!{/^             ],/!d;};}' data/backgrounds
 
 #sed -i 's/do_gl = do_vsync = 1;/do_gl = do_vsync = 0;/g' src/modules/wizard/page_150.c
 #sed -i 's/do_gl = 1/do_gl = 0/g' src/modules/wizard/page_150.c
-patch -f -p1 < /usr/share/RBOS_PATCHES/enlightenment.diff
 meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwl-drm=true -Dwl-x11=true -Dxwayland=true -Dwl-desktop-shell=true -Dwl=true -Dxwayland-bin=$INSTALLDIR/bin/Xwayland build
 }
 
