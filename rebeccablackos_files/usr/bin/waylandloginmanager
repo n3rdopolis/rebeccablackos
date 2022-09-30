@@ -3341,8 +3341,15 @@ function WaylandLoginManagerMain
             ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
             if [[ -z $ActiveLogindSession ]]
             then
-              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat unexpectedly has no active session."
+              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat which now unexpectedly has no active session."
               loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            else
+              ActiveSessionPID=$(loginctl show-session $ActiveLogindSession  -p Leader --value)
+              if [[ ! -e /proc/$ActiveSessionPID/environ ]]
+              then
+                WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat as the leader PID for $ActiveLogindSession is not running"
+                loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+              fi
             fi
           fi
         fi
