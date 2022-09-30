@@ -224,6 +224,8 @@ function UserSessionWorker
   fi
   unset wlmforcepixman
 
+  journalctl -f -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null &
+
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
     export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
@@ -300,10 +302,8 @@ function UserSessionWorker
     fi
   fi
 
-  #Write the error code and any Journal logs for this session into the logfile
-  echo -e "\nSession exited with the error code: $SessionReturnCode\nSession's Journal Logs:" >> $WLM_SESSION_LOG
-  journalctl -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null
-
+  #Write the error code into the logfile
+  echo -e "\nSession exited with the error code: $SessionReturnCode" >> $WLM_SESSION_LOG
   exit
 }
 
