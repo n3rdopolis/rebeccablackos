@@ -224,7 +224,9 @@ function UserSessionWorker
   fi
   unset wlmforcepixman
 
+  #If the session chooses to log to the journal, log the output to the log file as well
   journalctl -f -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null &
+  JournalctlPID=$!
 
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
@@ -304,6 +306,7 @@ function UserSessionWorker
 
   #Write the error code into the logfile
   echo -e "\nSession exited with the error code: $SessionReturnCode" >> $WLM_SESSION_LOG
+  TerminateJobPID $JournalctlPID 15 0
   exit
 }
 
