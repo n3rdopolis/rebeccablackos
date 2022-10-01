@@ -2267,16 +2267,13 @@ function AuthenticateUser
     $res = $pamh->pam_authenticate;
 
     if ($res == PAM_SUCCESS()) {
-      printf ("%s\n","Success");
       exit (0);
     }
     else {
-      printf ("%s\n","Failure");
       exit (1);
     }
 EOF
   )
-
 
   echo "$LOGINUSER"$'\n'"$TryPassword" | perl -e "$AuthenticationTestScript" 2>/dev/null
   PasswordResult=$?
