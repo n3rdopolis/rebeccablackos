@@ -18,16 +18,58 @@
 
 #This script displays a status on power information, such as battery percentages, and if the power is plugged in
 
-SampleDate=$(date +"%Y-%m-%d %I:%M %p")
+IFS=" "
+dcopRef=($(kdialog --cancel-label="Close" --title "Battery Status" --progressbar "Battery Status"))
+KdialogProcess=$!
+unset IFS
 
-#Get Battery status
-BatteryString=$(acpi -V 2>/dev/null | grep ^Battery)
-if [[ -z $BatteryString ]]
-then
-  BatteryString="No batteries detected"
-fi
+while [ 1 ]
+do
+  #Get Battery status
+  BatteryString=$(acpi -bi 2>/dev/null)
+  SystemBatteryPercent=0
 
-kdialog --msgbox "
-Battery Status as of $SampleDate
+  if [[ -z $BatteryString ]]
+  then
+    BatteryString="No batteries detected"
+  else
+    IFS=$'\n'
+    BatteryStringLines=($BatteryString)
+    unset IFS
+    BatteryCount=0
+    BatteryPercents=0
+    for BatteryStringLine in "${BatteryStringLines[@]}"
+    do
+      IFS=","
+      BatteryStringLineSegments=($BatteryStringLine)
+      unset IFS
 
-$BatteryString" --title="Battery Status"
+
+      BatteryPercent=${BatteryStringLineSegments[1]}
+      IFS=" "
+      BatteryPercent=($BatteryPercent)
+      unset IFS
+      BatteryPercent=${BatteryPercent[0]}
+      BatteryPercent=${BatteryPercent//%/}
+
+      if [[ $BatteryPercent == ?(-)+([[:digit:]]) ]]
+      then
+        ((BatteryCount++))
+        ((BatteryPercents+=$BatteryPercent))
+      fi
+    done
+    if [[ $BatteryCount -gt 0 ]]
+    then
+      SystemBatteryPercent=$(($BatteryPercents/$BatteryCount))
+    fi
+  fi
+  qdbus ${dcopRef[0]} ${dcopRef[1]} org.freedesktop.DBus.Properties.Set org.kde.kdialog.ProgressDialog value $SystemBatteryPercent > /dev/null 2>&1
+  qdbus ${dcopRef[0]} ${dcopRef[1]} org.kde.kdialog.ProgressDialog.setLabelText $'\n'"Battery Status:"$'\n'$'\n'"$BatteryString"  > /dev/null 2>&1
+
+  #If qdbus fails, assume the dialog was closed
+  if [[ $? != 0 ]]
+  then
+    exit
+  fi
+  sleep 60
+done
