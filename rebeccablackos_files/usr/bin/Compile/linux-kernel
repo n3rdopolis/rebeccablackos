@@ -144,6 +144,7 @@ fi
 
 #Disable debug option
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
+./scripts/config -d CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
 BUILD_CONFIGVT_N=0
 if [[ $BUILD_CONFIGVT_N == 1 ]]
