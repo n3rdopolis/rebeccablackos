@@ -817,6 +817,8 @@ function PrepareLoginManager
   #Enable job control in this script
   set -m
 
+  #Export variables for configuring GTK settings
+  export DCONF_PROFILE=/etc/loginmanagerdisplay/dconf/waylandloginmanager
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
