@@ -19,7 +19,7 @@
 #Set Dconf settings
 if [[ ! -e ~/.config/dconf/user ]]
 then
-  dconf load / < ~/.config/dconfimport.ini &>/dev/null
+  dconf load / < ~/.config/dconfimport/dconfimport.ini &>/dev/null
 fi
 
 #Build RDP keys for weston-share
