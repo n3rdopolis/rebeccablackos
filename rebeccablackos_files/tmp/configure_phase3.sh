@@ -226,6 +226,8 @@ function PostInstallActions
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
   echo "Post Install action: Plymouth theme"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
+  echo "Post Install action: Create dconf config for the loginmanagerdisplay"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
 
   echo "Post Install action: Configure dbus and polkit"
   mkdir -p /usr/share/polkit-1/actions/
