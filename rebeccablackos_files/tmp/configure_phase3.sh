@@ -227,6 +227,7 @@ function PostInstallActions
   echo "Post Install action: Plymouth theme"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
 
+  echo "Post Install action: Configure dbus and polkit"
   mkdir -p /usr/share/polkit-1/actions/
   find /opt/share/polkit-1/actions/ -type f | while read -r FILE;
   do
