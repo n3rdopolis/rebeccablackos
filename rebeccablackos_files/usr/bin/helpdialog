@@ -31,47 +31,36 @@ then
 SessionHelpText="Weston Key Bindings:
 Note: The 'Super Key' on most keyboards is the Windows logo key.
 
-Terminate Active Application: Super Key + K
-Move Window: Super Key + Left Mouse Button
-Resize Window: Super Key + Shift Key + Right Mouse Button
-Switch Windows: Super Key + Tab
-Change Window Opacity: Super Key + Alt Key + Scroll Wheel
-Rotate Window: Super Key + Middle Mouse Button (press Scroll Wheel)
-Share Weston with RDP: Ctrl Key + Alt Key + S
+   - Terminate Active Application: Super Key + K
+   - Move Window: Super Key + Left Mouse Button
+   - Resize Window: Super Key + Shift Key + Right Mouse Button
+   - Switch Windows: Super Key + Tab
+   - Change Window Opacity: Super Key + Alt Key + Scroll Wheel
+   - Rotate Window: Super Key + Middle Mouse Button (press Scroll Wheel)
+   - Share Weston with RDP: Ctrl Key + Alt Key + S
 
-Save a screenshot: Super Key + S
-Start and stop video recording: Super Key + R 
-Start and stop h264 video recording: Super Key + Ctrl + Space + Q
-  (After recording run weston-video-convert in the panel to 
-   convert the capture file to a .webm video file)
+   - Save a screenshot: Super Key + S
+   - Start and stop video recording: Super Key + R
+   - Start and stop h264 video recording: Super Key + Ctrl + Space + Q
+     (After recording run weston-video-convert in the panel to
+     convert the capture file to a .webm video file)
 
-Exit Weston: Ctrl Key + Alt Key + Backspace}
+   - Exit Weston: Ctrl Key + Alt Key + Backspace}
 
 
 
-The Panel Icons:
-Click on the \"RBOS\" Icon on the top for the Application menu.
-
-Click on the File Manager icon for the file manager
-
-Click on the Globe icon for the Web Browser
-
-Click on the Terminal icon for a Terminal
-
-Click on the Xorg logo for an application launcher to start programs with their X11 backends.
-
-Click the Speaker icon to adjust the volume
-
-Click on the Antenna icon to launch the Network Manager
-
-The movie icon converts the Weston recording file to .WEBM files as mentioned 
-above
-
-Click on the lightbulb icon for battery info
-
-The I icon launches these help dialogs 
-
-Click on the red X icon for shutdown options
+On the main panel:
+   - The \"RBOS\" Icon opens the application menu.
+   - The file cabinet icon opens the file manager
+   - The globe icon opens a web browser
+   - The terminal icon opens a terminal emulator
+   - The Xorg icon opens application launcher to start programs with their X11 backends.
+   - The speaker icon opens a volume panel
+   - The wireless icon opens a network setup panel
+   - The movie icon converts record Weston screen capture files to .WEBM files as mentioned above
+   - The lightbulb icon shows the current power and battery status
+   - The "I" icon shows this help dialog
+   - The "X" icon shows session exit and power options
 "
 fi
 
