@@ -61,23 +61,19 @@ sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/build/config/compiler/B
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/perfetto/gn/standalone/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/openscreen/src/build/config/BUILD.gn
 
-mkdir build
-cd build
-cmake -Wno-dev .. -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_webengine_system_ffmpeg=ON -DQT_FEATURE_webengine_system_icu=ON -DQT_FEATURE_webengine_system_libevent=ON -DQT_FEATURE_webengine_system_libxslt=ON -DQT_FEATURE_webengine_proprietary_codecs=ON -DQT_FEATURE_webengine_kerberos=ON -DQT_FEATURE_webengine_full_debug_info=OFF -DQT_FEATURE_webengine_webrtc_pipewire=ON
+cmake -B build -G Ninja -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_webengine_system_ffmpeg=ON -DQT_FEATURE_webengine_system_icu=ON -DQT_FEATURE_webengine_system_libevent=ON -DQT_FEATURE_webengine_system_libxslt=ON -DQT_FEATURE_webengine_proprietary_codecs=ON -DQT_FEATURE_webengine_kerberos=ON -DQT_FEATURE_webengine_full_debug_info=OFF -DQT_FEATURE_webengine_webrtc_pipewire=ON
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-cd build
-make
+cmake --build build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-cd build
-make install
+cmake --install build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
