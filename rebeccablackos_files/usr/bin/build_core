@@ -948,7 +948,7 @@ function MakeAndInstall()
             then
               if [[ \"\$FILE\" != $INSTALLDIR/share/* ]]
               then
-                strip -x \"\$FILE\" &>/dev/null
+                strip -sx \"\$FILE\" &>/dev/null
               else
                 touch \"\$FILE\" &>/dev/null
               fi
