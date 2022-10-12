@@ -70,7 +70,7 @@ PreloadWeight=0
 [Containments][1][General]
 AppletOrder=2;3;4;5;6
 
-[Containments][24]
+[Containments][25]
 activityId=0745dc1e-8e95-4726-8aaa-0dc823d85edf
 formfactor=0
 immutability=1
@@ -79,11 +79,13 @@ location=0
 plugin=org.kde.plasma.folder
 wallpaperplugin=org.kde.image
 
-[Containments][24][Configuration]
-PreloadWeight=0
+[Containments][25][ConfigDialog]
+DialogHeight=510
+DialogWidth=680
 
-[Containments][24][Wallpaper][org.kde.image][General]
-Image=file:///usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png
+[Containments][25][Wallpaper][org.kde.image][General]
+Image=/usr/share/wallpapers/RBOS_Desktop/
+SlidePaths=/opt/share/wallpapers/,/usr/share/wallpapers/
 
 [Containments][8]
 activityId=
@@ -182,5 +184,9 @@ PreloadWeight=18
 PreloadWeight=0
 
 [Containments][8][General]
-extraItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.manage-inputmethod,org.kde.plasma.nightcolorcontrol
-knownItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.manage-inputmethod,org.kde.plasma.nightcolorcontrol
+extraItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.manage-inputmethod,org.kde.plasma.nightcolorcontrol,org.kde.plasma.bluetooth
+knownItems=org.kde.plasma.battery,org.kde.plasma.clipboard,org.kde.plasma.devicenotifier,org.kde.plasma.mediacontroller,org.kde.plasma.networkmanagement,org.kde.plasma.notifications,org.kde.plasma.volume,org.kde.plasma.keyboardindicator,org.kde.plasma.keyboardlayout,org.kde.plasma.manage-inputmethod,org.kde.plasma.nightcolorcontrol,org.kde.plasma.bluetooth
+
+[ScreenMapping]
+itemsOnDisabledScreens=
+screenMapping=
