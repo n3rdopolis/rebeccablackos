@@ -508,7 +508,7 @@ FOO
 
     fi
 
-    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 -no-duplicates $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES 2>>$WORKDIR/remastersys.log
+    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES 2>>$WORKDIR/remastersys.log
 
     sleep 1
 
