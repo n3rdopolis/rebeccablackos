@@ -229,63 +229,6 @@ but may allow more hardware to work."
   fi
 fi
 
-FIRMWARELIST="firmware-amd-graphics
-atmel-firmware
-firmware-atheros
-firmware-b43-installer
-firmware-b43legacy-installer
-firmware-bnx2
-firmware-bnx2x
-firmware-brcm80211
-firmware-intelwimax
-firmware-ipw2x00
-firmware-iwlwifi
-firmware-libertas
-firmware-myricom
-firmware-netxen
-firmware-realtek
-firmware-ti-connectivity
-firmware-zd1211
-broadcom-sta-dkms"
-
-FIRMWAREUILIST=""
-
-if [ -z $FIRMWARESELECT ]
-then
-  if [[ $DOUIFALLBACK != 0 ]]
-  then
-    while read -r FIRMWARE
-    do
-      FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
-    done < <(echo "$FIRMWARELIST")
-    FIRMWARESELECT=$($DIALOGCOMMAND --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
-  else
-    if [[ $UIDIALOGTYPE == kdialog ]]
-    then
-      while read -r FIRMWARE
-      do
-        FIRMWAREUILIST+="$FIRMWARE $FIRMWARE off "
-      done < <(echo "$FIRMWARELIST")
-      FIRMWARESELECT=$($KDIALOGCOMMAND --checklist "Select Firmware:" $FIRMWAREUILIST 2>/dev/null | sed 's/"//g')
-    else
-      while read -r FIRMWARE
-      do
-        if [[ $FIRMWAREUILIST != "" ]]
-        then
-          FIRMWAREUILIST+=$'\n'$'\n'
-        else
-          FIRMWAREUILIST+=$'\n'
-        fi
-        FIRMWAREUILIST+="$FIRMWARE"
-      done < <(echo "$FIRMWARELIST")
-
-      FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
-    fi
-  fi
-fi
-FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
-echo "Additional Firmware Selected: $FIRMWARESELECT"
-
 #enter users home directory
 cd "$MOUNTHOME"
 
@@ -445,6 +388,59 @@ NAMESPACE_ENTER rm "$MOUNTHOME"/isorebuild/unionmountpoint/etc/resolv.conf
 NAMESPACE_ENTER cp /etc/resolv.conf "$MOUNTHOME"/isorebuild/unionmountpoint/etc/resolv.conf
 NAMESPACE_ENTER sed -i 's/main/main non-free/g' "$MOUNTHOME"/isorebuild/unionmountpoint/etc/apt/sources.list
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get update
+
+FIRMWARELIST=""
+FIRMWAREUILIST=""
+ALLFIRMWARELIST=($(NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-cache pkgnames | grep -E 'microcode|firmware' | sort))
+
+for FIRMWARE in "${ALLFIRMWARELIST[@]}"
+do
+  FIRMWARESTATUS=$(NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint dpkg-query --show --showformat='${db:Status-Abbrev}\n' $FIRMWARE 2>/dev/null)
+  if [[ $FIRMWARESTATUS != "ii" ]]
+  then
+    if [[ $FIRMWARELIST != "" ]]
+    then
+      FIRMWARELIST+=$'\n'
+    fi
+    FIRMWARELIST+="$FIRMWARE"
+  fi
+done
+
+if [ -z $FIRMWARESELECT ]
+then
+  if [[ $DOUIFALLBACK != 0 ]]
+  then
+    while read -r FIRMWARE
+    do
+      FIRMWAREUILIST+="$FIRMWARE \"\" 0 "
+    done < <(echo "$FIRMWARELIST")
+    FIRMWARESELECT=$($DIALOGCOMMAND --checklist "Select Firmware:" 40 40 40 $FIRMWAREUILIST --stdout)
+  else
+    if [[ $UIDIALOGTYPE == kdialog ]]
+    then
+      while read -r FIRMWARE
+      do
+        FIRMWAREUILIST+="$FIRMWARE $FIRMWARE off "
+      done < <(echo "$FIRMWARELIST")
+      FIRMWARESELECT=$($KDIALOGCOMMAND --checklist "Select Firmware:" $FIRMWAREUILIST 2>/dev/null | sed 's/"//g')
+    else
+      while read -r FIRMWARE
+      do
+        if [[ $FIRMWAREUILIST != "" ]]
+        then
+          FIRMWAREUILIST+=$'\n'$'\n'
+        else
+          FIRMWAREUILIST+=$'\n'
+        fi
+        FIRMWAREUILIST+="$FIRMWARE"
+      done < <(echo "$FIRMWARELIST")
+
+      FIRMWARESELECT=$(echo "$FIRMWAREUILIST" | $ZENITYCOMMAND --list --text="Select Firmware:" --checklist --separator=" " --multiple --hide-header --column=check --column=firmware 2>/dev/null)
+    fi
+  fi
+fi
+FIRMWARESELECT=$(echo "$FIRMWARESELECT"| sed 's/ /\n/g')
+echo "Additional Firmware Selected: $FIRMWARESELECT"
 NAMESPACE_ENTER chroot "$MOUNTHOME"/isorebuild/unionmountpoint apt-get install -y firmware-misc-nonfree firmware-linux-nonfree
 echo "$FIRMWARESELECT" | while read -r FIRMWARE
 do
