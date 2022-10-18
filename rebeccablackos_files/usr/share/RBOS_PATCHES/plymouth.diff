@@ -1,84 +1,124 @@
 diff --git a/src/libply-splash-core/ply-device-manager.c b/src/libply-splash-core/ply-device-manager.c
-index 40d3334d..40b27f8a 100644
+index a5667db2..6d6dd51c 100644
 --- a/src/libply-splash-core/ply-device-manager.c
 +++ b/src/libply-splash-core/ply-device-manager.c
-@@ -385,7 +385,9 @@ create_devices_for_udev_device (ply_device_manager_t *manager,
-                         ply_terminal_t *terminal = NULL;
+@@ -865,15 +865,24 @@ ply_device_manager_new (const char                *default_tty,
+                         ply_device_manager_flags_t flags)
+ {
+         ply_device_manager_t *manager;
++        ply_terminal_t *terminal;
++
  
-                         if (!manager->local_console_managed)
--                                terminal = manager->local_console_terminal;
-+                                if (manager->local_console_terminal != NULL &&
-+                                    ply_terminal_is_vt (manager->local_console_terminal))
-+                                        terminal = manager->local_console_terminal;
+         manager = calloc (1, sizeof(ply_device_manager_t));
+         manager->loop = NULL;
+         manager->xkb_context = xkb_context_new (XKB_CONTEXT_NO_FLAGS);
+         parse_vconsole_conf (manager);
  
-                         created = create_devices_for_terminal_and_renderer_type (manager,
-                                                                                  device_path,
++        terminal = ply_terminal_new (default_tty, manager->keymap);
++
++        if (!ply_terminal_is_vt (terminal)) {
++                ply_terminal_free (terminal);
++                terminal = NULL;
++        }
++
+         manager->terminals = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
+         manager->renderers = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
+-        manager->local_console_terminal = ply_terminal_new (default_tty, manager->keymap);
++        manager->local_console_terminal = terminal;
+         manager->input_devices = ply_hashtable_new (ply_hashtable_string_hash, ply_hashtable_string_compare);
+         manager->keyboards = ply_list_new ();
+         manager->text_displays = ply_list_new ();
 diff --git a/src/main.c b/src/main.c
-index 3a987873..d4e4ad84 100644
+index debe3f89..7ef0a6a2 100644
 --- a/src/main.c
 +++ b/src/main.c
-@@ -156,6 +156,7 @@ static void on_quit (state_t       *state,
-                      bool           retain_splash,
-                      ply_trigger_t *quit_trigger);
- static bool sh_is_init (state_t *state);
-+static bool plymouth_arguments_want_splash (state_t *state);
- static void cancel_pending_delayed_show (state_t *state);
- static void prepare_logging (state_t *state);
- static void dump_debug_buffer_to_file (void);
-@@ -872,14 +873,21 @@ plymouth_should_show_default_splash (state_t *state)
- {
-         ply_trace ("checking if plymouth should show default splash");
+@@ -137,6 +137,7 @@ static void on_error_message (ply_buffer_t *debug_buffer,
+                               const void   *bytes,
+                               size_t        number_of_bytes);
+ static ply_buffer_t *debug_buffer;
++static bool force_graphical_boot = false;
+ static char *debug_buffer_path = NULL;
+ static char *pid_file = NULL;
+ static void toggle_between_splash_and_details (state_t *state);
+@@ -867,6 +868,16 @@ sh_is_init (state_t *state)
+         return result;
+ }
  
-+        if (state->should_force_details)
-+                return false;
-+
-+        if (plymouth_arguments_want_splash (state))
++static bool
++check_if_graphical_forced (state_t *state)
++{
++        if (ply_kernel_command_line_has_argument ("plymouth.graphical") ||
++            force_graphical_boot == true)
 +                return true;
++
++        return false;
 +}
 +
-+static bool
-+plymouth_arguments_want_splash (state_t *state)
-+{
-         const char * const strings[] = {
-                 "single", "1", "s", "S", "-S", NULL
-         };
-         int i;
+ static bool
+ plymouth_should_show_default_splash (state_t *state)
+ {
+@@ -907,6 +918,11 @@ plymouth_should_show_default_splash (state_t *state)
+                 return true;
+         }
  
--        if (state->should_force_details)
--                return false;
--
-         for (i = 0; strings[i] != NULL; i++) {
-                 if (ply_kernel_command_line_has_argument (strings[i])) {
-                         ply_trace ("no default splash because kernel command line has option \"%s\"", strings[i]);
-@@ -1518,6 +1526,14 @@ static void
++        if (check_if_graphical_forced (state)) {
++                ply_trace ("using default splash because kernel command line has option \"plymouth.graphical\"");
++                return true;
++        }
++
+         ply_trace ("no default splash because kernel command line lacks \"splash\" or \"rhgb\"");
+         return false;
+ }
+@@ -1518,6 +1534,14 @@ static void
  on_escape_pressed (state_t *state)
  {
          ply_trace ("escape key pressed");
 +
-+        if (state->local_console_terminal != NULL)
++        if (state->local_console_terminal != NULL) {
 +                if (!ply_terminal_is_vt (state->local_console_terminal))
 +                        return;
-+        else
++        } else {
 +                return;
-+
++        }
 +
          if (validate_input (state, "", "\e"))
                  toggle_between_splash_and_details (state);
  }
-@@ -1990,6 +2006,8 @@ initialize_environment (state_t *state)
-         if (!state->default_tty)
-                 if (getenv ("DISPLAY") != NULL && access (PLYMOUTH_PLUGIN_PATH "renderers/x11.so", F_OK) == 0)
-                         state->default_tty = "/dev/tty";
-+                if (!state->default_tty && plymouth_arguments_want_splash (state))
-+                        state->default_tty = find_fallback_tty (state);
-         if (!state->default_tty) {
-                 if (state->mode == PLY_BOOT_SPLASH_MODE_SHUTDOWN ||
-                     state->mode == PLY_BOOT_SPLASH_MODE_REBOOT)
-@@ -2350,6 +2368,9 @@ main (int    argc,
+@@ -1999,8 +2023,11 @@ initialize_environment (state_t *state)
+ 
+                 ply_trace ("checking if '%s' exists", state->default_tty);
+                 if (!ply_character_device_exists (state->default_tty)) {
+-                        ply_trace ("nope, forcing details mode");
+-                        state->should_force_details = true;
++                        if (!check_if_graphical_forced (state))
++                        {
++                                ply_trace ("nope, forcing details mode");
++                                state->should_force_details = true;
++                        }
+ 
+                         state->default_tty = find_fallback_tty (state);
+                         ply_trace ("going to go with '%s'", state->default_tty);
+@@ -2186,6 +2213,7 @@ main (int    argc,
+                                         "tty", "TTY to use instead of default", PLY_COMMAND_OPTION_TYPE_STRING,
+                                         "no-boot-log", "Do not write boot log file", PLY_COMMAND_OPTION_TYPE_FLAG,
+                                         "ignore-serial-consoles", "Ignore serial consoles", PLY_COMMAND_OPTION_TYPE_FLAG,
++                                        "graphical-boot", "Use graphical splashes even if the kernel console is not a VT", PLY_COMMAND_OPTION_TYPE_FLAG,
+                                         NULL);
+ 
+         if (!ply_command_parser_parse_arguments (state.command_parser, state.loop, argv, argc)) {
+@@ -2207,6 +2235,7 @@ main (int    argc,
+                                         "no-daemon", &no_daemon,
+                                         "debug", &debug,
+                                         "ignore-serial-consoles", &ignore_serial_consoles,
++                                        "graphical-boot", &force_graphical_boot,
+                                         "debug-file", &debug_buffer_path,
+                                         "pid-file", &pid_file,
+                                         "tty", &tty,
+@@ -2350,6 +2379,9 @@ main (int    argc,
          find_system_default_splash (&state);
          find_distribution_default_splash (&state);
  
-+        if (plymouth_arguments_want_splash (&state))
++        if (check_if_graphical_forced (&state))
 +                device_manager_flags |= PLY_DEVICE_MANAGER_FLAGS_IGNORE_SERIAL_CONSOLES;
 +
          if (ply_kernel_command_line_has_argument ("plymouth.ignore-serial-consoles") ||
