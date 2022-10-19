@@ -40,7 +40,7 @@ case "${THEME_NAME}" in
                 ;;
 
         *)
-                PLUGINS="text.so details.so label.so"
+                PLUGINS="text.so details.so label-pango.so label-freetype.so"
                 ;;
 esac
 
@@ -119,6 +119,7 @@ case "${THEME_NAME}" in
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -a /usr/share/fonts/Plymouth.ttf "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
                 fi
                 case "${THEME_NAME}" in
                         spinner|bgrt)

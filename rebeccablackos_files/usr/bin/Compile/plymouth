@@ -111,6 +111,8 @@ chmod +x /usr/share/initramfs-tools/scripts/init-premount/plymouth_init-premount
 chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth_panic
 
 rm $INSTALLDIR/etc/plymouth/plymouthd.conf
+
+ln -s /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf /usr/share/fonts/Plymouth.ttf
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
