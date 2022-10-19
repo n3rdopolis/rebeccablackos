@@ -752,7 +752,7 @@ ln -s /proc/self/fd/1 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stdout
 ln -s /proc/self/fd/2 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stderr
 
 #Copy external builders into thier own directory, make them executable
-cp "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
+cp -r "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
 chmod +x "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 
 #Copy all external files before they are used
