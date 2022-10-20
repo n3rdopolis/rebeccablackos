@@ -279,7 +279,7 @@ function UserSessionWorker
   unset WLM_SEAT
 
   #Execute the Wayland server, and save the output the log.
-  #dbus-run-session allows a single user to log in multiple times, despite the fact that it may prevent sessions from managing themselves with cgroups, so it's the default
+  #dbus-run-session allows a single user to log in multiple times, despite the fact that it may prevent sessions from managing themselves with cgroups, so it's the default.
   if [[ -z $WLM_NO_DBUS_RUN_SESSION ]]
   then
     dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
