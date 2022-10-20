@@ -20,4 +20,6 @@ SessionArgument=--debug
 AdditionalArguments=--xwayland
 NeedsFile=/opt/bin/weston
 [EnvironmentFile]
+set=QT_STYLE_OVERRIDE=oxygen
+set=QT_QPA_SYSTEM_ICON_THEME=oxygen
 set=XDG_CURRENT_DESKTOP=Weston
