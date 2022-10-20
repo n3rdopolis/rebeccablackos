@@ -206,7 +206,7 @@ function UserSessionWorker
 
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  DATESTAMP=$(date +%s)
+  DATESTAMP=$(date +%Y-%m-%d__%H-%M-%S)
   export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
   echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
@@ -278,8 +278,14 @@ function UserSessionWorker
   fi
   unset WLM_SEAT
 
-  #Execute the Wayland server, and log it to $HOME/.cache/wlsessionlogs/waylandsession_${SEAT}_${DATESTAMP}.log
-  dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+  #Execute the Wayland server, and save the output the log.
+  #dbus-run-session allows a single user to log in multiple times, despite the fact that it may prevent sessions from managing themselves with cgroups, so it's the default
+  if [[ -z $WLM_NO_DBUS_RUN_SESSION ]]
+  then
+    dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+  else
+    ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+  fi
   GuestServerPID=$!
 
   #Terminate the host server after the guest terminates
