@@ -610,12 +610,13 @@ The utility will present a list of devices. Select the desired devices,
 then associate them with the desired seat.
 
 The devices are sorted by the order they were connected. Newest devices are on top.
-The device detection time is queried, the utility does not have to be running when
-devices are being plugged in to get the timing.
+The device plugin time is queried the same way the other attriubtes are, and it is
+relative to the boot time. No actions are needed to ensure that the device plugin
+order is determined by this utility correctly.
 
 Leaving a field blank leaves the device assigned to the current seat info.
 For example, if a device is on seat0/default and the logical seat is set to seat1
-the device wil be left on seat0 for the physical seat.
+the device's physical seat will remain on seat0 as the logical seat is set to seat1.
 
 "|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
 }
