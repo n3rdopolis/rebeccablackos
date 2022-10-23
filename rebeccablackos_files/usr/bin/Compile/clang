@@ -65,7 +65,7 @@ mkdir build
 cd build
 export CC=gcc 
 export CXX=g++
-cmake -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -Wno-dev .. 
+cmake -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DLIB_INSTALL_DIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Wno-dev .. 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
