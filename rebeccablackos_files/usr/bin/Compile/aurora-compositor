@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=RELEASE
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=RELEASE -DQT_MAJOR_VERSION=5
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
