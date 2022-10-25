@@ -24,6 +24,11 @@ then
   export INSTALLDIR=/opt
 fi
 
+if [[ -z $INSTALLDIR_LIBDIR ]]
+then
+  export INSTALLDIR_LIBDIR=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+fi
+
 if [[ -z $BUILDARCH ]]
 then
   export BUILDARCH=$(arch)
