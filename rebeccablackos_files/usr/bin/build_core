@@ -238,6 +238,7 @@ function RunDownloadAndOrBuild
 function InstallDebFile()
 {
   dpkg -i --force-overwrite "$1"
+  return $?
 }
 
 #function to get the revison of GIT repos
@@ -1066,9 +1067,10 @@ function MakeAndInstall()
       #Install the newly created deb file
       STARTTIME=$(date +%s)
       InstallDebFile "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
+      InstallResult=$?
       ENDTIME=$(date +%s)
       echo "BuiltDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
-    
+
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
       $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
@@ -1078,8 +1080,14 @@ function MakeAndInstall()
       #move the resulting deb file into the buildoutput tree.
       mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
 
-      #Create lock file that when removed forces the package to be rebuilt
-      touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      #If dpkg aborts for some reason, such as being unable to overwrite a file, log it, and force the package to rebuild
+      if [[ $InstallResult != 0 ]]
+      then
+        echo "$SOURCENAME (dpkg install)" >> "$BUILDLOGDIR/failedcompiles"
+      else
+        #Create lock file that when removed forces the package to be rebuilt
+        touch "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
+      fi
 
     else
       #call the package install script directly if BUILDCOREMAKEDEBS isn't used
