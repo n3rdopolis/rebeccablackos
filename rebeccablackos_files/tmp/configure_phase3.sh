@@ -311,22 +311,6 @@ rm -rf /var/cache/apt-xapian-index/*
 rm -rf /var/lib/apt/lists/*
 rm -rf /var/lib/dlocate/*
 
-#Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done wi$
-REMOVEDEVPGKS=""
-REMOVEDEVPGKSPROPOSED=(nodejs)
-for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKSPROPOSED[@]}; Iterator++ ))
-do
-  PACKAGE=${REMOVEDEVPGKSPROPOSED[Iterator]}
-  AvailableCount=$(dpkg --get-selections | awk '{print $1}' | awk -F : '{print $1}' | grep -c ^$PACKAGE$)
-  if [[ $AvailableCount != 0 ]]
-  then
-    REMOVEDEVPGKS+="$PACKAGE "
-  fi
-done
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purges.log
-apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
-
-
 #start the remastersys job
 remastersys dist
 
@@ -362,7 +346,7 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/arch
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=""
-REMOVEDEVPGKSPROPOSED=(texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libgl1-mesa-dri libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial autoconf texinfo rustc cpp cpp-9 cpp-10 gcc gcc-9 gcc-10 g++ g++-9 g++-10 clang llvm-9 docbook-xsl linux-headers-"*")
+REMOVEDEVPGKSPROPOSED=(nodejs texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libgl1-mesa-dri libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial autoconf texinfo rustc cpp cpp-9 cpp-10 gcc gcc-9 gcc-10 g++ g++-9 g++-10 clang llvm-9 docbook-xsl linux-headers-"*")
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKSPROPOSED[@]}; Iterator++ ))
 do
   PACKAGE=${REMOVEDEVPGKSPROPOSED[Iterator]}
