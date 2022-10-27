@@ -39,6 +39,8 @@ then
   export EXTERNALBUILDHOME=/tmp
 fi
 
+#avoid hardcoding qt version in scripts
+export BUILD_QT_MAJOR_VERSION=5
 
 #export BUILD_CORE_FORCE_GCC_VERSION=7
 export DESTDIR=/
@@ -54,7 +56,6 @@ export PATH="$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin
 export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
 export CPATH=$INSTALLDIR/include
 export LIBRARY_PATH=$INSTALLDIR/lib
-export QT_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/plugins/
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
 export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"

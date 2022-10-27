@@ -40,7 +40,6 @@ export QTVER=qt5
 export QTDIR=/opt
 export PKG_CONFIG_PATH=/opt/lib/pkgconfig/:$PKG_CONFIG_PATH
 export QT_QPA_PLATFORM=wayland-egl
-export QT_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/plugins/
 export ELM_DISPLAY=wl
 export ELM_ACCEL=gl
 export IRR_DEVICE_TYPE=wayland
