@@ -1,0 +1,13 @@
+diff --git a/src/imports/notifications/CMakeLists.txt b/src/imports/notifications/CMakeLists.txt
+index 311011ab..602accd8 100644
+--- a/src/imports/notifications/CMakeLists.txt
++++ b/src/imports/notifications/CMakeLists.txt
+@@ -19,6 +19,8 @@ liri_add_qml_plugin(NotificationsServerQmlPlugin
+         QT_NO_CAST_FROM_ASCII
+         QT_NO_FOREACH
+         PROJECT_VERSION="${PROJECT_VERSION}"
++    PUBLIC_LIBRARIES
++        Qt5::DBus
+ )
+ 
+ liri_finalize_qml_plugin(NotificationsServerQmlPlugin)
