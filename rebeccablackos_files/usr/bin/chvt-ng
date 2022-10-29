@@ -21,7 +21,10 @@
 if [[ -z $1 ]]
 then
   ExecutableName=$(basename $0)
-  echo "This utility switches to a session number that is running on the current seat"
+  echo "This utility switches to a session number that is running on the current seat, or specified seat"
+  echo " If there are VTs on the seat the session number is the vt number"
+  echo " If there are no VTs on the seat the session number is relative to the start order of sessions on the seat"
+  echo ""
   echo "$ExecutableName: Not enough arguments."
   echo "usage: $ExecutableName <session number>"
   echo "or"
@@ -41,5 +44,14 @@ then
     busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/seat0 org.freedesktop.login1.Seat SwitchTo u $1
   fi
 else
-  busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/"$2" org.freedesktop.login1.Seat SwitchTo u $1
+  busctl introspect org.freedesktop.login1 /org/freedesktop/login1/seat/"$2" org.freedesktop.login1.Seat &>/dev/null
+  Result=$?
+
+  if [[ $Result == 0 ]]
+  then
+    busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/"$2" org.freedesktop.login1.Seat SwitchTo u $1
+  else
+    echo "seat $2 doesn't exist"
+    exit 1
+  fi
 fi
