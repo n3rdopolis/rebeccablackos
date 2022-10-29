@@ -2034,7 +2034,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	# If translation is on, it will catch these too.
 	
 	if [ -f "${DIRECTORIO_FUENTE}/${CK_INCLUDE_FILE}" ]; then
-   	   cat "${DIRECTORIO_FUENTE}/${CK_INCLUDE_FILE}" | while read include_file; do
+   	   cat "${DIRECTORIO_FUENTE}/${CK_INCLUDE_FILE}" | while read -r include_file; do
 	       copy_dir_hierarchy --deref-parents "$include_file" "." "${BUILD_DIR}" &>/dev/null
            done
 
@@ -2068,7 +2068,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 
 	  # OK, now we clean it up a bit
 	  mv /${TMP_DIR}/newfiles.tmp /${TMP_DIR}/newfiles.installwatch
-	  sort -u <  /${TMP_DIR}/newfiles | uniq  | while read file; do
+	  sort -u <  /${TMP_DIR}/newfiles | uniq  | while read -r file; do
 	     if [ -e "${TRANSLROOT}${file}" ]; then
 	        echo $file >> /${TMP_DIR}/newfiles.tmp
 	     else
@@ -2138,7 +2138,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	   $VISUAL ${TMP_DIR}/newfiles
 
 	   # Check if new files were added by the user
-	   cat /${TMP_DIR}/newfiles | while read file; do 
+	   cat /${TMP_DIR}/newfiles | while read -r file; do 
 	      if ! [ -e "${TRANSLROOT}${file}" ]; then
 		  copy_dir_hierarchy --deref-parents "${file}" "/" "${BUILD_DIR}" >> /${TMP_DIR}/updated-by-user.log 2>&1
 	      fi
@@ -2151,7 +2151,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
         if [[ $USEOVERLAYFS == 1 && $BACKUP == 1 ]]
         then
           mkdir "/${TMP_DIR}/BACKUP"
-          cat "/${TMP_DIR}/newfiles" | while read File
+          cat "/${TMP_DIR}/newfiles" | while read -r File
           do
             if [[ -e "$File" && ! -d "$File" ]]
             then
@@ -2176,13 +2176,13 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	if [[ $USEOVERLAYFS == 1 ]]
 	then
 		#In the overlay, clean up folders that were created to simulate the mount point structure
-		while read TRANSLFOLDER
+		while read -r TRANSLFOLDER
 		do
 			rm -d "$TRANSLFOLDER" 2> /dev/null
 		done < <(cat "${TMP_DIR}/TRANSLFOLDERLIST" | sort -r | grep -v "^${TMP_DIR}/TRANSL/$")
 		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
-	    ( cat /${TMP_DIR}/newfiles | while read i; do 
+	    ( cat /${TMP_DIR}/newfiles | while read -r i; do 
 	          if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
 	          echo ".${i}"
 	       fi
@@ -2196,7 +2196,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
             NEWFILES="${TMP_DIR}/modified"
             LOGFILE="/${TMP_DIR}/checkinstall.log"
 
- 	    cat /${TMP_DIR}/newfiles-tar | while read file; do
+ 	    cat /${TMP_DIR}/newfiles-tar | while read -r file; do
                 parents=`list_parents ${file} | sed s/^\.//`
                 for p in $parents; do
                 # We have to remove the ./ at the beginning
@@ -2394,7 +2394,7 @@ if [ $ADD_SO -eq 1 ]; then
 # to /etc/ld.so.conf file if they're not already there. This will be done
 # in the postinstall script.
 
-cat ${TMP_DIR}/newfiles | while read libfile; do
+cat ${TMP_DIR}/newfiles | while read -r libfile; do
   FILETYPE=`file $libfile` 
   if echo /$FILETYPE | grep -e ".*ELF.*hared.*bject" &> /dev/null; then
      echo `dirname $libfile` >> ${TMP_DIR}/libdirs
@@ -2424,7 +2424,7 @@ EOF
 
  echo "echo" >>  "${DIRECTORIO_FUENTE}/postinstall-pak"
 
- cat ${TMP_DIR}/libdirs | while read libdir; do
+ cat ${TMP_DIR}/libdirs | while read -r libdir; do
    (
     echo "if ! grep -E \"^/${libdir} *$\" /etc/ld.so.conf &> /dev/null; then"
     echo "   echo \"Adding \"/$libdir\" to /etc/ld.so.conf\"" 
@@ -2559,7 +2559,7 @@ echo "|-----handy-ruler------------------------------------------------------|" 
 
 
 # Add the prefixed description
- cat description-pak | while read line; do
+ cat description-pak | while read -r line; do
     echo "$NAME: $line" >> ${BUILD_DIR}/install/slack-desc
  done
 
@@ -2575,7 +2575,7 @@ else
 
 if [ $AUTODOINST -eq 1 ]; then
    echo "PACKAGE DESCRIPTION:" > ${BUILD_DIR}/install/description
-   cat description-pak | while read line; do
+   cat description-pak | while read -r line; do
       echo $line >> ${BUILD_DIR}/install/description
    done
    okfail 
@@ -2872,7 +2872,7 @@ EOF
 
 # Prepare directories to be included in the .spec file
 mv ${TMP_DIR}/newfiles ${TMP_DIR}/newfiles.tmp
-cat ${TMP_DIR}/newfiles.tmp | while read line; do
+cat ${TMP_DIR}/newfiles.tmp | while read -r line; do
    [ -d "${BUILD_DIR}/${line}" -o -L "${BUILD_DIR}/${line}" ] && echo -n "%dir " >> ${TMP_DIR}/newfiles
    echo "\"/${line}\"" >> ${TMP_DIR}/newfiles
 done
@@ -3030,7 +3030,7 @@ Description: $SUMMARY
 EOF
 
 # Add the description
-cat "$DIRECTORIO_FUENTE/description-pak"| grep -E -v "$SUMMARY|^[ 	]*$" | while read line; do
+cat "$DIRECTORIO_FUENTE/description-pak"| grep -E -v "$SUMMARY|^[ 	]*$" | while read -r line; do
    echo " "$line >> $BUILD_DIR/DEBIAN/control
 done
 
