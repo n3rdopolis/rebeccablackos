@@ -749,7 +749,7 @@ iso (){
     sleep 1
 
     # Step 9 - Make the ISO file
-    log_msg "Creating $CUSTOMISO in $WORKDIR"
+    log_msg "Creating $CUSTOMISO in $WORKDIR with $CREATEISO"
     #https://bazaar.launchpad.net/~ubuntu-cdimage/debian-cd/ubuntu/view/head:/tools/boot/groovy/boot-amd64 for xorriso command. Hybrid boot is now handled here
     if [[ $BUILDEFI == 1 ]]
     then
