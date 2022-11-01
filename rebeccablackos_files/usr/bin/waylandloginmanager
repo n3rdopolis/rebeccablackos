@@ -1264,7 +1264,10 @@ function ParseWSessionFiles
     then
       read -r -n 16385 -d $'\r' WSESSIONFILEDATA 2>/dev/null < "$WSESSIONFILE"
     else
-      WriteToLog "$WSESSIONFILE is not a file"
+      if [[ -e "$WSESSIONFILE" ]]
+      then
+        WriteToLog "$WSESSIONFILE is not a file"
+      fi
       continue
     fi
 
@@ -3112,7 +3115,7 @@ function WaylandLoginManagerMain
 
     if [[ $DoDetectSeats == 1 || $MainLoopMinutes -ge 120 ]]
     then
-      WriteToLog "Detecting seat configuration..."
+      WriteToLog "Detecting any seat configuration changes..."
       DoDetectSeats=0
       MainLoopMinutes=0
       #Find what seats are new
