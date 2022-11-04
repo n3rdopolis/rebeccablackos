@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=appstream
+SOURCENAME=libxmlb
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/ximion/appstream
+SOURCEURL=https://github.com/hughsie/libxmlb
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -57,14 +57,12 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dqt=true -Dapt-support=true build
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export LD_LIBRARY_PATH=$INTERNALBUILDHOME/build/src:$LD_LIBRARY_PATH
-ninja -v -C build
 ninja -v -C build
 }
 
