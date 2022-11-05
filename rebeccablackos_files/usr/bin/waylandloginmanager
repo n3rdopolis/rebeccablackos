@@ -1162,7 +1162,7 @@ function ReadRegister
           ExportSessionData
           if [[ $SessionDoLock == 1 ]]
           then
-            (sleep 30; loginctl lock-session $SessionID 2> /dev/null) &
+            loginctl lock-session $SessionID 2> /dev/null
           fi
         else
           WriteToLog "Session failed to start"
