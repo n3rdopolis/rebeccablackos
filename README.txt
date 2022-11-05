@@ -106,6 +106,9 @@ BOOT OPTIONS:
       These utilities assit with changing boot options:
             rbos-force-softwarerendering:  Wizard for configuring the bootloader wlmforceswrender option to the kernel command line
 
+            rbos-force-softwarerendering:  Wizard for configuring the bootloader to add or remove `nomodeset to the kernel command line to force or unforce
+                                           using the fallback (SimpleDRM) driver.
+
             rbos-configure-simplegraphics: Wizard for configuring the bootloader frambuffer size for hardware that requires SimpleDRM (see CHANGING THE
             RESOLUTION ON SIMPLE HARDWARE)
 
