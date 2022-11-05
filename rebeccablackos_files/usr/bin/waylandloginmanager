@@ -2151,7 +2151,6 @@ function StartUserSession
   export DefaultBackendType=${BackendData[1]}
   export IsFallbackSession=${BackendData[2]}
 
-
   #Call the server with the arguments specified by the selected session
   if [[ "$USERSEAT" == seat0 && $seat0HasTTYs == 1  ]]
   then
@@ -2179,9 +2178,16 @@ function StartUserSession
   WriteToLog "Starting server \"$CompositorExec\" with the arguments of \"$BackendArguments\" \"$SessionArgument\" \"$CompositorSeatArgument\" \"$AdditionalArguments\" \"$CompositorDisplayArgument\" for user $LOGINUSER $TTYSTRING on seat $USERSEAT"
   systemd-run --unit="$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/ /tmp/.Test-unix/" -p PAMName=waylandloginmanager -p User="$LOGINUSER" $OutputArgs -p WorkingDirectory=\~ -p UtmpMode=user -p UtmpIdentifier="$SESSIONID-$SeatFileName" --setenv=SessionName="$SessionName" --setenv=BackendType="$BackendType" --setenv=DefaultBackendType="$DefaultBackendType" --setenv=IsFallbackSession="$IsFallbackSession" --setenv=EnvironmentFile="$EnvironmentFile" --setenv=WAYLAND_GUEST=$WAYLAND_GUEST --setenv=XDG_SEAT="$USERSEAT" --setenv=WLM_SEAT=$SeatFileName --setenv=WAYLAND_HOST="$WAYLAND_HOST" $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
-  $SLEEPCMD 5
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
-  USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p ExecMainPID --value 2>/dev/null)
+  TRYCOUNT=0
+  USERSESSIONPID=""
+  while [[ -z $USERSESSIONPID  && $TRYCOUNT -le 5 ]]
+  do
+    USERSESSIONPID=$(systemctl show "$LOGINUSER-wayland-$SESSIONID-$SeatFileName" -p ExecMainPID --value 2>/dev/null)
+    $SLEEPCMD 1
+    ((TRYCOUNT++))
+  done
+
   #Find the logind session id, by trying to find out what session is lead by the $USERSESSIONPID. This is needed to know what logind session needs to be switched to to enable desktop permissions
   SESSIONS=($(loginctl show-seat "$USERSEAT" -p Sessions --value 2>/dev/null ))
   for SESSION in "${SESSIONS[@]}"

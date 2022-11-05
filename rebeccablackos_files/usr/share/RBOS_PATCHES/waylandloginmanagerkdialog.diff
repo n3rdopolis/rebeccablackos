@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-10-31 22:11:49.613661056 -0400
-+++ usr/bin/waylandloginmanagerkdialog	2022-11-02 19:24:35.396776762 -0400
+--- usr/bin/waylandloginmanager	2022-11-04 22:43:10.596163842 -0400
++++ usr/bin/waylandloginmanagerkdialog	2022-11-04 22:46:52.587363696 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -214,7 +214,7 @@
        fi
      fi
    fi
-@@ -2335,26 +2339,30 @@
+@@ -2341,26 +2345,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -253,7 +253,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2362,9 +2370,9 @@
+@@ -2368,9 +2376,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -265,7 +265,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2395,9 +2403,9 @@
+@@ -2401,9 +2409,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -277,7 +277,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2411,7 +2419,7 @@
+@@ -2417,7 +2425,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -286,7 +286,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2435,13 +2443,13 @@
+@@ -2441,13 +2449,13 @@
        StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
      fi
    else
@@ -302,7 +302,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2456,7 +2464,7 @@
+@@ -2462,7 +2470,7 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -311,7 +311,7 @@
      SessionPromptThreshold=2
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
-@@ -2484,7 +2492,7 @@
+@@ -2490,7 +2498,7 @@
    unset RunningSessions
    unset RunningSessionTypes
  
@@ -320,7 +320,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2540,9 +2548,15 @@
+@@ -2546,9 +2554,15 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -338,7 +338,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2561,7 +2575,7 @@
+@@ -2567,7 +2581,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -347,7 +347,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2606,7 +2620,7 @@
+@@ -2612,7 +2626,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -356,7 +356,7 @@
    fi
  }
  
-@@ -2935,7 +2949,7 @@
+@@ -2941,7 +2955,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -365,7 +365,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2973,7 +2987,7 @@
+@@ -2979,7 +2993,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -374,7 +374,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3009,15 +3023,20 @@
+@@ -3015,15 +3029,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -401,7 +401,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -3025,12 +3044,12 @@
+@@ -3031,12 +3050,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -417,7 +417,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3392,9 +3411,9 @@
+@@ -3398,9 +3417,9 @@
      done
      LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
