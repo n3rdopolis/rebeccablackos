@@ -43,7 +43,7 @@
 #At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
 
 #/etc/waylandloginmanager.conf
-  #Otherwise it uses /etc/lightdm/lightdm.conf . The supported key is 'autologin-user=$AUTOLOGINUSER', and it usually takes it from /etc/lightdm/lightdm.conf at first run. It only uses /etc/waylandloginmanager.conf, as another init script can cause the lightdm config to drop the configured autologin user on an unsafe shutdown
+     #autologin-user=$AUTOLOGINUSER
      #it can also have 
      #      autologin-user-{$SEAT}=$AUTOLOGINUSER
      #to set a different autologin user per seat or
