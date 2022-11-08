@@ -7,34 +7,32 @@ timeout 300
 # SAY The following options for boot: are availible to be used:
 # SAY If no options are passed in 30 seconds, then it defaults to live
 # SAY _____________________________________________________________________
-# SAY __|live|____________________________________Start the system normally 
+# SAY __|live|_____________________________________________Startup Normally
 # SAY _____________________________________________________________________
-# SAY __|liveforcesw|___________________Force software rendering to be used
-# SAY __|livefbdefault|_______________Attempt to use the framebuffer device
+# SAY __|liveforcesw|____________________Startup and use Software Rendering
+# SAY __|livesddefault|___Startup with Fallback Graphics Driver (auto size)
 # SAY _____________________________________________________________________
-# SAY __|livefb342|_______________Attempt to use a 640x480(x32) framebuffer
-# SAY __|livefb343|_______________Attempt to use a 800x600(x32) framebuffer
-# SAY __|livefb344|______________Attempt to use a 1024x768(x32) framebuffer
-# SAY __|livefb345|_____________Attempt to use a 1280x1024(x32) framebuffer
+# SAY __|livesd342|______Startup with Fallback Graphics Driver 640x480(x32)
+# SAY __|livesd343|______Startup with Fallback Graphics Driver 800x600(x32)
+# SAY __|livesd344|_____Startup with Fallback Graphics Driver 1024x768(x32)
+# SAY __|livesd345|____Startup with Fallback Graphics Driver 1280x1024(x32)
 # SAY _____________________________________________________________________
-
-# SAY __|livefb37A|______________Attempt to use a 1280x800(x32) framebuffer
-# SAY __|livefb380|______________Attempt to use a 1400x900(x32) framebuffer
-# SAY __|livefb347|_____________Attempt to use a 1600x1200(x32) framebuffer
-# SAY __|livefb392|_____________Attempt to use a 1920x1080(x32) framebuffer
-# SAY __|livefb38C|_____________Attempt to use a 2560x1600(x32) framebuffer
+# SAY __|livesd37A|_____Startup with Fallback Graphics Driver 1280x800(x32)
+# SAY __|livesd380|_____Startup with Fallback Graphics Driver 1400x900(x32)
+# SAY __|livesd347|____Startup with Fallback Graphics Driver 1600x1200(x32)
+# SAY __|livesd392|____Startup with Fallback Graphics Driver 1920x1080(x32)
+# SAY __|livesd38C|____Startup with Fallback Graphics Driver 2560x1600(x32)
 menu title __LIVECDLABEL__
 menu background splash.png
 menu color title 1;37;44 #c0ffffff #00000000 std
 
 
 label live
-  menu label Startup in native graphics mode
+  menu label Startup Normally
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet loglevel=3 splash vt.global_cursor_default=0 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical --
 TEXT HELP
-Start with no configured framebuffer, for hardware
-devices that do have drivers that most Wayland servers prefer.
+Start with default graphics driver
 
 Live user name is 'rebestie' with no password
 ENDTEXT
@@ -42,155 +40,122 @@ ENDTEXT
 MENU SEPARATOR
 
 label liveforcesw
-  menu label Fallback native graphics with software renderer
+  menu label Startup and use Software Rendering
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet loglevel=3 splash vt.global_cursor_default=0 wlmforceswrender --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman --
 TEXT HELP
-Start and force software rendering.
-
-This is for systems that support kernel mode setting, but have
-problems using hardware rendering. 
-Live user name is 'rebestie' with no password
-ENDTEXT
-
-
-label livefbdefault
-  menu label Fallback with framebuffer mode (automatic size)
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject noprompt quiet loglevel=3 splash vt.global_cursor_default=0 wlmforceswrender wlmforcefbdev --
-TEXT HELP
-Start with a default framebuffer size specified by the drivers, and force 
-all sessions to use the framebuffer backend instead of kernel mode setting
-
-This is for diagnostics on systems that have kernel mode settings drivers
-and provide a virtual framebuffer device the size of the screen, but
-have problems when kernel mode setting is used directly.
-Live user name is 'rebestie' with no password
-ENDTEXT
-
-label livefb342
-  menu label Fallback attempting a 640x480(x32) framebuffer
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x342 --
-TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer.
-
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
-
-Live user name is 'rebestie' with no password
-ENDTEXT
-
-label livefb343
-  menu label Fallback attempting a 800x600(x32) framebuffer
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x343 --
-TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer.
-
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
-
-Live user name is 'rebestie' with no password
-ENDTEXT
-
-label livefb344
-  menu label Fallback attempting a 1024x768(x32) framebuffer *
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x344 --
-TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer.
-
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
+Start with default graphics driver, but force software rendering.
 
 Live user name is 'rebestie' with no password
 ENDTEXT
 
 
-label livefb345
-  menu label Fallback attempting a 1280x1024(x32) framebuffer
+label livesddefault
+  menu label Startup with Fallback Graphics Driver (auto size)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x345 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset --
 TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer.
-
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
+Start with the fallback graphics driver. Use the default resolution.
 
 Live user name is 'rebestie' with no password
 ENDTEXT
 
-label livefb37A
-  menu label Fallback attempting a 1280x800(x32) framebuffer
+label livesd342
+  menu label Startup with Fallback Graphics Driver 640x480(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x37A --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x342 --
 TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer. 
-**This resolution may not be supported by all hardware**
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
 
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
 Live user name is 'rebestie' with no password
 ENDTEXT
 
-label livefb380
-  menu label Fallback attempting a 1400x900(x32) framebuffer
+label livesd343
+  menu label Startup with Fallback Graphics Driver 800x600(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x380 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x343 --
 TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer. 
-**This resolution may not be supported by all hardware**
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
 
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
 Live user name is 'rebestie' with no password
 ENDTEXT
 
-label livefb347
-  menu label Fallback attempting a 1600x1200(x32) framebuffer
+label livesd344
+  menu label Startup with Fallback Graphics Driver 1024x768(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x347 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x344 --
 TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer. 
-**This resolution may not be supported by all hardware**
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
 
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
 Live user name is 'rebestie' with no password
 ENDTEXT
 
-label livefb392
-  menu label Fallback attempting a 1920x1080(x32) framebuffer
-  kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x392 --
-TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer. 
-**This resolution may not be supported by all hardware**
 
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
+label livesd345
+  menu label Startup with Fallback Graphics Driver 1280x1024(x32)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x345 --
+TEXT HELP
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
+
 Live user name is 'rebestie' with no password
 ENDTEXT
 
-label livefb38C
-  menu label Fallback attempting a 2560x1600(x32) framebuffer
+label livesd37A
+  menu label Startup with Fallback Graphics Driver 1280x800(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz noeject wlmforceswrender wlmforcefbdev splash vt.global_cursor_default=0 noprompt quiet loglevel=3 vga=0x38C --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x37A --
 TEXT HELP
-Start with a fallback framebuffer, for hardware devices 
-that don't have drivers that most Wayland servers prefer. 
-**This resolution may not be supported by all hardware**
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
 
-On some systems with kernel mode setting, the framebuffer is virtual, 
-and the framebuffer size specified will be the size of your screen
+Live user name is 'rebestie' with no password
+ENDTEXT
+
+label livesd380
+  menu label Startup with Fallback Graphics Driver 1400x900(x32)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x380 --
+TEXT HELP
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
+
+Live user name is 'rebestie' with no password
+ENDTEXT
+
+label livesd347
+  menu label Startup with Fallback Graphics Driver 1600x1200(x32)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x347 --
+TEXT HELP
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
+
+Live user name is 'rebestie' with no password
+ENDTEXT
+
+label livesd392
+  menu label Startup with Fallback Graphics Driver 1920x1080(x32)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x392 --
+TEXT HELP
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
+
+Live user name is 'rebestie' with no password
+ENDTEXT
+
+label livesd38C
+  menu label Startup with Fallback Graphics Driver 2560x1600(x32)
+  kernel /casper/vmlinuz
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical wlmforceswrender wlmforcepixman nomodeset vga=0x38C --
+TEXT HELP
+Start with the fallback graphics driver.
+Attempt to use the specified resolution. Specified resolution may fail
+
 Live user name is 'rebestie' with no password
 ENDTEXT
