@@ -1162,7 +1162,9 @@ function ReadRegister
           ExportSessionData
           if [[ $SessionDoLock == 1 ]]
           then
-            loginctl lock-session $SessionID 2> /dev/null
+            WriteToLog "Locking Session $SessionID for autologin on seat $SessionSeatID"
+            busctl call org.freedesktop.login1 /org/freedesktop/login1/session/$SessionID org.freedesktop.login1.Session SetLockedHint b true
+            loginctl lock-session $SessionID &> /dev/null
           fi
         else
           WriteToLog "Session failed to start"
