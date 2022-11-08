@@ -122,7 +122,7 @@ fi
 
 cage -d -s -m extend -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
-$SHELLCOMMAND -l > /dev/null 2>&1
+sh -c "$SHELLCOMMAND -l; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
 #undo fake udev device info
 if [ $systemd_result -ne 0 ]
