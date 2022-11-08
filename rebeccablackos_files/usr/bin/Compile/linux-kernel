@@ -146,16 +146,13 @@ fi
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
 ./scripts/config -d CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
-BUILD_CONFIGVT_N=0
-if [[ $BUILD_CONFIGVT_N == 1 ]]
-then
-  ./scripts/config -d CONFIG_VT
-  ./scripts/config -d CONFIG_CONSOLE_TRANSLATIONS
-  ./scripts/config -d CONFIG_VT_CONSOLE
-  ./scripts/config -d CONFIG_VT_CONSOLE_SLEEP
-  ./scripts/config -d CONFIG_HW_CONSOLE
-  ./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
-fi
+#Disable VTs
+./scripts/config -d CONFIG_VT
+./scripts/config -d CONFIG_CONSOLE_TRANSLATIONS
+./scripts/config -d CONFIG_VT_CONSOLE
+./scripts/config -d CONFIG_VT_CONSOLE_SLEEP
+./scripts/config -d CONFIG_HW_CONSOLE
+./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
 
 make olddefconfig
 
