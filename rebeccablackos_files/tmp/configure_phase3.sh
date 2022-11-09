@@ -207,9 +207,6 @@ function PostInstallActions
   systemctl --global disable pulseaudio.socket
   systemctl --global enable pipewire-pulse.socket
 
-  #Enable kactivites
-  systemctl --global enable plasma-kactivitymanagerd.service
-
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
   #common postinstall actions
