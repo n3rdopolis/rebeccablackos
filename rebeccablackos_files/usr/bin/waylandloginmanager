@@ -3515,7 +3515,7 @@ Will show a menu with a few options for diagnosis." 20 50
           if [[ $RunningSeatID != "seat0" || $seat0HasTTYs != 1 ]]
           then
             ActiveLogindSession=$(loginctl show-seat $RunningSeatID  -p ActiveSession --value)
-            if [[ -z $ActiveLogindSession ]]
+            if [[ -z $ActiveLogindSession || $ActiveLogindSession == $RunningSessionID ]]
             then
               WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeatID after $RunningSessionID terminated"
               loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
