@@ -3373,32 +3373,7 @@ function WaylandLoginManagerMain
           LastUserActionPIDs[$SeatIndexID]=$!
         fi
       fi
-
-      #If a seat without TTYs has no active session unexpectedly, fall back to the loginmanagerdisplay.
-      if [[ ${LoginManagerDisplayBackends[$SeatIndexID]} != "" && ${LoginManagerDisplayBackends[$SeatIndexID]} != 0 ]]
-      then
-        if [[ ($RunningSeat == seat0 && $seat0HasTTYs == 0) || $RunningSeat != seat0 ]]
-        then
-          if [[ $LastMainLoopMinuteQuarter != $MainLoopMinuteQuarter ]]
-          then
-            ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
-            if [[ -z $ActiveLogindSession ]]
-            then
-              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat which now unexpectedly has no active session."
-              loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
-            else
-              ActiveSessionPID=$(loginctl show-session $ActiveLogindSession  -p Leader --value)
-              if [[ ! -e /proc/$ActiveSessionPID/environ ]]
-              then
-                WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat as the leader PID for $ActiveLogindSession is not running"
-                loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
-              fi
-            fi
-          fi
-        fi
-      fi
     done
-    LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
 
     if [[ $ZenityCommandFoundResult != 0 ]]
     then
@@ -3511,7 +3486,7 @@ Will show a menu with a few options for diagnosis." 20 50
         else
           GetStartedSeatIndex $RunningSeatID
           SeatIndexID=$ReturnSeatIndex
-          #If the session terminated, and then current system TTY is the same as the terminated sessions, go back to the loginmanagerdisplay
+          #Switch back to the loginmanagerdisplay if the active session exits. This is determined by the active vt, if there is no active logind session, or in the case where the session still exits, after the leader pid quits
           if [[ $RunningSeatID != "seat0" || $seat0HasTTYs != 1 ]]
           then
             ActiveLogindSession=$(loginctl show-seat $RunningSeatID  -p ActiveSession --value)
@@ -3550,6 +3525,34 @@ Will show a menu with a few options for diagnosis." 20 50
       unset NewAllSeatIDs
     fi
 
+    #Detect seats that have no active session at all, if in the case where a session is started not by waylandloginmanager, and then it terminates. This check runs every 15 seconds
+    if [[ $LastMainLoopMinuteQuarter != $MainLoopMinuteQuarter ]]
+    then
+      for RunningSeat in "${AllRunningSeats[@]}"
+      do
+        #If a seat without TTYs has no active session, fall back to the loginmanagerdisplay.
+        if [[ ${LoginManagerDisplayBackends[$SeatIndexID]} != "" && ${LoginManagerDisplayBackends[$SeatIndexID]} != 0 ]]
+        then
+          if [[ ($RunningSeat == seat0 && $seat0HasTTYs == 0) || $RunningSeat != seat0 ]]
+          then
+            ActiveLogindSession=$(loginctl show-seat $RunningSeat  -p ActiveSession --value)
+            if [[ -z $ActiveLogindSession ]]
+            then
+              WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat which now unexpectedly has no active session."
+              loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+            else
+              ActiveSessionPID=$(loginctl show-session $ActiveLogindSession  -p Leader --value)
+              if [[ ! -e /proc/$ActiveSessionPID/environ ]]
+              then
+                WriteToLog "Switching back to the loginmanagerdisplay for seat $RunningSeat as the leader PID for $ActiveLogindSession is not running"
+                loginctl activate ${LoginManagerDisplaySessions[$SeatIndexID]} &>/dev/null
+              fi
+            fi
+          fi
+        fi
+      done
+    fi
+    LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
 
     #Read the next line that was sent to the FIFO. Allow a 1 second delay before it times out, and assumes a null command. the timeout allows detection for when sessions quit. It only reads 290 bytes at a time.
     #32 for the command, 1 for the delimiter, and 255 for the max logind seat name size, and 2 for encasing newlines

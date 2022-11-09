@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2022-11-08 15:52:15.459004690 -0500
-+++ usr/bin/waylandloginmanagerkdialog	2022-11-08 15:55:42.712443461 -0500
+--- usr/bin/waylandloginmanager	2022-11-09 08:45:10.281239802 -0500
++++ usr/bin/waylandloginmanagerkdialog	2022-11-09 17:06:28.032021587 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -417,9 +417,9 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3400,9 +3419,9 @@
+@@ -3375,9 +3394,9 @@
+       fi
      done
-     LastMainLoopMinuteQuarter=$MainLoopMinuteQuarter
  
 -    if [[ $ZenityCommandFoundResult != 0 ]]
 +    if [[ $KdialogCommandFoundResult != 0 ]]
