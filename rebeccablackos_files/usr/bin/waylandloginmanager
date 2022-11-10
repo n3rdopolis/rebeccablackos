@@ -93,10 +93,10 @@
      #to be the default session
      #or defaultwsession--{$USER_LOGNAME}=Unquoted Session Name
      #to force it for a paticular user only
-     #or defaultwsession--{$USER_LOGNAME}=:
+     #or defaultwsession--{$USER_LOGNAME}=:       OR      defaultwsession--:{$USER_LOGNAME}
      #or defaultwsession-{$SEAT}=Unquoted Session Name
-     #or defaultwsession-{$SEAT}-{$USER_LOGNAME}=Unquoted Session Name
-     #set defaultwsession-{$SEAT}-{$USER_LOGNAME}=::
+     #or defaultwsession-{$SEAT}-{$USER_LOGNAME}=Unquoted Session Name       OR       defaultwsession-{$SEAT}-:{$USER_LOGNAME}=Unquoted Session Name
+     #set defaultwsession-{$SEAT}-{$USER_LOGNAME}=::       OR       defaultwsession-{$SEAT}-:{$USER_LOGNAME}=::
      #to make it always prompt for autologins
      #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
@@ -1861,8 +1861,19 @@ function ChooseSessionType
     else
       WSESSIONKEY="::"
     fi
+    #Older config format for saving user session selection, possible for collisions, as seats and users can have - characters. Still support for compatibility.
+    #
+    #defaultwsession  or defaultwsession--[USER]
     GetConfigKey defaultwsession "-$SessionUser" "$WSESSIONKEY" 0 GETDEFAULTWSESSION
+    #defaultwsession-[SEAT] or defaultwsession-[SEAT]-[USER]
     GetConfigKey defaultwsession-${CurrentHandleSeat} "$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
+
+    #Newer config format for saving user session selections. Seats or users can't have : characters
+    #
+    #defaultwsession or defaultwsession--:[USER]
+    GetConfigKey defaultwsession "-:$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
+    #defaultwsession-[SEAT] or defaultwsession-[SEAT]-:[USER]
+    GetConfigKey defaultwsession-${CurrentHandleSeat} ":$SessionUser" "$GETDEFAULTWSESSION" 0 GETDEFAULTWSESSION
     if [[ $IsAutologin == 1 ]]
     then
       SessionSelectionTitleHint="Autologin: Select the session for $SessionUser..."
@@ -1915,7 +1926,7 @@ function ChooseSessionType
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
     if [[ $GETDEFAULTWSESSION != "::" ]]
     then
-      SendSelfRegisterData "SETCONFIGKEY"$'\u1F'"defaultwsession-${CurrentHandleSeat}-${SessionUser}"$'\u1F'"${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
+      SendSelfRegisterData "SETCONFIGKEY"$'\u1F'"defaultwsession-${CurrentHandleSeat}-:${SessionUser}"$'\u1F'"${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
     fi
 
   else
