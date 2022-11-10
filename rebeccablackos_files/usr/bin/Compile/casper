@@ -23,13 +23,13 @@
 SOURCENAME=casper
 
 #The URL of the Source code repo
-SOURCEURL=http://bazaar.launchpad.net/~ubuntu-branches/ubuntu/wily/casper/wily/
+SOURCEURL=https://git.launchpad.net/ubuntu/+source/casper
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
-REPOSITORYTYPE=BZR
+REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=last:1
+SOURCEREVISION=ubuntu/jammy
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -65,7 +65,7 @@ sed -i "s@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/
 sed -i 's/overlayfs/overlay/g' hooks/casper
 sed -i '/manual_add_modules aufs/d' hooks/casper
 sed -i '/manual_add_modules unionfs/d' hooks/casper
-patch -f --no-backup-if-mismatch -p0 < /usr/share/RBOS_PATCHES/casper.diff
+patch -f --no-backup-if-mismatch -p1 < /usr/share/RBOS_PATCHES/casper.diff
 rm scripts/casper-bottom/22sslcert #WORKAROUND
 }
 
@@ -78,6 +78,7 @@ make
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+chmod +x scripts/casper-bottom/*
 cat debian/*.install | grep -v ^casper.conf |while read -r LINE
 do 
 echo "DOING $LINE"

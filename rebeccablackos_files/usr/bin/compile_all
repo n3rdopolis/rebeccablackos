@@ -652,16 +652,6 @@ CompilePackage xdg-desktop-portal-wlr
 CompilePackage mir
 CompilePackage wine
 CompilePackage calamares
-
-
-if [[ ! -e /usr/lib/casper ]]
-then
-  CompilePackage casper
-fi
-
-if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
-then
-  CompilePackage lupin
-fi
+CompilePackage casper
 
 CompilePackageList

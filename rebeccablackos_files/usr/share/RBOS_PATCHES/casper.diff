@@ -1,7 +1,17 @@
-=== modified file 'scripts/casper-bottom/15autologin'
---- scripts/casper-bottom/15autologin	2015-03-26 00:29:17 +0000
-+++ scripts/casper-bottom/15autologin	2015-08-07 02:28:49 +0000
-@@ -92,4 +92,9 @@
+diff --git a/hooks/casper b/hooks/casper
+index f377849..52904ba 100755
+--- a/hooks/casper
++++ b/hooks/casper
+@@ -92,3 +92,4 @@ if [ -z "\$BOOT" ]; then
+ fi
+ EOF
+ fi
++ln -s /bin/udevadm "${DESTDIR}/sbin/udevadm"
+diff --git a/scripts/casper-bottom/15autologin b/scripts/casper-bottom/15autologin
+index d6c75e6..dcaa8a8 100755
+--- a/scripts/casper-bottom/15autologin
++++ b/scripts/casper-bottom/15autologin
+@@ -99,4 +99,9 @@ Session=$sddm_session
  EOF
  fi
  
@@ -11,14 +21,28 @@
 +fi
 +
  log_end_msg
-
-
-=== modified file 'hooks/casper'
---- hooks/casper        2012-11-22 14:35:36 +0000
-+++ hooks/casper        2018-10-20 13:44:51 +0000
-@@ -87,3 +87,4 @@
-     mkdir -p $DESTDIR/conf
-     uuidgen -r > $DESTDIR/conf/uuid.conf
- fi
-+ln -s /bin/udevadm "${DESTDIR}/sbin/udevadm"
-
+diff --git a/scripts/casper-bottom/35limit_coredumpctl_usage b/scripts/casper-bottom/35limit_coredumpctl_usage
+new file mode 100755
+index 0000000..2b1986a
+--- /dev/null
++++ b/scripts/casper-bottom/35limit_coredumpctl_usage
+@@ -0,0 +1,19 @@
++#!/bin/sh
++
++PREREQ=""
++
++prereqs()
++{
++       echo "$PREREQ"
++}
++
++case $1 in
++# get pre-requisites
++prereqs)
++       prereqs
++       exit 0
++       ;;
++esac
++
++echo "MaxUse=256M" >> /root/etc/systemd/coredump.conf
++
