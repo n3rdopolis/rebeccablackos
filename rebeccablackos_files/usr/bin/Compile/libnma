@@ -75,7 +75,8 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-: 
+#Prevent overwrites, network-manager-applet should have this file, but it's also in libnma
+rm $INSTALLDIR/share/glib-2.0/schemas/org.gnome.nm-applet.gschema.xml
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
