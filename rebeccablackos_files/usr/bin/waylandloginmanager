@@ -639,11 +639,11 @@ function ReadEnvironmentFile
   unset EnvironmentFileArray
 }
 
-#All functions below this point are for the main operation of the waylandloginmanager
-
 #This function writes to the logs. It takes 1 argument, the string to log.
 function WriteToLog
 {
+  #Log to the log file, as well as stdout, so that the logs are also captured in the journal
+  builtin printf "%s\n" "$1"
   builtin printf "%(%F %T %z)T: %s\n" -1 "$1"   >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
 }
 
