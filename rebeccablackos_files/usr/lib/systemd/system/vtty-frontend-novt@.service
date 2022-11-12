@@ -4,8 +4,9 @@
 #As not all login managers have an always-running greeter like waylandloginmanager
 Description=Graphical terminal for vTTY %I
 
+Wants=plymouth-deactivate.service
 After=vtty-backend-novt@.service
-After=systemd-user-sessions.service plymouth.service display-manager.service
+After=systemd-user-sessions.service plymouth.service display-manager.service plymouth-deactivate.service
 
 
 BindsTo=vtty-backend-novt@.service
