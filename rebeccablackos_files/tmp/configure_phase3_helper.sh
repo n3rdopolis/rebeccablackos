@@ -26,19 +26,20 @@ fi
 #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
 
 #Copy select files into place, that are suitable for distribution.
-mkdir -p /usr/bin
-cp -a /usr/import/usr/bin/* /usr/bin
-
-mkdir -p /usr/libexec
-cp -a /usr/import/usr/libexec/* /usr/libexec
-
-mkdir -p /usr/share/
-cp -a /usr/import/usr/share/* /usr/share
+cp -a /usr/import/usr/* /usr
 
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/skel/* /etc/skel
-
 mkdir -p /etc/skel/Desktop
+
+mkdir -p /etc/remastersys
+cp -a /usr/import/etc/remastersys/* /etc/remastersys
+
+mkdir -p /etc/pam.d
+cp -a /usr/import/etc/pam.d/* /etc/pam.d
+
+mkdir -p /etc/grub.d
+cp -a /usr/import/etc/grub.d/* /etc/grub.d
 
 mkdir -p /etc/loginmanagerdisplay
 cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
