@@ -43,10 +43,10 @@ DetectedWorkingResolutions=($(/usr/sbin/hwinfo --framebuffer 2>/dev/null | grep 
 #hwinfo tends to fail on real hardware.
 if [[ ${#DetectedWorkingResolutions[@]} == 0 ]]
 then
-  ResolutionListComment="The listed resolutions are a list of possibly supported, but also possibly unsupported resolutions, as the list could not be detected automatically."
+  ResolutionListComment="The listed resolutions are a list commonly supported resolutions. Some may not be supported by your hardware, as this BIOS does not appear to report the ones that it does."
   WorkingResolutions+=(320x200 640x400 640x480 800x600 1024x768 1152x864 1280x1024 1280x720 1280x768 1280x800 1280x960 1400x1050 1440x900 1600x1200 1680x1050 1920x1080 1920x1200 2560x1600)
 else
-  ResolutionListComment="The listed resolutions are all reported as supported by your BIOS/Graphics hardware"
+  ResolutionListComment="The listed resolutions *are* all reported as supported by your BIOS/Graphics hardware."
   WorkingResolutions+=(${DetectedWorkingResolutions[@]})
 fi
 
