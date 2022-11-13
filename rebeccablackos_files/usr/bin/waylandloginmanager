@@ -1345,6 +1345,7 @@ function ParseWSessionFiles
       WSESSIONLINE=($WSESSIONLINE)
       unset IFS
 
+      #Get the key name and the key value
       KeyName=""
       KeyValue=""
       ChangeArrayElement=""
@@ -1369,12 +1370,18 @@ function ParseWSessionFiles
       fi
 
       #Set the NeedFile
-      if [[ $KeyName == NeedsFile ]]
+      if [[ $KeyName == NeedsFile || $KeyName == TryExec ]]
       then
+        #Ignore if it's not an absolute path
+        if [[ $KeyValue != "/*" ]]
+        then
+          continue
+        fi
         NeedsFileArray+=("000#$KeyValue")
         continue
       fi
 
+      #Build the array for the file, each key has its position in the array. (CompositorExec and Exec are handled the same)
       ChangeArrayElement=-1
       case $KeyName in
         Enabled)
@@ -1396,6 +1403,8 @@ function ParseWSessionFiles
         AdditionalArguments)
           ChangeArrayElement=8;;
         CompositorExec)
+          ChangeArrayElement=9;;
+        Exec)
           ChangeArrayElement=9;;
         EnvironmentFile)
           ChangeArrayElement=10;;
@@ -1465,6 +1474,8 @@ function ParseWSessionFiles
       fi
     done
 
+    #Build the 3 array of arrays, for the arrays of unique keys, the array of the backend/seat support, and for the list of declared needed files
+    #\n separates elements, \r separates a new array
     FirstElement=0
     for Element in "${DesktopFileDataArray[@]}"
     do
@@ -1729,27 +1740,15 @@ function ChooseSessionType
       SessionName=$CompositorExec
     fi
 
+    IsExecutable=1
+
     if [[ ! ($WSessionFilePath =~ ^$WSESSIONSPATH) ]]
     then
       SessionComment="[User Created Session] $SessionComment"
-    fi
-
-    if [[ ! -x $WSessionFilePath ]]
-    then
-      WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user."
-      IsExecutable=0
-    else
-      IsExecutable=1
-    fi
-
-    if [[ $IsExecutable != 0 ]]
-    then
-      if [[ ! -x $CompositorExec ]]
+      if [[ ! -x $WSessionFilePath ]]
       then
-        WriteToLog "Warning: CompositorExec \"$CompositorExec\" specified in $WSessionFilePath is not executable, the session will not be availible for selection by the user."
         IsExecutable=0
-      else
-        IsExecutable=1
+        WriteToLog "Warning: $WSessionFilePath is not executable, the session will not be availible for selection by the user."
       fi
     fi
 
@@ -1785,9 +1784,11 @@ function ChooseSessionType
       WriteToLog "Warning: $WSessionFilePath backends $BackendType does not support seats for $CurrentHandleSeat , the session will not be availible for selection by the user."
     fi
 
-    if [[ $Type != "WSession" ]]
+    TypeIsAccepted=1
+    if [[ $Type != "WSession" && $Type != "Application" ]]
     then
-      WriteToLog "Warning: $WSessionFilePath does not have a Type of 'WSession' , the session will not be availible for selection by the user."
+      TypeIsAccepted=0
+      WriteToLog "Warning: $WSessionFilePath does not have a Type of 'WSession' or 'Application' , the session will not be availible for selection by the user."
     fi
 
     #if the session supports the CompositorDisplayArgument, for setting the WAYLAND_DISPLAY it should use, then ammend the WAYLAND_GUEST to the end of the command.
@@ -1820,7 +1821,7 @@ function ChooseSessionType
 
     #If the session is enabled, the backend is supported, all the files it needs are there, and its a wsession file, and is executable add the lines describing the session to the string.
     #This is sent through stdio which is added to teh WSESSIONLIST variable
-    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled != 0 && $Type == "WSession" && $IsExecutable != 0 && $ExcludeDebugSession != 1 ]]
+    if [[ $NotFoundCount == 0 && $SupportsBackend == 1 && $SupportsSeat == 1 && $Enabled != 0 && $TypeIsAccepted == 1 && $IsExecutable != 0 && $ExcludeDebugSession != 1 ]]
     then
       if [[ $FirstRunNotRan == 0 ]]
       then

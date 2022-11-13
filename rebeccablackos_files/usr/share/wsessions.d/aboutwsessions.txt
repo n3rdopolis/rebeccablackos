@@ -5,11 +5,12 @@ About the wsession file:
 any variables in the keys are expanded with perl
 
 The wsession file must be executable, the wsession file must end in .desktop, and must start with [Desktop File] at the top line 
-It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of that folder are not probed. See line 1 in the example
+It must be in the top directory of /usr/share/wsessions.d/ , as subfolders of that folder are not probed. See line 1 in the example.
+These do not need to be executable.
 
 A user can have their own wsession files. These can be placed under $HOME/.local/share/wsessions.d/
 Sessions that are discovered from a users HOME directory are marked as such.
-
+These must be executable
 
 The keys------------------------------
 Enabled:
@@ -19,7 +20,7 @@ DebugSession:
 if DebugSession is set to 1, then this session will only appear if the wlmdebug or wlmdebuginsecure options have been passed
 
 Type:
-Type=WSession is assumed by default, and notes the .desktop file as a WSession type Desktop file. .desktop files that waylandloginmanager handles are now assumed to 
+Type=WSession is assumed by default, and notes the .desktop file as a WSession type Desktop file. .desktop files that waylandloginmanager handles are now assumed to. The Type must be WSession or Application
 
 Name:
 The Name key is the name of the wsession, in user friendly string. See line 4 in the example
@@ -29,8 +30,9 @@ Comment:
 A short descrition of the wsession, in a user friendly string. See line 5 in the example
 
 CompositorExec:
-The path to the Wayland server binary. See line 6 in the example
-This is the most important key.
+Exec:
+The path or command line to the Wayland server binary. See line 6 in the example
+This is the most important key. Exec is an alias to CompositorExec
 
 
 CompositorSupports(BACKEND):
@@ -87,7 +89,11 @@ if the specific session needs arguments passed. Weston for example is one server
 AdditionalArguments:
 Any other arguments that should be passed to the server, but are more generic, for example in line 14 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
 
-NeedsFile: there can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example
+NeedsFile:
+TryExec:
+There can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example.
+These must be absolute paths, otherwise they are ignored
+TryExec is an alias to NeedsFile
 
 EnvironmentFile: this is documented in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
 
@@ -177,7 +183,6 @@ The order of the sections do not matter to the waylandloginmanager, but it is be
 
 
 A very minimal wsession file can be as shown below.
-The wsession desktop file must be executable.
 ----------------------------------------------
 01.|    [Desktop Entry]
 02.|    CompositorExec=/path/to/compositor
