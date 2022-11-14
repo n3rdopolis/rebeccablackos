@@ -101,6 +101,10 @@
      #for setting it per seat, or per user per seat
      #to override setting any default sessions for a user, when the global one is set.
 
+     #wsessionspaths
+     #Colon separated list of more paths containing wessions files.
+     #wsessionspaths=/usr/share/wsessions.d:/opt/share/wsessions.d
+
 #/etc/loginmanagerdisplay/loginmanagerdisplay.ini
   #Configuration for the loginmanagerdisplay. This should add the launchers in /usr/lib/waylandloginmanager to the launcher bar, which send commands to the socket, or prevent the default terminal icon from appearing in the toolbar for security reasons.
   #The mainform makes this reqirement optional
@@ -1242,10 +1246,17 @@ function ParseWSessionFiles
   unset NeedsFileArrays
   unset SeatBackendArrays
 
+  IFS=":"
+  WSESSIONSPATHSLIST=($WSESSIONSPATHS)
+  unset IFS
+
   WSESSIONFILES=()
-  for WSESSIONFILE in "$WSESSIONSPATH"/*.desktop
+  for WSESSIONSEARCHPATH in "${WSESSIONSPATHSLIST[@]}"
   do
-    WSESSIONFILES+=($WSESSIONFILE)
+    for WSESSIONFILE in "$WSESSIONSEARCHPATH"/*.desktop
+    do
+      WSESSIONFILES+=($WSESSIONFILE)
+    done
   done
 
   #Find user custom wsession files
@@ -1624,6 +1635,7 @@ function ChooseSessionType
     fi
   fi
 
+  GetConfigKey wsessionspaths "" $WSESSIONSPATH 0 WSESSIONSPATHS
   ParseWSessionFiles $SessionUserHome
 
   #Get the number of files in the array
@@ -1742,7 +1754,7 @@ function ChooseSessionType
 
     IsExecutable=1
 
-    if [[ ! ($WSessionFilePath =~ ^$WSESSIONSPATH) ]]
+    if [[ $WSessionFilePath =~ ^$SessionUserHome ]]
     then
       SessionComment="[User Created Session] $SessionComment"
       if [[ ! -x $WSessionFilePath ]]
@@ -1897,7 +1909,7 @@ function ChooseSessionType
       if [[ $WSESSIONNUMBER == -1 ]]
       then
         $ZENITYCMD --width=500 --error --title "Session Selection" --text="$DEFAULTWSESSION set as default session for $SessionUser, but was not found, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-        WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
+        WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
         return 1
       fi
     fi
@@ -1934,7 +1946,7 @@ function ChooseSessionType
     unset WSESSIONDATA
     unset WSESSIONNUMBER
     $ZENITYCMD --width=500 --error --title "Session Selection" --text="No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
-    WriteToLog "No sessions are installed in $WSESSIONSPATH, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
+    WriteToLog "No sessions are installed in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
     return 1
   fi
 }
