@@ -71,6 +71,7 @@ function PackageInstallSource()
 {
 python3 setup.py install --prefix=$INSTALLDIR --root=/ --install-layout=deb
 cp ./meson.py $INSTALLDIR/bin/meson
+mkdir -p $INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/
 cp -R ./mesonbuild $INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/
 }
 
