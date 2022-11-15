@@ -65,20 +65,19 @@ patch -p1 < /usr/share/RBOS_PATCHES/plymouth.diff
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 
-
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk --enable-drm --enable-pango --enable-systemd-integration --with-logo=$INSTALLDIR/share/plymouth/boot_logo.png --runstatedir=/run/plymouth
+meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgtk=enabled -Ddrm=true -Dpango=enabled -Dsystemd-integration=true -Dlogo=$INSTALLDIR/share/plymouth/boot_logo.png -Drunstatedir=/run/plymouth build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make 
+ninja -v -C build 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
