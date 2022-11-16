@@ -60,6 +60,12 @@ then
   cp -a /opt/share/X11/xkb/* "${DESTDIR}/opt/share/X11/xkb"
 fi
 
+if [ -e /usr/share/X11/locale ]
+then
+  mkdir -p "${DESTDIR}/usr/share/X11/locale"
+  cp -a /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
+fi
+
 if [ -e /etc/footkiosk.conf ]
 then
   mkdir -p "${DESTDIR}/etc"

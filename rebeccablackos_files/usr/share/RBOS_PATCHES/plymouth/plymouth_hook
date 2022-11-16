@@ -20,6 +20,12 @@ esac
 . /usr/bin/wlruntime_vars
 . /usr/share/initramfs-tools/hook-functions
 
+mkdir -p "${DESTDIR}/usr/share/X11/xkb"
+cp -a /usr/share/X11/xkb/* "${DESTDIR}/usr/share/X11/xkb"
+
+mkdir -p "${DESTDIR}/usr/share/X11/locale"
+cp -a /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
+
 THEME="$(/opt/sbin/plymouth-set-default-theme || true)"
 THEMES="/opt/share/plymouth/themes"
 
@@ -98,10 +104,10 @@ case "${THEME_NAME}" in
                 ;;
 
         *)
-                if [ -e /opt/lib/plymouth/boot_logo.png ]
+                if [ -e /opt/share/plymouth/boot_logo.png ]
                 then
                   mkdir -p "${DESTDIR}/opt/share/plymouth"
-                  cp /opt/lib/plymouth/boot_logo.png "${DESTDIR}/opt/share/plymouth"
+                  cp -L /opt/share/plymouth/boot_logo.png "${DESTDIR}/opt/share/plymouth"
                 fi
 
                 # fontconfig
