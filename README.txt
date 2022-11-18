@@ -152,6 +152,7 @@ BUILDING:
                                                                  is the chroot that gets copied to Phase3, and is on the output ISO files.
         DontRestartBuildoutput(architechture):                   Delete this file to force all deb packages to rebuild for the respective architechture. This
                                                                  will increase the build time.
+        DontRestartRustDownload(architechture):                  Delete this file to force build_core to redownload Rust
         DontStartFromScratch(architechture):                     Delete this file to force delete everything included downloaded repositories for the
                                                                  respective architechture, and cause it to start from scratch.
         DontRestartCargoDownload(architechture):                 Clear the Cargo cache

@@ -144,6 +144,12 @@ ln -s $(which python3) /usr/bin/python
 #Configure a locale so that the initramfs doesn't have to
 update-locale LANG=en_US.UTF-8
 
+#Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
+if [[ -e /srcbuild/buildhome/buildcore_rust/lockfile ]]
+then
+  rm /srcbuild/buildhome/buildcore_rust/lockfile &> /dev/null
+fi
+
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 

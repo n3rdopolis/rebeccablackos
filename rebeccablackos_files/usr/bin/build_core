@@ -580,9 +580,9 @@ function DownloadTOMLData()
   do
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    /$SOURCEDIR/buildhome/rust_exec/bin/cargo fetch --manifest-path "$CARGOFILE"
+    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
   done
-  /$SOURCEDIR/buildhome/rust_exec/bin/cargo vendor
+  /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor
   mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
   echo '[source.crates-io]'                  >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
   echo 'replace-with = "vendored-sources"'   >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
@@ -677,26 +677,25 @@ function DownloadSource()
 
     TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
 
-    #Download rust/cargo
-    if [[ ! -e "/$SOURCEDIR/buildhome/rust_exec/bin/rustc" && ! -z $TOMLFILES ]]
+    if [[ ! -z $TOMLFILES ]]
     then
+      mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust
+
       #Ensure only one instace of the rust/cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
       SLEEPTIME=$(( (RANDOM%10)+1 ))
       sleep 0.$SLEEPTIME
-      ls $(readlink -f "/$SOURCEDIR/buildhome/rust_exec/lockfile") &> /dev/null
+      ls $(readlink -f "/$SOURCEDIR/buildhome/buildcore_rust/lockfile") &> /dev/null
       DOWNLOADLOCKRESULT=$?
-      while [[ $DOWNLOADLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/rust_exec/lockfile" ]]
+      while [[ $DOWNLOADLOCKRESULT == 0 && -e "/$SOURCEDIR/buildhome/buildcore_rust/lockfile" ]]
       do
-        ls $(readlink -f "/$SOURCEDIR/buildhome/rust_exec/lockfile") &> /dev/null
+        echo "Waiting for /$SOURCEDIR/buildhome/buildcore_rust/lockfile"
+        ls $(readlink -f "/$SOURCEDIR/buildhome/buildcore_rust/lockfile") &> /dev/null
         DOWNLOADLOCKRESULT=$?
         sleep 1
       done
+      ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/buildcore_rust/lockfile"
 
-      mkdir -p /"$SOURCEDIR"/buildhome/rust_exec
-      mkdir -p /"$SOURCEDIR"/buildhome/rust_exec/download
-
-      ln -s /proc/"$$"/cmdline "/$SOURCEDIR/buildhome/rust_exec/lockfile"
-
+      #Download rust/cargo
       DEBIAN_ARCH=$(dpkg --print-architecture)
       #Use the Beta version of Rust, as the name is stable, (there is no build named stable, as those have version numbers)
       if [[ $DEBIAN_ARCH == amd64 ]]
@@ -708,13 +707,33 @@ function DownloadSource()
         RUSTPACKAGENAME=rust-beta-i686-unknown-linux-gnu
       fi
 
-      $NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz > /"$SOURCEDIR"/buildhome/rust_exec/download/rust.tar.gz
-      tar -C /"$SOURCEDIR"/buildhome/rust_exec/download/ -xzf /"$SOURCEDIR"/buildhome/rust_exec/download/rust.tar.gz
-      /"$SOURCEDIR"/buildhome/rust_exec/download/$RUSTPACKAGENAME/install.sh --prefix=/ --destdir=/"$SOURCEDIR"/buildhome/rust_exec/
-      rm -rf /"$SOURCEDIR"/buildhome/rust_exec/download/
+      #Use the SHA sum of the rust package to determine if there is a new one server side
+      CURRENTRUSTCHECKSUM=$(wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz.sha256 | head -1)
+      LASTRUSTCHECKSUM=$(cat /"$SOURCEDIR"/buildhome/buildcore_rust/rustchecksum | head -1)
 
+      #Detect if the rust version changed
+      if [[ "$CURRENTRUSTCHECKSUM" != "$LASTRUSTCHECKSUM" ]]
+      then
+        echo "$CURRENTRUSTCHECKSUM"
+        echo MISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCH
+        echo "$LASTRUSTCHECKSUM"
+        rm -rf /$SOURCEDIR/buildhome/buildcore_rust/download
+        rm -rf /$SOURCEDIR/buildhome/buildcore_rust/rustrun
+        echo -n "$CURRENTRUSTCHECKSUM" > /"$SOURCEDIR"/buildhome/buildcore_rust/rustchecksum
+      fi
 
-      rm "/$SOURCEDIR/buildhome/rust_exec/lockfile"
+      if [[ ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc" || ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo" ]]
+      then
+        mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/download
+        mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
+
+        $NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz > /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
+        tar -C /"$SOURCEDIR"/buildhome/buildcore_rust/download/ -xzf /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
+        /"$SOURCEDIR"/buildhome/buildcore_rust/download/$RUSTPACKAGENAME/install.sh --prefix=/ --destdir=/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
+        rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/download/
+      fi
+
+      rm "/$SOURCEDIR/buildhome/buildcore_rust/lockfile"
     fi
 
     #Create a script that will run as a nonroot user, to handle the scripts custom download actions after its been downloaded, and run cargo.
@@ -763,7 +782,7 @@ function SetBuildVariables()
 {
   #Create build variables
   . /usr/bin/build_vars
-  export PATH=/srcbuild/buildhome/rust_exec/bin/:"$EXTERNALBUILDHOME"/bin:$PATH
+  export PATH=/srcbuild/buildhome/buildcore_rust/rustrun/bin/:"$EXTERNALBUILDHOME"/bin:$PATH
 }
 
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function

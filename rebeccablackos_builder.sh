@@ -841,11 +841,15 @@ then
   touch "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH"
 fi
 
-#Force buildcore to redownload rust
-if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec ]]
+#Force buildcore to redownload rust if the control file is gone
+if [[ ! -e "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH" ]]
 then
-  echolog "Deleting downloaded version of Rust..."
-  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec
+  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/buildcore_rust ]]
+  then
+    echolog "Deleting downloaded version of Rust..."
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/buildcore_rust
+  fi
+  touch "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH"
 fi
 
 BUILD_RUNNING=1
