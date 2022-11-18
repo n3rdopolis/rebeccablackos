@@ -582,6 +582,13 @@ function DownloadTOMLData()
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
     /$SOURCEDIR/buildhome/rust_exec/bin/cargo fetch --manifest-path "$CARGOFILE"
   done
+  /$SOURCEDIR/buildhome/rust_exec/bin/cargo vendor
+  mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
+  echo '[source.crates-io]'                  >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+  echo 'replace-with = "vendored-sources"'   >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+  echo ''                                    >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+  echo '[source.vendored-sources]'           >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+  echo 'directory = "vendor"'                >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
