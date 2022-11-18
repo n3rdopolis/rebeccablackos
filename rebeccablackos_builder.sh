@@ -452,7 +452,6 @@ then
     rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
     rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
-    rm "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH"
     touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
     touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
@@ -842,17 +841,11 @@ then
   touch "$BUILDLOCATION"/DontRestartCargoDownload"$BUILDARCH"
 fi
 
-#Force buildcore to redownload rust if the control file is gone
-if [[ ! -e "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH" ]]
+#Force buildcore to redownload rust
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec ]]
 then
-
-  if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec ]]
-  then
-    echolog "Deleting downloaded version of Rust..."
-    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec
-  fi
-
-  touch "$BUILDLOCATION"/DontRestartRustDownload"$BUILDARCH"
+  echolog "Deleting downloaded version of Rust..."
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/rust_exec
 fi
 
 BUILD_RUNNING=1
