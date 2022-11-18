@@ -62,3 +62,10 @@ export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
 export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/:/opt/lib/python3/dist-packages/
+
+export CARGO_PROFILE_RELEASE_DEBUG=false
+export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
+export CARGO_PROFILE_RELEASE_INCREMENTAL=false
+export CARGO_PROFILE_RELEASE_LTO=true
+export CARGO_PROFILE_RELEASE_OPT_LEVEL=z
+
