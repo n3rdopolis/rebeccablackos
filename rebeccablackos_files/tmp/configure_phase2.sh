@@ -204,16 +204,19 @@ then
 fi
 
 #remove old kernels!
-CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
-if [[ -z $CURRENTKERNELVERSION ]]
+if [[ -e /vmlinuz ]]
 then
-  CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9]'\.'[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
-fi
+  CURRENTKERNELVERSION=$(basename $(readlink /vmlinuz) |awk -F "-" '{print $2"-"$3}')
+  if [[ -z $CURRENTKERNELVERSION ]]
+  then
+    CURRENTKERNELVERSION=$(dpkg --get-selections | awk '{print $1}' | grep linux-image-[0-9]'\.'[0-9] | tail -1 |awk -F "-" '{print $3"-"$4}')
+  fi
 
-dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read -r PACKAGE
-do
-  apt-get purge $PACKAGE -y 
-done
+  dpkg --get-selections | awk '{print $1}' | grep -v "$CURRENTKERNELVERSION" | grep 'linux-image\|linux-headers' | grep -E \(linux-image-[0-9]'\.'[0-9]\|linux-headers-[0-9]'\.'[0-9]\) | while read -r PACKAGE
+  do
+    apt-get purge $PACKAGE -y
+  done
+fi
 
 #Delete the old depends of the packages no longer needed.
 apt-get --purge autoremove -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/Installs/purge_autoremove.log
