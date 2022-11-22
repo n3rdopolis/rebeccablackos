@@ -78,7 +78,7 @@ ninja -v -C build
 function PackageInstallSource()
 {
 mkdir -p $INSTALLDIR/share/plymouth/
-cp /usr/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
+cp /usr/share/RBOS_PATCHES/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
 ninja -C build install
 }
 
