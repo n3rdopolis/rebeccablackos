@@ -277,18 +277,28 @@ function UserSessionWorker
       exit
     fi
   else
-    unset WAYLAND_HOST
-    unset WAYLAND_GUEST
+    if [[ -z $WLM_GDB_SESSION ]]
+    then
+      unset WAYLAND_HOST
+      unset WAYLAND_GUEST
+    fi
   fi
-  unset WLM_SEAT
 
   #Execute the Wayland server, and save the output the log.
   #dbus-run-session allows a single user to log in multiple times, despite the fact that it may prevent sessions from managing themselves with cgroups, so it's the default.
-  if [[ -z $WLM_NO_DBUS_RUN_SESSION ]]
+  if [[ ! -z $WLM_GDB_SESSION ]]
   then
-    dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+    mkdir -p $XDG_RUNTIME_DIR/waylandloginmanager
+    SessionCommand="${ArgArray[@]//\"/\\\"}"
+    dbus-run-session -- socat exec:"bash -c \\\"gdb --args $SessionCommand\\\"",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_GUEST}",mode=0700 &>> $WLM_SESSION_LOG &
   else
-    ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+    unset WLM_SEAT
+    if [[ -z $WLM_NO_DBUS_RUN_SESSION ]]
+    then
+      dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+    else
+      ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+    fi
   fi
   GuestServerPID=$!
 
@@ -3780,6 +3790,26 @@ function GetXDGVariables
   export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
 }
 
+#Fuction to assist in handling sessions started with GDB
+function DebugConnect
+{
+  PTYPath=$(tty)
+  DebugSockets=($(find $XDG_RUNTIME_DIR/waylandloginmanager -type s))
+  if [[ ${#DebugSockets[@]} == 0 ]]
+  then
+    echo "No debugged sessions found for the current user."
+    exit
+  fi
+  SocketList=()
+  for DebugSocket in "${DebugSockets[@]}"
+  do
+    SocketList+=($DebugSocket)
+    SocketList+=("")
+  done
+  SelectedSocket=$(dialog --menu "Select an Action" 10 60 0 --stdout -- "${SocketList[@]}")
+  socat file:$PTYPath,raw,echo=0 unix-connect:"$SelectedSocket"
+}
+
 #Use bash builtin sleep if availible
 if [[ -f /usr/lib/bash/sleep ]]
 then
@@ -3869,11 +3899,16 @@ elif [[ $1 == "--switchuser" ]]
 then
   GetXDGVariables
   SendSelfCommand Switch $XDG_SEAT
+elif [[ $1 == "--debugconnect" ]]
+then
+  DebugConnect
 else
   echo "waylandloginmanager: incorrect usage"
   echo "Useful options:"
   echo "   --shutdowndialog shows a shutdown dialog."
   echo "   --udevtrigger forces seats to be redetected"
   echo "   --logoff ends the current logind session"
+  echo "   --switchuser acticates the loginmanagerdisplay for the specified seat"
+  echo "   --debugconnect lists and handles sessions started by a debugger"
   exit 1
 fi

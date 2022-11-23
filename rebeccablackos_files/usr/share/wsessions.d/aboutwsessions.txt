@@ -168,6 +168,19 @@ Noteable Environment Variables:
                               However for sessions that have a hard requirement for managing themselves with systemd user sessions, the separate dbus session causes issues.
                               Sesssions that require this can can set this in the [EnvironmentFile] to inhibit the session starter portion from starting a new dbus session.
 
+   WLM_GDB_SESSION=1:         When set, waylandloginmanager starts the compositor with gdb. gdb is started in a pty with socat as a proxy to the PTY.
+
+                              Running `waylandloginmanager --debugconnect` from another seat, or session, or serial connection lists these sockets, and assists in connecting to 
+                              it with a socat client, to allow interaction with gdb.
+
+                              The sockets are under $XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_DISPLAY}_${XDG_SEAT}
+                              Note: the $WAYLAND_DISPLAY is the WAYLAND_DISPLAY waylandloginmanager intends. Not every compositor has a way for waylandloginmanager to specify the
+                              WAYLAND_DISPLAY, so it might not match exactly
+
+                              See debug-weston-desktop.desktop as an example. Note that while DebugSession=1 is set in debug-weston-desktop.desktop, this value is NOT 
+                              manditory for WLM_GDB_SESSION=1 to work with the session, nor does wlmdebug or wlmdebuginsecure have to be passed. It may be prefered though
+                              to prevent users from accidentally selecting a debug session that they will see as hanging upon startup, as it waits for the debug commands.
+
 
 An example of that: (With most abriged as this is documented above)
 ----------------------------------------------
