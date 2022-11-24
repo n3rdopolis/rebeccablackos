@@ -782,7 +782,10 @@ function SetBuildVariables()
 {
   #Create build variables
   . /usr/bin/build_vars
-  export PATH=/srcbuild/buildhome/buildcore_rust/rustrun/bin/:"$EXTERNALBUILDHOME"/bin:$PATH
+  if [[ -d /srcbuild/buildhome/buildcore_rust/rustrun/bin/ ]]
+  then
+    export PATH=/srcbuild/buildhome/buildcore_rust/rustrun/bin/:"$EXTERNALBUILDHOME"/bin:$PATH
+  fi
 }
 
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function
