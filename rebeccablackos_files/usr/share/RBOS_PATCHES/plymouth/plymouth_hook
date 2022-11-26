@@ -205,6 +205,11 @@ copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/frame-buffer.so
 copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/drm.so
 
 # copy config files
+if [ -f /etc/vconsole.conf ]
+then
+        cp /etc/vconsole.conf "${DESTDIR}/etc"
+fi
+
 mkdir -p "${DESTDIR}/opt/etc/plymouth"
 
 if [ -r /opt/etc/plymouth/plymouthd.conf ]
