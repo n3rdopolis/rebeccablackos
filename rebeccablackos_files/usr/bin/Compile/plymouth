@@ -23,19 +23,19 @@
 SOURCENAME=plymouth
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.freedesktop.org/Diegovsky/plymouth.git
+SOURCEURL=https://gitlab.freedesktop.org/plymouth/plymouth.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=dev_input
+SOURCEREVISION=main
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=1
+REBUILDNEWREVISION=0
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
@@ -61,7 +61,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -p1 < /usr/share/RBOS_PATCHES/plymouth.diff
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 
