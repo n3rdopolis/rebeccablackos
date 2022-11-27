@@ -576,13 +576,18 @@ function DownloadTOMLData()
 {
 
   #Handle Cargo files for any potential rust programs
+  TOMLFilesHandled=0
   find | grep /Cargo.toml$ | while read -r CARGOFILE
   do
+    TOMLFilesHandled=1
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
     /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
   done
-  /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor
+  if [[ $TOMLFilesHandled == 1 ]]
+  then
+    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor
+  fi
   mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
   echo '[source.crates-io]'                  >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
   echo 'replace-with = "vendored-sources"'   >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
