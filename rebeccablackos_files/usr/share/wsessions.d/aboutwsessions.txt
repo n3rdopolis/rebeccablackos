@@ -31,7 +31,7 @@ A short descrition of the wsession, in a user friendly string. See line 5 in the
 
 CompositorExec:
 Exec:
-The path or command line to the Wayland server binary. See line 6 in the example
+CompositorExec is the path or command line for the session. See line 6 in the example
 This is the most important key. Exec is an alias to CompositorExec
 
 
@@ -93,7 +93,7 @@ NeedsFile:
 TryExec:
 There can be as many NeedsFile arguments as needed. if one of these files are missing, for example, a path to a module or executable, it does NOT display in the waylandloginmanager as a usable session. See line 15 and 16 in the example.
 These must be absolute paths, otherwise they are ignored
-TryExec is an alias to NeedsFile
+TryExec is an alias to NeedsFile and there can be multiple as well
 
 EnvironmentFile: this is documented in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
 
