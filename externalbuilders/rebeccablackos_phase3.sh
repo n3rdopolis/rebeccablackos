@@ -58,7 +58,7 @@ mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
 then
   mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
-    mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
+  mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 else
   mount -t overlay overlay -o  lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
@@ -92,3 +92,13 @@ else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
 
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir

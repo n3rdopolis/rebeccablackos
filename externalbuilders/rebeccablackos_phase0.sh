@@ -84,3 +84,6 @@ then
     touch "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
   fi
 fi
+
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/archives
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt/archives

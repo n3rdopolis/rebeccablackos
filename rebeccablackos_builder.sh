@@ -981,7 +981,15 @@ if [[ $RAMDISK_FOR_REMASTERSYS == 1 && $RAMDISK_STATUS == 0 ]]
 then
   umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys
 fi
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+if [[ $RAMDISK_STATUS == 0 ]]
+then
+  umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk
+fi
+
+#Unmount the minidevfs
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/pts
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/minidev
 
 
 #Continue cleaning non reusable files
