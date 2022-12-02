@@ -697,7 +697,7 @@ function createtraslationmounts
   MAPPEDMOUNTS=$(</dev/stdin)
   mkdir "${TMP_DIR}/TRANSL"
   mkdir "${TMP_DIR}/workdir"
-  mkdir "${TMP_DIR}/uniondirs"
+  mkdir "${TMP_DIR}/ovl_workdirs"
   declare -i MOUNTFAILCOUNT=0
   mount --make-rprivate /
   MOUNTRESULT=$?
@@ -707,13 +707,15 @@ function createtraslationmounts
     >&2 echo "Failed to make all mounts private"
   fi
 
-  #Create empty excluded folders under TRANSL
-  #The workaround to delete empty subfolder trees under TRANSL if it was created to recreate a folder under a mount structure
-  #Use the same workaround here, so that an empty /tmp doesn't get created
-  for EXCLUDE in ${EXCLUDES[@]}
-  do
-    mkdir -p "${TMP_DIR}/TRANSL/$EXCLUDE"
-  done
+  #Needs newline for sed to be able to append on the top
+  #TRANSLFOLDERLIST is the auto generated script to built the TRANSL tree.
+  #  Eligable filesystems that are tranalated are union mounted on eachother. There can be filesystems stacked on eachother. The upperdir
+  #  TRANSLFOLDERLIST is then run later where the TRANSL folder becomes
+  #UNMOUNTCOMMANDS is the auto generated list of unmount commands in reverse to unmount the overlay and bind mounts
+  echo "" > "${TMP_DIR}/TRANSLFOLDERLIST"
+  echo "" > "${TMP_DIR}/UNMOUNTCOMMANDS"
+  chmod +x "${TMP_DIR}/TRANSLFOLDERLIST"
+  chmod +x "${TMP_DIR}/UNMOUNTCOMMANDS"
 
   #Go through each mount, and create an overlayfs, or bind it in, or create a bind mount, based on an existing bind mount
   IFS=$'\n'
@@ -725,18 +727,23 @@ function createtraslationmounts
       if [[ $DOOVERLAY == 1 ]]
       then
         WORKDIRNAME=$RANDOM$RANDOM$RANDOM$RANDOM$RANDOM
-        mkdir -p "${TMP_DIR}/uniondirs/$WORKDIRNAME"
+        mkdir -p "${TMP_DIR}/upperdirs/$WORKDIRNAME"
+        mkdir -p "${TMP_DIR}/ovl_workdirs/$WORKDIRNAME"
         mkdir -p "${TMP_DIR}/workdir/$MOUNTDEST"
-        mkdir -p "${TMP_DIR}/TRANSL/$MOUNTDEST"
 
-        mount -t overlay overlay -o lowerdir="$MOUNTDEST",upperdir="${TMP_DIR}/TRANSL/$MOUNTDEST",workdir="${TMP_DIR}/uniondirs/$WORKDIRNAME" "${TMP_DIR}/workdir/$MOUNTDEST"
+        #Mount and create the overylayfs filesystem, script the unmounting, and the copyiying of the files
+        echo "[ \"\$(ls -A \"${TMP_DIR}/upperdirs/$WORKDIRNAME\")\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\" && rsync -a \"${TMP_DIR}/upperdirs/$WORKDIRNAME\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
+        #command to unmount this filesystem. Because the mounts are ordered on top of eachother, this orders the unmount command in the other way
+        sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
+        mount -t overlay overlay -o lowerdir="$MOUNTDEST",upperdir="${TMP_DIR}/upperdirs/$WORKDIRNAME",workdir="${TMP_DIR}/ovl_workdirs/$WORKDIRNAME" "${TMP_DIR}/workdir/$MOUNTDEST"
         MOUNTRESULT=$?
-        MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
           >&2 echo "Failed to union mount $MOUNTDEST"
         fi
       else
+        #Excluded folders have the real folder bind monted, that way the files don't get written to the overlayfs, and end up in an upperdir
+        sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
         mount --bind $MOUNTDEST "${TMP_DIR}/workdir/$MOUNTDEST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
@@ -746,17 +753,18 @@ function createtraslationmounts
         fi
       fi
     else
+      #handle bind mounts. If a folder is bind mounted on the real tree, bind mount them on the fake tree.
+      #the copy command will simulate the file being in two places in the built package
       if [[ -d "${TMP_DIR}/workdir/$MOUNTSOURCE" ]]
       then
-        mkdir -p "${TMP_DIR}/TRANSL/$MOUNTSOURCE"
-        mkdir -p "${TMP_DIR}/TRANSL/$MOUNTDEST"
-        mount --bind "${TMP_DIR}/TRANSL/$MOUNTSOURCE" "${TMP_DIR}/TRANSL/$MOUNTDEST"
+        echo "[ \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\" && rsync -a \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
           >&2 echo "Failed bind mount real $MOUNTSOURCE to $MOUNTDEST"
         fi
+        sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
         mount --bind "${TMP_DIR}/workdir/$MOUNTSOURCE" "${TMP_DIR}/workdir/$MOUNTDEST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
@@ -769,27 +777,15 @@ function createtraslationmounts
         MOUNTFAILCOUNT+=1
       fi
     fi
-
-  done
-
-  #Remount all overlayfs filesystems to account for folders being created in the /TRANL/ upperdir
-  #Overlayfs does not expect items to be created in the upperdir, and can cause problems
-  #but these problems go away after a remount
-  for MAPPEDMOUNT in $MAPPEDMOUNTS
-  do
-    eval "$MAPPEDMOUNT"
-    if [[ $ISBIND == 0 ]]
-    then
-      mount -o remount "${TMP_DIR}/workdir/$MOUNTDEST"
-    fi
   done
 
   unset IFS
 
-  #Get the list of folders that had to be created in the overlay to be able to simulate the mount point structure
-  find "${TMP_DIR}/TRANSL/" > "${TMP_DIR}/TRANSLFOLDERLIST"
+  #add the hashbang at the top of the autogenerated scripts
+  sed -i "1i#! /bin/bash" "${TMP_DIR}/TRANSLFOLDERLIST"
+  sed -i "1i#! /bin/bash" "${TMP_DIR}/UNMOUNTCOMMANDS"
 
-  pivot_root "${TMP_DIR}/workdir" "${TMP_DIR}/workdir/${TMP_DIR}/uniondirs"
+  pivot_root "${TMP_DIR}/workdir" "${TMP_DIR}/workdir/${TMP_DIR}/ovl_workdirs"
   MOUNTRESULT=$?
   MOUNTFAILCOUNT+=$MOUNTRESULT
   if [[ $MOUNTRESULT != 0 ]]
@@ -2175,11 +2171,8 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 
 	if [[ $USEOVERLAYFS == 1 ]]
 	then
-		#In the overlay, clean up folders that were created to simulate the mount point structure
-		while read -r TRANSLFOLDER
-		do
-			rm -d "$TRANSLFOLDER" 2> /dev/null
-		done < <(cat "${TMP_DIR}/TRANSLFOLDERLIST" | sort -r | grep -v "^${TMP_DIR}/TRANSL/$")
+		#Run the autogenerated script that copies the files out of the upperdirs to the TRANSLROOT so the TRANSLROOT files end up in the package
+		"${TMP_DIR}/TRANSLFOLDERLIST"
 		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
 	    ( cat /${TMP_DIR}/newfiles | while read -r i; do 
