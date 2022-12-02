@@ -736,7 +736,7 @@ function createtraslationmounts
         #command to unmount this filesystem. Because the mounts are ordered on top of eachother, this orders the unmount command in the other way
         sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
         mount -t overlay overlay -o lowerdir="$MOUNTDEST",upperdir="${TMP_DIR}/upperdirs/$WORKDIRNAME",workdir="${TMP_DIR}/ovl_workdirs/$WORKDIRNAME" "${TMP_DIR}/workdir/$MOUNTDEST"
-        MOUNTRESULT=$?
+        MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
         then
           >&2 echo "Failed to union mount $MOUNTDEST"
@@ -757,7 +757,7 @@ function createtraslationmounts
       #the copy command will simulate the file being in two places in the built package
       if [[ -d "${TMP_DIR}/workdir/$MOUNTSOURCE" ]]
       then
-        echo "[ \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\" && rsync -a \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
+        echo "[ \"\$(ls -A \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\" 2>/dev/null)\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\"/* && rsync -a \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
@@ -2134,7 +2134,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 	   $VISUAL ${TMP_DIR}/newfiles
 
 	   # Check if new files were added by the user
-	   cat /${TMP_DIR}/newfiles | while read -r file; do 
+	   cat /${TMP_DIR}/newfiles | while read -r file; do
 	      if ! [ -e "${TRANSLROOT}${file}" ]; then
 		  copy_dir_hierarchy --deref-parents "${file}" "/" "${BUILD_DIR}" >> /${TMP_DIR}/updated-by-user.log 2>&1
 	      fi
@@ -2175,7 +2175,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 		"${TMP_DIR}/TRANSLFOLDERLIST"
 		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
-	    ( cat /${TMP_DIR}/newfiles | while read -r i; do 
+	    ( cat /${TMP_DIR}/newfiles | while read -r i; do
 	          if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
 	          echo ".${i}"
 	       fi
