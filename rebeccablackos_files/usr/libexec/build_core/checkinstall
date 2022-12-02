@@ -785,7 +785,6 @@ function createtraslationmounts
   sed -i "1i#! /bin/bash" "${TMP_DIR}/TRANSLFOLDERLIST"
   sed -i "1i#! /bin/bash" "${TMP_DIR}/UNMOUNTCOMMANDS"
 
-  pivot_root "${TMP_DIR}/workdir" "${TMP_DIR}/workdir/${TMP_DIR}/ovl_workdirs"
   MOUNTRESULT=$?
   MOUNTFAILCOUNT+=$MOUNTRESULT
   if [[ $MOUNTRESULT != 0 ]]
@@ -1921,11 +1920,13 @@ cat << EOF >> $TMP_SCRIPT
 cd "$DIRECTORIO_FUENTE"
 EOF
 
-shell_escape "${INSTALLCMD[@]}" >> $TMP_SCRIPT
+shell_escape chroot ${TMP_DIR}/workdir "${INSTALLCMD[@]}" >> $TMP_SCRIPT
 
 cat << EOF >> $TMP_SCRIPT
+Status=\$?
 # Report success or failure
-if [ \$? -eq 0 ]; then
+${TMP_DIR}/UNMOUNTCOMMANDS
+if [ \$Status -eq 0 ]; then
    exit 0
 else
    exit 1
@@ -1935,7 +1936,6 @@ EOF
 
 # No one needs to see what we are doing. It's safer this way.
 chmod 700 $TMP_SCRIPT
-
 
 echo
 echogn "Installing with %s..." "${INSTALLCMD[*]}"
