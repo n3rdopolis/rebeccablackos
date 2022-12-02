@@ -73,9 +73,9 @@ else
 fi
 
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
