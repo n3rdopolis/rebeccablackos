@@ -204,11 +204,38 @@ done
 copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/frame-buffer.so
 copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/drm.so
 
-# copy config files
+# handle keymap config
+#default value
+XKBLAYOUT=us
+if [ -f /etc/default/keyboard ]
+then
+        . /etc/default/keyboard
+fi
 if [ -f /etc/vconsole.conf ]
 then
+        . /etc/vconsole.conf
         cp /etc/vconsole.conf "${DESTDIR}/etc"
 fi
+if [[ -z $XKB_LAYOUT ]]
+then
+	XKB_LAYOUT=$XKBLAYOUT
+fi
+if [[ -z $XKB_MODEL ]]
+then
+	XKB_MODEL=$XKBMODEL
+fi
+if [[ -z $XKB_VARIANT ]]
+then
+	XKB_VARIANT=$XKBVARIANT
+fi
+if [[ -z $XKB_OPTIONS ]]
+then
+	XKB_OPTIONS=$XKBOPTIONS
+fi
+echo "XKB_LAYOUT=$XKB_LAYOUT" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_MODEL=$XKB_MODEL" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_VARIANT=$XKB_VARIANT" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_OPTIONS=$XKB_OPTIONS" >> "${DESTDIR}/etc/vconsole.conf"
 
 mkdir -p "${DESTDIR}/opt/etc/plymouth"
 
