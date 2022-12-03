@@ -1920,7 +1920,7 @@ cat << EOF >> $TMP_SCRIPT
 cd "$DIRECTORIO_FUENTE"
 EOF
 
-shell_escape chroot ${TMP_DIR}/workdir "${INSTALLCMD[@]}" >> $TMP_SCRIPT
+shell_escape chroot ${TMP_DIR}/workdir env -C "$DIRECTORIO_FUENTE" -- "${INSTALLCMD[@]}" >> $TMP_SCRIPT
 
 cat << EOF >> $TMP_SCRIPT
 Status=\$?
