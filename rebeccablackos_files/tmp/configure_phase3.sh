@@ -71,10 +71,10 @@ echo "blacklist bochs_drm"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 
 #Create a default /etc/vconsole.conf for plymouth
-echo "XKB_LAYOUT=\"us\"" >> /etc/vconsole
-echo "XKB_MODEL=\"pc105\"" >> /etc/vconsole
-echo "XKB_VARIANT=\"\"" >> /etc/vconsole
-echo "XKB_OPTIONS=\"\"" >> /etc/vconsole
+echo "XKB_LAYOUT=\"us\"" >> /etc/vconsole.conf
+echo "XKB_MODEL=\"pc105\"" >> /etc/vconsole.conf
+echo "XKB_VARIANT=\"\"" >> /etc/vconsole.conf
+echo "XKB_OPTIONS=\"\"" >> /etc/vconsole.conf
 
 
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
