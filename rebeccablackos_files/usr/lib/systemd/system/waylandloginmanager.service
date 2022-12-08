@@ -4,7 +4,7 @@ Wants=plymouth-deactivate.service
 Conflicts=plymouth-quit.service plymouth-quit-wait.service
 Before=getty@tty1.service plymouth.service plymouth-quit-wait.service plymouth-quit.service
 After=systemd-user-sessions.service plymouth-deactivate.service
-#OnFailure=plymouth-start.service
+OnFailure=plymouth-start.service
 
 [Service]
 Type=notify
