@@ -232,10 +232,10 @@ if [ -z $XKB_OPTIONS ]
 then
 	XKB_OPTIONS=$XKBOPTIONS
 fi
-echo "XKB_LAYOUT=$XKB_LAYOUT" >> "${DESTDIR}/etc/vconsole.conf"
-echo "XKB_MODEL=$XKB_MODEL" >> "${DESTDIR}/etc/vconsole.conf"
-echo "XKB_VARIANT=$XKB_VARIANT" >> "${DESTDIR}/etc/vconsole.conf"
-echo "XKB_OPTIONS=$XKB_OPTIONS" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_LAYOUT=\"$XKB_LAYOUT\"" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_MODEL=\"$XKB_MODEL\"" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_VARIANT=\"$XKB_VARIANT\"" >> "${DESTDIR}/etc/vconsole.conf"
+echo "XKB_OPTIONS=\"$XKB_OPTIONS\"" >> "${DESTDIR}/etc/vconsole.conf"
 
 mkdir -p "${DESTDIR}/opt/etc/plymouth"
 

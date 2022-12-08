@@ -63,12 +63,19 @@ fi
 echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
 echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
 
-#wlroots new renderer needs DRM Prime sharing enabled. These GPU drivers appear to not support it yet.
+#wlroots new renderer needs DRM Prime sharing enabled. These GPU drivers appear to not support it yet.  (they need to import DRM_GEM_SHMEM_DRIVER_OPS)
 #Force these to fallback with SimpleDRM
 echo "blacklist ast"          > /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist bochs_drm"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
+
+#Create a default /etc/vconsole.conf for plymouth
+echo "XKB_LAYOUT=\"us\"" >> /etc/vconsole
+echo "XKB_MODEL=\"pc105\"" >> /etc/vconsole
+echo "XKB_VARIANT=\"\"" >> /etc/vconsole
+echo "XKB_OPTIONS=\"\"" >> /etc/vconsole
+
 
 #Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
 mkdir /etc/lightdm/
