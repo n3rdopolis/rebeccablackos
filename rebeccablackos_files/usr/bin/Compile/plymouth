@@ -85,6 +85,15 @@ ninja -C build install
 function PackagePostInstall()
 {
 cp $INSTALLDIR/lib/systemd/system/*plymouth* /usr/lib/systemd/system/
+mkdir -p /usr/lib/systemd/system/halt.target.wants; cp -P $INSTALLDIR/lib/systemd/system/halt.target.wants/*plymouth* /usr/lib/systemd/system/halt.target.wants
+mkdir -p /usr/lib/systemd/system/initrd-switch-root.target.wants; cp -P $INSTALLDIR/lib/systemd/system/initrd-switch-root.target.wants/*plymouth* /usr/lib/systemd/system/initrd-switch-root.target.wants
+mkdir -p /usr/lib/systemd/system/kexec.target.wants; cp -P $INSTALLDIR/lib/systemd/system/kexec.target.wants/*plymouth* /usr/lib/systemd/system/kexec.target.wants
+mkdir -p /usr/lib/systemd/system/multi-user.target.wants; cp -P $INSTALLDIR/lib/systemd/system/multi-user.target.wants/*plymouth* /usr/lib/systemd/system/multi-user.target.wants
+mkdir -p /usr/lib/systemd/system/poweroff.target.wants; cp -P $INSTALLDIR/lib/systemd/system/poweroff.target.wants/*plymouth* /usr/lib/systemd/system/poweroff.target.wants
+mkdir -p /usr/lib/systemd/system/reboot.target.wants; cp -P $INSTALLDIR/lib/systemd/system/reboot.target.wants/*plymouth* /usr/lib/systemd/system/reboot.target.wants
+mkdir -p /usr/lib/systemd/system/sysinit.target.wants; cp -P $INSTALLDIR/lib/systemd/system/sysinit.target.wants/*plymouth* /usr/lib/systemd/system/sysinit.target.wants
+
+
 ln -s $INSTALLDIR/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
 rm $INSTALLDIR/share/plymouth/themes/spinfinity/header-image.png
 
