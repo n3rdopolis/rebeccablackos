@@ -2176,7 +2176,11 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 		#Remove any files that might be an overlayfs whiteout file. They have permissions of 000, and are character files
 		find "${TRANSLROOT}" -type c -perm 0000 | while read OVERLAYWHITEOUT
 		do
-			rm "$OVERLAYWHITEOUT"
+			MAJMIN=$(stat $OVERLAYWHITEOUT -c %t,%T)
+			if [[ $MAJMIN == "0,0" ]]
+			then
+				rm "$OVERLAYWHITEOUT"
+			fi
 		done
 		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
 	else
