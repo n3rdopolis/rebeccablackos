@@ -5,6 +5,8 @@ Wants=plymouth-deactivate.service
 After=vtty-backend@.service
 After=systemd-user-sessions.service plymouth.service display-manager.service plymouth-deactivate.service
 
+StartLimitIntervalSec=30
+StartLimitBurst=3
 
 BindsTo=vtty-backend@.service
 
@@ -37,8 +39,6 @@ TTYVTDisallocate=true
 
 Restart=on-failure
 RestartSec=0
-StartLimitIntervalSec=30
-StartLimitBurst=3
 
 Type=simple
 User=vtty
