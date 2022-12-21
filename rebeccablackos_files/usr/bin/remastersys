@@ -508,7 +508,7 @@ FOO
 
     fi
 
-    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES 2>>$WORKDIR/remastersys.log
+    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES
 
     sleep 1
 
@@ -753,9 +753,9 @@ iso (){
     #https://bazaar.launchpad.net/~ubuntu-cdimage/debian-cd/ubuntu/view/head:/tools/boot/groovy/boot-amd64 for xorriso command. Hybrid boot is now handled here
     if [[ $BUILDEFI == 1 ]]
     then
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -append_partition 2 0xef boot/EFI/grub.efi -appended_part_as_gpt --mbr-force-bootable -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 2>>$WORKDIR/remastersys.log 1>>$WORKDIR/remastersys.log
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -append_partition 2 0xef boot/EFI/grub.efi -appended_part_as_gpt --mbr-force-bootable -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
     else
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP" 1>>$WORKDIR/remastersys.log
+      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
     fi
     if [ ! -f $WORKDIR/$CUSTOMISO ]; then
         log_msg "The iso was not created. There was a problem. Exiting"
