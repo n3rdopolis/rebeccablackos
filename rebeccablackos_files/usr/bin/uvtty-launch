@@ -36,7 +36,7 @@ function SessionCheck
   #If the command succeeds, there is nothing holding control of the logind session
   if [[ $Result == 0 ]]
   then
-    echo "Info: There are no processes controling the logind session. It is likely no display server is running. Will now uninhibit cage. Start with --no-session-check to disable."
+    echo "uvtty-launch: There are no processes controling the logind session within the timeout. It is likely a display server was not run. Will now uninhibit cage. Start with --no-session-check to disable."
     rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
   fi
 }
