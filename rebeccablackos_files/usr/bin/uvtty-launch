@@ -18,6 +18,29 @@
 
 #Suspend cage in the FullscreenShell session, to launch another program
 
+DoSessionCheck=1
+
+#Detect if a display server is running. If there is not one (nothing controling the logind session), remove the inhibit file to allow cage/foot to start again.
+function SessionCheck
+{
+  sleep 5
+  busctl call org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session TakeControl "b" false &> /dev/null
+  Result=$?
+
+  #Exit if the child process already quit, and the inhibt file was already removed
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+  then
+    return
+  fi
+
+  #If the command succeeds, there is nothing holding control of the logind session
+  if [[ $Result == 0 ]]
+  then
+    echo "Info: There are no processes controling the logind session. It is likely no display server is running. Will now uninhibit cage. Start with --no-session-check to disable."
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  fi
+}
+
 #Use bash builtin sleep if availible
 if [[ -f /usr/lib/bash/sleep ]]
 then
@@ -27,9 +50,15 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
+if [[ $1 == "--no-session-check" ]]
+then
+  DoSessionCheck=0
+  shift
+fi
+
 if [[ -z $1 ]]
 then
-  echo "No arguments passed. Usage is $0 programname [--args]"
+  echo "No arguments passed. Usage is $0 [--no-session-check] programname [--args]"
   exit 1
 fi
 
@@ -66,6 +95,10 @@ then
 fi
 
 touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+if [[ $DoSessionCheck != 0 ]]
+then
+  SessionCheck &
+fi
 
 #Wait before ending cage, so key press of "enter" isn't held down when the command is run
 $SLEEPCMD .3
@@ -86,5 +119,4 @@ fi
 CommandResult=$?
 
 rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
-
-echo $CommandResult
+exit $CommandResult
