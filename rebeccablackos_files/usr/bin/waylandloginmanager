@@ -2447,7 +2447,7 @@ function GetUserCredentials
       fi
 
       #send the password to an AuthenticateUser function with stdin
-      echo $USERPASSWORD | AuthenticateUser "$CurrentSeat"
+      printf "%s" "$USERPASSWORD" | AuthenticateUser "$CurrentSeat"
       #get the result from AuthenticateUser in the pipe, (and not the echo command)
       passwordresult=${PIPESTATUS[1]}
       unset USERPASSWORD
