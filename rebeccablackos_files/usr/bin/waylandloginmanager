@@ -962,6 +962,9 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
     exit 1
   fi
 
+  #Request plymouth to give up control, but retain the splash on the screen, until the loginmanagerdisplay draws.
+  plymouth deactivate
+
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
   ProbeFilesExist "/run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_*" LoginManagerDisplayFileProbe
@@ -2886,8 +2889,6 @@ function StartLoginManagerDisplay
             ((TRYCOUNT++))
           done
           systemd-notify --ready &> /dev/null
-          plymouth quit --retain-splash &> /dev/null
-          plymouth --wait &> /dev/null
         fi
       else
         #If the first loginmanagerdisplay fails to start on the first attempt
