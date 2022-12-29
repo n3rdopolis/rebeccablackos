@@ -1160,6 +1160,13 @@ function ReadRegister
       WriteToLog "received register data: ${RegisterData//$'\u1F'/||}"
       if [[ $RegisterType == NEWSESSION ]]
       then
+
+        if [[ $PlymouthQuitRequestSent == 0 ]]
+        then
+          plymouth quit &> /dev/null
+          PlymouthQuitRequestSent=1
+        fi
+
         #Add the session data to the arrays that store info about the sessions.
         SessionTTY=${ArraySessionData[1]}
         SessionPID=${ArraySessionData[2]}
@@ -3108,6 +3115,12 @@ function WaylandLoginManagerMain
   DoDetectSeatsDeferred=0
   StartedSeats=()
   
+  #Plymouth can remain running after plymouth deactivate is called. waylandloginmanager needs to be responsible for quitting it.
+  #For seamless startup to work, waylandloginmanager will issue the request on the first UI action it gets sent.
+  #Switch, Login, Info, Leave, Debug, and on startup of the first session count as the UI actions.
+  #Weston might be reported as usable, however it is not an absolute that the desktop shell is running. If Plymouth is quit beforehand, the screen will blank, and it will appear to be a flicker.
+  PlymouthQuitRequestSent=0
+
   #Value is 1 for new seats, when a seat is removed, it is set to 0. This is for tracking if a seat is recreated.
   SeatInitializationStatuses=()
   
@@ -3132,6 +3145,9 @@ function WaylandLoginManagerMain
   SeatForceSWRenderFlags=()
   SeatFileNames=()
 
+
+  #wait for udev to initialize all devices so that all seats are more likely to be populated the first time seats are enumerated, as DetectSeats is throttled to decrease CPU load
+  udevadm settle
 
   #loop 'forever'
   while [ 1 ]
@@ -3650,6 +3666,13 @@ Will show a menu with a few options for diagnosis." 20 50
         fi
         SwitchUserDialog "$SEATARG" &
         LastSwitchPIDs[$SeatIndexID]=$!
+
+        if [[ $PlymouthQuitRequestSent == 0 ]]
+        then
+          plymouth quit &> /dev/null
+          PlymouthQuitRequestSent=1
+        fi
+
       else
         WriteToLog "A handler for the Switch command is already open"
       fi
@@ -3689,6 +3712,13 @@ Will show a menu with a few options for diagnosis." 20 50
         fi
         GetUserCredentials "$SEATARG" &
         LastLoginPIDs[$SeatIndexID]=$!
+
+        if [[ $PlymouthQuitRequestSent == 0 ]]
+        then
+          plymouth quit &> /dev/null
+          PlymouthQuitRequestSent=1
+        fi
+
       else
         WriteToLog "A handler for the Login command is already open"
       fi
@@ -3711,6 +3741,13 @@ Will show a menu with a few options for diagnosis." 20 50
         fi
         LeavePrompt $SEATARG &
         LastLeavePIDs[$SeatIndexID]=$!
+
+        if [[ $PlymouthQuitRequestSent == 0 ]]
+        then
+          plymouth quit &> /dev/null
+          PlymouthQuitRequestSent=1
+        fi
+
       else
         WriteToLog "A handler for the Leave command is already open"
       fi
@@ -3750,6 +3787,13 @@ Will show a menu with a few options for diagnosis." 20 50
         fi
         ShowInfo "$SEATARG" &
         LastInfoPIDs[$SeatIndexID]=$!
+
+        if [[ $PlymouthQuitRequestSent == 0 ]]
+        then
+          plymouth quit &> /dev/null
+          PlymouthQuitRequestSent=1
+        fi
+
       else
         WriteToLog "A handler for the Info command is already open"
       fi
@@ -3770,6 +3814,13 @@ Will show a menu with a few options for diagnosis." 20 50
           DiagnosticTerminal "$SEATARG" &
           LastDebugPIDs[$SeatIndexID]=$!
           WriteToLog "Spawned a root terminal window on the loginmanagerdisplay for $SEATARG"
+
+          if [[ $PlymouthQuitRequestSent == 0 ]]
+          then
+            plymouth quit &> /dev/null
+            PlymouthQuitRequestSent=1
+          fi
+
         else
           WriteToLog "A handler for the Debug command is already open"
         fi
