@@ -30,6 +30,9 @@ then
   copy_file script /usr/sbin/recinit
 fi
 
+mkdir -p "${DESTDIR}/lib/udev/rules.d"
+cp /lib/udev/rules.d/60-input-id.rules "${DESTDIR}/lib/udev/rules.d"
+
 if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf ]
 then
   mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"

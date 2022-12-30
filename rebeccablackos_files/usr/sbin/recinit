@@ -28,6 +28,17 @@ then
   exit 1
 fi
 
+#Ensure /run is writable
+touch /run/.rotest > /dev/null 2>&1
+if [ $? -ne 0 ]
+then
+  unmountrunfs=1
+  mount -t tmpfs none /run
+else
+  unmountrunfs=0
+  rm /run/.rotest
+fi
+
 mkdir -p /run/user/0
 chmod 700 /run/user/0
 export XDG_RUNTIME_DIR=/run/user/0
@@ -55,54 +66,21 @@ export LC_ALL=C.UTF-8
 #fi
 modprobe evdev
 
-#Fake udevd to configure the devices just enough to start a display server
-
-#Ensure /run is writable
-touch /run/.rotest > /dev/null 2>&1
-if [ $? -ne 0 ]
-then
-  unmountrunfs=1
-  mount -t tmpfs none /run
-else
-  unmountrunfs=0
-  rm /run/.rotest
-fi
-
-mkdir -p /run/udev/data
-
 #populate fake udev device info if udev not running
-systemctl is-active system.slice --quiet >/dev/null 2>&1
-systemd_result=$?
+udevadm control --ping -t 1 > /dev/null 2>&1
+udev_result=$?
 
 #Get Plymouth status
 plymouth --ping
 plymouth_result=$?
 
-if [ $systemd_result -ne 0 ]
+if [ $udev_result -ne 0 ]
 then
-  find /sys/class/input/event* | while read -r Device
-  do
-    read MAJMIN < $Device/dev
-    if [ -e /run/udev/data/c${MAJMIN} ]
-    then
-      mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
-    fi
-    echo "E:ID_INPUT=1"            > /run/udev/data/c${MAJMIN}
-    echo "E:ID_INPUT_KEY=1"       >> /run/udev/data/c${MAJMIN}
-    echo "E:ID_INPUT_KEYBOARD=1"  >> /run/udev/data/c${MAJMIN}
-    echo "E:ID_INPUT_MOUSE=1"     >> /run/udev/data/c${MAJMIN}
-    echo "E:ID_SEAT=seat0"        >> /run/udev/data/c${MAJMIN}
-  done
+  /lib/systemd/systemd-udevd --daemon --resolve-names=never
 
-  find /sys/class/drm/*/dev | while read -r Device
-  do
-    read MAJMIN < $Device
-    if [ -e /run/udev/data/c${MAJMIN} ]
-    then
-      mv /run/udev/data/c${MAJMIN} /run/udev/data/c${MAJMIN}.old
-    fi
-    echo "E:ID_SEAT=seat0" > /run/udev/data/c${MAJMIN}
-  done
+  udevadm trigger --type=subsystems --action=add
+  udevadm trigger --type=devices --action=add
+  udevadm settle
 fi
 
 #Hide plymouth if it's running
@@ -124,34 +102,9 @@ cage -d -s -m extend -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
 sh -c "$SHELLCOMMAND -l; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
-#undo fake udev device info
-if [ $systemd_result -ne 0 ]
+if [ $udev_result -ne 0 ]
 then
-  find /sys/class/input/event* | while read -r Device
-  do
-    read MAJMIN < $Device
-    if [ -e /run/udev/data/c${MAJMIN} ]
-    then
-      rm /run/udev/data/c${MAJMIN}
-    fi
-    if [ -e /run/udev/data/c${MAJMIN}.old ]
-    then
-      mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
-    fi
-  done
-
-  find /sys/class/drm/*/dev | while read -r Device
-  do
-    read MAJMIN < $Device
-    if [ -e /run/udev/data/c${MAJMIN} ]
-    then
-      rm /run/udev/data/c${MAJMIN}
-    fi
-    if [ -e /run/udev/data/c${MAJMIN}.old ]
-    then
-      mv /run/udev/data/c${MAJMIN}.old /run/udev/data/c${MAJMIN}
-    fi
-  done
+  udevadm control --exit
 fi
 
 #Unload simpledrm if it was loaded manually, so udev can load it in the right order later
