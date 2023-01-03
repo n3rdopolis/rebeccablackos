@@ -962,9 +962,6 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
     exit 1
   fi
 
-  #Request plymouth to give up control, but retain the splash on the screen, until the loginmanagerdisplay draws.
-  plymouth deactivate
-
   ReadyNotifySent=0
   #Get the TTY that will hold the Wayland server that displays the login screen for seat0
   ProbeFilesExist "/run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_*" LoginManagerDisplayFileProbe
@@ -3148,6 +3145,9 @@ function WaylandLoginManagerMain
 
   #wait for udev to initialize all devices so that all seats are more likely to be populated the first time seats are enumerated, as DetectSeats is throttled to decrease CPU load
   udevadm settle
+
+  #Request plymouth to give up control, but retain the splash on the screen, until the loginmanagerdisplay draws.
+  plymouth deactivate
 
   #loop 'forever'
   while [ 1 ]
