@@ -1,9 +1,8 @@
 [Unit]
 Description=The multi-seat Wayland Login Manager for RebeccaBlackOS
-Wants=plymouth-deactivate.service
 Conflicts=plymouth-quit.service plymouth-quit-wait.service
 Before=getty@tty1.service plymouth.service plymouth-quit-wait.service plymouth-quit.service
-After=systemd-user-sessions.service plymouth-deactivate.service
+After=systemd-user-sessions.service
 OnFailure=vtty-frontend-novt@seat0.service
 
 [Service]
