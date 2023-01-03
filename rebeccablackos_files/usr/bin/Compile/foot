@@ -87,7 +87,7 @@ sed -i 's/^.*dim5=.*$/dim5=b218b2/' foot.ini
 sed -i 's/^.*dim6=.*$/dim6=18b2b2/' foot.ini
 sed -i 's/^.*dim7=.*$/dim7=b2b2b2/' foot.ini
 
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Ddefault-terminfo=xterm-256color build
+meson setup --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Ddefault-terminfo=xterm-256color build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

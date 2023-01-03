@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 sed -i "s/subdir('tests')//g" meson.build
 echo -e "#! /bin/bash\n. /usr/bin/wlruntime_vars\ngdk-pixbuf-query-loaders > $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache" > "postinstall-pak"
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
+meson setup --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

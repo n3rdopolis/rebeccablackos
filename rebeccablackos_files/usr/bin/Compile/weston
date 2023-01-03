@@ -57,7 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -p1 < /usr/share/RBOS_PATCHES/weston.diff
-meson --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=$INSTALLDIR/bin/Xwayland -Dtools=calibrator,debug,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dpipewire=true build
+meson setup --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=$INSTALLDIR/bin/Xwayland -Dtools=calibrator,debug,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dpipewire=true build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
