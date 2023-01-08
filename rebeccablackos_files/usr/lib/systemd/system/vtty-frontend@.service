@@ -2,7 +2,7 @@
 Description=Graphical terminal for vTTY %I
 
 After=vtty-backend@.service
-After=systemd-user-sessions.service plymouth.service display-manager.service
+After=systemd-user-sessions.service display-manager.service
 
 StartLimitIntervalSec=30
 StartLimitBurst=3
