@@ -32,7 +32,6 @@ else
 fi
 
 plymouth deactivate &> /dev/null
-plymouth quit &> /dev/null
 
 systemctl stop getty@$EmulatedTTY.service
 
@@ -81,6 +80,7 @@ then
   done
 fi
 
+PlymouthQuitRequested=0
 systemd-notify --ready &> /dev/null
 #Accept commands from the connection to manage the PTY (currently only the size)
 while [ 1 ]
@@ -92,6 +92,13 @@ do
   #s for size, then number of rows, then number of cols
   if [[ ${COMMANDDATA[0]} == "s" ]]
   then
+
+    if [[ $PlymouthQuitRequested == 0 ]]
+    then
+      plymouth quit &> /dev/null
+      PlymouthQuitRequested=1
+    fi
+
     XSize=${COMMANDDATA[1]}
     YSize=${COMMANDDATA[2]}
     if [[ ! -e /run/vtty/$EmulatedTTY/loginpty ]]
