@@ -31,6 +31,9 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
+plymouth deactivate &> /dev/null
+plymouth quit &> /dev/null
+
 systemctl stop getty@$EmulatedTTY.service
 
 which socat &> /dev/null

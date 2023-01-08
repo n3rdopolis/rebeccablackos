@@ -18,8 +18,6 @@
 
 #This runs a graphical terminal full screen to connect to the socat socket where the login process is running
 
-plymouth deactivate &> /dev/null
-
 #Test if there is a graphics card, if not revert to text mode TTY
 if ! compgen -G '/dev/dri/card[0-9]*' >/dev/null
 then
