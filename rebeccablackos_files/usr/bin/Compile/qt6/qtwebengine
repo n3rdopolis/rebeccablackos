@@ -61,7 +61,7 @@ sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/build/config/compiler/B
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/perfetto/gn/standalone/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/openscreen/src/build/config/BUILD.gn
 
-cmake -B build -G Ninja -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=Release -DQT_FEATURE_webengine_system_ffmpeg=ON -DQT_FEATURE_webengine_system_icu=ON -DQT_FEATURE_webengine_system_libevent=ON -DQT_FEATURE_webengine_system_libxslt=ON -DQT_FEATURE_webengine_proprietary_codecs=ON -DQT_FEATURE_webengine_kerberos=ON -DQT_FEATURE_webengine_full_debug_info=OFF -DQT_FEATURE_webengine_webrtc_pipewire=ON
+cmake -B build -G Ninja -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DQT_FEATURE_webengine_system_ffmpeg=ON -DQT_FEATURE_webengine_system_icu=ON -DQT_FEATURE_webengine_system_libevent=ON -DQT_FEATURE_webengine_system_libxslt=ON -DQT_FEATURE_webengine_proprietary_codecs=ON -DQT_FEATURE_webengine_kerberos=ON -DQT_FEATURE_webengine_full_debug_info=OFF -DQT_FEATURE_webengine_webrtc_pipewire=ON
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

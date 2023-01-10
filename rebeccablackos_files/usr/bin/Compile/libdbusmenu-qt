@@ -60,7 +60,7 @@ function PackagePrepareBuild()
 sed -i 's/add_subdirectory(tests)//g' CMakeLists.txt
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR  
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

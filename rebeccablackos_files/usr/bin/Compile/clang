@@ -65,7 +65,7 @@ mkdir build
 cd build
 export CC=gcc 
 export CXX=g++
-cmake -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -Wno-dev .. 
+cmake -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -Wno-dev .. 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

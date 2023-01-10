@@ -64,7 +64,7 @@ function PackagePrepareBuild()
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinfinity/spinfinity.plymouth.in
 
-meson setup --buildtype=plain --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgtk=enabled -Ddrm=true -Dpango=enabled -Dsystemd-integration=true -Dlogo=$INSTALLDIR/share/plymouth/boot_logo.png -Drunstatedir=/run/plymouth build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgtk=enabled -Ddrm=true -Dpango=enabled -Dsystemd-integration=true -Dlogo=$INSTALLDIR/share/plymouth/boot_logo.png -Drunstatedir=/run/plymouth build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

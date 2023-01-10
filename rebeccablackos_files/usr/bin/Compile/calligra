@@ -60,7 +60,7 @@ sed -i '/calligra_drop_products_on_old_flag(words/a calligra_drop_products_on_ol
 sed -i '/#include <QVector>/a #include <cmath>' libs/flake/KoSnapStrategy.h
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=Release -DBUILD_krita=OFF -DBUILD_karbon=OFF -DBUILD_gemini=OFF
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DBUILD_krita=OFF -DBUILD_karbon=OFF -DBUILD_gemini=OFF
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 

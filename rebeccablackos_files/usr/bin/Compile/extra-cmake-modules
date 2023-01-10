@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX:PATH=$INSTALLDIR -DLIB_INSTALL_DIR:PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX:PATH=$INSTALLDIR -DLIB_INSTALL_DIR:PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_BUILD_TYPE=MinSizeRel
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
