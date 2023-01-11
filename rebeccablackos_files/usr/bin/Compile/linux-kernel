@@ -146,6 +146,11 @@ fi
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
 ./scripts/config -d CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
 
+#Disable CX18 driver which causes GCC to crash when compiling it
+./scripts/config -d CONFIG_VIDEO_CX18
+./scripts/config -d CONFIG_VIDEO_CX18_ALSA
+
+
 #Disable VTs
 ./scripts/config -d CONFIG_VT
 ./scripts/config -d CONFIG_CONSOLE_TRANSLATIONS
