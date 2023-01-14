@@ -36,6 +36,14 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
+if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
+then
+  WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+else
+  WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+fi
+rm $WAYLANDDISPLAYPATH
+
 function PtyResizeEvent
 {
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
