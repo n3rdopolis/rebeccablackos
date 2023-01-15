@@ -326,6 +326,7 @@ function UserSessionWorker
 
   #Write the error code into the logfile
   echo -e "\nSession exited with the error code: $SessionReturnCode" >> $WLM_SESSION_LOG
+  $SLEEPCMD 1
   TerminateJobPID $JournalctlPID 15 0
   exit
 }
