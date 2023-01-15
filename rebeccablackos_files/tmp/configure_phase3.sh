@@ -138,6 +138,9 @@ fi
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 
+#Set default user groups
+printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="systemd-journald"\n" >> /etc/adduser.conf
+
 #workaround so that all PAM files are stored in the proper place
 mkdir -p /opt/etc
 ln -s /etc/pam.d /opt/etc/pam.d
