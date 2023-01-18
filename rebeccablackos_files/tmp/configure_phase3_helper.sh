@@ -63,7 +63,30 @@ do
   fi
 done
 
+cp /usr/lib/os-release.rbos /usr/lib/os-release
+
+#configure /etc/issue
+echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
+setterm -cursor on >> /etc/issue
+echo -e "RebeccaBlackOS \n" > /etc/issue.net
 
 #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
 echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
 echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
+
+#save the build date of the CD.
+date -u +"%A, %Y-%m-%d %H:%M:%S %Z" > /etc/builddate
+
+if [[ $DEBIAN_DISTRO == Debian ]]
+then
+  echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
+fi
+echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
+echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
+
+#wlroots new renderer needs DRM Prime sharing enabled. These GPU drivers appear to not support it yet.  (they need to import DRM_GEM_SHMEM_DRIVER_OPS)
+#Force these to fallback with SimpleDRM
+echo "blacklist ast"          > /etc/modprobe.d/wlrootsdrmprime.conf
+echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
+echo "blacklist bochs_drm"   >> /etc/modprobe.d/wlrootsdrmprime.conf
+echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf

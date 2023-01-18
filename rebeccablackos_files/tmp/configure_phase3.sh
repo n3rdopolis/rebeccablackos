@@ -50,35 +50,18 @@ function RedirectFile {
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
+dpkg-divert --local --rename --add /etc/issue
+dpkg-divert --local --rename --add /etc/issue.net
 dpkg-divert --local --rename --add /usr/lib/os-release
-mv /usr/lib/os-release.rbos /usr/lib/os-release
 
 #ibus workaround
 ln -s /usr/share/unicode/ /usr/share/unicode/ucd
-
-if [[ $DEBIAN_DISTRO == Debian ]]
-then
-  echo "blacklist pcspkr" > /etc/modprobe.d/nobeep.conf
-fi
-echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
-echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
-
-#wlroots new renderer needs DRM Prime sharing enabled. These GPU drivers appear to not support it yet.  (they need to import DRM_GEM_SHMEM_DRIVER_OPS)
-#Force these to fallback with SimpleDRM
-echo "blacklist ast"          > /etc/modprobe.d/wlrootsdrmprime.conf
-echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
-echo "blacklist bochs_drm"   >> /etc/modprobe.d/wlrootsdrmprime.conf
-echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 
 #Create a default /etc/vconsole.conf for plymouth
 echo "XKB_LAYOUT=\"us\"" >> /etc/vconsole.conf
 echo "XKB_MODEL=\"pc105\"" >> /etc/vconsole.conf
 echo "XKB_VARIANT=\"\"" >> /etc/vconsole.conf
 echo "XKB_OPTIONS=\"\"" >> /etc/vconsole.conf
-
-
-#Create a folder for lightdm, so that casper and ubiquity configure autologin, as waylandloginmanager reads the config files
-mkdir /etc/lightdm/
 
 #Create admin groups
 addgroup --system lpadmin
@@ -125,15 +108,6 @@ ar q waylandloginmanager-rbos.deb control.tar.gz
 ar q waylandloginmanager-rbos.deb data.tar.gz
 dpkg -i waylandloginmanager-rbos.deb
 cd $OLDPWD
-
-
-#Redirect grub-install if lupin isn't 1st tier
-if [[ ! -e /usr/share/initramfs-tools/hooks/lupin_casper ]]
-then
-  dpkg-divert --add --rename --divert /usr/sbin/grub-install.real /usr/sbin/grub-install
-  echo 'if [ -x /usr/sbin/grub-install.lupin ]; then /usr/sbin/grub-install.lupin "$@"; else /usr/sbin/grub-install.real "$@"; fi; exit $?' > /usr/sbin/grub-install
-  chmod +x /usr/sbin/grub-install
-fi
 
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
@@ -182,16 +156,10 @@ function PostInstallActions
     ln -s $FILE /usr/lib/systemd/user/
   done
 
-  #configure /etc/issue
-  echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
-  setterm -cursor on >> /etc/issue
-  echo -e "RebeccaBlackOS \n" > /etc/issue.net
-
   #configure grub color
   echo "set color_normal=black/black" > /boot/grub/custom.cfg
 
   #disable services that conflict with the waylandloginmanager
-  systemctl disable lightdm.service
   systemctl disable gdm.service
 
   #Don't run ssh by default
@@ -278,14 +246,6 @@ function PostInstallActions
     ln -s "$FILE" /usr/share/dbus-1/system.d/$FILENAME
   done
 
-  #ubiquity workaround. XWayland only permits applications that run as the user, so run it as a Wayland cleint
-  if [[ -e /usr/bin/ubiquity ]]
-  then
-    dpkg-divert --add --rename --divert /usr/bin/ubiquity.real /usr/bin/ubiquity
-    echo -e "#! /bin/bash\nwlsudo ubiquity.real" > /usr/bin/ubiquity
-    chmod +x /usr/bin/ubiquity
-  fi
-
   #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
   #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
   dpkg --force-overwrite -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
@@ -309,9 +269,6 @@ function PostInstallActions
   #Replace chvt with the seat aware wrapper
   dpkg-divert --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt 
   ln -s /usr/bin/chvt-ng /usr/bin/chvt
-
-  #save the build date of the CD.
-  date -u +"%A, %Y-%m-%d %H:%M:%S %Z" > /etc/builddate
 }
 PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
 
