@@ -134,16 +134,20 @@ fi
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
-#Append the snapshot date to the end of the revisions file
-cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
-
 #Actions that are performed after all the packages are compiled
 function PostInstallActions
 {
+  #Append the snapshot date to the end of the revisions file
+  cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
+
   #Create a package with all the menu items.
   cd /tmp
   rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
   /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+
+  rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
+  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
+
   cp *.deb "/srcbuild/buildoutput/"
   cd $OLDPWD
 
@@ -328,7 +332,7 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purg
 apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
-REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos)
+REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos)
 apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devbuiltpackages.log
 
 #Install the reduced packages
