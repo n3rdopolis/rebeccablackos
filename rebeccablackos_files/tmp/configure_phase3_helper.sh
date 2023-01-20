@@ -89,5 +89,4 @@ echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
 echo "blacklist ast"          > /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist bochs"       >> /etc/modprobe.d/wlrootsdrmprime.conf
-echo "blacklist bochs_drm"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
