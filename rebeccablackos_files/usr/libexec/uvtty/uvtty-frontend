@@ -35,6 +35,55 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
+function GetFirstDeviceInSeat
+{
+  #Get all input devices from udev, and store attributes into an array
+  while read -r Device
+  do
+    #get properties of the device
+    DeviceProperties=$(udevadm info --query=property  --path=$Device)
+    IFS=$'\n'
+    DeviceProperties=($DeviceProperties)
+    unset IFS
+
+    unset DEV_ID_SEAT DEV_DEVNAME
+    for DeviceProperty in ${DeviceProperties[@]}
+    do
+      IFS="="
+      DeviceProperty=($DeviceProperty)
+      unset IFS
+      case ${DeviceProperty[0]} in
+        ID_SEAT)
+          DEV_ID_SEAT=${DeviceProperty[1]}
+          ;;
+        DEVNAME)
+          DEV_DEVNAME=${DeviceProperty[1]}
+          ;;
+      esac
+    done
+
+    DeviceName=$DEV_DEVNAME
+    DevicePhysicalSeatID=$DEV_ID_SEAT
+
+    #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
+    if [[ -z $DevicePhysicalSeatID ]]
+    then
+      DevicePhysicalSeatID="seat0"
+    fi
+
+    if [[ $DevicePhysicalSeatID == $XDG_SEAT ]]
+    then
+      echo $DeviceName
+      break
+    fi
+  done < <(EnumerateDeviceFiles)
+}
+
+#Command to enumerate device files
+function EnumerateDeviceFiles
+{
+  find /sys/class/drm/card[0-9]* ! -path "*-*"
+}
 
 for (( AttemptItr=0 ; AttemptItr < 5 ; AttemptItr++ ))
 do
@@ -44,6 +93,7 @@ do
     tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
   fi
 
+  export WLR_DRM_DEVICES=$(GetFirstDeviceInSeat)
   cage -m extend -d -s -- \
   foot --font DejaVuSansMono:size=9 -- \
   /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &

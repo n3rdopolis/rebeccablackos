@@ -25,6 +25,55 @@ then
   exit 1
 fi
 
+function GetFirstDeviceInSeat
+{
+  #Get all input devices from udev, and store attributes into an array
+  while read -r Device
+  do
+    #get properties of the device
+    DeviceProperties=$(udevadm info --query=property  --path=$Device)
+    IFS=$'\n'
+    DeviceProperties=($DeviceProperties)
+    unset IFS
+
+    unset DEV_ID_SEAT DEV_DEVNAME
+    for DeviceProperty in ${DeviceProperties[@]}
+    do
+      IFS="="
+      DeviceProperty=($DeviceProperty)
+      unset IFS
+      case ${DeviceProperty[0]} in
+        ID_SEAT)
+          DEV_ID_SEAT=${DeviceProperty[1]}
+          ;;
+        DEVNAME)
+          DEV_DEVNAME=${DeviceProperty[1]}
+          ;;
+      esac
+    done
+
+    DeviceName=$DEV_DEVNAME
+    DevicePhysicalSeatID=$DEV_ID_SEAT
+
+    #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
+    if [[ -z $DevicePhysicalSeatID ]]
+    then
+      DevicePhysicalSeatID="seat0"
+    fi
+
+    if [[ $DevicePhysicalSeatID == $XDG_SEAT ]]
+    then
+      echo $DeviceName
+      break
+    fi
+  done < <(EnumerateDeviceFiles)
+}
+
+#Command to enumerate device files
+function EnumerateDeviceFiles
+{
+  find /sys/class/drm/card[0-9]* ! -path "*-*"
+}
 
 function ResetTTYMode
 {
@@ -119,6 +168,7 @@ export WLR_NO_HARDWARE_CURSORS=1
 export WLR_LIBINPUT_NO_DEVICES=1
 export LIBGL_ALWAYS_SOFTWARE=1
 export DBUS_SESSION_BUS_ADDRESS=/dev/null
+export WLR_DRM_DEVICES=$(GetFirstDeviceInSeat)
 cage -m extend -d -s -- \
 foot --config=/etc/footkiosk.conf -- \
 /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
