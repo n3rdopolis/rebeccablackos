@@ -58,10 +58,10 @@ dpkg-divert --local --rename --add /usr/lib/os-release
 ln -s /usr/share/unicode/ /usr/share/unicode/ucd
 
 #Create a default /etc/vconsole.conf for plymouth
-echo "XKB_LAYOUT=\"us\"" >> /etc/vconsole.conf
-echo "XKB_MODEL=\"pc105\"" >> /etc/vconsole.conf
-echo "XKB_VARIANT=\"\"" >> /etc/vconsole.conf
-echo "XKB_OPTIONS=\"\"" >> /etc/vconsole.conf
+echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
+echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
+echo "XKBVARIANT=\"\"" >> /etc/vconsole.conf
+echo "XKBOPTIONS=\"\"" >> /etc/vconsole.conf
 
 #Create admin groups
 addgroup --system lpadmin
