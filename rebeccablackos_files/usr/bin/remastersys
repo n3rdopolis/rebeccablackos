@@ -228,7 +228,7 @@ update-rc.d remastersys-firstboot defaults
         touch $WORKDIR/dummysys/etc/printcap
         touch $WORKDIR/dummysys/etc/cups/printers.conf
         rm -rf $WORKDIR/dummysys/var/cache/gdm/*
-        rm -rf $WORKDIR/dummysys/var/lib/sudo/*
+        find $WORKDIR/dummysys/var/lib/sudo ! -type d -delete
         rm -rf $WORKDIR/dummysys/var/lib/AccountsService/users/*
 	rm -rf $WORKDIR/dummysys/var/lib/kdm/*
         rm -rf $WORKDIR/dummysys/var/run/console/*
