@@ -63,7 +63,10 @@ do
   fi
 done
 
-cp /usr/lib/os-release.rbos /usr/lib/os-release
+#ibus workaround
+ln -s /usr/share/unicode/ /usr/share/unicode/ucd
+
+ln -s /usr/lib/os-release.rbos /etc/os-release
 
 #configure /etc/issue
 echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
@@ -90,3 +93,44 @@ echo "blacklist ast"          > /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist bochs"       >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
+
+#workaround hardcoded links to /usr/bin/python in various scripts
+ln -s $(which python3) /usr/bin/python
+
+#Create a python path
+mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
+
+#Create a /opt/var/log folder
+mkdir -p /opt/var/log
+
+mkdir -p /opt/etc
+mkdir -p /etc/pam.d
+ln -s /etc/pam.d /opt/etc/pam.d
+
+mkdir -p /opt/lib/systemd/
+mkdir -p /usr/lib/systemd/user/
+mkdir -p /usr/lib/systemd/system/
+ln -s /usr/lib/systemd/user/ /opt/lib/systemd/user
+ln -s /usr/lib/systemd/system/ /opt/lib/systemd/system
+
+mkdir -p /opt/share/polkit-1/
+mkdir -p /usr/share/polkit-1/actions/
+mkdir -p /usr/share/polkit-1/rules.d/
+ln -s /usr/share/polkit-1/actions/ /opt/share/polkit-1/actions
+ln -s /usr/share/polkit-1/rules.d/ /opt/share/polkit-1/rules.d
+
+mkdir -p /opt/etc/dbus-1/
+mkdir -p /etc/dbus-1/services/
+ln -s /etc/dbus-1/services/ /opt/etc/dbus-1/services
+
+mkdir -p /opt/share/dbus-1/
+mkdir -p /usr/share/dbus-1/system-services/
+mkdir -p /usr/share/dbus-1/system.d/
+ln -s /usr/share/dbus-1/system-services/ /opt/share/dbus-1/system-services
+ln -s /usr/share/dbus-1/system.d/ /opt/share/dbus-1/system.d
+
+#Replace X symlink
+ln -s /opt/bin/Xorg /usr/bin/X
+
+#Replace chvt with the seat aware wrapper
+ln -s /usr/bin/chvt-ng /usr/bin/chvt

@@ -50,12 +50,12 @@ function RedirectFile {
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
-dpkg-divert --local --rename --add /etc/issue
-dpkg-divert --local --rename --add /etc/issue.net
-dpkg-divert --local --rename --add /usr/lib/os-release
-
-#ibus workaround
-ln -s /usr/share/unicode/ /usr/share/unicode/ucd
+dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.distrib /etc/issue
+dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.net.distrib /etc/issue.net
+dpkg-divert --package rbos-rbos --add --rename --divert /etc/os-release.distrib /etc/os-release
+dpkg-divert --package rbos-rbos --add --rename --divert /etc/lsb-release.distrib /etc/lsb-release
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/X.distrib /usr/bin/X
 
 #Create a default /etc/vconsole.conf for plymouth
 echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
@@ -74,9 +74,6 @@ then
 else
   PACKAGEDATE=$(date +%s)
 fi
-
-#Create a python path
-mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 
 #Set the pager to not be interactive
 export PAGER=cat
@@ -115,13 +112,6 @@ echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 #Set default user groups
 printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="systemd-journald"\n" >> /etc/adduser.conf
 
-#workaround so that all PAM files are stored in the proper place
-mkdir -p /opt/etc
-ln -s /etc/pam.d /opt/etc/pam.d
-
-#workaround hardcoded links to /usr/bin/python in various scripts
-ln -s $(which python3) /usr/bin/python
-
 #Configure a locale so that the initramfs doesn't have to
 update-locale LANG=en_US.UTF-8
 
@@ -153,12 +143,6 @@ function PostInstallActions
 
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-  
-  #Install any systemd-user sessions from /opt to where systemd can see them
-  find /opt/lib/systemd/user/* | while read -r FILE
-  do
-    ln -s $FILE /usr/lib/systemd/user/
-  done
 
   #configure grub color
   echo "set color_normal=black/black" > /boot/grub/custom.cfg
@@ -215,40 +199,6 @@ function PostInstallActions
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
 
   echo "Post Install action: Configure dbus and polkit"
-  mkdir -p /usr/share/polkit-1/actions/
-  find /opt/share/polkit-1/actions/ -type f | while read -r FILE;
-  do
-    FILENAME=$(basename $FILE)
-    cp "$FILE" /usr/share/polkit-1/actions/$FILENAME
-  done
-
-  mkdir -p /usr/share/polkit-1/rules.d/
-  find /opt/share/polkit-1/rules.d -type f | while read -r FILE;
-  do
-    FILENAME=$(basename $FILE)
-    ln -s "$FILE" /usr/share/polkit-1/rules.d/$FILENAME
-  done
-
-  mkdir -p /usr/share/dbus-1/system-services/
-  find /opt/share/dbus-1/system-services/ -type f | while read -r FILE;
-  do
-    FILENAME=$(basename $FILE)
-    ln -s "$FILE" /usr/share/dbus-1/system-services/$FILENAME
-  done
-
-  mkdir -p /etc/dbus-1/services/
-  find /opt/etc/dbus-1/services/ -type f | while read -r FILE;
-  do
-    FILENAME=$(basename $FILE)
-    ln -s "$FILE" /etc/dbus-1/services/$FILENAME
-  done
-
-  mkdir -p /usr/share/dbus-1/system.d/
-  find /opt/share/dbus-1/system.d/ -type f | while read -r FILE;
-  do
-    FILENAME=$(basename $FILE)
-    ln -s "$FILE" /usr/share/dbus-1/system.d/$FILENAME
-  done
 
   #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
   #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
@@ -262,24 +212,13 @@ function PostInstallActions
 
   #Force initramfs utilites to include the overlay filesystem
   echo overlay >> /etc/initramfs-tools/modules
-
-  #Create a /opt/var/log folder
-  mkdir /opt/var/log
-
-  #Replace X symlink
-  dpkg-divert --add --rename --divert /usr/bin/X.distrib /usr/bin/X
-  ln -s /opt/bin/Xorg /usr/bin/X
-  
-  #Replace chvt with the seat aware wrapper
-  dpkg-divert --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt 
-  ln -s /usr/bin/chvt-ng /usr/bin/chvt
 }
 PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
 
 #clean apt stuff
 apt-get clean
 rm -rf /var/cache/apt-xapian-index/*
-rm -rf /var/lib/apt/lists/*
+find /var/lib/apt/lists ! -type d -delete
 rm -rf /var/lib/dlocate/*
 
 #start the remastersys job
