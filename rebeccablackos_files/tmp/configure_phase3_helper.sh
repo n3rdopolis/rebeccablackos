@@ -29,20 +29,8 @@ fi
 cp -a /usr/import/usr/* /usr
 
 mkdir -p /etc/skel/.config
-cp -a /usr/import/etc/skel/* /etc/skel
+cp -a /usr/import/etc/* /etc/
 mkdir -p /etc/skel/Desktop
-
-mkdir -p /etc/remastersys
-cp -a /usr/import/etc/remastersys/* /etc/remastersys
-
-mkdir -p /etc/pam.d
-cp -a /usr/import/etc/pam.d/* /etc/pam.d
-
-mkdir -p /etc/grub.d
-cp -a /usr/import/etc/grub.d/* /etc/grub.d
-
-mkdir -p /etc/loginmanagerdisplay
-cp -a /usr/import/etc/loginmanagerdisplay/* /etc/loginmanagerdisplay
 
 #Configure python to use modules in /opt
 echo "/opt/lib/python2.7/site-packages" > "/usr/lib/python2.7/dist-packages/optpkgs.pth"
@@ -94,6 +82,12 @@ echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist bochs"       >> /etc/modprobe.d/wlrootsdrmprime.conf
 echo "blacklist vboxvideo"   >> /etc/modprobe.d/wlrootsdrmprime.conf
 
+#Create a default /etc/vconsole.conf for plymouth
+echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
+echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
+echo "XKBVARIANT=\"\"" >> /etc/vconsole.conf
+echo "XKBOPTIONS=\"\"" >> /etc/vconsole.conf
+
 #workaround hardcoded links to /usr/bin/python in various scripts
 ln -s $(which python3) /usr/bin/python
 
@@ -134,3 +128,6 @@ ln -s /opt/bin/Xorg /usr/bin/X
 
 #Replace chvt with the seat aware wrapper
 ln -s /usr/bin/chvt-ng /usr/bin/chvt
+
+#include /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults as part of the package, the contents get generated later when dconf is actually built
+touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults

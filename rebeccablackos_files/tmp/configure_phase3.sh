@@ -58,12 +58,6 @@ dpkg-divert --package rbos-rbos --add --rename --divert /etc/lsb-release.distrib
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/X.distrib /usr/bin/X
 
-#Create a default /etc/vconsole.conf for plymouth
-echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
-echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
-echo "XKBVARIANT=\"\"" >> /etc/vconsole.conf
-echo "XKBOPTIONS=\"\"" >> /etc/vconsole.conf
-
 #Create admin groups
 addgroup --system lpadmin
 addgroup --system sambashare
