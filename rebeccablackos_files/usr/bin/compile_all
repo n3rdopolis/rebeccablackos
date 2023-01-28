@@ -178,7 +178,9 @@ CompilePackage drm
 CompilePackage macros
 CompilePackage xorgproto
 CompilePackage xcbproto
+CompilePackage libxtrans
 CompilePackage libxcb
+CompilePackage libx11
 CompilePackage libxfont
 CompilePackage libxfixes
 CompilePackage libxcvt
@@ -249,7 +251,6 @@ CompilePackage qt6/qtbase
 CompilePackage qt6/qtshadertools
 CompilePackage qt6/qtdeclarative
 CompilePackage qt6/qt5compat
-#CompilePackage qt6/qtxmlpatterns
 #CompilePackage qt6/qtmultimedia
 #CompilePackage qt6/qtsvg
 #CompilePackage qt6/qtsensors
@@ -264,8 +265,8 @@ CompilePackage qt6/qt5compat
 #CompilePackage qt6/qttools
 #CompilePackage qt6/qttranslations
 #CompilePackage qt6/qtvirtualkeyboard
-#CompilePackage qt6ct
 CompilePackage qt6/qtwayland
+CompilePackage qt6ct
 CompilePackage qt5/qtbase
 CompilePackage qt5/qtxmlpatterns
 CompilePackage qt5/qtdeclarative
@@ -295,7 +296,6 @@ CompilePackage qca
 #CompilePackage otter
 CompilePackage libdbusmenu-qt
 CompilePackage phonon
-CompilePackage phonon-gstreamer
 CompilePackage phonon-vlc
 CompilePackage polkit-qt-1
 CompilePackage gcab
