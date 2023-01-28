@@ -118,8 +118,6 @@ chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth_init-bottom
 chmod +x /usr/share/initramfs-tools/scripts/init-premount/plymouth_init-premount
 chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth_panic
 
-rm $INSTALLDIR/etc/plymouth/plymouthd.conf
-
 ln -s /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf /usr/share/fonts/Plymouth.ttf
 
 rm -r /run/plymouth
