@@ -3061,9 +3061,12 @@ if [ -f postremove-pak ]; then
    chmod 755 $BUILD_DIR/DEBIAN/postrm
 fi
 
-# Tag files in /etc to be conffiles
-find -L $BUILD_DIR/etc -type f 2> /dev/null | sed -e "s,$BUILD_DIR,," | \
-	> $BUILD_DIR/DEBIAN/conffiles
+# Tag files in /etc's to be conffiles
+echo -n > $BUILD_DIR/DEBIAN/conffiles
+find $BUILD_DIR | grep /etc$ | while read ETCFOLDER
+do
+  find $ETCFOLDER -type f 2> /dev/null | sed -e "s,$BUILD_DIR,," >> $BUILD_DIR/DEBIAN/conffiles
+done
 
 # The package will be saved here (ignores <epoch>: prefix):
 DEBPKG="${DIRECTORIO_FUENTE}/${NAME}_`echo ${VERSION} | sed -e 's/^[0123456789]*://'`-${RELEASE}_${ARCHITECTURE}.deb"
