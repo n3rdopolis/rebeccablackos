@@ -91,7 +91,7 @@ mkdir debian
 touch debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-/usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_helper.sh
+/usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_helper.sh
 cd $OLDPWD
 
 #Create a virtual configuration package for the waylandloginmanager
@@ -104,7 +104,7 @@ tar czf data.tar.gz -T /dev/null
 ar q waylandloginmanager-rbos.deb debian-binary
 ar q waylandloginmanager-rbos.deb control.tar.gz
 ar q waylandloginmanager-rbos.deb data.tar.gz
-dpkg -i waylandloginmanager-rbos.deb
+dpkg --force-overwrite --force-confmiss --force-confnew -i waylandloginmanager-rbos.deb
 cd $OLDPWD
 
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
@@ -134,10 +134,10 @@ function PostInstallActions
   #Create a package with all the menu items.
   cd /tmp
   rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
-  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 
   rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
-  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=--force-overwrite --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
+  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags=-"--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
 
   cp *.deb "/srcbuild/buildoutput/"
   cd $OLDPWD
@@ -203,7 +203,7 @@ function PostInstallActions
 
   #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
   #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-  dpkg --force-overwrite -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
+  dpkg --force-overwrite --force-confmiss --force-confnew -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
   #move the import folder
   mv /usr/import /tmp
@@ -281,7 +281,7 @@ compile_all installsmallpackage
 
 #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
 #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-dpkg --force-overwrite -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
+dpkg --force-overwrite --force-confmiss --force-confnew -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
 
 #Reset the utilites back to the way they are supposed to be.
