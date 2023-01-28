@@ -79,7 +79,7 @@ make
 function PackageInstallSource()
 {
 chmod +x scripts/casper-bottom/*
-cat debian/*.install | grep -v ^casper.conf |while read -r LINE
+cat debian/*.install | while read -r LINE
 do 
 echo "DOING $LINE"
   FILECOPY=($LINE)
