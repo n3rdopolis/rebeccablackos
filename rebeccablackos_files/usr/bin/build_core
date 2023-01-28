@@ -236,7 +236,7 @@ function RunDownloadAndOrBuild
 #Function to install build_core built deb files
 function InstallDebFile()
 {
-  dpkg -i --force-overwrite "$1"
+  dpkg -i --force-overwrite --force-confmiss --force-confnew "$1"
   return $?
 }
 
