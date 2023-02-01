@@ -135,6 +135,31 @@ function RunDownloadAndOrBuild
     exit
   fi
 
+  if ! declare -F PackageDownloadSource &> /dev/null
+  then
+    function PackageDownloadSource { :; }
+  fi
+
+  if ! declare -F PackagePrepareBuild &> /dev/null
+  then
+    function PackagePrepareBuild { :; }
+  fi
+
+  if ! declare -F PackageCompileSource &> /dev/null
+  then
+    function PackageCompileSource { :; }
+  fi
+
+  if ! declare -F PackageInstallSource &> /dev/null
+  then
+    function PackageInstallSource { :; }
+  fi
+
+  if ! declare -F PackagePostInstall &> /dev/null
+  then
+    function PackagePostInstall { :; }
+  fi
+
   #If this variable is not set, assume this is the only pacakge being compiled
   if [[ -z $BUILDCORETOTALPACKAGESNUMBER ]]
   then
@@ -609,7 +634,7 @@ function DownloadSource()
     BASHEXE=$(which bash)
     RUNUSEREXE=$(which runuser)
     FOLDERDATE=$(date +%s)
-    mkdir /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
+    mkdir -p /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
     chmod 700 /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
     chown $NONROOTUSER /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/*
@@ -653,8 +678,8 @@ function DownloadSource()
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       #create directories for output
-      mkdir "/$SOURCEDIR/buildoutput/"
-      mkdir "/$SOURCEDIR/buildoutput/control"
+      mkdir -p "/$SOURCEDIR/buildoutput/"
+      mkdir -p "/$SOURCEDIR/buildoutput/control"
       if [[ -e "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME" && $REBUILDNEWREVISION == 0 ]]
       then
         rm "/$SOURCEDIR/buildoutput/control/$SOURCENAME"
@@ -882,7 +907,7 @@ function MakeAndInstall()
     fi
 
     #Empty any possible logs inside the source folder
-    rm "/$SOURCEDIR/$SOURCENAME/Logs/"*
+    rm "/$SOURCEDIR/$SOURCENAME/Logs/"* &> /dev/null
 
     #Update the ldconfig cache
     ldconfig
@@ -932,7 +957,7 @@ function MakeAndInstall()
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    mkdir \"/usr/share/buildcore_revisions/\"
+    mkdir -p \"/usr/share/buildcore_revisions/\"
     cp \"$BUILDLOGDIR/$SOURCENAME/GetSourceVersion\" \"/usr/share/buildcore_revisions/$SOURCENAME\"
 
     SetBuildVariables
@@ -949,7 +974,7 @@ function MakeAndInstall()
     echo \" PackagePostInstall finished in \$((ENDTIME-STARTTIME)) seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackagePostInstall\"
     if [[ \$PackageInstallSourceResult != 0 || $PackageCompileSourceResult != 0 ]]
     then
-      mkdir \"/usr/share/buildcore_revisions/buildresults/\"
+      mkdir -p \"/usr/share/buildcore_revisions/buildresults/\"
       touch $SOURCENAME \"/usr/share/buildcore_revisions/buildresults/$SOURCENAME\"
       echo $SOURCENAME >> \"/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles\"
     fi
@@ -1008,8 +1033,8 @@ function MakeAndInstall()
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
       #create directories for output
-      mkdir "/$SOURCEDIR/buildoutput/"
-      mkdir "/$SOURCEDIR/buildoutput/control"
+      mkdir -p "/$SOURCEDIR/buildoutput/"
+      mkdir -p "/$SOURCEDIR/buildoutput/control"
       #checkinstall wants a debian/control file, otherwise it exits out.
       mkdir debian
       touch debian/control
