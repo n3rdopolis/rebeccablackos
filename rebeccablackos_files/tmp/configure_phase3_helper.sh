@@ -114,7 +114,9 @@ ln -s /usr/share/polkit-1/actions/ /opt/share/polkit-1/actions
 ln -s /usr/share/polkit-1/rules.d/ /opt/share/polkit-1/rules.d
 
 mkdir -p /opt/etc/dbus-1/
+mkdir -p /etc/dbus-1/system.d/
 mkdir -p /etc/dbus-1/services/
+ln -s /etc/dbus-1/system.d/ /opt/etc/dbus-1/system.d/
 ln -s /etc/dbus-1/services/ /opt/etc/dbus-1/services
 
 mkdir -p /opt/share/dbus-1/
