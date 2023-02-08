@@ -58,6 +58,7 @@ export CPATH=$INSTALLDIR/include
 export LIBRARY_PATH=$INSTALLDIR/lib
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
+export ACLOCAL_PATH=/opt/share/aclocal:/usr/share/aclocal
 export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
