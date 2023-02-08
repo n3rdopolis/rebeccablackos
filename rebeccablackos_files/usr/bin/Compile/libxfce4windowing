@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=wayfire
+SOURCENAME=libxfce4windowing
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/WayfireWM/wayfire
+SOURCEURL=https://gitlab.xfce.org/xfce/libxfce4windowing.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', 'HG', or 'ARCHIVE'.
 REPOSITORYTYPE=GIT
@@ -35,7 +35,7 @@ SOURCEREVISION=git:defaultbranch
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=1
+REBUILDNEWREVISION=0
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
@@ -61,44 +61,25 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build -Ddebug_ipc=false -Dprint_trace=false
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-ninja -v -C build
+make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-ninja -C build install
+make install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp wayfire.ini /etc/skel/.config/wayfire-mate.ini
-sed -i 's/autostart_wf_shell = true/autostart_wf_shell = false/g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's/alacritty/konsole/g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's|wf-background|swaybg -i /usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png -o "*"|g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's|wf-panel|mate-panel|g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's|^# background|background|g' /etc/skel/.config/wayfire-mate.ini
-sed -i 's|^# panel|panel|g' /etc/skel/.config/wayfire-mate.ini
-sed -i "s|/usr/libexec/xdg-desktop-portal|$INSTALLDIR/libexec/xdg-desktop-portal|g" /etc/skel/.config/wayfire-mate.ini
-
-cp wayfire.ini /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/autostart_wf_shell = true/autostart_wf_shell = false/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/alacritty/konsole/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|wf-background|xfdesktop -D|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|wf-panel|xfce4-panel|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|^# background|background|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|^# panel|panel|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i "s|/usr/libexec/xdg-desktop-portal|$INSTALLDIR/libexec/xdg-desktop-portal|g" /etc/skel/.config/wayfire-xfce.ini
-
+:
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core

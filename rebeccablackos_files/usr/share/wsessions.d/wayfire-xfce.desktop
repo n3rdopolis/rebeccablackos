@@ -1,0 +1,24 @@
+[Desktop Entry]
+Enabled=1
+Type=WSession
+Name=Wayfire
+Comment=XFCE backed by Wlroots based compositor with Compiz/KWin like effects
+CompositorExec=/opt/bin/wayfire
+CompositorSupportsWL=0
+CompositorSupportsKMS=1
+CompositorSupportsWKS=0
+CompositorKMSSeatAware=1
+CompositorSupportsFB=0
+CompositorWLArguments=
+CompositorKMSArguments=
+CompositorFBArguments=
+CompositorDisplayArgument=
+NeedsFile=/opt/bin/wayfire
+SessionArgument=
+AdditionalArguments=--config-file=~/.config/wayfire-xfce.ini
+[EnvironmentFile]
+set=XDG_CURRENT_DESKTOP=Wayfire
+set=WLR_BACKENDS=wayland@WKS
+set=WLR_RENDERER_ALLOW_SOFTWARE=1
+set=WLR_NO_HARDWARE_CURSORS=1
+set=WLR_LIBINPUT_NO_DEVICES=1
