@@ -1,9 +1,9 @@
 [Desktop Entry]
 Enabled=1
 Type=WSession
-Name=Wayfire
-Comment=XFCE backed by Wlroots based compositor with Compiz/KWin like effects
-CompositorExec=/opt/bin/wayfire
+Name=XFCE
+Comment=XFCE on LabWC
+CompositorExec=/opt/bin/labwc
 CompositorSupportsWL=0
 CompositorSupportsKMS=1
 CompositorSupportsWKS=0
@@ -13,12 +13,14 @@ CompositorWLArguments=
 CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
-NeedsFile=/opt/bin/wayfire
+NeedsFile=/opt/bin/labwc
 SessionArgument=
-AdditionalArguments=--config-file=~/.config/wayfire-xfce.ini
+AdditionalArguments=
 [EnvironmentFile]
-set=XDG_CURRENT_DESKTOP=Wayfire
+set=LABWC_AUTOLAUNCH=XFCE
+set=XDG_CURRENT_DESKTOP=XFCE
 set=WLR_BACKENDS=wayland@WKS
+set=WLR_RENDERER=pixman@SOFTWARE
 set=WLR_RENDERER_ALLOW_SOFTWARE=1
 set=WLR_NO_HARDWARE_CURSORS=1
 set=WLR_LIBINPUT_NO_DEVICES=1
