@@ -89,16 +89,6 @@ sed -i 's|^# background|background|g' /etc/skel/.config/wayfire-mate.ini
 sed -i 's|^# panel|panel|g' /etc/skel/.config/wayfire-mate.ini
 sed -i "s|/usr/libexec/xdg-desktop-portal|$INSTALLDIR/libexec/xdg-desktop-portal|g" /etc/skel/.config/wayfire-mate.ini
 
-cp wayfire.ini /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/autostart_wf_shell = true/autostart_wf_shell = false/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/alacritty/konsole/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|wf-background|xfdesktop -D|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|wf-panel|xfce4-panel|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|^# background|background|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i 's|^# panel|panel|g' /etc/skel/.config/wayfire-xfce.ini
-sed -i "s|/usr/libexec/xdg-desktop-portal|$INSTALLDIR/libexec/xdg-desktop-portal|g" /etc/skel/.config/wayfire-xfce.ini
-
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
