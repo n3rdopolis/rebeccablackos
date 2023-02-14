@@ -16,8 +16,21 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+function call_program
+{
+  for (( launch_count=0 ; launch_count < 5 ; launch_count++ ))
+  do
+    "$@"
+  done
+}
+
+function launch_watcher
+{
+   call_program "$@" &
+}
+
 if [[ $LABWC_AUTOLAUNCH == "XFCE" ]]
 then
-  xfdesktop &
-  xfce4-panel &
+  launch_watcher xfdesktop
+  launch_watcher xfce4-panel
 fi
