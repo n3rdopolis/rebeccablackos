@@ -50,7 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-:
+git revert -n f6247fff2a97b5036f7a7a53eefc314f41916126
 }
 
 
