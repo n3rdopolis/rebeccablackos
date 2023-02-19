@@ -88,9 +88,6 @@ echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
 echo "XKBVARIANT=\"\"" >> /etc/vconsole.conf
 echo "XKBOPTIONS=\"\"" >> /etc/vconsole.conf
 
-#workaround hardcoded links to /usr/bin/python in various scripts
-ln -s $(which python3) /usr/bin/python
-
 #Create a python path
 mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 
