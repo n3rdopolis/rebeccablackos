@@ -268,9 +268,9 @@ function InstallDebFile()
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-  SOURCEREVISION_EXPORT=$(git rev-parse HEAD)
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND git rev-parse HEAD)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
-  SUBMODULESTRING=$(git submodule | sed -e 's/+//g' -e 's/-//g' | awk '{print $2 "|" $1 "|" }')
+  SUBMODULESTRING=$($NONROOTCOMMAND git submodule | sed -e 's/+//g' -e 's/-//g' | awk '{print $2 "|" $1 "|" }')
   export IFS="|"$'\n'
   SUBMODULEREVISIONS_EXPORT=($SUBMODULESTRING)
   unset IFS
@@ -378,7 +378,7 @@ function DownloadGIT()
     $NONROOTCOMMAND git pull -f
     $NONROOTCOMMAND git rebase -s ours
     $NONROOTCOMMAND git fetch --prune
-    git config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
+    $NONROOTCOMMAND git config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
     $NONROOTCOMMAND git submodule sync --recursive
     $NONROOTCOMMAND git submodule init
     $NONROOTCOMMAND git submodule update --recursive --force
@@ -460,7 +460,7 @@ function CleanupBZR()
 #Function to download bzr repos
 function DownloadBZR()
 {
-  OLDSOURCEURL=$(bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
+  OLDSOURCEURL=$($NONROOTCOMMAND bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
