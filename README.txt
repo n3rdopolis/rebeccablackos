@@ -22,7 +22,7 @@ OVERVIEW:
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
-  It is based on Debian Bullseye for Tier 1 packages.
+  It is based on Debian Bookworm for Tier 1 packages.
 
 
 How to use the ISO:
