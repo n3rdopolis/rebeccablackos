@@ -58,11 +58,6 @@ dpkg-divert --package rbos-rbos --add --rename --divert /etc/lsb-release.distrib
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/X.distrib /usr/bin/X
 
-#Create admin groups
-addgroup --system lpadmin
-addgroup --system sambashare
-addgroup --system systemd-journald
-
 if [[ -f /tmp/APTFETCHDATE ]]
 then
   PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
