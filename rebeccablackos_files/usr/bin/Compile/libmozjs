@@ -61,6 +61,13 @@ if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
 then
   sed -e '/typedef[ ]*double/s/double/long double/' -i modules/fdlibm/src/math_private.h
 fi
+
+sed -i 's/rU/r/' python/mozbuild/mozpack/files.py
+sed -i 's/rU/r/' python/mozbuild/mozbuild/backend/base.py
+sed -i 's/rU/r/' python/mozbuild/mozbuild/action/process_define_files.py
+sed -i 's/rU/r/' python/mozbuild/mozbuild/util.py
+sed -i 's/rU/r/' python/mozbuild/mozbuild/preprocessor.py
+
 export SHELL=/bin/bash
 #cd mozjs-38.0.0/js/src/
 mkdir build
