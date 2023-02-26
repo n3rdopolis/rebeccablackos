@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2023-01-14 21:11:45.075689102 -0500
-+++ usr/bin/waylandloginmanagertui	2023-01-14 21:13:41.608515468 -0500
+--- usr/bin/waylandloginmanager	2023-02-25 23:01:42.598128881 -0500
++++ usr/bin/waylandloginmanagertui	2023-02-25 23:29:44.665332931 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -301,7 +301,7 @@
        fi
      fi
    fi
-@@ -2386,26 +2366,30 @@
+@@ -2382,26 +2362,30 @@
      then
        UserDisplayName=$UserName
      fi
@@ -340,7 +340,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2413,9 +2397,9 @@
+@@ -2409,9 +2393,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -352,7 +352,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2446,9 +2430,9 @@
+@@ -2442,9 +2426,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -364,7 +364,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2462,7 +2446,7 @@
+@@ -2458,7 +2442,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -373,7 +373,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2481,18 +2465,18 @@
+@@ -2477,18 +2461,18 @@
          TTYSTRING=""
        fi
        WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
@@ -395,7 +395,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2505,10 +2489,12 @@
+@@ -2501,10 +2485,12 @@
      export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
      SetFallbackEnvironmentVariables $CurrentSeat
      SessionPromptThreshold=1
@@ -409,7 +409,7 @@
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
    fi
-@@ -2535,7 +2521,7 @@
+@@ -2531,7 +2517,7 @@
    unset RunningSessions
    unset RunningSessionTypes
  
@@ -418,7 +418,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2591,9 +2577,20 @@
+@@ -2587,9 +2573,20 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -441,7 +441,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2612,7 +2609,12 @@
+@@ -2608,7 +2605,12 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -455,7 +455,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2657,7 +2659,12 @@
+@@ -2653,7 +2655,12 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -469,7 +469,7 @@
    fi
  }
  
-@@ -2848,7 +2855,7 @@
+@@ -2844,7 +2851,7 @@
          OutputArgs=""
        fi
        SetFallbackEnvironmentVariables $CurrentSeat
@@ -478,16 +478,16 @@
        if [[ ! -z $LIBGL_ALWAYS_SOFTWARE ]]
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=LIBGL_ALWAYS_SOFTWARE=$LIBGL_ALWAYS_SOFTWARE "
-@@ -2857,7 +2864,7 @@
+@@ -2853,7 +2860,7 @@
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=GBM_ALWAYS_SOFTWARE=$GBM_ALWAYS_SOFTWARE "
        fi
--      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/ /tmp/.Test-unix/" -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
-+      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/ /tmp/.Test-unix/" -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" --setenv=SeatFileName=$SeatFileName $DEFAULTWAYLANDSERVER -m extend -d -s -- foot --config=/etc/footkiosk.conf -- bash -c "trap '' 2; rm /run/waylandloginmanager/ptys/\$SeatFileName &>/dev/null; ln -s \$(tty) /run/waylandloginmanager/ptys/\$SeatFileName; sleep inf" &>/dev/null
+-      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/" -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_$SeatFileName.log --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
++      systemd-run --unit=wlm-loginmanagerdisplay_$SeatFileName -p CollectMode=inactive-or-failed -p PrivateTmp=yes -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/" -p PAMName=waylandloginmanager-loginmanagerdisplay -p User="$LOGINMANAGERDISPLAYUSER" $OutputArgs -p WorkingDirectory=\~ $LOGINMANAGERDISPLAYENVSTRING --setenv=LD_LIBRARY_PATH="$LD_LIBRARY_PATH" --setenv=PATH="$PATH" --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" --setenv=XDG_SEAT=$CurrentSeat --setenv=HOME="$HOME" --setenv=SeatFileName=$SeatFileName $DEFAULTWAYLANDSERVER -m extend -d -s -- foot --config=/etc/footkiosk.conf -- bash -c "trap '' 2; rm /run/waylandloginmanager/ptys/\$SeatFileName &>/dev/null; ln -s \$(tty) /run/waylandloginmanager/ptys/\$SeatFileName; sleep inf" &>/dev/null
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -2984,7 +2991,7 @@
+@@ -2980,7 +2987,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -496,7 +496,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -2997,7 +3004,7 @@
+@@ -2993,7 +3000,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -505,7 +505,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -3022,7 +3029,7 @@
+@@ -3018,7 +3025,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -514,7 +514,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3058,15 +3065,20 @@
+@@ -3054,15 +3061,20 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -541,7 +541,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -3074,12 +3086,12 @@
+@@ -3070,12 +3082,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -557,7 +557,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3428,9 +3440,9 @@
+@@ -3424,9 +3436,9 @@
        fi
      done
  
@@ -569,7 +569,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3658,7 +3670,7 @@
+@@ -3654,7 +3666,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -578,7 +578,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3704,7 +3716,7 @@
+@@ -3700,7 +3712,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -587,7 +587,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3733,7 +3745,7 @@
+@@ -3729,7 +3741,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -596,7 +596,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3779,7 +3791,7 @@
+@@ -3775,7 +3787,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -605,7 +605,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3801,6 +3813,7 @@
+@@ -3797,6 +3809,7 @@
      #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
      elif [[ $COMMAND == "Debug" ]]
      then
@@ -613,7 +613,7 @@
        if [[ $wlmdebuginsecure == 1 ]]
        then
          if [[ -z $SEATARG ]]
-@@ -3885,6 +3898,7 @@
+@@ -3881,6 +3894,7 @@
  
    #Start the filter that will only send valid data to the main command FIFO
    WLM_SOCKET_FILTER=1 $0 --socketfilter &
