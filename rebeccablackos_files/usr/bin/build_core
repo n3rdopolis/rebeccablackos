@@ -76,6 +76,7 @@ then
   export REBUILDNEWREVISION
 fi
 
+shopt -s dotglob
 
 export NONROOTUSER=build_core
 export NONROOTGROUP=build_core
@@ -177,8 +178,6 @@ function RunDownloadAndOrBuild
 
   export PAGER=cat
   export CARGO_HOME="$SOURCEDIR"/buildhome/cargocache
-  rm -rf "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  rm -rf "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
   export HOME="$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
@@ -296,7 +295,7 @@ function CleanupGIT()
 #Function to download git repos
 function DownloadGIT()
 {
-  $NONROOTCOMMAND git config --global --add safe.directory $(readlink -f /"$SOURCEDIR"/"$SOURCENAME")
+  $NONROOTCOMMAND git config --global --add safe.directory /"$SOURCEDIR"/"$SOURCENAME"
   $NONROOTCOMMAND git config --global core.askpass /bin/true
   OLDSOURCEURL=$($NONROOTCOMMAND git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
@@ -626,6 +625,10 @@ function DownloadTOMLData()
 #debs that have had build failures will have a /usr/share/buildcore_revisions/buildresults/$SOURCENAME file in them, to mark that they need to be rebuilt
 function DownloadSource()
 {
+  #Delete any configs that might have been generated in previous runs
+  rm -rf "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"/*
+  rm -rf "/$SOURCEDIR"/buildhome/config/"$SOURCENAME"/*
+
   #If /tmp/buildcore_revisions.txt exists, then import it.
   #Copy the /tmp/buildcore_revisions.txt script into its own folder, and set that folder as the path for a restricted shell, running as nonroot
   #For that restricted shell, call the function for setting the SOURCEREVISION and SUBMODULEREVISIONS for the current sourcce name
