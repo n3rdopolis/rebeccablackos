@@ -295,7 +295,7 @@ function CleanupGIT()
 #Function to download git repos
 function DownloadGIT()
 {
-  $NONROOTCOMMAND git config --global --add safe.directory /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND git config --global --add safe.directory $(readlink -f /"$SOURCEDIR"/"$SOURCENAME")
   $NONROOTCOMMAND git config --global core.askpass /bin/true
   OLDSOURCEURL=$($NONROOTCOMMAND git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
