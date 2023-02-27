@@ -18,6 +18,8 @@
 
 #This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
+shopt -s dotglob
+
 #Detect the best Python command to use
 PYTHONTESTCOMMANDS=(python3 python2 python2.7 python)
 for PYTHONTESTCOMMAND in ${PYTHONTESTCOMMANDS[@]}

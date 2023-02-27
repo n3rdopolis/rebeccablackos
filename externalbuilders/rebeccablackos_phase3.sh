@@ -19,6 +19,8 @@ echo "PHASE 3"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
+shopt -s dotglob
+
 unset HOME
 
 if [[ -z "$BUILDARCH" || -z $BUILDLOCATION || $UID != 0 ]]

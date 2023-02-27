@@ -18,6 +18,7 @@
 
 #This is a script for mounting a Ubuntu live CD, or live CD with Casper, and creating a chroot session.
 
+shopt -s dotglob
 
 trap 'kill -9 $ROOTPID; exit' 2
 

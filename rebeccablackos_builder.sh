@@ -16,6 +16,8 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+shopt -s dotglob
+
 #This function retrives the PID, and some of the child PIDs, to eventually get the pid 1 of the namespace for the build
 function GetJobPIDs
 {
