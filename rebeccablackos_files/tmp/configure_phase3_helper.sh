@@ -23,6 +23,8 @@ then
   exit
 fi
 
+shopt -s dotglob
+
 #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
 
 #Copy select files into place, that are suitable for distribution.

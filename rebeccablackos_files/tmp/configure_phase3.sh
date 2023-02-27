@@ -23,6 +23,8 @@ then
   exit
 fi
 
+shopt -s dotglob
+
 export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
 
 #Create a log folder for the remove operations
