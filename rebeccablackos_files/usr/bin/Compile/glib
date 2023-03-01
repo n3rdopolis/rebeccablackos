@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.gnome.org/GNOME/glib.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=2.75.2 #VERSIONFREEZE
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -50,8 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-git revert -n d900d0efce39c889d094ebb1248402bb5071dbf3
-git cherry-pick -n 9d5bcc94919b7502d41de4d1de3630f47d4abb09
+:
 }
 
 
@@ -64,6 +63,7 @@ meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTAL
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+unset LD_LIBRARY_PATH
 ninja -v -C build
 }
 
