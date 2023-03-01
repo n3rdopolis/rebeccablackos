@@ -241,6 +241,14 @@ function RunDownloadAndOrBuild
     exit
   fi
   
+  TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
+  if [[ ! -z $TOMLFILES ]]
+  then
+    export TOMLFilesExist=1
+  else
+    export TOMLFilesExist=0
+  fi
+
   #Download source, unless the argument passed to the build script is 'build-only'
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
   then
@@ -708,9 +716,7 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
-    TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
-
-    if [[ ! -z $TOMLFILES ]]
+    if [[ $TOMLFilesExist == 1 ]]
     then
       mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust
 
@@ -818,9 +824,18 @@ function SetBuildVariables()
 {
   #Create build variables
   . /usr/bin/build_vars
-  if [[ -d "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/" ]]
+  DEBIAN_ARCH=$(dpkg --print-architecture)
+  if [[ $TOMLFilesExist == 1 ]]
   then
-    export PATH="/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/":"$EXTERNALBUILDHOME"/bin:$PATH
+    if [[ $DEBIAN_ARCH == amd64 ]]
+    then
+      RUSTBINARYNAME=x86_64-unknown-linux-gnu
+    fi
+    if [[ $DEBIAN_ARCH == i386 ]]
+    then
+      RUSTBINARYNAME=i686-unknown-linux-gnu
+    fi
+    export PATH="/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/":"/$SOURCEDIR/buildhome/buildcore_rust/rustrun/lib/rustlib/$RUSTBINARYNAME/bin/":"$EXTERNALBUILDHOME"/bin:$PATH
   fi
 }
 
