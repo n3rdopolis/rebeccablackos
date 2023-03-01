@@ -118,7 +118,6 @@ function SetACLPermissions
   echo "Setting permissions to allow non root user '$NONROOTUSER' to manage $SOURCENAME source"
   chown -R $NONROOTUSER:$NONROOTGROUP /"$SOURCEDIR"/"$SOURCENAME" /"$SOURCEDIR"/buildhome/config/"$SOURCENAME" /"$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
   setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/"$SOURCENAME" /"$SOURCEDIR"/buildhome/config/"$SOURCENAME" /"$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"
-  setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
 }
 
 #This is the main function of the script that must be called by the script that sources it in.  It determines if the action is to build, download, or do both.
@@ -765,6 +764,9 @@ function DownloadSource()
         tar -C /"$SOURCEDIR"/buildhome/buildcore_rust/download/ -xzf /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
         /"$SOURCEDIR"/buildhome/buildcore_rust/download/$RUSTPACKAGENAME/install.sh --prefix=/ --destdir=/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
         rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/download/
+
+        chown -R $NONROOTUSER:$NONROOTGROUP /"$SOURCEDIR"/buildhome/cargocache
+        setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
       fi
 
       rm "/$SOURCEDIR/buildhome/buildcore_rust/lockfile"
