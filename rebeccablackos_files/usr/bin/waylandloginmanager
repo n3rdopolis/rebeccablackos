@@ -658,7 +658,10 @@ function ReadEnvironmentFile
 function WriteToLog
 {
   #Log to the log file, as well as stdout, so that the logs are also captured in the journal
-  builtin printf "%s\n" "waylandloginmanager: $1" > /dev/kmsg
+  if [[ $wlmdebug != 0 ]]
+  then
+    builtin printf "%s\n" "waylandloginmanager: $1" > /dev/kmsg
+  fi
   builtin printf "%s\n" "$1"
   builtin printf "%(%F %T %z)T: %s\n" -1 "$1"   >> /var/log/waylandloginmanager/waylandloginmanager.log 2>&1
 }
