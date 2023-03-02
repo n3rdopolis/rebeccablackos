@@ -1,0 +1,49 @@
+https://lore.kernel.org/dri-devel/20230302143502.500661-1-contact@emersion.fr/
+https://lore.kernel.org/dri-devel/20230302143502.500661-2-contact@emersion.fr/
+
+diff --git a/drivers/gpu/drm/drm_prime.c b/drivers/gpu/drm/drm_prime.c
+index f924b8b4ab6b..ab1d21d63a03 100644
+--- a/drivers/gpu/drm/drm_prime.c
++++ b/drivers/gpu/drm/drm_prime.c
+@@ -544,7 +544,8 @@ int drm_prime_handle_to_fd_ioctl(struct drm_device *dev, void *data,
+  * Optional pinning of buffers is handled at dma-buf attach and detach time in
+  * drm_gem_map_attach() and drm_gem_map_detach(). Backing storage itself is
+  * handled by drm_gem_map_dma_buf() and drm_gem_unmap_dma_buf(), which relies on
+- * &drm_gem_object_funcs.get_sg_table.
++ * &drm_gem_object_funcs.get_sg_table. If &drm_gem_object_funcs.get_sg_table is
++ * unimplemented, exports into another device are rejected.
+  *
+  * For kernel-internal access there's drm_gem_dmabuf_vmap() and
+  * drm_gem_dmabuf_vunmap(). Userspace mmap support is provided by
+@@ -583,6 +584,9 @@ int drm_gem_map_attach(struct dma_buf *dma_buf,
+ {
+ 	struct drm_gem_object *obj = dma_buf->priv;
+ 
++	if (!obj->funcs->get_sg_table)
++		return -EOPNOTSUPP;
++
+ 	return drm_gem_pin(obj);
+ }
+ EXPORT_SYMBOL(drm_gem_map_attach);
+-- 
+2.39.2
+
+diff --git a/include/drm/drm_gem_vram_helper.h b/include/drm/drm_gem_vram_helper.h
+index d3e8920c0b64..f4aab64411d8 100644
+--- a/include/drm/drm_gem_vram_helper.h
++++ b/include/drm/drm_gem_vram_helper.h
+@@ -160,7 +160,9 @@ void drm_gem_vram_simple_display_pipe_cleanup_fb(
+ 	.debugfs_init             = drm_vram_mm_debugfs_init, \
+ 	.dumb_create		  = drm_gem_vram_driver_dumb_create, \
+ 	.dumb_map_offset	  = drm_gem_ttm_dumb_map_offset, \
+-	.gem_prime_mmap		  = drm_gem_prime_mmap
++	.gem_prime_mmap		  = drm_gem_prime_mmap, \
++	.prime_handle_to_fd	  = drm_gem_prime_handle_to_fd, \
++	.prime_fd_to_handle	  = drm_gem_prime_fd_to_handle
+ 
+ /*
+  *  VRAM memory manager
+-- 
+2.39.2
+
+
