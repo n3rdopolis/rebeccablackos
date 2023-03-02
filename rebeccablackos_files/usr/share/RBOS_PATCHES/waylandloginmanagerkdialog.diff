@@ -21,7 +21,7 @@
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that reads from the loginmanager_control socket, and filters the command sent to it to loginmanager_listener FIFO
    export FIFOREADERUSER=waylandloginmanager
-@@ -849,7 +849,8 @@
+@@ -850,7 +850,8 @@
    export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
@@ -31,7 +31,7 @@
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston)
    #Specify where wsession files are found
-@@ -877,7 +878,7 @@
+@@ -878,7 +879,7 @@
    #Determine if this is running on a live instance, if booted with casper
    GetConfigKey wlmlivemode "" 0 0 LiveCDMode
  
@@ -40,7 +40,7 @@
    TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
    WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
    if [[ $seat0HasTTYs == 1 ]]
-@@ -889,8 +890,8 @@
+@@ -890,8 +891,8 @@
      TTYWIZARDCMD=true
    fi
  

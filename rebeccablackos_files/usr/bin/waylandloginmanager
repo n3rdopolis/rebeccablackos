@@ -777,6 +777,7 @@ function PrepareLoginManager
   chown $LOGINMANAGERDISPLAYUSER /run/waylandloginmanager/home
 
   #Prepare logging for the loginmanagerdisplay
+  GetConfigKey wlmdebug "" 0 2 wlmdebug
 
   #Older versions of the waylandloginmanager used to log to /var/log/waylandloginmanager , now /var/log/waylandloginmanager is a folder
   #Handle rare cases where an older version of waylandloginmanager would now prevent proper logging.
@@ -1004,7 +1005,6 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
   fi
 
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
-  GetConfigKey wlmdebug "" 0 2 wlmdebug
   if [[ $wlmdebug != 0 ]]
   then
     echo 1 > /proc/sys/kernel/sysrq
