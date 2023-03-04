@@ -57,6 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/option(BUILD_WITH_QT6 "Build against Qt 6" OFF)/option(BUILD_WITH_QT6 "Build against Qt 6" ON)/g' modules/QtVersionOption.cmake
 mkdir build
 cd build
 cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX:PATH=$INSTALLDIR -DLIB_INSTALL_DIR:PATH=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_BUILD_TYPE=MinSizeRel
