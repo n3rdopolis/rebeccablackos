@@ -20,7 +20,7 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=kf5-kplotting
+SOURCENAME=kf6-kplotting
 
 #The URL of the Source code repo
 SOURCEURL=https://invent.kde.org/frameworks/kplotting.git
@@ -29,7 +29,7 @@ SOURCEURL=https://invent.kde.org/frameworks/kplotting.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=kf5
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
