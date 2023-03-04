@@ -29,7 +29,7 @@ function SymlinkDirToDir
   DestinationDir="$2"
   mkdir -p "$SourceDir"
   mkdir -p "$DestinationDir"
-  env -C "$SourceDir" -- find -printf '%P\n' | sort | while read Item
+  env -C "$SourceDir" -- find -printf '%P\n' | sort | while read -r Item
   do
     if [[ -d "$SourceDir/$Item" ]]
     then
