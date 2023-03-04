@@ -130,6 +130,9 @@ function PostInstallActions
   rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
   /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
 
+  rm "/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
+  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_symlinks.sh
+
   cp *.deb "/srcbuild/buildoutput/"
   cd $OLDPWD
 
@@ -164,8 +167,6 @@ function PostInstallActions
   #Enable pipewire services
   systemctl --global enable pipewire.socket
   systemctl --global enable wireplumber.service
-  systemctl --global disable pulseaudio.service
-  systemctl --global disable pulseaudio.socket
   systemctl --global enable pipewire-pulse.socket
 
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)

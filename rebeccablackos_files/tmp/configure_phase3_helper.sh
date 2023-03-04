@@ -92,34 +92,6 @@ mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 #Create a /opt/var/log folder
 mkdir -p /opt/var/log
 
-mkdir -p /opt/etc
-mkdir -p /etc/pam.d
-ln -s /etc/pam.d /opt/etc/pam.d
-
-mkdir -p /opt/lib/systemd/
-mkdir -p /usr/lib/systemd/user/
-mkdir -p /usr/lib/systemd/system/
-ln -s /usr/lib/systemd/user/ /opt/lib/systemd/user
-ln -s /usr/lib/systemd/system/ /opt/lib/systemd/system
-
-mkdir -p /opt/share/polkit-1/
-mkdir -p /usr/share/polkit-1/actions/
-mkdir -p /usr/share/polkit-1/rules.d/
-ln -s /usr/share/polkit-1/actions/ /opt/share/polkit-1/actions
-ln -s /usr/share/polkit-1/rules.d/ /opt/share/polkit-1/rules.d
-
-mkdir -p /opt/etc/dbus-1/
-mkdir -p /etc/dbus-1/system.d/
-mkdir -p /etc/dbus-1/services/
-ln -s /etc/dbus-1/system.d/ /opt/etc/dbus-1/system.d
-ln -s /etc/dbus-1/services/ /opt/etc/dbus-1/services
-
-mkdir -p /opt/share/dbus-1/
-mkdir -p /usr/share/dbus-1/system-services/
-mkdir -p /usr/share/dbus-1/system.d/
-ln -s /usr/share/dbus-1/system-services/ /opt/share/dbus-1/system-services
-ln -s /usr/share/dbus-1/system.d/ /opt/share/dbus-1/system.d
-
 #Replace X symlink
 ln -s /opt/bin/Xorg /usr/bin/X
 
