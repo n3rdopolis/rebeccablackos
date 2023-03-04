@@ -1088,6 +1088,7 @@ function MakeAndInstall()
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       echo "Evaluating dependancies, this might take some time..."
+      echo "Dependancies of discovered files:" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
       DEPENDS=$(find "$DEPENDSEARCHROOT" -type f -executable | while read -r FILE
       do
         FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
@@ -1096,7 +1097,7 @@ function MakeAndInstall()
           DIRECTDEPENDS=$(readelf -d "$FILE" 2>/dev/null | grep NEEDED |sed -e 's/\[//g' -e 's/]//g' |awk '{print $5}')
           DIRECTDEPENDS=$(echo $DIRECTDEPENDS | sed 's/ /\\\|/g')
           ALLDEPENDS=$(ldd "$FILE" 2>/dev/null | grep =\> | awk '{print $3}')
-          echo "$FILE" "$ALLDEPENDS" "$DIRECTDEPENDS" "$BUILTSOFILES" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+          echo "Evaluating file: $FILE" $'\n' "  All Dependencies: $ALLDEPENDS" $'\n' "  Direct Dependencies: $DIRECTDEPENDS" $'\n' "Exclude:" $'\n'"$BUILTSOFILES" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
           if [[ -z $BUILTSOFILES ]]
           then
             echo "$ALLDEPENDS" | grep "$DIRECTDEPENDS"  
@@ -1107,12 +1108,12 @@ function MakeAndInstall()
         fi
       done | sort | uniq | grep -v ^$ | while read -r LIBRARY
       do
-        echo $LIBRARY >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+        echo "Finding package $LIBRARY is from:" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         if [[ -e "$LIBRARY" ]]
         then
           DEPEND=$(dlocate -S --package-only "$LIBRARY"$)
           echo $DEPEND
-          echo "$LIBRARY:$DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+          echo "$LIBRARY is from $DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
       done | sort | uniq | grep -ve "\-dev:" -ve "\-dev$" -ve "\-dbg" -ve cmake -ve git -ve svn -ve bzr )
 
