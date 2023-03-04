@@ -1076,14 +1076,17 @@ function MakeAndInstall()
       fi
 
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
-      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |grep -e '\.so$' -e '\.so\.' |while read -r SOFILE
-      do 
-        SOFILE=$(basename "$SOFILE")
-        IFS="."
-        SOFILE=($SOFILE)
-        unset IFS
-        SOFILE=${SOFILE[0]}.${SOFILE[1]}
-        echo $SOFILE
+      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |while read -r FILE
+      do
+        SOFILE=$(basename "$FILE" | grep -e '\.so$' -e '\.so\.')
+        if [[ ! -z $SOFILE ]]
+        then
+          IFS="."
+          SOFILE=($SOFILE)
+          unset IFS
+          SOFILE=${SOFILE[0]}.${SOFILE[1]}
+          echo /$SOFILE
+        fi
       done)
 
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
@@ -1108,12 +1111,13 @@ function MakeAndInstall()
         fi
       done | sort | uniq | grep -v ^$ | while read -r LIBRARY
       do
-        echo "Finding package $LIBRARY is from:" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         if [[ -e "$LIBRARY" ]]
         then
           DEPEND=$(dlocate -S --package-only "$LIBRARY"$)
           echo $DEPEND
-          echo "$LIBRARY is from $DEPEND" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+          echo "$LIBRARY is from \"$DEPEND\"" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
+        else
+          echo "$LIBRARY is not found by dlocate" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
         fi
       done | sort | uniq | grep -ve "\-dev:" -ve "\-dev$" -ve "\-dbg" -ve cmake -ve git -ve svn -ve bzr )
 
