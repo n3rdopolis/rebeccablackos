@@ -64,7 +64,7 @@ sed -i '/set( LIB_INSTALL_DIR/d' CMakeLists.txt
 sed -i 's/template <typename T> class QList;/#include <QList>/g' templates/lib/lexer_p.h |grep QList
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DLIB_INSTALL_DIR=$INSTALLDIR_LIBDIR -DBUILD_TESTS=FALSE
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DLIB_INSTALL_DIR=$INSTALLDIR_LIBDIR -DBUILD_TESTS=FALSE -DGRANTLEE_BUILD_WITH_QT6=ON
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
