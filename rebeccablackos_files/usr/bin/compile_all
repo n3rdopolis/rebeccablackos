@@ -272,7 +272,7 @@ CompilePackage qt5/qtbase
 CompilePackage qt5/qtxmlpatterns
 CompilePackage qt5/qtdeclarative
 #CompilePackage qt5/qtmultimedia
-#CompilePackage qt5/qtsvg
+CompilePackage qt5/qtsvg
 #CompilePackage qt5/qtsensors
 #CompilePackage qt5/qtimageformats
 #CompilePackage qt5/qtsystems
@@ -285,7 +285,7 @@ CompilePackage qt5/qtdeclarative
 #CompilePackage qt5/qtscript
 CompilePackage qt5/qtquickcontrols
 CompilePackage qt5/qtquickcontrols2
-#CompilePackage qt5/qttools
+CompilePackage qt5/qttools
 #CompilePackage qt5/qtx11extras
 #CompilePackage qt5/qttranslations
 #CompilePackage qt5/qtgraphicaleffects
@@ -299,7 +299,7 @@ CompilePackage qca
 CompilePackage libdbusmenu-qt
 CompilePackage phonon
 CompilePackage phonon-vlc
-CompilePackage polkit-qt-1
+CompilePackage polkit-qt6-1
 CompilePackage gcab
 CompilePackage libxmlb
 CompilePackage appstream
@@ -377,6 +377,9 @@ CompilePackage kf6/plasma-framework
 CompilePackage kf6/krunner
 CompilePackage kf6/oxygen-icons5
 CompilePackage kf6/breeze-icons
+CompilePackage kf5/solid
+CompilePackage kf5/networkmanager-qt
+CompilePackage kf5/modemmanager-qt
 CompilePackage libkscreen
 CompilePackage kdiagram
 CompilePackage kmime
@@ -487,6 +490,7 @@ CompilePackage kdeplasma-addons
 CompilePackage plasma-nm
 #CompilePackage calligra
 CompilePackage cmake-shared
+CompilePackage polkit-qt5-1
 CompilePackage qtaccountsservice
 CompilePackage lxqt-build-tools
 CompilePackage libqtxdg
