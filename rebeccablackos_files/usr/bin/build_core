@@ -1075,7 +1075,8 @@ function MakeAndInstall()
         DEPENDSEARCHROOT=/"$SOURCEDIR"/$SOURCENAME/
       fi
 
-      #Find All so file names, built within the package, so that they can be excluded from the list of dependant files. 
+      #Find All so file names, built within the package, so that they can be excluded from the list of dependant files.
+      #This prevents files with the same name that are about to be installed from being found in older existing packages
       BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |while read -r FILE
       do
         SOFILE=$(basename "$FILE" | grep -e '\.so$' -e '\.so\.')
