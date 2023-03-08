@@ -39,6 +39,15 @@ else
   rm /run/.rotest
 fi
 
+if [ ! -e /dev/shm ]
+then
+  removedevshm=1
+  mkdir /run/shmfs
+  ln -s /run/shmfs /dev/shm
+else
+  removedevshm=0
+fi
+
 mkdir -p /run/user/0
 chmod 700 /run/user/0
 export XDG_RUNTIME_DIR=/run/user/0
@@ -115,6 +124,11 @@ fi
 if [ $unmountrunfs -eq 1 ]
 then
   umount -lf /run
+fi
+
+if [ $removedevshm -eq 1 ]
+then
+  unlink /dev/shm
 fi
 
 #Reshow plymoth
