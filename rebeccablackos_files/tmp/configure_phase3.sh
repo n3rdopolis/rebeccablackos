@@ -166,7 +166,7 @@ function PostInstallActions
   
   #Enable pipewire services
   systemctl --global enable pipewire.socket
-  systemctl --global enable wireplumber.service
+  systemctl --global add-wants pipewire.service wireplumber.service
   systemctl --global enable pipewire-pulse.socket
 
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
