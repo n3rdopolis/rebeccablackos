@@ -836,6 +836,7 @@ function SetBuildVariables()
       RUSTBINARYNAME=i686-unknown-linux-gnu
     fi
     export PATH="/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/":"/$SOURCEDIR/buildhome/buildcore_rust/rustrun/lib/rustlib/$RUSTBINARYNAME/bin/":"$EXTERNALBUILDHOME"/bin:$PATH
+    export NM=llvm-nm
   fi
 }
 
