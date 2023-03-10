@@ -619,13 +619,13 @@ function DownloadTOMLData()
   if [[ $TOMLFilesHandled == 1 ]]
   then
     /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor
+    mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
+    echo '[source.crates-io]'                  >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+    echo 'replace-with = "vendored-sources"'   >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+    echo ''                                    >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+    echo '[source.vendored-sources]'           >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+    echo 'directory = "vendor"'                >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
   fi
-  mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
-  echo '[source.crates-io]'                  >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
-  echo 'replace-with = "vendored-sources"'   >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
-  echo ''                                    >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
-  echo '[source.vendored-sources]'           >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
-  echo 'directory = "vendor"'                >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
