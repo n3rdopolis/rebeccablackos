@@ -264,7 +264,7 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purg
 apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
-REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos)
+REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos | grep -v integrationsymlinks-rbos)
 apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devbuiltpackages.log
 
 #Install the reduced packages
