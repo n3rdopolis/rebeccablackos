@@ -297,7 +297,12 @@ function UserSessionWorker
     then
       dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
     else
-      ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+      if [[ $(systemctl --quiet --user is-active graphical-session.target) ]]
+      then
+        echo "systemd only allows one session using systemd-user for one user. Another session is running. Exiting this session." >> $WLM_SESSION_LOG &
+      else
+        ${ArgArray[@]} &>> $WLM_SESSION_LOG &
+      fi
     fi
   fi
   GuestServerPID=$!
