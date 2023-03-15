@@ -293,11 +293,11 @@ function UserSessionWorker
     dbus-run-session -- socat exec:"bash -c \\\"gdb --args $SessionCommand\\\"",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_GUEST}",mode=0700 &>> $WLM_SESSION_LOG &
   else
     unset WLM_SEAT
-    if [[ -z $WLM_NO_DBUS_RUN_SESSION ]]
+    if [[ $WLM_NO_DBUS_RUN_SESSION != 1 ]]
     then
       dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
     else
-      if [[ $(systemctl --quiet --user is-active graphical-session.target) ]]
+      if systemctl --quiet --user is-active graphical-session.target
       then
         echo "systemd only allows one session using systemd-user for one user. Another session is running. Exiting this session." >> $WLM_SESSION_LOG
         export WLR_RENDERER_ALLOW_SOFTWARE=1
