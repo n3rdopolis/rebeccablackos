@@ -299,7 +299,11 @@ function UserSessionWorker
     else
       if [[ $(systemctl --quiet --user is-active graphical-session.target) ]]
       then
-        echo "systemd only allows one session using systemd-user for one user. Another session is running. Exiting this session." >> $WLM_SESSION_LOG &
+        echo "systemd only allows one session using systemd-user for one user. Another session is running. Exiting this session." >> $WLM_SESSION_LOG
+        export WLR_RENDERER_ALLOW_SOFTWARE=1
+        export WLR_LIBINPUT_NO_DEVICES=1
+        export WLR_NO_HARDWARE_CURSORS=1
+        cage -d -s -m extend -- foot -- dialog --msgbox "This session uses systemd to manage its startup."$'\n'"Unfortunately, there already is another session that does so for this user."$'\n'"A systemd limitation prevents a user from having multiple of these types of sessions running at a time."$'\n'"Will now exit." 10 70 &>> $WLM_SESSION_LOG &
       else
         ${ArgArray[@]} &>> $WLM_SESSION_LOG &
       fi
