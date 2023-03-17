@@ -232,6 +232,24 @@ function UserSessionWorker
   journalctl -f -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null &
   JournalctlPID=$!
 
+  #Create an isolated systemd user session running under the current systemd user session. This allows multiple systemd managed sessions to allow to run as the same user at the same time. The initilization of the "systemctl --user" instance comes from xrdp.
+  if [[ $WLM_NO_DBUS_RUN_SESSION == 1 ]]
+  then
+    BASE_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+    BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+    WLM_XDG_RUNTIME_DIR=/run/user/`id -u`/wlm-rd-"$WAYLAND_GUEST"
+    WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
+    install -dDTm700 $WLM_XDG_RUNTIME_DIR
+    systemd-run --user -u "wlm-systemd-$WAYLAND_GUEST" -E XDG_RUNTIME_DIR="$WLM_XDG_RUNTIME_DIR" -E DBUS_SESSION_BUS_ADDRESS="$WLM_DBUS_SESSION_BUS_ADDRESS" systemd --user
+    export DBUS_SESSION_BUS_ADDRESS=$WLM_DBUS_SESSION_BUS_ADDRESS
+    export XDG_RUNTIME_DIR=$WLM_XDG_RUNTIME_DIR
+    #Wait for the socket to be active
+    while [[ ! -e "$WLM_XDG_RUNTIME_DIR/bus" ]]
+    do
+      $SLEEPCMD .1
+    done
+  fi
+
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
     export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
@@ -297,16 +315,7 @@ function UserSessionWorker
     then
       dbus-run-session -- ${ArgArray[@]} &>> $WLM_SESSION_LOG &
     else
-      if systemctl --quiet --user is-active graphical-session.target
-      then
-        echo "systemd only allows one session using systemd-user for one user. Another session is running. Exiting this session." >> $WLM_SESSION_LOG
-        export WLR_RENDERER_ALLOW_SOFTWARE=1
-        export WLR_LIBINPUT_NO_DEVICES=1
-        export WLR_NO_HARDWARE_CURSORS=1
-        cage -d -s -m extend -- foot -- dialog --msgbox "This session uses systemd to manage its startup."$'\n'"Unfortunately, there already is another session that does so for this user."$'\n'"A systemd limitation prevents a user from having multiple of these types of sessions running at a time."$'\n'"Will now exit." 10 70 &>> $WLM_SESSION_LOG &
-      else
-        ${ArgArray[@]} &>> $WLM_SESSION_LOG &
-      fi
+      ${ArgArray[@]} &>> $WLM_SESSION_LOG &
     fi
   fi
   GuestServerPID=$!
@@ -331,6 +340,12 @@ function UserSessionWorker
     then
       SendSelfCommand Change "$XDG_SEAT"
     fi
+  fi
+
+  #Stop the nested systemctl --user session if it was started.
+  if [[ $WLM_NO_DBUS_RUN_SESSION == 1 ]]
+  then
+    XDG_RUNTIME_DIR=$BASE_XDG_RUNTIME_DIR DBUS_SESSION_BUS_ADDRESS=$BASE_DBUS_SESSION_BUS_ADDRESS systemctl --user stop "wlm-systemd-$WAYLAND_GUEST"
   fi
 
   #Write the error code into the logfile
