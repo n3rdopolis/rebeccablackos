@@ -250,6 +250,10 @@ function UserSessionWorker
     done
   fi
 
+  #XDG_SEAT and XDG_SESSION_ID variables tend to get cousumed by some desktops
+  export WLM_XDG_SEAT=$XDG_SEAT
+  export WLM_XDG_SESSION_ID=$XDG_SESSION_ID
+
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
     export WLM_HOST_LOG="$HOME"/.cache/wlsessionlogs/waylandhost_${WLM_SEAT}.log
@@ -2645,13 +2649,13 @@ function LeavePrompt
   #For switch user, send the Switch command to the waylandloginmanager
   if [[ $ACTION == "Switch User" ]]
   then
-    $0 --sendcommand Switch
+    $0 --sendcommand Switch $WLM_XDG_SEAT
     RESULT=$?
   #If the request is logoff, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
   elif [[ $ACTION == "Logoff" ]]
   then
-    $0 --sendcommand Change
-    loginctl terminate-session $XDG_SESSION_ID
+    $0 --sendcommand Change $WLM_XDG_SEAT
+    loginctl terminate-session $WLM_XDG_SESSION_ID
     RESULT=$?
   #For all other actions, use logind dbus commands
   elif [[ $ACTION == "Shutdown" ]]
@@ -3860,13 +3864,6 @@ Will show a menu with a few options for diagnosis." 20 50
   done
 }
 
-#Function to lookup XDG_SEAT and XDG_SESSION_ID in case if the variables are unset. It needs no arguments
-function GetXDGVariables
-{
-  export XDG_SESSION_ID=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Id | awk -F \" '{print $2}')
-  export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
-}
-
 #Fuction to assist in handling sessions started with GDB
 function DebugConnect
 {
@@ -3919,8 +3916,7 @@ elif [[ $1 == "--sendcommand" ]]
 then
   if [[ -z $3 ]]
   then
-    GetXDGVariables
-    SEAT=$XDG_SEAT
+    SEAT=$WLM_XDG_SEAT
   else
     SEAT=$3
   fi
@@ -3966,16 +3962,13 @@ then
   done
 elif [[ $1 == "--shutdowndialog" ]]
 then
-  GetXDGVariables
   LeavePrompt
 elif [[ $1 == "--logoff" ]]
 then
-  GetXDGVariables
-  loginctl terminate-session $XDG_SESSION_ID
+  loginctl terminate-session $WLM_XDG_SESSION_ID
 elif [[ $1 == "--switchuser" ]]
 then
-  GetXDGVariables
-  SendSelfCommand Switch $XDG_SEAT
+  SendSelfCommand Switch $WLM_XDG_SEAT
 elif [[ $1 == "--debugconnect" ]]
 then
   DebugConnect
