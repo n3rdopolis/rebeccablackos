@@ -3916,7 +3916,12 @@ elif [[ $1 == "--sendcommand" ]]
 then
   if [[ -z $3 ]]
   then
-    SEAT=$WLM_XDG_SEAT
+    if [[ -z $XDG_SEAT ]]
+    then
+      SEAT=$WLM_XDG_SEAT
+    else
+      SEAT=$XDG_SEAT
+    fi
   else
     SEAT=$3
   fi
