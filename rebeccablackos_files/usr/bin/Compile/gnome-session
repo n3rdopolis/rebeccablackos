@@ -57,6 +57,10 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+#Don't allow gnome-session to clear variables that gnome-shell itself may need. gnome-session by removing these variables has gnome-shell guessing the session id, and it may select an existing one, and fail to start
+sed -i '/XDG_SEAT/d' gnome-session/gsm-util.c
+sed -i '/XDG_SESSION_ID/d' gnome-session/gsm-util.c
+
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
