@@ -7,8 +7,8 @@ CompositorExec=/opt/bin/liri-session
 CompositorSupportsWL=1
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
-CompositorWLArguments=--no-systemd -- -platform wayland
-CompositorKMSArguments=--no-systemd -- -platform liri -plugin libinput
+CompositorWLArguments= -- -platform wayland
+CompositorKMSArguments= -- -platform liri -plugin libinput
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
@@ -22,3 +22,4 @@ set=QT_QPA_PLATFORM=eglfs@KMS
 set=QT_QPA_EGLFS_ALWAYS_SET_MODE=1@KMS
 set=QT_QPA_EGLFS_KMS_ATOMIC=1@KMS
 set=QT_WAYLAND_SHELL_INTEGRATION=fullscreen-shell@WL
+set=WLM_NO_DBUS_RUN_SESSION=1
