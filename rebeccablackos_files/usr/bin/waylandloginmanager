@@ -229,7 +229,7 @@ function UserSessionWorker
   unset wlmforcepixman
 
   #If the session chooses to log to the journal, log the output to the log file as well
-  journalctl -f -b _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null &
+  journalctl --user -f -b _SYSTEMD_USER_UNIT="wlm-systemd-$WAYLAND_GUEST".service + _SYSTEMD_SESSION=$XDG_SESSION_ID >> $WLM_SESSION_LOG 2>/dev/null &
   JournalctlPID=$!
 
   #Create an isolated systemd user session running under the current systemd user session. This allows multiple systemd managed sessions to allow to run as the same user at the same time. The initilization of the "systemctl --user" instance comes from xrdp.
