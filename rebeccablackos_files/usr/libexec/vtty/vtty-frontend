@@ -49,10 +49,10 @@ then
   exit 1
 fi
 
-which vte &> /dev/null
+which foot &> /dev/null
 if [[ $? != 0 ]]
 then
-  echo "vte not installed"
+  echo "foot not installed"
   systemd-notify ERRNO=1
   exit 1
 fi
