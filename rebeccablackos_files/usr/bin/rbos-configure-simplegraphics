@@ -69,9 +69,9 @@ unset IFS
 
 #Only the simpledrm driver is handled by this
 CardDriver=$(udevadm info -n /dev/dri/card0 | grep ID_PATH_TAG | awk -F = '{print $2}')
-if [[ ! ($CardDriver =~ platform-simple-framebuffer) ]]
+if [[ ! ($CardDriver =~ platform-simple-framebuffer) && ($1 != "--force")]]
 then
-  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility, as a different driver is being used. Will now exit." 20 60
+  runuser -u $DIALOGUSER -- dialog  --msgbox "This utility is for hardware that uses a fallback graphics driver. Your hardware will not be impacted by this utility, as a different driver is being used. Will now exit. Specify --force to bypass" 20 60
   exit
 fi
 
