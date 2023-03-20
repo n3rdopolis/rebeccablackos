@@ -16,31 +16,20 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
-#This script assists programs running as other users to use a WAYLAND_DISPLAY. This is a workaround for https://bugs.freedesktop.org/show_bug.cgi?id=84817
+#This script wraps around su for ensuring WAYLAND_DISPLAY is an absolute path, and the variable is whitelisted
 
 FIRSTARGUMENT=$1
 
-
-
-
 if [[ -z "$FIRSTARGUMENT" ]]
 then
-  echo "wlsuhelper:
-wlsuhelper sets the WAYLAND_DISPLAY variable to the full path, to share with other users, provided it has been shared with wlhost
+  echo "wlsu:
+wlsu sets the WAYLAND_DISPLAY variable to the full path, and whitelists needed variables
 
-wlsuhelper usage:
+wlsu usage:
 XDG_RUNTIME_DIR must be set to the user's XDG_RUNTIME_DIR path that is sharing the server
 WAYLAND_DISPLAY must be set to the name of the users shared Wayland server
 
-wlsuhelper is to be called running as the guest user the server was shared to.
-Under the main session it can be run as
-su username -c wlsuhelper programname --args --args 2
-or
-sudo -E -u username wlsuhelper programname --args --args2
-
-If you are already running a shell as the guest user the server was shared to you can run
-wlsuhelper programname --args --args2"
-
+wlsu's arguments are the same as su"
 else
 
   if [[ -z "$WAYLAND_DISPLAY" ]]
@@ -76,6 +65,6 @@ else
   fi
 
   #Execute the program
-  "$@"
+  su --whitelist-environment WAYLAND_DISPLAY,DISPLAY "$@"
   exit $?
 fi
