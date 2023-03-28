@@ -103,19 +103,19 @@ mkdir -p /usr/lib/lsb/init-functions.d/
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 mkdir -p /usr/share/initramfs-tools/hooks/
 mkdir -p /usr/share/initramfs-tools/scripts/init-bottom
-mkdir -p /usr/share/initramfs-tools/scripts/init-premount
+mkdir -p /usr/share/initramfs-tools/scripts/init-top
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_lsb /usr/lib/lsb/init-functions.d/
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hooks/
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-premount /usr/share/initramfs-tools/scripts/init-premount
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-top /usr/share/initramfs-tools/scripts/init-top
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic
 
 chmod +x /usr/lib/lsb/init-functions.d/plymouth_lsb
 chmod +x /usr/share/initramfs-tools/hooks/plymouth_hook
 chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth_init-bottom
-chmod +x /usr/share/initramfs-tools/scripts/init-premount/plymouth_init-premount
+chmod +x /usr/share/initramfs-tools/scripts/init-top/plymouth_init-top
 chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth_panic
 
 ln -s /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf /usr/share/fonts/Plymouth.ttf
