@@ -122,9 +122,9 @@ function NAMESPACE_EXECUTE {
 
   if [[ $HASNETWORK == 0 ]]
   then
-    UNSHAREFLAGS="-f --pid --mount --net --mount-proc"
+    UNSHAREFLAGS="-f --cgroup --ipc --uts --pid --mount --net --mount-proc"
   else
-    UNSHAREFLAGS="-f --pid --mount --mount-proc"
+    UNSHAREFLAGS="-f --cgroup --ipc --uts --pid --mount --mount-proc"
   fi
 
   #Create the PID and Mount namespaces to start the command in

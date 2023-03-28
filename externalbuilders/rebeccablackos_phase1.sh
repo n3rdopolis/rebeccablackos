@@ -23,6 +23,9 @@ shopt -s dotglob
 
 unset HOME
 
+#Set the hostname in the namespace this builder gets started in
+hostname $BUILDUNIXNAME
+
 if [[ -z "$BUILDARCH" || -z $BUILDLOCATION || $UID != 0 ]]
 then
   echo "BUILDARCH variable not set, or BUILDLOCATION not set, or not run as root. This external build script should be called by the main build script."
