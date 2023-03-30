@@ -1,7 +1,7 @@
 LICENSE:
   The build script are all under GPL v2+, except for were stated, namely in code in patches under rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES
-  or imported and modified files in rebeccablacklinux/rebeccablackos_files/usr/share/RBOS_PATCHES/ Some diffs are for software that is under a different Open 
-  Source license, for example Calamares is GPLv3
+  or imported and modified files in rebeccablackos_files/usr/share/RBOS_PATCHES/ Some diffs are for software that is under a different Open Source license, for 
+  example Calamares is GPLv3
   
   The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on KDE-look,
   this was documented in the commit message for commit #1985, but the file was moved, and git-svn (or git) doesn't retain the logs of moved files, on the git
@@ -17,8 +17,8 @@ OVERVIEW:
 
   Xwayland is also included, which allows X applications to run.
 
-  There are also other Wayland Desktop environments that are usable: Liri, Enlightenment, and Gnome Shell Wayland, Kwin, Wayfire, and Sway, aside from the
-  default Weston Desktop shell.
+  There are also other Wayland Desktop environments that are usable: Enlightenment, and Gnome Shell Wayland, Kwin, Wayfire, and Sway, aside from the default 
+  Weston Desktop shell.
 
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
@@ -61,9 +61,9 @@ How to use Wayland:
     Most UI programs use their toolkit's Wayland backend, (unless they are started with the xwaylandapp utility)
 
 PROBLEMS:
-      A few files outside of /opt in packages may conflict with the files provided by main Debian archives. The number of files that get overwritten is
-      small. If an installed system can't be updated due to this, use the rbos-enable-dpkg-overwrites command for a wizard to
-      enable dpkg overwrites.
+      A few files outside of /opt in packages may conflict with the files provided by main Debian archives, if addtional packages from Debian are installed
+      manually on an installed system. If package operations fail due to overwrites , use the rbos-enable-dpkg-overwrites command for a wizard to enable dpkg 
+      overwrites.
 
       Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
 
@@ -79,14 +79,14 @@ BOOT OPTIONS:
                                         pixman renderer. Use this if there is a problem with Mesa's software renderer.
 
             wlmforcefbdev :             [Legacy option] Force the WaylandLoginManager to handle the system as if though it does not support kernel mode
-                                        setting, even if kernel mode setting is available.
+                                        setting, even if kernel mode setting is available. Weston dropped the framebuffer backend, so this option no longer works
 
             wlmnofbdev :                [Legacy option] Force the WaylandLoginManager to handle the system as if though it does not support framebuffer, even
                                         if framebuffers are available. (Recent versions of Weston dropped the framebuffer backend. This is redundant now.)
 
-            wlmdebug :                  [Legacy option] Forces more sysrq trigger options to be available.
+            wlmdebug :                  [Legacy option] Forces more sysrq trigger options to be available, and sessions marked as debug only to be listed
 
-            wlmdebuginsecure :          This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
+            wlmdebuginsecure :          [Legacy option] This option is the same as wlmdebug, and allows a root diagnostic terminal to be started.
 
 
        These relevant options are also handled, (but not by the WaylandLoginManager itself)
@@ -101,13 +101,14 @@ BOOT OPTIONS:
 
       This option is handled early in initramfs:
             norecinit=1                 This forces the initramfs recovery prompt to fall back to the system console, and not use the user mode terminal.
+                                        This is not recommended for most users, as the system console is the first serial device
 
 
       These utilities assit with changing boot options:
-            rbos-force-softwarerendering:  Wizard for configuring the bootloader wlmforceswrender option to the kernel command line
-
             rbos-force-softwarerendering:  Wizard for configuring the bootloader to add or remove `nomodeset to the kernel command line to force or unforce
                                            using the fallback (SimpleDRM) driver.
+
+            rbos-force-simplegraphics:     Wizard for configuring the bootloader wlmforceswrender option to the kernel command line
 
             rbos-configure-simplegraphics: Wizard for configuring the bootloader frambuffer size for hardware that requires SimpleDRM (see CHANGING THE
             RESOLUTION ON SIMPLE HARDWARE)
