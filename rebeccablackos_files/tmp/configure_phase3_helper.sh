@@ -96,7 +96,7 @@ mkdir -p /opt/var/log
 ln -s /opt/bin/Xorg /usr/bin/X
 
 #Replace chvt with the seat aware wrapper
-ln -s /usr/bin/chvt-ng /usr/bin/chvt
+ln -s /usr/bin/chvt-logind /usr/bin/chvt
 
 #include /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults as part of the package, the contents get generated later when dconf is actually built
 touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
