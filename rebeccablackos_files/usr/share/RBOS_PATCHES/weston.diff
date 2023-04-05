@@ -1,8 +1,8 @@
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index 548a635b..d5bfa529 100644
+index e4caacfc..d8fec694 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -7068,6 +7068,7 @@ weston_output_placement_ok(struct weston_output *output)
+@@ -7216,6 +7216,7 @@ weston_output_placement_ok(struct weston_output *output)
  WL_EXPORT int
  weston_output_enable(struct weston_output *output)
  {
@@ -10,15 +10,16 @@ index 548a635b..d5bfa529 100644
  	struct weston_head *head;
  	char *head_names;
  
-@@ -7114,7 +7115,10 @@ weston_output_enable(struct weston_output *output)
- 		return -1;
+@@ -7289,7 +7290,11 @@ weston_output_enable(struct weston_output *output)
+ 	}
  
- 	weston_output_update_matrix(output);
+ 	weston_compositor_add_output(output->compositor, output);
 -	weston_output_damage(output);
 +	pixman_region32_union(&c->primary_plane.damage,
-+	                      &c->primary_plane.damage,
-+	                      &output->region);
++			      &c->primary_plane.damage,
++			      &output->region);
++
 +
  
- 	wl_list_init(&output->animation_list);
- 	wl_list_init(&output->feedback_list);
+ 	head_names = weston_output_create_heads_string(output);
+ 	weston_log("Output '%s' enabled with head(s) %s\n",
