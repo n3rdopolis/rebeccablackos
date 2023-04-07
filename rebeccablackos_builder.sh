@@ -341,6 +341,12 @@ PREPARE_STARTTIME=$(date +%s)
 #prepare debootstrap
 if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
 then
+  type ar &> /dev/null
+  if [[ $? != 0 ]]
+  then
+    faillog "ar command not installed. ar is needed to extract debootstrap, and usually comes with binutils"
+  fi
+
   echolog "Control file for debootstrap removed, or non existing. Deleting downloaded debootstrap folder"
   touch "$BUILDLOCATION"/DontDownloadDebootstrapScript
   mkdir -p "$BUILDLOCATION"/debootstrap
