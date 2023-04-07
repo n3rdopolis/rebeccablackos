@@ -65,6 +65,8 @@ then
 fi
 BUILDCOREDIRECTLYRUN=1
 
+DownloadAttempts=3
+
 #if the first argument is buildspec, a file is being sourced.
 if [[ $1 == buildspec ]]
 then
@@ -683,8 +685,17 @@ function DownloadSource()
     STARTTIME=$(date +%s)
     SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
-    Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
-    DownloadRepoResult=${PIPESTATUS[0]}
+    for (( DownloadAttempt=1 ; DownloadAttempt <= $DownloadAttempts ; DownloadAttempt++ ))
+    do
+      echo "Downloading $PACKAGESOURCENAME attempt $DownloadAttempt of $DownloadAttempts"
+      Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+      DownloadRepoResult=${PIPESTATUS[0]}
+      if [[ $DownloadRepoResult == 0 ]]
+      then
+        break
+      fi
+    done
+
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
