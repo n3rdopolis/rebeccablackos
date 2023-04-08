@@ -139,6 +139,8 @@ BUILDING:
      most distros. A full build from scratch may take several hours to about a day depending on your hardware, and may take several GB. If nothing is selected
      to be rebuilt on the second build attempt, it may take less than an hour depending on your hardware.
 
+     It requires the 'ar' utility from the 'binutils' package for the extraction of debootstrap to work
+
      If you need to select specific revisions of the packages, copy buildcore_revisions_(architecture).txt into /var/cache/RBOS_Build_Files . Ensure that the
      file is not tampered with maliciously, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418+ are
      fully compatible for setting the package source versions/exact commits. Revisions files can also specify a snapshot date for the underlying Debian
