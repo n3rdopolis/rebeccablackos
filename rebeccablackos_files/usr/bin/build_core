@@ -293,11 +293,11 @@ function CleanupGIT()
   $NONROOTCOMMAND mkdir -p "$SOURCENAME"
   cd "$SOURCENAME"
   $NONROOTCOMMAND git submodule foreach --recursive git reset --hard
-  $NONROOTCOMMAND git submodule foreach --recursive git clean -fdx
+  $NONROOTCOMMAND git submodule foreach --recursive git clean -xffd
   $NONROOTCOMMAND git submodule foreach --recursive git gc --auto
-  $NONROOTCOMMAND git clean -fdx
+  $NONROOTCOMMAND git clean -xffd
   $NONROOTCOMMAND git reset --hard
-  $NONROOTCOMMAND git clean -fdx
+  $NONROOTCOMMAND git clean -xffd
   $NONROOTCOMMAND git gc --auto
 }
 
