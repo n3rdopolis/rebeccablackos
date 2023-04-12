@@ -1201,15 +1201,7 @@ function MakeAndInstall()
       cat "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" >> "$BUILDLOGDIR/failedcompiles"
     fi
 
-    #Cleanup the source build overlay if specified
-    echo $BUILDCORECLEANOVERLAY
-    echo $SOURCEDIROVERLAYDIR
-    echo $SOURCENAME
-    echo "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/*"
-    echo "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
-    ls -l "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/"
-    ls -l "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
-
+    #Cleanup the source build overlay if specifiedkd
     if [[ $BUILDCORECLEANOVERLAY == 1 && ! -z "$SOURCEDIROVERLAYDIR" && ! -z $SOURCENAME ]]
     then
       rm -rf "/$SOURCEDIROVERLAYDIR/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/" "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
