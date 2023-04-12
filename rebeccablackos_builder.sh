@@ -134,11 +134,18 @@ function setup_buildprocess
           then GetJobPIDs;
         fi;
 
-        if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" && $ROOTPID != -1 ]];
+        if [[ -e /proc/"$ROOTPID" && $ROOTPID != "" && $ROOTPID != -1 ]];
+          then pkill -STOP --nslist pid --ns $ROOTPID "";
+        fi
+
+        if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" && $ROOTPID != "" && $ROOTPID != -1 ]];
           then kill -STOP $SUBSHELLPID;
         fi;
 
-        kill -STOP $$' 20
+        if [[ $ROOTPID != "" && $ROOTPID != -1 ]]
+        then
+          kill -STOP $$
+        fi' 20
 }
 
 #Function to start a command and all arguments, starting from the third one, as a command in a seperate PID and mount namespace. The first argument determines if the namespace should have network connectivity or not (1 = have network connectivity, 0 = no network connectivity). The second argument states where the log output will be written.
