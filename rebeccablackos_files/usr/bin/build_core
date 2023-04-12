@@ -1202,9 +1202,17 @@ function MakeAndInstall()
     fi
 
     #Cleanup the source build overlay if specified
+    echo $BUILDCORECLEANOVERLAY
+    echo $SOURCEDIROVERLAYDIR
+    echo $SOURCENAME
+    echo "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/*"
+    echo "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
+    ls -l "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/"
+    ls -l "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
+
     if [[ $BUILDCORECLEANOVERLAY == 1 && ! -z "$SOURCEDIROVERLAYDIR" && ! -z $SOURCENAME ]]
     then
-      rm -rf "/$SOURCEDIROVERLAYDIR/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/*" "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/*"
+      rm -rf "/$SOURCEDIROVERLAYDIR/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/" "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
     fi
 
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
