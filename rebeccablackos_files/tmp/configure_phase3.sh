@@ -82,7 +82,7 @@ mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_helper.sh
+env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs /tmp/configure_phase3_helper.sh
 
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
@@ -125,10 +125,10 @@ function PostInstallActions
   env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 
   rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs touch /usr/share/buildcore_revisions.txt
 
   rm "/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_symlinks.sh
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires=""  --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs /tmp/configure_phase3_symlinks.sh
 
   cp /tmp/*.deb "/srcbuild/buildoutput/"
 
