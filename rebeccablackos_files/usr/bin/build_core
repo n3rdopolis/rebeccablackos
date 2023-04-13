@@ -451,7 +451,7 @@ function DownloadSVN()
 #function to get the version of BZR repos
 function GetVersionBZR()
 {
-  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND bzr version-info | grep revno | awk '{print $2}')
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr version-info | grep revno | awk '{print $2}')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
@@ -502,16 +502,16 @@ function DownloadBZR()
   return $UpdateCommandResult
 }
 
-#function to get the version of HG repos
+#function to get the version of hg repos
 function GetVersionHG()
 {
-  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND hg --debug id -i | sed 's/+//g')
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg --debug id -i | sed 's/+//g')
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
-#Function to cleanup BZR repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
+#Function to cleanup hg repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
 function CleanupHG()
 {
   $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
