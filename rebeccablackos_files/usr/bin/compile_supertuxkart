@@ -30,7 +30,7 @@ CLEANUPOVERLAY=1
 export BUILDCOREMAKEDEBS=1
 if [[ $(mountpoint -q /tmp/srcbuild_overlay/; echo $?) == 0 && $CLEANUPOVERLAY == 1 ]]
 then
-  export BUILDCORECLEANOVERLAY=1
+  export BUILDCOREUSEOVERLAY=1
 fi
 
 
@@ -84,10 +84,6 @@ function CompilePackageInList
       echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
       echo "$BUILDNAME" >> /buildlogs/build_core/failedcompiles
       return
-    fi
-    if [[ $BUILDCORECLEANOVERLAY == 1 ]]
-    then
-      mount -o remount /srcbuild/
     fi
   fi
 

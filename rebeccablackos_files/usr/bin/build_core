@@ -66,6 +66,7 @@ fi
 BUILDCOREDIRECTLYRUN=1
 
 DownloadAttempts=3
+ExtraFileCleanupOnlyValue=1
 
 #if the first argument is buildspec, a file is being sourced.
 if [[ $1 == buildspec ]]
@@ -227,7 +228,6 @@ function RunDownloadAndOrBuild
   #If the argument passed is cleanup, then cleanup the source only
   if [[ "$ACTION" == clean ]]
   then
-    cd "$SOURCEDIR"
     SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE" | sed -e "s|^|  Cleanup $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
     exit
@@ -287,18 +287,22 @@ function GetVersionGIT()
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
-#Function to cleanup GIT repos
+#Function to cleanup GIT repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
 function CleanupGIT()
 {
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND git submodule foreach --recursive git reset --hard
-  $NONROOTCOMMAND git submodule foreach --recursive git clean -xffd
-  $NONROOTCOMMAND git submodule foreach --recursive git gc --auto
-  $NONROOTCOMMAND git clean -xffd
-  $NONROOTCOMMAND git reset --hard
-  $NONROOTCOMMAND git clean -xffd
-  $NONROOTCOMMAND git gc --auto
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  if [[ $1 != $ExtraFileCleanupOnlyValue ]]
+  then
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git reset --hard
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git gc --auto
+  fi
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git clean -xffd
+  if [[ $1 != 1 ]]
+  then
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" reset --hard
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" gc --auto
+  fi
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" clean -xffd
 }
 
 #Function to download git repos
@@ -306,10 +310,10 @@ function DownloadGIT()
 {
   $NONROOTCOMMAND git config --global --add safe.directory $(readlink -f /"$SOURCEDIR"/"$SOURCENAME")
   $NONROOTCOMMAND git config --global core.askpass /bin/true
-  OLDSOURCEURL=$($NONROOTCOMMAND git --git-dir="$SOURCENAME"/.git remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
+  OLDSOURCEURL=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote -v | grep '(fetch)' | grep origin | awk '{print $2}' )
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
-    rm -rf "$SOURCENAME"
+    rm -rf /"$SOURCEDIR"/"$SOURCENAME"
 
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
     then
@@ -319,40 +323,39 @@ function DownloadGIT()
     fi
   fi
 
-  $NONROOTCOMMAND git clone $SOURCEURL $SOURCENAME
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND git remote update origin --prune
+  $NONROOTCOMMAND git clone $SOURCEURL /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote update origin --prune
   if [[ -z $SOURCEREVISION || $SOURCEREVISION == "git:defaultbranch" ]]
   then
-    $NONROOTCOMMAND git remote set-head origin --auto
-    ORIGINNAME=$($NONROOTCOMMAND git remote)
-    REMOTEBRANCH=$($NONROOTCOMMAND git rev-parse --abbrev-ref origin/HEAD)
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"remote set-head origin --auto
+    ORIGINNAME=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote)
+    REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rev-parse --abbrev-ref origin/HEAD)
     SOURCEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
   fi
-  find .git |grep index.lock|
+  find /"$SOURCEDIR"/"$SOURCENAME"/.git | grep index.lock |
   while read -r LOCKFILE
   do
     rm "$LOCKFILE"
   done
 
-  $NONROOTCOMMAND git ls-remote "$SOURCEURL" > /dev/null
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" ls-remote "$SOURCEURL" > /dev/null
   SourceURLActive=$?
-  $NONROOTCOMMAND git checkout -f $SOURCEREVISION 
-  $NONROOTCOMMAND git reset --hard
-  rm -rf .git/rebase-*/
-  rm -rf .git/modules/*/rebase-*/
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" checkout -f $SOURCEREVISION 
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" reset --hard
+  rm -rf /"$SOURCEDIR"/"$SOURCENAME"/.git/rebase-*/
+  rm -rf /"$SOURCEDIR"/"$SOURCENAME"/.git/modules/*/rebase-*/
 
-  $NONROOTCOMMAND git rebase -s ours
-  $NONROOTCOMMAND git pull -f
-  $NONROOTCOMMAND git rebase -s ours
-  $NONROOTCOMMAND git fetch --prune
-  $NONROOTCOMMAND git checkout -f $SOURCEREVISION
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rebase -s ours
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" pull -f
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rebase -s ours
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" fetch --prune
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" checkout -f $SOURCEREVISION
   GitCheckoutResult=$?
-  $NONROOTCOMMAND git config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
-  $NONROOTCOMMAND git submodule sync --recursive
-  $NONROOTCOMMAND git submodule deinit -f .
-  $NONROOTCOMMAND git submodule update --recursive --force --init
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" config user.email "$PACKAGESUFFIX"@"$PACKAGESUFFIX"
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule sync --recursive
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule deinit -f .
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule update --recursive --force --init
   if [[ ($SourceURLActive == 0) && ($GitCheckoutResult == 0) ]]
   then
     UpdateCommandResult=0
@@ -367,31 +370,28 @@ function DownloadGIT()
     MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
     MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
 
-    cd "$SOURCEDIR"
-    cd "$SOURCENAME"
+    $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME
 
-    $NONROOTCOMMAND mkdir -p $MODULENAME
-    cd $MODULENAME
-    $NONROOTCOMMAND git remote update origin --prune
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote update origin --prune
     if [[ -z $MODULEREVISION ]]
     then
-      $NONROOTCOMMAND git remote set-head origin --auto
-      ORIGINNAME=$($NONROOTCOMMAND git remote)
-      REMOTEBRANCH=$($NONROOTCOMMAND git rev-parse --abbrev-ref origin/HEAD)
+      $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote set-head origin --auto
+      ORIGINNAME=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote)
+      REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rev-parse --abbrev-ref origin/HEAD)
       MODULEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
     fi
-    $NONROOTCOMMAND git checkout -f $MODULEREVISION 
-    $NONROOTCOMMAND git reset --hard
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME checkout -f $MODULEREVISION 
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME reset --hard
     
-    $NONROOTCOMMAND git rebase
-    $NONROOTCOMMAND git pull -f
-    $NONROOTCOMMAND git rebase -s ours
-    $NONROOTCOMMAND git fetch --prune
-    $NONROOTCOMMAND git config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
-    $NONROOTCOMMAND git submodule sync --recursive
-    $NONROOTCOMMAND git submodule init
-    $NONROOTCOMMAND git submodule update --recursive --force
-    $NONROOTCOMMAND git pull -f
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rebase
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME pull -f
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rebase -s ours
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME fetch --prune
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule sync --recursive
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule init
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule update --recursive --force
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME pull -f
   done
   return $UpdateCommandResult
 }
@@ -399,19 +399,21 @@ function DownloadGIT()
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
-  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND svnversion .)
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND svnversion /"$SOURCEDIR"/"$SOURCENAME")
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
   FUNCTIONSTRING="{ $SOURCEREVISION ; SOURCEREVISION=\\\$SOURCEREVISION_EXPORT ; : $SOURCENAME; }"
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
-#Function to cleanup SVN repos
+#Function to cleanup SVN repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
 function CleanupSVN()
 {
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND svn revert --non-interactive --recursive .
-  $NONROOTCOMMAND svn cleanup --non-interactive
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  if [[ $1 != $ExtraFileCleanupOnlyValue ]]
+  then
+    $NONROOTCOMMAND svn revert --non-interactive --recursive /"$SOURCEDIR"/"$SOURCENAME"
+  fi
+  $NONROOTCOMMAND svn cleanup --non-interactive /"$SOURCEDIR"/"$SOURCENAME"
 }
 
 #Function to download svn repos
@@ -430,12 +432,11 @@ function DownloadSVN()
 
   fi
 
-  $NONROOTCOMMAND svn ls "$SOURCEURL" --depth empty --non-interactive > /dev/null
+  $NONROOTCOMMAND svn ls "$SOURCEURL" --depth empty --non-interactive /"$SOURCEDIR"/"$SOURCENAME" > /dev/null
   SourceURLActive=$?
-  $NONROOTCOMMAND svn co --non-interactive "$SOURCEURL" "$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION
+  $NONROOTCOMMAND svn co --non-interactive "$SOURCEURL" /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND svn update --non-interactive -r $SOURCEREVISION /"$SOURCEDIR"/"$SOURCENAME"
   SvnUpdateResult=$?
   if [[ ($SourceURLActive == 0) && ($SvnUpdateResult == 0) ]]
   then
@@ -456,20 +457,22 @@ function GetVersionBZR()
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
-#Function to cleanup BZR repos
+#Function to cleanup BZR repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
 function CleanupBZR()
 {
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND bzr revert
-  $NONROOTCOMMAND bzr clean-tree --force
-  $NONROOTCOMMAND bzr clean-tree --force --detritus
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  if [[ $1 != $ExtraFileCleanupOnlyValue ]]
+  then
+    $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr revert
+  fi
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr clean-tree --force
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr clean-tree --force --detritus
 }
 
 #Function to download bzr repos
 function DownloadBZR()
 {
-  OLDSOURCEURL=$($NONROOTCOMMAND bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
+  OLDSOURCEURL=$($NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr info $SOURCENAME | grep "parent branch" | awk -F "branch: " '{print $2}')
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
@@ -483,14 +486,13 @@ function DownloadBZR()
 
   fi
 
-  $NONROOTCOMMAND bzr info "$SOURCEURL" > /dev/null
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr info "$SOURCEURL" > /dev/null
   SourceURLActive=$?
-  $NONROOTCOMMAND bzr branch "$SOURCEURL" "$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND bzr pull
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr branch "$SOURCEURL" "$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr pull
   BzrPullResult=$?
-  $NONROOTCOMMAND bzr update -r $SOURCEREVISION
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- bzr update -r $SOURCEREVISION
   if [[ ($SourceURLActive == 0) && ($BzrPullResult == 0) ]]
   then
     UpdateCommandResult=0
@@ -509,19 +511,21 @@ function GetVersionHG()
   REVISIONSTRING="eval \"OverrideRevisions_${SAFESOURCENAME}() $FUNCTIONSTRING\""
 }
 
-#Function to cleanup BZR repos
+#Function to cleanup BZR repos, if the first argument is 1, that implies to skip reverting modifications of the repositories, and only remove extra files, otherwise the repository is reverted to a prestine state
 function CleanupHG()
 {
-  $NONROOTCOMMAND  mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root revert --all
-  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root --config extensions.purge= purge
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  if [[ $1 != $ExtraFileCleanupOnlyValue ]]
+  then
+    $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg --config trusted.users=$NONROOTUSER,root revert --all
+  fi
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg --config trusted.users=$NONROOTUSER,root --config extensions.purge= purge
 }
 
 #Function to download hg repos
 function DownloadHG()
 {
-  OLDSOURCEURL=$($NONROOTCOMMAND hg paths -R "$SOURCENAME" default)
+  OLDSOURCEURL=$($NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg paths -R "$SOURCENAME" default)
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     rm -rf "$SOURCENAME"
@@ -535,14 +539,13 @@ function DownloadHG()
 
   fi
 
-  $NONROOTCOMMAND hg identify "$SOURCEURL" > /dev/null
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg identify "$SOURCEURL" > /dev/null
   SourceURLActive=$?
-  $NONROOTCOMMAND hg clone "$SOURCEURL" "$SOURCENAME"
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root pull
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg clone "$SOURCEURL" "$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME"hg --config trusted.users=$NONROOTUSER,root pull
   HgPullResult=$?
-  $NONROOTCOMMAND hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME"hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
   return $UpdateCommandResult
   if [[ ($SourceURLActive == 0) && ($HgPullResult == 0) ]]
   then
@@ -565,9 +568,8 @@ function GetVersionARCHIVE()
 #Function to cleanup archives
 function CleanupARCHIVE()
 {
-  $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
-  find | grep -v ./SOURCEFILE$ | grep -v ./SOURCEURL | sort -r | while read -r FILE
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  find /"$SOURCEDIR"/"$SOURCENAME" | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE$ | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILESLIST$ | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEURL$ | sort -r | while read -r FILE
   do
     rm -rf $FILE
   done
@@ -575,8 +577,8 @@ function CleanupARCHIVE()
 #Function to download archives
 function DownloadARCHIVE()
 {
-  rm "$SOURCENAME/SOURCEFILE"
-  OLDSOURCEURL=$(cat "$SOURCENAME/SOURCEURL")
+  rm /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE
+  OLDSOURCEURL=$(cat /"$SOURCEDIR"/"$SOURCENAME"/SOURCEURL)
   if [[ -z "$OLDSOURCEURL" || "$SOURCEURL" != "$OLDSOURCEURL" ]]
   then
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
@@ -593,14 +595,15 @@ function DownloadARCHIVE()
   then
     echo "$SOURCEURL failed to download"
   fi
-  if [[ ! -f "$SOURCENAME/SOURCEFILE" ]]
+  if [[ ! -f /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE ]]
   then
-    $NONROOTCOMMAND mkdir -p "$SOURCENAME"
-    $NONROOTCOMMAND wget "$SOURCEURL" -O $SOURCENAME/SOURCEFILE
-    echo "$SOURCEURL" > $SOURCENAME/SOURCEURL
+    $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"/
+    $NONROOTCOMMAND wget "$SOURCEURL" -O /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE
+    echo "$SOURCEURL" > /"$SOURCEDIR"/"$SOURCENAME"/SOURCEURL
   fi
-  cd "$SOURCENAME"
-  $NONROOTCOMMAND tar xaf SOURCEFILE -C .
+  $NONROOTCOMMAND tar xaf /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE -C /"$SOURCEDIR"/"$SOURCENAME"
+  touch /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILESLIST
+  find /"$SOURCEDIR"/"$SOURCENAME" | sed "s|/"$SOURCEDIR"/"$SOURCENAME"||g" > /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILESLIST
   return $UpdateCommandResult
 }
 
@@ -658,8 +661,8 @@ function DownloadSource()
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
   fi
-  mkdir -p "/$SOURCEDIR"
-  cd "$SOURCEDIR"
+  mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 
   #count the number of non-empty debs for this package
@@ -855,10 +858,7 @@ function SetBuildVariables()
 function PrepareBuild()
 {
   SetBuildVariables
-  mkdir -p "/$SOURCEDIR"
-  cd "$SOURCEDIR"
-  mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
+  mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
 
   #If BUILD_CORE_FORCE_GCC_VERSION specified, the "$EXTERNALBUILDHOME"/bin folder is at the top of $PATH
   #and is filled with symlinks, such as gcc gpp, that link to /usr/bin/gcc-$VERSION to override without
@@ -886,10 +886,8 @@ function PrepareBuild()
 #Function that handles the build of the source, creation of the deb file, or installation of the source
 function MakeAndInstall()
 {
-  mkdir -p "/$SOURCEDIR"
-  cd "$SOURCEDIR"
-  mkdir -p "$SOURCENAME"
-  cd "$SOURCENAME"
+  mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+
   mkdir -p "$INSTALLDIR/share/aclocal"
   mkdir -p "$INSTALLDIR/lib/$DEB_HOST_MULTIARCH"
   mkdir -p "$INSTALLDIR/libexec"
@@ -1080,7 +1078,7 @@ function MakeAndInstall()
       
       #If being built as a chroot, and overlayfs is supported, then the srcbuild path will have an upperdir exposed
       #where it can be searched, so that only new/changed files need to be evaluated
-      if [[ $BUILDCORECLEANOVERLAY == 1 && -e "/$SOURCEDIROVERLAYDIR/$SOURCENAME" ]]
+      if [[ $BUILDCOREUSEOVERLAY == 1 && -e "/$SOURCEDIROVERLAYDIR/$SOURCENAME" ]]
       then
         DEPENDSEARCHROOT="/$SOURCEDIROVERLAYDIR/$SOURCENAME"
       else
@@ -1201,11 +1199,8 @@ function MakeAndInstall()
       cat "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" >> "$BUILDLOGDIR/failedcompiles"
     fi
 
-    #Cleanup the source build overlay if specifiedkd
-    if [[ $BUILDCORECLEANOVERLAY == 1 && ! -z "$SOURCEDIROVERLAYDIR" && ! -z $SOURCENAME ]]
-    then
-      rm -rf "/$SOURCEDIROVERLAYDIR/$SOURCENAME" "/$SOURCEDIROVERLAYDIR/buildhome/config/$SOURCENAME/" "/$SOURCEDIROVERLAYDIR/buildhome/sourcehome/$SOURCENAME/"
-    fi
+    Cleanup$REPOSITORYTYPE $ExtraFileCleanupOnlyValue 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/PostBuildCleanup" &
+    rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/* "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"/*
 
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
   else
