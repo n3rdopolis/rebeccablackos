@@ -99,9 +99,6 @@ dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpacka
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 
-#Set default user groups
-printf "\nADD_EXTRA_GROUPS=1\nEXTRA_GROUPS="systemd-journald"\n" >> /etc/adduser.conf
-
 #Configure a locale so that the initramfs doesn't have to
 update-locale LANG=en_US.UTF-8
 
