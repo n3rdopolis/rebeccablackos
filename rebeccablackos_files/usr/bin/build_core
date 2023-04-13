@@ -992,6 +992,7 @@ function MakeAndInstall()
     cp \"$BUILDLOGDIR/$SOURCENAME/GetSourceVersion\" \"/usr/share/buildcore_revisions/$SOURCENAME\"
 
     SetBuildVariables
+    cd "$SOURCEDIR/$SOURCENAME"
 
     STARTTIME=\$(date +%s)
     PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
@@ -1067,8 +1068,8 @@ function MakeAndInstall()
       mkdir -p "/$SOURCEDIR/buildoutput/"
       mkdir -p "/$SOURCEDIR/buildoutput/control"
       #checkinstall wants a debian/control file, otherwise it exits out.
-      mkdir debian
-      touch debian/control
+      mkdir /$SOURCEDIR/$SOURCENAME/"debian
+      touch /$SOURCEDIR/$SOURCENAME/"debian/control
 
       #Set the build variables for ldd
       SetBuildVariables
@@ -1142,7 +1143,7 @@ function MakeAndInstall()
       #mv "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/versionbackup"
       rm "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb
       rm "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb
-      rm *.deb
+      rm /"$SOURCEDIR"/$SOURCENAME/*.deb
 
       #create the new deb
       STARTTIME=$(date +%s)
@@ -1152,12 +1153,12 @@ function MakeAndInstall()
       else
         PACKAGEDATE=$(date +%s)
       fi
-      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
       #move the resulting deb file into the buildoutput tree.
-      mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
+      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
 
       #Install the newly created deb file
       STARTTIME=$(date +%s)
@@ -1168,12 +1169,12 @@ function MakeAndInstall()
 
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
       #move the resulting deb file into the buildoutput tree.
-      mv "$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
+      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
 
       #If dpkg aborts for some reason, such as being unable to overwrite a file, log it, and force the package to rebuild
       if [[ $InstallResult != 0 ]]
