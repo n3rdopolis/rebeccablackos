@@ -276,9 +276,9 @@ function InstallDebFile()
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
-  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND git rev-parse HEAD)
+  SOURCEREVISION_EXPORT=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rev-parse HEAD)
   SOURCEREVISION=$(declare -p SOURCEREVISION_EXPORT)
-  SUBMODULESTRING=$($NONROOTCOMMAND git submodule | sed -e 's/+//g' -e 's/-//g' | awk '{print $2 "|" $1 "|" }')
+  SUBMODULESTRING=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule | sed -e 's/+//g' -e 's/-//g' | awk '{print $2 "|" $1 "|" }')
   export IFS="|"$'\n'
   SUBMODULEREVISIONS_EXPORT=($SUBMODULESTRING)
   unset IFS
