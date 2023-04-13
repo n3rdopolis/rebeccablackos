@@ -77,26 +77,24 @@ cp /usr/import/tmp/* /tmp
 rsync -Ka -- /usr/import/* /
 chmod 777 /tmp
 
-cd /tmp
-mkdir debian
-touch debian/control
+
+mkdir /tmp/debian
+touch /tmp/debian/control
 #remove any old deb files for this package
 rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-/usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_helper.sh
-cd $OLDPWD
+env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_helper.sh
 
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
-cd /tmp/wlm-virtualpackage
-chmod +x config
-chmod +x postinst
-tar czf control.tar.gz control config templates postinst
-tar czf data.tar.gz -T /dev/null
-ar q waylandloginmanager-rbos.deb debian-binary
-ar q waylandloginmanager-rbos.deb control.tar.gz
-ar q waylandloginmanager-rbos.deb data.tar.gz
-dpkg --force-overwrite --force-confmiss --force-confnew -i waylandloginmanager-rbos.deb
-cd $OLDPWD
+mkdir /tmp/wlm-virtualpackage
+chmod +x /tmp/wlm-virtualpackage/config
+chmod +x /tmp/wlm-virtualpackage/postinst
+env -C /tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst
+env -C /tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb debian-binary
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb control.tar.gz
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb data.tar.gz
+dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-rbos.deb
 
 #Force CRYPTSETUP to be enabled, so that needed files are already copied
 echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
@@ -123,18 +121,16 @@ function PostInstallActions
   cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
   #Create a package with all the menu items.
-  cd /tmp
   rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
-  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 
   rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
-  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos touch /usr/share/buildcore_revisions.txt
 
   rm "/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
-  /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_symlinks.sh
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" /tmp/configure_phase3_symlinks.sh
 
-  cp *.deb "/srcbuild/buildoutput/"
-  cd $OLDPWD
+  cp /tmp/*.deb "/srcbuild/buildoutput/"
 
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
