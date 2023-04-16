@@ -632,7 +632,6 @@ iso (){
 
     #Get the current architecture, and set arrays for each architecture the CPU supports. 
     #(a 32 bit ISO might be started on a 64 bit only EFI, a 64 bit computers have 32 bit only EFIs)
-    cd $WORKDIR/efibuild
     if [[ $ARCH == i386 ]]
     then
       EFIARCHPREFIXES=(ia32 x64)
@@ -681,8 +680,8 @@ iso (){
       for (( i=0; i<${#INSTALLEDGRUBEFIARCHES[@]}; i++ ))
       do
         EFIFILENAME=boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi
-        grub-mkstandalone -o $EFIFILENAME -O ${INSTALLEDGRUBEFIARCHES[$i]}-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
-        (( IMAGESIZE+=$(( $(du -b -c $EFIFILENAME | tail -1| cut -f 1)  )) ))
+        grub-mkstandalone -o $WORKDIR/efibuild/$EFIFILENAME -O ${INSTALLEDGRUBEFIARCHES[$i]}-efi --compress=gz --modules="part_gpt part_msdos iso9660" "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
+        (( IMAGESIZE+=$(( $(du -b -c $WORKDIR/efibuild/$EFIFILENAME | tail -1| cut -f 1)  )) ))
       done
 
       #Make the number of sectors (with 512b a sector) divisible by 32, by getting the next largest possible size, add a padding of 32*8 sectors, and then get the number of bytes
@@ -690,20 +689,20 @@ iso (){
 
       log_msg "Creating FAT file system image for EFI boot" 
       #Create the FAT filesystem
-      dd if=/dev/zero of=efiboot.img seek=$IMAGESIZE bs=1 count=0
+      dd if=/dev/zero of=$WORKDIR/efibuild/efiboot.img seek=$IMAGESIZE bs=1 count=0
       #Ensure 512 bytes a sector, use FAT12 as that's what other EFI alt boot images appear to be. The bootloader should at most be a few MB, so FAT12 is fine
-      mkfs.vfat efiboot.img -v -S 512 -F 12
-      mmd -i efiboot.img ::/efi
-      mmd -i efiboot.img ::/efi/boot
+      mkfs.vfat $WORKDIR/efibuild/efiboot.img -v -S 512 -F 12
+      mmd -i $WORKDIR/efibuild/efiboot.img ::/efi
+      mmd -i $WORKDIR/efibuild/efiboot.img ::/efi/boot
       
       #Copy all built EFI images to the EFI FAT file system
       for (( i=0; i<${#INSTALLEDEFIARCHPREFIXES[@]}; i++ ))
       do
-        mcopy -i efiboot.img boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi ::/efi/boot
+        mcopy -i $WORKDIR/efibuild/efiboot.img $WORKDIR/efibuild/boot${INSTALLEDEFIARCHPREFIXES[$i]}.efi ::/efi/boot
       done
       
       mkdir -p $WORKDIR/ISOTMP/boot/EFI/
-      cp efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
+      cp $WORKDIR/efibuild/efiboot.img $WORKDIR/ISOTMP/boot/EFI/grub.efi
     fi
 
     #Create a file with the name of the Live CD
