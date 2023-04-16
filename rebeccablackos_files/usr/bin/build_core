@@ -1088,7 +1088,7 @@ function MakeAndInstall()
 
       #Find All so file names, built within the package, so that they can be excluded from the list of dependant files.
       #This prevents files with the same name that are about to be installed from being found in older existing packages
-      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" |while read -r FILE
+      BUILTSOFILES=$(find "$DEPENDSEARCHROOT" "$EXTERNALBUILDHOME" |while read -r FILE
       do
         SOFILE=$(basename "$FILE" | grep -e '\.so$' -e '\.so\.')
         if [[ ! -z $SOFILE ]]
@@ -1104,7 +1104,7 @@ function MakeAndInstall()
       #Find all Executable files compiled in the source tree, get the dependancy Library files, and find the package the libraries belong to
       echo "Evaluating dependancies, this might take some time..."
       echo "Dependancies of discovered files:" >> "$BUILDLOGDIR/$SOURCENAME/CheckinstallDepends"
-      DEPENDS=$(find "$DEPENDSEARCHROOT" -type f -executable | while read -r FILE
+      DEPENDS=$(find "$DEPENDSEARCHROOT" "$EXTERNALBUILDHOME" -type f -executable | while read -r FILE
       do
         FILETYPE=$(file -bi $FILE |awk -F / '{print $1}')
         if [[ $FILETYPE == application ]]
