@@ -209,7 +209,7 @@ rm -rf /var/lib/dlocate/*
 
 #start the remastersys job
 (. /usr/bin/build_vars; remastersys dist)
-rm -rf /home/remastersys
+rm -rf /home/remastersys/remastersys/*
 
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
 
@@ -287,4 +287,4 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
 #start the remastersys job
 (. /usr/bin/build_vars; remastersys dist)
-rm -rf /home/remastersys
+rm -rf /home/remastersys/remastersys/*
