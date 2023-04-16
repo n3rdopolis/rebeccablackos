@@ -209,10 +209,8 @@ rm -rf /var/lib/dlocate/*
 
 #start the remastersys job
 (. /usr/bin/build_vars; remastersys dist)
+mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom-full.iso
 rm -rf /home/remastersys/remastersys/*
-
-mv /home/remastersys/remastersys/custom.iso /home/remastersys/remastersys/custom-full.iso
-
 
 
 #Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
@@ -287,4 +285,5 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
 #start the remastersys job
 (. /usr/bin/build_vars; remastersys dist)
+mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom.iso
 rm -rf /home/remastersys/remastersys/*
