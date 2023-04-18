@@ -1068,8 +1068,8 @@ function MakeAndInstall()
       mkdir -p "/$SOURCEDIR/buildoutput/"
       mkdir -p "/$SOURCEDIR/buildoutput/control"
       #checkinstall wants a debian/control file, otherwise it exits out.
-      mkdir /$SOURCEDIR/$SOURCENAME/"debian
-      touch /$SOURCEDIR/$SOURCENAME/"debian/control
+      mkdir "/$SOURCEDIR/$SOURCENAME/"debian
+      touch "/$SOURCEDIR/$SOURCENAME/"debian/control
 
       #Set the build variables for ldd
       SetBuildVariables
