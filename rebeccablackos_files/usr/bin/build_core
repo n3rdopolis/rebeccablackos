@@ -1200,8 +1200,11 @@ function MakeAndInstall()
       cat "/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles" >> "$BUILDLOGDIR/failedcompiles"
     fi
 
-    Cleanup$REPOSITORYTYPE $ExtraFileCleanupOnlyValue 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuildCleanup$REPOSITORYTYPE" &
-    rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/* "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"/*
+    if [[ $BUILDCOREMAKEDEBS == 1 ]]
+    then
+      Cleanup$REPOSITORYTYPE $ExtraFileCleanupOnlyValue 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuildCleanup$REPOSITORYTYPE"
+      rm -rf "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/* "/$SOURCEDIR"/buildhome/sourcehome/"$SOURCENAME"/*
+    fi
 
     #If the deb file exists, the control file exists, and the script is configured to make deb files, then just install the deb
   else
