@@ -1136,7 +1136,7 @@ function MakeAndInstall()
       DEPENDS=$(echo $DEPENDS | sed 's/ /,/g') 
 
       #.spec file seem to cause problems with checkinstall
-      rm *.spec
+      rm "/$SOURCEDIR/$SOURCENAME/"*.spec
 
       #remove any old deb files for this package from the local source dir, and backup the old version.
       #mkdir "/$SOURCEDIR/buildoutput/versionbackup"
