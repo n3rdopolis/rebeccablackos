@@ -23,10 +23,10 @@ then
   exit
 fi
 
-patch /usr/bin/waylandloginmanager /usr/share/RBOS_PATCHES/waylandloginmanagerkdialog.diff  -t --no-backup-if-mismatch --dry-run
+patch /usr/bin/waylandloginmanager /usr/share/RBOS_PATCHES/waylandloginmanagerzenity.diff  -t --no-backup-if-mismatch --dry-run
 
 if [[ $? == 0 ]]
 then
-  patch /usr/bin/waylandloginmanager /usr/share/RBOS_PATCHES/waylandloginmanagerkdialog.diff  -t --no-backup-if-mismatch
+  patch /usr/bin/waylandloginmanager /usr/share/RBOS_PATCHES/waylandloginmanagerzenity.diff  -t --no-backup-if-mismatch
 fi
 systemctl restart waylandloginmanager.service
