@@ -125,7 +125,10 @@ case "${THEME_NAME}" in
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-                        cp -a /usr/share/fonts/Plymouth.ttf "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
+                        font=$(fc-match -f %{file})
+                        monospacedfont=$(fc-match -f %{file} monospace)
+                        cp -a "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
+                        cp -a "$monospacedfont" "$INITRDDIR/usr/share/fonts/Plymouth-monospace.ttf"
                 fi
                 case "${THEME_NAME}" in
                         spinner|bgrt)
