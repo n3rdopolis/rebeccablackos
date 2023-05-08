@@ -125,11 +125,13 @@ case "${THEME_NAME}" in
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                         cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-                        font=$(fc-match -f %{file})
-                        monospacedfont=$(fc-match -f %{file} monospace)
-                        cp -a "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
-                        cp -a "$monospacedfont" "$INITRDDIR/usr/share/fonts/Plymouth-monospace.ttf"
                 fi
+
+                font=$(fc-match -f %{file})
+                monospacedfont=$(fc-match -f %{file} monospace)
+                cp -a "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
+                cp -a "$monospacedfont" "$INITRDDIR/usr/share/fonts/Plymouth-monospace.ttf"
+
                 case "${THEME_NAME}" in
                         spinner|bgrt)
                                 # ATM, this is needed by the spinner and bgrt themes
