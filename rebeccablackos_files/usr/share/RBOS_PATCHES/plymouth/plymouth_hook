@@ -130,7 +130,7 @@ case "${THEME_NAME}" in
                 font=$(fc-match -f %{file})
                 monospacedfont=$(fc-match -f %{file} monospace)
                 cp -a "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
-                cp -a "$monospacedfont" "$INITRDDIR/usr/share/fonts/Plymouth-monospace.ttf"
+                cp -a "$monospacedfont" "${DESTDIR}/usr/share/fonts/Plymouth-monospace.ttf"
 
                 case "${THEME_NAME}" in
                         spinner|bgrt)
