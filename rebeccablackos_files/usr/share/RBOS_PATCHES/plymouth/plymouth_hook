@@ -34,6 +34,33 @@ then
         THEME_NAME="${THEME}"
         THEME="${THEMES}/${THEME}/${THEME}.plymouth"
         IMAGE_DIR=$(grep "ImageDir *= *" ${THEME} | sed 's/ImageDir *= *//')
+        
+        PLYMOUTH_FONT_PATH=""
+        PLYMOUTH_FONT=$(grep "\bFont *= *" ${PLYMOUTH_SYSROOT}${PLYMOUTH_THEME_DIR}/${PLYMOUTH_THEME_NAME}.plymouth | sed 's/Font *= *//' | head -1)
+        if [ ! -z "$PLYMOUTH_FONT" ]; then
+                PLYMOUTH_FONT_PATH=$(fc-match -f %{file} "$PLYMOUTH_FONT")
+                if [ ! -z "$PLYMOUTH_FONT_PATH" ]; then
+                        copy_exec "$PLYMOUTH_FONT_PATH"
+                fi
+        fi
+
+        PLYMOUTH_TITLE_FONT_PATH=""
+        PLYMOUTH_TITLE_FONT=$(grep "\bTitleFont *= *" ${PLYMOUTH_SYSROOT}${PLYMOUTH_THEME_DIR}/${PLYMOUTH_THEME_NAME}.plymouth | sed 's/TitleFont *= *//' | head -1)
+        if [ ! -z "$PLYMOUTH_TITLE_FONT" ]; then
+                PLYMOUTH_TITLE_FONT_PATH=$(fc-match -f %{file} "$PLYMOUTH_TITLE_FONT")
+                if [ ! -z "$PLYMOUTH_TITLE_FONT_PATH" ]; then
+                        copy_exec "$PLYMOUTH_TITLE_FONT_PATH"
+        fi
+fi
+
+        PLYMOUTH_MONOSPACE_FONT_PATH=""
+        PLYMOUTH_MONOSPACE_FONT=$(grep "\bMonospaceFont *= *" ${PLYMOUTH_SYSROOT}${PLYMOUTH_THEME_DIR}/${PLYMOUTH_THEME_NAME}.plymouth | sed 's/MonospaceFont *= *//' | head -1)
+        if [ ! -z "$PLYMOUTH_MONOSPACE_FONT" ]; then
+                PLYMOUTH_MONOSPACE_FONT_PATH=$(fc-match -f %{file} "$PLYMOUTH_MONOSPACE_FONT")
+                if [ ! -z "$PLYMOUTH_MONOSPACE_FONT_PATH" ]; then
+                        copy_exec "$PLYMOUTH_MONOSPACE_FONT_PATH"
+                fi
+        fi
 else
         exit 0
 fi

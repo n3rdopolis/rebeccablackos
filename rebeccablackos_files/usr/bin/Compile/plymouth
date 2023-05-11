@@ -118,11 +118,6 @@ chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth
 chmod +x /usr/share/initramfs-tools/scripts/init-top/plymouth
 chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth
 
-font=$(fc-match -f %{file})
-monospacedfont=$(fc-match -f %{file} monospace)
-ln -s "$font" "/usr/share/fonts/Plymouth.ttf"
-ln -s "$monospacedfont" "/usr/share/fonts/Plymouth-monospace.ttf"
-
 rm -r /run/plymouth
 }
 
