@@ -34,7 +34,7 @@ then
         THEME_NAME="${THEME}"
         THEME="${THEMES}/${THEME}/${THEME}.plymouth"
         IMAGE_DIR=$(grep "ImageDir *= *" ${THEME} | sed 's/ImageDir *= *//')
-        
+
         PLYMOUTH_FONT_PATH=""
         PLYMOUTH_FONT=$(grep "\bFont *= *" ${PLYMOUTH_SYSROOT}${PLYMOUTH_THEME_DIR}/${PLYMOUTH_THEME_NAME}.plymouth | sed 's/Font *= *//' | head -1)
         if [ ! -z "$PLYMOUTH_FONT" ]; then
@@ -51,7 +51,6 @@ then
                 if [ ! -z "$PLYMOUTH_TITLE_FONT_PATH" ]; then
                         copy_exec "$PLYMOUTH_TITLE_FONT_PATH"
         fi
-fi
 
         PLYMOUTH_MONOSPACE_FONT_PATH=""
         PLYMOUTH_MONOSPACE_FONT=$(grep "\bMonospaceFont *= *" ${PLYMOUTH_SYSROOT}${PLYMOUTH_THEME_DIR}/${PLYMOUTH_THEME_NAME}.plymouth | sed 's/MonospaceFont *= *//' | head -1)
