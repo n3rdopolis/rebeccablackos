@@ -328,7 +328,7 @@ function DownloadGIT()
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote update origin --prune
   if [[ -z $SOURCEREVISION || $SOURCEREVISION == "git:defaultbranch" ]]
   then
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"remote set-head origin --auto
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote set-head origin --auto
     ORIGINNAME=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote)
     REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rev-parse --abbrev-ref origin/HEAD)
     SOURCEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
