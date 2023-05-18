@@ -47,6 +47,11 @@ fi
 #Union mount phase2 and phase3
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3 ]]
 then
+  #Don't need to use overlayfs if phase2 is in the ramdisk
+  if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE2_PATHNAME ]]
+  then
+    mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE2_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  fi
   mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
   mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
