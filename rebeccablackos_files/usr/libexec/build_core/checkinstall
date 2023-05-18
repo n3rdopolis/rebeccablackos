@@ -503,7 +503,7 @@ function copy_dir_hierarchy {
 function checkcanoverlayaslower
 {
   #test using the given directory, and a newly mounted tmpfs
-  unshare -p -m bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o lowerdir="$1:/tmp"  /tmp/" &>/dev/null
+  unshare -p -m bash -c "mount -t tmpfs tmpfs /tmp; mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$1:/tmp"  /tmp/" &>/dev/null
 
   overlaytestresult=$?
   if [[ $overlaytestresult == 0 ]]
@@ -525,7 +525,7 @@ function checkcanoverlayasupper
   fi
   mkdir -p "$1/.ovlprobeworkdir"
   mkdir -p "$1/.ovlprobeupperdir"
-  unshare -p -m mount -t overlay overlay -o lowerdir=/,upperdir="$1/.ovlprobeupperdir",workdir="$1/.ovlprobeworkdir"  /tmp/ &>/dev/null
+  unshare -p -m mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir=/,upperdir="$1/.ovlprobeupperdir",workdir="$1/.ovlprobeworkdir"  /tmp/ &>/dev/null
   overlaytestresult=$?
   rmdir "$1/.ovlprobeworkdir/work/"  2>/dev/null
   rmdir "$1/.ovlprobeworkdir/"  2>/dev/null
@@ -731,7 +731,7 @@ function createtraslationmounts
         echo "[ \"\$(ls -A \"${TMP_DIR}/upperdirs/$WORKDIRNAME\")\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\" && rsync -a \"${TMP_DIR}/upperdirs/$WORKDIRNAME\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
         #command to unmount this filesystem. Because the mounts are ordered on top of eachother, this orders the unmount command in the other way
         sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
-        mount -t overlay overlay -o lowerdir="$MOUNTDEST",upperdir="${TMP_DIR}/upperdirs/$WORKDIRNAME",workdir="${TMP_DIR}/ovl_workdirs/$WORKDIRNAME" "${TMP_DIR}/workdir/$MOUNTDEST"
+        mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$MOUNTDEST",upperdir="${TMP_DIR}/upperdirs/$WORKDIRNAME",workdir="${TMP_DIR}/ovl_workdirs/$WORKDIRNAME" "${TMP_DIR}/workdir/$MOUNTDEST"
         MOUNTRESULT=$?
         MOUNTFAILCOUNT+=$MOUNTRESULT
         if [[ $MOUNTRESULT != 0 ]]
@@ -1331,6 +1331,16 @@ then
       HASOVERLAYFS=1
     fi
   fi
+
+  #Overlayfs can cause problems with very high inodes for 32 bit chroots on 64 bit kernels. The bitness has to be looked up from phase2 as the bitness now needs to be determined before the workdir is mounted
+  TARGETBITSIZE=$(/usr/bin/getconf LONG_BIT)
+  if [[ $TARGETBITSIZE == 32 ]]
+  then
+    ADDITIONAL_OVERLAYFS_PARAMS="xino=off"
+  else
+    ADDITIONAL_OVERLAYFS_PARAMS=""
+  fi
+
   #Get a mapping of the filesystem, if it reports an unfavorable condition, then fall back
   FILESYSTEMMAP=$(getmountmap)
   GETMAPRESULT=$?
