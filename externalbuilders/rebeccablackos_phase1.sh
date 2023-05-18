@@ -35,6 +35,21 @@ fi
 #Ensure that all the mountpoints in the namespace are private, and won't be shared to the main system
 mount --make-rprivate /
 
+#Overlayfs can cause problems with very high inodes for 32 bit chroots on 64 bit kernels. The bitness has to be looked up before the workdir is mounted
+if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
+then
+  TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME /usr/bin/getconf LONG_BIT)
+else
+  TARGETBITSIZE=$(chroot "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME /usr/bin/getconf LONG_BIT)
+fi
+
+if [[ $TARGETBITSIZE == 32 ]]
+then
+  ADDITIONAL_OVERLAYFS_PARAMS="xino=off"
+else
+  ADDITIONAL_OVERLAYFS_PARAMS=""
+fi
+
 #copy the dselect data saved in phase 2 into phase 1
 if [[ -f "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLSSTATUS.txt ]]
 then
@@ -54,9 +69,10 @@ cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/preferences.d/* "$BUIL
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
 then
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  #Upperdir and workdir need to be in the same mount
+  mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
-  mount -t overlay overlay -o lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
 #If a sources.list was created for Debian Snapshots, import it in
