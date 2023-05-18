@@ -696,6 +696,8 @@ function DownloadSource()
       if [[ $DownloadRepoResult == 0 ]]
       then
         break
+      else
+        sleep 60
       fi
     done
 
