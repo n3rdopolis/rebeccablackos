@@ -1136,7 +1136,7 @@ exit
 if [[ $BUILDER_IS_UNSHARED != 1 ]]
 then
   export BUILDER_IS_UNSHARED=1
-  sudo -E unshare --mount "$0" "$@"
+  exec sudo -E unshare --mount "$0" "$@"
 else
   setup_buildprocess
   run_buildprocess "$@"
