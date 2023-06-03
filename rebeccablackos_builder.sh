@@ -432,6 +432,7 @@ echolog "Starting the build process..."
 REBUILT="to update"
 
 #Move the builder in its own cgroup, systemd managed user sessions start applications like terminal emulators in their own cgroup. This avoids making the oom killer kill the whole terminal emulator if the system is low on RAM
+OriginalCgroup=$(cat /proc/self/cgroup | sed 's|^0::|/sys/fs/cgroup|g')
 mkdir -p /sys/fs/cgroup/machine.slice/"$BUILDUNIXNAME"_builder:"$BUILDARCH"
 echo $$ > /sys/fs/cgroup/machine.slice/"$BUILDUNIXNAME"_builder:"$BUILDARCH"/cgroup.procs
 
@@ -1126,7 +1127,7 @@ fi
 echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/externallogs/mainlog.log
 
 #Remove the process from the cgroup, and clean up the cgroup
-echo $$> /sys/fs/cgroup/machine.slice/cgroup.procs
+echo $$ > ${OriginalCgroup}/cgroup.procs
 rmdir /sys/fs/cgroup/machine.slice/"$BUILDUNIXNAME"_builder:"$BUILDARCH"
 
 exit
