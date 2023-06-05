@@ -51,9 +51,12 @@ then
   if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE2_PATHNAME ]]
   then
     mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE2_PATHNAME "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
+  else
+    rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork/*
+    mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
   fi
-  mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork/*
   mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/phase_3,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
@@ -76,9 +79,11 @@ mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 #if there is enough ram, use the ramdisk as the upperdir, if not, use a path on the same filesystem as the upperdir
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
 then
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild/*
   mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 else
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild/*
   mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 fi

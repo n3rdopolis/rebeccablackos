@@ -70,8 +70,10 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME ]]
 then
   #Upperdir and workdir need to be in the same mount
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1/*
   mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_phase1 "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 else
+  rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork/*
   mount -t overlay overlay -o ${ADDITIONAL_OVERLAYFS_PARAMS},lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/importdata,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork "$BUILDLOCATION"/build/"$BUILDARCH"/workdir
 fi
 
