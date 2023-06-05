@@ -800,7 +800,6 @@ ln -s /proc/self/fd/2 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/stderr
 
 #Copy external builders into thier own directory, make them executable
 cp -r "$SCRIPTFOLDERPATH"/externalbuilders/* "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders
-chmod +x "$BUILDLOCATION"/build/"$BUILDARCH"/externalbuilders/*
 
 #Copy all external files before they are used
 rsync -CKr -- "$SCRIPTFOLDERPATH"/"$BUILDUNIXNAME"_files/* "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
@@ -852,17 +851,8 @@ do
 done
 echo -n > "$BUILDLOCATION"/RestartPackageList_"$BUILDARCH".txt
 
-#make needed imported files executable
-chmod 0644 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/bin
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/sbin
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/libexec
-chmod 0755 -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/initramfs-tools/
-chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/grub.d/*
-chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.bashrc
-chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/skel/.local/wlprofile
-chmod 0755 "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/usr/share/wsessions.d/*.desktop
+#Cleanup permissions on imported files, leaving only the executable bit 
+chmod u=rwX,g=rX,o=rX,a-st -R "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/
 
 find "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/ -type d | while read -r DIRECTORY
 do
