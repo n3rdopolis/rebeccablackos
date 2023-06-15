@@ -142,11 +142,12 @@ BUILDING:
      It requires the 'ar' utility from the 'binutils' package for the extraction of debootstrap to work
 
      If you need to select specific revisions of the packages, copy buildcore_revisions_(architecture).txt into /var/cache/RBOS_Build_Files . Ensure that the
-     file is not tampered with maliciously, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418+ are
-     fully compatible for setting the package source versions/exact commits. Revisions files can also specify a snapshot date for the underlying Debian
-     packages, but this only works for revisions files built since commit 5555+.
+     file is not tampered with maliciously, as it is *executed* by the build scripts to set the revision. Only revision files built by SVN commit 3418 and
+     above are fully compatible for setting the package source versions/exact commits. Revisions files can also specify a snapshot date for the underlying
+     Debian packages, but this only works for revisions files built since commit 5555.
 
      Note that Commit 6413 corrected a bash 5.0 quirk in how the function-name safe names were handled, to prevent too many characters from being escaped.
+     This issue went unnoticed for likely since commit 5822 with the switch to Debian Buster, impacting the built revisions file for the release on 2019-10-05
 
      CONTROL FILES (relative to /var/cache/RBOS_Build_Files):
         DontDownloadDebootstrapScript:                           Delete this file to force the downloaded debootstrap in RBOS_Build_Files to run again at the
