@@ -681,7 +681,7 @@ function MainConfig
       done
       if [[ $ChangedDeviceCount == 0 ]]
       then
-        $QARMACMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility without making changes?" 2>/dev/null
+        $QARMACMD --forms --ok-label=Yes --cancel-label=No --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility without making changes?" 2>/dev/null
         Result=$?
         if [[ $Result == 0 ]]
         then
@@ -690,7 +690,7 @@ function MainConfig
           continue
         fi
       fi
-      $QARMACMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
+      $QARMACMD --forms --ok-label=Yes --cancel-label=No  --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
