@@ -1133,7 +1133,7 @@ function elevate_buildprocess
 #Start the build process
 if [[ $BUILDER_IS_UNSHARED != 1 ]]
 then
-  elevate_buildprocess
+  elevate_buildprocess "$@"
 else
   setup_buildprocess
   run_buildprocess "$@"
