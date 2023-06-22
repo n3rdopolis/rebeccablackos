@@ -349,6 +349,8 @@ function DownloadGIT()
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rebase -s ours
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" pull -f
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rebase -s ours
+  #Probe the source URL, force it to log when it is being redirected (Only want the stderr from the redirection warning in the log)
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" ls-remote $SOURCEURL > /dev/null
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" fetch --prune
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" checkout -f $SOURCEREVISION
   GitCheckoutResult=$?
