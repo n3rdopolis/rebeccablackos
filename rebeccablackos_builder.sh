@@ -1126,7 +1126,7 @@ exit
 function elevate_buildprocess
 {
   export BUILDER_IS_UNSHARED=1
-  systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages and building Live CD" --what=sleep:shutdown -- sudo -E unshare --mount "$0" "$@"
+  sudo -E -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages and building Live CD" --what=sleep:shutdown -- unshare --mount "$0" "$@"
   exit
 }
 
