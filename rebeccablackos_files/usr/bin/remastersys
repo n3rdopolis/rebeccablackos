@@ -764,10 +764,10 @@ iso (){
     # create the md5 sum file so the user doesn't have to - this is good so the iso
     # file can later be tested to ensure it hasn't become corrupted
 
-    log_msg "Creating $CUSTOMISO.md5 in $WORKDIR"
+    #log_msg "Creating $CUSTOMISO.md5 in $WORKDIR"
 
-    cd $WORKDIR
-    md5sum $CUSTOMISO > $CUSTOMISO.md5
+    #cd $WORKDIR
+    #md5sum $CUSTOMISO > $CUSTOMISO.md5
 
     sleep 1
 
