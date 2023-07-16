@@ -1,25 +1,13 @@
 diff --git a/libweston/compositor.c b/libweston/compositor.c
-index e4caacfc..d8fec694 100644
+index 2d864463..2dd07da9 100644
 --- a/libweston/compositor.c
 +++ b/libweston/compositor.c
-@@ -7216,6 +7216,7 @@ weston_output_placement_ok(struct weston_output *output)
- WL_EXPORT int
- weston_output_enable(struct weston_output *output)
- {
-+	struct weston_compositor *c = output->compositor;
- 	struct weston_head *head;
- 	char *head_names;
- 
-@@ -7289,7 +7290,11 @@ weston_output_enable(struct weston_output *output)
+@@ -7669,7 +7669,7 @@ weston_output_enable(struct weston_output *output)
  	}
  
  	weston_compositor_add_output(output->compositor, output);
 -	weston_output_damage(output);
-+	pixman_region32_union(&c->primary_plane.damage,
-+			      &c->primary_plane.damage,
-+			      &output->region);
-+
-+
++	output->full_repaint_needed = true;
  
  	head_names = weston_output_create_heads_string(output);
  	weston_log("Output '%s' enabled with head(s) %s\n",
