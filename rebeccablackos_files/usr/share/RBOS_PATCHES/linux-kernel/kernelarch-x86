@@ -53,8 +53,6 @@ CONFIG_X86_PAT=y
 CONFIG_X86_UMIP=y
 CONFIG_EFI=y
 CONFIG_EFI_STUB=y
-# CONFIG_EFI_FAKE_MEMMAP is not set
-CONFIG_EFI_RUNTIME_MAP=y
 CONFIG_KEXEC=y
 CONFIG_CRASH_DUMP=y
 # CONFIG_KEXEC_JUMP is not set
@@ -119,7 +117,6 @@ CONFIG_PERF_EVENTS_AMD_POWER=m
 CONFIG_VIRTUALIZATION=y
 CONFIG_KVM=m
 CONFIG_KVM_INTEL=m
-CONFIG_X86_SGX_KVM=y
 CONFIG_KVM_AMD=m
 CONFIG_KVM_AMD_SEV=y
 
@@ -191,7 +188,7 @@ CONFIG_ACPI_APEI=y
 CONFIG_ACPI_APEI_GHES=y
 CONFIG_ACPI_APEI_PCIEAER=y
 CONFIG_ACPI_APEI_MEMORY_FAILURE=y
-CONFIG_ACPI_APEI_EINJ=m
+# CONFIG_ACPI_APEI_EINJ is not set
 # CONFIG_ACPI_APEI_ERST_DEBUG is not set
 
 ##
@@ -333,8 +330,6 @@ CONFIG_IPMI_POWEROFF=m
 ##
 CONFIG_TCG_TPM=m
 CONFIG_TCG_TIS=m
-CONFIG_TCG_TIS_SPI_CR50=y
-CONFIG_TCG_TIS_I2C_CR50=m
 CONFIG_TCG_TIS_I2C_ATMEL=m
 CONFIG_TCG_TIS_I2C_INFINEON=m
 CONFIG_TCG_TIS_I2C_NUVOTON=m
@@ -479,7 +474,7 @@ CONFIG_CRYPTO_DEV_CCP_DD=m
 CONFIG_CRYPTO_DEV_CCP_CRYPTO=m
 
 ##
-## file: drivers/crypto/intel/qat/Kconfig
+## file: drivers/crypto/qat/Kconfig
 ##
 CONFIG_CRYPTO_DEV_QAT_DH895xCC=m
 CONFIG_CRYPTO_DEV_QAT_C3XXX=m
@@ -550,13 +545,9 @@ CONFIG_ISCSI_IBFT_FIND=y
 ##
 ## file: drivers/firmware/efi/Kconfig
 ##
+CONFIG_EFI_RUNTIME_MAP=y
+# CONFIG_EFI_FAKE_MEMMAP is not set
 CONFIG_APPLE_PROPERTIES=y
-
-##
-## file: drivers/firmware/google/Kconfig
-##
-CONFIG_GOOGLE_COREBOOT_TABLE=y
-CONFIG_GOOGLE_FRAMEBUFFER_COREBOOT=y
 
 ##
 ## file: drivers/gpio/Kconfig
@@ -564,7 +555,7 @@ CONFIG_GOOGLE_FRAMEBUFFER_COREBOOT=y
 CONFIG_GPIOLIB=y
 CONFIG_GPIO_AMDPT=m
 # CONFIG_GPIO_ICH is not set
-CONFIG_GPIO_F7188X=m
+# CONFIG_GPIO_F7188X is not set
 # CONFIG_GPIO_SCH is not set
 CONFIG_GPIO_KEMPLD=m
 CONFIG_GPIO_ML_IOH=m
@@ -573,17 +564,14 @@ CONFIG_GPIO_ML_IOH=m
 ## file: drivers/gpu/drm/Kconfig
 ##
 CONFIG_DRM=m
+CONFIG_DRM_RADEON=m
+CONFIG_DRM_AMDGPU=m
 CONFIG_DRM_HYPERV=m
 
 ##
 ## file: drivers/gpu/drm/amd/acp/Kconfig
 ##
 CONFIG_DRM_AMD_ACP=y
-
-##
-## file: drivers/gpu/drm/amd/amdgpu/Kconfig
-##
-CONFIG_DRM_AMDGPU=m
 
 ##
 ## file: drivers/gpu/drm/amd/amdkfd/Kconfig
@@ -628,11 +616,6 @@ CONFIG_DRM_NOUVEAU=m
 CONFIG_DRM_NOUVEAU_BACKLIGHT=y
 
 ##
-## file: drivers/gpu/drm/radeon/Kconfig
-##
-CONFIG_DRM_RADEON=m
-
-##
 ## file: drivers/gpu/drm/vboxvideo/Kconfig
 ##
 CONFIG_DRM_VBOXVIDEO=m
@@ -641,6 +624,7 @@ CONFIG_DRM_VBOXVIDEO=m
 ## file: drivers/gpu/drm/vmwgfx/Kconfig
 ##
 CONFIG_DRM_VMWGFX=m
+CONFIG_DRM_VMWGFX_FBCON=y
 
 ##
 ## file: drivers/gpu/drm/xen/Kconfig
@@ -801,6 +785,11 @@ CONFIG_GAMEPORT_NS558=m
 CONFIG_GAMEPORT_L4=m
 CONFIG_GAMEPORT_EMU10K1=m
 CONFIG_GAMEPORT_FM801=m
+
+##
+## file: drivers/input/joystick/Kconfig
+##
+CONFIG_INPUT_JOYSTICK=y
 
 ##
 ## file: drivers/input/keyboard/Kconfig
@@ -980,17 +969,11 @@ CONFIG_VMWARE_BALLOON=m
 CONFIG_INTEL_MEI=m
 CONFIG_INTEL_MEI_ME=m
 CONFIG_INTEL_MEI_TXE=m
-CONFIG_INTEL_MEI_GSC=m
 
 ##
 ## file: drivers/misc/mei/hdcp/Kconfig
 ##
 CONFIG_INTEL_MEI_HDCP=m
-
-##
-## file: drivers/misc/mei/pxp/Kconfig
-##
-CONFIG_INTEL_MEI_PXP=m
 
 ##
 ## file: drivers/misc/pvpanic/Kconfig
@@ -1106,6 +1089,7 @@ CONFIG_DUMMY=m
 CONFIG_NET_FC=y
 CONFIG_NET_SB1000=m
 CONFIG_VMXNET3=m
+CONFIG_USB4_NET=m
 
 ##
 ## file: drivers/net/arcnet/Kconfig
@@ -1126,6 +1110,7 @@ CONFIG_ARCNET_COM20020_CS=m
 ## file: drivers/net/ethernet/Kconfig
 ##
 # CONFIG_CX_ECAT is not set
+CONFIG_FEALNX=m
 
 ##
 ## file: drivers/net/ethernet/3com/Kconfig
@@ -1282,17 +1267,18 @@ CONFIG_HYPERV_NET=m
 CONFIG_PLIP=m
 
 ##
-## file: drivers/net/thunderbolt/Kconfig
-##
-CONFIG_USB4_NET=m
-
-##
 ## file: drivers/net/wan/Kconfig
 ##
 CONFIG_WAN=y
 CONFIG_PCI200SYN=m
 CONFIG_WANXL=m
 CONFIG_FARSYNC=m
+
+##
+## file: drivers/net/wireless/Kconfig
+##
+CONFIG_PCMCIA_RAYCS=m
+CONFIG_PCMCIA_WL3501=m
 
 ##
 ## file: drivers/net/wireless/atmel/Kconfig
@@ -1320,12 +1306,6 @@ CONFIG_PLX_HERMES=m
 CONFIG_TMD_HERMES=m
 CONFIG_PCI_HERMES=m
 CONFIG_PCMCIA_HERMES=m
-
-##
-## file: drivers/net/wireless/legacy/Kconfig
-##
-CONFIG_PCMCIA_RAYCS=m
-CONFIG_PCMCIA_WL3501=m
 
 ##
 ## file: drivers/net/wireless/marvell/mwifiex/Kconfig
@@ -1422,7 +1402,6 @@ CONFIG_PINCTRL_TIGERLAKE=y
 ## file: drivers/platform/chrome/Kconfig
 ##
 CONFIG_CHROME_PLATFORMS=y
-CONFIG_CHROMEOS_ACPI=m
 CONFIG_CHROMEOS_LAPTOP=m
 CONFIG_CHROMEOS_PSTORE=m
 CONFIG_CROS_EC=m
@@ -1452,6 +1431,7 @@ CONFIG_SURFACE_AGGREGATOR=m
 CONFIG_X86_PLATFORM_DEVICES=y
 CONFIG_ACPI_WMI=m
 CONFIG_HUAWEI_WMI=m
+CONFIG_PEAQ_WMI=m
 CONFIG_NVIDIA_WMI_EC_BACKLIGHT=m
 CONFIG_XIAOMI_WMI=m
 CONFIG_GIGABYTE_WMI=m
@@ -1469,6 +1449,8 @@ CONFIG_AMILO_RFKILL=m
 CONFIG_FUJITSU_LAPTOP=m
 CONFIG_FUJITSU_TABLET=m
 CONFIG_GPD_POCKET_FAN=m
+CONFIG_HP_ACCEL=m
+CONFIG_HP_WMI=m
 CONFIG_IBM_RTL=m
 CONFIG_IDEAPAD_LAPTOP=m
 CONFIG_SENSORS_HDAPS=m
@@ -1479,7 +1461,6 @@ CONFIG_THINKPAD_ACPI_ALSA_SUPPORT=y
 # CONFIG_THINKPAD_ACPI_UNSAFE_LEDS is not set
 CONFIG_THINKPAD_ACPI_VIDEO=y
 CONFIG_THINKPAD_ACPI_HOTKEY_POLL=y
-CONFIG_THINKPAD_LMI=m
 CONFIG_MSI_LAPTOP=m
 CONFIG_MSI_WMI=m
 CONFIG_PCENGINES_APU2=m
@@ -1497,7 +1478,7 @@ CONFIG_SONY_LAPTOP=m
 CONFIG_SONYPI_COMPAT=y
 CONFIG_TOPSTAR_LAPTOP=m
 CONFIG_SERIAL_MULTI_INSTANTIATE=m
-CONFIG_TOUCHSCREEN_DMI=y
+CONFIG_X86_ANDROID_TABLETS=m
 CONFIG_INTEL_IPS=m
 CONFIG_SIEMENS_SIMATIC_IPC=m
 
@@ -1519,13 +1500,6 @@ CONFIG_DELL_WMI_AIO=m
 CONFIG_DELL_WMI_LED=m
 
 ##
-## file: drivers/platform/x86/hp/Kconfig
-##
-CONFIG_X86_PLATFORM_DRIVERS_HP=y
-CONFIG_HP_ACCEL=m
-CONFIG_HP_WMI=m
-
-##
 ## file: drivers/platform/x86/intel/Kconfig
 ##
 CONFIG_INTEL_HID_EVENT=m
@@ -1534,10 +1508,8 @@ CONFIG_INTEL_INT0002_VGPIO=m
 CONFIG_INTEL_OAKTRAIL=m
 CONFIG_INTEL_CHTWC_INT33FE=m
 CONFIG_INTEL_RST=m
-CONFIG_INTEL_SDSI=m
 CONFIG_INTEL_SMARTCONNECT=m
 CONFIG_INTEL_TURBO_MAX_3=y
-CONFIG_INTEL_VSEC=m
 
 ##
 ## file: drivers/platform/x86/intel/atomisp2/Kconfig
@@ -1550,25 +1522,9 @@ CONFIG_INTEL_ATOMISP2_PM=m
 CONFIG_INTEL_PMC_CORE=m
 
 ##
-## file: drivers/platform/x86/intel/pmt/Kconfig
-##
-CONFIG_INTEL_PMT_TELEMETRY=m
-CONFIG_INTEL_PMT_CRASHLOG=m
-
-##
-## file: drivers/platform/x86/intel/speed_select_if/Kconfig
-##
-CONFIG_INTEL_SPEED_SELECT_INTERFACE=m
-
-##
 ## file: drivers/platform/x86/intel/wmi/Kconfig
 ##
 CONFIG_INTEL_WMI_THUNDERBOLT=m
-
-##
-## file: drivers/platform/x86/x86-android-tablets/Kconfig
-##
-CONFIG_X86_ANDROID_TABLETS=m
 
 ##
 ## file: drivers/pnp/Kconfig
@@ -1678,6 +1634,13 @@ CONFIG_PCMCIA_SYM53C500=m
 CONFIG_STAGING_MEDIA=y
 
 ##
+## file: drivers/staging/media/deprecated/tm6000/Kconfig
+##
+CONFIG_VIDEO_TM6000=m
+CONFIG_VIDEO_TM6000_ALSA=m
+CONFIG_VIDEO_TM6000_DVB=m
+
+##
 ## file: drivers/staging/rtl8192e/Kconfig
 ##
 CONFIG_RTLLIB=m
@@ -1724,7 +1687,7 @@ CONFIG_INTEL_POWERCLAMP=m
 CONFIG_X86_PKG_TEMP_THERMAL=m
 CONFIG_INTEL_SOC_DTS_THERMAL=m
 CONFIG_INTEL_PCH_THERMAL=m
-CONFIG_INTEL_HFI_THERMAL=y
+# CONFIG_INTEL_MENLOW is not set
 
 ##
 ## file: drivers/thermal/intel/int340x_thermal/Kconfig
@@ -1777,6 +1740,7 @@ CONFIG_UIO_HV_GENERIC=m
 ## file: drivers/usb/Kconfig
 ##
 CONFIG_USB=m
+CONFIG_USB_USS720=m
 
 ##
 ## file: drivers/usb/atm/Kconfig
@@ -1804,11 +1768,6 @@ CONFIG_USB_UHCI_HCD=m
 CONFIG_USB_SL811_HCD=m
 # CONFIG_USB_SL811_HCD_ISO is not set
 CONFIG_USB_SL811_CS=m
-
-##
-## file: drivers/usb/misc/Kconfig
-##
-CONFIG_USB_USS720=m
 
 ##
 ## file: drivers/usb/roles/Kconfig
@@ -1897,7 +1856,8 @@ CONFIG_FB_KYRO=m
 CONFIG_FB_VOODOO1=m
 CONFIG_FB_TRIDENT=m
 CONFIG_FB_VIRTUAL=m
-CONFIG_FB_SIMPLE=y
+#. Doesn't support handover; see #822575
+# CONFIG_FB_SIMPLE is not set
 
 ##
 ## file: drivers/video/fbdev/geode/Kconfig
