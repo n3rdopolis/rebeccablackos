@@ -106,7 +106,7 @@ else
   SHELLCOMMAND="sh"
 fi
 
-cage -d -s -m extend -- \
+cage -d -s -m last -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
 sh -c "$SHELLCOMMAND -l; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
