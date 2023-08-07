@@ -155,7 +155,6 @@ function CompilePackageList
 
 #build these packages in this order.
 
-#CompilePackage linux-modules
 CompilePackage linux-kernel
 CompilePackage cmake
 CompilePackage meson
@@ -344,6 +343,7 @@ CompilePackage kf6/kquickcharts
 CompilePackage kf6/kcolorscheme
 CompilePackage kf6/kconfigwidgets
 CompilePackage kf6/ksvg
+CompilePackage kf6/ktexttemplate
 CompilePackage kf6/kiconthemes
 CompilePackage kf6/knotifications
 CompilePackage kf6/kcompletion
@@ -402,7 +402,6 @@ CompilePackage kwallet-pam
 CompilePackage kwalletmanager
 CompilePackage libkomparediff2
 CompilePackage grantlee
-CompilePackage ktexttemplate
 CompilePackage kmoretools
 CompilePackage libkexiv2
 CompilePackage akonadi
