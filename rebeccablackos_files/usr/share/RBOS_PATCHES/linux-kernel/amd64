@@ -10,10 +10,10 @@ CONFIG_ARCH_MMAP_RND_COMPAT_BITS=8
 CONFIG_64BIT=y
 CONFIG_SMP=y
 CONFIG_X86_X2APIC=y
+CONFIG_INTEL_TDX_GUEST=y
 CONFIG_MAXSMP=y
 CONFIG_X86_16BIT=y
 CONFIG_X86_VSYSCALL_EMULATION=y
-# CONFIG_X86_5LEVEL is not set
 CONFIG_NUMA=y
 CONFIG_AMD_NUMA=y
 CONFIG_X86_64_ACPI_NUMA=y
@@ -109,16 +109,19 @@ CONFIG_CXL_BUS=y
 ##
 CONFIG_INTEL_IDXD=m
 CONFIG_INTEL_IDXD_SVM=y
+CONFIG_INTEL_IDXD_PERFMON=y
 
 ##
 ## file: drivers/edac/Kconfig
 ##
 CONFIG_EDAC_SBRIDGE=m
+CONFIG_EDAC_IGEN6=m
 
 ##
 ## file: drivers/gpu/drm/i915/Kconfig
 ##
 CONFIG_DRM_I915_GVT_KVMGT=m
+CONFIG_DRM_I915_PXP=y
 
 ##
 ## file: drivers/hid/amd-sfh-hid/Kconfig
@@ -199,6 +202,16 @@ CONFIG_PINCTRL_AMD=y
 CONFIG_AMD_PMC=m
 
 ##
+## file: drivers/platform/x86/intel/ifs/Kconfig
+##
+CONFIG_INTEL_IFS=m
+
+##
+## file: drivers/platform/x86/intel/uncore-frequency/Kconfig
+##
+CONFIG_INTEL_UNCORE_FREQ_CONTROL=m
+
+##
 ## file: drivers/scsi/Kconfig
 ##
 CONFIG_SCSI_INIA100=m
@@ -214,17 +227,17 @@ CONFIG_SPI_PXA2XX=m
 CONFIG_MOXA_INTELLIO=m
 
 ##
-## file: drivers/vfio/mdev/Kconfig
-##
-CONFIG_VFIO_MDEV=m
-
-##
 ## file: drivers/video/fbdev/Kconfig
 ##
 CONFIG_FB_MATROX_G=y
 CONFIG_FB_MATROX_MAVEN=m
 # CONFIG_FB_ATY_GENERIC_LCD is not set
 # CONFIG_FB_SAVAGE_I2C is not set
+
+##
+## file: drivers/virt/coco/tdx-guest/Kconfig
+##
+CONFIG_TDX_GUEST_DRIVER=m
 
 ##
 ## file: init/Kconfig
@@ -245,6 +258,9 @@ CONFIG_RCU_FANOUT=64
 ## file: lib/Kconfig.debug
 ##
 CONFIG_DEBUG_INFO_BTF=y
+#. Workaround module loading of different builds of on-disk modules
+#. vs booted kernel when keeping same ABI, cf. #1003210, #1022202
+CONFIG_MODULE_ALLOW_BTF_MISMATCH=y
 CONFIG_FRAME_WARN=2048
 
 ##

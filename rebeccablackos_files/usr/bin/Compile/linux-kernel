@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.1.y
+SOURCEREVISION=linux-6.4.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -61,7 +61,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/linux-kernel.diff
 make olddefconfig
 ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/config
 
