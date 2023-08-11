@@ -1259,7 +1259,10 @@ function DialogWait
   SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
   export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
   SetFallbackEnvironmentVariables $3
-  $KDIALOGCMD --passivepopup "$2" "$1" 2>/dev/null
+  $KDIALOGCMD --title="Login Manager" --msgbox "$2" 2>/dev/null &
+  DialogPID=$!
+  $SLEEPCMD $1
+  TerminateJobPID $DialogPID 15 0
 }
 
 #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
@@ -2528,7 +2531,7 @@ function GetUserCredentials
         TTYSTRING=""
       fi
       WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
-      DialogWait 3 "Attempting to start the selected session..." "$CurrentSeat" &
+      DialogWait 3 "Selected session is attempting to start. Please wait..." "$CurrentSeat" &
       DoSessionLock=0
       StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
     fi
@@ -3050,7 +3053,7 @@ function StartAutoLogin
    else
     export AutoSessionTTY=0
   fi
-  DialogWait 3 "Attempting to start the selected session..." "$1" &
+  DialogWait 3 "Selected session is attempting to start. Please wait..." "$1" &
   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
   if [[ $AutoSessionTTY -ne -1 ]]
   then
