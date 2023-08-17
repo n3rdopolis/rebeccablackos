@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2023-08-11 19:52:00.549921030 -0400
-+++ usr/bin/waylandloginmanagertui	2023-08-11 19:56:05.453126498 -0400
++++ usr/bin/waylandloginmanagertui	2023-08-16 20:31:28.732068108 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -253,7 +253,7 @@
        fi
        WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
 -      DialogWait 3 "Selected session is attempting to start. Please wait..." "$CurrentSeat" &
-+      #DialogWait 3 "Attempting to start the selected session..." "$CurrentSeat" &
++      #DialogWait 3 "Selected session is attempting to start. Please wait..." "$CurrentSeat" &
        DoSessionLock=0
        StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
      fi
@@ -342,7 +342,7 @@
      export AutoSessionTTY=0
    fi
 -  DialogWait 3 "Selected session is attempting to start. Please wait..." "$1" &
-+  #DialogWait 3 "Attempting to start the selected session..." "$1" &
++  #DialogWait 3 "Selected session is attempting to start. Please wait..." "$CurrentSeat" &
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then

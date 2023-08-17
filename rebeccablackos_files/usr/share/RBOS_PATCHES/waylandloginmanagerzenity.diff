@@ -1,5 +1,5 @@
 --- usr/bin/waylandloginmanager	2023-08-11 19:52:00.549921030 -0400
-+++ usr/bin/waylandloginmanagerzenity	2023-08-11 19:55:55.477982634 -0400
++++ usr/bin/waylandloginmanagerzenity	2023-08-16 20:36:15.985898144 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -289,13 +289,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2531,18 +2520,18 @@
-         TTYSTRING=""
-       fi
-       WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
--      DialogWait 3 "Selected session is attempting to start. Please wait..." "$CurrentSeat" &
-+      DialogWait 3 "Attempting to start the selected session..." "$CurrentSeat" &
-       DoSessionLock=0
+@@ -2536,13 +2525,13 @@
        StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
      fi
    else
@@ -373,15 +367,6 @@
 +  #Abort if the user selected cancel on the zenity dialog
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
-   then
-@@ -3053,7 +3036,7 @@
-    else
-     export AutoSessionTTY=0
-   fi
--  DialogWait 3 "Selected session is attempting to start. Please wait..." "$1" &
-+  DialogWait 3 "Attempting to start the selected session..." "$1" &
-   #if there is a tty for the autologin session, the autologin is configured, start the autologin session
-   if [[ $AutoSessionTTY -ne -1 ]]
    then
 @@ -3078,7 +3061,7 @@
  
