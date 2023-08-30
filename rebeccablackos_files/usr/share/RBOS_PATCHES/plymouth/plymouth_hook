@@ -21,10 +21,10 @@ esac
 . /usr/share/initramfs-tools/hook-functions
 
 mkdir -p "${DESTDIR}/usr/share/X11/xkb"
-cp -a /usr/share/X11/xkb/* "${DESTDIR}/usr/share/X11/xkb"
+cp -aZ /usr/share/X11/xkb/* "${DESTDIR}/usr/share/X11/xkb"
 
 mkdir -p "${DESTDIR}/usr/share/X11/locale"
-cp -a /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
+cp -aZ /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
 
 THEME="$(/opt/sbin/plymouth-set-default-theme || true)"
 THEMES="/opt/share/plymouth/themes"
@@ -117,8 +117,8 @@ do
 done
 
 # copy base themes and logo
-cp -a "${THEMES}/details" "${DESTDIR}/${THEMES}"
-cp -a "${THEMES}/text" "${DESTDIR}/${THEMES}"
+cp -aZ "${THEMES}/details" "${DESTDIR}/${THEMES}"
+cp -aZ "${THEMES}/text" "${DESTDIR}/${THEMES}"
 
 if [ -f /etc/os-release ]
 then
@@ -139,7 +139,7 @@ case "${THEME_NAME}" in
 
                 # fontconfig
                 mkdir -p "${DESTDIR}/etc/fonts/conf.d"
-                cp -a /etc/fonts/fonts.conf "${DESTDIR}/etc/fonts"
+                cp -aZ /etc/fonts/fonts.conf "${DESTDIR}/etc/fonts"
                 cp -rL /etc/fonts/conf.d/60-latin.conf "${DESTDIR}/etc/fonts/conf.d"
                 mkdir -p "${DESTDIR}/var/cache/fontconfig"
                 # This is only needed because fc-cache bellow fails if the directory doesn't exist
@@ -149,15 +149,15 @@ case "${THEME_NAME}" in
                 if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf ]
                 then
                         mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-                        cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -aZ /usr/share/fonts/truetype/dejavu/DejaVuSerif.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -aZ /usr/share/fonts/truetype/dejavu/DejaVuSans.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+                        cp -aZ /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf  "${DESTDIR}/usr/share/fonts/truetype/dejavu"
                 fi
 
                 font=$(fc-match -f %{file})
                 monospacedfont=$(fc-match -f %{file} monospace)
-                cp -a "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
-                cp -a "$monospacedfont" "${DESTDIR}/usr/share/fonts/Plymouth-monospace.ttf"
+                cp -aZ "$font" "${DESTDIR}/usr/share/fonts/Plymouth.ttf"
+                cp -aZ "$monospacedfont" "${DESTDIR}/usr/share/fonts/Plymouth-monospace.ttf"
 
                 case "${THEME_NAME}" in
                         spinner|bgrt)
@@ -165,8 +165,8 @@ case "${THEME_NAME}" in
                                 if [ -e /usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf ]
                                 then
                                         mkdir -p "${DESTDIR}/usr/share/fonts/opentype/cantarell"
-                                        cp -a /usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
-                                        cp -a /usr/share/fonts/opentype/cantarell/Cantarell-Light.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
+                                        cp -aZ /usr/share/fonts/opentype/cantarell/Cantarell-Regular.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
+                                        cp -aZ /usr/share/fonts/opentype/cantarell/Cantarell-Light.otf "${DESTDIR}/usr/share/fonts/opentype/cantarell"
                                 fi
                                 # We continue to the default case here
                                 ;;
@@ -257,10 +257,10 @@ mkdir -p "${DESTDIR}/opt/etc/plymouth"
 
 if [ -r /opt/etc/plymouth/plymouthd.conf ]
 then
-        cp -a /opt/etc/plymouth/plymouthd.conf "${DESTDIR}/opt/etc/plymouth/"
+        cp -aZ /opt/etc/plymouth/plymouthd.conf "${DESTDIR}/opt/etc/plymouth/"
 fi
 
-cp -a /opt/share/plymouth/plymouthd.defaults "${DESTDIR}/opt/share/plymouth/"
+cp -aZ /opt/share/plymouth/plymouthd.defaults "${DESTDIR}/opt/share/plymouth/"
 
 # temporarily include dummy root account lookup (#691598)
 if ! grep -qs '^root:' "${DESTDIR}/etc/passwd"

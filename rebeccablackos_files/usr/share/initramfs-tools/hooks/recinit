@@ -36,38 +36,38 @@ cp /lib/udev/rules.d/60-input-id.rules "${DESTDIR}/lib/udev/rules.d"
 if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf ]
 then
   mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-  cp -a /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+  cp -aZ /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
 fi
 
 if [ -e /usr/share/icons/oxy-white/cursors/ ]
 then
   mkdir -p "${DESTDIR}/usr/share/icons/default/cursors/"
-  cp -a /usr/share/icons/oxy-white/cursors/* "${DESTDIR}/usr/share/icons/default/cursors/"
+  cp -aZ /usr/share/icons/oxy-white/cursors/* "${DESTDIR}/usr/share/icons/default/cursors/"
 fi
 
 if [ -e /usr/lib/locale/[cC].[uU][tT][fF]*8/ ]
 then
   CUTF8DIR=$(basename $(ls -d /usr/lib/locale/[cC].[uU][tT][fF]*8))
   mkdir -p "${DESTDIR}/usr/lib/locale/$CUTF8DIR/"
-  cp -a "/usr/lib/locale/$CUTF8DIR/"* "${DESTDIR}/usr/lib/locale/$CUTF8DIR/"
+  cp -aZ "/usr/lib/locale/$CUTF8DIR/"* "${DESTDIR}/usr/lib/locale/$CUTF8DIR/"
 fi
 
 if [ -e /opt/share/libinput ]
 then
   mkdir -p "${DESTDIR}/opt/share/libinput/"
-  cp -a /opt/share/libinput/* "${DESTDIR}/opt/share/libinput/"
+  cp -aZ /opt/share/libinput/* "${DESTDIR}/opt/share/libinput/"
 fi
 
 if [ -e /opt/share/X11/xkb ]
 then
   mkdir -p "${DESTDIR}/opt/share/X11/xkb"
-  cp -a /opt/share/X11/xkb/* "${DESTDIR}/opt/share/X11/xkb"
+  cp -aZ /opt/share/X11/xkb/* "${DESTDIR}/opt/share/X11/xkb"
 fi
 
 if [ -e /usr/share/X11/locale ]
 then
   mkdir -p "${DESTDIR}/usr/share/X11/locale"
-  cp -a /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
+  cp -aZ /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
 fi
 
 if [ -e /etc/footkiosk.conf ]
