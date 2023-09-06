@@ -83,25 +83,9 @@ cmake --install build
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-
-
-mkdir "$EXTERNALBUILDHOME/mainwindow"
-cd "$EXTERNALBUILDHOME/mainwindow"
-cmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/mainwindows/mainwindow
-make
-cp "$EXTERNALBUILDHOME/mainwindow/mainwindow" $INSTALLDIR/bin/mainwindow6
-
-
-mkdir "$EXTERNALBUILDHOME/wiggly"
-cd "$EXTERNALBUILDHOME/wiggly"
-cmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/wiggly
-make
-cp "$EXTERNALBUILDHOME/wiggly/wiggly" $INSTALLDIR/bin/wiggly6
-
-
 mkdir "$EXTERNALBUILDHOME/tetrix"
 cd "$EXTERNALBUILDHOME/tetrix"
-cmake "$SOURCEDIR"/"$SOURCENAME"/examples/widgets/widgets/tetrix
+cmake "$SOURCEDIR"/"$SOURCENAME"/tests/manual/examples/widgets/widgets/tetrix
 make
 cp "$EXTERNALBUILDHOME/tetrix/tetrix" $INSTALLDIR/bin/tetrix6
 
