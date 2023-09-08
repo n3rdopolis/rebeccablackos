@@ -1,0 +1,25 @@
+https://codereview.qt-project.org/gitweb?p=qt/qtwebengine-chromium.git;a=patch;h=8ebc2ff3
+From 8ebc2ff350f33920fb45c2d0a5d659b265eac259 Mon Sep 17 00:00:00 2001
+From: Martin Negyokru <negyokru@inf.u-szeged.hu>
+Date: Wed, 9 Aug 2023 14:03:13 +0200
+Subject: [PATCH] FIXUP: Fixes for jumbo build
+
+Change-Id: I90818adc19abc1ed79dfe9b46212b576b659d6e0
+---
+ /src/3rdparty/chromium/third_party/webrtc/modules/portal/BUILD.gn | 1 +
+ 1 file changed, 1 insertion(+)
+
+diff --git a/src/3rdparty/chromium/third_party/webrtc/modules/portal/BUILD.gn b/src/3rdparty/chromium/third_party/webrtc/modules/portal/BUILD.gn
+index d0756f269be..9482dd3150c 100644
+--- a/src/3rdparty/chromium/third_party/webrtc/modules/portal/BUILD.gn
++++ b/src/3rdparty/chromium/third_party/webrtc/modules/portal/BUILD.gn
+@@ -86,6 +86,7 @@ if ((is_linux || is_chromeos) && rtc_use_pipewire) {
+     # included in targets. More details in: webrtc:13898
+     if (is_linux && !is_castos) {
+       defines += [ "WEBRTC_USE_GIO" ]
++      configs = [ ":gio" ]
+     }
+   }
+ 
+-- 
+2.16.3
