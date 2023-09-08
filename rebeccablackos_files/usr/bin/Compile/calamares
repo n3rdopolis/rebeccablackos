@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/calamares/calamares.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=v3.2.61
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -61,6 +61,9 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/add_subdirectory(tests)//g' src/modules/partition/CMakeLists.txt
+sed -i 's/NOT WITH_QT6/WITH_QT6/g' CMakeModules/KPMcoreHelper.cmake
+
 cp -a /usr/share/RBOS_PATCHES/calamares/* .
 sed -i "s|^Exec=*|Exec=bash -c -- \"xhost +SI:localuser:root; systemd-inhibit --who=\'System Installer\' --why=\'Installing System\' --mode=block -- wlsudo calamares -style oxygen\"\n|g" calamares.desktop
 sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
@@ -69,7 +72,7 @@ sed -i '/pkexec/d' calamares.desktop
 
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DWITH_PARTITIONMANAGER=1
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DWITH_QT6=ON
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
