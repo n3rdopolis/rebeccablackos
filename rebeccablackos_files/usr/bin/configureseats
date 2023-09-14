@@ -23,46 +23,45 @@
 #Require root privlages
 if [[ $UID != 0 ]]
 then
-  qarma --info --text="Must be run as root." --title="Multipointer and Seat Configuration" 2>/dev/null
+  zenity --info --text="Must be run as root." --title="Multipointer and Seat Configuration" 2>/dev/null
   exit
 fi
 
 #Allow Exclamation points to be used in commands by turning off the history
 set +H
 
-#Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the qarma dialog. There can be more, but if there are too many, it become a hastle for the user
+#Specify the maximum number of seats. This is a more for usability, for specifying how many seats are listed in the zenity dialog. There can be more, but if there are too many, it become a hastle for the user
 MaxNumberOfSeats=10
 
 #get the current session ID and seat id
 export XDG_SESSION_ID=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Id | awk -F \" '{print $2}')
 export XDG_SEAT=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
 
-#Dont run qarma as root
+#Dont run zenity as root
 if [[ ! -z $SUDO_USER ]]
 then
-  QARMACMD="runuser -u "$SUDO_USER" -m -- qarma"
+  ZENITYCMD="runuser -u "$SUDO_USER" -m -- zenity"
 else
-  QARMACMD="qarma"
+  ZENITYCMD="zenity"
 fi
 
 #Function that prepares the list of seats for the dropdown menus
 #It takes no arguments
 function PrepareSeatList
 {
-  #Generate a list of logical seats for the Qarma dialogs for selection
+  #Generate a list of logical seats for the Zenity dialogs for selection
   unset LogicalSeatList
-  LogicalSeatList="|default"
+  LogicalSeatList="default"
   for (( SeatIterator=1; SeatIterator<MaxNumberOfSeats; SeatIterator++ ))
   do
     LogicalSeatList+="|"
     LogicalSeatList+="seat$SeatIterator"
   done
 
-  #Generate a list of physical seats for the Qarma dialogs for selection
+  #Generate a list of physical seats for the Zenity dialogs for selection
   unset PhysicalSeatArray
 
-  PhysicalSeatArray=('')
-  PhysicalSeatArray+=($(loginctl list-seats --no-legend | grep -v seat-vtty | sort))
+  PhysicalSeatArray=($(loginctl list-seats --no-legend | grep -v seat-vtty | sort))
   for (( SeatIterator=1; SeatIterator<MaxNumberOfSeats; SeatIterator++ ))
   do
     IncludeSeat=1
@@ -335,30 +334,37 @@ function DeviceSelection
   DeviceSortArrayIndex=($(echo "$DeviceSortArrayString" | sort -rnt "," -k 2,2 | awk -F "," '{print $1}'))
 
 
-  DeviceSelectionArray=()
+  DeviceSelectionString=""
+  DeviceIterator=0
   DeviceConnectionOrder=$NumberOfDevices
   for DeviceElementNumber in "${DeviceSortArrayIndex[@]}"
   do
-    DeviceSelectionArray+=("$DeviceElementNumber")
-    DeviceSelectionArray+=("${DeviceTypes[$DeviceElementNumber]}")
-    DeviceSelectionArray+=("${DeviceNames[$DeviceElementNumber]}")
-    DeviceSelectionArray+=("${DeviceConnections[$DeviceElementNumber]}")
+    ((DeviceIterator++))
+    if [[ $DeviceIterator != 1 ]]
+    then
+      DeviceSelectionString+=$'\n'
+    fi
+
+    DeviceSelectionString+=$DeviceElementNumber$'\n'
+    DeviceSelectionString+=${DeviceTypes[$DeviceElementNumber]}$'\n'
+    DeviceSelectionString+=${DeviceNames[$DeviceElementNumber]}$'\n'
+    DeviceSelectionString+=${DeviceConnections[$DeviceElementNumber]}$'\n'
     if [[ ${DeviceInputTypeFlags[$DeviceElementNumber]} == 1 ]]
     then
-      DeviceSelectionArray+=("${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentLogicalSeatIDs[$DeviceElementNumber]}")
-      DeviceSelectionArray+=("${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceNewLogicalSeatIDs[$DeviceElementNumber]}")
+      DeviceSelectionString+="${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceCurrentLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]} / ${DeviceNewLogicalSeatIDs[$DeviceElementNumber]}"$'\n'
     else
-      DeviceSelectionArray+=("${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]}")
-      DeviceSelectionArray+=("${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]}")
+      DeviceSelectionString+="${DeviceCurrentPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
+      DeviceSelectionString+="${DeviceNewPhysicalSeatIDs[$DeviceElementNumber]}"$'\n'
     fi
-    DeviceSelectionArray+=("$DeviceConnectionOrder")
+    DeviceSelectionString+=$DeviceConnectionOrder
     ((DeviceConnectionOrder--))
   done
 
-  DeviceSelectionArray+=(-1 "[Apply Changes]" '' '' '' '' '')
-  DeviceSelectionArray+=(-2 "[Cancel Changes]" '' '' '' '' '')
+  DeviceSelectionString+=$'\n'-1$'\n'"[Apply Changes]"$'\n'$'\n'$'\n'$'\n'$'\n'
+  DeviceSelectionString+=$'\n'-2$'\n'"[Cancel Changes]"$'\n'$'\n'$'\n'$'\n'$'\n'
 
-  $QARMACMD --height 580 --width 800 --list --hide-column 1 --column=selectionnumber --column="Type" --column="Name" --column="Connection Path" --column="Current Physical/Logical Seats" --column="New Physical/Logical Seats" --column="Connected Order" --title="Multipointer and Seat Configuration" --text="The changes made here will impact all users, as well as the login greeters. 
+  echo "$DeviceSelectionString" | $ZENITYCMD --height 580 --width 800 --list --hide-column 1 --print-column 1 --column=selectionnumber --column="Type" --column="Name" --column="Connection Path" --column="Current Physical/Logical Seats" --column="New Physical/Logical Seats" --column="Connected Order" --title="Multipointer and Seat Configuration" --text="The changes made here will impact all users, as well as the login greeters. 
 Multipointer is not supported by all Wayland desktops like it is on Weston.
 
 This assist in associating devices with physical seats and logical seats.
@@ -378,7 +384,7 @@ The default seat for physical seats is 'seat0', and the default seat for logical
 
 Please note that some devices have multiple internal components, and sometimes appear as 'different' devices
 
-Devices are sorted by the order they were connected, with the newest devices on top" "${DeviceSelectionArray[@]}" 2> /dev/null
+Devices are sorted by the order they were connected, with the newest devices on top" 2> /dev/null
 }
 
 #Configure the seats of a selected device, it takes one argument, the array index element number of the device to configure
@@ -390,25 +396,25 @@ function ConfigureDevice
 
   if [[ ${DeviceInputTypeFlags[$CurrentDeviceNumber]} == 1 ]]
   then
-    NewSeatSelection=$($QARMACMD  --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --add-combo "Logical Seat" --combo-values="$LogicalSeatList" --text="Multipointer and Seat Configuration
+    NewSeatSelection=$($ZENITYCMD  --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --add-combo "Logical Seat" --combo-values="$LogicalSeatList" --text="Multipointer and Seat Configuration
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
     Current Physical Seat: ${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}
     Current Logical Seat: ${DeviceCurrentLogicalSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
-    QarmaResult=$?
+    ZenityResult=$?
   else
-    NewSeatSelection=$($QARMACMD --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --text="Multipointer and Seat Configuration
+    NewSeatSelection=$($ZENITYCMD --forms --add-combo "Physical Seat" --combo-values="$PhysicalSeatList" --text="Multipointer and Seat Configuration
 
     Select a seat for ${DeviceTypes[$CurrentDeviceNumber]}: ${DeviceDisplayNames[$CurrentDeviceNumber]}
     Connected to: ${DeviceConnections[$CurrentDeviceNumber]}
 
     Current Physical Seat: ${DeviceCurrentPhysicalSeatIDs[$CurrentDeviceNumber]}" --separator="@" --title "Multipointer and Seat Configuration" 2>/dev/null)
-    QarmaResult=$?
+    ZenityResult=$?
   fi
 
-  if [[ $QarmaResult != 0 ]]
+  if [[ $ZenityResult != 0 ]]
   then
     return 1
   fi
@@ -498,7 +504,7 @@ function CommitConfigFile
 function SignalCompletion
 {
 
-  $QARMACMD --info --text "Seat Configuration for all devices is now complete.
+  $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
 
 Press OK to apply all the changes. This will switch user to the loginmanager display.
 This is to signal the display server to detect the new changes, and the waylandloginmanager to detect new seats.
@@ -612,7 +618,7 @@ Leaving a field blank leaves the device assigned to the current seat info.
 For example, if a device is on seat0/default and the logical seat is set to seat1
 the device's physical seat will remain on seat0 as the logical seat is set to seat1.
 
-"|$QARMACMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
+"|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
 }
 
 #Function for the main configuration wizard, it takes no arguments
@@ -628,7 +634,7 @@ function MainConfig
     #Exit if selected
     if [[ $Result != 0 || $SelectedDevice == -2 ]]
     then
-      $QARMACMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without saving changes?" 2>/dev/null
+      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "Are you sure you want to quit this utility without saving changes?" 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
@@ -681,7 +687,7 @@ function MainConfig
       done
       if [[ $ChangedDeviceCount == 0 ]]
       then
-        $QARMACMD --forms --ok-label=Yes --cancel-label=No --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility without making changes?" 2>/dev/null
+        $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility without making changes?" 2>/dev/null
         Result=$?
         if [[ $Result == 0 ]]
         then
@@ -690,7 +696,7 @@ function MainConfig
           continue
         fi
       fi
-      $QARMACMD --forms --ok-label=Yes --cancel-label=No  --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
+      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
@@ -714,14 +720,19 @@ function MainConfig
 
 function MainDialog
 {
-SelectedOption=$($QARMACMD --height 380 --list --hide-column 1 --column=selectionnumber --column=option --hide-header --title="Multipointer and Seat Configuration" --text "Select device configuration mode.
+SelectedOption=$(echo "1
+Configure Devices
+2
+Show Detailed Help
+3
+Quit"| $ZENITYCMD --height 380 --list --hide-column 1 --print-column 1 --column=selectionnumber --column=option --hide-header --title="Multipointer and Seat Configuration" --text "Select device configuration mode.
 
 'Configure All Devices' lists all devices currently attached to be configured.
 
 'Show Detailed Help' shows more details on how to use this wizard
 
 'Quit' Exits this wizard
-" "1" "Configure Devices" "2" "Show Detailed Help" "3" "Quit")
+")
 Return=$?
 if [[ $Return != 0 ]]
 then
