@@ -61,8 +61,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's|DEFAULT_BACKDROP   DATADIR "/backgrounds/xfce/xfce-shapes.svg"|DEFAULT_BACKDROP  "/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png"|g' common/xfdesktop-common.h
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)  
+./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --with-default-backdrop-filename=/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
