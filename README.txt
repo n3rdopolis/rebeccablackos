@@ -20,6 +20,8 @@ OVERVIEW:
   There are also other Wayland Desktop environments that are usable: Enlightenment, and Gnome Shell Wayland, Kwin, Wayfire, and Sway, aside from the default
   Weston Desktop shell.
 
+  The kernel is compiled without VTs enabled.
+
   This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
   It is based on Debian Bookworm for Tier 1 packages.
