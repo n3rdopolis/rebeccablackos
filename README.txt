@@ -88,11 +88,8 @@ BOOT OPTIONS:
             wlmnofbdev :                [Legacy option] Force the WaylandLoginManager to hide framebuffer support even if framebuffer support is possible.
                                         (Recent versions of Weston dropped the framebuffer backend. This is redundant now.)
 
-            wlmdebug :                  Forces more Sys-Rq triggers to be enabled, and sessions marked as debug-only to be selectable as runnable sessions.
+            wlmdebug :                  Forces sessions marked as debug-only to be selectable as runnable sessions, and WaylandLoginManager to log to /dev/kmsg.
 
-            wlmdebuginsecure :          This option is the same as wlmdebug, and allows a root diagnostic terminal to be started on the loginmanagerdisplay
-                                        with the same variables as the WaylandLoginManager service. This is for diagnosis and debugging the WaylandLoginManager
-                                        itself. This option is only available when the kernel command line is modified to have this option.
 
 
        These relevant options are also handled, (but not by the WaylandLoginManager itself)

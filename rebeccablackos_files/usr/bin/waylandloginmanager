@@ -920,7 +920,6 @@ function PrepareLoginManager
   GetConfigKey wlmlivemode "" 0 0 LiveCDMode
 
   KDIALOGCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- kdialog"
-  TERMINALCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- vte"
   WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
   if [[ $seat0HasTTYs == 1 ]]
   then
@@ -1048,19 +1047,7 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
   #Enable full alt+sysrq, and allow a debug login terminal window when wlmdebug is passed as a kernel argument. This is for testing general issues with the waylandloginmanager
   if [[ $wlmdebug != 0 ]]
   then
-    echo 1 > /proc/sys/kernel/sysrq
-    WriteToLog "WARNING: The diagnostic 'wlmdebug' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical login terminal window on the loginmanagerdisplay"
     wlmdebug=1
-  fi
-
-  #Enable full alt+sysrq, and allow a debug root terminal window when wlmdebuginsecure is passed as a kernel argument, this is for testing commands that need to be run within the same context as the waylandloginmanager
-  GetConfigKey wlmdebuginsecure "" 0 2 wlmdebuginsecure
-  if [[ $wlmdebuginsecure != 0 ]]
-  then
-    echo 1 > /proc/sys/kernel/sysrq
-    WriteToLog "WARNING: The diagnostic and insecure 'wlmdebuginsecure' option has been passed to the kernel. This causes the waylandloginmanager to enable all magic sysrq keys, including the ability to kill processes, and the waylandloginmanager will respond to the Debug command when sent to the main control FIFO, by spawning a graphical ROOT terminal window on the loginmanagerdisplay"
-    wlmdebug=1
-    wlmdebuginsecure=1
   fi
 
   HOSTNAME=$(hostname)
@@ -2021,22 +2008,6 @@ function ChooseSessionType
     $KDIALOGCMD --title="Session Selection" --error "No sessions are installed, configured correctly, or supported by the hardware in this seat." 2>/dev/null
     WriteToLog "No sessions are installed in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
     return 1
-  fi
-}
-
-
-#This function displays a diagnostic terminal. It starts the terminal as root, with a root terminal. (only when wlmdebuginsecure is passed as a boot option)
-#It takes 1 argument, the seat to display the terminal on
-function DiagnosticTerminal 
-{
-  CurrentSeat=$1
-  GetStartedSeatIndex $CurrentSeat
-  SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
-  export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
-  SetFallbackEnvironmentVariables $CurrentSeat
-  if [[ $wlmdebuginsecure == 1 ]]
-  then
-    vte -N &>/dev/null
   fi
 }
 
@@ -3117,10 +3088,6 @@ function UserActionDialog
   ActionMenu="Login"$'\n'"Login..."$'\n'
   ActionMenu+="Switch"$'\n'"Switch User..."$'\n'
   ActionMenu+="Leave"$'\n'"Shutdown..."$'\n'"Info"$'\n'"Help..."
-  if [[ $wlmdebuginsecure == 1 ]]
-  then
-    ActionMenu+=$'\n'"Debug"$'\n'"Root Terminal..."
-  fi
 
   IFS=$'\n'
   ActionMenu=($ActionMenu)
@@ -3859,36 +3826,6 @@ Will show a menu with a few options for diagnosis." 20 50
       else
         WriteToLog "A handler for the Info command is already open"
       fi
-    #If the command is Debug, and wlmdebug was passed to the kernel, then show a login terminal window, only if there isn't another debug terminal window job running
-    elif [[ $COMMAND == "Debug" ]]
-    then
-      if [[ $wlmdebuginsecure == 1 ]]
-      then
-        if [[ -z $SEATARG ]]
-        then
-          WriteToLog "received command $COMMAND with no seat specifed"
-          continue
-        else
-          WriteToLog "received command $COMMAND for seat $SEATARG"
-        fi
-        if [[ ! $(jobs -p -r) =~ (^|[[:space:]])${LastDebugPIDs[$SeatIndexID]}([[:space:]]|$) || $wlmdebuginsecure == 1  ]]
-        then
-          DiagnosticTerminal "$SEATARG" &
-          LastDebugPIDs[$SeatIndexID]=$!
-          WriteToLog "Spawned a root terminal window on the loginmanagerdisplay for $SEATARG"
-
-          if [[ $PlymouthQuitRequestSent == 0 ]]
-          then
-            plymouth quit &> /dev/null
-            PlymouthQuitRequestSent=1
-          fi
-
-        else
-          WriteToLog "A handler for the Debug command is already open"
-        fi
-      else
-        WriteToLog "Invalid command: $COMMAND for $SEATARG received, but wlmdebuginsecure not passed to the kernel."
-      fi
     #if the command is unknown, then log that.
     else
       WriteToLog "Invalid command: $COMMAND received for seat $SEATARG"
@@ -3995,7 +3932,7 @@ then
   while [ 1 ]
   do
     runuser -u $FIFOREADERUSER -m -- socat UNIX-LISTEN:/run/waylandloginmanager/loginmanager_control,reuseaddr,fork,readbytes=290,mode=0622,unlink-early - | \
-     runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$|^Debug@[a-Z0-9_\-]*$|^$" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+     runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
     #Pause so that the CPU usage doesn't storm if socat fails to start
     $SLEEPCMD .1
   done
