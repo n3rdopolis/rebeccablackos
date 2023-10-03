@@ -1,0 +1,20 @@
+[Unit]
+Description=Recinit backed Emergency Shell
+Conflicts=shutdown.target
+After=sysinit.target plymouth-start.service
+Before=shutdown.target
+
+[Service]
+Environment=RECINIT_SYSTEMD=1
+Environment=RECINIT_SYSTEMD_TYPE=emergency
+Environment=HOME=/root
+WorkingDirectory=-/root
+ExecStartPre=-/bin/plymouth --wait quit
+ExecStart=/usr/sbin/recinit
+Type=idle
+KillMode=process
+IgnoreSIGPIPE=no
+SendSIGHUP=yes
+
+[Install]
+WantedBy=emergency.target

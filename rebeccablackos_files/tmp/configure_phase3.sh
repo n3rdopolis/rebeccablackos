@@ -156,7 +156,11 @@ function PostInstallActions
 
   #Enable the auto simpledrm fallback detector
   systemctl enable auto_simpledrm_fallback.service
-  
+
+  #Enable the recinit services for systemd's recovery shells
+  systemctl enable recinit-rescue.service
+  systemctl enable recinit-emergency.service
+
   #Enable pipewire services
   systemctl --global enable pipewire.socket
   systemctl --global add-wants pipewire.service wireplumber.service

@@ -75,6 +75,12 @@ export LC_ALL=C.UTF-8
 #fi
 modprobe evdev
 
+if [ "$RECINIT_SYSTEMD" = 1 ]
+then
+  fuser -k /dev/dri/card*
+  sleep 1
+fi
+
 #populate fake udev device info if udev not running
 udevadm control --ping -t 1 > /dev/null 2>&1
 udev_result=$?
@@ -101,14 +107,25 @@ fi
 #Prefer bash (if started as init). In initramfs, only sh tends to be usable, use sh as a fallback
 if command -v bash > /dev/null 2>/dev/null
 then
-  SHELLCOMMAND="bash"
+  RUNCOMMAND="bash -l"
 else
-  SHELLCOMMAND="sh"
+  RUNCOMMAND="sh -l"
+fi
+
+if [ "$RECINIT_SYSTEMD" = "1" ]
+then
+  if [ "$RECINIT_SYSTEMD_TYPE" = "rescue" ]
+  then
+    RUNCOMMAND="/usr/lib/systemd/systemd-sulogin-shell rescue"
+  elif [ "$RECINIT_SYSTEMD_TYPE" = "emergency" ]
+  then
+    RUNCOMMAND="/usr/lib/systemd/systemd-sulogin-shell emergency"
+  fi
 fi
 
 cage -d -s -m last -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
-sh -c "$SHELLCOMMAND -l; kill -9 \$(pidof cage)" > /dev/null 2>&1
+sh -c "$RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
 if [ $udev_result -ne 0 ]
 then
