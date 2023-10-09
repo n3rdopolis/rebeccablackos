@@ -17,7 +17,7 @@ OVERVIEW:
 
   Xwayland is also included, which allows X applications to run.
 
-  There are also other Wayland Desktop environments that are usable: Enlightenment, and Gnome Shell Wayland, Kwin, Wayfire, and Sway, aside from the default
+  There are also other Wayland Desktop environments that are usable: Enlightenment, Gnome Shell Wayland, Kwin, Mate, Sway, and XFCE aside from the default
   Weston Desktop shell.
 
   The kernel is compiled without VTs enabled.
