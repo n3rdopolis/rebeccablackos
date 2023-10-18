@@ -63,11 +63,6 @@ else
   ARCHARGS=""
 fi
 
-sed -i '/XKB_KEY_dead_lowline/d' src/gui/platform/unix/qxkbcommon.cpp
-sed -i '/XKB_KEY_dead_aboveverticalline/d' src/gui/platform/unix/qxkbcommon.cpp
-sed -i '/XKB_KEY_dead_belowverticalline/d' src/gui/platform/unix/qxkbcommon.cpp
-sed -i '/XKB_KEY_dead_longsolidusoverlay/d' src/gui/platform/unix/qxkbcommon.cpp
-
 cmake -B build -G Ninja -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_BINDIR=lib/qt6/bin -DINSTALL_DOCDIR=share/doc/qt6 -DINSTALL_ARCHDATADIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/qt6 -DINSTALL_DATADIR=share/qt6 -DINSTALL_INCLUDEDIR=include/qt6 -DINSTALL_MKSPECSDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/qt6/mkspecs -DINSTALL_EXAMPLESDIR=share/doc/qt6/examples \
 -DQT_FEATURE_journald=ON -DQT_FEATURE_openssl_linked=ON -DQT_QPA_DEFAULT_PLATFORM=wayland -DWARNINGS_ARE_ERRORS=OFF -DFEATURE_separate_debug_info=OFF -DQT_BUILD_TESTS=OFF -DFEATURE_optimize_size=ON -DFEATURE_system_sqlite=ON -DFEATURE_dbus=ON -DFEATURE_accessibility=ON $ARCHARGS
 }
