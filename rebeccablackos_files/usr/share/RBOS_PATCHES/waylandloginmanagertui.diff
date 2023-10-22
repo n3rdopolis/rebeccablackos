@@ -49,7 +49,7 @@
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
    export QT_QPA_PLATFORM=wayland
--  export QT_QPA_PLATFORMTHEME=qt5ct
+-  export QT_QPA_PLATFORMTHEME=qt6ct
 +  export QT_STYLE_OVERRIDE=oxygen
    #Set the default path for weston
 -  export DEFAULTWAYLANDSERVER=$(which weston)
