@@ -1,13 +1,21 @@
 diff --git a/kdecoration/oxygendecoration.cpp b/kdecoration/oxygendecoration.cpp
-index 83066fa4..66d01bed 100644
+index 83066fa4..7337b10f 100644
 --- a/kdecoration/oxygendecoration.cpp
 +++ b/kdecoration/oxygendecoration.cpp
-@@ -593,7 +593,7 @@ void Decoration::renderWindowBackground(QPainter *painter, const QRect &clipRect
+@@ -22,6 +22,7 @@
+ #include <KConfigGroup>
+ #include <KPluginFactory>
+ #include <KSharedConfig>
++#include <KWindowSystem>
+ 
+ #include <QPainter>
+ #include <QTextStream>
+@@ -593,7 +594,7 @@ void Decoration::renderWindowBackground(QPainter *painter, const QRect &clipRect
          innerClientRect.adjust(1, 1, -1, -1);
      }
  
 -    if (SettingsProvider::self()->helper()->hasBackgroundGradient(c->windowId())) {
-+    if (SettingsProvider::self()->helper()->hasBackgroundGradient(c->windowId()) || !QX11Info::isPlatformX11()) {
++    if (SettingsProvider::self()->helper()->hasBackgroundGradient(c->windowId()) || !KWindowSystem::isPlatformX11()) {
          SettingsProvider::self()->helper()->renderWindowBackground(painter, clipRect, innerClientRect, titleBarColor(palette), borderTop() - 24);
  
      } else {
