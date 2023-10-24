@@ -291,3 +291,5 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 (. /usr/bin/build_vars; remastersys dist)
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom.iso
 rm -rf /home/remastersys/remastersys/*
+
+cp /usr/share/buildcore_revisions.txt /home/remastersys/
