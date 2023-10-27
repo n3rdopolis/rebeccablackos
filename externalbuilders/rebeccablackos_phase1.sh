@@ -90,13 +90,13 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Bind mount shared directories
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
 #Hide /proc/modules as some debian packages call lsmod during install, which could lead to different results
 mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
@@ -127,8 +127,8 @@ umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir

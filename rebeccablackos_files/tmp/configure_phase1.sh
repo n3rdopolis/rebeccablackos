@@ -25,7 +25,7 @@ fi
 
 shopt -s dotglob
 
-export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
+export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
 #create folder for install logs
 mkdir -p "$PACKAGEOPERATIONLOGDIR"

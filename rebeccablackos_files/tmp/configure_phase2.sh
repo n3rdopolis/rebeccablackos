@@ -23,7 +23,7 @@ then
   exit
 fi
 
-export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
+export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {

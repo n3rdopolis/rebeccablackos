@@ -67,10 +67,10 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
 #Bind mount shared directories
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 
 #Hide /proc/modules as some debian packages call lsmod during install, which could lead to different results
@@ -80,18 +80,18 @@ mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 if [[ -d "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay ]]
 then
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild/*
-  mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+  mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 else
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild/*
-  mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+  mount -t overlay overlay -o  ${ADDITIONAL_OVERLAYFS_PARAMS},redirect_dir=on,volatile,lowerdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild,upperdir="$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay,workdir="$BUILDLOCATION"/build/"$BUILDARCH"/unionwork_srcbuild "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
 fi
 
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
 mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
 #copy the files to where they belong
 rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
@@ -119,9 +119,9 @@ umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/srcbuild_overlay
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/buildoutput
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/srcbuild/
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/home/remastersys
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/buildlogs
+umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir

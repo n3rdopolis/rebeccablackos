@@ -63,9 +63,9 @@ function CompilePackageInList
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
     else
-      mkdir -p /buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecDownloadBuilder
-      echo "$BUILDNAME" >> /buildlogs/build_core/faileddownloads
+      mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecDownloadBuilder
+      echo "$BUILDNAME" >> /var/log/buildlogs/build_core/faileddownloads
       return
     fi
     export MULTIJOBSTATUS="~"
@@ -80,9 +80,9 @@ function CompilePackageInList
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
     else
-      mkdir -p /buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
-      echo "$BUILDNAME" >> /buildlogs/build_core/failedcompiles
+      mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
+      echo "$BUILDNAME" >> /var/log/buildlogs/build_core/failedcompiles
       return
     fi
   fi
@@ -95,8 +95,8 @@ function CompilePackageInList
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
     else
-      mkdir -p /buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecSmallInstallBuilder
+      mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecSmallInstallBuilder
       return
     fi
   fi
@@ -119,8 +119,8 @@ function CompilePackageInList
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
     else
-      mkdir -p /buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
+      mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
       return
     fi
     MULTIJOBSTATUS="~"

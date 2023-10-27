@@ -25,7 +25,7 @@ fi
 
 shopt -s dotglob
 
-export PACKAGEOPERATIONLOGDIR=/buildlogs/package_operations
+export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
 #Create a log folder for the remove operations
 mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
@@ -81,12 +81,12 @@ chmod 777 /tmp
 mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
-rm "/srcbuild/buildoutput/"rbos-rbos_*.deb
-env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs /tmp/configure_phase3_helper.sh
+rm "/var/cache/srcbuild/buildoutput/"rbos-rbos_*.deb
+env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_helper.sh
 
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
-mkdir /tmp/wlm-virtualpackage
+mkdir -p /tmp/wlm-virtualpackage
 chmod +x /tmp/wlm-virtualpackage/config
 chmod +x /tmp/wlm-virtualpackage/postinst
 env -C /tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst
@@ -103,9 +103,9 @@ echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
 update-locale LANG=en_US.UTF-8
 
 #Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
-if [[ -e /srcbuild/buildhome/buildcore_rust/lockfile ]]
+if [[ -e /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
 then
-  rm /srcbuild/buildhome/buildcore_rust/lockfile &> /dev/null
+  rm /var/cache/srcbuild/buildhome/buildcore_rust/lockfile &> /dev/null
 fi
 
 #run the script that calls all compile scripts in a specified order, in build only mode
@@ -118,16 +118,16 @@ function PostInstallActions
   cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
   #Create a package with all the menu items.
-  rm "/srcbuild/buildoutput/"menuitems-rbos*.deb
+  rm "/var/cache/srcbuild/buildoutput/"menuitems-rbos*.deb
   env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
 
-  rm "/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs touch /usr/share/buildcore_revisions.txt
+  rm "/var/cache/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs touch /usr/share/buildcore_revisions.txt
 
-  rm "/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires=""  --exclude=/srcbuild,/home/remastersys,/var/tmp,/buildlogs /tmp/configure_phase3_symlinks.sh
+  rm "/var/cache/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
+  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires=""  --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_symlinks.sh
 
-  cp /tmp/*.deb "/srcbuild/buildoutput/"
+  cp /tmp/*.deb "/var/cache/srcbuild/buildoutput/"
 
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
@@ -192,7 +192,7 @@ function PostInstallActions
 
   #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
   #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-  dpkg --force-overwrite --force-confmiss --force-confnew -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
+  dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
   #move the import folder
   mv /usr/import /tmp
@@ -269,7 +269,7 @@ compile_all installsmallpackage
 
 #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
 #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-dpkg --force-overwrite --force-confmiss --force-confnew -i /srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
+dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
 
 
 #Reset the utilites back to the way they are supposed to be.

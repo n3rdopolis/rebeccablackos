@@ -49,12 +49,12 @@
 #Each function is started with the CWD as the source download folder. For example If PackageCompileSource cd's to ./build and make is called, then PackageInstallSource will also need to cd to ./build
 
 #About BUILDCOREMAKEDEBS. 
-#BUILDCOREMAKEDEBS causes debs to be built in /srcbuild/buildoutput fo the packages it compiles, with checkinstall, which watches the files touched and created by the install functions.
+#BUILDCOREMAKEDEBS causes debs to be built in /var/cache/srcbuild/buildoutput fo the packages it compiles, with checkinstall, which watches the files touched and created by the install functions.
 #It finds all built libraries and binaries in the source, finds what libraries they all depend on with ldd, and then finds what packages the depends are in, to give a rough dependancy manament for the built debs.
 #When a deb is built, it installs the deb on the next run instead of a compile. UNLESS REBUILDNEWREVISION=1 is set, AND the revision number/ID based on the source revision control software changes.
 #or the control file is deleted, or the deb is nonexistant or empty.
 
-#removing /srcbuild/buildoutput/control/PACKAGENAME causes PACKAGENAME to be rebuilt manually
+#removing /var/cache/srcbuild/buildoutput/control/PACKAGENAME causes PACKAGENAME to be rebuilt manually
 
 #buildcore also uses /tmp/buildcore_revisions.txt, when it is formatted from the list of all built revisions exported by the project. If it exists, the revision specified by the build script is overidden, and the exact commit is used instead
 
@@ -96,7 +96,7 @@ then
   adduser --no-create-home --disabled-password --system --uid 65533 $NONROOTUSER --ingroup $NONROOTGROUP
 fi
 
-export SOURCEDIR=/srcbuild
+export SOURCEDIR=/var/cache/srcbuild
 export SOURCEDIROVERLAYDIR=/tmp/srcbuild_overlay
 if [[ -z $REBUILDNEWREVISION ]]
 then
@@ -104,7 +104,7 @@ then
 fi
 export PACKAGESUFFIX=rbos
 export NONROOTCOMMAND="runuser -u "$NONROOTUSER" -m --"
-export BUILDLOGDIR=/buildlogs/build_core
+export BUILDLOGDIR=/var/log/buildlogs/build_core
 
 if [[ -x /usr/libexec/build_core/checkinstall ]]
 then
@@ -1157,7 +1157,7 @@ function MakeAndInstall()
       else
         PACKAGEDATE=$(date +%s)
       fi
-      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,"$BUILDLOGDIR" "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
@@ -1173,7 +1173,7 @@ function MakeAndInstall()
 
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,/buildlogs "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/var/tmp,"$BUILDLOGDIR" "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
