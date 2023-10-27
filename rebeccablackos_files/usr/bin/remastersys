@@ -196,14 +196,24 @@ update-rc.d remastersys-firstboot defaults
 
     log_msg "Copying /var and /etc to temp area and excluding extra files  ... this will take a while so be patient"
 
-    if [ "$EXCLUDES" != "" ]; then
-        for addvar in $EXCLUDES ; do
-            VAREXCLUDES="$VAREXCLUDES --exclude='$addvar' "
+    VAREXCLUDES=()
+    ETCEXCLUDES=()
+    if [[ ${#EXCLUDES[@]} > 0 ]]
+    then
+        for addvar in "${EXCLUDES[@]}"
+        do
+            if [[ $addvar =~ /var/* ]]
+            then
+                VAREXCLUDES+=("--exclude=${addvar/\/var/}/")
+            elif [[ $addvar =~ /etc/* ]]
+            then
+                ETCEXCLUDES+=("--exclude=${addvar/\/etc/}/")
+            fi
         done
     fi
 
-    rsync --exclude='*.log.*' --exclude='*.pid' --exclude='*.bak' --exclude='*.[0-9].gz' --exclude='*.deb' --exclude='kdecache*' $VAREXCLUDES-a /var/. $WORKDIR/dummysys/var/.
-    rsync $VAREXCLUDES-a /etc/. $WORKDIR/dummysys/etc/.
+    rsync --exclude='*.log.*' --exclude='*.pid' --exclude='*.bak' --exclude='*.[0-9].gz' --exclude='*.deb' --exclude='kdecache*' ${VAREXCLUDES[@]} -a /var/. $WORKDIR/dummysys/var/.
+    rsync ${ETCEXCLUDES[@]} -a /etc/. $WORKDIR/dummysys/etc/.
 
     log_msg "Cleaning up files not needed for the live in $WORKDIR/dummysys"
     rm -f $WORKDIR/dummysys/etc/X11/xorg.conf*
@@ -508,7 +518,7 @@ FOO
 
     fi
 
-    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR $EXCLUDES
+    mksquashfs $REALFOLDERS $WORKDIR/ISOTMP/casper/filesystem.squashfs -root-mode 0755 $SQUASHFSOPTS -e root/.local/Trash root/.thumbnails root/.cache root/.bash_history root/.lesshst root/.nano_history boot/grub $BASEWORKDIR "${EXCLUDES[@]}"
 
     sleep 1
 
