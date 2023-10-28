@@ -586,7 +586,8 @@ firmware-qlogic::PART
 firmware-realtek::PART
 firmware-ti-connectivity::PART
 firmware-iwlwifi::PART
-amd64-microcode::PART
+amd64-microcode::PART::$DEBIAN_ARCH == i386
+amd64-microcode::PART::$DEBIAN_ARCH == amd64
 atmel-firmware::PART
 firmware-bnx2::PART
 firmware-bnx2x::PART
