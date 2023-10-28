@@ -54,7 +54,40 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-:
+DebianKernelConfigVersion=6.5
+DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/debian/$DebianKernelConfigVersion.1-1_exp1/debian/config
+DebianArch=$(dpkg --print-architecture)
+KernelArch=$(wget $DebianConfigRootURL/$DebianArch/defines -O - 2>/dev/null | grep kernel-arch | awk '{print $2}')
+if [[ $? != 0 ]]
+then
+  echo "Failed to download Debian config defines: $DebianConfigRootURL/$DebianArch/defines"
+  exit 1
+fi
+
+
+echo > ./kernelarch.config
+wget $DebianConfigRootURL/kernelarch-$KernelArch/config 2>/dev/null -O - > ./kernelarch.config
+if [[ $? != 0 ]]
+then
+  echo "Failed to download Debian kernel arch config $DebianConfigRootURL/kernelarch-$KernelArch/config"
+  rm ./kernelarch.config
+  exit 1
+fi
+
+ConfigFileName="config"
+if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
+then
+  ConfigFileName="config.686-pae"
+fi
+
+echo > ./arch.config
+wget $DebianConfigRootURL/$DebianArch/$ConfigFileName 2>/dev/null -O - > ./arch.config
+if [[ $? != 0 ]]
+then
+  echo "Failed to download Debian arch config $DebianConfigRootURL/$DebianArch/$ConfigFileName"
+  rm ./arch.config
+  exit 1
+fi
 }
 
 
@@ -64,19 +97,14 @@ function PackagePrepareBuild()
 make olddefconfig
 ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/config
 
-
-if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
+if [[ ! -e ./kernelarch.config || ! -e ./arch.config ]]
 then
-  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/kernelarch-x86
-  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/i386
-elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
-then
-  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/kernelarch-x86
-  ./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/amd64
-else
-  echo "$BUILDARCH not supported"
-  rm .config
+  echo "Downloaded Debian configs not found, check the download logs"
+  exit 1
 fi
+
+./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
+./scripts/kconfig/merge_config.sh -m .config ./arch.config
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
 ./scripts/config -e CONFIG_DRM
