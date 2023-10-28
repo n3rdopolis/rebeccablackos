@@ -29,7 +29,8 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.5.y
+KernelVersion=6.5
+SOURCEREVISION=linux-$KernelVersion.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -54,8 +55,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-DebianKernelConfigVersion=6.5
-DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/debian/$DebianKernelConfigVersion.1-1_exp1/debian/config
+DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/debian/$KernelVersion.1-1_exp1/debian/config
 DebianArch=$(dpkg --print-architecture)
 KernelArch=$(wget $DebianConfigRootURL/$DebianArch/defines -O - 2>/dev/null | grep kernel-arch | awk '{print $2}')
 if [[ $? != 0 ]]
@@ -88,6 +88,15 @@ then
   rm ./arch.config
   exit 1
 fi
+
+echo > ./mainconfig.config
+wget $DebianConfigRootURL/config 2>/dev/null -O - > ./mainconfig.config
+if [[ $? != 0 ]]
+then
+  echo "Failed to download Debian main config $DebianConfigRootURL/config"
+  rm ./mainconfig.config
+  exit 1
+fi
 }
 
 
@@ -95,14 +104,14 @@ fi
 function PackagePrepareBuild()
 {
 make olddefconfig
-./scripts/kconfig/merge_config.sh -m .config /usr/share/RBOS_PATCHES/linux-kernel/config
 
-if [[ ! -e ./kernelarch.config || ! -e ./arch.config ]]
+if [[ ! -e ./kernelarch.config || ! -e ./arch.config || -e ./mainconfig.config ]]
 then
-  echo "Downloaded Debian configs not found, check the download logs"
+  echo "Downloaded Debian configs not found, check the download logs from PackageDownloadSource"
   exit 1
 fi
 
+./scripts/kconfig/merge_config.sh -m .config ./mainconfig.config
 ./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
 ./scripts/kconfig/merge_config.sh -m .config ./arch.config
 
