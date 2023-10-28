@@ -66,10 +66,11 @@ sed -i '/XKB_KEY_dead_aboveverticalline/d' dlls/winewayland.drv/wayland_keyboard
 sed -i '/XKB_KEY_dead_belowverticalline/d' dlls/winewayland.drv/wayland_keyboard.c
 sed -i '/XKB_KEY_dead_longsolidusoverlay/d' dlls/winewayland.drv/wayland_keyboard.c
 
-if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
+TARGETBITSIZE=$(getconf LONG_BIT)
+if [[ $TARGETBITSIZE == 32 ]]
 then
   ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests
-elif [[ $DEB_HOST_MULTIARCH == x86_64-linux-gnu ]]
+elif [[ $TARGETBITSIZE == 64 ]]
 then
   ./configure --without-x --with-wayland --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --disable-tests --enable-win64 #--enable-archs=i386,x86_64
 else
