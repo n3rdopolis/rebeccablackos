@@ -852,13 +852,19 @@ function SetBuildVariables()
   DEBIAN_ARCH=$(dpkg --print-architecture)
   if [[ $TOMLFilesExist == 1 ]]
   then
-    if [[ $DEBIAN_ARCH == amd64 ]]
+    DEBIAN_ARCH=$(dpkg --print-architecture)
+    RUSTBINARYNAME=$(rustc -vV 2>/dev/null | grep -- -linux-gnu$ | awk '{print $2}')
+
+    if [[ -z $RUSTBINARYNAME ]]
     then
-      RUSTBINARYNAME=x86_64-unknown-linux-gnu
-    fi
-    if [[ $DEBIAN_ARCH == i386 ]]
-    then
-      RUSTBINARYNAME=i686-unknown-linux-gnu
+      if [[ $DEBIAN_ARCH == amd64 ]]
+      then
+        RUSTBINARYNAME=x86_64-unknown-linux-gnu
+      fi
+      if [[ $DEBIAN_ARCH == i386 ]]
+      then
+        RUSTBINARYNAME=i686-unknown-linux-gnu
+      fi
     fi
     export PATH="/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/":"/$SOURCEDIR/buildhome/buildcore_rust/rustrun/lib/rustlib/$RUSTBINARYNAME/bin/":"$EXTERNALBUILDHOME"/bin:$PATH
     export NM=llvm-nm
