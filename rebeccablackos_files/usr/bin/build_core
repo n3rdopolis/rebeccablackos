@@ -754,15 +754,22 @@ function DownloadSource()
 
       #Download rust/cargo
       DEBIAN_ARCH=$(dpkg --print-architecture)
+      RUST_PACKAGE_ARCH=$(rustc -vV 2>/dev/null | grep -- -linux-gnu$ | awk '{print $2}')
+
+      if [[ -z $RUST_PACKAGE_ARCH ]]
+      then
+        if [[ $DEBIAN_ARCH == amd64 ]]
+        then
+          RUST_PACKAGE_ARCH=x86_64-unknown-linux-gnu
+        fi
+        if [[ $DEBIAN_ARCH == i386 ]]
+        then
+          RUST_PACKAGE_ARCH=i686-unknown-linux-gnu
+        fi
+      fi
+
       #Use the Beta version of Rust, as the name is stable, (there is no build named stable, as those have version numbers)
-      if [[ $DEBIAN_ARCH == amd64 ]]
-      then
-        RUSTPACKAGENAME=rust-beta-x86_64-unknown-linux-gnu
-      fi
-      if [[ $DEBIAN_ARCH == i386 ]]
-      then
-        RUSTPACKAGENAME=rust-beta-i686-unknown-linux-gnu
-      fi
+      RUSTPACKAGENAME=rust-beta-$RUST_PACKAGE_ARCH
 
       #Use the SHA sum of the rust package to determine if there is a new one server side
       CURRENTRUSTCHECKSUM=$(wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz.sha256 | head -1)
