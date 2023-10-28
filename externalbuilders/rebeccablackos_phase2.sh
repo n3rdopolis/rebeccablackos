@@ -40,7 +40,7 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME "$BUILDLOCATIO
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-mount --rbind /proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+mount -t proc proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
