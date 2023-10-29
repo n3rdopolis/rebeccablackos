@@ -336,19 +336,34 @@ update-rc.d remastersys-firstboot defaults
 
     fi
 
-    #Copy Grub files
-    mkdir -p $WORKDIR/ISOTMP/boot/grub
-    mkdir -p $WORKDIR/ISOTMP/boot/grub/fonts
-    cp /usr/share/grub/unicode.pf2 $WORKDIR/ISOTMP/boot/grub/fonts/unicode.pf2
-    mkdir -p $WORKDIR/ISOTMP/boot/grub/i386-pc/
-    mkdir -p $WORKDIR/ISOTMP/boot/grub/i386-efi/
-    mkdir -p $WORKDIR/ISOTMP/boot/grub/x86_64-efi/
-    cp /usr/lib/grub/i386-pc/*.mod $WORKDIR/ISOTMP/boot/grub/i386-pc/
-    cp /usr/lib/grub/i386-efi/*.mod $WORKDIR/ISOTMP/boot/grub/i386-efi/
-    cp /usr/lib/grub/x86_64-efi/*.mod $WORKDIR/ISOTMP/boot/grub/x86_64-efi/
-
     log_msg "Checking the ARCH of the system and setting the README.diskdefines file"
     ARCH=$(dpkg --print-architecture)
+
+    if [[ $ARCH == i386 ]]
+    then
+      EFIARCHPREFIXES=(ia32 x64)
+      GRUBARCHPREFIXES=(i386 x86_64)
+      ARCHHASEFI=1
+    elif [[ $ARCH == amd64 ]]
+    then
+      EFIARCHPREFIXES=(ia32 x64)
+      GRUBARCHPREFIXES=(i386 x86_64)
+      ARCHHASEFI=1
+    elif [[ $ARCH == armhf ]]
+    then
+      EFIARCHPREFIXES=(arm)
+      GRUBARCHPREFIXES=(arm)
+      ARCHHASEFI=1
+    elif [[ $ARCH == arm64 ]]
+    then
+      EFIARCHPREFIXES=(aa64)
+      GRUBARCHPREFIXES=(arm64)
+      ARCHHASEFI=1
+    else
+      log_msg "The current architecture, $ARCH, either does not support have EFI support, or does not have the prefixes defined in the script"
+      GRUBARCHPREFIXES=($ARCH)
+      ARCHHASEFI=0
+    fi
 
     cat > $WORKDIR/ISOTMP/README.diskdefines <<FOO
 #define DISKNAME  $LIVECDLABEL
@@ -362,6 +377,22 @@ update-rc.d remastersys-firstboot defaults
 #define TOTALNUM0  1
 FOO
     cp $WORKDIR/ISOTMP/README.diskdefines $WORKDIR/ISOTMP/casper/README.diskdefines
+
+    #Copy Grub files
+    mkdir -p $WORKDIR/ISOTMP/boot/grub
+    mkdir -p $WORKDIR/ISOTMP/boot/grub/fonts
+    cp /usr/share/grub/unicode.pf2 $WORKDIR/ISOTMP/boot/grub/fonts/unicode.pf2
+    if [[ $ARCH == i386 || $ARCH == amd64 ]]
+    then
+      mkdir -p $WORKDIR/ISOTMP/boot/grub/i386-pc/
+      cp /usr/lib/grub/i386-pc/*.mod $WORKDIR/ISOTMP/boot/grub/i386-pc/
+    fi
+
+    for (( i=0; i<${#GRUBARCHPREFIXES[@]}; i++ ))
+    do
+        mkdir -p $WORKDIR/ISOTMP/boot/grub/${GRUBARCHPREFIXES[$i]}-efi/
+        cp /usr/lib/grub/${GRUBARCHPREFIXES[$i]}-efi/*.mod $WORKDIR/ISOTMP/boot/grub/${GRUBARCHPREFIXES[$i]}-efi/
+    done
 
     sleep 1
 
@@ -642,20 +673,6 @@ iso (){
 
     #Get the current architecture, and set arrays for each architecture the CPU supports. 
     #(a 32 bit ISO might be started on a 64 bit only EFI, a 64 bit computers have 32 bit only EFIs)
-    if [[ $ARCH == i386 ]]
-    then
-      EFIARCHPREFIXES=(ia32 x64)
-      GRUBARCHPREFIXES=(i386 x86_64)
-      ARCHHASEFI=1
-    elif [[ $ARCH == amd64 ]]
-    then
-      EFIARCHPREFIXES=(ia32 x64)
-      GRUBARCHPREFIXES=(i386 x86_64)
-      ARCHHASEFI=1
-    else
-      log_msg "The current architecture, $ARCH, either does not support have EFI support, or does not have the prefixes defined in the script"
-      ARCHHASEFI=0
-    fi
 
     #determine if the grub files needed for each arch are installed or not
     INSTALLEDGRUBEFIARCHES=()
