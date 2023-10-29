@@ -572,6 +572,8 @@ grub-efi-ia32-bin::FULL::$DEBIAN_ARCH == i386
 grub-efi-amd64-bin::FULL::$DEBIAN_ARCH == i386
 grub-efi-ia32-bin::FULL::$DEBIAN_ARCH == amd64
 grub-efi-amd64-bin::FULL::$DEBIAN_ARCH == amd64
+grub-efi-arm::FULL::$DEBIAN_ARCH == armhf
+grub-efi-arm64::FULL::$DEBIAN_ARCH == armh64
 firmware-amd-graphics::PART
 firmware-misc-nonfree::PART
 firmware-atheros::PART
@@ -598,7 +600,8 @@ firmware-samsung::PART
 intel-microcode::PART
 iucode-tool::PART
 firmware-sof-signed::PART
-grub-pc-bin::FULL
+grub-pc-bin::FULL::$DEBIAN_ARCH == i386
+grub-pc-bin::FULL::$DEBIAN_ARCH == amd64
 grub-pc::FULL
 live-config::PART
 gnome-common::PART
