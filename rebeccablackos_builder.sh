@@ -196,6 +196,7 @@ function NAMESPACE_EXECUTE {
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
 function run_buildprocess {
+EXITSTATUS=0
 BUILD_RUNNING=0
 
 SCRIPTFILEPATH=$(readlink -f "$0")
@@ -1067,6 +1068,7 @@ then
   echolog "Live CD image build was successful."
 else
   echolog "The Live CD did not succesfuly build. The script could have been modified, or a network connection could have failed to one of the servers preventing the installation packages for Debian, or Remstersys from installing. There could also be a problem with the selected architecture for the build, such as an incompatible kernel or CPU, or a misconfigured qemu-system bin_fmt"
+  EXITSTATUS=1
 fi
 
 ENDTIME=$(date +%s)
@@ -1132,21 +1134,27 @@ echo "$LOGTEXT" > ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/externallogs/mainl
 echo $$ > ${OriginalCgroup}/cgroup.procs
 rmdir /sys/fs/cgroup/machine.slice/"$BUILDUNIXNAME"_builder:"$BUILDARCH"
 
-exit
+exit $EXITSTATUS
 }
 
 function elevate_buildprocess
 {
   export BUILDER_IS_UNSHARED=1
   sudo -E -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages and building Live CD" --what=sleep:shutdown -- unshare --mount "$0" "$@"
-  exit
+  exit $?
 }
 
-#Start the build process
-if [[ $BUILDER_IS_UNSHARED != 1 ]]
-then
-  elevate_buildprocess "$@"
-else
-  setup_buildprocess
-  run_buildprocess "$@"
-fi
+function execute_buildprocess
+{
+  #Start the build process
+  if [[ $BUILDER_IS_UNSHARED != 1 ]]
+  then
+    elevate_buildprocess "$@"
+  else
+    setup_buildprocess
+    run_buildprocess "$@"
+  fi
+  exit $?
+}
+
+execute_buildprocess "$@"
