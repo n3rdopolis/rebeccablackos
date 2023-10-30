@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2023-10-02 19:39:30.317802564 -0400
-+++ usr/bin/waylandloginmanagertui	2023-10-02 19:44:43.005353407 -0400
+--- usr/bin/waylandloginmanager	2023-10-30 08:20:32.352385059 -0400
++++ usr/bin/waylandloginmanagertui	2023-10-30 08:24:49.695195346 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -365,7 +365,7 @@
    DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
-@@ -3456,9 +3441,9 @@
+@@ -3455,9 +3440,9 @@
        fi
      done
  
@@ -377,7 +377,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3686,7 +3671,7 @@
+@@ -3685,7 +3670,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -386,7 +386,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3732,7 +3717,7 @@
+@@ -3731,7 +3716,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -395,7 +395,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3761,7 +3746,7 @@
+@@ -3760,7 +3745,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -404,7 +404,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3807,7 +3792,7 @@
+@@ -3806,7 +3791,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -413,11 +413,11 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3876,6 +3861,7 @@
+@@ -3878,6 +3863,7 @@
  
-   #Start the filter that will only send valid data to the main command FIFO
-   WLM_SOCKET_FILTER=1 $0 --socketfilter &
-+  FIFOFilterPID=$!
+     #Start the filter that will only send valid data to the main command FIFO
+     WLM_SOCKET_FILTER=1 $0 --socketfilter &
++    FIFOFilterPID=$!
  
-   #Start the loginmanager
-   WaylandLoginManagerMain
+     #Start the loginmanager
+     WaylandLoginManagerMain

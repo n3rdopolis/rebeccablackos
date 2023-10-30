@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2023-10-02 19:39:30.317802564 -0400
-+++ usr/bin/waylandloginmanagerzenity	2023-10-02 19:47:15.159174989 -0400
+--- usr/bin/waylandloginmanager	2023-10-30 08:20:32.352385059 -0400
++++ usr/bin/waylandloginmanagerzenity	2023-10-30 08:24:38.464116677 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -415,7 +415,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3456,9 +3435,9 @@
+@@ -3455,9 +3434,9 @@
        fi
      done
  

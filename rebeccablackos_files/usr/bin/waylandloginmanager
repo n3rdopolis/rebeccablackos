@@ -3143,7 +3143,7 @@ function WaylandLoginManagerMain
   
   #Plymouth can remain running after plymouth deactivate is called. waylandloginmanager needs to be responsible for quitting it.
   #For seamless startup to work, waylandloginmanager will issue the request on the first UI action it gets sent.
-  #Switch, Login, Info, Leave, Debug, and on startup of the first session count as the UI actions.
+  #Switch, Login, Info, Leave, and on startup of the first session count as the UI actions.
   #Weston might be reported as usable, however it is not an absolute that the desktop shell is running. If Plymouth is quit beforehand, the screen will blank, and it will appear to be a flicker.
   PlymouthQuitRequestSent=0
 
@@ -3156,7 +3156,6 @@ function WaylandLoginManagerMain
   LastLoginPIDs=()
   LastLeavePIDs=()
   LastInfoPIDs=()
-  LastDebugPIDs=()
   LoginManagerDisplaySessions=()
   LoginManagerDisplayPIDs=()
   LoginManagerDisplayStartTimes=()
@@ -3855,106 +3854,113 @@ function DebugConnect
   socat file:$PTYPath,raw,echo=0 unix-connect:"$SelectedSocket"
 }
 
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
-#If the waylandloginmanager is started with no arguments assume default operation. 
-#If it is started with --usersession, then perform operations to start the user session, running as the user
-if [[ $1 == "" ]]
-then
-  #Prepare the loginmanager
-  PrepareLoginManager
-
-  #Create files used for ipc
-  SetupIPCFiles
-
-  #Start the filter that will only send valid data to the main command FIFO
-  WLM_SOCKET_FILTER=1 $0 --socketfilter &
-
-  #Start the loginmanager
-  WaylandLoginManagerMain
-elif [[ $1 == "--usersession" ]]
-then
-  shift
-  UserSessionWorker "$@" &> /dev/null
-elif [[ $1 == "--sendcommand" ]]
-then
-  if [[ -z $3 ]]
+#Launcher function for the main waylandloginmanager functionality, or other functionatity like --sendcommand, etc
+function WaylandLoginManagerExecute
+{
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
   then
-    if [[ -z $XDG_SEAT ]]
-    then
-      SEAT=$WLM_XDG_SEAT
-    else
-      SEAT=$XDG_SEAT
-    fi
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=\sleep
   else
-    SEAT=$3
+    SLEEPCMD=/bin/sleep
   fi
-  SendSelfCommand $2 "$SEAT"
-elif [[ $1 == "--udevtrigger" ]]
-then
-  if [[ $UID == 0 ]]
+
+  #If the waylandloginmanager is started with no arguments assume default operation. 
+  #If it is started with --usersession, then perform operations to start the user session, running as the user
+  if [[ $1 == "" ]]
   then
-    if [[ -f /run/waylandloginmanager/sessiondata ]]
+    #Prepare the loginmanager
+    PrepareLoginManager
+
+    #Create files used for ipc
+    SetupIPCFiles
+
+    #Start the filter that will only send valid data to the main command FIFO
+    WLM_SOCKET_FILTER=1 $0 --socketfilter &
+
+    #Start the loginmanager
+    WaylandLoginManagerMain
+  elif [[ $1 == "--usersession" ]]
+  then
+    shift
+    UserSessionWorker "$@" &> /dev/null
+  elif [[ $1 == "--sendcommand" ]]
+  then
+    if [[ -z $3 ]]
     then
-      SendSelfCommand DetectSeats
+      if [[ -z $XDG_SEAT ]]
+      then
+        SEAT=$WLM_XDG_SEAT
+      else
+        SEAT=$XDG_SEAT
+      fi
+    else
+      SEAT=$3
     fi
-  fi
-elif [[ $1 == "--getconfigkey" ]]
-then
-  GetConfigKey "$2" "$3" "$4" "$5"
-elif [[ $1 == "--setconfigkey" ]]
-then
-  #Require root privlages
-  if [[ $UID != 0 ]]
+    SendSelfCommand $2 "$SEAT"
+  elif [[ $1 == "--udevtrigger" ]]
   then
-    echo "Must be run as root."
+    if [[ $UID == 0 ]]
+    then
+      if [[ -f /run/waylandloginmanager/sessiondata ]]
+      then
+        SendSelfCommand DetectSeats
+      fi
+    fi
+  elif [[ $1 == "--getconfigkey" ]]
+  then
+    GetConfigKey "$2" "$3" "$4" "$5"
+  elif [[ $1 == "--setconfigkey" ]]
+  then
+    #Require root privlages
+    if [[ $UID != 0 ]]
+    then
+      echo "Must be run as root."
+      exit 1
+    fi
+    SetConfigKey "$2" "$3"
+  #This reads what the user send to loginmanager_control running as a limited account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
+  elif [[ $1 == "--socketfilter" ]]
+  then
+    #Require root privlages
+    if [[ -z $WLM_SOCKET_FILTER ]]
+    then
+      echo "Invalid option"
+      exit 1
+    fi
+    SetCommonConfig
+    #In theory socat should only be run once, but account for the process failing
+    while [ 1 ]
+    do
+      runuser -u $FIFOREADERUSER -m -- socat UNIX-LISTEN:/run/waylandloginmanager/loginmanager_control,reuseaddr,fork,readbytes=290,mode=0622,unlink-early - | \
+       runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
+      #Pause so that the CPU usage doesn't storm if socat fails to start
+      $SLEEPCMD .1
+    done
+  elif [[ $1 == "--shutdowndialog" ]]
+  then
+    LeavePrompt
+  elif [[ $1 == "--logoff" ]]
+  then
+    loginctl terminate-session $WLM_XDG_SESSION_ID
+  elif [[ $1 == "--switchuser" ]]
+  then
+    SendSelfCommand Switch $WLM_XDG_SEAT
+  elif [[ $1 == "--debugconnect" ]]
+  then
+    DebugConnect
+  else
+    echo "waylandloginmanager: incorrect usage"
+    echo "Useful options:"
+    echo "   --shutdowndialog shows a shutdown dialog."
+    echo "   --udevtrigger forces seats to be redetected"
+    echo "   --logoff ends the current logind session"
+    echo "   --switchuser acticates the loginmanagerdisplay for the specified seat"
+    echo "   --debugconnect lists and handles sessions started by a debugger"
     exit 1
   fi
-  SetConfigKey "$2" "$3"
-#This reads what the user send to loginmanager_control running as a limited account, and filters out only valid commands to loginmanager_listener, and only sends a limited number of lines.
-elif [[ $1 == "--socketfilter" ]]
-then
-  #Require root privlages
-  if [[ -z $WLM_SOCKET_FILTER ]]
-  then
-    echo "Invalid option"
-    exit 1
-  fi
-  SetCommonConfig
-  #In theory socat should only be run once, but account for the process failing
-  while [ 1 ]
-  do
-    runuser -u $FIFOREADERUSER -m -- socat UNIX-LISTEN:/run/waylandloginmanager/loginmanager_control,reuseaddr,fork,readbytes=290,mode=0622,unlink-early - | \
-     runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$" > /run/waylandloginmanager/loginmanager_listener 2>/dev/null
-    #Pause so that the CPU usage doesn't storm if socat fails to start
-    $SLEEPCMD .1
-  done
-elif [[ $1 == "--shutdowndialog" ]]
-then
-  LeavePrompt
-elif [[ $1 == "--logoff" ]]
-then
-  loginctl terminate-session $WLM_XDG_SESSION_ID
-elif [[ $1 == "--switchuser" ]]
-then
-  SendSelfCommand Switch $WLM_XDG_SEAT
-elif [[ $1 == "--debugconnect" ]]
-then
-  DebugConnect
-else
-  echo "waylandloginmanager: incorrect usage"
-  echo "Useful options:"
-  echo "   --shutdowndialog shows a shutdown dialog."
-  echo "   --udevtrigger forces seats to be redetected"
-  echo "   --logoff ends the current logind session"
-  echo "   --switchuser acticates the loginmanagerdisplay for the specified seat"
-  echo "   --debugconnect lists and handles sessions started by a debugger"
-  exit 1
-fi
+  exit
+}
+
+WaylandLoginManagerExecute "$@"
