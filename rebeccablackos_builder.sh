@@ -256,13 +256,25 @@ export REVISIONSFILE=$2
 DONODELAY=0
 if [[ -z "$BUILDARCH" ]]
 then
-  echolog "Select Arch. Enter 1 for amd64, 2 for i386, 3 for custom. Default=amd64"
+  echolog "Select architecture:"
+  echolog "  Enter 1 for amd64"
+  echolog "  Enter 2 for i386"
+  echolog "  Enter 3 for armhf (Unsupported)"
+  echolog "  Enter 4 for arm64 (Unsupported)"
+  echolog "  Enter 5 for a prompt for a custom architecture (Unsupported)"
+  echolog "Default=amd64"
   echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument. The second argument can be a path to a handled revisions file."
   read archselect
   if [[ $archselect == 2 ]]
   then
     export BUILDARCH=i386
   elif [[ $archselect == 3 ]]
+  then
+    export BUILDARCH=armhf
+  elif [[ $archselect == 4 ]]
+  then
+    export BUILDARCH=arm64
+  elif [[ $archselect == 5 ]]
   then
     echolog "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
     read BUILDARCH
