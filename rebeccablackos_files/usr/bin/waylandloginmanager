@@ -3960,7 +3960,7 @@ function WaylandLoginManagerExecute
     echo "   --debugconnect lists and handles sessions started by a debugger"
     exit 1
   fi
-  exit
+  exit $?
 }
 
 WaylandLoginManagerExecute "$@"
