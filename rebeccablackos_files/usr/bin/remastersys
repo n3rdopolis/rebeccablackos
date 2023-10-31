@@ -735,17 +735,20 @@ iso (){
     #Create a file with the name of the Live CD
     #touch $WORKDIR/ISOTMP/$LIVECDLABEL
 
-    log_msg "Creating GRUB images for live boot"
-    #Create the live bootloader
-    mkdir -p $WORKDIR/ISOTMP/boot/grub/
-    grub-mkstandalone \
-      -O i386-pc-eltorito \
-      -o $WORKDIR/ISOTMP/boot/grub/eltorito.img \
-      --install-modules="linux16 linux normal iso9660 biosdisk memdisk search tar ls" \
-      --modules="linux16 linux normal iso9660 biosdisk search" \
-      --locales="" \
-      --fonts="" \
-      "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
+    if [[ $ARCH == i386 || $ARCH == amd64 ]]
+    then
+      log_msg "Creating GRUB images for live boot"
+      #Create the live bootloader
+      mkdir -p $WORKDIR/ISOTMP/boot/grub/
+      grub-mkstandalone \
+        -O i386-pc-eltorito \
+        -o $WORKDIR/ISOTMP/boot/grub/eltorito.img \
+        --install-modules="linux16 linux normal iso9660 biosdisk memdisk search tar ls" \
+        --modules="linux16 linux normal iso9660 biosdisk search" \
+        --locales="" \
+        --fonts="" \
+        "boot/grub/grub.cfg=$WORKDIR/ISOTMP/boot/grub/grub.cfg"
+    fi
 
     #Create a chainloadable GRUB image
     #Use as boot.img kernel
@@ -776,13 +779,34 @@ iso (){
 
     # Step 9 - Make the ISO file
     log_msg "Creating $CUSTOMISO in $WORKDIR with $CREATEISO"
-    #https://bazaar.launchpad.net/~ubuntu-cdimage/debian-cd/ubuntu/view/head:/tools/boot/groovy/boot-amd64 for xorriso command. Hybrid boot is now handled here
+
+    #https://git.launchpad.net/~ubuntu-cdimage/debian-cd/+git/ubuntu  for xorriso command. Hybrid boot is now handled here
+    ISO_BUILD=0
     if [[ $BUILDEFI == 1 ]]
     then
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -append_partition 2 0xef boot/EFI/grub.efi -appended_part_as_gpt --mbr-force-bootable -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
+      if [[ $ARCH == i386 || $ARCH == amd64 ]]
+      then
+        ISO_BUILD=1
+        $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -c boot/boot.catalog -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -append_partition 2 0xef boot/EFI/grub.efi -appended_part_as_gpt --mbr-force-bootable -eltorito-alt-boot -e --interval:appended_partition_2:all:: -no-emul-boot -partition_offset 16 -partition_cyl_align all -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
+      else
+        ISO_BUILD=1
+        #Only x86 should be BIOS compatible
+        $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -c boot/boot.cat -partition_offset 16 -append_partition 2 0xef boot/EFI/grub.efi -e --interval:appended_partition_2:all:: -no-emul-boot -partition_cyl_align all -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
+      fi
     else
-      $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -no-emul-boot -partition_offset 16 -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
+      if [[ $ARCH == i386 || $ARCH == amd64 ]]
+      then
+        ISO_BUILD=1
+        $CREATEISO -iso-level 3 -quiet -r -V "$LIVECDLABEL" -J -joliet-long -l -c boot/boot.catalog -b boot/grub/eltorito.img -no-emul-boot -boot-load-size 4 -boot-info-table --grub2-boot-info --grub2-mbr /usr/lib/grub/i386-pc/boot_hybrid.img -no-emul-boot -partition_offset 16 -partition_cyl_align all -o $WORKDIR/$CUSTOMISO "$WORKDIR/ISOTMP"
+      fi
     fi
+
+    if [[ $ISO_BUILD == 0 ]]
+    then
+      log_msg "Cannot build bootable ISOs for $ARCH"
+      exit 1
+    fi
+
     if [ ! -f $WORKDIR/$CUSTOMISO ]; then
         log_msg "The iso was not created. There was a problem. Exiting"
         exit 1
