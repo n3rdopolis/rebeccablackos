@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 setenv CXX CC 
 setenv CC cc
-./bootstrap --prefix=$INSTALLDIR
+./bootstrap --prefix=$INSTALLDIR --docdir=/share/doc/cmake-data
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
