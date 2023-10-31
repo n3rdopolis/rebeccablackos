@@ -196,6 +196,14 @@ function NAMESPACE_EXECUTE {
 
 #Declare most of the script as a function, to protect against the script from any changes when running, from causing the build process to be inconsistant
 function run_buildprocess {
+type dpkg &> /dev/null
+if [[ $? != 0 ]]
+then
+  DEFAULT_ARCH=amd64
+else
+  DEFAULT_ARCH=$(dpkg --print-architecture)
+fi
+
 EXITSTATUS=0
 BUILD_RUNNING=0
 
@@ -260,10 +268,10 @@ then
   echolog "Select architecture:"
   echolog "  Enter 1 for amd64"
   echolog "  Enter 2 for i386"
-  echolog "  Enter 3 for armhf (Unsupported)"
-  echolog "  Enter 4 for arm64 (Unsupported)"
+  echolog "  Enter 3 for arm64 (Unsupported)"
+  echolog "  Enter 4 for armhf (Unsupported)"
   echolog "  Enter 5 for a prompt for a custom architecture (Unsupported)"
-  echolog "Default=amd64"
+  echolog "Default is the current CPU architecture: $DEFAULT_ARCH"
   echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument. The second argument can be a path to a handled revisions file."
   read archselect
   if [[ $archselect == 2 ]]
@@ -271,17 +279,17 @@ then
     export BUILDARCH=i386
   elif [[ $archselect == 3 ]]
   then
-    export BUILDARCH=armhf
+    export BUILDARCH=arm64
   elif [[ $archselect == 4 ]]
   then
-    export BUILDARCH=arm64
+    export BUILDARCH=armhf
   elif [[ $archselect == 5 ]]
   then
     echolog "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
     read BUILDARCH
-    export BUILDARCH
+    export BUILDARCH=$BUILDARCH
   else
-    export BUILDARCH=amd64
+    export BUILDARCH=$DEFAULT_ARCH
   fi
   SHOWSKIPPROMPT=0
 else
