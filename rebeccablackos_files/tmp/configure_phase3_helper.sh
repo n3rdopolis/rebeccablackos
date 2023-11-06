@@ -76,10 +76,6 @@ fi
 echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
 echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
 
-#wlroots new renderer needs DRM Prime sharing enabled. These GPU drivers appear to not support it yet.  (they need to import DRM_GEM_SHMEM_DRIVER_OPS)
-#Force these to fallback with SimpleDRM
-echo "blacklist gma500_gfx"  >> /etc/modprobe.d/wlrootsdrmprime.conf
-
 #Create a default /etc/vconsole.conf for plymouth
 echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
 echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
