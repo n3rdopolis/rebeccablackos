@@ -102,6 +102,8 @@ fi
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+#Workaround virtio flickering
+git revert -n 01f05940a9a75e11a2be64993c44ad8dd06e6e26
 make olddefconfig
 
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
@@ -113,6 +115,8 @@ fi
 ./scripts/kconfig/merge_config.sh -m .config ./mainconfig.config
 ./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
 ./scripts/kconfig/merge_config.sh -m .config ./arch.config
+
+
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
 ./scripts/config -e CONFIG_DRM
@@ -197,7 +201,7 @@ fi
 
 make olddefconfig
 
-KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
+KernelVersion=$(make kernelrelease)
 echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
 touch .scmversion
 }
@@ -211,7 +215,7 @@ make -j$BUILD_CPU_COUNT
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-KernelVersion=$(cat .config|grep "Kernel Configuration" | awk '{print $3}')
+KernelVersion=$(make kernelrelease)
 make install
 make modules_install
 rm /boot/initrd*${KernelVersion}*
