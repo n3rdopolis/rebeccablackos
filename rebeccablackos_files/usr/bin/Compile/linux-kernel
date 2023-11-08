@@ -104,13 +104,17 @@ function PackagePrepareBuild()
 {
 #Workaround virtio flickering
 git revert -n 01f05940a9a75e11a2be64993c44ad8dd06e6e26
-make olddefconfig
 
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
 then
   echo "Downloaded Debian configs not found, check the download logs from PackageDownloadSource"
   exit 1
 fi
+
+#Ensure the kernel scripts don't append unexpected suffixes in the build name
+export LOCALVERSION=""
+
+make olddefconfig
 
 ./scripts/kconfig/merge_config.sh -m .config ./mainconfig.config
 ./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
@@ -203,18 +207,23 @@ make olddefconfig
 
 KernelVersion=$(make kernelrelease)
 echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
-touch .scmversion
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+#Ensure the kernel scripts don't append unexpected suffixes in the build name
+export LOCALVERSION=""
+
 make -j$BUILD_CPU_COUNT
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+#Ensure the kernel scripts don't append unexpected suffixes in the build name
+export LOCALVERSION=""
+
 KernelVersion=$(make kernelrelease)
 make install
 make modules_install
