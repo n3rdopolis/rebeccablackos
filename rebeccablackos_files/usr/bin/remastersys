@@ -313,8 +313,8 @@ update-rc.d remastersys-firstboot defaults
     cp /etc/remastersys/preseed/* $WORKDIR/ISOTMP/preseed/
 
     #BOOT Type is isolinux
-    log_msg "Copying memtest86+ for the live system"
-    cp /boot/memtest86+.bin $WORKDIR/ISOTMP/install/memtest
+    #log_msg "Copying memtest86+ for the live system"
+    #cp /boot/memtest86+.bin $WORKDIR/ISOTMP/install/memtest
 
     # check and see if they have a custom isolinux already setup. eg. they copied over 
     # the isolinux folder from their original livecd or made a custom one for their distro
