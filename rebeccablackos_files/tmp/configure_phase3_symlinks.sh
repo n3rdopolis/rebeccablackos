@@ -55,6 +55,8 @@ function SymlinkDirToDir
   done
 }
 
+SymlinkDirToDir /opt/lib/udev/rules.d /usr/lib/udev/rules.d "rbos"
+
 SymlinkDirToDir /opt/etc/pam.d /etc/pam.d "rbos"
 
 SymlinkDirToDir /opt/lib/systemd/user /usr/lib/systemd/user/ ""
