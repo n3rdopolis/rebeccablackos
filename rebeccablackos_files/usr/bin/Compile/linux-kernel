@@ -204,9 +204,6 @@ make olddefconfig
 ./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
 
 make olddefconfig
-
-KernelVersion=$(make kernelrelease)
-echo "update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -216,6 +213,9 @@ function PackageCompileSource()
 export LOCALVERSION=""
 
 make -j$BUILD_CPU_COUNT
+
+KernelVersion=$(make kernelrelease)
+echo "#! /bin/bash"$'\n'"update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
