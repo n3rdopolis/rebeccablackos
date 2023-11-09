@@ -27,7 +27,7 @@ function SymlinkDirToDir
 {
   SourceDir="$1"
   DestinationDir="$2"
-  FilePrefix="$3"
+  FileSuffix="$3"
   mkdir -p "$SourceDir"
   mkdir -p "$DestinationDir"
   env -C "$SourceDir" -- find -printf '%P\n' | sort | while read -r Item
@@ -41,14 +41,26 @@ function SymlinkDirToDir
     else
       if [[ ! -e "$DestinationDir/$Item" ]]
       then
-        if [[ -z $FilePrefix ]]
+        if [[ -z $FileSuffix ]]
         then
           ln -s "$SourceDir/$Item" "$DestinationDir/$Item"
         else
           FolderLeaf=$(dirname "$Item")
           FileName=${Item##*/}
+          IFS="."
+          FileName=($FileName)
+          ElementCount=${#FileName[@]}
+          if [[ $ElementCount -gt 2 ]]
+          then
+            IndexNumber=$(( $ElementCount - 2 ))
+          else
+            IndexNumber=0
+          fi
+          FileName[$IndexNumber]="${FileName[$IndexNumber]}-$FileSuffix"
+          FileName=$(echo "${FileName[*]}")
+          unset IFS
           mkdir -p "$DestinationDir/$FolderLeaf"
-          ln -s "$SourceDir/$Item" "$DestinationDir/$FolderLeaf/${FilePrefix}-${FileName}"
+          ln -s "$SourceDir/$Item" "$DestinationDir/$FolderLeaf/$FileName"
         fi
       fi
     fi
