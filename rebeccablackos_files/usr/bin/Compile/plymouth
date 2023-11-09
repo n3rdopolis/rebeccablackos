@@ -84,14 +84,14 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp $INSTALLDIR/lib/systemd/system/*plymouth* /usr/lib/systemd/system/
-mkdir -p /usr/lib/systemd/system/halt.target.wants; cp -P $INSTALLDIR/lib/systemd/system/halt.target.wants/*plymouth* /usr/lib/systemd/system/halt.target.wants
-mkdir -p /usr/lib/systemd/system/initrd-switch-root.target.wants; cp -P $INSTALLDIR/lib/systemd/system/initrd-switch-root.target.wants/*plymouth* /usr/lib/systemd/system/initrd-switch-root.target.wants
-mkdir -p /usr/lib/systemd/system/kexec.target.wants; cp -P $INSTALLDIR/lib/systemd/system/kexec.target.wants/*plymouth* /usr/lib/systemd/system/kexec.target.wants
-mkdir -p /usr/lib/systemd/system/multi-user.target.wants; cp -P $INSTALLDIR/lib/systemd/system/multi-user.target.wants/*plymouth* /usr/lib/systemd/system/multi-user.target.wants
-mkdir -p /usr/lib/systemd/system/poweroff.target.wants; cp -P $INSTALLDIR/lib/systemd/system/poweroff.target.wants/*plymouth* /usr/lib/systemd/system/poweroff.target.wants
-mkdir -p /usr/lib/systemd/system/reboot.target.wants; cp -P $INSTALLDIR/lib/systemd/system/reboot.target.wants/*plymouth* /usr/lib/systemd/system/reboot.target.wants
-mkdir -p /usr/lib/systemd/system/sysinit.target.wants; cp -P $INSTALLDIR/lib/systemd/system/sysinit.target.wants/*plymouth* /usr/lib/systemd/system/sysinit.target.wants
+#cp $INSTALLDIR/lib/systemd/system/*plymouth* /usr/lib/systemd/system/
+#mkdir -p /usr/lib/systemd/system/halt.target.wants; cp -P $INSTALLDIR/lib/systemd/system/halt.target.wants/*plymouth* /usr/lib/systemd/system/halt.target.wants
+#mkdir -p /usr/lib/systemd/system/initrd-switch-root.target.wants; cp -P $INSTALLDIR/lib/systemd/system/initrd-switch-root.target.wants/*plymouth* /usr/lib/systemd/system/initrd-switch-root.target.wants
+#mkdir -p /usr/lib/systemd/system/kexec.target.wants; cp -P $INSTALLDIR/lib/systemd/system/kexec.target.wants/*plymouth* /usr/lib/systemd/system/kexec.target.wants
+#mkdir -p /usr/lib/systemd/system/multi-user.target.wants; cp -P $INSTALLDIR/lib/systemd/system/multi-user.target.wants/*plymouth* /usr/lib/systemd/system/multi-user.target.wants
+#mkdir -p /usr/lib/systemd/system/poweroff.target.wants; cp -P $INSTALLDIR/lib/systemd/system/poweroff.target.wants/*plymouth* /usr/lib/systemd/system/poweroff.target.wants
+#mkdir -p /usr/lib/systemd/system/reboot.target.wants; cp -P $INSTALLDIR/lib/systemd/system/reboot.target.wants/*plymouth* /usr/lib/systemd/system/reboot.target.wants
+#mkdir -p /usr/lib/systemd/system/sysinit.target.wants; cp -P $INSTALLDIR/lib/systemd/system/sysinit.target.wants/*plymouth* /usr/lib/systemd/system/sysinit.target.wants
 
 
 ln -s $INSTALLDIR/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
@@ -107,16 +107,16 @@ mkdir -p /usr/share/initramfs-tools/scripts/init-top
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 
 cp /usr/share/RBOS_PATCHES/plymouth/plymouth_lsb /usr/lib/lsb/init-functions.d/99-plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hooks/plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom/plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-top /usr/share/initramfs-tools/scripts/init-top/plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic/plymouth
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hooks/99-plymouth
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom/99-plymouth
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-top /usr/share/initramfs-tools/scripts/init-top/99-plymouth
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic/99-plymouth
 
 chmod +x /usr/lib/lsb/init-functions.d/99-plymouth
-chmod +x /usr/share/initramfs-tools/hooks/plymouth
-chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth
-chmod +x /usr/share/initramfs-tools/scripts/init-top/plymouth
-chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth
+chmod +x /usr/share/initramfs-tools/hooks/99-plymouth
+chmod +x /usr/share/initramfs-tools/scripts/init-bottom/99-plymouth
+chmod +x /usr/share/initramfs-tools/scripts/init-top/99-plymouth
+chmod +x /usr/share/initramfs-tools/scripts/panic/99-plymouth
 
 rm -r /run/plymouth
 }
