@@ -27,6 +27,7 @@ function SymlinkDirToDir
 {
   SourceDir="$1"
   DestinationDir="$2"
+  FilePrefix="$3"
   mkdir -p "$SourceDir"
   mkdir -p "$DestinationDir"
   env -C "$SourceDir" -- find -printf '%P\n' | sort | while read -r Item
@@ -40,25 +41,33 @@ function SymlinkDirToDir
     else
       if [[ ! -e "$DestinationDir/$Item" ]]
       then
-        ln -s "$SourceDir/$Item" "$DestinationDir/$Item"
+        if [[ -z $FilePrefix ]]
+        then
+          ln -s "$SourceDir/$Item" "$DestinationDir/$Item"
+        else
+          FolderLeaf=$(dirname "$Item")
+          FileName=${Item##*/}
+          mkdir -p "$DestinationDir/$FolderLeaf"
+          ln -s "$SourceDir/$Item" "$DestinationDir/$FolderLeaf/${FilePrefix}-${FileName}"
+        fi
       fi
     fi
   done
 }
 
-SymlinkDirToDir /opt/etc/pam.d /etc/pam.d
+SymlinkDirToDir /opt/etc/pam.d /etc/pam.d "rbos"
 
-SymlinkDirToDir /opt/lib/systemd/user /usr/lib/systemd/user/
+SymlinkDirToDir /opt/lib/systemd/user /usr/lib/systemd/user/ ""
 
-SymlinkDirToDir /opt/lib/systemd/system /usr/lib/systemd/system/
+SymlinkDirToDir /opt/lib/systemd/system /usr/lib/systemd/system/ ""
 
-SymlinkDirToDir /opt/share/polkit-1/actions /usr/share/polkit-1/actions/
+SymlinkDirToDir /opt/share/polkit-1/actions /usr/share/polkit-1/actions/ "rbos"
 
-SymlinkDirToDir /opt/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/
+SymlinkDirToDir /opt/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/ "rbos"
 
 
-SymlinkDirToDir /opt/etc/dbus-1/system.d /etc/dbus-1/system.d/
-SymlinkDirToDir /opt/etc/dbus-1/services /etc/dbus-1/services/
+SymlinkDirToDir /opt/etc/dbus-1/system.d /etc/dbus-1/system.d/ "rbos"
+SymlinkDirToDir /opt/etc/dbus-1/services /etc/dbus-1/services/ "rbos"
 
-SymlinkDirToDir /opt/share/dbus-1/system-services /usr/share/dbus-1/system-services/
-SymlinkDirToDir /opt/share/dbus-1/system.d /usr/share/dbus-1/system.d/
+SymlinkDirToDir /opt/share/dbus-1/system-services /usr/share/dbus-1/system-services/ "rbos"
+SymlinkDirToDir /opt/share/dbus-1/system.d /usr/share/dbus-1/system.d/ "rbos"
