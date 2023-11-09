@@ -97,8 +97,6 @@ function PackagePostInstall()
 ln -s $INSTALLDIR/share/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/themes/spinfinity/watermark.png
 rm $INSTALLDIR/share/plymouth/themes/spinfinity/header-image.png
 
-ln -s $INSTALLDIR/bin/plymouth /bin/plymouth
-ln -s $INSTALLDIR/sbin/plymouthd /sbin/plymouthd
 mkdir -p /usr/lib/lsb/init-functions.d/
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 mkdir -p /usr/share/initramfs-tools/hooks/
