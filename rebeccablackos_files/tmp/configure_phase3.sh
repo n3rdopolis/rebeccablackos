@@ -52,6 +52,7 @@ function RedirectFile {
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
+dpkg-divert --package rbos-rbos --add --rename --divert /etc/default/grub.distrib /etc/default/grub
 dpkg-divert --package rbos-rbos --add --rename --divert /etc/skel/.bashrc.distrib /etc/skel/.bashrc
 dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.distrib /etc/issue
 dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.net.distrib /etc/issue.net
