@@ -104,17 +104,17 @@ mkdir -p /usr/share/initramfs-tools/scripts/init-bottom
 mkdir -p /usr/share/initramfs-tools/scripts/init-top
 mkdir -p /usr/share/initramfs-tools/scripts/panic
 
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_lsb /usr/lib/lsb/init-functions.d/99-plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hooks/99-plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom/99-plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-top /usr/share/initramfs-tools/scripts/init-top/99-plymouth
-cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic/99-plymouth
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_lsb /usr/lib/lsb/init-functions.d/99-plymouth-bootsplash
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_hook /usr/share/initramfs-tools/hooks/plymouth-bootsplash
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-bottom /usr/share/initramfs-tools/scripts/init-bottom/plymouth-bootsplash
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_init-top /usr/share/initramfs-tools/scripts/init-top/plymouth-bootsplash
+cp /usr/share/RBOS_PATCHES/plymouth/plymouth_panic /usr/share/initramfs-tools/scripts/panic/plymouth-bootsplash
 
-chmod +x /usr/lib/lsb/init-functions.d/99-plymouth
-chmod +x /usr/share/initramfs-tools/hooks/99-plymouth
-chmod +x /usr/share/initramfs-tools/scripts/init-bottom/99-plymouth
-chmod +x /usr/share/initramfs-tools/scripts/init-top/99-plymouth
-chmod +x /usr/share/initramfs-tools/scripts/panic/99-plymouth
+chmod +x /usr/lib/lsb/init-functions.d/99-plymouth-bootsplash
+chmod +x /usr/share/initramfs-tools/hooks/plymouth-bootsplash
+chmod +x /usr/share/initramfs-tools/scripts/init-bottom/plymouth-bootsplash
+chmod +x /usr/share/initramfs-tools/scripts/init-top/plymouth-bootsplash
+chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth-bootsplash
 
 rm -r /run/plymouth
 }
