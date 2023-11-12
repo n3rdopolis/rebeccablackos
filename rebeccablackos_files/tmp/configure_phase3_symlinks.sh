@@ -85,3 +85,8 @@ SymlinkDirToDir /opt/etc/dbus-1/services /etc/dbus-1/services/ "rbos"
 
 SymlinkDirToDir /opt/share/dbus-1/system-services /usr/share/dbus-1/system-services/ "rbos"
 SymlinkDirToDir /opt/share/dbus-1/system.d /usr/share/dbus-1/system.d/ "rbos"
+
+SymlinkDirToDir /opt/share/bash-completion/ /usr/share/bash-completion/ "rbos"
+
+SymlinkDirToDir /opt/share/fish/vendor_completions.d/ /usr/share/fish/vendor_completions.d/ "rbos"
+SymlinkDirToDir /opt/share/zsh /usr/share/zsh "rbos"
