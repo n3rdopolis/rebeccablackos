@@ -80,11 +80,9 @@ SymlinkDirToDir /opt/share/polkit-1/actions /usr/share/polkit-1/actions/ "rbos"
 SymlinkDirToDir /opt/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/ "rbos"
 
 
-SymlinkDirToDir /opt/etc/dbus-1/system.d /etc/dbus-1/system.d/ "rbos"
-SymlinkDirToDir /opt/etc/dbus-1/services /etc/dbus-1/services/ "rbos"
+SymlinkDirToDir /opt/etc/dbus-1/ /etc/dbus-1/ "rbos"
 
-SymlinkDirToDir /opt/share/dbus-1/system-services /usr/share/dbus-1/system-services/ "rbos"
-SymlinkDirToDir /opt/share/dbus-1/system.d /usr/share/dbus-1/system.d/ "rbos"
+SymlinkDirToDir /opt/share/dbus-1/ /usr/share/dbus-1/ "rbos"
 
 SymlinkDirToDir /opt/share/bash-completion/ /usr/share/bash-completion/ "rbos"
 
