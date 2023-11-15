@@ -53,20 +53,32 @@ export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export MAKEFLAGS="-j $(( $BUILD_CPU_COUNT ))"
 export LD_LIBRARY_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH:$INSTALLDIR/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
 export PATH="$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/
+export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/:$(pkg-config --variable pc_path pkg-config)
 export CPATH=$INSTALLDIR/include
 export LIBRARY_PATH=$INSTALLDIR/lib
 export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
 export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
-export ACLOCAL_PATH=/opt/share/aclocal:/usr/share/aclocal
+export ACLOCAL_PATH=$INSTALLDIR/share/aclocal:/usr/share/aclocal
 export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
-export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/:/opt/lib/python3/dist-packages/
+export PYTHONPATH=$INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/:$INSTALLDIR/lib/python3/dist-packages/
 
 export CARGO_PROFILE_RELEASE_DEBUG=false
 export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
 export CARGO_PROFILE_RELEASE_INCREMENTAL=false
 export CARGO_PROFILE_RELEASE_LTO=true
 export CARGO_PROFILE_RELEASE_OPT_LEVEL=z
+
+#Array format, pkgconfig_file.pc=variablename=newvalue
+BUILD_CORE_PKGCONIFG_OVERRIDE_VARS=(
+                                    "bash-completion.pc=completionsdir=$INSTALLDIR/bash-completion/completions"
+                                    "bash-completion.pc=helpersdir=$INSTALLDIR/bash-completion/helpers"
+                                    "systemd.pc=systemd_system_unit_dir=$INSTALLDIR/lib/systemd/system"
+                                    "systemd.pc=systemdsystemunitdir=$INSTALLDIR/lib/systemd/system"
+                                    "systemd.pc=systemd_user_unit_dir=$INSTALLDIR/lib/systemd/user"
+                                    "systemd.pc=systemduserunitdir=$INSTALLDIR/lib/systemd/user"
+                                    "udev.pc=udev_dir=$INSTALLDIR/lib/udev/"
+                                    "udev.pc=udevdir=$INSTALLDIR/lib/udev/"
+                                   )
 

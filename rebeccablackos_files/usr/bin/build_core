@@ -163,13 +163,13 @@ function RunDownloadAndOrBuild
     function PackagePostInstall { :; }
   fi
 
-  #If this variable is not set, assume this is the only pacakge being compiled
+  #If this variable is not set, assume this is the only package being compiled
   if [[ -z $BUILDCORETOTALPACKAGESNUMBER ]]
   then
     BUILDCORETOTALPACKAGESNUMBER=1
   fi
 
-  #If this variable is not set, assume this is the only pacakge being compiled
+  #If this variable is not set, assume this is the only package being compiled
   if [[ -z $BUILDCORECURRENTPACKAGENUMBER ]]
   then
     BUILDCORECURRENTPACKAGENUMBER=1
@@ -848,6 +848,55 @@ function GetSourceVersion()
   fi
 }
 
+#Function that creates pkgconfig files in $EXTERNALBUILDHOME"/pkgconfig with overridden variables
+#This allows packages that look up some variables, such as systemd_system_unit_dir to be tricked to not install files that overwrite the system ones
+#For the functionality to work, for systemd to find the unit files, and such they do need to be linked in by other scripts
+function RedirectPkgconfigFileVars()
+{
+  if [[ -z $PKG_CONFIG_PATH ]]
+  then
+    IFS=:
+    PkgconfigFolders=($(pkg-config --variable pc_path pkg-config))
+    unset IFS
+  else
+    IFS=:
+    PkgconfigFolders=($PKG_CONFIG_PATH)
+    unset IFS
+  fi
+
+  if [[ ! -z $BUILD_CORE_PKGCONIFG_OVERRIDE_VARS ]]
+  then
+    for PkgconfigOverrideVar in "${BUILD_CORE_PKGCONIFG_OVERRIDE_VARS[@]}"
+    do
+      IFS="="
+      PkgconfigOverrideVar=($PkgconfigOverrideVar)
+      unset IFS
+      PkgconfigOverrideVarFile=${PkgconfigOverrideVar[0]}
+      PkgconfigOverrideVarName=${PkgconfigOverrideVar[1]}
+      PkgconfigOverrideVarValue=${PkgconfigOverrideVar[2]}
+
+      PkgConfigFilePath=""
+      for PkgconfigFolder in "${PkgconfigFolders[@]}"
+      do
+        if [[ -e "$PkgconfigFolder/$PkgconfigOverrideVarFile" ]]
+        then
+          PkgConfigFilePath="$PkgconfigFolder/$PkgconfigOverrideVarFile"
+          break
+        fi
+      done
+
+      if [[ "$PkgConfigFilePath" != "" ]]
+      then
+        mkdir -p "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/pkgconfig
+        if [[ ! -e "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/pkgconfig/"$PkgconfigOverrideVarFile" ]]
+        then
+          cp "$PkgConfigFilePath" "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/pkgconfig/"$PkgconfigOverrideVarFile"
+        fi
+        sed -i "s|^${PkgconfigOverrideVarName}=.*$|${PkgconfigOverrideVarName}=${PkgconfigOverrideVarValue}|g" "$SOURCEDIR"/buildhome/config/"$SOURCENAME"/pkgconfig/"$PkgconfigOverrideVarFile"
+      fi
+    done
+  fi
+}
 
 function SetBuildVariables()
 {
@@ -873,6 +922,7 @@ function SetBuildVariables()
     export PATH="/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/":"/$SOURCEDIR/buildhome/buildcore_rust/rustrun/lib/rustlib/$RUSTBINARYNAME/bin/":"$EXTERNALBUILDHOME"/bin:$PATH
     export NM=llvm-nm
   fi
+  export PKG_CONFIG_PATH="$SOURCEDIR"/buildhome/config/"$SOURCENAME"/pkgconfig:$PKG_CONFIG_PATH
 }
 
 #Function that calls common build preperations, and then calls upon the main builder scripts prepare function
@@ -897,6 +947,7 @@ function PrepareBuild()
       ln -s $FILE "$EXTERNALBUILDHOME"/bin/$TARGET
     done
   fi
+  RedirectPkgconfigFileVars
 
   STARTTIME=$(date +%s)
   PackagePrepareBuild 2>&1 | tee "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
@@ -967,6 +1018,7 @@ function MakeAndInstall()
     #Create a script that will be run as non root, to handle the custom configure and build options
     echo "#! /bin/bash
     mkdir -p \"/$SOURCEDIR/$SOURCENAME/Logs\"
+    $(declare -f RedirectPkgconfigFileVars)
     $(declare -f SetBuildVariables)
     $(declare -f PrepareBuild)
     $(declare -f PackagePrepareBuild)
@@ -995,7 +1047,7 @@ function MakeAndInstall()
     $NONROOTCOMMAND "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
     PackageCompileSourceResult=$?
 
-    #Set the owner of the HOME directory for building the pacakge to root, as the non-root owner can cause some install scripts to stop, because the UIDs don't match, since the packages are compiled with the non-root user.
+    #Set the owner of the HOME directory for building the package to root, as the non-root owner can cause some install scripts to stop, because the UIDs don't match, since the packages are compiled with the non-root user.
     chown -R root:root "$SOURCEDIR"/buildhome/config/"$SOURCENAME"
 
 
