@@ -243,7 +243,7 @@ function RunDownloadAndOrBuild
     exit
   fi
   
-  TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep /Cargo.toml$)
+  TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep '/*\.toml$')
   if [[ ! -z $TOMLFILES ]]
   then
     export TOMLFilesExist=1
