@@ -65,7 +65,7 @@ fi
 echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 
 #install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget python-is-python3 python3-distutils rustc curl dselect dnsutils locales acl sudo cargo usrmerge -y
+apt-get install aptitude git bzr subversion mercurial wget python-is-python3 python3-distutils rustc curl dselect dnsutils locales acl sudo cargo meson usrmerge -y
 apt-get dist-upgrade -y --no-install-recommends
 
 #perl outputs complaints if a locale isn't generated

@@ -812,6 +812,10 @@ function DownloadSource()
     export INSTALLDIR=$INSTALLDIR
 
     cd "$SOURCEDIR/$SOURCENAME"
+    if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
+    then
+      meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
+    fi
 
     DownloadTOMLData
     PackageDownloadSource
