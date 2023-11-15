@@ -70,10 +70,6 @@ How to use Wayland:
 
 PROBLEMS:
 ---------
-      * A few files outside of /opt in packages may conflict with the files provided by main Debian archives, if additional packages from Debian are installed
-      manually on an installed system. If package operations fail due to overwrites , use the rbos-enable-dpkg-overwrites command for a wizard to enable dpkg 
-      overwrites.
-
       * Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
 
 BOOT OPTIONS:
