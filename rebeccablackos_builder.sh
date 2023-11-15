@@ -153,6 +153,7 @@ function NAMESPACE_EXECUTE {
   HASNETWORK=$1
   shift
   LOGFILE="$1"
+  echolog "   Logging to $(basename $LOGFILE)"
   shift
 
   if [[ $HASNETWORK == 0 ]]
