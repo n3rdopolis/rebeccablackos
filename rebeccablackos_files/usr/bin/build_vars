@@ -78,6 +78,9 @@ BUILD_CORE_PKGCONIFG_OVERRIDE_VARS=(
                                     "systemd.pc=systemdsystemunitdir=$INSTALLDIR/lib/systemd/system"
                                     "systemd.pc=systemd_user_unit_dir=$INSTALLDIR/lib/systemd/user"
                                     "systemd.pc=systemduserunitdir=$INSTALLDIR/lib/systemd/user"
+                                    "dbus-1.pc=session_bus_services_dir=$INSTALLDIR/share/dbus-1/services"
+                                    "dbus-1.pc=system_bus_services_dir=$INSTALLDIR/share/dbus-1/system-services"
+                                    "dbus-1.pc=interfaces_dir=$INSTALLDIR/share/dbus-1/interfaces"
                                     "udev.pc=udev_dir=$INSTALLDIR/lib/udev/"
                                     "udev.pc=udevdir=$INSTALLDIR/lib/udev/"
                                    )
