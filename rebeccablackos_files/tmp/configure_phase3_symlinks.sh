@@ -71,9 +71,9 @@ SymlinkDirToDir /opt/lib/udev/rules.d /usr/lib/udev/rules.d "rbos"
 
 SymlinkDirToDir /opt/etc/pam.d /etc/pam.d "rbos"
 
-SymlinkDirToDir /opt/lib/systemd/user /usr/lib/systemd/user/ ""
+SymlinkDirToDir /opt/lib/systemd/user /usr/local/lib/systemd/user/ ""
 
-SymlinkDirToDir /opt/lib/systemd/system /usr/lib/systemd/system/ ""
+SymlinkDirToDir /opt/lib/systemd/system /usr/local/lib/systemd/system/ ""
 
 SymlinkDirToDir /opt/share/polkit-1/actions /usr/share/polkit-1/actions/ "rbos"
 
