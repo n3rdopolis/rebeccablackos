@@ -45,6 +45,7 @@ else
       sleep 1
     done
   else
+    export XDG_MENU_PREFIX=plasma-
     kioclient appmenu
   fi
 fi
