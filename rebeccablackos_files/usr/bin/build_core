@@ -681,7 +681,7 @@ function DownloadSource()
        DEBFILECONTENTCOUNT=0
        break
      fi
-    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
+    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
   #If there is no deb file, no control file, debs aren't being built, or the package is set to rebuild on every try, run the download routine
@@ -998,7 +998,7 @@ function MakeAndInstall()
        DEBFILECONTENTCOUNT=0
        break
      fi
-    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v /include/ | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
+    done < <(dpkg-deb -c "$DEBFILE" 2>/dev/null | grep -v ^d | grep -v "/usr/share/buildcore_revisions/$SOURCENAME" )
   done < <(find "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb -maxdepth 1 -type f )
 
   #If the deb file is gone, there is no control file, or the script is set to build a new revision and there is anew revision, or the scripts not configured to make deb files, then build the source
