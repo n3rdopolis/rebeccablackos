@@ -29,7 +29,7 @@ then
 fi
 
 
-read -n 65535 KernelCommandLine < /proc/cmdline
+read -r -n 65535 KernelCommandLine < /proc/cmdline
 
 #Don't do anything if this is a livecd
 if [[ $KernelCommandLine =~ (=| )casper($| ) ]]
