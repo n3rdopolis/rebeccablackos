@@ -274,7 +274,7 @@ then
   echolog "  Enter 5 for a prompt for a custom architecture (Unsupported)"
   echolog "Default is the current CPU architecture: $DEFAULT_ARCH"
   echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument. The second argument can be a path to a handled revisions file."
-  read archselect
+  read -r archselect
   if [[ $archselect == 2 ]]
   then
     export BUILDARCH=i386
@@ -287,7 +287,7 @@ then
   elif [[ $archselect == 5 ]]
   then
     echolog "Enter custom CPU arch. Please ensure your processor is capable of running the selected architecture."
-    read BUILDARCH
+    read -r BUILDARCH
     export BUILDARCH=$BUILDARCH
   else
     export BUILDARCH=$DEFAULT_ARCH
