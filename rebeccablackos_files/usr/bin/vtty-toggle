@@ -77,7 +77,7 @@ function PromptUI
   then
     Prompt=0
   else
-    read -p "By running the action $Action on $CurrentTTY this will end the current session on $CurrentTTY . Continue? (Must be y or Y): " Prompt 
+    read -r -p "By running the action $Action on $CurrentTTY this will end the current session on $CurrentTTY . Continue? (Must be y or Y): " Prompt 
     if [[ $Prompt != y && $Prompt != Y ]]
     then
       echo "Action not confirmed. Exiting..."
