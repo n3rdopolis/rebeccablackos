@@ -72,8 +72,8 @@ export CARGO_PROFILE_RELEASE_OPT_LEVEL=z
 
 #Array format, pkgconfig_file.pc=variablename=newvalue
 BUILD_CORE_PKGCONIFG_OVERRIDE_VARS=(
-                                    "bash-completion.pc=completionsdir=$INSTALLDIR/bash-completion/completions"
-                                    "bash-completion.pc=helpersdir=$INSTALLDIR/bash-completion/helpers"
+                                    "bash-completion.pc=completionsdir=$INSTALLDIR/share/bash-completion/completions"
+                                    "bash-completion.pc=helpersdir=$INSTALLDIR/share/bash-completion/helpers"
                                     "systemd.pc=systemd_system_unit_dir=$INSTALLDIR/lib/systemd/system"
                                     "systemd.pc=systemdsystemunitdir=$INSTALLDIR/lib/systemd/system"
                                     "systemd.pc=systemd_user_unit_dir=$INSTALLDIR/lib/systemd/user"
