@@ -330,6 +330,9 @@ function UserSessionWorker
   fi
   GuestServerPID=$!
 
+  #Attempt to guess the WAYLAND_DISPLAY and notify systemd
+  UserSessionGuessWAYLAND_DISPLAY $$ &
+
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
@@ -359,6 +362,55 @@ function UserSessionWorker
   $SLEEPCMD 1
   TerminateJobPID $JournalctlPID 15 0
   exit
+}
+
+#Function that UserSession calls to attempt to guess and notify the user systemd of the WAYLAND_DISPLAY
+#Only Weston supports the waylandloginmanager's ability to set an explict WAYLAND_DISPLAY, so a hueristic has to be used
+#If it fails, because the session uses systemd to start itself (and it's not in the tree, then that is OK)
+#This is needed for the xdg-desktop-portal to work
+#It takes one argument, the pid of the UserSessionWorker
+function UserSessionGuessWAYLAND_DISPLAY
+{
+  UserSessionWorkerPID=$1
+  UserSessionWAYLAND_DISPLAY=""
+  UserSessionWAYLAND_DISPLAYFound=0
+  for (( AttemptItr=0 ; AttemptItr < 10 ; AttemptItr++ ))
+  do
+    UserSessionWorkerPIDChildren=($(ps -s $UserSessionWorkerPID -o pid=))
+    UserSessionWaylandSockets=($(find $XDG_RUNTIME_DIR -maxdepth 1 -type s -name "wayland-*"))
+    for UserSessionWaylandSocket in "${UserSessionWaylandSockets[@]}"
+    do
+      WaylandSocketUsers=($(fuser $UserSessionWaylandSocket 2>/dev/null))
+      for WaylandSocketUser in "${WaylandSocketUsers[@]}"
+      do
+        for UserSessionWorkerPIDChild in "${UserSessionWorkerPIDChildren[@]}"
+        do
+          if [[ $WaylandSocketUser == $UserSessionWorkerPIDChild ]]
+          then
+            WAYLAND_DISPLAY=$(basename $UserSessionWaylandSocket) dbus-update-activation-environment --systemd WAYLAND_DISPLAY
+            UserSessionWAYLAND_DISPLAYFound=1
+          fi
+        done
+
+        if [[ $UserSessionWAYLAND_DISPLAYFound != 0 ]]
+        then
+          break
+        fi
+      done
+
+      if [[ $UserSessionWAYLAND_DISPLAYFound != 0 ]]
+      then
+        break
+      fi
+    done
+
+    if [[ $UserSessionWAYLAND_DISPLAYFound != 0 ]]
+    then
+      break
+    fi
+
+    $SLEEPCMD 1
+  done
 }
 
 #Function that UserSessionWorker calls when exiting. It takes no arguments
