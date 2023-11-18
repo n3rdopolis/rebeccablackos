@@ -183,22 +183,6 @@ function UserSessionWorker
   then
     ReadEnvironmentFile "$EnvironmentFile"
   fi
-  
-  #instead of .xprofile handle ~/.local/wlprofile files
-  if [[ -x /etc/wlprofile ]]
-  then
-    . /etc/wlprofile &> /dev/null
-  fi
-  if [[ -x ~/.local/wlprofile ]]
-  then
-    . ~/.local/wlprofile &> /dev/null
-  fi
-
-  #Create a folder for the logs
-  if [[ ! -e ~/.cache/wlsessionlogs ]]
-  then
-    mkdir -p ~/.cache/wlsessionlogs
-  fi
 
   #Cleanup old log files
   LOGFILECOUNT=0
@@ -253,6 +237,22 @@ function UserSessionWorker
     do
       $SLEEPCMD .1
     done
+  fi
+
+  #instead of .xprofile handle ~/.local/wlprofile files
+  if [[ -x /etc/wlprofile ]]
+  then
+    . /etc/wlprofile &> /dev/null
+  fi
+  if [[ -x ~/.local/wlprofile ]]
+  then
+    . ~/.local/wlprofile &> /dev/null
+  fi
+
+  #Create a folder for the logs
+  if [[ ! -e ~/.cache/wlsessionlogs ]]
+  then
+    mkdir -p ~/.cache/wlsessionlogs
   fi
 
   #XDG_SEAT and XDG_SESSION_ID variables tend to get cousumed by some desktops
