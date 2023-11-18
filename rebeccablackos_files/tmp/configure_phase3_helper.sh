@@ -25,7 +25,7 @@ fi
 
 shopt -s dotglob
 
-#This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
+  #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
 
 #Copy select files into place, that are suitable for distribution.
 cp -a /usr/import/usr/* /usr
@@ -33,6 +33,9 @@ cp -a /usr/import/usr/* /usr
 mkdir -p /etc/skel/.config
 cp -a /usr/import/etc/* /etc/
 mkdir -p /etc/skel/Desktop
+
+#Make the 'hidden' waylandloginmanager zenity to kdialog convert script executable
+chmod 755 /usr/share/RBOS_PATCHES/wlm-zenity-kdialog
 
 #Configure python to use modules in /opt
 echo "/opt/lib/python3/dist-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"

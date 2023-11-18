@@ -197,9 +197,6 @@ function PostInstallActions
 
   #move the import folder
   mv /usr/import /tmp
-  
-  #Make the 'hidden' waylandloginmanager zenity to kdialog convert script executable
-  chmod 755 /usr/share/RBOS_PATCHES/wlm-zenity-kdialog
 
   #Force initramfs utilites to include the overlay filesystem
   echo overlay >> /etc/initramfs-tools/modules
