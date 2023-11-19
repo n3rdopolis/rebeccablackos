@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2023-11-18 22:02:31.566069000 -0500
-+++ usr/bin/waylandloginmanagertui	2023-11-18 23:10:26.006695574 -0500
+--- usr/bin/waylandloginmanager	2023-11-18 23:54:01.317847411 -0500
++++ usr/bin/waylandloginmanagertui	2023-11-18 23:54:20.489485264 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -45,11 +45,12 @@
  
    #Prepare logging for the loginmanagerdisplay
    GetConfigKey wlmdebug "" 0 2 wlmdebug
-@@ -943,22 +943,14 @@
+@@ -941,23 +941,14 @@
    export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
    export XDG_DATA_DIRS=/opt/share:/usr/share
    export QT_QPA_PLATFORM=wayland
 -  export QT_QPA_PLATFORMTHEME=qt6ct
+-  export QT_LOGGING_TO_CONSOLE=1
 +  export QT_STYLE_OVERRIDE=oxygen
    #Set the default path for weston
 -  export DEFAULTWAYLANDSERVER=$(which weston)
@@ -71,7 +72,7 @@
  
    #set MinimumTTY to be 7.
    MinimumTTY=7
-@@ -971,7 +963,7 @@
+@@ -970,7 +961,7 @@
    #Determine if this is running on a live instance, if booted with casper
    GetConfigKey wlmlivemode "" 0 0 LiveCDMode
  
@@ -80,7 +81,7 @@
    WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
    if [[ $seat0HasTTYs == 1 ]]
    then
-@@ -982,8 +974,8 @@
+@@ -981,8 +972,8 @@
      TTYWIZARDCMD=true
    fi
  
@@ -91,7 +92,7 @@
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
    GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
-@@ -1061,7 +1053,7 @@
+@@ -1060,7 +1051,7 @@
  
    ReadyNotifySent=0
    #Get the TTY that will hold the Wayland server that displays the login screen for seat0
@@ -100,7 +101,7 @@
    if [[ $LoginManagerDisplayFileProbe == 1 ]]
    then
      RUNNINGWLMCOUNT=$(systemctl show wlm-loginmanagerdisplay_*.service -p MainPID --value |& wc -l )
-@@ -1298,10 +1290,7 @@
+@@ -1297,10 +1288,7 @@
    SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
    export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
    SetFallbackEnvironmentVariables $3
@@ -112,7 +113,7 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -1311,26 +1300,10 @@
+@@ -1310,26 +1298,10 @@
    GetStartedSeatIndex $CurrentSeat
    SeatFileName=${SeatFileNames[$ReturnSeatIndex]}
  
@@ -140,7 +141,7 @@
  }
  
  #This takes 1 argument, the user home dir to search for wsession files under $HOME/.local/share/wsessions.d/*.desktop.
-@@ -2004,7 +1977,7 @@
+@@ -2003,7 +1975,7 @@
        done
        if [[ $WSESSIONNUMBER == -1 ]]
        then
@@ -149,7 +150,7 @@
          WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
          return 1
        fi
-@@ -2040,7 +2013,7 @@
+@@ -2039,7 +2011,7 @@
        unset IFS
        #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
        #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
@@ -158,7 +159,7 @@
        #Abort if the user selected cancel on the dialog
        CancelOrOK=$?
        if [[ $CancelOrOK != 0 ]]
-@@ -2057,7 +2030,7 @@
+@@ -2056,7 +2028,7 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
@@ -167,7 +168,7 @@
      WriteToLog "No sessions are installed in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
-@@ -2093,16 +2066,11 @@
+@@ -2092,16 +2064,11 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -186,16 +187,16 @@
  
  }
  
-@@ -2170,7 +2138,7 @@
+@@ -2169,7 +2136,7 @@
  
    unset ChangeSession
    #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
--  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300 -- "${SessionList[@]}" 2>/dev/null )
+-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
 +  ChangeSession=$($UIDIALOGCMD --title "Switch User" --menu "Select a running session to change into" 50 80 0 -- "${SessionList[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
    CancelOrOK=$?
    #Abort if the user selected cancel on the dialog
    if [[ $CancelOrOK != 0 ]]
-@@ -2201,7 +2169,7 @@
+@@ -2200,7 +2167,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -204,7 +205,7 @@
        fi
      fi
    fi
-@@ -2458,7 +2426,7 @@
+@@ -2457,7 +2424,7 @@
      #The display in the dialog should be "Firstname Lastname    (loginname)"
      UserDisplayName="$UserDisplayName   (${UserData[1]})" 
      unset IFS
@@ -213,7 +214,7 @@
      USERLISTSTRING+="$UserName"
      USERLISTSTRING+=$'\n'
      USERLISTSTRING+="$UserDisplayName"
-@@ -2475,7 +2443,7 @@
+@@ -2474,7 +2441,7 @@
    unset IFS
  
    #present the list of the users to the system
@@ -222,7 +223,7 @@
    CancelOrOK=$?
    export LOGINUSER
    #Abort if the user selected cancel on the dialog
-@@ -2486,7 +2454,7 @@
+@@ -2485,7 +2452,7 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -231,7 +232,7 @@
      CancelOrOK=$?
      #Abort if the user selected cancel on the dialog
      if [[ $CancelOrOK != 0 ]]
-@@ -2519,7 +2487,7 @@
+@@ -2518,7 +2485,7 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -240,7 +241,7 @@
        CancelOrOK=$?
        #Abort if the user selected cancel on the dialog
        if [[ $CancelOrOK != 0 ]]
-@@ -2535,7 +2503,7 @@
+@@ -2534,7 +2501,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -249,7 +250,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2554,12 +2522,12 @@
+@@ -2553,12 +2520,12 @@
          TTYSTRING=""
        fi
        WriteToLog "Opening a session for $LOGINUSER $TTYSTRING on seat $CurrentSeat"
@@ -264,7 +265,7 @@
      WriteToLog "Not Enough TTYs for user login!"
    fi
  }
-@@ -2578,10 +2546,12 @@
+@@ -2577,10 +2544,12 @@
      export WAYLAND_DISPLAY=loginmanagerdisplay_"$SeatFileName"
      SetFallbackEnvironmentVariables $CurrentSeat
      SessionPromptThreshold=1
@@ -278,7 +279,7 @@
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
    fi
-@@ -2669,7 +2639,12 @@
+@@ -2668,7 +2637,12 @@
    ACTIONSTRING=($ACTIONSTRING)
    unset IFS
  
@@ -292,7 +293,7 @@
  
    CancelOrOK=$?
    #Abort if the user selected cancel on the dialog
-@@ -2691,7 +2666,12 @@
+@@ -2690,7 +2664,12 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -306,7 +307,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2736,7 +2716,12 @@
+@@ -2735,7 +2714,12 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -320,7 +321,7 @@
    fi
  }
  
-@@ -2927,7 +2912,7 @@
+@@ -2926,7 +2910,7 @@
          OutputArgs=""
        fi
        SetFallbackEnvironmentVariables $CurrentSeat
@@ -329,7 +330,7 @@
        if [[ ! -z $LIBGL_ALWAYS_SOFTWARE ]]
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=LIBGL_ALWAYS_SOFTWARE=$LIBGL_ALWAYS_SOFTWARE "
-@@ -2936,7 +2921,7 @@
+@@ -2935,7 +2919,7 @@
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=GBM_ALWAYS_SOFTWARE=$GBM_ALWAYS_SOFTWARE "
        fi
@@ -338,7 +339,7 @@
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -3076,7 +3061,7 @@
+@@ -3075,7 +3059,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -347,7 +348,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -3101,7 +3086,7 @@
+@@ -3100,7 +3084,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -356,7 +357,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3145,7 +3130,7 @@
+@@ -3144,7 +3128,7 @@
    ActionMenu=($ActionMenu)
    unset IFS
  
@@ -365,7 +366,7 @@
    DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
-@@ -3507,9 +3492,9 @@
+@@ -3506,9 +3490,9 @@
        fi
      done
  
@@ -377,7 +378,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3742,7 +3727,7 @@
+@@ -3741,7 +3725,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -386,7 +387,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3788,7 +3773,7 @@
+@@ -3787,7 +3771,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -395,7 +396,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3817,7 +3802,7 @@
+@@ -3816,7 +3800,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -404,7 +405,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3863,7 +3848,7 @@
+@@ -3862,7 +3846,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -413,7 +414,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3935,6 +3920,7 @@
+@@ -3934,6 +3918,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      WLM_SOCKET_FILTER=1 $0 --socketfilter &

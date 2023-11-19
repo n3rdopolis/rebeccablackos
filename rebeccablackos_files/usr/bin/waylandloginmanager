@@ -935,8 +935,6 @@ function PrepareLoginManager
   #Enable job control in this script
   set -m
 
-  #Export variables for configuring GTK settings
-  export DCONF_PROFILE=/etc/loginmanagerdisplay/dconf/waylandloginmanager
   #Set Wayland/runtime vars
   export PATH=/opt/bin:$PATH
   export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
@@ -944,6 +942,7 @@ function PrepareLoginManager
   export XDG_DATA_DIRS=/opt/share:/usr/share
   export QT_QPA_PLATFORM=wayland
   export QT_QPA_PLATFORMTHEME=qt6ct
+  export QT_LOGGING_TO_CONSOLE=1
   #Set the default path for weston
   export DEFAULTWAYLANDSERVER=$(which weston)
   #Specify where wsession files are found
@@ -2170,7 +2169,7 @@ function SwitchUserDialog
 
   unset ChangeSession
   #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300 -- "${SessionList[@]}" 2>/dev/null )
+  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
   CancelOrOK=$?
   #Abort if the user selected cancel on the dialog
   if [[ $CancelOrOK != 0 ]]
