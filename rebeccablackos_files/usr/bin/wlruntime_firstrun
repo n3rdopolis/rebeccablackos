@@ -31,3 +31,9 @@ then
   cp ~/.config/weston-rdp/$HOSTNAME.key ~/.config/weston-rdp/HOST.key 2>/dev/null 
   cp ~/.config/weston-rdp/$HOSTNAME.crt ~/.config/weston-rdp/HOST.crt 2>/dev/null 
 fi
+
+find ~/.cache/ksycoca6* &>/dev/null
+if [[ $? != 0 ]]
+then
+  XDG_MENU_PREFIX="plasma-" kbuildsycoca6
+fi

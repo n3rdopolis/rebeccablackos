@@ -35,8 +35,6 @@ then
   "$@"
   exit $?
 else
-  export XDG_MENU_PREFIX=plasma-
-
   #If APPMENU_DO_LOOP is specified, then the appmenu is launched after every application it launches
   if [[ $APPMENU_DO_LOOP == 1 ]]
   then
