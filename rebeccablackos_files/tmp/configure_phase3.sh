@@ -52,15 +52,17 @@ function RedirectFile {
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/default/grub.distrib /etc/default/grub
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/skel/.bashrc.distrib /etc/skel/.bashrc
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.distrib /etc/issue
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/issue.net.distrib /etc/issue.net
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/os-release.distrib /etc/os-release
-dpkg-divert --package rbos-rbos --add --rename --divert /etc/lsb-release.distrib /etc/lsb-release
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/X.distrib /usr/bin/X
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/plymouth.distrib /usr/bin/plymouth
+#redirect files from tier 1 Debian packages
+mkdir /usr/share/rbos-distrib
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_default_grub /etc/default/grub
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_skel_.bashrc /etc/skel/.bashrc
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_issue        /etc/issue
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_issue.net    /etc/issue.net
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_os-release   /etc/os-release
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_lsb-release  /etc/lsb-release
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_X        /usr/bin/X
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_plymouth /usr/bin/plymouth
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_chvt /usr/bin/chvt
 
 if [[ -f /tmp/APTFETCHDATE ]]
 then
