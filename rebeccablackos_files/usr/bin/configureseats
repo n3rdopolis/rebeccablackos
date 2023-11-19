@@ -702,7 +702,7 @@ function MainConfig
           continue
         fi
       fi
-      $ZENITYCMD --question --no-wrap --title="Multipointer and Seat Configuration" --text "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" 2>/dev/null
+      echo "${AdditionalPromptText}Are you sure you want to quit this utility and save the following changes to the $ChangedDeviceCount Devices?"$'\n'$'\n'"$NewDeviceConfigPromptText" | $ZENITYCMD --text-info --title="Multipointer and Seat Configuration"  --width=550 --height=700 --ok-label=Yes --cancel-label=No 2>/dev/null
       Result=$?
       if [[ $Result == 0 ]]
       then
