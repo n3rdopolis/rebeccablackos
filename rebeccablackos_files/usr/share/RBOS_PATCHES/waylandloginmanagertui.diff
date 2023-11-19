@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2023-11-18 19:02:30.485289046 -0500
-+++ usr/bin/waylandloginmanagertui	2023-11-18 19:28:32.689930949 -0500
+--- usr/bin/waylandloginmanager	2023-11-18 22:02:31.566069000 -0500
++++ usr/bin/waylandloginmanagertui	2023-11-18 23:10:26.006695574 -0500
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports watching the active session until it fails, so that it swiches back to the needed TTY for the user.
@@ -377,7 +377,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3737,7 +3722,7 @@
+@@ -3742,7 +3727,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -386,7 +386,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3783,7 +3768,7 @@
+@@ -3788,7 +3773,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -395,7 +395,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3812,7 +3797,7 @@
+@@ -3817,7 +3802,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -404,7 +404,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3858,7 +3843,7 @@
+@@ -3863,7 +3848,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -413,7 +413,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3930,6 +3915,7 @@
+@@ -3935,6 +3920,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      WLM_SOCKET_FILTER=1 $0 --socketfilter &
