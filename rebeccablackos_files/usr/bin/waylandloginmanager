@@ -2170,7 +2170,7 @@ function SwitchUserDialog
 
   unset ChangeSession
   #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" -- "${SessionList[@]}" 2>/dev/null )
+  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300 -- "${SessionList[@]}" 2>/dev/null )
   CancelOrOK=$?
   #Abort if the user selected cancel on the dialog
   if [[ $CancelOrOK != 0 ]]
@@ -2355,7 +2355,7 @@ function StartUserSession
   fi
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  SendSelfRegisterData "NEWSESSION"$'\u1F'"$USERSESSIONTTY"$'\u1F'"$USERSESSIONPID"$'\u1F'"$USERREGISTERDISPLAYNAME"$'\u1F'"$LOGINDSESSION"$'\u1F'"$USERSEAT"$'\u1F'"$STARTLOCKED"
+  SendSelfRegisterData "NEWSESSION"$'\u1F'"$USERSESSIONTTY"$'\u1F'"$USERSESSIONPID"$'\u1F'"$USERREGISTERDISPLAYNAME: $SessionName"$'\u1F'"$LOGINDSESSION"$'\u1F'"$USERSEAT"$'\u1F'"$STARTLOCKED"
 
 }
 
