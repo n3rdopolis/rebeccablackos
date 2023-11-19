@@ -94,6 +94,9 @@ mkdir -p /opt/var/log
 #Replace X symlink
 ln -s /opt/bin/Xorg /usr/bin/X
 
+#Create a link to plymouth
+ln -s /opt/bin/plymouth /usr/bin/plymouth
+
 #Replace chvt with the seat aware wrapper
 ln -s /usr/bin/chvt-logind /usr/bin/chvt
 

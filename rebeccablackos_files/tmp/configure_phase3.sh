@@ -60,6 +60,7 @@ dpkg-divert --package rbos-rbos --add --rename --divert /etc/os-release.distrib 
 dpkg-divert --package rbos-rbos --add --rename --divert /etc/lsb-release.distrib /etc/lsb-release
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/chvt.console /usr/bin/chvt
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/X.distrib /usr/bin/X
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/bin/plymouth.distrib /usr/bin/plymouth
 
 if [[ -f /tmp/APTFETCHDATE ]]
 then
