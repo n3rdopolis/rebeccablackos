@@ -54,15 +54,15 @@ export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
 #redirect files from tier 1 Debian packages
 mkdir /usr/share/rbos-distrib
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_default_grub /etc/default/grub
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_skel_.bashrc /etc/skel/.bashrc
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_issue        /etc/issue
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_issue.net    /etc/issue.net
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_os-release   /etc/os-release
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/etc_lsb-release  /etc/lsb-release
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_X        /usr/bin/X
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_plymouth /usr/bin/plymouth
-dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/rbos-distrib/usr_bin_chvt /usr/bin/chvt
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_default_grub /etc/default/grub
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_skel_.bashrc /etc/skel/.bashrc
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_issue        /etc/issue
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_issue.net    /etc/issue.net
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_os-release   /etc/os-release
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_lsb-release  /etc/lsb-release
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/usr_bin_X        /usr/bin/X
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/usr_bin_plymouth /usr/bin/plymouth
+dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/usr_bin_chvt /usr/bin/chvt
 
 if [[ -f /tmp/APTFETCHDATE ]]
 then
