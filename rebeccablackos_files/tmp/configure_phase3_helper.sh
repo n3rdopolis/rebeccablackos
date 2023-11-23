@@ -104,4 +104,4 @@ ln -s /usr/bin/chvt-logind /usr/bin/chvt
 touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
 
 #Set the bootsplash for remastersys
-ln -s /usr/share/wallpapers/RBOS_Bootsplash/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png
+ln -s /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png

@@ -80,7 +80,7 @@ mkdir -p $INSTALLDIR/share/plymouth/
 #cp /usr/share/RBOS_PATCHES/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
 touch $INSTALLDIR/share/plymouth/boot_logo.png
 ninja -C build install
-cp /usr/share/wallpapers/RBOS_Bootsplash/contents/images/1920x1200.png /opt/share/plymouth/themes/spinfinity/background.png
+cp /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /opt/share/plymouth/themes/spinfinity/background.png
 sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' /opt/share/plymouth/themes/spinfinity/spinfinity.plymouth
 }
 
