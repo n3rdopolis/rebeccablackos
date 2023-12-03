@@ -188,7 +188,7 @@ function PostInstallActions
   echo "Post Install action: fc-cache"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
   echo "Post Install action: Plymouth theme"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
   echo "Post Install action: Create dconf config for the loginmanagerdisplay"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
 
@@ -287,7 +287,7 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
 
 #Reconfigue Plymouth
-(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinfinity)
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
 #start the remastersys job
 (. /usr/bin/build_vars; remastersys dist)
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom.iso
