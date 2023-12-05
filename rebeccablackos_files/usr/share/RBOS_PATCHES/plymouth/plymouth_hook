@@ -224,12 +224,39 @@ manual_add_modules evdev
 #It seems to be any module that calls drm_privacy_screen_register will be needed in the initramfs
 #It seems kernel/drivers/platform/x86 is where all these drivers are
 #It seems that the called functions are listed in strings within the kernel modules
-find $MODULESDIR/kernel/drivers/platform/x86 -maxdepth 1 -type f | while read -r MODULE
+find $MODULESDIR/kernel/drivers/platform/ -type f | while read -r MODULE
 do
-  if strings "$MODULE" | grep "^drm_privacy_screen_register$" >/dev/null 2>/dev/null
-  then
-    manual_add_modules "$(basename "$MODULE" .ko)"
-  fi
+        READCOMMAND=""
+        case "$MODULE" in
+        *.xz)
+                if ! command -v xzcat >/dev/null 2>&1; then
+                        break
+                fi
+                SUFFIX=".ko.xz"
+                READCOMMAND=xzcat
+                ;;
+        *.zst)
+                if ! command -v zstdcat >/dev/null 2>&1; then
+                        break
+                fi
+                SUFFIX=".ko.zst"
+                READCOMMAND=zstdcat
+                ;;
+        *)
+                SUFFIX=".ko"
+                READCOMMAND=cat
+                ;;
+        esac
+
+        if [ -z $READCOMMAND ]
+        then
+                break
+        fi
+
+        if $READCOMMAND "$MODULE" | strings | grep "^drm_privacy_screen_register$" >/dev/null 2>/dev/null
+        then
+                manual_add_modules "$(basename -s $SUFFIX "$MODULE")"
+        fi
 done
 
 # copy renderers
