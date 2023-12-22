@@ -1100,7 +1100,7 @@ echolog    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log ]]
 then
- echolog -e "\nPackages and perations that failed to download in phase 1:"
+ echolog -e "\nPackages and operations that failed to download in phase 1:"
  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
  echolog "$LIST"
  echolog " "
