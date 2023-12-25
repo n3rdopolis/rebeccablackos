@@ -79,6 +79,7 @@ SymlinkDirToDir /opt/share/polkit-1/actions /usr/share/polkit-1/actions/ "rbos"
 
 SymlinkDirToDir /opt/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/ "rbos"
 
+SymlinkDirToDir /opt/etc/dbus-1/ /etc/dbus-1/ "rbos"
 
 SymlinkDirToDir /opt/share/dbus-1/accessibility-services /usr/local/share/dbus-1/accessibility-services ""
 SymlinkDirToDir /opt/share/dbus-1/system-services /usr/local/share/dbus-1/system-services ""
