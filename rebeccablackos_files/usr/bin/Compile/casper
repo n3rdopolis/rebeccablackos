@@ -61,6 +61,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i "s|/usr/share/kubuntu-default-settings/kf5-settings/|/etc/skel/.config/|g" scripts/casper-bottom/34disable_kde_services
 sed -i "s@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/ubiquity-kdeui.desktop@$INSTALLDIR/share/applications/calamares.desktop@g" scripts/casper-bottom/25adduser
 sed -i 's/overlayfs/overlay/g' hooks/casper
 sed -i '/manual_add_modules aufs/d' hooks/casper
