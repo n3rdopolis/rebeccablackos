@@ -29,6 +29,9 @@ else
   unset HOME
   export HOME=$(echo ~root)
 fi
+
+XDG_MENU_PREFIX="plasma-" kbuildsycoca6
+
 #If no application specified, show a menu
 if [[ ! -z $1 ]]
 then

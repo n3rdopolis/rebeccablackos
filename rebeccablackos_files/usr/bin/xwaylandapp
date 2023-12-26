@@ -37,6 +37,8 @@ then
   export QT_FONT_DPI=96
 fi
 
+XDG_MENU_PREFIX="plasma-" kbuildsycoca6
+
 #If no application specified, show a menu
 if [[ ! -z $1 ]]
 then
