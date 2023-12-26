@@ -66,6 +66,8 @@ sed -i "s@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/
 sed -i 's/overlayfs/overlay/g' hooks/casper
 sed -i '/manual_add_modules aufs/d' hooks/casper
 sed -i '/manual_add_modules unionfs/d' hooks/casper
+sed -i '/manual_add_modules unionfs/d' scripts/casper
+sed -i 's/^    setup_auto_log_persistence$//g' scripts/casper
 patch -f --no-backup-if-mismatch -p1 < /usr/share/RBOS_PATCHES/casper.diff
 rm scripts/casper-bottom/22sslcert #WORKAROUND
 }
