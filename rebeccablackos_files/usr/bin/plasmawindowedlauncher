@@ -17,6 +17,8 @@
 #    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 kded6 &
+sleep .5
+qdbus org.kde.kded6 /kded  org.kde.kded6.loadModule networkmanagement
 if [[ -z "$1" ]]
 then
   PlasmoidListText=""
