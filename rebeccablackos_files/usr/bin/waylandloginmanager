@@ -195,6 +195,12 @@ function UserSessionWorker
     fi
   done
 
+  #Create a folder for the logs
+  if [[ ! -e ~/.cache/wlsessionlogs ]]
+  then
+    mkdir -p ~/.cache/wlsessionlogs
+  fi
+
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
   DATESTAMP=$(date +%Y-%m-%d__%H-%M-%S)
@@ -247,12 +253,6 @@ function UserSessionWorker
   if [[ -x ~/.local/wlprofile ]]
   then
     . ~/.local/wlprofile &> /dev/null
-  fi
-
-  #Create a folder for the logs
-  if [[ ! -e ~/.cache/wlsessionlogs ]]
-  then
-    mkdir -p ~/.cache/wlsessionlogs
   fi
 
   #XDG_SEAT and XDG_SESSION_ID variables tend to get cousumed by some desktops
