@@ -799,7 +799,7 @@ if [[ $? != 0 ]]
 then
   faillog "Failed to create mini devtmpfs"
 fi
-#Use #http://www.linuxfromscratch.org/lfs/view/6.1/chapter06/devices.html
+#Use #https://www.linuxfromscratch.org/lfs/view/6.1/chapter06/devices.html
 #for the list of devices, permissions, and makor and minor numbers
 mknod -m 622 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/console c 5 1
 mknod -m 666 "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/null c 1 3
@@ -848,8 +848,8 @@ then
   APTFETCHDATERESULT=$?
   if [[ $APTFETCHDATERESULT == 0 ]]
   then
-    DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-    sed "s|http://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+    DEBIANREPO="https://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+    sed "s|https://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
   else
     echolog "Invalid APTFETCHDATESECONDS set. Falling back"
   fi

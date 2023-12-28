@@ -50,13 +50,13 @@ then
   APTFETCHDATERESULT=$?
   if [[ $APTFETCHDATERESULT == 0 ]]
   then
-    DEBIANREPO="http://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
+    DEBIANREPO="https://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
   else
     echo "Invalid APTFETCHDATESECONDS set. Falling back"
-    DEBIANREPO="http://httpredir.debian.org/debian"
+    DEBIANREPO="https://httpredir.debian.org/debian"
   fi
 else
-  DEBIANREPO="http://httpredir.debian.org/debian"
+  DEBIANREPO="https://httpredir.debian.org/debian"
 fi
 
 #Set the debootstrap dir
