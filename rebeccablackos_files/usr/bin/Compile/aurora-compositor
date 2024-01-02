@@ -57,9 +57,10 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+patch -f -p1 < /usr/share/RBOS_PATCHES/aurora-compositor.diff
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=RELEASE -DQT_MAJOR_VERSION=5 -DINSTALL_PLUGINSDIR=$INSTALLDIR_LIBDIR/qt5/plugins -DINSTALL_QMLDIR=$INSTALLDIR_LIBDIR/qt5/qml
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=RELEASE -DQT_MAJOR_VERSION=6 -DINSTALL_PLUGINSDIR=$INSTALLDIR_LIBDIR/qt6/plugins -DINSTALL_QMLDIR=$INSTALLDIR_LIBDIR/qt6/qml
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
