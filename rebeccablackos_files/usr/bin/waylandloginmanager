@@ -1205,6 +1205,13 @@ function SendSelfRegisterData
   do
     $SLEEPCMD 1
   done
+
+  #When mknod is successful, this is the winning process that can write to the loginmanager_register fifo
+  while [[ $(mknod -m 700 /run/waylandloginmanager/loginmanager_register.lock p &> /dev/null; echo $?) != 0 ]]
+  do
+    $SLEEPCMD .5
+  done
+
   echo -n $'\u1E'"$SENDDATA"$'\u1F'$'\u1E' > /run/waylandloginmanager/loginmanager_register &
   SendSelfCommand ReadRegister
 }
@@ -1287,6 +1294,7 @@ function ReadRegister
         SetConfigKey "$SetValueName" "$SetValueData"
       fi
     fi
+    rm /run/waylandloginmanager/loginmanager_register.lock &> /dev/null
   done
 }
 
