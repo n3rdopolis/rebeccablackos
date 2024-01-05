@@ -13,7 +13,8 @@ OVERVIEW:
   * Use the latest ISO here: https://sourceforge.net/projects/rebeccablackos/files/
 
   * This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only
-  this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea. https://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
+  this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea.
+           https://web.archive.org/web/20110819224427/https://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
 
   * There are many native Wayland toolkits and libraries installed, Qt, GTK, EFL, Clutter and SDL has been compiled to support Wayland.
 
