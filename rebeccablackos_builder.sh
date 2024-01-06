@@ -73,11 +73,17 @@ function setup_buildprocess
 {
   #unset most varaibles
   unset VARLIST
-  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^PATH$|^HOME$|^SUDO_USER$" )
+  CALLING_SUDO_USER=$SUDO_USER
+  HOMELOCATION=$HOME
+  OLDBUILDROOT=$HOME
+
+  PATH=$(getconf PATH):/sbin:/usr/sbin
+  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^PATH$" )
   for var in $VARLIST
   do 
     unset "$var" &> /dev/null
   done
+  echo $CALLING_SUDO_USER
 
   #Detect the best Python command to use
   PYTHONTESTCOMMANDS=(python3 python2 python2.7 python)
@@ -92,13 +98,12 @@ function setup_buildprocess
   done
 
   export TERM=linux
-  PATH=$(getconf PATH):/sbin:/usr/sbin
   export LANG=en_US.UTF-8
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
-  if [[ ! -z $SUDO_USER ]]
+  if [[ ! -z $CALLING_SUDO_USER ]]
   then
-    WGETCOMMAND="runuser -u "$SUDO_USER" -- wget"
+    WGETCOMMAND="runuser -u "$CALLING_SUDO_USER" -- wget"
   else
     WGETCOMMAND="wget"
   fi
@@ -212,8 +217,7 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 #Begin config options
-HOMELOCATION=$HOME
-OLDBUILDROOT=$HOME
+echo $HOMELOCATION
 BUILDROOT=/var/cache
 BUILDFOLDERNAME=RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
@@ -1012,10 +1016,10 @@ cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/buildcore_revisions.txt" 
 cp -a ""$BUILDLOCATION"/build/"$BUILDARCH"/remastersys/buildcore_revisions.txt" ""$HOMELOCATION"/"$BUILDFRIENDLYNAME"_Revisions_"$BUILDARCH".txt"
 
 #allow the user to actually read the iso
-if [[ ! -z $SUDO_USER ]]
+if [[ ! -z $CALLING_SUDO_USER ]]
 then
-  chown $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
-  chgrp $SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+  chown $CALLING_SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
+  chgrp $CALLING_SUDO_USER "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
   chmod 777 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
 fi
 EXPORT_ENDTIME=$(date +%s)
