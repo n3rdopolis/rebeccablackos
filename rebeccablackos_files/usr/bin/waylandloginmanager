@@ -634,14 +634,14 @@ function ReadEnvironmentFile
     read -r -n 16385 -d $'\r' EnvironmentFileArray 2>/dev/null < "$EnvironmentFilePath"
   else
     echo "$EnvironmentFilePath is not a file"
-    continue
+    return
   fi
 
   #If the file is too large
   if [[ ${#EnvironmentFileArray} -ge 16385 ]]
   then
     echo "$EnvironmentFilePath is too large, and will be ignored"
-    continue
+    return
   fi
 
   #Convert the file data to an array
