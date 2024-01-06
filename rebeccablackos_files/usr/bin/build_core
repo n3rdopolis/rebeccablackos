@@ -81,6 +81,18 @@ fi
 
 shopt -s dotglob
 
+if [[ -z $BUILDCOREPRESERVEENVIRONMENT ]]
+then
+  export PATH=$(getconf PATH):/sbin:/usr/sbin
+  unset VARLIST
+  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^BUILDCORE|^PATH$|^PAGER$" )
+  for var in $VARLIST
+  do
+    unset "$var" &> /dev/null
+  done
+  export LANG=en_US.UTF-8
+fi
+
 export NONROOTUSER=build_core
 export NONROOTGROUP=build_core
 
