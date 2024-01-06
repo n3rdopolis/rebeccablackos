@@ -185,6 +185,11 @@ function RunDownloadAndOrBuild
 
   mkdir -p "/$SOURCEDIR"
 
+  if [[ -e "$SOURCEDIR"/buildhome/inactive_packages ]]
+  then
+    rm "$SOURCEDIR"/buildhome/inactive_packages/"$SOURCENAME"
+  fi
+
   #Set ACL permissions to allow a non root user account manage the source repos
   setfacl -dm $NONROOTUSER:rwx /"$SOURCEDIR"
   setfacl -m $NONROOTUSER:rwx /"$SOURCEDIR"

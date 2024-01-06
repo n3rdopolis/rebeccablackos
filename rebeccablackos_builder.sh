@@ -761,6 +761,13 @@ then
   mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/exportsource "$BUILDLOCATION"/build/"$BUILDARCH"/exportsource
 fi
 
+#Make a list of all current items under srcbuild
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages
+find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ -mindepth 1 -maxdepth 1 -printf "%f\n" -type d | grep -v ^buildoutput$ | grep -v ^buildhome$ | while read -r PACKAGE
+do
+  touch "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/"$PACKAGE"
+done
+
 if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 && $RAMDISK_FOR_PHASE1 == 1 && $RAMDISK_STATUS == 0 ]]
 then
   mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/ramdisk/snapshot_phase_1
@@ -1096,14 +1103,21 @@ echolog -n "Phase 3 build time: $((PHASE3_ENDTIME-PHASE3_STARTTIME)) seconds, "
 echolog -n "Export time: $((EXPORT_ENDTIME-EXPORT_STARTTIME)) seconds, " 
 echolog    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
 
+LIST=$(find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/ -mindepth 1 -maxdepth 1 -type f -printf "%f, ")
+if [[ ! -z $LIST ]]
+then
+  echolog -e "\nExtra packages found under "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ that were not used"
+  echolog "$LIST"
+  echolog " "
+fi
 
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log ]]
 then
- echolog -e "\nPackages and operations that failed to download in phase 1:"
- LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
- echolog "$LIST"
- echolog " "
+  echolog -e "\nPackages and operations that failed to download in phase 1:"
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+  echolog "$LIST"
+  echolog " "
 fi
 
 if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log ]]
