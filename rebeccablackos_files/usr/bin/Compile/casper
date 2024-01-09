@@ -62,6 +62,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i "s|/usr/share/kubuntu-default-settings/kf5-settings/|/etc/skel/.config/|g" scripts/casper-bottom/34disable_kde_services
+sed -i "s|/usr/|$INSTALLDIR/|g" scripts/casper-bottom/34disable_kde_services
+mv scripts/casper-bottom/34disable_kde_services scripts/casper-bottom/24disable_kde_services
 sed -i "s@/usr/share/applications/ubiquity.desktop /usr/share/applications/kde4/ubiquity-kdeui.desktop@$INSTALLDIR/share/applications/calamares.desktop@g" scripts/casper-bottom/25adduser
 sed -i 's/overlayfs/overlay/g' hooks/casper
 sed -i '/manual_add_modules aufs/d' hooks/casper
@@ -70,6 +72,8 @@ sed -i '/manual_add_modules unionfs/d' scripts/casper
 sed -i 's/^    setup_auto_log_persistence$//g' scripts/casper
 patch -f --no-backup-if-mismatch -p1 < /usr/share/RBOS_PATCHES/casper.diff
 rm scripts/casper-bottom/22sslcert #WORKAROUND
+rm scripts/casper-bottom/41apt_cdrom
+sed -i "s|/root$INSTALLDIR/share/autostart/trackerd.desktop|$INSTALLDIR/etc/xdg/autostart/tracker-store.desktop|g" scripts/casper-bottom/36disable_trackerd
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -95,9 +99,6 @@ echo "DOING $LINE"
     cp -r --preserve=mode,links,timestamps "$SRC" "$DEST"
   done
 done
-rm /usr/share/initramfs-tools/scripts/casper-bottom/41apt_cdrom
-sed -i "s|/root$INSTALLDIR/share/autostart/trackerd.desktop|$INSTALLDIR/etc/xdg/autostart/tracker-store.desktop|g" /usr/share/initramfs-tools/scripts/casper-bottom/36disable_trackerd
-sed -i "s|/usr/|$INSTALLDIR/|g" /usr/share/initramfs-tools/scripts/casper-bottom/34disable_kde_services
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
