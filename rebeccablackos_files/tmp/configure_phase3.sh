@@ -53,7 +53,7 @@ function RedirectFile {
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
 #redirect files from tier 1 Debian packages
-mkdir /usr/share/rbos-distrib
+mkdir /usr/share/divert-distrib
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_default_grub /etc/default/grub
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_skel_.bashrc /etc/skel/.bashrc
 dpkg-divert --package rbos-rbos --add --rename --divert /usr/share/divert-distrib/etc_issue        /etc/issue
