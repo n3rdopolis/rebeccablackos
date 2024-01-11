@@ -767,7 +767,10 @@ fi
 
 #Make a list of all current items under srcbuild
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages
-rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/*
+if [[ $(ls -A "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/) ]]
+then
+  rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/*
+fi
 find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v ^buildoutput$ | grep -v ^buildhome$ | while read -r PACKAGE
 do
   touch "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/"$PACKAGE"
