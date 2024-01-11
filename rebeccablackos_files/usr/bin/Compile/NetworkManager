@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.freedesktop.org/NetworkManager/NetworkManager.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=nm-1-32
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,19 +57,19 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) --enable-gtk-doc=no --with-nmtui=yes
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dqt=false build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-make 
+ninja -v -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-make install
+ninja -C build install
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
@@ -84,8 +84,8 @@ managed=true
 [device]
 wifi.scan-rand-mac-address=no
 " > $INSTALLDIR/etc/NetworkManager/NetworkManager.conf 
-cp $INSTALLDIR/etc/dbus-1/system.d/nm-dispatcher.conf /etc/dbus-1/system.d/nm-dispatcher_rbos.conf
-cp $INSTALLDIR/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf /etc/dbus-1/system.d/org.freedesktop.NetworkManager_rbos.conf
+#cp $INSTALLDIR/etc/dbus-1/system.d/nm-dispatcher.conf /etc/dbus-1/system.d/nm-dispatcher_rbos.conf
+#cp $INSTALLDIR/etc/dbus-1/system.d/org.freedesktop.NetworkManager.conf /etc/dbus-1/system.d/org.freedesktop.NetworkManager_rbos.conf
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
