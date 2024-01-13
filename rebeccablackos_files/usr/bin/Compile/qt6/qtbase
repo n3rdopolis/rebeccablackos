@@ -90,10 +90,6 @@ cd "$EXTERNALBUILDHOME/tetrix"
 cmake "$SOURCEDIR"/"$SOURCENAME"/tests/manual/examples/widgets/widgets/tetrix
 make
 cp "$EXTERNALBUILDHOME/tetrix/tetrix" $INSTALLDIR/bin/tetrix6
-
-ln -s $INSTALLDIR/lib/qt6/bin/qmake6 $INSTALLDIR/bin/qmake6
-ln -s $INSTALLDIR/lib/qt6/bin/qtpaths6 $INSTALLDIR/bin/qtpaths6
-ln -s $INSTALLDIR/lib/qt6/bin/qtdiag6 $INSTALLDIR/bin/qtdiag6
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
