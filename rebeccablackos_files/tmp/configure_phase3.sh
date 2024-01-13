@@ -27,8 +27,8 @@ shopt -s dotglob
 
 export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
-#Create a log folder for the remove operations
-mkdir "$PACKAGEOPERATIONLOGDIR"/Removes
+#Create a log folder for the package operations
+mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3
 
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
@@ -204,7 +204,7 @@ function PostInstallActions
   #Force initramfs utilites to include the overlay filesystem
   echo overlay >> /etc/initramfs-tools/modules
 }
-PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/PostInstallActions.log
+PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/PostInstallActions.log
 
 #clean apt stuff
 apt-get clean
@@ -231,18 +231,18 @@ echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v dpkg-dev)
 
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/devpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdevpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/archdevpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/dbgpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/dbgpackages.log
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/archdpgpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=""
@@ -256,13 +256,13 @@ do
     REMOVEDEVPGKS+="$PACKAGE "
   fi
 done
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/Purges.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/Purges.log
 
-apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/autoremoves.log
+apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
 REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos | grep -v integrationsymlinks-rbos)
-apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/Removes/devbuiltpackages.log
+apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/devbuiltpackages.log
 
 #Install the reduced packages
 compile_all installsmallpackage 

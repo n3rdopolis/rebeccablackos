@@ -1120,18 +1120,18 @@ then
 fi
 
 
-if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log ]]
+if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/phase_1/failedpackages.log ]]
 then
   echolog -e "\nPackages and operations that failed to download in phase 1:"
-  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Downloads/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/phase_1/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
   echolog "$LIST"
   echolog " "
 fi
 
-if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log ]]
+if [[ -e ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/phase_2/failedpackages.log ]]
 then
   echolog -e "\nPackages and operations that failed to install in phase 2:"
-  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/Installs/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+  LIST=$(cat ""$BUILDLOCATION"/logs/latest-"$BUILDARCH""/package_operations/phase_2/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
   echolog "$LIST"
   echolog " "
 fi
