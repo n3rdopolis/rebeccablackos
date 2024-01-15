@@ -944,20 +944,52 @@ function PrepareLoginManager
   export QT_QPA_PLATFORMTHEME=qt6ct
   export QT_LOGGING_TO_CONSOLE=1
   #Set the default path for weston
-  export DEFAULTWAYLANDSERVER=$(which weston)
+  export DEFAULTWAYLANDSERVER=$(which weston 2>/dev/null)
   #Specify where wsession files are found
   export WSESSIONSPATH="/usr/share/wsessions.d"
-  export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
 
-  WestonFBDev=$(weston --help |& grep fbdev-backend.so -c)
-  if [[ $WestonFBDev -gt 0 ]]
+  WestonPath=$(type -p weston 2>/dev/null)
+  if [[ ! -z $WestonPath ]]
+  then
+    LibWestonVersion=$(ldd "$WestonPath" | grep /libweston- | awk '{print $1}' | awk -F '.' '{print $1}')
+    LibWestonPath=$(dirname $(ldd "$WestonPath" | grep /libweston- | tr -s [:space:]  | awk '{print $3}'))/$LibWestonVersion
+    WestonPluginPath=$(objdump -p "$WestonPath" | sed 's/^ *//g' |grep "^RUNPATH " | tr -s [:space:] | cut -d" " -f 2-)
+    WriteToLog "libweston path: $LibWestonPath, Weston plugin path: $WestonPluginPath"
+  fi
+
+  if [[ -e "$LibWestonPath/drm-backend.so" ]]
+  then
+    WestonSupportsDRM=1
+  else
+    WriteToLog "Installed version of Weston does not have a drm backend. The drm backend is now disabled."
+    WestonSupportsDRM=0
+  fi
+
+  if [[ -e "$LibWestonPath/fbdev-backend.so" ]]
   then
     WestonSupportsFBDev=1
   else
-    WriteToLog "Installed version of Weston does not have a framebuffer backend. The Framebuffer fallback is now disabled."
+    WriteToLog "Installed version of Weston does not have a framebuffer backend. The framebuffer fallback is now disabled."
     WestonSupportsFBDev=0
   fi
-  unset WestonFBDev
+
+  #Weston in wsessions can bee a host for. Weston must be installed for this feature to work
+  if [[ ! -z $WestonPath && -e "$WestonPluginPath/fullscreen-shell.so" ]]
+  then
+    WestonSupportsWL=1
+  else
+    WriteToLog "Installed version of Weston does not have the fullscreen shell. The fullscreen shell host is now disabled."
+    WestonSupportsWL=0
+  fi
+
+  #Weston in wsessions can bee a host for. Weston must be installed for this feature to work
+  if [[ ! -z $WestonPath && -e "$WestonPluginPath/kiosk-shell.so" ]]
+  then
+    WestonSupportsWKS=1
+  else
+    WriteToLog "Installed version of Weston does not have the kiosk shell. The nested Wayland kiosk host is now disabled."
+    WestonSupportsWKS=0
+  fi
 
   #set MinimumTTY to be 7.
   MinimumTTY=7
@@ -987,7 +1019,7 @@ function PrepareLoginManager
   #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
   GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
   ProbeFilesExist "/dev/dri/card[0-9]*" KMSFileProbe
-  if [[ $KMSFileProbe == 1 && $wlmforcefbdev == 0 ]]
+  if [[ $KMSFileProbe == 1 && $wlmforcefbdev == 0 && $WestonSupportsDRM == 1 ]]
   then 
     WriteToLog "Kernel mode setting found."
     HardwareSupported=1
@@ -1704,7 +1736,7 @@ function ChooseSessionType
 
   #If the kernel mode setting is disabled system wide globally, or just for this seat, do not include kernel mode setting
   #for this seat
-  if [[ $SeatSupportsKMS != 0 ]]
+  if [[ $SeatSupportsKMS != 0 && $WestonSupportsDRM == 1 ]]
   then
     SeatSupportedBackends+=(KMS)
     SeatSupportedBackendsString+="KMS "
@@ -1713,19 +1745,31 @@ function ChooseSessionType
   #If Weston doesn't support a framebuffer backend, other desktop environments still might.
   #If there is no kernel mode setting support on a seat, and it supports framebuffers, and Weston is missing framebuffer support
   #Weston can't be used to run nested sessions
-  if [[ $SeatSupportsKMS != 0 || ($SeatSupportsFB != 0 && $WestonSupportsFBDev == 1) ]]
+  if [[ ($SeatSupportsKMS != 0 && $WestonSupportsDRM == 1) || ($SeatSupportsFB != 0 && $WestonSupportsFBDev == 1) ]]
   then
-    SeatSupportedBackends+=(WKS)
-    SeatSupportedBackendsString+="WKS "
-    SeatSupportedBackends+=(WL)
-    SeatSupportedBackendsString+="WL "
-  else
-    if [[ $FB0INSEAT != 0 && $WestonSupportsFBDev == 1 ]]
+    if [[ $WestonSupportsWKS == 1 ]]
     then
       SeatSupportedBackends+=(WKS)
       SeatSupportedBackendsString+="WKS "
+    fi
+    if [[ $WestonSupportsWL == 1 ]]
+    then
       SeatSupportedBackends+=(WL)
       SeatSupportedBackendsString+="WL "
+    fi
+  else
+    if [[ $FB0INSEAT != 0 && $WestonSupportsFBDev == 1 ]]
+    then
+      if [[ $WestonSupportsWKS == 1 ]]
+      then
+        SeatSupportedBackends+=(WKS)
+        SeatSupportedBackendsString+="WKS "
+      fi
+      if [[ $WestonSupportsWL == 1 ]]
+      then
+        SeatSupportedBackends+=(WL)
+        SeatSupportedBackendsString+="WL "
+      fi
     fi
   fi
   if [[ $SeatSupportsFB != 0 && $WestonSupportsFBDev == 1 ]]
@@ -2757,7 +2801,7 @@ function GetSeatCapabilityString
   GetConfigKey wlmforcefbdev "$CurrentSeat" 0 1 wlmforcefbdev
   if [[ $wlmforcefbdev == 0  ]]
   then
-    if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] ]]
+    if [[ "$LoginctlSeatStatusString" =~ /drm/card[0-9]*[[:space:]] && $WestonSupportsDRM == 1 ]]
     then
       SeatSupportsKMS=1
     else
