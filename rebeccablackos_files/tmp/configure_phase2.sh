@@ -136,7 +136,7 @@ do
   then
     if [[ $Result == 0 ]]
     then
-      echo "Installing with partial dependancies for $PACKAGE"                     > "$PACKAGEOPERATIONLOGDIR"/phase_2/PART_Installs.log
+      echo "Installing with partial dependancies for $PACKAGE"                     > "$PACKAGEOPERATIONLOGDIR"/phase_2/0_PART_Installs.log
       PART_PACKAGES+="$PACKAGE "
     fi
   #with all dependancies
@@ -144,7 +144,7 @@ do
   then
     if [[ $Result == 0 ]]
     then
-      echo "Installing with all dependancies for $PACKAGE"                         > "$PACKAGEOPERATIONLOGDIR"/phase_2/FULL_Installs.log
+      echo "Installing with all dependancies for $PACKAGE"                         > "$PACKAGEOPERATIONLOGDIR"/phase_2/1_FULL_Installs.log
       FULL_PACKAGES+="$PACKAGE "
     fi
   #Remove packages if specified, or if a package is no longer specified in INSTALLS.txt
@@ -152,11 +152,11 @@ do
   then
     if [[ $Result == 0 ]]
     then
-      echo "Removing $PACKAGE"                                                      > "$PACKAGEOPERATIONLOGDIR"/phase_2/REMOVE_Uninstalls.log
+      echo "Removing $PACKAGE"                                                      > "$PACKAGEOPERATIONLOGDIR"/phase_2/2_REMOVE_Uninstalls.log
       REMOVE_PACKAGES+="$PACKAGE "
     fi
   else
-    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/"$PACKAGE".log
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/failed_"$PACKAGE".log
     Result=1
     METHOD="INVALID OPERATION SPECIFIED"
   fi
@@ -169,21 +169,21 @@ do
 
 done < <(echo -n "$INSTALLS")
 
-apt-get --no-install-recommends install $PART_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/PART_Installs.log
+apt-get --no-install-recommends install $PART_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/0_PART_Installs.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
   echo "Partial Installs failed: $PART_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/failedpackages.log
 fi
 
-apt-get install $FULL_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/FULL_Installs.log
+apt-get install $FULL_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/1_FULL_Installs.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
   echo "Full Installs failed: $FULL_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/failedpackages.log
 fi
 
-apt-get purge $REMOVE_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/REMOVE_Uninstalls.log
+apt-get purge $REMOVE_PACKAGES -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/2_REMOVE_Uninstalls.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -196,7 +196,7 @@ fi
 cp /tmp/INSTALLS.txt /tmp/INSTALLS.txt.lastrun
 
 #install updates
-apt-get dist-upgrade -y --no-install-recommends 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/dist-upgrade.log
+apt-get dist-upgrade -y --no-install-recommends 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/3_dist-upgrade.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -219,7 +219,7 @@ then
 fi
 
 #Delete the old depends of the packages no longer needed.
-apt-get --purge autoremove -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/purge_autoremove.log
+apt-get --purge autoremove -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/4_purge_autoremove.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -230,14 +230,14 @@ fi
 ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
 if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 ]]
 then
-  aptitude purge ?obsolete -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/purge_obsolete.log
+  aptitude purge ?obsolete -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/5_purge_obsolete.log
   Result=${PIPESTATUS[0]}
   if [[ $Result != 0 ]]
   then
    echo "APT purge failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/failedpackages.log
   fi
 else
-  echo        "Not purging older packages, because apt-get update failed" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/purge_obsolete.log
+  echo        "Not purging older packages, because apt-get update failed" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/5_purge_obsolete.log
 fi
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe

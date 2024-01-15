@@ -169,7 +169,7 @@ do
   then
     if [[ $Result == 0 ]]
     then
-      echo "Downloading with partial dependancies for $PACKAGE"                     > "$PACKAGEOPERATIONLOGDIR"/phase_1/PART_Downloads.log
+      echo "Downloading with partial dependancies for $PACKAGE"                     > "$PACKAGEOPERATIONLOGDIR"/phase_1/0_PART_Downloads.log
       PART_PACKAGES+="$PACKAGE "
     fi
   #with all dependancies
@@ -177,11 +177,11 @@ do
   then
     if [[ $Result == 0 ]]
     then
-      echo "Downloading with all dependancies for $PACKAGE"                         > "$PACKAGEOPERATIONLOGDIR"/phase_1/FULL_Downloads.log
+      echo "Downloading with all dependancies for $PACKAGE"                         > "$PACKAGEOPERATIONLOGDIR"/phase_1/1_FULL_Downloads.log
       FULL_PACKAGES+="$PACKAGE "
     fi
   else
-    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   > "$PACKAGEOPERATIONLOGDIR"/phase_1/"$PACKAGE".log
+    echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   > "$PACKAGEOPERATIONLOGDIR"/phase_1/failed_"$PACKAGE".log
     METHOD="INVALID OPERATION SPECIFIED"
   fi
 
@@ -193,14 +193,14 @@ do
 done < <(echo -n "$INSTALLS")
 
 
-apt-get --no-install-recommends install $PART_PACKAGES -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/PART_Downloads.log
+apt-get --no-install-recommends install $PART_PACKAGES -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/0_PART_Downloads.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
   echo "Partial Downloads failed: $PART_PACKAGES" |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/failedpackages.log
 fi
 
-apt-get install $FULL_PACKAGES -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/FULL_Downloads.log
+apt-get install $FULL_PACKAGES -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/1_FULL_Downloads.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -208,7 +208,7 @@ then
 fi
 
 #Download updates
-apt-get dist-upgrade -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/dist-upgrade.log
+apt-get dist-upgrade -d -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/2_dist-upgrade.log
 Result=${PIPESTATUS[0]}
 if [[ $Result != 0 ]]
 then
@@ -221,7 +221,7 @@ if [[ -f /tmp/INSTALLSSTATUS.txt ]]
 then
   dpkg --get-selections > /tmp/DOWNLOADSSTATUS.txt
   dpkg --set-selections < /tmp/INSTALLSSTATUS.txt
-  apt-get -d -u dselect-upgrade --no-install-recommends -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/dselect-upgrade.log
+  apt-get -d -u dselect-upgrade --no-install-recommends -y 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/3_dselect-upgrade.log
   dpkg --clear-selections
   dpkg --set-selections < /tmp/DOWNLOADSSTATUS.txt
 fi
@@ -230,9 +230,9 @@ fi
 ESSENTIALOBSOLETEPACKAGECOUNT=$(aptitude search '~o~E' |wc -l)
 if [[ $ESSENTIALOBSOLETEPACKAGECOUNT == 0 && ! -e /tmp/buildcore_revisions.txt ]]
 then
-  apt-get autoclean -o APT::Clean-Installed=off 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/purge_obsolete.log
+  apt-get autoclean -o APT::Clean-Installed=off 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/4_purge_obsolete.log
 else
-  echo "Not purging older packages, because apt-get update failed, or building from a Debian snapshot" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/purge_obsolete.log
+  echo "Not purging older packages, because apt-get update failed, or building from a Debian snapshot" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/4_purge_obsolete.log
 fi
 
 
