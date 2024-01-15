@@ -83,7 +83,6 @@ function setup_buildprocess
   do 
     unset "$var" &> /dev/null
   done
-  echo $CALLING_SUDO_USER
 
   #Detect the best Python command to use
   PYTHONTESTCOMMANDS=(python3 python2 python2.7 python)
@@ -217,7 +216,6 @@ SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
 #Begin config options
-echo $HOMELOCATION
 BUILDROOT=/var/cache
 BUILDFOLDERNAME=RBOS_Build_Files
 export BUILDUNIXNAME=rebeccablackos
