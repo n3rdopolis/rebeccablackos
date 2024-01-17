@@ -13,8 +13,7 @@ CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
 AdditionalArguments=
-NeedsFile=/opt/libexec/liri-shell
-NeedsFile=/opt/bin/liri-session
+NeedsFile=/opt/lib/systemd/user/liri-shell.service
 CompositorKMSSeatAware=1
 [EnvironmentFile]
 set=XDG_CURRENT_DESKTOP=liri
