@@ -269,15 +269,21 @@ DONODELAY=0
 if [[ -z "$BUILDARCH" ]]
 then
   echolog "Select architecture:"
+  echolog "  Enter 0 to build an ISO matching the current architecture ($DEFAULT_ARCH)"
   echolog "  Enter 1 for amd64"
   echolog "  Enter 2 for i386"
   echolog "  Enter 3 for arm64 (Unsupported)"
   echolog "  Enter 4 for armhf (Unsupported)"
   echolog "  Enter 5 for a prompt for a custom architecture (Unsupported)"
-  echolog "Default is the current CPU architecture: $DEFAULT_ARCH"
   echolog "The arch can also be selected by passing BUILDARCH=(architecture) as the first argument. The second argument can be a path to a handled revisions file."
   read -r archselect
-  if [[ $archselect == 2 ]]
+  if [[ $archselect == 0 ]]
+  then
+    export BUILDARCH=$DEFAULT_ARCH
+  elif [[ $archselect == 1 ]]
+  then
+    export BUILDARCH=amd64
+  elif [[ $archselect == 2 ]]
   then
     export BUILDARCH=i386
   elif [[ $archselect == 3 ]]
