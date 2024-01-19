@@ -77,7 +77,7 @@ function PackageInstallSource()
 {
 cd build
 make install
-cp ./build/bin/LiriSessionCtl $INSTALLDIR/bin/liri-session-ctl
+cp bin/LiriSessionCtl $INSTALLDIR/bin/liri-session-ctl
 }
 
 
