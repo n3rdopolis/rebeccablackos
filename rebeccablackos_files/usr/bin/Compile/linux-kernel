@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.6.y
+SOURCEREVISION=linux-6.7.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -54,15 +54,56 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-DebianConfigCommit=d68f17274e8344d3b9aad0bcf2b89ff7f55b7f29
+DebianConfigCommit=debian/6.7.1-1_exp1
 DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/$DebianConfigCommit/debian/config
 DebianArch=$(dpkg --print-architecture)
-KernelArch=$(wget ${DebianConfigRootURL}/${DebianArch}/defines -O - 2>/dev/null | grep kernel-arch | awk '{print $2}')
+
+#Download the Debian defines
+wget ${DebianConfigRootURL}/defines.toml -O - 2>/dev/null > ./defines.toml
 if [[ $? != 0 ]]
 then
-  echo "Failed to download Debian config defines: ${DebianConfigRootURL}/${DebianArch}/defines"
+  echo "Failed to download Debian config defines: ${DebianConfigRootURL}/defines.toml"
   exit 1
 fi
+
+#Parse the Debian defines to get the kernelarch of the debian arch (eg amd64 = x86)
+KernelArchGroup=0
+KernelArchGroupName=""
+while IFS= read -r TOMLLINE
+do
+  if [[ "$TOMLLINE" == "[[kernelarch]]" ]]
+  then
+    KernelArchGroup=1
+    KernelArchGroupName=""
+    continue
+  fi
+  if [[ $KernelArchGroup == 1 && $TOMLLINE == "" ]]
+  then
+    KernelArchGroup=0
+    continue
+  fi
+  if [[ $KernelArchGroup == 1 && $KernelArchGroupName == "" && $TOMLLINE =~ ^"name = " ]]
+  then
+    IFS=\'
+    TOMLLINE=($TOMLLINE)
+    unset IFS
+    KernelArchGroupName=${TOMLLINE[1]}
+    continue
+  fi
+  if [[ $KernelArchGroup == 1 && $KernelArchGroupName != ""&& $TOMLLINE =~ ^" "*"name = " ]]
+  then
+    IFS=\'
+    TOMLLINE=($TOMLLINE)
+    unset IFS
+    DebianArchGroupName=${TOMLLINE[1]}
+    if [[ $DebianArchGroupName == $DebianArch ]]
+    then
+      KernelArch=$KernelArchGroupName
+      break
+    fi
+    continue
+  fi
+done < <(cat ./defines.toml)
 
 echo > ./kernelarch.config
 wget ${DebianConfigRootURL}/kernelarch-${KernelArch}/config -O - > ./kernelarch.config
@@ -102,9 +143,6 @@ fi
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#Workaround virtio flickering
-git revert -n 01f05940a9a75e11a2be64993c44ad8dd06e6e26
-
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
 then
   echo "Downloaded Debian configs not found, check the download logs from PackageDownloadSource"
