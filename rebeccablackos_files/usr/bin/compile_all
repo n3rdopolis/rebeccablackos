@@ -153,6 +153,12 @@ function CompilePackageList
   wait
 }
 
+#Remove the buildcore rust download lockfile if it exists
+if [[ -f /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
+then
+  rm /var/cache/srcbuild/buildhome/buildcore_rust/lockfile
+fi
+
 #build these packages in this order.
 
 CompilePackage linux-kernel
