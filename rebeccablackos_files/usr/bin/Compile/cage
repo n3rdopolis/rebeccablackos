@@ -62,9 +62,9 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #Workaround for co-installablilty of multiple wlroots versions
-sed -i "s/wlroots        = dependency('wlroots',/wlroots        = dependency('wlroots-0.16',/g" meson.build
+sed -i "s/wlroots        = dependency('wlroots',/wlroots        = dependency('wlroots-0.17',/g" meson.build
 
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false -Dxwayland=false build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false -Dxwayland=disabled build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
