@@ -94,7 +94,7 @@ do
   UntrueConditionals=0
   CONDITIONAL_STATEMENTS=${LINE[2]}
 
-  #Get all the conditionals in the third collumn of INSTALLS_LIST.txt. If there are none, all are assumed true. They are seperated by commas,
+  #Get all the conditionals in the third column of INSTALLS_LIST.txt. If there are none, all are assumed true. They are seperated by commas,
   IFS=,
   CONDITIONAL_STATEMENTS=($CONDITIONAL_STATEMENTS)
   unset IFS
@@ -118,7 +118,7 @@ do
   done
 
   #If all conditionals are true
-  if [[ $UntrueConditionals == 0 && ! -z "${LINE[0]}" && ! -z "${LINE[1]}" ]]
+  if [[ $UntrueConditionals == 0 && ! -z "${LINE[0]}" ]]
   then
    echo "${LINE[0]}::${LINE[1]}" | grep  -E -v "^#|^$" >> /tmp/INSTALLS.txt
   fi
@@ -140,7 +140,7 @@ INSTALLS="$(cat /tmp/INSTALLS.txt | awk -F "#" '{print $1}' )"
 INSTALLS="$(echo "$INSTALLS" | awk ' !x[$0]++')"
 
 #Clear any empty lines
-INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^::$/d;/^$/d')
+INSTALLS=$(echo -n "$INSTALLS" |sed 's/^ *//;s/ *$//;/^$/d')
 
 #Add a newline, only if there is one or more actual lines
 if [[ ! -z $INSTALLS ]]
@@ -181,6 +181,7 @@ do
       FULL_PACKAGES+="$PACKAGE "
     fi
   else
+    Result=1
     echo "Invalid Install Operation: $METHOD on package $PACKAGE"                   > "$PACKAGEOPERATIONLOGDIR"/phase_1/failed_"$PACKAGE".log
     METHOD="INVALID OPERATION SPECIFIED"
   fi
