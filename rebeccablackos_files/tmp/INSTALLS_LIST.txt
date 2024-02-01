@@ -39,10 +39,9 @@ libattr1::PART
 libattr1-dev::PART
 cryptsetup::PART
 cryptsetup-initramfs::PART
+cryptsetup-bin::PART
 libcryptsetup12::PART
 libcryptsetup-dev::PART
-cryptsetup::PART
-cryptsetup-bin::PART
 libpolkit-agent-1-dev::PART
 libpolkit-agent-1-0::PART
 libpolkit-gobject-1-dev::PART
@@ -83,8 +82,6 @@ libpsl5::PART
 libpsl-dev::PART
 libnewt0.52::PART
 libnewt-dev::PART
-libnl-3-200::PART
-libnl-3-dev::PART
 libncurses5::PART
 libncurses5-dev::PART
 libreadline8::PART
@@ -94,13 +91,10 @@ libteam-dev::PART
 ppp::PART
 ppp-dev::PART
 wpasupplicant::PART
-wireless-regdb::PART
 iw::PART
 wireless-regdb::PART
 usb-modeswitch::PART
 usb-modeswitch-data::PART
-policykit-1::PART
-libpam-systemd::PART
 libproxy1v5::PART
 libproxy-dev::PART
 libudisks2-0::PART
@@ -213,7 +207,6 @@ libxcb-render-util0::PART
 libxcb-render-util0-dev::PART
 libalsaplayer0::PART
 libalsaplayer-dev::PART
-libavutil-dev::PART
 shtool::PART
 yasm::PART
 libffi-dev::PART
@@ -234,7 +227,6 @@ libenchant-2-2::PART
 git::PART
 diffstat::PART
 bzr::PART
-libx11-xcb-dev::PART
 quilt::PART
 autopoint::PART
 dh-autoreconf::PART
@@ -297,7 +289,6 @@ libboost-date-time1.74-dev::PART
 libboost-date-time1.74.0::PART
 libboost-system1.74.0::PART
 libboost-system1.74-dev::PART
-libboost-system1.74-dev::PART
 libboost-filesystem1.74.0::PART
 libboost-filesystem1.74-dev::PART
 libboost-locale1.74.0::PART
@@ -331,7 +322,6 @@ libxcb-icccm4::PART
 libxcb-icccm4-dev::PART
 libxcb-sync1::PART
 libxcb-sync-dev::PART 
-libxcb-xfixes0-dev::PART
 libxcomposite1::PART
 libxcomposite-dev::PART
 libxcursor1::PART
@@ -424,7 +414,6 @@ xmlto::PART
 libxcb1::PART
 libx11-xcb1::PART
 libxcb-dri2-0::PART
-libxcb-xfixes0::PART
 libxcb-keysyms1::PART
 libxcb-image0::PART
 subversion::PART
@@ -459,7 +448,6 @@ libraptor2-dev::PART
 libstartup-notification0::PART
 libstartup-notification0-dev::PART
 vpx-tools::PART
-gperf::PART
 libwebp7::PART
 libwebp-dev::PART
 libupower-glib-dev::PART
@@ -526,7 +514,6 @@ libkdb5-10::PART
 libkrb5-dev::PART
 libwoff1::PART
 libwoff-dev::PART
-libnss3::PART
 liboauth0::PART
 liboauth-dev::PART
 libparted-dev::FULL
@@ -644,7 +631,7 @@ xdg-dbus-proxy::PART
 libcmrt-dev::PART
 libcmrt1::PART
 packagekit::PART
-libnl-3-200
+libnl-3-200::PART
 libnl-3-dev::PART
 libnl-route-3-200::PART
 libnl-route-3-dev::PART
