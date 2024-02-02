@@ -143,13 +143,6 @@ fi
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-#Workaround virtio flickering
-git show 35ed38d58257336c1df26b14fd5110b026e2adde | patch -f -p1
-git show 0240db231dfe5ee5b7a3a03cba96f0844b7a673d | patch -f -p1
-git show b83b2a80d662cc8ba9d78db64fb70fbb5a481d9c | patch -f -p1
-git show 017bdf8fa20175b9cccbc746122256432a599845 | patch -f -p1
-git show 6c18005d8fabe8a6835fc0f96102d4269199e05b | patch -f -p1
-
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
 then
   echo "Downloaded Debian configs not found, check the download logs from PackageDownloadSource"
