@@ -1,63 +1,63 @@
 LICENSE:
 --------
-  * The build script are all under GPL v2+, except for were stated, namely in patches under rebeccablackos_files/usr/share/RBOS_PATCHES or imported and
-  modified files in rebeccablackos_files/usr/share/RBOS_PATCHES/ Some diffs are for software that is under a different Open Source license, for example
-  Calamares is GPLv3
+    * The build script are all under GPL v2+, except for were stated, namely in patches under rebeccablackos_files/usr/share/RBOS_PATCHES or imported and
+    modified files in rebeccablackos_files/usr/share/RBOS_PATCHES/ Some diffs are for software that is under a different Open Source license, for example
+    Calamares is GPLv3
   
-  * The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on
-  KDE-look, this was documented in the commit message for commit #1985, but the file was moved, and git-svn (or git) doesn't retain the logs of moved files,
-  on the git mirror
+    * The Desktop wallpaper (other then the logo) is from https://store.kde.org/content/show.php/Into+Flames+%281920x1200%29?content=52726 by 'Janet' on
+    KDE-look, this was documented in the commit message for commit #1985, but the file was moved, and git-svn (or git) doesn't retain the logs of moved files,
+    on the git mirror
 
 OVERVIEW:
 ---------
-  * Use the latest ISO here: https://sourceforge.net/projects/rebeccablackos/files/
+    * Use the latest ISO here: https://sourceforge.net/projects/rebeccablackos/files/
 
-  * This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only
-  this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea.
-           https://web.archive.org/web/20110819224427/https://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
+    * This is inspired by Linux distributions of the same theme (Hannah Montana Linux, and Justin Beiber Linux) that have appeared in the Linux community, only
+    this is RebeccaBlackOS. This KDE blog post from 2011 also inspired the idea.
+             https://web.archive.org/web/20110819224427/https://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
 
-  * There are many native Wayland toolkits and libraries installed, Qt, GTK, EFL, Clutter and SDL has been compiled to support Wayland.
+    * There are many native Wayland toolkits and libraries installed, Qt, GTK, EFL, Clutter and SDL has been compiled to support Wayland.
 
-  * Xwayland is also included, which allows X applications to run.
+    * Xwayland is also included, which allows X applications to run.
 
-  * There are also other Wayland Desktop environments that are usable: Enlightenment, Gnome Shell Wayland, Kwin, Mate, Sway, and XFCE aside from the default
-  Weston Desktop shell.
+    * There are also other Wayland Desktop environments that are usable: Enlightenment, Gnome Shell Wayland, Kwin, Mate, Sway, and XFCE aside from the default
+    Weston Desktop shell.
 
-  * The kernel is compiled without VTs enabled.
+    * The kernel is compiled without VTs enabled.
 
-  * This distribution is fan made. Yes. I am a fan of Rebecca Black.
+    * This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
-  * It is based on Debian Bookworm for Tier 1 packages.
+    * It is based on Debian Bookworm for Tier 1 packages.
 
 
 How to use the ISO:
 -------------------
-  * Burn the ISO, (or set it to be "in" the CD ROM device in your favorite VM software), reboot, set the BIOS to boot from the DVD if it does not already, boot
-  from the DVD. Once it boots you can use the live system.
+    * Burn the ISO, (or set it to be "in" the CD ROM device in your favorite VM software), reboot, set the BIOS to boot from the DVD if it does not already,
+    boot from the DVD. Once it boots you can use the live system.
 
-  * The ISOs are also hybrid ISOs, meaning they can also be written directly to a flash drive, to be bootable without using slower optical media.
+    * The ISOs are also hybrid ISOs, meaning they can also be written directly to a flash drive, to be bootable without using slower optical media.
 
-  * The live user "rebestie" has no password.
+    * The live user "rebestie" has no password.
 
-  * The ISO is built with Remastersys, and has Casper, which makes it compatible with the USB Startup creator, despite being based off of Debian. Unetbootin
-  will also work. Note that Unetbootin is not recommened if your target computer needs SimpleDRM, as it uses syslinux instead of Grub which does not properly
-  allow SimpleDRM to work correctly. (See "CHANGING THE RESOLUTION ON SIMPLE HARDWARE" section for more details)
+    * The ISO is built with Remastersys, and has Casper, which makes it compatible with the USB Startup creator, despite being based off of Debian. Unetbootin
+    will also work. Note that Unetbootin is not recommened if your target computer needs SimpleDRM, as it uses syslinux instead of Grub which does not properly
+    allow SimpleDRM to work correctly. (See "CHANGING THE RESOLUTION ON SIMPLE HARDWARE" section for more details)
 
-  * You could also use the test_RBOS_ISO.sh to try software on the ISO without a reboot or a VM. This is more recommended for advanced users, as it is not
-  *fully* isolated. To use, Download the ISO, and download and make the test_RBOS_ISO.sh script executable, and run the script. It can be run from a terminal,
-  or from your file manager.
+    * You could also use the test_RBOS_ISO.sh to try software on the ISO without a reboot or a VM. This is more recommended for advanced users, as it is not
+    *fully* isolated. To use, Download the ISO, and download and make the test_RBOS_ISO.sh script executable, and run the script. It can be run from a
+    terminal, or from your file manager.
 
-    ** It is only recommended for expert users now. Before, it was beneficial to demonstrate sessions that could run nested, and struggled to run on VMs
-    (before generic modesetting, as well as before EGL software rendering worked as well as it does now)
+        ** It is only recommended for expert users now. Before, it was beneficial to demonstrate sessions that could run nested, and struggled to run on VMs
+        (before generic modesetting, as well as before EGL software rendering worked as well as it does now)
   
-    ** It will give you a shell running with your UID, sudo works in the nested environment, and the password wil be the same as your password, rather than
-    setting a weaker, or known default. (it reads the host /etc/shadow to put the same line in the nested /etc/shadow) 
+        ** It will give you a shell running with your UID, sudo works in the nested environment, and the password wil be the same as your password, rather than
+        setting a weaker, or known default. (it reads the host /etc/shadow to put the same line in the nested /etc/shadow) 
 
-    ** It requires squashfs, and also needs dialog or zenity or kdialog to be installed, and it also needs either konsole, gnome-terminal OR a standard
-    x-terminal-emulator.
+        ** It requires squashfs, and also needs dialog or zenity or kdialog to be installed, and it also needs either konsole, gnome-terminal OR a standard
+        x-terminal-emulator.
 
-    ** Warning: It is not as isolated as a VM. While there are some separations to act as a play sandbox, it's NOT to be treated as a security sandbox, as it
-    makes NO security guarantees.
+        ** Warning: It is not as isolated as a VM. While there are some separations to act as a play sandbox, it's NOT to be treated as a security sandbox, as
+        it makes NO security guarantees.
  
 How to use Wayland:
 -------------------
