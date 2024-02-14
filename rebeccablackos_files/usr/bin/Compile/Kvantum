@@ -57,6 +57,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i 's|#include <KF5/kwindowsystem_version.h>|#include <KF5/KWindowSystem/kwindowsystem_version.h>|g' Kvantum/style/blur/blurhelper.cpp
+sed -i 's/if(ENABLE_QT5)/if(TRUE)/g' Kvantum/CMakeLists.txt
 cd Kvantum
 mkdir build
 cd build
