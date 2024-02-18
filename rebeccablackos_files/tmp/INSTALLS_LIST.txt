@@ -138,7 +138,11 @@ g++-12::PART
 llvm::PART
 llvm-15::PART
 llvm-15-dev::PART
-libclang-dev::PART
+libllvmspirvlib15::PART
+libllvmspirvlib-15-dev::PART
+libclang-15-dev::PART
+libclang-cpp15::PART
+libclang-cpp15-dev::PART
 cmake::PART
 ninja-build::PART
 asciidoc-base::PART
@@ -263,6 +267,7 @@ python3-html5lib::PART
 python3-toml::PART
 python3-typogrify::PART
 python3-packaging::PART
+python3-ply::PART
 doxyqml::PART
 cython3::PART
 libjpeg-dev::PART
@@ -676,3 +681,5 @@ libopenh264-7::PART
 libopenh264-dev::PART
 libsrtp2-1::PART
 libsrtp2-dev::PART
+libclc-15::PART
+libclc-15-dev::PART
