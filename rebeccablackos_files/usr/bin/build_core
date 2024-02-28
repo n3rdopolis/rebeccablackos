@@ -342,6 +342,13 @@ function DownloadGIT()
 
   $NONROOTCOMMAND git clone $SOURCEURL /"$SOURCEDIR"/"$SOURCENAME"
   $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+
+  find /"$SOURCEDIR"/"$SOURCENAME"/.git | grep '\.lock' |
+  while read -r LOCKFILE
+  do
+    rm "$LOCKFILE"
+  done
+
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" remote update origin --prune
   if [[ -z $SOURCEREVISION || $SOURCEREVISION == "git:defaultbranch" ]]
   then
@@ -350,11 +357,6 @@ function DownloadGIT()
     REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" rev-parse --abbrev-ref origin/HEAD)
     SOURCEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
   fi
-  find /"$SOURCEDIR"/"$SOURCENAME"/.git | grep index.lock |
-  while read -r LOCKFILE
-  do
-    rm "$LOCKFILE"
-  done
 
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" ls-remote "$SOURCEURL" > /dev/null
   SourceURLActive=$?
