@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_INSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Denable-alsa-mixer=NO -Denable-sound-effects=NO
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -DCMAKE_INSTALL_LIBDIR=lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Denable-alsa-mixer=NO -Denable-sound-effects=NO -Dwith_vala=NO -Denable-vala-interface=no 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
