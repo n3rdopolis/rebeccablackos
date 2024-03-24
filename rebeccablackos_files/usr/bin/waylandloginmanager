@@ -1228,11 +1228,13 @@ function SendSelfCommand
   echo $'\n'"$SENDCOMMAND@$SENDSEATARG" | socat -u - UNIX-CONNECT:/run/waylandloginmanager/loginmanager_control
 }
 
-#This function sends registration data to the waylandloginmanager's own loginmanager_register FIFO. It takes 1 argument, the data string to send to the registration FIFO.
-#it appends a return character to the string
+#This function sends registration data to the waylandloginmanager's own loginmanager_register FIFO. It takes 1 or more arguemnt, each argument is a separate element
 function SendSelfRegisterData
 {
-  SENDDATA=$1
+  IFS=$'\u1F'
+  RegisterDataString="$*"
+  unset IFS
+
   while [[ -e /run/waylandloginmanager/socketlock ]]
   do
     $SLEEPCMD 1
@@ -1244,7 +1246,7 @@ function SendSelfRegisterData
     $SLEEPCMD .5
   done
 
-  echo -n $'\u1E'"$SENDDATA"$'\u1F'$'\u1E' > /run/waylandloginmanager/loginmanager_register &
+  echo -n $'\u1E'"$RegisterDataString"$'\u1F'$'\u1E' > /run/waylandloginmanager/loginmanager_register &
   SendSelfCommand ReadRegister
 }
 
@@ -2102,7 +2104,7 @@ function ChooseSessionType
     WSESSIONDATA=${WSESSIONARRAY[$((0+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((1+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((2+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((3+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((4+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((5+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((6+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((7+WSESSIONNUMBER*10))]}$'\n'${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}$'\n'
     if [[ $GETDEFAULTWSESSION != "::" ]]
     then
-      SendSelfRegisterData "SETCONFIGKEY"$'\u1F'"defaultwsession-${CurrentHandleSeat}-:${SessionUser}"$'\u1F'"${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
+      SendSelfRegisterData "SETCONFIGKEY" "defaultwsession-${CurrentHandleSeat}-:${SessionUser}" "${WSESSIONARRAY[$((8+WSESSIONNUMBER*10))]}"
     fi
 
   else
@@ -2406,7 +2408,7 @@ function StartUserSession
   fi
 
   #Send the tty number, pid, user name, and logind session ID to loginmanager_register in the background, then tell loginmanager_control to read loginmanager_register.
-  SendSelfRegisterData "NEWSESSION"$'\u1F'"$USERSESSIONTTY"$'\u1F'"$USERSESSIONPID"$'\u1F'"$USERREGISTERDISPLAYNAME: $SessionName"$'\u1F'"$LOGINDSESSION"$'\u1F'"$USERSEAT"$'\u1F'"$STARTLOCKED"
+  SendSelfRegisterData "NEWSESSION" "$USERSESSIONTTY" "$USERSESSIONPID" "$USERREGISTERDISPLAYNAME: $SessionName" "$LOGINDSESSION" "$USERSEAT" "$STARTLOCKED"
 
 }
 
@@ -4015,10 +4017,7 @@ function WaylandLoginManagerExecute
       echo "Must be run as root."
       exit 1
     fi
-    IFS=$'\u1F'
-    RegisterDataString="$*"
-    unset IFS
-    SendSelfRegisterData "$RegisterDataString"
+    SendSelfRegisterData "$@"
   elif [[ $1 == "--udevtrigger" ]]
   then
     if [[ $UID == 0 ]]
