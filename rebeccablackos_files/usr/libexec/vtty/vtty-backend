@@ -48,6 +48,11 @@ mkdir -p /run/vtty/$EmulatedTTY
 chown $VTTYUSER:$VTTYUSER /run/vtty/$EmulatedTTY
 chmod 700 /run/vtty/$EmulatedTTY
 
+#Make the session folder
+mkdir /run/vtty/sessions
+chown $VTTYUSER:$VTTYUSER /run/vtty/sessions
+chmod 744 /run/vtty/sessions
+
 #Make the logging folder
 mkdir -p /var/log/vtty
 chown $VTTYUSER:$VTTYUSER /var/log/vtty
