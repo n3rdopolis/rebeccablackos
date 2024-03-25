@@ -51,7 +51,7 @@ chmod 700 /run/vtty/$EmulatedTTY
 #Make the session folder
 mkdir /run/vtty/sessions
 chown $VTTYUSER:$VTTYUSER /run/vtty/sessions
-chmod 744 /run/vtty/sessions
+chmod 755 /run/vtty/sessions
 
 #Make the logging folder
 mkdir -p /var/log/vtty
