@@ -20,7 +20,7 @@
 
 #The main server it displays on is refered to as the loginmanagerdisplay. it runs as non root, as well as the kdialog dialogs
 
-#It depends on kdialog kbd, weston, socat, and libauthen-pam-perl
+#It depends on kdialog kbd, weston, socat, libauthen-pam-perl, and libnet-dbus-perl
 
 #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
 
@@ -41,6 +41,7 @@
 
 #as well as:
 #At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
+#An external systemd patch is needed for logind to have SecureAttentionKey handling, but this is a soft requirement
 
 #/etc/waylandloginmanager.conf
      #autologin-user=$AUTOLOGINUSER
@@ -3295,6 +3296,34 @@ function StartSocketFilter
   done
 }
 
+#This watches for a signal sent from logind when a key sequence is hit to start or switch back to the greeter
+#It takes no arguments
+function StartDbusHandler {
+  #https://www.alteeve.com/w/TPM_Talk:_An_Introduction_to_'D-Bus'_in_Perl
+  perl -e 'use strict;
+  use warnings;
+  use Net::DBus;
+  use Net::DBus::Reactor;
+
+  my $SystemBus=Net::DBus->system();
+  my $Login1Service=$SystemBus->get_service("org.freedesktop.login1");
+  my $Login1Object=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.login1.Manager");
+
+  sub HandleSecureAttentionKey
+  {
+    my $SecureAttentionKeySeat=shift;
+
+    system("waylandloginmanager --sendregisterdata RESCUESEAT $SecureAttentionKeySeat");
+
+    return;
+  }
+
+  $Login1Object->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
+  my $DbusReactor=Net::DBus::Reactor->main();
+  $DbusReactor->run();
+  exit 0;'
+}
+
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
 #it also checks to see if the active sesssion is active, and if not, switches back to the tty of the loginmanagerdisplay.
 function WaylandLoginManagerMain
@@ -4052,6 +4081,9 @@ function WaylandLoginManagerExecute
 
     #Start the filter that will only send valid data to the main command FIFO
     StartSocketFilter &
+
+    #Start the dbus listener
+    StartDbusHandler &
 
     #Start the loginmanager
     WaylandLoginManagerMain
