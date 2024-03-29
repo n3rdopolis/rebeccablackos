@@ -64,6 +64,16 @@ then
   export SEATD_VTBOUND=0
 fi
 
+#Make init command in /run/recinit/init file, 
+#/run/recinit/init will get executed when recinit ends
+#Users can replace it if they want recinit to start a different init command after working in recinit
+if [ $$ -eq 1 ]
+then
+  mkdir /run/recinit/
+  echo "exec /sbin/init" > /run/recinit/init
+  chmod +x /run/recinit/init
+fi
+
 #Supress warning when started from initramfs
 export LC_ALL=C.UTF-8
 
@@ -172,6 +182,6 @@ then
   then
     exec $overrideinit
   else
-    exec /sbin/init
+    . /run/recinit/init
   fi
 fi
