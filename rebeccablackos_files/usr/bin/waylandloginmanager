@@ -1332,7 +1332,7 @@ function ReadRegister
       elif [[ $RegisterType == RESCUESEAT ]]
       then
         RescueSeat=${ArraySessionData[1]}
-
+        WriteToLog "The loginmanagerdisplay for $RescueSeat has been requested by logind"
         GetStartedSeatIndex $RescueSeat
         SeatLastRescueTimestamp=${SeatRescueTimestamps[$ReturnSeatIndex]}
         CurrentTime=$EPOCHSECONDS
@@ -3313,7 +3313,7 @@ function StartDbusHandler {
   {
     my $SecureAttentionKeySeat=shift;
 
-    system("waylandloginmanager --sendregisterdata RESCUESEAT $SecureAttentionKeySeat");
+    system("$ARGV[0] --sendregisterdata RESCUESEAT $SecureAttentionKeySeat");
 
     return;
   }
@@ -3321,7 +3321,7 @@ function StartDbusHandler {
   $Login1Object->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
   my $DbusReactor=Net::DBus::Reactor->main();
   $DbusReactor->run();
-  exit 0;'
+  exit 0;' "${BASH_SOURCE[0]}"
 }
 
 #This part of the script is constantly running, once it finishes setting up. This reads the loginmanager_listener FIFO constantly, waiting for it to recive a command from a program called by the loginmanagerdisplay's weston desktop shell that sends approriate commands to it, or the user session, shutdowndialog, or even some functions within this script.
