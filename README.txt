@@ -20,7 +20,7 @@ OVERVIEW:
 
     * Xwayland is also included, which allows X applications to run.
 
-    * There are also other Wayland Desktop environments that are usable: Enlightenment, Gnome Shell Wayland, Kwin, Mate, Sway, and XFCE aside from the default
+    * There are also other Wayland Desktop environments that are usable: Gnome Shell Wayland, Kwin, Mate, Sway, and XFCE aside from the default
     Weston Desktop shell.
 
     * The kernel is compiled without VTs enabled.
@@ -28,7 +28,6 @@ OVERVIEW:
     * This distribution is fan made. Yes. I am a fan of Rebecca Black.
 
     * It is based on Debian Bookworm for Tier 1 packages.
-
 
 How to use the ISO:
 -------------------
@@ -68,10 +67,6 @@ How to use Wayland:
 
     * Most UI programs use their toolkit's Wayland backend, unless they are started with the xwaylandapp utility, which then forces most toolkits to start
     under xwayland.
-
-PROBLEMS:
----------
-      * Enlightenment in wizard mode sometimes doesn't show the cursor. This is apparently random.
 
 BOOT OPTIONS:
 -------------
