@@ -1331,6 +1331,7 @@ function ReadRegister
         SetConfigKey "$SetValueName" "$SetValueData"
       elif [[ $RegisterType == RESCUESEAT ]]
       then
+        vTTYSessionID=""
         RescueSeat=${ArraySessionData[1]}
         WriteToLog "The loginmanagerdisplay for $RescueSeat has been requested by logind"
         GetStartedSeatIndex $RescueSeat
@@ -1360,14 +1361,18 @@ function ReadRegister
           #Start the vTTY rescue terminal if RESCUESEAT is sent to the privleged socket twice within 30 seconds. (Or switch to it if already running)
           if [[ $(systemctl is-active vtty-frontend-novt@${RescueSeat}.service &> /dev/null; echo $?) == 1 || -z $vTTYSessionID ]]
           then
+            WriteToLog "Sequence pressed twice. Restartting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
             systemctl restart vtty-frontend-novt@${RescueSeat}.service &> /dev/null
           else
+            WriteToLog "Sequence pressed twice. The vTTY for seat $RescueSeat is already running. Switching to $vTTYSessionID"
             loginctl activate $vTTYSessionID &> /dev/null
           fi
+          SeatRescueTimestamps[$ReturnSeatIndex]=0
         else
           if [[ $SeatRescueTimeDelay -gt 30 ]]
           then
             #Switch back to the loginmanagerdisplay if RESCUESEAT is sent to the privleged socket
+            WriteToLog "Switching back to the loginmanagerdisplay for seat $RescueSeat"
             loginctl activate $SeatLoginManagerDisplay &>/dev/null
           fi
         fi
