@@ -23,13 +23,13 @@
 SOURCENAME=systemd
 
 #The URL of the Source code repo
-SOURCEURL=https://github.com/n3rdopolis/systemd
+SOURCEURL=https://salsa.debian.org/systemd-team/systemd
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=seatrescuekey
+SOURCEREVISION=upstream/252.x
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,7 +57,8 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build -Dsysvinit-path=$INSTALLDIR/etc/init.d -Dsysvrcnd-path=$INSTALLDIR/etc/rc.d -Dsysconfdir=$INSTALLDIR/etc
+patch -f -p1 < /usr/share/RBOS_PATCHES/systemd.diff
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build -Dsysvinit-path=$INSTALLDIR/etc/init.d -Dsysvrcnd-path=$INSTALLDIR/etc/rc.d -Dsysconfdir=$INSTALLDIR/etc -Drootprefix=$INSTALLDIR
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
