@@ -333,12 +333,15 @@ function UserSessionWorker
 
   #Attempt to guess the WAYLAND_DISPLAY and notify systemd
   UserSessionGuessWAYLAND_DISPLAY $$ &
+  wait $GuestServerPID
+  SessionReturnCode=$?
+
+  #Wait for the session to terminate
+  tail --pid=$GuestServerPID -f /dev/null 2>/dev/null
 
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WKS || $BackendType == WL ]]
   then
-    wait $GuestServerPID
-    SessionReturnCode=$?
     if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
     then
       SendSelfCommand Change "$XDG_SEAT"
@@ -348,8 +351,6 @@ function UserSessionWorker
     $SLEEPCMD 3
     TerminateJobPID $HostServerPID 9 0
   else
-    wait $GuestServerPID
-    SessionReturnCode=$?
     if [[ $(loginctl show-session --value -p State $XDG_SESSION_ID 2>/dev/null) == active ]]
     then
       SendSelfCommand Change "$XDG_SEAT"
