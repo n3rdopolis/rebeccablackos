@@ -128,9 +128,6 @@ function PostInstallActions
   rm "/var/cache/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
   env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs touch /usr/share/buildcore_revisions.txt
 
-  rm "/var/cache/srcbuild/buildoutput/"integrationsymlinks-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=integrationsymlinks-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires=""  --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_symlinks.sh
-
   cp /tmp/*.deb "/var/cache/srcbuild/buildoutput/"
 
   #Set the cursor theme
@@ -261,7 +258,7 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/5_Pu
 apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
-REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos | grep -v integrationsymlinks-rbos)
+REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos)
 apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/7_devbuiltpackages.log
 
 #Install the reduced packages
