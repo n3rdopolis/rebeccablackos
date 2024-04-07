@@ -87,11 +87,8 @@ cp build/src/shared/libsystemd-shared-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/s
 cp build/src/core/libsystemd-core-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
 
 mkdir -p $INSTALLDIR/lib/systemd/
-mkdir -p $INSTALLDIR/bin/
 cp build/systemd-logind $INSTALLDIR/lib/systemd/
-cp build/loginctl $INSTALLDIR/bin/
 chrpath $INSTALLDIR/lib/systemd/systemd-logind -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
-chrpath $INSTALLDIR/bin/loginctl -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
 
 mkdir -p $INSTALLDIR/share/dbus-1/interfaces/
 cp build/interfaces/org.freedesktop.login1.Manager.xml $INSTALLDIR/share/dbus-1/interfaces/
