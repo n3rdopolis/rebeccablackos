@@ -959,6 +959,7 @@ function GenerateChangedFilesList()
     do
       FilePath="${FilePath/$SourceDir/$MountDir}"
       FilePath="${FilePath//$DoubleSlash/$SingleSlash}"
+      #Only handle files created standard mounts, not files resulting in bind mount targets
       if [[ $MountType == 0 ]]
       then
         echo "$FilePath" >> "$EXTERNALBUILDHOME/checkinstall_files"
