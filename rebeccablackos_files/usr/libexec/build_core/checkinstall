@@ -710,11 +710,30 @@ function createtraslationmounts
   #UNMOUNTCOMMANDS is the auto generated list of unmount commands in reverse to unmount the overlay and bind mounts
   echo "" > "${TMP_DIR}/TRANSLFOLDERLIST"
   echo "" > "${TMP_DIR}/UNMOUNTCOMMANDS"
+  mkdir -p "${TMP_DIR}/checkinstall_maps"
   chmod +x "${TMP_DIR}/TRANSLFOLDERLIST"
   chmod +x "${TMP_DIR}/UNMOUNTCOMMANDS"
 
+  #The processes called by checkinstall can use these files to enumerate the files that have been modfied or created so far by the process
+  #files starting with a denote a standard mount, and are numbered in order
+  #files starting with b denote a bind mount, and are numbered in order
+  #They all contain an array `MountLine` with 3 elements
+  #The first element is the type, 0 is standard mount, 1 is bind mount
+  #standard mounts contain the second element being the upperdir location, the third element being the mount location
+  #bind mounts are not handled automatically. They contain the mount source location as the second element, and the mount destination location as the third
+  #This is intended for read only handling, (to list what files are changed so far)
+  export CHECKINSTALL_MAP_FILES="${TMP_DIR}/checkinstall_maps/"
+
+  #Ensure the checkinstall maps folder is empty of any files
+  find "${TMP_DIR}/checkinstall_maps" -type f | while read -r FILE
+  do
+    rm "$FILE"
+  done
+
   #Go through each mount, and create an overlayfs, or bind it in, or create a bind mount, based on an existing bind mount
   IFS=$'\n'
+  MountCount=0
+  BindCount=0
   for MAPPEDMOUNT in $MAPPEDMOUNTS
   do
     eval "$MAPPEDMOUNT"
@@ -726,6 +745,9 @@ function createtraslationmounts
         mkdir -p "${TMP_DIR}/upperdirs/$WORKDIRNAME"
         mkdir -p "${TMP_DIR}/ovl_workdirs/$WORKDIRNAME"
         mkdir -p "${TMP_DIR}/workdir/$MOUNTDEST"
+
+        MountLine=(0 "${TMP_DIR}/upperdirs/$WORKDIRNAME" "$MOUNTDEST")
+        declare -p MountLine > "${TMP_DIR}/checkinstall_maps/a$MountCount"
 
         #Mount and create the overylayfs filesystem, script the unmounting, and the copyiying of the files
         echo "[ \"\$(ls -A \"${TMP_DIR}/upperdirs/$WORKDIRNAME\")\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\" && rsync -a \"${TMP_DIR}/upperdirs/$WORKDIRNAME\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
@@ -749,11 +771,15 @@ function createtraslationmounts
           >&2 echo "Failed to bind in non unioned $MOUNTDEST"
         fi
       fi
+      ((MountCount++))
     else
       #handle bind mounts. If a folder is bind mounted on the real tree, bind mount them on the fake tree.
       #the copy command will simulate the file being in two places in the built package
       if [[ -d "${TMP_DIR}/workdir/$MOUNTSOURCE" ]]
       then
+        MountLine=(1 "$MOUNTSOURCE" "$MOUNTDEST")
+        declare -p MountLine > "${TMP_DIR}/checkinstall_maps/b$BindCount"
+
         echo "[ \"\$(ls -A \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\" 2>/dev/null)\" ] && mkdir -p \"${TMP_DIR}/TRANSL/$MOUNTDEST\"/* && rsync -a \"${TMP_DIR}/TRANSL/$MOUNTSOURCE\"/* \"${TMP_DIR}/TRANSL/$MOUNTDEST\"" >> "${TMP_DIR}/TRANSLFOLDERLIST"
 
         sed -i "1iumount -lf \"${TMP_DIR}/workdir/$MOUNTDEST\"" "${TMP_DIR}/UNMOUNTCOMMANDS"
@@ -768,6 +794,7 @@ function createtraslationmounts
         >&2 echo "$MOUNTSOURCE does not exist"
         MOUNTFAILCOUNT+=1
       fi
+      ((BindCount++))
     fi
   done
 
