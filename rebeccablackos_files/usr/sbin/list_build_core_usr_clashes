@@ -37,5 +37,5 @@ do
     then
       echo "$PACKAGE $PACKAGEFILE"
     fi
-  done < <(dpkg -L "$PACKAGE" | grep -v ^/opt | grep -v buildcore)
-done < <(dpkg --get-selections | grep install$ | awk '{print $1}' | grep -- -rbos$ | grep -v rbos-rbos | grep -v integrationsymlinks-rbos | grep -v menuitems-rbos | grep -v linux-rbos)
+  done < <(dpkg -L "$PACKAGE" | grep -v ^/opt/ | grep -v -- -rbos | grep -v ^/usr/local/ | grep -v buildcore)
+done < <(dpkg --get-selections | grep install$ | awk '{print $1}' | grep -- -rbos$ | grep -v rbos-rbos | grep -v menuitems-rbos | grep -v linux-rbos)
