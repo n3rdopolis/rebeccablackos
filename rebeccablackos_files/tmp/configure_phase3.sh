@@ -52,18 +52,6 @@ function RedirectFile {
 #Redirect some files that get changed
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
-#redirect files from tier 1 Debian packages
-mkdir /var/lib/divert-distrib
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_default_grub /etc/default/grub
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_skel_.bashrc /etc/skel/.bashrc
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_issue        /etc/issue
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_issue.net    /etc/issue.net
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_os-release   /etc/os-release
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/etc_lsb-release  /etc/lsb-release
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/usr_bin_X        /usr/bin/X
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/usr_bin_plymouth /usr/bin/plymouth
-dpkg-divert --package rbos-rbos --add --rename --divert /var/lib/divert-distrib/usr_bin_chvt /usr/bin/chvt
-
 if [[ -f /tmp/APTFETCHDATE ]]
 then
   PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
@@ -86,7 +74,8 @@ mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
 rm "/var/cache/srcbuild/buildoutput/"rbos-rbos_*.deb
-env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_helper.sh
+env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_helper.sh
+cp /tmp/mainpackage/rbos-rbos*.deb "/var/cache/srcbuild/buildoutput/"
 
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
@@ -124,11 +113,11 @@ function PostInstallActions
   #Create a package with all the menu items.
   rm "/var/cache/srcbuild/buildoutput/"menuitems-rbos*.deb
   env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
+  cp /tmp/menuitems-rbos*.deb "/var/cache/srcbuild/buildoutput/"
 
   rm "/var/cache/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
   env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs touch /usr/share/buildcore_revisions.txt
-
-  cp /tmp/*.deb "/var/cache/srcbuild/buildoutput/"
+  cp /tmp/buildcorerevisions-rbos*.deb "/var/cache/srcbuild/buildoutput/"
 
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme

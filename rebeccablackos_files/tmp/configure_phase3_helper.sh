@@ -51,14 +51,14 @@ echo -e "daemon\nid128\njournal\nlogin" | while read -r LIBRARY
 do
   if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
   then
-    ln -s /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
+    ln -sf /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
   fi
 done
 
 #ibus workaround
-ln -s /usr/share/unicode/ /usr/share/unicode/ucd
+ln -sf /usr/share/unicode/ /usr/share/unicode/ucd
 
-ln -s /usr/lib/os-release.rbos /etc/os-release
+ln -sf /usr/lib/os-release.rbos /etc/os-release
 
 #configure /etc/issue
 echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
@@ -92,16 +92,16 @@ mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 mkdir -p /opt/var/log
 
 #Replace X symlink
-ln -s /opt/bin/Xorg /usr/bin/X
+ln -sf /opt/bin/Xorg /usr/bin/X
 
 #Create a link to plymouth
-ln -s /opt/bin/plymouth /usr/bin/plymouth
+ln -sf /opt/bin/plymouth /usr/bin/plymouth
 
 #Replace chvt with the seat aware wrapper
-ln -s /usr/bin/chvt-logind /usr/bin/chvt
+ln -sf /usr/bin/chvt-logind /usr/bin/chvt
 
 #include /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults as part of the package, the contents get generated later when dconf is actually built
 touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
 
 #Set the bootsplash for remastersys
-ln -s /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png
+ln -sf /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png

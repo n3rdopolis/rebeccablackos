@@ -1,0 +1,41 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2024 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+
+mkdir -p /var/lib/divert-distrib
+
+function DivertPackage
+{
+  DivertName=rbos
+  SourceFile="$1"
+  DivertDestination="$2"
+
+  DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
+  if [[ "$DivertPackage" != "$DivertName"-"$DivertName" ]]
+  then
+    dpkg-divert --package "$DivertName"-"$DivertName" --add --rename --divert "$DivertDestination" "$SourceFile"
+  fi
+}
+
+DivertPackage /etc/default/grub /var/lib/divert-distrib/etc_default_grub
+DivertPackage /etc/skel/.bashrc /var/lib/divert-distrib/etc_skel_.bashrc
+DivertPackage /etc/issue        /var/lib/divert-distrib/etc_issue
+DivertPackage /etc/issue.net    /var/lib/divert-distrib/etc_issue.net
+DivertPackage /etc/os-release   /var/lib/divert-distrib/etc_os-release
+DivertPackage /etc/lsb-release  /var/lib/divert-distrib/etc_lsb-release
+DivertPackage /usr/bin/X        /var/lib/divert-distrib/usr_bin_X
+DivertPackage /usr/bin/plymouth /var/lib/divert-distrib/usr_bin_plymouth
+DivertPackage /usr/bin/chvt     /var/lib/divert-distrib/usr_bin_chvt

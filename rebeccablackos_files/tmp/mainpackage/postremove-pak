@@ -1,0 +1,47 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2024 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+
+if [[ $1 == upgrade ]]
+then
+  exit
+fi
+
+function UndivertPackage
+{
+  DivertName=rbos
+  SourceFile="$1"
+
+  DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
+  if [[ "$DivertPackage" == "$DivertName"-"$DivertName" ]]
+  then
+    dpkg-divert --remove --rename "$SourceFile"
+  fi
+}
+
+if [[ $1 == purge ]]
+then
+  UndivertPackage /etc/default/grub
+  UndivertPackage /etc/skel/.bashrc
+  UndivertPackage /etc/issue
+  UndivertPackage /etc/issue.net
+  UndivertPackage /etc/os-release
+  UndivertPackage /etc/lsb-release
+fi
+
+UndivertPackage /usr/bin/X
+UndivertPackage /usr/bin/plymouth
+UndivertPackage /usr/bin/chvt
