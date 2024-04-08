@@ -3291,7 +3291,7 @@ function StartSocketFilter
   while [ 1 ]
   do
     runuser -u $FIFOREADERUSER -m -- socat UNIX-LISTEN:/run/waylandloginmanager/loginmanager_control,reuseaddr,fork,readbytes=290,mode=0622,unlink-early - 2>/dev/null | \
-     runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-Z0-9_\-]*$|^Change@[a-Z0-9_\-]*$|^Login@[a-Z0-9_\-]*$|^Leave@[a-Z0-9_\-]*$|^ReadRegister@[a-Z0-9_\-]*$|^DetectSeats@[a-Z0-9_\-]*$|^Info@[a-Z0-9_\-]*$" 2>/dev/null | while read COMMAND
+     runuser -u $FIFOREADERUSER -m -- grep --line-buffered -aEo "^Switch@[a-zA-Z0-9_\-]*$|^Change@[a-zA-Z0-9_\-]*$|^Login@[a-zA-Z0-9_\-]*$|^Leave@[a-zA-Z0-9_\-]*$|^ReadRegister@[a-zA-Z0-9_\-]*$|^DetectSeats@[a-zA-Z0-9_\-]*$|^Info@[a-zA-Z0-9_\-]*$" 2>/dev/null | while read COMMAND
       do
         tail --follow=name /run/waylandloginmanager/loginmanager_listener.lock 2> /dev/null
         touch /run/waylandloginmanager/loginmanager_listener.lock
@@ -3814,6 +3814,8 @@ Will show a menu with a few options for diagnosis." 20 50
     then
       for RunningSeat in "${AllRunningSeats[@]}"
       do
+        GetStartedSeatIndex $RunningSeat
+        SeatIndexID=$ReturnSeatIndex
         #If a seat without TTYs has no active session, fall back to the loginmanagerdisplay.
         if [[ ${LoginManagerDisplayBackends[$SeatIndexID]} != "" && ${LoginManagerDisplayBackends[$SeatIndexID]} != 0 ]]
         then
