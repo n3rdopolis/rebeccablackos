@@ -23,6 +23,8 @@ then
   exit
 fi
 
+export PACKAGESUFFIX="rbos"
+
 shopt -s dotglob
 
 export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
@@ -76,21 +78,21 @@ chmod 777 /tmp
 mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
-rm "/var/cache/srcbuild/buildoutput/"rbos-rbos_*.deb
-env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/rbos-rbos.log
-cp /tmp/mainpackage/rbos-rbos*.deb "/var/cache/srcbuild/buildoutput/"
+rm "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb
+env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
+cp /tmp/mainpackage/${PACKAGESUFFIX}-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
 #Create a virtual configuration package for the waylandloginmanager
 export DEBIAN_FRONTEND=noninteractive
-mkdir -p /tmp/wlm-virtualpackage
-chmod +x /tmp/wlm-virtualpackage/config
-chmod +x /tmp/wlm-virtualpackage/postinst
-env -C /tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst
-env -C /tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb debian-binary
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb control.tar.gz
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb data.tar.gz
-dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-rbos.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+mkdir -p /tmp/wlm-virtualpackage                                                                                            |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+chmod +x /tmp/wlm-virtualpackage/config                                                                                     |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+chmod +x /tmp/wlm-virtualpackage/postinst                                                                                   |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst                                  |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null                                                          |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb debian-binary                               |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb control.tar.gz                              |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb data.tar.gz                                 |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-${PACKAGESUFFIX}.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 
 #Don't run ssh by default
 systemctl disable ssh.service
@@ -111,9 +113,9 @@ compile_all build-only
 cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
 #Create a package with all the post install actions, including generating the menu items.
-rm "/var/cache/srcbuild/buildoutput/"postbuildcore-rbos*.deb
-env -C /tmp/postbuildcorepackage -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-rbos.log
-cp /tmp/postbuildcorepackage/postbuildcore-rbos*.deb "/var/cache/srcbuild/buildoutput/"
+rm "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFFIX}*.deb
+env -C /tmp/postbuildcorepackage -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-${PACKAGESUFFIX}.log
+cp /tmp/postbuildcorepackage/postbuildcore-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
 #clean apt stuff
 apt-get clean
@@ -170,7 +172,7 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_Pu
 apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/5_autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
-REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v postbuildcore-rbos)
+REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep -- "-${PACKAGESUFFIX}$"| grep -v ${PACKAGESUFFIX}-${PACKAGESUFFIX} | grep -v postbuildcore-${PACKAGESUFFIX})
 apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_devbuiltpackages.log
 
 #Install the reduced packages
