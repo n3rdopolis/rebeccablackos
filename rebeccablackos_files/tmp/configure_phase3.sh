@@ -124,7 +124,7 @@ find /var/lib/apt/lists ! -type d -delete
 rm -rf /var/lib/dlocate/*
 
 #start the remastersys job
-(. /usr/bin/build_vars; remastersys dist)
+remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom-full.iso
 rm -rf /home/remastersys/remastersys/*
 
@@ -194,7 +194,7 @@ rm /etc/dpkg/dpkg.cfg.d/force-confdef
 #Reconfigue Plymouth
 (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
 #start the remastersys job
-(. /usr/bin/build_vars; remastersys dist)
+remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom.iso
 rm -rf /home/remastersys/remastersys/*
 
