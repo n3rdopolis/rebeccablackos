@@ -1,0 +1,81 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2024 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+
+if [[ $1 != upgrade ]]
+then
+  #Force CRYPTSETUP to be enabled, so that needed files are already copied
+  echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
+
+  #Set the cursor theme
+  update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
+
+  #configure grub color
+  echo "set color_normal=black/black" >> /boot/grub/custom.cfg
+
+  #disable services that conflict with the waylandloginmanager
+  systemctl disable gdm.service
+
+  #Enable networkmanager
+  systemctl enable NetworkManager.service
+
+  #enable acpid
+  systemctl enable acpid.service
+
+  #enable upower
+  systemctl enable upower.service
+
+  #enable the virtual tty services.
+  systemctl enable vtty-frontend@.service
+  ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
+
+  #Enable the auto simpledrm fallback detector
+  systemctl enable auto_simpledrm_fallback.service
+
+  #Enable the recinit services for systemd's recovery shells
+  systemctl enable recinit-rescue.service
+  systemctl enable recinit-emergency.service
+
+  #Enable pipewire services
+  systemctl --global enable pipewire.socket
+  systemctl --global add-wants pipewire.service wireplumber.service
+  systemctl --global enable pipewire-pulse.socket
+
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
+
+  #common postinstall actions
+  echo "Action: glib-compile-schemas"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
+  echo "Action: update-desktop-database"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-desktop-database /opt/share/applications)
+  echo "Action: gtk-query-immodules-3.0"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gtk-query-immodules-3.0 --update-cache)
+  echo "Action: update-icon-caches"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-icon-caches /opt/share/icons/*)
+  echo "Action: gio-querymodules"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+  echo "Action: gdk-pixbuf-query-loaders"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
+  echo "Action: fc-cache"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
+  echo "Action: Plymouth theme"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
+  echo "Action: Create dconf config for the loginmanagerdisplay"
+  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
+
+  #Force initramfs utilites to include the overlay filesystem
+  echo overlay >> /etc/initramfs-tools/modules
+fi

@@ -30,6 +30,9 @@ export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 #Create a log folder for the package operations
 mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3
 
+#Create a log folder for non-buildcore built packages
+mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
@@ -74,7 +77,7 @@ mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
 rm "/var/cache/srcbuild/buildoutput/"rbos-rbos_*.deb
-env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/configure_phase3_helper.sh
+env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=rbos-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/rbos-rbos.log
 cp /tmp/mainpackage/rbos-rbos*.deb "/var/cache/srcbuild/buildoutput/"
 
 #Create a virtual configuration package for the waylandloginmanager
@@ -87,13 +90,13 @@ env -C /tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null
 env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb debian-binary
 env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb control.tar.gz
 env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-rbos.deb data.tar.gz
-dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-rbos.deb
+dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-rbos.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 
-#Force CRYPTSETUP to be enabled, so that needed files are already copied
-echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
+#Don't run ssh by default
+systemctl disable ssh.service
 
 #Configure a locale so that the initramfs doesn't have to
-update-locale LANG=en_US.UTF-8
+update-locale LANG=C.UTF-8
 
 #Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
 if [[ -e /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
@@ -104,93 +107,13 @@ fi
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
-#Actions that are performed after all the packages are compiled
-function PostInstallActions
-{
-  #Append the snapshot date to the end of the revisions file
-  cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
+#Append the snapshot date to the end of the revisions file
+cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
-  #Create a package with all the menu items.
-  rm "/var/cache/srcbuild/buildoutput/"menuitems-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=menuitems-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos install_menu_items
-  cp /tmp/menuitems-rbos*.deb "/var/cache/srcbuild/buildoutput/"
-
-  rm "/var/cache/srcbuild/buildoutput/"buildcorerevisions-rbos*.deb
-  env -C /tmp -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=buildcorerevisions-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs touch /usr/share/buildcore_revisions.txt
-  cp /tmp/buildcorerevisions-rbos*.deb "/var/cache/srcbuild/buildoutput/"
-
-  #Set the cursor theme
-  update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
-
-  #configure grub color
-  echo "set color_normal=black/black" > /boot/grub/custom.cfg
-
-  #disable services that conflict with the waylandloginmanager
-  systemctl disable gdm.service
-
-  #Don't run ssh by default
-  systemctl disable ssh.service
-
-  #Enable networkmanager
-  systemctl enable NetworkManager.service
-  
-  #enable acpid
-  systemctl enable acpid.service
-  
-  #enable upower
-  systemctl enable upower.service
-
-  #enable the virtual tty services.
-  systemctl enable vtty-frontend@.service
-  ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
-
-  #Enable the auto simpledrm fallback detector
-  systemctl enable auto_simpledrm_fallback.service
-
-  #Enable the recinit services for systemd's recovery shells
-  systemctl enable recinit-rescue.service
-  systemctl enable recinit-emergency.service
-
-  #Enable pipewire services
-  systemctl --global enable pipewire.socket
-  systemctl --global add-wants pipewire.service wireplumber.service
-  systemctl --global enable pipewire-pulse.socket
-
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
-
-  #common postinstall actions
-  echo "Post Install action: glib-compile-schemas"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
-  echo "Post Install action: update-desktop-database"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-desktop-database /opt/share/applications)
-  echo "Post Install action: gtk-query-immodules-3.0"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gtk-query-immodules-3.0 --update-cache)
-  echo "Post Install action: update-icon-caches"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-icon-caches /opt/share/icons/*)
-  echo "Post Install action: gio-querymodules"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
-  echo "Post Install action: gdk-pixbuf-query-loaders"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
-  echo "Post Install action: fc-cache"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
-  echo "Post Install action: Plymouth theme"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
-  echo "Post Install action: Create dconf config for the loginmanagerdisplay"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
-
-  echo "Post Install action: Configure dbus and polkit"
-
-  #Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
-  #The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-  dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
-
-  #move the import folder
-  mv /usr/import /tmp
-
-  #Force initramfs utilites to include the overlay filesystem
-  echo overlay >> /etc/initramfs-tools/modules
-}
-PostInstallActions |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/0_PostInstallActions.log
+#Create a package with all the post install actions, including generating the menu items.
+rm "/var/cache/srcbuild/buildoutput/"postbuildcore-rbos*.deb
+env -C /tmp/postbuildcorepackage -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-rbos --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=rbos@rbos --pkgsource=rbos --pkggroup=rbos /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-rbos.log
+cp /tmp/postbuildcorepackage/postbuildcore-rbos*.deb "/var/cache/srcbuild/buildoutput/"
 
 #clean apt stuff
 apt-get clean
@@ -217,18 +140,18 @@ echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v dpkg-dev)
 
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/1_devpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/0_devpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev:"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/2_archdevpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/1_archdevpackages.log
 
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg$"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/3_dbgpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/2_dbgpackages.log
 
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dbg:"  | grep -v dpkg-dev)
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_archdpgpackages.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/3_archdpgpackages.log
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=""
@@ -242,22 +165,16 @@ do
     REMOVEDEVPGKS+="$PACKAGE "
   fi
 done
-apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/5_Purges.log
+apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_Purges.log
 
-apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_autoremoves.log
+apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/5_autoremoves.log
 
 #remove the built packages so that the smaller ones can be installed cleanly
-REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v menuitems-rbos | grep -v buildcorerevisions-rbos)
-apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/7_devbuiltpackages.log
+REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep '\-rbos$'| grep -v rbos-rbos | grep -v postbuildcore-rbos)
+apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_devbuiltpackages.log
 
 #Install the reduced packages
 compile_all installsmallpackage 
-
-
-#Force the current files to be true, if a package build process accidentally added an imported file (by touching the file)
-#The cached built deb would accidentally overwrite the latest version, install the built deb with the current files.
-dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/rbos-rbos_1-${PACKAGEDATE}_${BUILDARCH}.deb
-
 
 #Reset the utilites back to the way they are supposed to be.
 RevertFile /usr/sbin/grub-probe
