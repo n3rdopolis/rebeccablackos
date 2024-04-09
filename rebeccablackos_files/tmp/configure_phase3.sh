@@ -60,6 +60,14 @@ else
   PACKAGEDATE=$(date +%s)
 fi
 
+#Pre-config
+#Don't run ssh by default 
+systemctl disable ssh.service
+
+#Configure a locale so that the initramfs doesn't have to
+update-locale LANG=C.UTF-8
+#End pre-config
+
 #Set the pager to not be interactive
 export PAGER=cat
 
@@ -90,11 +98,6 @@ env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb 
 env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb data.tar.gz                                 |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-${PACKAGESUFFIX}.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 
-#Don't run ssh by default
-systemctl disable ssh.service
-
-#Configure a locale so that the initramfs doesn't have to
-update-locale LANG=C.UTF-8
 
 #Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
 if [[ -e /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
