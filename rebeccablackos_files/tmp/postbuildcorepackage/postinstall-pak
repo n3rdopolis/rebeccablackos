@@ -15,7 +15,27 @@
 #
 #    You should have received a copy of the GNU General Public License
 
-if [[ $1 != upgrade ]]
+#common rerunable postinstall actions
+echo "Action: ldconfig"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
+echo "Action: glib-compile-schemas"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
+echo "Action: update-desktop-database"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-desktop-database /opt/share/applications)
+echo "Action: gtk-query-immodules-3.0"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gtk-query-immodules-3.0 --update-cache)
+echo "Action: update-icon-caches"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-icon-caches /opt/share/icons/*)
+echo "Action: gio-querymodules"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
+echo "Action: gdk-pixbuf-query-loaders"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
+echo "Action: fc-cache"
+(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
+
+#Run once postinstall actions
+#The second argument is NULL the first time the package is installed or configured
+if [[ -z $2 ]]
 then
   #Force CRYPTSETUP to be enabled, so that needed files are already copied
   echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
@@ -54,23 +74,6 @@ then
   systemctl --global add-wants pipewire.service wireplumber.service
   systemctl --global enable pipewire-pulse.socket
 
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
-
-  #common postinstall actions
-  echo "Action: glib-compile-schemas"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; glib-compile-schemas /opt/share/glib-2.0/schemas)
-  echo "Action: update-desktop-database"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-desktop-database /opt/share/applications)
-  echo "Action: gtk-query-immodules-3.0"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gtk-query-immodules-3.0 --update-cache)
-  echo "Action: update-icon-caches"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; update-icon-caches /opt/share/icons/*)
-  echo "Action: gio-querymodules"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gio-querymodules /opt/lib/$DEB_HOST_MULTIARCH/gio/modules)
-  echo "Action: gdk-pixbuf-query-loaders"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
-  echo "Action: fc-cache"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
   echo "Action: Create dconf config for the loginmanagerdisplay"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
 

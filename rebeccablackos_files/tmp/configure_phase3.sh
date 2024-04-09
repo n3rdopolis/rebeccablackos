@@ -188,8 +188,8 @@ rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 rm /etc/dpkg/dpkg.cfg.d/force-confold
 rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
-#Rebuild the library cache
-(. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; ldconfig)
+#Force the post install package to re-run certian actions
+dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/postbuildcore-${PACKAGESUFFIX}*.deb
 
 #start the remastersys job
 remastersys dist
