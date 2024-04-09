@@ -53,10 +53,6 @@ function RedirectFile {
   ln -s /bin/true "$1"
 }
 
-
-#Redirect some files that get changed
-export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
-
 if [[ -f /tmp/APTFETCHDATE ]]
 then
   PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')

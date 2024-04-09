@@ -25,7 +25,9 @@ fi
 
 shopt -s dotglob
 
-  #This file is used by checkinstall for creating the rbos-rbos package that has all of the installed SVN files
+#This file is used by checkinstall for creating the main package that has all of the installed SVN files
+
+export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
 #Copy select files into place, that are suitable for distribution.
 cp -a /usr/import/usr/* /usr
