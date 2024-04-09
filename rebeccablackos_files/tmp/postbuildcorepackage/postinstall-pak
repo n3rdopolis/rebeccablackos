@@ -71,8 +71,6 @@ then
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; gdk-pixbuf-query-loaders > /opt/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache)
   echo "Action: fc-cache"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; fc-cache)
-  echo "Action: Plymouth theme"
-  (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; /opt/sbin/plymouth-set-default-theme spinner)
   echo "Action: Create dconf config for the loginmanagerdisplay"
   (. /usr/bin/build_vars; . /usr/bin/wlruntime_vars; dconf compile /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults /etc/loginmanagerdisplay/dconf/dconfimport)
 

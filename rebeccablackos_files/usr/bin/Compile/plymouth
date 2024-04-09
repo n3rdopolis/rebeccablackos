@@ -120,6 +120,8 @@ chmod +x /usr/share/initramfs-tools/scripts/init-top/plymouth-bootsplash
 chmod +x /usr/share/initramfs-tools/scripts/panic/plymouth-bootsplash
 
 rm -r /run/plymouth
+
+/opt/sbin/plymouth-set-default-theme spinner
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
