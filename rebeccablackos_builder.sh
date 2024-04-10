@@ -949,6 +949,7 @@ PHASE1_ENDTIME=$(date +%s)
 #copy the installs data copied in phase 1 into phase 2
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt/lists/*
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/INSTALLS.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/INSTALLS.txt
+cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/POSTREMOVES.txt "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/POSTREMOVES.txt
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt
 
