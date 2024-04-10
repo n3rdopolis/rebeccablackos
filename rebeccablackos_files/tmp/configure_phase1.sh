@@ -76,7 +76,17 @@ localedef -i en_US -f UTF-8 en_US.UTF-8
 yes Y | dselect update
 
 #Get the packages that need to be installed, by determining new packages specified, and packages that did not complete.
-rm /tmp/INSTALLS.txt
+if [[ -e /tmp/INSTALLS.txt ]]
+then
+  rm /tmp/INSTALLS.txt
+fi
+touch /tmp/INSTALLS.txt
+
+if [[ -e /tmp/POSTREMOVES.txt ]]
+then
+  rm /tmp/POSTREMOVES.txt
+fi
+touch /tmp/POSTREMOVES.txt
 
 #Set some variables
 export DEBIAN_ARCH=$(dpkg --print-architecture)
@@ -93,6 +103,7 @@ do
   unset IFS
   UntrueConditionals=0
   CONDITIONAL_STATEMENTS=${LINE[2]}
+  
 
   #Get all the conditionals in the third column of INSTALLS_LIST.txt. If there are none, all are assumed true. They are seperated by commas,
   IFS=,
@@ -121,6 +132,11 @@ do
   if [[ $UntrueConditionals == 0 && ! -z "${LINE[0]}" ]]
   then
    echo "${LINE[0]}::${LINE[1]}" | grep  -E -v "^#|^$" >> /tmp/INSTALLS.txt
+   #If the package is set to be removed after it is used only for building certian packages
+   if [[ ${LINE[3]} == "BUILDONLY" ]]
+   then
+     echo "${LINE[0]}" | grep  -E -v "^#|^$" >> /tmp/POSTREMOVES.txt
+   fi
   fi
 done
 
