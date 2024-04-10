@@ -156,14 +156,18 @@ apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/3_ar
 
 #Handle these packages one at a time, as they are not automatically generated. one incorrect specification and apt-get quits. The automatic generated ones are done with one apt-get command for speed
 REMOVEDEVPGKS=""
-REMOVEDEVPGKSPROPOSED=(nodejs texlive-base gnome-user-guide cmake libgl1-mesa-dri-dbg libgl1-mesa-dri libglib2.0-doc valgrind smbclient freepats libc6-dbg doxygen git subversion bzr mercurial autoconf texinfo rustc cpp cpp-9 cpp-10 gcc gcc-9 gcc-10 g++ g++-9 g++-10 clang llvm-9 docbook-xsl linux-headers-"*")
+REMOVEDEVPGKSPROPOSED=( $(cat /tmp/POSTREMOVES.txt) )
+REMOVEDEVPGKSPROPOSED+=(linux-headers-"*")
 for (( Iterator = 0; Iterator < ${#REMOVEDEVPGKSPROPOSED[@]}; Iterator++ ))
 do
   PACKAGE=${REMOVEDEVPGKSPROPOSED[Iterator]}
   AvailableCount=$(dpkg --get-selections | awk '{print $1}' | awk -F : '{print $1}' | grep -c ^$PACKAGE$)
   if [[ $AvailableCount != 0 ]]
   then
+    echo "Will remove $PACKAGE as it is installed and set for removal" |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_Purges.log
     REMOVEDEVPGKS+="$PACKAGE "
+  else
+    echo "Will not remove $PACKAGE as it is already not installed" |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_Purges.log
   fi
 done
 apt-get purge $REMOVEDEVPGKS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/4_Purges.log
