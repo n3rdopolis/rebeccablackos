@@ -7,11 +7,11 @@ CompositorExec=/opt/bin/gnome-session
 CompositorSupportsKMS=1
 CompositorSupportsFB=0
 #Force gnome-session script to not kill the PATH variable (workaround)
-CompositorKMSArguments=-l
+CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 SessionArgument=
-AdditionalArguments=--session=gnome -f
+AdditionalArguments=-l --session=gnome -f
 NeedsFile=/opt/bin/gnome-shell
 NeedsFile=/opt/bin/gnome-session
 CompositorKMSSeatAware=1
