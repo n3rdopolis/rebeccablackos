@@ -269,7 +269,7 @@ DONODELAY=0
 if [[ -z "$BUILDARCH" ]]
 then
   echolog "Select architecture:"
-  echolog "  Enter 0 to build an ISO matching the current architecture ($DEFAULT_ARCH)"
+  echolog "  Enter 0 or press Enter to build an ISO matching the current architecture ($DEFAULT_ARCH)"
   echolog "  Enter 1 for amd64"
   echolog "  Enter 2 for i386"
   echolog "  Enter 3 for arm64 (Unsupported)"
