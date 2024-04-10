@@ -1,4 +1,4 @@
-#File Format is packagename::ACTION::CONDITIONAL
+#File Format is packagename::ACTION::CONDITIONAL::SECOND_ACTION
 #######
 #package name is the installable name of the package
 #variables in package names are expanded. For example linux-image-$DEBIAN_ARCH
@@ -19,10 +19,14 @@
 #
 #conditionals are seperated by commas, and are ANDed only
 #######
+#section_action is another action that may be performed on the package
+#The only supported second_action is currently only "BUILDONLY"
+#If "BUILDONLY" is specified, the package will be uninstalled after they are used to build the packages, in order to build a smaller ISO
+#######
 apt-rdepends::PART
-ragel::PART
-check::FULL
-chrpath::PART
+ragel::PART::::BUILDONLY
+check::FULL::::BUILDONLY
+chrpath::PART::::BUILDONLY
 acl::PART
 bolt::PART
 bluez::PART
@@ -48,6 +52,8 @@ libpolkit-agent-1-0::PART
 libpolkit-gobject-1-dev::PART
 libpolkit-gobject-1-0::PART
 libsystemd-dev::PART
+libc-devtools::PART::::BUILDONLY
+libc-dev-bin::PART::::BUILDONLY
 systemd-coredump::PART
 zstd::PART
 zip::PART
@@ -125,7 +131,7 @@ thermald::FULL
 libomxil-bellagio0::PART
 libomxil-bellagio-dev::PART
 libelf-dev::PART
-valac::PART
+valac::PART::::BUILDONLY
 xdg-utils::PART
 libxkbcommon-dev::PART
 libxdamage-dev::PART
@@ -134,23 +140,25 @@ python3-xcbgen::PART
 manpages::FULL
 build-essential::PART
 bc::PART
-gcc-12::PART
-g++-12::PART
-llvm::PART
-llvm-15::PART
+cpp::PART::::BUILDONLY
+cpp-12::PART::::BUILDONLY
+gcc-12::PART::::BUILDONLY
+g++-12::PART::::BUILDONLY
+llvm::PART::::BUILDONLY
+llvm-15::PART::::BUILDONLY
 llvm-15-dev::PART
 libllvmspirvlib15::PART
 libllvmspirvlib-15-dev::PART
 libclang-15-dev::PART
 libclang-cpp15::PART
 libclang-cpp15-dev::PART
-cmake::PART
-ninja-build::PART
+cmake::PART::::BUILDONLY
+ninja-build::PART::::BUILDONLY
 asciidoc-base::PART
-itstool::PART
-doxygen::PART
-texinfo::PART
-libtool::PART
+itstool::PART::::BUILDONLY
+doxygen::PART::::BUILDONLY
+texinfo::PART::::BUILDONLY
+libtool::PART::::BUILDONLY
 libltdl7::PART
 libltdl-dev::PART
 libxi-dev::PART
@@ -160,18 +168,18 @@ libxt-dev::PART
 libsndfile1-dev::PART
 curl::PART
 dlocate::PART
-bison::PART
+bison::PART::::BUILDONLY
 ruby::PART
 ruby-dev::PART
-flex::PART
+flex::PART::::BUILDONLY
 xutils-dev::PART
 desktop-file-utils::PART
 libtalloc-dev::PART
 libdrm-dev::PART
 libavahi-client-dev::PART
 libavahi-glib-dev::PART
-autoconf::PART
-protobuf-c-compiler::PART
+autoconf::PART::::BUILDONLY
+protobuf-c-compiler::PART::::BUILDONLY
 libprotobuf-c1::PART
 libprotobuf-c-dev::PART
 x11proto-kb-dev::PART
@@ -213,7 +221,7 @@ libxcb-render-util0-dev::PART
 libalsaplayer0::PART
 libalsaplayer-dev::PART
 shtool::PART
-yasm::PART
+yasm::PART::::BUILDONLY
 libffi-dev::PART
 libpoppler-dev::PART
 libpoppler-glib-dev::PART
@@ -229,20 +237,23 @@ libaspell15::PART
 libaspell-dev::PART
 libenchant-2-dev::PART
 libenchant-2-2::PART
-git::PART
+git::PART::::BUILDONLY
 diffstat::PART
-bzr::PART
-quilt::PART
-autopoint::PART
-dh-autoreconf::PART
+bzr::PART::::BUILDONLY
+quilt::PART::::BUILDONLY
+autopoint::PART::::BUILDONLY
+dh-autoreconf::PART::::BUILDONLY
 xkb-data::PART
 libxklavier16::PART
 libxklavier-dev::PART
 libxslt1.1::PART
 libxslt1-dev::PART
-gtk-doc-tools::PART
-gobject-introspection::PART 
-gperf::PART
+docbook::PART::::BUILDONLY
+docbook-xsl::PART::::BUILDONLY
+docbook-xml::::BUILDONLY
+gtk-doc-tools::PART::::BUILDONLY
+gobject-introspection::PART::::BUILDONLY
+gperf::PART::::BUILDONLY
 rsync::PART
 dbus-x11::PART
 dbus-user-session::PART
@@ -254,7 +265,7 @@ libexif12::PART
 libexiv2-dev::PART
 libexiv2-27::PART
 libexif-dev::PART
-libpciaccess-dev::PART 
+libpciaccess-dev::PART
 libpci-dev::PART
 libpulse-dev::PART
 python3-libxml2::PART
@@ -269,8 +280,8 @@ python3-toml::PART
 python3-typogrify::PART
 python3-packaging::PART
 python3-ply::PART
-doxyqml::PART
-cython3::PART
+doxyqml::PART::::BUILDONLY
+cython3::PART::::BUILDONLY
 libjpeg-dev::PART
 libopenjp2-7-dev::PART
 libopenjp2-7::PART
@@ -422,9 +433,9 @@ libx11-xcb1::PART
 libxcb-dri2-0::PART
 libxcb-keysyms1::PART
 libxcb-image0::PART
-subversion::PART
-subversion-tools::PART
-mercurial::PART
+subversion::PART::::BUILDONLY
+subversion-tools::PART::::BUILDONLY
+mercurial::PART::::BUILDONLY
 libass9::FULL
 libass-dev::FULL
 libavutil57::FULL
@@ -646,7 +657,7 @@ libnl-genl-3-200::PART
 libnl-genl-3-dev::PART
 libpcap0.8::PART
 libpcap-dev::PART
-nodejs::PART
+nodejs::PART::::BUILDONLY
 libsecret-1-0::PART
 man-db::PART
 libmpc-dev::PART
