@@ -91,8 +91,6 @@ BOOT OPTIONS:
 
 
        * These relevant options are also handled, (but not by the WaylandLoginManager itself)
-           ** vttydisable :             This option turns off the minimal display server used for logging into TTYs, and falls back to legacy gettys
-
            ** init=/sbin/recinit :      Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.
 
            ** nomodeset :               This option is handled by the kernel. It may be slightly misleading in name, but it prevents other drivers from
