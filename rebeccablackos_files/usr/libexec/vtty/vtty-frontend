@@ -68,7 +68,7 @@ fi
 
 #if vttydisable is specified on the boot command line, fall back to legacy gettys
 read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
-if [[ $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
+if [[ $EmulatedTTY =~ tty* && $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
 then
   echo "vttydisable specified on the command line. Falling back to default getty"
   exit 1
