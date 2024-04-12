@@ -57,9 +57,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i '/autotests/d' CMakeLists.txt 
-sed -i 's/defaultWallpaperTheme=Elarun/defaultWallpaperTheme=RBOS_Desktop/g' src/desktoptheme/air/metadata.desktop.cmake
-sed -i '/defaultWidth=2560/d' src/desktoptheme/air/metadata.desktop.cmake
-sed -i '/defaultHeight=1600/d' src/desktoptheme/air/metadata.desktop.cmake
+sed -i 's/defaultWallpaperTheme=Next/defaultWallpaperTheme=RBOS_Desktop/g' src/desktoptheme/breeze/plasmarc
+sed -i 's/defaultWallpaperTheme=Elarun/defaultWallpaperTheme=RBOS_Desktop/g' src/desktoptheme/oxygen/plasmarc
 
 mkdir build
 cd build
