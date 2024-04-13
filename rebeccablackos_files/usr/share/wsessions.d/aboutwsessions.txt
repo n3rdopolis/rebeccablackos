@@ -12,6 +12,12 @@ A user can have their own wsession files. These can be placed under $HOME/.local
 Sessions that are discovered from a users HOME directory are marked as such.
 These must be executable
 
+The backends------------------------------
+  KMS: This is the typical default for the majority of Wayland servers, using kernel mode setting.
+  WKS: This is for a Wayland server that can only run nested under another Wayland server, They are typical Wayland clients that use standard protocols, that are forced to be fullscreen
+  WL:  This is also for a Wayland server that can only run nested under another Wayland server, however they need Weston's fullscreen-shell protocol
+  FB:  This is for Wayland servers that use the legacy framebuffer backend. Historically, there were select ones that supported a framebuffer backend for hardware that didn't support kernel mode setting.
+
 The keys------------------------------
 Enabled:
 Enabled sets the session to be enabled. Enabled=1 is now assumed by default. A session can be disabled by specifying Enabled=0
@@ -23,30 +29,30 @@ Type:
 Type=WSession is assumed by default, and notes the .desktop file as a WSession type Desktop file. .desktop files that waylandloginmanager handles are now assumed to. The Type must be WSession or Application
 
 Name:
-The Name key is the name of the wsession, in user friendly string. See line 4 in the example
+The Name key is the name of the wsession, in user friendly string. See line 5 in the example
 If not specified, the Name will be CompositorExec
 
 Comment:
-A short descrition of the wsession, in a user friendly string. See line 5 in the example
+A short descrition of the wsession, in a user friendly string. See line 6 in the example
 
 CompositorExec:
 Exec:
-CompositorExec is the path or command line for the session. See line 6 in the example
+CompositorExec is the path or command line for the session. See line 7 in the example
 This is the most important key. Exec is an alias to CompositorExec
 
 
 CompositorSupports(BACKEND):
-Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WL (Wayland hosted), and FB (framebuffer), so the three lines are CompositorSupportsKMS CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 7, 8, and 9 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
+Currently there are three case sensitive backend types KMS (Kernel Mode Setting) WKS (Weston Kiosk Shell hosted) WL (Weston Full-screen shell hosted), and FB (framebuffer), so the four lines are CompositorSupportsKMS CompositorSupportsWKS, CompositorSupportsWL, and CompositorSupportsFB, as shown on lines 8, 9, 10, and 11 on the example below. if the compositor doesn't have support for the Framebuffer backend for example, CompositorSupportsFB=1 should be changed to CompositorSupportsFB=0
 
   If the hardware doesn't support a backend, for example VirtualBox doesn't support KMS, if a server only supports KMS, it does not appear in the list.
   Note that the WL or WKS backends requires the hardware to support either KMS or FB, as the Wayland display server host that will run the guest requires either KMS or FB in order to be able to run, which is selected automatically by the Wayland Login Manager.
 
-  Currently, the backend selection preference is to check KMS, then WL, then lastly FB.
+  Currently, the backend selection preference is to check KMS, then WKS, then WL, then lastly FB.
 
   If for example a session only supports FB backends, and the hardware supports FB and KMS, the session will be opened using the FB backend.
   If for example a session supports KMS and FB, and the hardware only supports FB backends, then the session will be opened with the FB backend.
   If for example a session only supports KMS, but the hardware only supports FB, then the session will not be available for selection.
-  If a session supports only WL, then it will run on platforms that only support KMS, only support FB, and only support KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
+  If a session supports only WKS or WL, then it will run on platforms that only support KMS, or platforms that only support FB, and platforms that support both KMS and FB, as the host server that is used has support for both backends. This is a detail that is handled automatically.
   
   Unless specified otherwise CompositorSupportsKMS=1 is assumed to be true, while other backends are assumed to be false if not specified.
 
@@ -65,29 +71,29 @@ This specifies how the compositor is specified what to use for WAYLAND_DISPLAY i
 
   Not all servers need this so this is optional. some servers have WAYLAND_DISPLAY specified based on what it's exported as, which waylandloginmanager supports
 
-  See line 11 in the example
+  See line 12 in the example
 
 
 Compositor(BACKEND)SeatAware:
 This determines if a particular backend supported by the compositor is seat aware. (As in, will start on something other than seat0 properly)
 The option for hosted (WL) sessions if specified in this file is ignored, as the Display server that is the host is concerned about that detail.
-See Lines 19 and 20 as examples
+See Lines 21 and 22 as examples
 
 CompositorSeatArgument:
 This specifies how the compositor is specified as to what XDG_SEAT it is started on . waylandloginmanager then automatically appends the seat ID after id, so it doesn't need any variables. It only appends it if CompositorSeatArgument is specified. This is ignored when using the WL backend (running hosted)
-See line 21 as example
+See line 23 as example
 
 Compositor(BACKEND)SeatArgument:
 This specifies how the compositor is specified as to what XDG_SEAT it is started on, similar to CompositorSeatArgument for a particular backend. This overrides CompositorSeatArgument if it is set.
 (CompositorWLSeatArgument would be ignored, as the WL backend means that it is not directly concerned about the hardware)
-See line 22 as example. (It CAN be different from what is specified in line 21)
+See line 24 as example. (It CAN be different from what is specified in line 21)
 
 SessionArgument:
-if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or liri shell module opposed to the weston-desktop-shell. See line 13 in the example
+if the specific session needs arguments passed. Weston for example is one server, but can have different sessions specified, based on what modules it loads, such as loading the orbital or liri shell module opposed to the weston-desktop-shell. See line 15 in the example
 
 
 AdditionalArguments:
-Any other arguments that should be passed to the server, but are more generic, for example in line 14 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
+Any other arguments that should be passed to the server, but are more generic, for example in line 16 in the example, it specifies where weston should log. AdditionalArguments are passed as the last arguments to the session.
 
 NeedsFile:
 TryExec:
@@ -95,10 +101,10 @@ There can be as many NeedsFile arguments as needed. if one of these files are mi
 These must be absolute paths, otherwise they are ignored
 TryExec is an alias to NeedsFile and there can be multiple as well
 
-EnvironmentFile: this is documented in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 17 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
+EnvironmentFile: this is documented in Section 2, as to how to create this file, this file describes optional variables that should be set or unset to run this session. It also supports setting or unsetting variables for a specific backend. This is a path to the environment file, see line 19 in the example. If EnvironmentFile is not specified, the .desktop file will be handled as the EnvironmentFile, that is if it has a proper [EnvironmentFile] section
 
 IsFallbackSession:
-This specifies if the current session is a fallback session, so that the session can be handled in a particular way. See line 18 in the example
+This specifies if the current session is a fallback session, so that the session can be handled in a particular way. See line 20 in the example
 ----------------------------------------------
 
 An example:
