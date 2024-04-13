@@ -333,11 +333,20 @@ function UserSessionWorker
 
   #Attempt to guess the WAYLAND_DISPLAY and notify systemd
   UserSessionGuessWAYLAND_DISPLAY $$ &
-  wait $GuestServerPID
-  SessionReturnCode=$?
 
   #Wait for the session to terminate
-  tail --pid=$GuestServerPID -f /dev/null 2>/dev/null
+  GuestServerPIDRunning=1
+  while [[ $GuestServerPIDRunning == 1 ]]
+  do
+    wait $GuestServerPID
+    SessionReturnCode=$?
+    if [[ -e /proc/$GuestServerPID ]]
+    then
+      $SLEEPCMD 1
+    else
+      GuestServerPIDRunning=0
+    fi
+  done
 
   #Terminate the host server after the guest terminates
   if [[ $BackendType == WKS || $BackendType == WL ]]
