@@ -82,7 +82,10 @@ chmod 777 /tmp
 mkdir /tmp/debian
 touch /tmp/debian/control
 #remove any old deb files for this package
-rm "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb
+if [[ $(compgen -G "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb) ]]
+then
+  rm "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb
+fi
 env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
 cp /tmp/mainpackage/${PACKAGESUFFIX}-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
@@ -112,7 +115,10 @@ compile_all build-only
 cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
 #Create a package with all the post install actions, including generating the menu items.
-rm "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFFIX}*.deb
+if [[ $(compgen -G "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFFIX}*.deb) ]]
+then
+  rm "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFFIX}*.deb
+fi
 env -C /tmp/postbuildcorepackage -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-${PACKAGESUFFIX}.log
 cp /tmp/postbuildcorepackage/postbuildcore-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
