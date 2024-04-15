@@ -30,10 +30,10 @@ shopt -s dotglob
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
 #Copy select files into place, that are suitable for distribution.
-cp -a /usr/import/usr/* /usr
+cp -a /tmp/import/usr/* /usr
 
 mkdir -p /etc/skel/.config
-cp -a /usr/import/etc/* /etc/
+cp -a /tmp/import/etc/* /etc/
 mkdir -p /etc/skel/Desktop
 
 #Make the 'hidden' waylandloginmanager zenity to kdialog convert script executable

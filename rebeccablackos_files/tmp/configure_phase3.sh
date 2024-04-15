@@ -68,38 +68,30 @@ systemctl disable ssh.service
 update-locale LANG=C.UTF-8
 #End pre-config
 
-#Set the pager to not be interactive
+#Set the pager, and debian prompts to not be interactive
 export PAGER=cat
+export DEBIAN_FRONTEND=noninteractive
 
-#Copy the import files into the system, while creating a deb with checkinstall.
-cp /usr/import/tmp/* /tmp
-
-#copy all the files to import
-rsync -Ka -- /usr/import/* /
-chmod 777 /tmp
-
-
-mkdir /tmp/debian
-touch /tmp/debian/control
 #remove any old deb files for this package
 if [[ $(compgen -G "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb) ]]
 then
   rm "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb
 fi
-env -C /tmp/mainpackage/ -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
-cp /tmp/mainpackage/${PACKAGESUFFIX}-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
+env -C /tmp/import/tmp/mainpackage/ -- /tmp/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
+cp /tmp/import/tmp/mainpackage/${PACKAGESUFFIX}-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
 #Create a virtual configuration package for the waylandloginmanager
-export DEBIAN_FRONTEND=noninteractive
-mkdir -p /tmp/wlm-virtualpackage                                                                                            |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-chmod +x /tmp/wlm-virtualpackage/config                                                                                     |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-chmod +x /tmp/wlm-virtualpackage/postinst                                                                                   |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-env -C /tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst                                  |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-env -C /tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null                                                          |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb debian-binary                               |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb control.tar.gz                              |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb data.tar.gz                                 |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
-dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-${PACKAGESUFFIX}.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+mkdir /tmp/import/tmp/debian
+touch /tmp/import/tmp/debian/control
+mkdir -p /tmp/import/tmp/wlm-virtualpackage                                                                                            |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+chmod +x /tmp/import/tmp/wlm-virtualpackage/config                                                                                     |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+chmod +x /tmp/import/tmp/wlm-virtualpackage/postinst                                                                                   |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/import/tmp/wlm-virtualpackage -- tar czf control.tar.gz control config templates postinst                                  |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/import/tmp/wlm-virtualpackage -- tar czf data.tar.gz -T /dev/null                                                          |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/import/tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb debian-binary                               |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/import/tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb control.tar.gz                              |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+env -C /tmp/import/tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb data.tar.gz                                 |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
+dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/import/tmp/wlm-virtualpackage/waylandloginmanager-${PACKAGESUFFIX}.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 
 
 #Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
@@ -119,8 +111,8 @@ if [[ $(compgen -G "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFF
 then
   rm "/var/cache/srcbuild/buildoutput/"postbuildcore-${PACKAGESUFFIX}*.deb
 fi
-env -C /tmp/postbuildcorepackage -- /usr/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-${PACKAGESUFFIX}.log
-cp /tmp/postbuildcorepackage/postbuildcore-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
+env -C /tmp/import/tmp/postbuildcorepackage -- /tmp/import/usr/libexec/build_core/checkinstall -y -D --fstrans=no --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=postbuildcore-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} /tmp/postbuildcorepackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/postbuildcore-${PACKAGESUFFIX}.log
+cp /tmp/import/tmp/postbuildcorepackage/postbuildcore-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
 #clean apt stuff
 apt-get clean

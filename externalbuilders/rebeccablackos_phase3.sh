@@ -96,9 +96,9 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/buil
 #copy the files to where they belong
 rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
 
-#Handle /usr/import for the creation of the deb file that contains this systems files
-mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
-rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/usr/import
+#Handle /tmp/import for the creation of the deb file that contains this systems files
+mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdi/tmp/import
+rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/import
 
 #delete the temp folder
 rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/temp/
