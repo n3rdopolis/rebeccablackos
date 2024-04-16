@@ -1341,6 +1341,12 @@ EXCLUDES+=($EXCLUDE)
 unset IFS
 EXCLUDECOUNT=${#EXCLUDES[@]}
 
+RSYNCEXCLUDEARGS=()
+for EXCLUDE in "${EXCLUDES[@]}"
+do
+  RSYNCEXCLUDEARGS+=(--exclude="$EXCLUDE")
+done
+
 if [[ $EXCLUDECOUNT == 0 ]]
 then
   EXCLUDES=(/proc /sys /dev /run /tmp /var/tmp)
@@ -2197,7 +2203,7 @@ if [ $INSTALL_FAILED -gt 0 ]; then
 				rm "$OVERLAYWHITEOUT"
 			fi
 		done
-		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}"
+		rsync -a "${TRANSLROOT}"/* "${BUILD_DIR}" ${RSYNCEXCLUDEARGS[@]}
 	else
 	    ( cat /${TMP_DIR}/newfiles | while read -r i; do
 	          if [ ! -d "${TRANSLROOT}${i}" -o -L "${TRANSLROOT}${i}" ]; then
