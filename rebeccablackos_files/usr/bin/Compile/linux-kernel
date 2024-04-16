@@ -158,6 +158,10 @@ make olddefconfig
 ./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
 ./scripts/kconfig/merge_config.sh -m .config ./arch.config
 
+#Disable signing
+./scripts/config -d CONFIG_MODULE_SIG_KEY
+./scripts/config -d CONFIG_SYSTEM_REVOCATION_KEYS
+./scripts/config -d CONFIG_SYSTEM_TRUSTED_KEYS
 
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
@@ -225,8 +229,11 @@ make olddefconfig
 ./scripts/config -d CONFIG_FB_HYPERV
 
 #Disable debug option
+./scripts/config -d CONFIG_DEBUG_INFO_DWARF5
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
 ./scripts/config -d CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
+./scripts/config -d CONFIG_DEBUG_KERNEL
+./scripts/config -e CONFIG_DEBUG_INFO_NONE
 
 #Disable VTs
 ./scripts/config -d CONFIG_VT
