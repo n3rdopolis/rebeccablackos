@@ -23,10 +23,13 @@
 #The only supported second_action is currently only "BUILDONLY"
 #If "BUILDONLY" is specified, the package will be uninstalled after they are used to build the packages, in order to build a smaller ISO
 #######
+aptitude::PART
+dselect::PART
 apt-rdepends::PART
 ragel::PART::::BUILDONLY
 check::FULL::::BUILDONLY
 chrpath::PART::::BUILDONLY
+locales::PAR
 acl::PART
 bolt::PART
 bluez::PART
@@ -140,6 +143,9 @@ python3-xcbgen::PART
 manpages::FULL
 build-essential::PART
 bc::PART
+meson::PART
+rustc::PART
+cargo::PART
 cpp::PART::::BUILDONLY
 cpp-12::PART::::BUILDONLY
 gcc-12::PART::::BUILDONLY
@@ -436,6 +442,8 @@ libxcb-image0::PART
 subversion::PART::::BUILDONLY
 subversion-tools::PART::::BUILDONLY
 mercurial::PART::::BUILDONLY
+wget::PULL
+curl::PULL
 libass9::FULL
 libass-dev::FULL
 libavutil57::FULL
@@ -548,6 +556,7 @@ lua-lgi::PART
 python-is-python3::PART
 python3-dev::FULL
 python3-setuptools::PART
+python3-distutils::PART
 python3-docutils::PART
 python3-attr::PART
 libatasmart4::PART

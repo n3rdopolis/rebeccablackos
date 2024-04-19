@@ -63,12 +63,9 @@ dpkg --configure -a
 #attempt to prevent packages from prompting for debconf
 export DEBIAN_FRONTEND=noninteractive
 
-#install basic applications that the system needs to get repositories and packages
-apt-get install aptitude git bzr subversion mercurial wget python-is-python3 python3-distutils rustc curl dselect dnsutils locales acl sudo cargo meson usrmerge -y
-
 #perl outputs complaints if a locale isn't generated
-locale-gen en_US.UTF-8
-localedef -i en_US -f UTF-8 en_US.UTF-8
+locale-gen C.UTF-8
+localedef -i C -f UTF-8 C.UTF-8
 
 #Create folder to hold the install logs
 mkdir -p "$PACKAGEOPERATIONLOGDIR"/phase_2
