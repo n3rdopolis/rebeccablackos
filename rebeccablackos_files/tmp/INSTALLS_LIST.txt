@@ -29,7 +29,6 @@ apt-rdepends::PART
 ragel::PART::::BUILDONLY
 check::FULL::::BUILDONLY
 chrpath::PART::::BUILDONLY
-locales::PAR
 acl::PART
 bolt::PART
 bluez::PART
@@ -172,7 +171,6 @@ libxmu-dev::PART
 libxmuu-dev::PART
 libxt-dev::PART
 libsndfile1-dev::PART
-curl::PART
 dlocate::PART
 bison::PART::::BUILDONLY
 ruby::PART
@@ -442,8 +440,8 @@ libxcb-image0::PART
 subversion::PART::::BUILDONLY
 subversion-tools::PART::::BUILDONLY
 mercurial::PART::::BUILDONLY
-wget::PULL
-curl::PULL
+wget::PART
+curl::PART
 libass9::FULL
 libass-dev::FULL
 libavutil57::FULL
