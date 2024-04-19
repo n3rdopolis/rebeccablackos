@@ -69,7 +69,7 @@ export DEBOOTSTRAP_DIR="$BUILDLOCATION"/debootstrap
 if [[ ! -f "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" || $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
 then
   echo "Setting up chroot for downloading archives and software..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --keyring "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg --arch "$BUILDARCH" "$DEBIANRELEASE" "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME $DEBIANREPO
+  "$BUILDLOCATION"/debootstrap/debootstrap --merged-usr --keyring "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg --arch "$BUILDARCH" "$DEBIANRELEASE" "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
@@ -82,7 +82,7 @@ if [[ ! -f "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" || $BUILD_SNAPSHOT_SYS
 then
   #setup a really basic Debian installation for the live cd
   echo "Setting up chroot for the Live CD..."
-  "$BUILDLOCATION"/debootstrap/debootstrap --keyring "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg --arch "$BUILDARCH" "$DEBIANRELEASE" "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME $DEBIANREPO
+  "$BUILDLOCATION"/debootstrap/debootstrap --merged-usr --keyring "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg --arch "$BUILDARCH" "$DEBIANRELEASE" "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME $DEBIANREPO
   debootstrapresult=$?
   if [[ $debootstrapresult == 0 ]]
   then
