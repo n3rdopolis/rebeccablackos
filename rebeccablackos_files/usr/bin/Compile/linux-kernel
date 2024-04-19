@@ -275,7 +275,6 @@ export LOCALVERSION=""
 KernelVersion=$(make kernelrelease)
 make install
 make modules_install
-make headers_install INSTALL_HDR_PATH=$INSTALLDIR
 rm /boot/initrd*${KernelVersion}*
 }
 
