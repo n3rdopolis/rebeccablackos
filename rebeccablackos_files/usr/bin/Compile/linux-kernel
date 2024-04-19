@@ -172,6 +172,14 @@ make olddefconfig
 ./scripts/config -e CONFIG_DRM_SIMPLEDRM
 ./scripts/config -m CONFIG_DRM_GUD
 
+#DMA buf options
+./scripts/config -e CONFIG_SYNC_FILE
+./scripts/config -e CONFIG_SW_SYNC
+./scripts/config -e CONFIG_UDMABUF
+./scripts/config -e CONFIG_DMABUF_MOVE_NOTIFY
+./scripts/config -e CONFIG_DMABUF_HEAPS
+./scripts/config -e CONFIG_DMABUF_HEAPS_SYSTEM
+
 #Disable fbdev drivers
 ./scripts/config -d CONFIG_FB_CIRRUS
 ./scripts/config -d CONFIG_FB_PM2
@@ -267,6 +275,7 @@ export LOCALVERSION=""
 KernelVersion=$(make kernelrelease)
 make install
 make modules_install
+make headers_install INSTALL_HDR_PATH=$INSTALLDIR
 rm /boot/initrd*${KernelVersion}*
 }
 
