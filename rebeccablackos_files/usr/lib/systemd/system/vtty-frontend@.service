@@ -1,5 +1,5 @@
 [Unit]
-Description=Graphical terminal for vTTY %I
+Description=Graphical terminal for vTTY %i
 
 After=vtty-backend@.service
 After=systemd-user-sessions.service display-manager.service
@@ -28,7 +28,7 @@ OnFailure=getty@%i.service
 Environment=XDG_SEAT=seat0
 PAMName=vtty
 
-ExecStart=/usr/libexec/vtty/vtty-frontend %I
+ExecStart=/usr/libexec/vtty/vtty-frontend %i
 
 TTYPath=/dev/%I
 TTYReset=true

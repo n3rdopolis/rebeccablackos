@@ -1,5 +1,5 @@
 [Unit]
-Description=Session proxy runner for vTTY %I
+Description=Session proxy runner for vTTY %i
 Before=vtty-frontend@.service
 
 ConditionPathExists=/dev/tty0
@@ -9,7 +9,7 @@ ConditionPathExists=/dev/%i
 Restart=on-failure
 RestartSec=0
 
-ExecStart=/usr/libexec/vtty/vtty-backend %I
+ExecStart=/usr/libexec/vtty/vtty-backend %i
 Type=notify
 
 IgnoreSIGPIPE=false
