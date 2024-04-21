@@ -70,8 +70,8 @@ apt-get install ${INSTALLS[@]} -y
 apt-get dist-upgrade -y --no-install-recommends
 
 #perl outputs complaints if a locale isn't generated
-locale-gen en_US.UTF-8
-localedef -i en_US -f UTF-8 en_US.UTF-8
+locale-gen C.UTF-8
+localedef -i C -f UTF-8 C.UTF-8
 
 #update the dselect database
 yes Y | dselect update
