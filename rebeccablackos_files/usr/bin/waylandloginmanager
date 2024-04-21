@@ -1371,7 +1371,7 @@ function ReadRegister
           #Start the vTTY rescue terminal if RESCUESEAT is sent to the privleged socket twice within 30 seconds. (Or switch to it if already running)
           if [[ $(systemctl is-active vtty-frontend-novt@${RescueSeat}.service &> /dev/null; echo $?) == 1 || -z $vTTYSessionID ]]
           then
-            WriteToLog "Sequence pressed twice. Restartting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
+            WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
             systemctl restart vtty-frontend-novt@${RescueSeat}.service &> /dev/null
           else
             WriteToLog "Sequence pressed twice. The vTTY for seat $RescueSeat is already running. Switching to $vTTYSessionID"
