@@ -97,7 +97,7 @@ function setup_buildprocess
   done
 
   export TERM=linux
-  export LANG=en_US.UTF-8
+  export LANG=C.UTF-8
   STARTDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
   if [[ ! -z $CALLING_SUDO_USER ]]
