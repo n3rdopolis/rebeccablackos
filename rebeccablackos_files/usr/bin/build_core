@@ -90,7 +90,7 @@ then
   do
     unset "$var" &> /dev/null
   done
-  export LANG=en_US.UTF-8
+  export LANG=C.UTF-8
 fi
 
 export NONROOTUSER=build_core
