@@ -42,9 +42,15 @@ do
       continue
     fi
     FILEPACKAGE=${FilesToPackage["$FILE"]}
-    if [[ ! -z $PACKAGEFILE ]]
+    if [[ ! -z "$FILEPACKAGE" ]]
     then
-      echo "$PACKAGE conflicts with $FILEPACKAGE with file: $FILE"
+      DIVERTPACKAGE=$(dpkg-divert --listpackage "$FILE")
+      if [[ ! -z "$DIVERTPACKAGE" ]]
+      then
+        echo "$PACKAGE conflicts with $FILEPACKAGE with file: $FILE , but $FILE is diverted by $DIVERTPACKAGE"
+      else
+        echo "$PACKAGE conflicts with $FILEPACKAGE with file: $FILE"
+     fi
     fi
   done < <(dpkg -L "$PACKAGE")
-done < <(dpkg --get-selections | grep install$ | awk '{print $1}' | grep -- -rbos$ | grep -v rbos-rbos)
+done < <(dpkg --get-selections | grep install$ | awk '{print $1}' | grep -- -rbos$)
