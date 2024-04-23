@@ -60,7 +60,7 @@ function PackagePrepareBuild()
 sed -i '/-Werror=redundant-decls/d' meson.build
 sed -i '/-Werror=return-type/d' meson.build
 sed -i 's/VK_ERROR_INCOMPATIBLE_VERSION_KHR/-1000150000/g' gdk/gdkvulkancontext.c
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgtk_doc=false -Dintrospection=enabled  build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dintrospection=enabled  build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
