@@ -231,8 +231,8 @@ function UserSessionWorker
   #Create an isolated systemd user session running under the current systemd user session. This allows multiple systemd managed sessions to allow to run as the same user at the same time. The initilization of the "systemctl --user" instance comes from xrdp.
   if [[ $WLM_NO_DBUS_RUN_SESSION == 1 ]]
   then
-    BASE_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
-    BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
+    export BASE_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
+    export BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
     WLM_XDG_RUNTIME_DIR=/run/user/`id -u`/wlm-rd-"$WAYLAND_GUEST"
     WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
     install -dDTm700 $WLM_XDG_RUNTIME_DIR
