@@ -65,6 +65,13 @@ then
 fi
 BUILDCOREDIRECTLYRUN=1
 
+if [[ -z $BUILDCOREMAKEDEBS ]]
+then
+  export BUILDCOREMAKEDEBS=0
+else
+  export BUILDCOREMAKEDEBS=1
+fi
+
 DownloadAttempts=3
 ExtraFileCleanupOnlyValue=1
 
@@ -1195,32 +1202,35 @@ function MakeAndInstall()
       touch $SOURCENAME \"/usr/share/buildcore_revisions/buildresults/$SOURCENAME\"
       echo $SOURCENAME >> \"/$SOURCEDIR/$SOURCENAME/Logs/failedcompiles\"
     else
-      GenerateChangedFilesList
-      SymlinkDirToDir $INSTALLDIR/lib/udev/rules.d /usr/lib/udev/rules.d $PACKAGESUFFIX
+      if [[ $BUILDCOREMAKEDEBS == 1 ]]
+      then
+        GenerateChangedFilesList
+        SymlinkDirToDir $INSTALLDIR/lib/udev/rules.d /usr/lib/udev/rules.d $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/etc/pam.d /etc/pam.d $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/etc/pam.d /etc/pam.d $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/lib/systemd/user /usr/local/lib/systemd/user/ ""
+        SymlinkDirToDir $INSTALLDIR/lib/systemd/user /usr/local/lib/systemd/user/ ""
 
-      SymlinkDirToDir $INSTALLDIR/lib/systemd/system /usr/local/lib/systemd/system/ ""
+        SymlinkDirToDir $INSTALLDIR/lib/systemd/system /usr/local/lib/systemd/system/ ""
 
-      SymlinkDirToDir $INSTALLDIR/share/polkit-1/actions /usr/share/polkit-1/actions/ $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/polkit-1/actions /usr/share/polkit-1/actions/ $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/ $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/polkit-1/rules.d /usr/share/polkit-1/rules.d/ $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/etc/dbus-1/ /etc/dbus-1/ $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/etc/dbus-1/ /etc/dbus-1/ $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/accessibility-services /usr/local/share/dbus-1/accessibility-services ""
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/system-services /usr/local/share/dbus-1/system-services ""
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/services /usr/local/share/dbus-1/services ""
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/interfaces /usr/local/share/dbus-1/interfaces ""
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/system.d /usr/share/dbus-1/system.d $PACKAGESUFFIX
-      SymlinkDirToDir $INSTALLDIR/share/dbus-1/session.d /usr/share/dbus-1/session.d $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/accessibility-services /usr/local/share/dbus-1/accessibility-services ""
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/system-services /usr/local/share/dbus-1/system-services ""
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/services /usr/local/share/dbus-1/services ""
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/interfaces /usr/local/share/dbus-1/interfaces ""
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/system.d /usr/share/dbus-1/system.d $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/dbus-1/session.d /usr/share/dbus-1/session.d $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/share/bash-completion/ /usr/share/bash-completion/ $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/bash-completion/ /usr/share/bash-completion/ $PACKAGESUFFIX
 
-      SymlinkDirToDir $INSTALLDIR/share/fish/vendor_completions.d/ /usr/share/fish/vendor_completions.d/ $PACKAGESUFFIX
-      SymlinkDirToDir $INSTALLDIR/share/zsh /usr/share/zsh $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/fish/vendor_completions.d/ /usr/share/fish/vendor_completions.d/ $PACKAGESUFFIX
+        SymlinkDirToDir $INSTALLDIR/share/zsh /usr/share/zsh $PACKAGESUFFIX
+      fi
     fi
     exit 0
 " > "/$SOURCEDIR/$SOURCENAME/packageinstallscript"
