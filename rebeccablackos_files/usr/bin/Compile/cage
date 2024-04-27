@@ -64,6 +64,7 @@ function PackagePrepareBuild()
 #Workaround for co-installablilty of multiple wlroots versions
 sed -i "s/wlroots        = dependency('wlroots',/wlroots        = dependency('wlroots-0.17',/g" meson.build
 
+patch -f -p1 < /usr/share/RBOS_PATCHES/cage.diff
 meson setup -Dbuildtype=plain -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false -Dxwayland=disabled build
 }
 
