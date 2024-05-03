@@ -1,0 +1,31 @@
+diff --git a/kdecoration/oxygenbutton.cpp b/kdecoration/oxygenbutton.cpp
+index 9e15cc17..4df0e4be 100644
+--- a/kdecoration/oxygenbutton.cpp
++++ b/kdecoration/oxygenbutton.cpp
+@@ -176,6 +176,9 @@ void Button::paint(QPainter *painter, const QRect &repaintRegion)
+     if (!decoration())
+         return;
+ 
++    if (isSpacer())
++        return;
++
+     painter->save();
+ 
+     // translate from offset
+diff --git a/kdecoration/oxygenbutton.h b/kdecoration/oxygenbutton.h
+index 26427aca..f1508155 100644
+--- a/kdecoration/oxygenbutton.h
++++ b/kdecoration/oxygenbutton.h
+@@ -127,6 +127,12 @@ private:
+     //*@name button properties
+     //@{
+ 
++    //* true if button if of close type
++    bool isSpacer(void) const
++    {
++        return type() == KDecoration2::DecorationButtonType::Spacer;
++    }
++
+     //* true if button if of menu type
+     bool isMenuButton(void) const
+     {
