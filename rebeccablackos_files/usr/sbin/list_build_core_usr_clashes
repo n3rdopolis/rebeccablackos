@@ -21,7 +21,7 @@
 sudo apt-file update
 
 declare -A FilesToPackage
-while read PACKAGEFILE
+while read -r PACKAGEFILE
 do
   PACKAGEFILE="${PACKAGEFILE/: /$'\t'}"
   IFS=$'\t'
@@ -33,9 +33,9 @@ do
 done < <(apt-file search --stream-results -x ^ | sed 's| /lib/| /usr/lib/|g' | sed 's| /bin/| /usr/bin/|g')
 
 
-while read PACKAGE
+while read -r PACKAGE
 do
-  while read FILE
+  while read -r FILE
   do
     if [[ -d $FILE ]]
     then
