@@ -130,7 +130,7 @@ then
   ((ErrorCount+=$?))
   if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
   then
-    ACCESS_COUNT=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null | while read FILE; do getfacl "$FILE" 2>/dev/null; done |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
+    ACCESS_COUNT=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null | while read -r FILE; do getfacl "$FILE" 2>/dev/null; done |grep -v -E "::|#|^$" | awk -F : '{print $2}' | grep -c $SECONDARGUMENT )
     #If the user doesn't have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
     if [[ $ACCESS_COUNT == 0 ]]
     then
@@ -191,8 +191,8 @@ then
   # revoking $XDG_RUNTIME_DIR when granting all users to the socket is difficult to determine the reversability, as other sockets in the directory might have the traditional UNIX permissons bits set for other users.
   #if [[ ${WAYLAND_DISPLAY:0:1} != "/" ]]
   #then
-  #  ACCESS_COUNT=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null| while read FILE; do getfacl "$FILE" 2>/dev/null; done | grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
-  #  ACCESS_COUNT+=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null| while read FILE; do getfacl "$FILE" 2>/dev/null; done |grep -v -E "#|^$" | grep -v "mask::"|grep -c "x$")
+  #  ACCESS_COUNT=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null| while read -r FILE; do getfacl "$FILE" 2>/dev/null; done | grep -v -E "::|#|^$" | awk -F : '{print $2}' | wc -l )
+  #  ACCESS_COUNT+=$(find "$ROOT_XDG_RUNTIME_DIR" -type s 2>/dev/null| while read -r FILE; do getfacl "$FILE" 2>/dev/null; done |grep -v -E "#|^$" | grep -v "mask::"|grep -c "x$")
   #  #If no users have access to other Wayland servers, then remove execute permissions from the XDG_RUNTIME_DIR
   #  if [[ $ACCESS_COUNT == 0 ]]
   #  then
