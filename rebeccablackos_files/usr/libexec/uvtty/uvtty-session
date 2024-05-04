@@ -16,6 +16,14 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+export XDG_CURRENT_DESKTOP=UvTTY
+export WLR_BACKENDS=libinput,drm
+export WLR_BACKENDS=wayland
+export WLR_RENDERER_ALLOW_SOFTWARE=1
+export WLR_RENDERER=pixman
+export WLR_NO_HARDWARE_CURSORS=1
+export WLR_LIBINPUT_NO_DEVICES=1
+
 UvTTYName="${XDG_SEAT}-${XDG_SESSION_ID}"
 
 #Make the proxy folder
