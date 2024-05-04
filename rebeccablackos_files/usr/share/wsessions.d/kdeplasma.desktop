@@ -19,6 +19,7 @@ NeedsFile=/opt/bin/kwin_wayland
 NeedsFile=/opt/bin/plasmashell
 NeedsFile=/opt/bin/startplasma-wayland
 [EnvironmentFile]
+unset=QT_QPA_PLATFORMTHEME
 set=XDG_CURRENT_DESKTOP=KDE
 #set=KWIN_COMPOSE=Q@SOFTWARE
 set=WLM_NO_DBUS_RUN_SESSION=1
