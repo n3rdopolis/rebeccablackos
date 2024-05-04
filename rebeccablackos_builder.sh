@@ -191,7 +191,7 @@ function NAMESPACE_EXECUTE {
   #Wait for the PID to complete
   if [[ $ROOTPID != -1 ]]
   then
-    read < <(tail -f /dev/null --pid=$UNSHAREPID)
+    read -r < <(tail -f /dev/null --pid=$UNSHAREPID)
   fi
   unset SUBSHELLPID
   unset PYTHONPID
