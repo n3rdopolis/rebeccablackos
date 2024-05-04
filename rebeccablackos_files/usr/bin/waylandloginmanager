@@ -2814,6 +2814,7 @@ function LeavePrompt
   #For switch user, send the Switch command to the waylandloginmanager
   if [[ $ACTION == "Switch User" ]]
   then
+    loginctl lock-session $WLM_XDG_SESSION_ID
     SendSelfCommand Switch $WLM_XDG_SEAT
     RESULT=$?
   #If the request is logoff, tell the waylandloginmanager to switch to its TTY, and terminate the current server.
@@ -4160,6 +4161,7 @@ function WaylandLoginManagerExecute
     loginctl terminate-session $WLM_XDG_SESSION_ID
   elif [[ $1 == "--switchuser" ]]
   then
+    loginctl lock-session $WLM_XDG_SESSION_ID
     SendSelfCommand Switch $WLM_XDG_SEAT
   elif [[ $1 == "--debugconnect" ]]
   then
