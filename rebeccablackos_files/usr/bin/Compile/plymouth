@@ -61,6 +61,8 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/ply_kernel_command_line_has_argument ("plymouth.use-simpledrm")/true/g' src/libply-splash-core/ply-device-manager.c
+
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinner/spinner.plymouth.in
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinner/spinner.plymouth.in
 
