@@ -1341,11 +1341,11 @@ function ReadRegister
         SetConfigKey "$SetValueName" "$SetValueData"
       elif [[ $RegisterType == RESCUESEAT ]]
       then
-        vTTYSessionID=""
         RescueSeat=${ArraySessionData[1]}
         WriteToLog "The loginmanagerdisplay for $RescueSeat has been requested by logind"
         GetStartedSeatIndex $RescueSeat
         SeatLastRescueTimestamp=${SeatRescueTimestamps[$ReturnSeatIndex]}
+        RescueSeatFileName=${SeatFileNames[$ReturnSeatIndex]}
         CurrentTime=$EPOCHSECONDS
         SeatRescueTimestamps[$ReturnSeatIndex]=$CurrentTime
         SeatLoginManagerDisplay=${LoginManagerDisplaySessions[$ReturnSeatIndex]}
@@ -1360,24 +1360,17 @@ function ReadRegister
         fi
 
         #If RESCUESEAT is sent to the privleged socket for the first time in 30 seconds switch back to the greeter
-        if [[ $SeatRescueTimeDelay -le 30 && ($SeatRescueTerminalValid == 1) ]]
+        if [[ $SeatRescueTimeDelay -le 30 && $SeatRescueTimeDelay -gt 1 && ($SeatRescueTerminalValid == 1) ]]
         then
-          #Get the session ID of a running vTTY session for the seat if one is already running
-          if [[ -e /run/vtty/sessions/$RescueSeat ]]
-          then
-            read -r -n 255 vTTYSessionID < /run/vtty/sessions/$RescueSeat
-          fi
-
-          #Start the vTTY rescue terminal if RESCUESEAT is sent to the privleged socket twice within 30 seconds. (Or switch to it if already running)
-          if [[ $(systemctl is-active vtty-frontend-novt@${RescueSeat}.service &> /dev/null; echo $?) == 1 || -z $vTTYSessionID ]]
-          then
-            WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
-            systemctl restart vtty-frontend-novt@${RescueSeat}.service &> /dev/null
-          else
-            WriteToLog "Sequence pressed twice. The vTTY for seat $RescueSeat is already running. Switching to $vTTYSessionID"
-            loginctl activate $vTTYSessionID &> /dev/null
-          fi
-          SeatRescueTimestamps[$ReturnSeatIndex]=0
+          WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
+          systemctl restart vtty-frontend-novt@${RescueSeat}.service &> /dev/null
+          SeatRescueTimestamps[$ReturnSeatIndex]=-1
+        elif [[ $SeatRescueTimeDelay -le 1 ]]
+        then
+          UserActionAttemptCounts[$ReturnSeatIndex]=$MAX_UI_ATTEMPTS
+          LoginManagerDisplayAttemptCounts[$ReturnSeatIndex]=$MAX_UI_ATTEMPTS
+          systemctl stop wlm-loginmanagerdisplay_$RescueSeatFileName &> /dev/null
+          SeatRescueTimestamps[$ReturnSeatIndex]=-1
         else
           if [[ $SeatRescueTimeDelay -gt 30 ]]
           then
