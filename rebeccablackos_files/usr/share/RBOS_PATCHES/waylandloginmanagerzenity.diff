@@ -34,7 +34,7 @@
    export XDG_DATA_DIRS=/opt/share:/usr/share
 -  export QT_QPA_PLATFORM=wayland
 -  export QT_QPA_PLATFORMTHEME=qt6ct
--  export QT_LOGGING_TO_CONSOLE=1
+-  export QT_FORCE_STDERR_LOGGING=1
 +  export GDK_BACKEND=wayland
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston 2>/dev/null)
