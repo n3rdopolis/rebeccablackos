@@ -35,7 +35,9 @@ else
   SLEEPCMD=/bin/sleep
 fi
 
-for (( AttemptItr=0 ; AttemptItr < 5 ; AttemptItr++ ))
+LoopStartTime=$EPOCHSECONDS
+AttemptItr=0
+while ((AttemptItr < 5))
 do
   if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
   then
@@ -68,6 +70,17 @@ do
   fi
   $SLEEPCMD 1
 
+  ((AttemptItr++))
+
+  if [[ $AttemptItr -ge 5 ]]
+  then
+    LoopStartDelay=$(($EPOCHSECONDS - $LoopStartTime))
+    if [[ $LoopStartDelay -gt 60 ]]
+    then
+      AttemptItr=0
+      LoopStartTime=$EPOCHSECONDS
+    fi
+  fi
 done
 
 #If the loop breaks, something went wrong, abort the session
