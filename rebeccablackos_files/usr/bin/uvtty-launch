@@ -260,7 +260,7 @@ CommandResult=$?
 
 if [[ $InhibitAfterQuit == 1 ]]
 then
-  fg 1
+  fg 1 &> /dev/null
 fi
 
 if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
