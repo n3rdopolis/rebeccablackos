@@ -20,11 +20,61 @@ esac
 . /usr/bin/wlruntime_vars
 . /usr/share/initramfs-tools/hook-functions
 
-mkdir -p "${DESTDIR}/usr/share/X11/xkb"
-cp -aZ /usr/share/X11/xkb/* "${DESTDIR}/usr/share/X11/xkb"
+if [ -e /usr/share/X11/xkb ]
+then
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/"
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/compat/"
 
-mkdir -p "${DESTDIR}/usr/share/X11/locale"
-cp -aZ /usr/share/X11/locale/* "${DESTDIR}/usr/share/X11/locale"
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/keycodes/"
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/rules/"
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/symbols/"
+  mkdir -p "${DESTDIR}/usr/share/X11/xkb/types/"
+  cp -Z /usr/share/X11/xkb/compat/accessx ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/basic ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/caps ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/complete ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/iso9995 ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/ledcaps ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/lednum ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/ledscroll ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/level5 ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/misc ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/mousekeys ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/compat/xfree86 ${DESTDIR}/usr/share/X11/xkb/compat/
+  cp -Z /usr/share/X11/xkb/keycodes/aliases ${DESTDIR}/usr/share/X11/xkb/keycodes/
+  cp -Z /usr/share/X11/xkb/keycodes/evdev ${DESTDIR}/usr/share/X11/xkb/keycodes/
+  cp -Z /usr/share/X11/xkb/rules/evdev ${DESTDIR}/usr/share/X11/xkb/rules/
+  find /usr/share/X11/xkb/symbols -maxdepth 1 ! -type d | while read file
+  do
+    cp -Z $file ${DESTDIR}/usr/share/X11/xkb/symbols/
+  done
+  cp -Z /usr/share/X11/xkb/types/basic ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/complete ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/extra ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/iso9995 ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/level5 ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/mousekeys ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/numpad ${DESTDIR}/usr/share/X11/xkb/types/
+  cp -Z /usr/share/X11/xkb/types/pc ${DESTDIR}/usr/share/X11/xkb/types/
+fi
+
+if [ -e /usr/share/X11/locale ]
+then
+  mkdir -p "${DESTDIR}/usr/share/X11/locale/"
+  # In the off chance the user uses their compose key in initrd
+  if [ -f "/usr/share/X11/locale/compose.dir" ]
+  then
+    cp -Z /usr/share/X11/locale/compose.dir ${DESTDIR}/usr/share/X11/locale/
+    grep UTF-8/Compose: /usr/share/X11/locale/compose.dir | awk -F: '{ print $1 }' | sort -u | xargs dirname | while read DIR
+    do
+      mkdir -p ${DESTDIR}/usr/share/X11/locale/$DIR
+      find /usr/share/X11/locale/$DIR -maxdepth 1 ! -type d | while read file
+      do
+        cp -Z $file ${DESTDIR}/usr/share/X11/locale/$DIR
+      done
+    done
+  fi
+fi
 
 THEME="$(/opt/sbin/plymouth-set-default-theme || true)"
 THEMES="/opt/share/plymouth/themes"
