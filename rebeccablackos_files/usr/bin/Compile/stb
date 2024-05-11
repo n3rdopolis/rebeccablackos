@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #There is no build system, use Debian's workaround
-find debian/patches/ -name "*.patch" | sort | while read PATCH
+find debian/patches/ -name "*.patch" | sort | while read -r PATCH
 do
   patch -p1 -f < $PATCH
 done
