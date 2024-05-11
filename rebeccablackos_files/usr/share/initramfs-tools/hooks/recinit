@@ -76,7 +76,7 @@ then
   cp -Z /opt/share/X11/xkb/keycodes/aliases ${DESTDIR}/opt/share/X11/xkb/keycodes/
   cp -Z /opt/share/X11/xkb/keycodes/evdev ${DESTDIR}/opt/share/X11/xkb/keycodes/
   cp -Z /opt/share/X11/xkb/rules/evdev ${DESTDIR}/opt/share/X11/xkb/rules/
-  find /opt/share/X11/xkb/symbols -maxdepth 1 ! -type d | while read file
+  find /opt/share/X11/xkb/symbols -maxdepth 1 ! -type d | while read -r file
   do
     cp -Z $file ${DESTDIR}/opt/share/X11/xkb/symbols/
   done
@@ -97,10 +97,10 @@ then
   if [ -f "/usr/share/X11/locale/compose.dir" ]
   then
     cp -Z /usr/share/X11/locale/compose.dir ${DESTDIR}/usr/share/X11/locale/
-    grep UTF-8/Compose: /usr/share/X11/locale/compose.dir | awk -F: '{ print $1 }' | sort -u | xargs dirname | while read DIR
+    grep UTF-8/Compose: /usr/share/X11/locale/compose.dir | awk -F: '{ print $1 }' | sort -u | xargs dirname | while read -r DIR
     do
       mkdir -p ${DESTDIR}/usr/share/X11/locale/$DIR
-      find /usr/share/X11/locale/$DIR -maxdepth 1 ! -type d | while read file
+      find /usr/share/X11/locale/$DIR -maxdepth 1 ! -type d | while read -r file
       do
         cp -Z $file ${DESTDIR}/usr/share/X11/locale/$DIR
       done
