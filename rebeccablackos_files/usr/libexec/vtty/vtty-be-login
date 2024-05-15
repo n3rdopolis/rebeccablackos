@@ -55,10 +55,11 @@ function DoLoginPrompt
   export VTTY=$EmulatedTTY
   echo "v${VTTY} backed by $PTYPath"
 
-  #Clear the clipboard
+  #Clear the clipboard and the primary selection
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
   then
-    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver /opt/bin/wl-copy ""
+    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver /opt/bin/wl-copy -c
+    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver /opt/bin/wl-copy -pc
   fi
 
   #/usr/bin/vtty-login-program could be a symlink provided by another package, such as console-conf
