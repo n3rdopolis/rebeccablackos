@@ -30,13 +30,6 @@ unset GST_GL_WINDOW
 unset CLUTTER_INPUT_BACKEND
 export MOZ_ENABLE_WAYLAND=0
 
-#Workaround Xwayland scaling bug
-DPI=$(xdpyinfo |grep "dots per inch" | grep -Eo '*[0-9,-]*' | head -1)
-if [[ $DPI -lt 96 ]]
-then
-  export QT_FONT_DPI=96
-fi
-
 XDG_MENU_PREFIX="plasma-" kbuildsycoca6
 
 #If no application specified, show a menu
