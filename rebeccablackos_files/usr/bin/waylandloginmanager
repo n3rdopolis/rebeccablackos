@@ -319,7 +319,7 @@ function UserSessionWorker
   then
     mkdir -p $XDG_RUNTIME_DIR/waylandloginmanager
     SessionCommand="${ArgArray[@]//\"/\\\"}"
-    dbus-run-session -- socat exec:"bash -c \\\"gdb --args $SessionCommand\\\"",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_GUEST}",mode=0700 &>> $WLM_SESSION_LOG &
+    dbus-run-session -- socat exec:"bash -c \\\"gdb --args $SessionCommand\\\"",pty,stderr,setsid,sigint,sane unix-listen:"$BASE_XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_GUEST}",mode=0700 &>> $WLM_SESSION_LOG &
   else
     unset WLM_SEAT
     if [[ $WLM_NO_DBUS_RUN_SESSION != 1 ]]
@@ -4052,7 +4052,7 @@ Will show a menu with a few options for diagnosis." 20 50
 function DebugConnect
 {
   PTYPath=$(tty)
-  DebugSockets=($(find $XDG_RUNTIME_DIR/waylandloginmanager -type s))
+  DebugSockets=($(find /run/user/$UID/waylandloginmanager -type s))
   if [[ ${#DebugSockets[@]} == 0 ]]
   then
     echo "No debugged sessions found for the current user."
