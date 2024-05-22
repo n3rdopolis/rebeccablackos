@@ -1,0 +1,22 @@
+diff --git a/backend/libinput/backend.c b/backend/libinput/backend.c
+index c4dbc3d83182f6daf312ee42645de5d1051df214..121731b3110a319bf168e6badc95b63ed3b44106 100644
+--- a/backend/libinput/backend.c
++++ b/backend/libinput/backend.c
+@@ -106,13 +106,11 @@ static bool backend_start(struct wlr_backend *wlr_backend) {
+ 
+ 	int libinput_fd = libinput_get_fd(backend->libinput_context);
+ 
++	handle_libinput_readable(libinput_fd, WL_EVENT_READABLE, backend);
+ 	if (!env_parse_bool("WLR_LIBINPUT_NO_DEVICES") && wl_list_empty(&backend->devices)) {
+-		handle_libinput_readable(libinput_fd, WL_EVENT_READABLE, backend);
+-		if (wl_list_empty(&backend->devices)) {
+-			wlr_log(WLR_ERROR, "libinput initialization failed, no input devices");
+-			wlr_log(WLR_ERROR, "Set WLR_LIBINPUT_NO_DEVICES=1 to suppress this check");
+-			return false;
+-		}
++		wlr_log(WLR_ERROR, "libinput initialization failed, no input devices");
++		wlr_log(WLR_ERROR, "Set WLR_LIBINPUT_NO_DEVICES=1 to suppress this check");
++		return false;
+ 	}
+ 
+ 	if (backend->input_event) {
