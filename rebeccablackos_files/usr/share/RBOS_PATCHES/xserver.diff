@@ -1,0 +1,13 @@
+diff --git a/hw/xfree86/drivers/modesetting/driver.c b/hw/xfree86/drivers/modesetting/driver.c
+index f3400a1cdf211bf7267debc814a770e18b0eb4eb..13c8fbb6f63ad951a85554a40274a6b08f161552 100644
+--- a/hw/xfree86/drivers/modesetting/driver.c
++++ b/hw/xfree86/drivers/modesetting/driver.c
+@@ -1340,6 +1340,8 @@ PreInit(ScrnInfoPtr pScrn, int flags)
+         ms->drmmode.sw_cursor = TRUE;
+     }
+ 
++    ms->min_cursor_width = 1;
++    ms->min_cursor_height = 1;
+     ms->max_cursor_width = 64;
+     ms->max_cursor_height = 64;
+     ret = drmGetCap(ms->fd, DRM_CAP_CURSOR_WIDTH, &value);
