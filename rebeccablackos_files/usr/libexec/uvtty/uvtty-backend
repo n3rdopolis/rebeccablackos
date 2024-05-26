@@ -18,112 +18,117 @@
 
 #This runs a session under socat, vtty-like server that runs as a user.
 
-UvTTYName=$1
-if [[ -z $UvTTYName ]]
-then
-  echo "Incorrect arguments passed"
-  exit 1
-fi
-
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
-which socat &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "socat not installed"
-  exit 1
-fi
-
-if [[ -z $XDG_RUNTIME_DIR ]]
-then
-  echo "XDG_RUNTIME_DIR not set"
-  exit 1
-fi
-
-#Exit if already running
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-then
-  echo "$UvTTYName already running"
-  exit 1
-fi
-
-#Open the FIFO to where resize commands will be sent
-exec 1000<>"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
-
-#Start the socat server
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-then
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy"
-fi
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
-then
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
-fi
-
-if [[ -z $SHELL ]]
-then
-  SHELLCMD="/bin/bash"
-else
-  SHELLCMD="$SHELL"
-fi
-
-socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700,fork &
-SOCATPID=$!
-$SLEEPCMD .1
-
-if [[ ! -e /proc/$SOCATPID ]]
-then
-  echo "socat proxy quit unexpectedly"
-  exit 1
-fi
-
-#Wait for the socat socket to be created
-if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-then
-  while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-  do
-    $SLEEPCMD 1
-  done
-fi
-
-#Exit when the job stops
-trap 'if [[ ! -e /proc/$SOCATPID ]]; then rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy &>/dev/null; rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy &>/dev/null; exit; fi' SIGCHLD
-
-#Accept commands from the connection to manage the PTY (currently only the size)
-while [ 1 ]
-do
-  #12 chars should be enough 's 9999 9999' more than enough
-  read -t 5 -r -n 12 COMMANDDATA <&1000
-  COMMANDDATA=($COMMANDDATA)
-
-  #s for size, then number of rows, then number of cols
-  if [[ ${COMMANDDATA[0]} == "s" ]]
+function UvTTYBackendMain
+{
+  UvTTYName=$1
+  if [[ -z $UvTTYName ]]
   then
-    XSize=${COMMANDDATA[1]}
-    YSize=${COMMANDDATA[2]}
-    if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
-    then
-      Retries=0
-      while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
-      do
-        $SLEEPCMD 1
-        ((Retries++))
-        if [[ $Retries -ge 5 ]]
-        then
-          echo "Timed out waiting for the symlink to the PTY being created"
-          break
-        fi
-      done
-    fi
-    stty -F "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" rows $XSize cols $YSize
+    echo "Incorrect arguments passed"
+    exit 1
   fi
 
-done
-exit 0
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
+  else
+    SLEEPCMD=/bin/sleep
+  fi
+
+  which socat &> /dev/null
+  if [[ $? != 0 ]]
+  then
+    echo "socat not installed"
+    exit 1
+  fi
+
+  if [[ -z $XDG_RUNTIME_DIR ]]
+  then
+    echo "XDG_RUNTIME_DIR not set"
+    exit 1
+  fi
+
+  #Exit if already running
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    echo "$UvTTYName already running"
+    exit 1
+  fi
+
+  #Open the FIFO to where resize commands will be sent
+  exec 1000<>"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
+
+  #Start the socat server
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy"
+  fi
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+  then
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
+  fi
+
+  if [[ -z $SHELL ]]
+  then
+    SHELLCMD="/bin/bash"
+  else
+    SHELLCMD="$SHELL"
+  fi
+
+  socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700,fork &
+  SOCATPID=$!
+  $SLEEPCMD .1
+
+  if [[ ! -e /proc/$SOCATPID ]]
+  then
+    echo "socat proxy quit unexpectedly"
+    exit 1
+  fi
+
+  #Wait for the socat socket to be created
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
+
+  #Exit when the job stops
+  trap 'if [[ ! -e /proc/$SOCATPID ]]; then rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy &>/dev/null; rm $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy &>/dev/null; exit; fi' SIGCHLD
+
+  #Accept commands from the connection to manage the PTY (currently only the size)
+  while [ 1 ]
+  do
+    #12 chars should be enough 's 9999 9999' more than enough
+    read -t 5 -r -n 12 COMMANDDATA <&1000
+    COMMANDDATA=($COMMANDDATA)
+
+    #s for size, then number of rows, then number of cols
+    if [[ ${COMMANDDATA[0]} == "s" ]]
+    then
+      XSize=${COMMANDDATA[1]}
+      YSize=${COMMANDDATA[2]}
+      if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+      then
+        Retries=0
+        while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+        do
+          $SLEEPCMD 1
+          ((Retries++))
+          if [[ $Retries -ge 5 ]]
+          then
+            echo "Timed out waiting for the symlink to the PTY being created"
+            break
+          fi
+        done
+      fi
+      stty -F "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" rows $XSize cols $YSize
+    fi
+
+  done
+  exit 0
+}
+
+UvTTYBackendMain "$@"

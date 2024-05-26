@@ -17,31 +17,37 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #This runs the shell, and links the current PTY
-UvTTYName=$1
-if [[ -z $UvTTYName ]]
-then
-  echo "Incorrect arguments passed"
-  exit 1
-fi
 
-shift
-export TERM=xterm-256color
+function UvTTYBeRunMain
+{
+  UvTTYName=$1
+  if [[ -z $UvTTYName ]]
+  then
+    echo "Incorrect arguments passed"
+    exit 1
+  fi
 
-#Create a static name for the PTY that this is running as
-PTYPath=$(tty)
-IFS="/"
-PTYPathArray=($PTYPath)
-unset IFS
-PTYNumber=${PTYPathArray[-1]}
+  shift
+  export TERM=xterm-256color
 
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
-then
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
-fi
-ln -s $PTYPath "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
+  #Create a static name for the PTY that this is running as
+  PTYPath=$(tty)
+  IFS="/"
+  PTYPathArray=($PTYPath)
+  unset IFS
+  PTYNumber=${PTYPathArray[-1]}
 
-"$@"
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" ]]
+  then
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
+  fi
+  ln -s $PTYPath "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
 
-rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" &>/dev/null
-pkill $SOCAT_PID
-exit $?
+  "$@"
+
+  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" &>/dev/null
+  pkill $SOCAT_PID
+  exit $?
+}
+
+UvTTYBeRunMain "$@"

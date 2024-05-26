@@ -18,32 +18,6 @@
 
 #This handles the connection to the main pty running the user shell, (this is run within the terminal emulator)
 
-UvTTYName=$1
-if [[ -z $UvTTYName ]]
-then
-  echo "Incorrect arguments passed"
-  exit 1
-fi
-
-PTYPath=$(tty)
-
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
-if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
-then
-  WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
-else
-  WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
-fi
-rm $WAYLANDDISPLAYPATH
-
 function PtyResizeEvent
 {
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
@@ -65,30 +39,64 @@ function PtyResizeEvent
   ClientPTYSize=($(stty size))
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 }
-#Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
-trap PtyResizeEvent WINCH
 
-#Wait for the socat socket to be created
-if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-then
-  while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-  do
-    $SLEEPCMD 1
-  done
-fi
-
-socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
-set -m
-SOCATPID=$!
-
-trap 'if [[ ! -e /proc/$SOCATPID ]]; then exit; fi' SIGCHLD
-PtyResizeEvent
-
-while [ 1 ]
-do
-  wait $SOCATPID
-  if [[ ! -e /proc/$SOCATPID ]]
-    then exit
+function UvTTYFeConnectMain
+{
+  UvTTYName=$1
+  if [[ -z $UvTTYName ]]
+  then
+    echo "Incorrect arguments passed"
+    exit 1
   fi
-  $SLEEPCMD .1
-done
+
+  PTYPath=$(tty)
+
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
+  else
+    SLEEPCMD=/bin/sleep
+  fi
+
+  if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
+  then
+    WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+  else
+    WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+  fi
+  rm $WAYLANDDISPLAYPATH
+
+  #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
+  trap PtyResizeEvent WINCH
+
+  #Wait for the socat socket to be created
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    while [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
+
+  socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
+  set -m
+  SOCATPID=$!
+
+  trap 'if [[ ! -e /proc/$SOCATPID ]]; then exit; fi' SIGCHLD
+  PtyResizeEvent
+
+  while [ 1 ]
+  do
+    wait $SOCATPID
+    if [[ ! -e /proc/$SOCATPID ]]
+      then exit
+    fi
+    $SLEEPCMD .1
+  done
+
+  exit
+}
+
+UvTTYFeConnectMain "$@"

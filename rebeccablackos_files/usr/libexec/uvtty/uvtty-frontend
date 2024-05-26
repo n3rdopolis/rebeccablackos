@@ -17,71 +17,79 @@
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 #This runs a graphical terminal full screen to connect to the socat socket
-set -m
 
-UvTTYName=$1
-if [[ -z $UvTTYName ]]
-then
-  echo "Incorrect arguments passed"
-  exit 1
-fi
+function UvTTYFrontendMain
+{
+  set -m
 
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
-LoopStartTime=$EPOCHSECONDS
-AttemptItr=0
-while ((AttemptItr < 5))
-do
-  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+  UvTTYName=$1
+  if [[ -z $UvTTYName ]]
   then
-    AttemptItr=0
-    tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
+    echo "Incorrect arguments passed"
+    exit 1
   fi
 
-  cage -m last -d -s -- \
-  foot --font DejaVuSansMono:size=9 -- \
-  /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
-  CAGEPID=$!
-
-  mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
-  echo $CAGEPID > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" 2>/dev/null
-  if [[ -e /proc/$CAGEPID ]]
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
   then
-    fg 1
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
+  else
+    SLEEPCMD=/bin/sleep
   fi
 
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" &>/dev/null
-
-  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-  then
-    #Force the backend proxy command loop to run so the bash trap detects the process exiting sooner
-    if [[ -e $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy ]]
-    then
-      echo "" > $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy
-    fi
-    exit
-  fi
-  $SLEEPCMD 1
-
-  ((AttemptItr++))
-
-  if [[ $AttemptItr -ge 5 ]]
-  then
-    LoopStartDelay=$(($EPOCHSECONDS - $LoopStartTime))
-    if [[ $LoopStartDelay -gt 60 ]]
+  LoopStartTime=$EPOCHSECONDS
+  AttemptItr=0
+  while ((AttemptItr < 5))
+  do
+    if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
     then
       AttemptItr=0
-      LoopStartTime=$EPOCHSECONDS
+      tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
     fi
-  fi
-done
 
-#If the loop breaks, something went wrong, abort the session
-loginctl terminate-session $XDG_SESSION_ID
+    cage -m last -d -s -- \
+    foot --font DejaVuSansMono:size=9 -- \
+    /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
+    CAGEPID=$!
+
+    mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
+    echo $CAGEPID > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" 2>/dev/null
+    if [[ -e /proc/$CAGEPID ]]
+    then
+      fg 1
+    fi
+
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" &>/dev/null
+
+    if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+    then
+      #Force the backend proxy command loop to run so the bash trap detects the process exiting sooner
+      if [[ -e $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy ]]
+      then
+        echo "" > $XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy
+      fi
+      exit
+    fi
+    $SLEEPCMD 1
+
+    ((AttemptItr++))
+
+    if [[ $AttemptItr -ge 5 ]]
+    then
+      LoopStartDelay=$(($EPOCHSECONDS - $LoopStartTime))
+      if [[ $LoopStartDelay -gt 60 ]]
+      then
+        AttemptItr=0
+        LoopStartTime=$EPOCHSECONDS
+      fi
+    fi
+  done
+
+  #If the loop breaks, something went wrong, abort the session
+  loginctl terminate-session $XDG_SESSION_ID
+
+  exit
+}
+
+UvTTYFrontendMain "$@"

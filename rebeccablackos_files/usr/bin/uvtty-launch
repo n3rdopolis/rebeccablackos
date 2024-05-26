@@ -18,9 +18,6 @@
 
 #Suspend cage in the FullscreenShell session, to launch another program
 
-#Enable job control
-set -m
-
 #Command to enumerate device files
 function EnumerateDeviceFiles
 {
@@ -42,7 +39,7 @@ function CollectDeviceInfo
     unset IFS
 
     unset DEV_ID_SEAT DEV_DEVNAME
-    for DeviceProperty in ${DeviceProperties[@]}
+    for DeviceProperty in "${DeviceProperties[@]}"
     do
       IFS="="
       DeviceProperty=($DeviceProperty)
@@ -164,108 +161,116 @@ function HelpText
   echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
 }
 
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
+function UvTTYLaunchMain
+{
+  #Enable job control
+  set -m
 
-if [[ -z $1 ]]
-then
-  HelpText
-  exit 1
-fi
-
-InhibitAfterQuit=0
-for ARG in "$@"
-do
-  if [[ $ARG =~ ^"-" ]]
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
   then
-    shift
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
   else
-    break
+    SLEEPCMD=/bin/sleep
   fi
 
-  if [[ $ARG == "--inhibit-after-quit" || $ARG == "-i" ]]
+  if [[ -z $1 ]]
   then
-    InhibitAfterQuit=1
-  elif [[ $ARG == "--help" ]]
-  then
-    HelpText
-    exit 1
-  elif [[ $ARG == "--" ]]
-  then
-    break
-  else
-    HelpText
-    exit 1
+   HelpText
+   exit 1
   fi
-done
 
-if ! command -v $1 &> /dev/null
-then
-  echo "$0: Command '$1' not found"
-  exit 1
-fi
-
-if [[ -z $UvTTYName ]]
-then
-  echo "UvTTYName variable not set. Not running under a UvTTY?"
-  exit 1
-fi
-
-if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-then
-  echo "$UvTTYName does not appear to be running"
-  exit 1
-fi
-
-if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
-then
-  echo "Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
-  exit 1
-fi
-
-CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
-
-if [[ ! -e /proc/$CAGEPID ]]
-then
-  echo "cage is not running."
-  exit
-fi
-
-touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
-SessionCheck &
-
-#Wait before ending cage, so key press of "enter" isn't held down when the command is run
-$SLEEPCMD .3
-
-kill -9 $CAGEPID
-
-#Wait for the cage process to end
-if [[ -e /proc/$CAGEPID ]]
-then
-  while [[ -e /proc/$CAGEPID ]]
+  InhibitAfterQuit=0
+  for ARG in "$@"
   do
-    $SLEEPCMD 1
+    if [[ $ARG =~ ^"-" ]]
+    then
+      shift
+    else
+      break
+    fi
+
+    if [[ $ARG == "--inhibit-after-quit" || $ARG == "-i" ]]
+    then
+      InhibitAfterQuit=1
+    elif [[ $ARG == "--help" ]]
+    then
+      HelpText
+      exit 1
+    elif [[ $ARG == "--" ]]
+    then
+      break
+    else
+      HelpText
+      exit 1
+    fi
   done
-fi
 
-#launch the program
-"$@"
-CommandResult=$?
+  if ! command -v $1 &> /dev/null
+  then
+    echo "$0: Command '$1' not found"
+    exit 1
+  fi
 
-if [[ $InhibitAfterQuit == 1 ]]
-then
-  fg 1 &> /dev/null
-fi
+  if [[ -z $UvTTYName ]]
+  then
+    echo "UvTTYName variable not set. Not running under a UvTTY?"
+    exit 1
+  fi
 
-if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
-then
-  rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
-fi
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    echo "$UvTTYName does not appear to be running"
+    exit 1
+  fi
 
-exit $CommandResult
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
+  then
+    echo "Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
+    exit 1
+  fi
+
+  CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
+
+  if [[ ! -e /proc/$CAGEPID ]]
+  then
+    echo "cage is not running."
+    exit
+  fi
+
+  touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  SessionCheck &
+
+  #Wait before ending cage, so key press of "enter" isn't held down when the command is run
+  $SLEEPCMD .3
+
+  kill -9 $CAGEPID
+
+  #Wait for the cage process to end
+  if [[ -e /proc/$CAGEPID ]]
+  then
+    while [[ -e /proc/$CAGEPID ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
+
+  #launch the program
+  "$@"
+  CommandResult=$?
+
+  if [[ $InhibitAfterQuit == 1 ]]
+  then
+    fg 1 &> /dev/null
+  fi
+
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+  then
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  fi
+
+  exit $CommandResult
+}
+
+UvTTYLaunchMain "$@"
