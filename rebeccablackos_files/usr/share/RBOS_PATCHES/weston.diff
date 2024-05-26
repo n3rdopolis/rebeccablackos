@@ -11,3 +11,62 @@ index 2d864463..2dd07da9 100644
  
  	head_names = weston_output_create_heads_string(output);
  	weston_log("Output '%s' enabled with head(s) %s\n",
+diff --git a/desktop-shell/shell.c b/desktop-shell/shell.c
+index 32fae2e1..298adecd 100644
+--- a/desktop-shell/shell.c
++++ b/desktop-shell/shell.c
+@@ -4872,6 +4872,33 @@ shell_add_bindings(struct weston_compositor *ec, struct desktop_shell *shell)
+ 	weston_install_debug_key_binding(ec, mod);
+ }
+ 
++static void
++desktop_shell_notify_session(struct wl_listener *listener, void *data)
++{
++	struct desktop_shell *shell =
++		container_of(listener, struct desktop_shell, session_listener);
++	struct weston_seat *seat;
++	struct shell_seat *shell_seat;
++	struct weston_compositor *compositor = data;
++
++	if (!compositor->session_active)
++		return;
++
++	wl_list_for_each(seat, &compositor->seat_list, link) {
++		shell_seat = get_shell_seat(seat);
++		if (shell_seat->focused_surface) {
++			struct shell_surface *current_focus =
++				get_shell_surface(shell_seat->focused_surface);
++
++			weston_view_activate_input(current_focus->view,
++						   shell_seat->seat,
++						   WESTON_ACTIVATE_FLAG_NONE);
++		}
++	}
++
++}
++
++
+ static void
+ handle_seat_created(struct wl_listener *listener, void *data)
+ {
+@@ -4972,6 +4999,8 @@ wet_shell_init(struct weston_compositor *ec,
+ 	shell->resized_listener.notify = handle_output_resized;
+ 	wl_signal_add(&ec->output_resized_signal, &shell->resized_listener);
+ 
++	shell->session_listener.notify = desktop_shell_notify_session;
++	wl_signal_add(&ec->session_signal, &shell->session_listener);
+ 	screenshooter_create(ec);
+ 
+ 	shell_add_bindings(ec, shell);
+diff --git a/desktop-shell/shell.h b/desktop-shell/shell.h
+index debb3652..fc34eb45 100644
+--- a/desktop-shell/shell.h
++++ b/desktop-shell/shell.h
+@@ -90,6 +90,7 @@ struct desktop_shell {
+ 	struct wl_listener show_input_panel_listener;
+ 	struct wl_listener hide_input_panel_listener;
+ 	struct wl_listener update_input_panel_listener;
++	struct wl_listener session_listener;
+ 
+ 	struct weston_layer fullscreen_layer;
+ 	struct weston_layer panel_layer;
