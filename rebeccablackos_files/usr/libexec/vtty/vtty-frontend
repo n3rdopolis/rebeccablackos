@@ -80,9 +80,9 @@ function vTTYFrontendMain
   if [[ -f /usr/lib/bash/sleep ]]
   then
     enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD=sleep
+    SLEEPCMD="sleep"
   else
-    SLEEPCMD=/bin/sleep
+    SLEEPCMD="/bin/sleep"
   fi
 
   echo $XDG_SESSION_ID > /run/vtty/sessions/$XDG_SEAT
@@ -95,9 +95,9 @@ function vTTYFrontendMain
     #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
     #Only start once the actual TTY is active, as otherwise it can conflict with a display server
     read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-    if [[ $ActiveTTY != $EmulatedTTY ]]
+    if [[ $ActiveTTY != "$EmulatedTTY" ]]
     then
-      while [[ $ActiveTTY != $EmulatedTTY ]]
+      while [[ $ActiveTTY != "$EmulatedTTY" ]]
       do
         read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
         $SLEEPCMD 1

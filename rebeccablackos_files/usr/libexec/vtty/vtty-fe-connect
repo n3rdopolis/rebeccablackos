@@ -49,9 +49,9 @@ function vTTYFeConnectMain
   if [[ -f /usr/lib/bash/sleep ]]
   then
     enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD=sleep
+    SLEEPCMD="sleep"
   else
-    SLEEPCMD=/bin/sleep
+    SLEEPCMD="/bin/sleep"
   fi
 
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]

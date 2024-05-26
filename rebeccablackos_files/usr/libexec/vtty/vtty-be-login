@@ -55,9 +55,9 @@ function vTTYBeLoginMain
   if [[ -f /usr/lib/bash/sleep ]]
   then
     enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD=sleep
+    SLEEPCMD="sleep"
   else
-    SLEEPCMD=/bin/sleep
+    SLEEPCMD="/bin/sleep"
   fi
 
   #Create a static name for the PTY that this is running as
