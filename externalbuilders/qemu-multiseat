@@ -73,7 +73,7 @@ then
     SelectedISO=$(zenity --file-selection)
   elif [[ $UIDIALOGTYPE == dialog ]]
   then
-    SelectedISO=$(dialog --fselect $HOME/ 20 60 --stdout)
+    SelectedISO=$(dialog --fselect "$HOME"/ 20 60 --stdout)
   elif [[ $UIDIALOGTYPE == none ]]
   then
     echo "No ISO specified as an argument to this script, and no dialog utilites are installed to select one."
@@ -83,35 +83,35 @@ fi
 
 if [[ $UIDIALOGTYPE == kdialog ]]
 then
-  SelectedCPUCount=$(kdialog --slider "Number of CPUs (1-$MaxProcs)" 1 $MaxProcs $MaxProcs)
+  SelectedCPUCount=$(kdialog --slider "Number of CPUs (1-$MaxProcs)" 1 "$MaxProcs" "$MaxProcs")
 elif [[ $UIDIALOGTYPE == zenity ]]
 then
-  SelectedCPUCount=$(zenity --scale --text="Number of CPUs" --min-value=1 --max-value=$MaxProcs --value=$DefaultCPUCount)
+  SelectedCPUCount=$(zenity --scale --text="Number of CPUs" --min-value=1 --max-value="$MaxProcs" --value="$DefaultCPUCount")
 elif [[ $UIDIALOGTYPE == dialog ]]
 then
-  SelectedCPUCount=$(dialog --rangebox "Number of CPUs" 10 40 1 $MaxProcs $DefaultCPUCount --stdout)
+  SelectedCPUCount=$(dialog --rangebox "Number of CPUs" 10 40 1 "$MaxProcs" "$DefaultCPUCount" --stdout)
 elif [[ $UIDIALOGTYPE == none ]]
 then
-  SelectedCPUCount=$DefaultCPUCount
+  SelectedCPUCount="$DefaultCPUCount"
 fi
 
 
 if [[ $UIDIALOGTYPE == kdialog ]]
 then
-  SelectedRAMValue=$(kdialog --slider "Amount of RAM in MB (256-$MaxRAM)" 256 $MaxRAM $MaxRAM)
+  SelectedRAMValue=$(kdialog --slider "Amount of RAM in MB (256-$MaxRAM)" 256 "$MaxRAM" "$MaxRAM")
 elif [[ $UIDIALOGTYPE == zenity ]]
 then
-  SelectedRAMValue=$(zenity --scale --text="Amount of RAM in MB" --min-value=256 --max-value=$MaxRAM --value=$DefaultRAM)
+  SelectedRAMValue=$(zenity --scale --text="Amount of RAM in MB" --min-value=256 --max-value="$MaxRAM" --value="$DefaultRAM")
 elif [[ $UIDIALOGTYPE == dialog ]]
 then
-  SelectedRAMValue=$(dialog --rangebox "Amount of RAM in MB" 10 40 256 $MaxRAM $DefaultRAM --stdout)
+  SelectedRAMValue=$(dialog --rangebox "Amount of RAM in MB" 10 40 256 "$MaxRAM" "$DefaultRAM" --stdout)
 elif [[ $UIDIALOGTYPE == none ]]
 then
   SelectedRAMValue=$DefaultRAM
 fi
 
 
-qemu-system-x86_64 -smp $SelectedCPUCount -boot d -m $SelectedRAMValue -cdrom "$SelectedISO" -vga virtio -display gtk -enable-kvm \
+qemu-system-x86_64 -smp "$SelectedCPUCount" -boot d -m "$SelectedRAMValue" -cdrom "$SelectedISO" -vga virtio -display gtk -enable-kvm \
 -device pci-bridge-seat,chassis_nr=2,id=head.2 \
 -device virtio-gpu-pci,bus=head.2,addr=02.0,id=video.2 \
 -device virtio-keyboard-pci,bus=head.2,display=video.2 \
