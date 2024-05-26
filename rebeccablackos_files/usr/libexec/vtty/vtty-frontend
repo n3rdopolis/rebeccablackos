@@ -18,13 +18,6 @@
 
 #This runs a graphical terminal full screen to connect to the socat socket where the login process is running
 
-#Test if there is a graphics card, if not revert to text mode TTY
-if ! compgen -G '/dev/dri/card[0-9]*' >/dev/null
-then
-  echo "No kernel mode setting found, reverting to legacy TTY mode"
-  exit 1
-fi
-
 function ResetTTYMode
 {
     python3 -c "from array import array; \
@@ -37,106 +30,117 @@ ioctl(fd, 0x05602, buf); \
 fd.close()" &>/dev/null
 }
 
-. /usr/bin/wlruntime_vars &> /dev/null
-
-EmulatedTTY=$1
-
-which socat &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "socat not installed"
-  systemd-notify ERRNO=1
-  exit 1
-fi
-
-which foot &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "foot not installed"
-  systemd-notify ERRNO=1
-  exit 1
-fi
-
-which cage &> /dev/null
-if [[ $? != 0 ]]
-then
-  echo "cage not installed"
-  systemd-notify ERRNO=1
-  exit 1
-fi
-
-
-#if vttydisable is specified on the boot command line, fall back to legacy gettys
-read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
-if [[ $EmulatedTTY =~ tty* && $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
-then
-  echo "vttydisable specified on the command line. Falling back to default getty"
-  exit 1
-fi
-
-
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
-echo $XDG_SESSION_ID > /run/vtty/sessions/$XDG_SEAT
-chmod 744 /run/vtty/sessions/$XDG_SEAT
-
-#Only handle special vTTY inhibit cases if there are traditional TTYs on the seat
-SeatCanTTY=$(loginctl show-seat $XDG_SEAT -p CanTTY --value)
-if [[ $SeatCanTTY == yes ]]
-then
-  #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
-  #Only start once the actual TTY is active, as otherwise it can conflict with a display server
-  read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-  if [[ $ActiveTTY != $EmulatedTTY ]]
+function vTTYFrontendMain
+{
+  #Test if there is a graphics card, if not revert to text mode TTY
+  if ! compgen -G '/dev/dri/card[0-9]*' >/dev/null
   then
-    while [[ $ActiveTTY != $EmulatedTTY ]]
-    do
-      read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-      $SLEEPCMD 1
-    done
+    echo "No kernel mode setting found, reverting to legacy TTY mode"
+    exit 1
   fi
 
-  #handle vtty inhibit
-  if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+  . /usr/bin/wlruntime_vars &> /dev/null
+
+  EmulatedTTY=$1
+
+  which socat &> /dev/null
+  if [[ $? != 0 ]]
   then
-    while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-    do
-      $SLEEPCMD 1
-    done
+    echo "socat not installed"
+    systemd-notify ERRNO=1
+    exit 1
   fi
-fi
 
-ResetTTYMode $EmulatedTTY
+  which foot &> /dev/null
+  if [[ $? != 0 ]]
+  then
+    echo "foot not installed"
+    systemd-notify ERRNO=1
+    exit 1
+  fi
 
-export WLR_RENDERER=pixman
-export WLR_RENDERER_ALLOW_SOFTWARE=1
-export WLR_NO_HARDWARE_CURSORS=1
-export WLR_LIBINPUT_NO_DEVICES=1
-export LIBGL_ALWAYS_SOFTWARE=1
-export DBUS_SESSION_BUS_ADDRESS=/dev/null
-cage -m last -d -s -- \
-foot --config=/etc/footkiosk.conf -- \
-/usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
+  which cage &> /dev/null
+  if [[ $? != 0 ]]
+  then
+    echo "cage not installed"
+    systemd-notify ERRNO=1
+    exit 1
+  fi
 
-ReturnCode=$?
-#systemd sends SIGHUP when a service is stopped. Account for this in case systemd sends it to cage first
-#and bash runs long enough to run the command to report failure, causing the service to restart if set to stopped
-#It's unlikely, but account for SIGHUP
-if [[ $ReturnCode != 0 && $ReturnCode != 129 ]]
-then
-  systemd-notify ERRNO=1
-fi
 
-if [[ -e /run/vtty/sessions/$XDG_SEAT ]]
-then
-  rm /run/vtty/sessions/$XDG_SEAT
-fi
+  #if vttydisable is specified on the boot command line, fall back to legacy gettys
+  read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
+  if [[ $EmulatedTTY =~ tty* && $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
+  then
+    echo "vttydisable specified on the command line. Falling back to default getty"
+    exit 1
+  fi
 
-exit $ReturnCode
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
+  else
+    SLEEPCMD=/bin/sleep
+  fi
+
+  echo $XDG_SESSION_ID > /run/vtty/sessions/$XDG_SEAT
+  chmod 744 /run/vtty/sessions/$XDG_SEAT
+
+  #Only handle special vTTY inhibit cases if there are traditional TTYs on the seat
+  SeatCanTTY=$(loginctl show-seat $XDG_SEAT -p CanTTY --value)
+  if [[ $SeatCanTTY == yes ]]
+  then
+    #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
+    #Only start once the actual TTY is active, as otherwise it can conflict with a display server
+    read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+    if [[ $ActiveTTY != $EmulatedTTY ]]
+    then
+      while [[ $ActiveTTY != $EmulatedTTY ]]
+      do
+        read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
+        $SLEEPCMD 1
+      done
+    fi
+
+    #handle vtty inhibit
+    if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+    then
+      while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
+      do
+        $SLEEPCMD 1
+      done
+    fi
+  fi
+
+  ResetTTYMode $EmulatedTTY
+
+  export WLR_RENDERER=pixman
+  export WLR_RENDERER_ALLOW_SOFTWARE=1
+  export WLR_NO_HARDWARE_CURSORS=1
+  export WLR_LIBINPUT_NO_DEVICES=1
+  export LIBGL_ALWAYS_SOFTWARE=1
+  export DBUS_SESSION_BUS_ADDRESS=/dev/null
+  cage -m last -d -s -- \
+  foot --config=/etc/footkiosk.conf -- \
+  /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log
+
+  ReturnCode=$?
+  #systemd sends SIGHUP when a service is stopped. Account for this in case systemd sends it to cage first
+  #and bash runs long enough to run the command to report failure, causing the service to restart if set to stopped
+  #It's unlikely, but account for SIGHUP
+  if [[ $ReturnCode != 0 && $ReturnCode != 129 ]]
+  then
+    systemd-notify ERRNO=1
+  fi
+
+  if [[ -e /run/vtty/sessions/$XDG_SEAT ]]
+  then
+    rm /run/vtty/sessions/$XDG_SEAT
+  fi
+
+  exit $ReturnCode
+}
+
+vTTYFrontendMain "$@"

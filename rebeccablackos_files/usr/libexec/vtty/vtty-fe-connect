@@ -18,18 +18,6 @@
 
 #This handles the connection to the main pty running login, (this is run within the terminal emulator)
 
-EmulatedTTY=$1
-PTYPath=$(tty)
-
-#Use bash builtin sleep if availible
-if [[ -f /usr/lib/bash/sleep ]]
-then
-  enable -f /usr/lib/bash/sleep sleep
-  SLEEPCMD=\sleep
-else
-  SLEEPCMD=/bin/sleep
-fi
-
 function PtyResizeEvent
 {
   if [[ ! -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
@@ -52,21 +40,39 @@ function PtyResizeEvent
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
 }
 
+function vTTYFeConnectMain
+{
+  EmulatedTTY=$1
+  PTYPath=$(tty)
 
-if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
-then
-  rm /run/vtty/$EmulatedTTY/waylandserver
-fi
-ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD=sleep
+  else
+    SLEEPCMD=/bin/sleep
+  fi
 
-socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
+  if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
+  then
+    rm /run/vtty/$EmulatedTTY/waylandserver
+  fi
+  ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
 
-#Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
-trap PtyResizeEvent WINCH
-PtyResizeEvent
+  socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
 
-while [ 1 ]
-do
-  wait $!
-  $SLEEPCMD .1
-done
+  #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
+  trap PtyResizeEvent WINCH
+  PtyResizeEvent
+
+  while [ 1 ]
+  do
+    wait $!
+    $SLEEPCMD .1
+  done
+
+  exit
+}
+
+vTTYFeConnectMain "$@"
