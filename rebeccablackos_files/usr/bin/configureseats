@@ -748,26 +748,32 @@ fi
 
 
 PrepareSeatList
-#Main wizard dialog
-while [ 1 ]
-do
-  MainDialog
-  if [[ $SelectedOption == 1 ]]
-  then
-    CollectDeviceInfo
-    MainConfig
-    Return=$?
-    #Only act if settings have been changed
-    if [[ $Return == 0 ]]
+
+function ConfigureSeatsMain
+{
+  #Main wizard dialog
+  while [ 1 ]
+  do
+    MainDialog
+    if [[ $SelectedOption == 1 ]]
     then
-      CommitConfigFile
-      SignalCompletion
+      CollectDeviceInfo
+      MainConfig
+      Return=$?
+      #Only act if settings have been changed
+      if [[ $Return == 0 ]]
+      then
+        CommitConfigFile
+        SignalCompletion
+      fi
+    elif [[ $SelectedOption == 2 ]]
+    then
+      HelpDialog
+    elif [[ $SelectedOption == 3 ]]
+    then
+      exit
     fi
-  elif [[ $SelectedOption == 2 ]]
-  then
-    HelpDialog
-  elif [[ $SelectedOption == 3 ]]
-  then
-    exit
-  fi
-done
+  done
+}
+
+ConfigureSeatsMain "$@"
