@@ -129,7 +129,7 @@ function CollectDeviceInfo
     unset IFS
 
     unset DEV_ID_SEAT DEV_WL_SEAT DEV_ID_INPUT DEV_ID_INPUT_MOUSE DEV_ID_INPUT_TOUCHSCREEN DEV_ID_INPUT_TOUCHPAD DEV_ID_INPUT_KEYBOARD DEV_DEVPATH DEV_ID_SERIAL DEV_ID_PATH DEV_DEVNAME DEV_SUBSYSTEM DEV_USEC_INITIALIZED
-    for DeviceProperty in ${DeviceProperties[@]}
+    for DeviceProperty in "${DeviceProperties[@]}"
     do
       IFS="="
       DeviceProperty=($DeviceProperty)
@@ -535,7 +535,7 @@ Your sessions will NOT be terminated, but they will need to be switched back int
   waylandloginmanager --sendcommand DetectSeats
   sleep 1
   RunningSeats=($(loginctl --no-legend list-seats 2>/dev/null | sort))
-  for RunningSeat in ${RunningSeats[@]}
+  for RunningSeat in "${RunningSeats[@]}"
   do
     if [[ $RunningSeat == $XDG_SEAT ]]
     then
