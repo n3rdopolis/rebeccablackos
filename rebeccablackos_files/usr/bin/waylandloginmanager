@@ -190,7 +190,7 @@ function UserSessionWorker
   ls -t ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read -r LOGFILE
   do
     ((LOGFILECOUNT++))
-    if [[ $LOGFILECOUNT > 4 ]]
+    if [[ $LOGFILECOUNT -gt 4 ]]
     then
       rm "$LOGFILE" &> /dev/null
     fi
@@ -233,7 +233,7 @@ function UserSessionWorker
   then
     export BASE_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
     export BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
-    WLM_XDG_RUNTIME_DIR=/run/user/`id -u`/wlm-rd-"$WAYLAND_GUEST"
+    WLM_XDG_RUNTIME_DIR=/run/user/$(id -u)/wlm-rd-"$WAYLAND_GUEST"
     WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
     install -dDTm700 $WLM_XDG_RUNTIME_DIR
     systemd-run --user -u "$WlmSDUserUnit" -E XDG_RUNTIME_DIR="$WLM_XDG_RUNTIME_DIR" -E DBUS_SESSION_BUS_ADDRESS="$WLM_DBUS_SESSION_BUS_ADDRESS" systemd --user
@@ -289,7 +289,7 @@ function UserSessionWorker
       WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
     fi
     #Wait for the server to start up for a maximum of 15 seconds. As soon as the socket is created, the wait loop ends
-    while [[ ! -e $WAYLANDDISPLAYPATH && $WaitTimes<15 ]]
+    while [[ ! -e $WAYLANDDISPLAYPATH && $WaitTimes -lt 15 ]]
     do
       $SLEEPCMD 1
       ((WaitTimes++))
@@ -1182,7 +1182,7 @@ function GetNextTTY
   SYSTEMDTTYS=()
   #Only seat0 has TTYs
   SESSIONS=($(loginctl show-seat seat0 -p Sessions --value 2>/dev/null ))
-  for SESSION in ${SESSIONS[@]}
+  for SESSION in "${SESSIONS[@]}"
   do
     SYSTEMDTTYS+=($(loginctl show-session $SESSION -p VTNr --value 2>/dev/null))
   done
@@ -1197,7 +1197,7 @@ function GetNextTTY
     TTYNotInUse=$?
     #Number of times the tty is associated with a session in logind, sometimes orphan ones without running processes still remain open in logind
     TTYInLogindCount=0
-    for SYSTEMDTTY in ${SYSTEMDTTYS[@]}
+    for SYSTEMDTTY in "${SYSTEMDTTYS[@]}"
     do
       if [[ $SYSTEMDTTY == "$CalcTTY" ]]
       then
@@ -3447,7 +3447,7 @@ function WaylandLoginManagerMain
         then
           #SeatCreationStrings is exported for waylandloginmanager reloads, and reimported
           #It is not a guarantee that the array will be in the same order after the reload
-          for OldSeatCreationString in ${SeatCreationStrings[@]}
+          for OldSeatCreationString in "${SeatCreationStrings[@]}"
           do
             #If a seat with the same name was seen, but with a different date
             if [[ $OldSeatCreationString == *@$RunningSeat && $OldSeatCreationString != $SeatCreationString ]]
@@ -4075,9 +4075,9 @@ function WaylandLoginManagerExecute
   if [[ -f /usr/lib/bash/sleep ]]
   then
     enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD=\sleep
+    SLEEPCMD="sleep"
   else
-    SLEEPCMD=/bin/sleep
+    SLEEPCMD="/bin/sleep"
   fi
 
   #If the waylandloginmanager is started with no arguments assume default operation. 
