@@ -64,10 +64,7 @@ function PackagePrepareBuild()
 #Prevent wlroots compositors from linking against libxcb-xfixes/libxcb in /usr instead of /opt
 sed -i "/name: meson.project_name(),/a\       libraries: \'-lxcb-xfixes\'," meson.build
 
-#Workaround for co-installablilty of multiple wlroots versions
-sed -i "s/^\t'wlroots',$/\t'wlroots-0.18',/g" meson.build
-
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --includedir=$INSTALLDIR/include/wlr-0.18 --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
