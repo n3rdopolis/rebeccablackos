@@ -63,6 +63,7 @@ export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
 export LIRI_LIBRARY_PREFIX=$INSTALLDIR
 export LIRI_INCLUDE_PREFIX=$INSTALLDIR
 export PYTHONPATH=$INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/:$INSTALLDIR/lib/python3/dist-packages/
+export GI_SCANNER_DISABLE_CACHE=1
 export GI_TYPELIB_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
 export CARGO_INSTALL_ROOT=$INSTALLDIR
 
