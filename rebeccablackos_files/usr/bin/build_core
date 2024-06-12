@@ -1375,7 +1375,27 @@ function MakeAndInstall()
       else
         PACKAGEDATE=$(date +%s)
       fi
-      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite --install=no --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/tmp,/var/tmp,"$BUILDLOGDIR" "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD \
+                                            -y \
+                                            -D \
+                                            --install=no \
+                                            --fstrans=no \
+                                            --strip=no \
+                                            --stripso=no \
+                                            --nodoc \
+                                            --dpkgflags=--force-overwrite \
+                                            --install=no \
+                                            --backup=no \
+                                            --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" \
+                                            --pkgversion=1 \
+                                            --pkgrelease=$PACKAGEDATE \
+                                            --pkglicense="OSI_COMPLIANT" \
+                                            --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" \
+                                            --pkgsource="$PACKAGESUFFIX" \
+                                            --pkggroup="$PACKAGESUFFIX" \
+                                            --requires="$DEPENDS" \
+                                            --exclude="$SOURCEDIR","$SOURCEDIROVERLAYDIR","$SOURCEDIR"/buildoutput,/home/remastersys,/tmp,/var/tmp,"$BUILDLOGDIR" \
+                                            "/$SOURCEDIR/$SOURCENAME/packageinstallscript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
       ENDTIME=$(date +%s)
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
@@ -1391,7 +1411,26 @@ function MakeAndInstall()
 
       #Build the 2nd smaller deb without debugging symbols for the smaller ISO. This is not installed by build_core and fstrans prevents the binaries from being clobbered
       STARTTIME=$(date +%s)
-      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD -y -D --install=no --fstrans=no --strip=no --stripso=no --nodoc --dpkgflags=--force-overwrite  --backup=no --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" --pkgversion=1 --pkgrelease=$PACKAGEDATE --pkglicense="OSI_COMPLIANT" --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" --pkgsource="$PACKAGESUFFIX" --pkggroup="$PACKAGESUFFIX" --requires="$DEPENDS" --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/tmp,/var/tmp,"$BUILDLOGDIR" "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
+      env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD \
+                                            -y \
+                                            -D \
+                                            --install=no \
+                                            --fstrans=no \
+                                            --strip=no \
+                                            --stripso=no \
+                                            --nodoc \
+                                            --dpkgflags=--force-overwrite \
+                                            --backup=no \
+                                            --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" \
+                                            --pkgversion=1 \
+                                            --pkgrelease=$PACKAGEDATE \
+                                            --pkglicense="OSI_COMPLIANT" \
+                                            --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" \
+                                            --pkgsource="$PACKAGESUFFIX" \
+                                            --pkggroup="$PACKAGESUFFIX" \
+                                            --requires="$DEPENDS" \
+                                            --exclude="/$SOURCEDIR","/$SOURCEDIROVERLAYDIR","/$SOURCEDIR"/buildoutput,/home/remastersys,/tmp,/var/tmp,"$BUILDLOGDIR" \
+                                            "/$SOURCEDIR/$SOURCENAME/packagereducescript" 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       ENDTIME=$(date +%s)
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
