@@ -34,3 +34,9 @@ then
   launch_watcher xfdesktop
   launch_watcher xfce4-panel
 fi
+
+if [[ $LABWC_AUTOLAUNCH == "LXQt" ]]
+then
+  launch_watcher pcmanfm-qt --desktop
+  launch_watcher lxqt-session
+fi
