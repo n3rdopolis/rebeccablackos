@@ -57,7 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=enabled -Dgles2=enabled -Dplatforms=x11,wayland -Dosmesa=true -Dgallium-xa=enabled -Dgbm=enabled -Dshared-glapi=enabled -Dllvm=enabled  -Dshared-llvm=enabled -Dvulkan-drivers=intel,intel_hasvk,amd,swrast,virtio,nouveau -Dllvm=enabled build -Dglvnd=true -Dvideo-codecs=vc1dec,h264dec,h264enc,h265dec,h265enc
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgles1=enabled -Dgles2=enabled -Dplatforms=x11,wayland -Dosmesa=true -Dgallium-xa=enabled -Dgbm=enabled -Dshared-glapi=enabled -Dllvm=enabled  -Dshared-llvm=enabled -Dvulkan-drivers=intel,intel_hasvk,amd,swrast,virtio,nouveau -Dllvm=enabled build -Dglvnd=enabled -Dvideo-codecs=vc1dec,h264dec,h264enc,h265dec,h265enc
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
