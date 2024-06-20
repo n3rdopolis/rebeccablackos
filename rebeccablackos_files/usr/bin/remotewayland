@@ -203,6 +203,7 @@ function StartRemoteCommand()
 
 }
 
+export XDG_RUNTIME_DIR=/run/user/$UID
 if [[ $RemoteWaylandTerminal != 1 ]]
 then
   export RemoteWaylandTerminal=1
