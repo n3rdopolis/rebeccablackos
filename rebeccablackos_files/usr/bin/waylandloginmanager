@@ -41,7 +41,7 @@
 
 #as well as:
 #At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
-#An external systemd patch is needed for logind to have SecureAttentionKey handling, but this is a soft requirement
+#At least systemd v257 is required SecureAttentionKey handling, but this is a soft requirement
 
 #/etc/waylandloginmanager.conf
      #autologin-user=$AUTOLOGINUSER
