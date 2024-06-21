@@ -94,12 +94,6 @@ env -C /tmp/wlm-virtualpackage -- ar q waylandloginmanager-${PACKAGESUFFIX}.deb 
 dpkg --force-overwrite --force-confmiss --force-confnew -i /tmp/wlm-virtualpackage/waylandloginmanager-${PACKAGESUFFIX}.deb |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/waylandloginmanager.log
 
 
-#Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
-if [[ -e /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
-then
-  rm /var/cache/srcbuild/buildhome/buildcore_rust/lockfile &> /dev/null
-fi
-
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 

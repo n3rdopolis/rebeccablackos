@@ -253,6 +253,11 @@ else
   echo "Not purging older packages, because apt-get update failed, or building from a Debian snapshot" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/4_purge_obsolete.log
 fi
 
+#Remove the rust lock file from previous builds in case the download process for rust stopped before it completed
+if [[ -e /var/cache/srcbuild/buildhome/buildcore_rust/lockfile || -L /var/cache/srcbuild/buildhome/buildcore_rust/lockfile ]]
+then
+  rm /var/cache/srcbuild/buildhome/buildcore_rust/lockfile &> /dev/null
+fi
 
 #run the script that calls all compile scripts in a specified order, in download only mode
 compile_all download-only
