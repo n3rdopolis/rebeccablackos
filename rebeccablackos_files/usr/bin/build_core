@@ -794,30 +794,32 @@ function DownloadSource()
         fi
       fi
 
-      #Use the Beta version of Rust, as the name is stable, (there is no build named stable, as those have version numbers)
-      RUSTPACKAGENAME=rust-beta-$RUST_PACKAGE_ARCH
+      RUSTPACKAGEURL=$($NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/channel-rust-stable.toml 2>/dev/null  | sed -n "/\[pkg.cargo.target.${RUST_PACKAGE_ARCH}\]/,/^$/p" | grep "^url = " | awk -F '"' '{print $2}')
+      RUSTVERSION=$(echo $RUSTPACKAGEURL | sed "s|.*cargo-||g" | awk -F - '{print $1}')
+      RUSTPACKAGEURL=$(echo $RUSTPACKAGEURL | sed 's|/cargo-|/rust-|g')
 
       #Use the SHA sum of the rust package to determine if there is a new one server side
-      CURRENTRUSTCHECKSUM=$(wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz.sha256 | head -1)
-      LASTRUSTCHECKSUM=$(cat /"$SOURCEDIR"/buildhome/buildcore_rust/rustchecksum | head -1)
+      LASTRUSTVERSION=$(cat /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion | head -1)
 
       #Detect if the rust version changed
-      if [[ "$CURRENTRUSTCHECKSUM" != "$LASTRUSTCHECKSUM" ]]
+      if [[ "$RUSTVERSION" != "$LASTRUSTVERSION" ]]
       then
-        echo "$CURRENTRUSTCHECKSUM"
+        echo "$RUSTVERSION"
         echo MISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCH
-        echo "$LASTRUSTCHECKSUM"
+        echo "$LASTRUSTVERSION"
         rm -rf /$SOURCEDIR/buildhome/buildcore_rust/download
         rm -rf /$SOURCEDIR/buildhome/buildcore_rust/rustrun
-        echo -n "$CURRENTRUSTCHECKSUM" > /"$SOURCEDIR"/buildhome/buildcore_rust/rustchecksum
+        echo -n "$RUSTVERSION" > /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion
       fi
+
+      RUSTPACKAGENAME=rust-${RUSTVERSION}-${RUST_PACKAGE_ARCH}
 
       if [[ ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc" || ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo" ]]
       then
         mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/download
         mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
 
-        $NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/$RUSTPACKAGENAME.tar.gz > /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
+        $NONROOTCOMMAND wget -O - $RUSTPACKAGEURL > /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
         tar -C /"$SOURCEDIR"/buildhome/buildcore_rust/download/ -xzf /"$SOURCEDIR"/buildhome/buildcore_rust/download/rust.tar.gz
         /"$SOURCEDIR"/buildhome/buildcore_rust/download/$RUSTPACKAGENAME/install.sh --prefix=/ --destdir=/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
         rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/download/
