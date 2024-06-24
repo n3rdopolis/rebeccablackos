@@ -1359,7 +1359,9 @@ function ReadRegister
           SeatRescueTerminalValid=1
         fi
 
-        #If RESCUESEAT is sent to the privleged socket for the first time in 30 seconds switch back to the greeter
+        #If RESCUESEAT gets sent twice within less than 1 second, restart the loginmanagerdisplay
+        #If RESCUESEAT gets sent twice within 1-30 seconds, start a rescue vtty with a login prompt
+        #If RESCUESEAT gets sent once, or twice within a timeframe after 30 seconds, switch back to the loginmanagerdisplay
         if [[ $SeatRescueTimeDelay -le 30 && $SeatRescueTimeDelay -gt 1 && ($SeatRescueTerminalValid == 1) ]]
         then
           WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend-novt@${RescueSeat}.service service"
@@ -3341,7 +3343,7 @@ function StartSocketFilter
   done
 }
 
-#This watches for a signal sent from logind when a key sequence is hit to start or switch back to the greeter
+#This watches for a signal sent from logind when Ctrl+Alt+Shift+Esc is hit to switch back to the greeter, or restart it
 #It takes no arguments
 function StartDbusHandler {
   #https://www.alteeve.com/w/TPM_Talk:_An_Introduction_to_'D-Bus'_in_Perl
