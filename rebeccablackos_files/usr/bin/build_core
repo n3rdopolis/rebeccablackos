@@ -92,7 +92,7 @@ if [[ -z $BUILDCOREPRESERVEENVIRONMENT ]]
 then
   export PATH=$(getconf PATH):/sbin:/usr/sbin
   unset VARLIST
-  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^BUILDCORE|^PATH$|^PAGER$" )
+  VARLIST=$(env | awk -F = '{print $1}' | grep -Ev "^BUILDCORE|^PATH$|^PAGER$|^SOURCENAME$|^SOURCEURL$|^REPOSITORYTYPE$|^SOURCEREVISION$|^INSTALLDIR$|^REBUILDNEWREVISION$" )
   for var in $VARLIST
   do
     unset "$var" &> /dev/null
