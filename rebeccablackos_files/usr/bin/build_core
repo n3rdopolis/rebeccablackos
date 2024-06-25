@@ -716,18 +716,30 @@ function DownloadSource()
     STARTTIME=$(date +%s)
     SetACLPermissions
     Cleanup$REPOSITORYTYPE 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Cleanup$REPOSITORYTYPE"
-    for (( DownloadAttempt=1 ; DownloadAttempt <= $DownloadAttempts ; DownloadAttempt++ ))
-    do
-      echo "Downloading $PACKAGESOURCENAME attempt $DownloadAttempt of $DownloadAttempts"
-      Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
-      DownloadRepoResult=${PIPESTATUS[0]}
-      if [[ $DownloadRepoResult == 0 ]]
-      then
-        break
-      else
-        sleep 60
-      fi
-    done
+
+    #Get if network/DNS is working
+    $NONROOTCOMMAND nslookup root-servers.org &> /dev/null
+    NetworkStatus=$?
+
+    #If no network, skip downloading.
+    if [[ $NetworkStatus != 0 ]]
+    then
+      echo "Skipping download, no network availible." | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+      DownloadRepoResult=1
+    else
+      for (( DownloadAttempt=1 ; DownloadAttempt <= $DownloadAttempts ; DownloadAttempt++ ))
+      do
+        echo "Downloading $PACKAGESOURCENAME attempt $DownloadAttempt of $DownloadAttempts"
+        Download$REPOSITORYTYPE 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+        DownloadRepoResult=${PIPESTATUS[0]}
+        if [[ $DownloadRepoResult == 0 ]]
+        then
+          break
+        else
+          sleep 60
+        fi
+      done
+    fi
 
     #if the script is configured to create debs then create the debs. If not, run the install routine as normal.
     if [[ $BUILDCOREMAKEDEBS == 1 ]]
@@ -742,9 +754,8 @@ function DownloadSource()
       if [[ $DownloadRepoResult != 0 ]]
       then
         echo $SOURCENAME >> "$BUILDLOGDIR/faileddownloads"
-        #a.root-servers.net
-        $NONROOTCOMMAND nslookup 198.41.0.4 198.41.0.4 &> /dev/null
-        if [[ $? == 0 ]]
+
+        if [[ $NetworkStatus == 0 ]]
         then
           touch "/$SOURCEDIR/buildoutput/control/faileddownload.$SOURCENAME"
         else
