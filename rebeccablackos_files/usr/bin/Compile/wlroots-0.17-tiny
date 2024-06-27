@@ -67,7 +67,6 @@ sed -i "/name: meson.project_name(),/a\       libraries: \'-lxcb-xfixes\'," meso
 #Workaround for co-installablilty of multiple wlroots versions
 sed -i "s/^\t'wlroots',$/\t'wlroots-0.17-tiny',/g" meson.build
 
-patch -f -p1 < /usr/share/RBOS_PATCHES/wlroots.diff
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --includedir=$INSTALLDIR/include/wlr-0.17-tiny --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build -Dxcb-errors=disabled -Dxwayland=disabled -Drenderers= -Dbackends=drm,libinput -Dallocators=
 }
 

@@ -64,7 +64,6 @@ function PackagePrepareBuild()
 #Prevent wlroots compositors from linking against libxcb-xfixes/libxcb in /usr instead of /opt
 sed -i "/name: meson.project_name(),/a\       libraries: \'-lxcb-xfixes\'," meson.build
 
-patch -f -p1 < /usr/share/RBOS_PATCHES/wlroots.diff
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build
 }
 
