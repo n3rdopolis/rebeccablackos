@@ -115,18 +115,25 @@ sys.exit(return_var);"
 #Probe all the GPUs on the seat if they are in use, if they are, return 1
 function ProbeSeatCardsInUse
 {
-  NoneInUse=0
   CollectDeviceInfo
+
+  #If there are no cards on the seat, assume that perhaps the device is being used as a pass-through GPU, and continue to inhibit
+  if [[ "${#SeatCards[@]}" == 0 ]]
+  then
+    return 1
+  fi
+
+  CardsInUse=0
   for SeatCard in "${SeatCards[@]}"
   do
     GetDriCardIsUnused $SeatCard
     if [[ $? != 0 ]]
     then
-      NoneInUse=1
+      ((CardsInUse++))
       break
     fi
   done
-  return $NoneInUse
+  return $CardsInUse
 }
 
 #Detect if a display server is running. If there is not one (nothing controling the logind session), remove the inhibit file to allow cage/foot to start again.
@@ -136,7 +143,7 @@ function SessionCheck
   do
     $SLEEPCMD 5
     ProbeSeatCardsInUse
-    Result=$?
+    CardsInUse=$?
 
     #Exit if the child process already quit, and the inhibit file was already removed
     if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
@@ -145,7 +152,7 @@ function SessionCheck
     fi
 
     #If the command succeeds, there is nothing holding control of the logind session
-    if [[ $Result == 0 ]]
+    if [[ $CardsInUse == 0 ]]
     then
       echo "uvtty-launch: There are no processes or no longer any processes that have any display devices open. It is likely that a display server was not run, or the display server quit. Will now uninhibit cage."
       rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
