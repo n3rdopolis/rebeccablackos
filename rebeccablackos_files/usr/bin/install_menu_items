@@ -70,7 +70,7 @@ do
     echo "   DirFileName: $DIRECTORYFILENAME"
     echo "   DirFilePath: $DIRECTORYFILELIST"
   else
-    echo "Files not found that are defined in the desktop file. Menu item not installed"
+    echo "WARNING: Files not found that are defined in the $DESKTOPFILE file. Menu item not installed"
   fi
 #find desktop files in the menupath
 done < <(find $MENUPATH | grep "\.desktop$" | awk -F "$MENUPATH" '{print $2}')
