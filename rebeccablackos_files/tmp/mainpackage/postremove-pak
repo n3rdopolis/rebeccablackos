@@ -20,7 +20,8 @@ then
   exit
 fi
 
-function UndivertPackage
+#1 argument: The first argument is the file to stop diverting
+function UndivertDpkgFile
 {
   DivertName=rbos
   SourceFile="$1"
@@ -34,14 +35,14 @@ function UndivertPackage
 
 if [[ $1 == purge ]]
 then
-  UndivertPackage /etc/default/grub
-  UndivertPackage /etc/skel/.bashrc
-  UndivertPackage /etc/issue
-  UndivertPackage /etc/issue.net
-  UndivertPackage /etc/os-release
-  UndivertPackage /etc/lsb-release
+  UndivertDpkgFile /etc/default/grub
+  UndivertDpkgFile /etc/skel/.bashrc
+  UndivertDpkgFile /etc/issue
+  UndivertDpkgFile /etc/issue.net
+  UndivertDpkgFile /etc/os-release
+  UndivertDpkgFile /etc/lsb-release
 fi
 
-UndivertPackage /usr/bin/X
-UndivertPackage /usr/bin/plymouth
-UndivertPackage /usr/bin/chvt
+UndivertDpkgFile /usr/bin/X
+UndivertDpkgFile /usr/bin/plymouth
+UndivertDpkgFile /usr/bin/chvt
