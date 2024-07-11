@@ -40,3 +40,9 @@ DivertDpkgFile /etc/lsb-release  /var/lib/divert-distrib/etc_lsb-release
 DivertDpkgFile /usr/bin/X        /var/lib/divert-distrib/usr_bin_X
 DivertDpkgFile /usr/bin/plymouth /var/lib/divert-distrib/usr_bin_plymouth
 DivertDpkgFile /usr/bin/chvt     /var/lib/divert-distrib/usr_bin_chvt
+
+#REMOVE WHEN SYSTEMD v257
+if [[ -x /usr/bin/Compile/systemd ]]
+then
+  DivertDpkgFile /sbin/init     /var/lib/divert-distrib/sbin_init
+fi

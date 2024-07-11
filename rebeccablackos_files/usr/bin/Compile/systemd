@@ -95,6 +95,9 @@ cp build/interfaces/org.freedesktop.login1.Manager.xml $INSTALLDIR/share/dbus-1/
 cp build/interfaces/org.freedesktop.login1.Seat.xml $INSTALLDIR/share/dbus-1/interfaces/
 cp build/interfaces/org.freedesktop.login1.Session.xml $INSTALLDIR/share/dbus-1/interfaces/
 cp build/interfaces/org.freedesktop.login1.User.xml $INSTALLDIR/share/dbus-1/interfaces/
+
+cp build/systemd /sbin/init
+chrpath $INSTALLDIR/sbin/systemd -r /sbin/init
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
