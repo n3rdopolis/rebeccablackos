@@ -229,10 +229,10 @@ function UserSessionWorker
   JournalctlPID=$!
 
   #Create an isolated systemd user session running under the current systemd user session. This allows multiple systemd managed sessions to allow to run as the same user at the same time. The initilization of the "systemctl --user" instance comes from xrdp.
+  export BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
   if [[ $WLM_NO_DBUS_RUN_SESSION == 1 ]]
   then
     export BASE_DBUS_SESSION_BUS_ADDRESS=$DBUS_SESSION_BUS_ADDRESS
-    export BASE_XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR
     WLM_XDG_RUNTIME_DIR=/run/user/$(id -u)/wlm-rd-"$WAYLAND_GUEST"
     WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
     install -dDTm700 $WLM_XDG_RUNTIME_DIR
@@ -317,7 +317,7 @@ function UserSessionWorker
   #dbus-run-session allows a single user to log in multiple times, despite the fact that it may prevent sessions from managing themselves with cgroups, so it's the default.
   if [[ ! -z $WLM_GDB_SESSION ]]
   then
-    mkdir -p $XDG_RUNTIME_DIR/waylandloginmanager
+    mkdir -p $BASE_XDG_RUNTIME_DIR/waylandloginmanager
     SessionCommand="${ArgArray[@]//\"/\\\"}"
     dbus-run-session -- socat exec:"bash -c \\\"gdb --args $SessionCommand\\\"",pty,stderr,setsid,sigint,sane unix-listen:"$BASE_XDG_RUNTIME_DIR/waylandloginmanager/${WAYLAND_GUEST}",mode=0700 &>> $WLM_SESSION_LOG &
   else
