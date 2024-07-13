@@ -31,18 +31,16 @@ function DivertDpkgFile
   fi
 }
 
-DivertDpkgFile /etc/default/grub /var/lib/divert-distrib/etc_default_grub
-DivertDpkgFile /etc/skel/.bashrc /var/lib/divert-distrib/etc_skel_.bashrc
-DivertDpkgFile /etc/issue        /var/lib/divert-distrib/etc_issue
-DivertDpkgFile /etc/issue.net    /var/lib/divert-distrib/etc_issue.net
-DivertDpkgFile /etc/os-release   /var/lib/divert-distrib/etc_os-release
-DivertDpkgFile /etc/lsb-release  /var/lib/divert-distrib/etc_lsb-release
-DivertDpkgFile /usr/bin/X        /var/lib/divert-distrib/usr_bin_X
-DivertDpkgFile /usr/bin/plymouth /var/lib/divert-distrib/usr_bin_plymouth
-DivertDpkgFile /usr/bin/chvt     /var/lib/divert-distrib/usr_bin_chvt
-
-#REMOVE WHEN SYSTEMD v257
-if [[ -x /usr/bin/Compile/systemd ]]
-then
-  DivertDpkgFile /sbin/init     /var/lib/divert-distrib/sbin_init
-fi
+DivertDpkgFile /etc/default/grub           /var/lib/divert-distrib/etc_default_grub
+DivertDpkgFile /etc/skel/.bashrc           /var/lib/divert-distrib/etc_skel_.bashrc
+DivertDpkgFile /etc/issue                  /var/lib/divert-distrib/etc_issue
+DivertDpkgFile /etc/issue.net              /var/lib/divert-distrib/etc_issue.net
+DivertDpkgFile /etc/os-release             /var/lib/divert-distrib/etc_os-release
+DivertDpkgFile /etc/lsb-release            /var/lib/divert-distrib/etc_lsb-release
+DivertDpkgFile /usr/bin/X                  /var/lib/divert-distrib/usr_bin_X
+DivertDpkgFile /usr/bin/plymouth           /var/lib/divert-distrib/usr_bin_plymouth
+DivertDpkgFile /usr/bin/chvt               /var/lib/divert-distrib/usr_bin_chvt
+#remove when /dev/console workaround not needed
+DivertDpkgFile /sbin/init                  /var/lib/divert-distrib/sbin_init
+#remove when systemd v257
+DivertDpkgFile /lib/systemd/systemd-logind /var/lib/divert-distrib/lib_systemd_systemd-logind

@@ -58,7 +58,8 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/systemd.diff
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build -Dsysvinit-path=$INSTALLDIR/etc/init.d -Dsysvrcnd-path=$INSTALLDIR/etc/rc.d -Dsysconfdir=$INSTALLDIR/etc -Drootprefix=$INSTALLDIR
+meson setup -Ddebug=false -Doptimization=s --prefix=/usr --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build \
+-Dsysvinit-path=/etc/init.d -Dsysvrcnd-path=/etc -Ddbuspolicydir=/usr/share/dbus-1/system.d/ -Dpamlibdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
@@ -70,18 +71,6 @@ ninja -v -C build
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-mkdir -p $INSTALLDIR/lib/systemd/system/
-cp build/units/systemd-logind.service $INSTALLDIR/lib/systemd/system/
-
-mkdir -p $INSTALLDIR/share/polkit-1/actions/
-cp src/login/org.freedesktop.login1.policy $INSTALLDIR/share/polkit-1/actions/
-
-mkdir -p $INSTALLDIR/etc/systemd/
-cp build/src/login/logind.conf $INSTALLDIR/etc/systemd/
-
-mkdir -p $INSTALLDIR/share/dbus-1/system-services/
-cp src/login/org.freedesktop.login1.service $INSTALLDIR/share/dbus-1/system-services/
-
 mkdir -p $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
 cp build/src/shared/libsystemd-shared-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
 cp build/src/core/libsystemd-core-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
@@ -89,15 +78,12 @@ cp build/src/core/libsystemd-core-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/syste
 mkdir -p $INSTALLDIR/lib/systemd/
 cp build/systemd-logind $INSTALLDIR/lib/systemd/
 chrpath $INSTALLDIR/lib/systemd/systemd-logind -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
+ln -s $INSTALLDIR/lib/systemd/systemd-logind /usr/lib/systemd/systemd-logind
 
-mkdir -p $INSTALLDIR/share/dbus-1/interfaces/
-cp build/interfaces/org.freedesktop.login1.Manager.xml $INSTALLDIR/share/dbus-1/interfaces/
-cp build/interfaces/org.freedesktop.login1.Seat.xml $INSTALLDIR/share/dbus-1/interfaces/
-cp build/interfaces/org.freedesktop.login1.Session.xml $INSTALLDIR/share/dbus-1/interfaces/
-cp build/interfaces/org.freedesktop.login1.User.xml $INSTALLDIR/share/dbus-1/interfaces/
-
-cp build/systemd /sbin/init
-chrpath /sbin/init -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
+#remove when /dev/console workaround not needed
+cp build/systemd $INSTALLDIR/lib/systemd/systemd
+chrpath $INSTALLDIR/lib/systemd/systemd -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
+ln -s $INSTALLDIR/lib/systemd/systemd /sbin/init
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 

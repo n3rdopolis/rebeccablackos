@@ -46,9 +46,7 @@ fi
 UndivertDpkgFile /usr/bin/X
 UndivertDpkgFile /usr/bin/plymouth
 UndivertDpkgFile /usr/bin/chvt
-
-#REMOVE WHEN SYSTEMD v257
-if [[ -x /usr/bin/Compile/systemd ]]
-then
-  UndivertDpkgFile /sbin/init
-fi
+#remove when /dev/console workaround not needed
+UndivertDpkgFile /sbin/init
+#remove when systemd v257
+UndivertDpkgFile /usr/lib/systemd/systemd-logind
