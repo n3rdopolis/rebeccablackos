@@ -30,7 +30,7 @@ do
   PACKAGE="${PACKAGEFILE[0]}"
   FILE="${PACKAGEFILE[1]}"
   FilesToPackage[$FILE]="$PACKAGE"
-done < <(apt-file search --stream-results -x ^ | sed 's| /lib/| /usr/lib/|g' | sed 's| /bin/| /usr/bin/|g')
+done < <(apt-file search --stream-results -x ^ | sed 's| /lib/| /usr/lib/|g' | sed 's| /bin/| /usr/bin/|g' | sed 's| /sbin/| /usr/sbin/|g')
 
 
 while read -r PACKAGE
