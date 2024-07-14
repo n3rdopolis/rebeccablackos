@@ -45,6 +45,12 @@ do
     if [[ ! -z "$FILEPACKAGE" ]]
     then
       DIVERTPACKAGE=$(dpkg-divert --listpackage "$FILE")
+      if [[ -z "$DIVERTPACKAGE" ]]
+      then
+        NONUSRMERGEFILE=$(echo $FILE | sed 's|^/usr/|/|g')
+        DIVERTPACKAGE=$(dpkg-divert --listpackage "$NONUSRMERGEFILE")
+      fi
+
       if [[ ! -z "$DIVERTPACKAGE" ]]
       then
         echo "$PACKAGE conflicts with $FILEPACKAGE with file: $FILE , but $FILE is diverted by $DIVERTPACKAGE"
