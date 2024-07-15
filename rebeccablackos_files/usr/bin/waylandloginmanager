@@ -1062,6 +1062,7 @@ function PrepareLoginManager
     if [[ $HardwareSupported != 1 ]]
     then
       systemd-notify --ready &> /dev/null
+      plymouth quit &> /dev/null
       WriteToLog "ERROR: No framebuffer device found for wlmforcefbdev override!"
       if [[ $seat0HasTTYs == 1 ]]
       then
@@ -1081,6 +1082,7 @@ Will show a menu with a few options for diagnosis." 20 50
   if [[ $HardwareSupported != 1 ]]
   then
     systemd-notify ERRNO=1 &> /dev/null
+    plymouth quit &> /dev/null
     if [[ $seat0HasTTYs == 1 ]]
     then
       chvt 63
@@ -1114,6 +1116,9 @@ Please check your bootloader config, namely the boot resolution, and if gfxpaylo
 
   if [[ $seat0HasTTYs == 1 ]]
   then
+    plymouth quit &> /dev/null
+    PlymouthQuitRequestSent=1
+
     OLDSEAT0WLMPID=$(systemctl show wlm-loginmanagerdisplay_seat0.service -p MainPID --value 2>/dev/null)
     if [[ $RUNNINGWLMCOUNT != 0 ]]
     then
