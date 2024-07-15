@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.9.y
+SOURCEREVISION=linux-6.10.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -250,6 +250,11 @@ make olddefconfig
 ./scripts/config -d CONFIG_VT_CONSOLE_SLEEP
 ./scripts/config -d CONFIG_HW_CONSOLE
 ./scripts/config -d CONFIG_VT_HW_CONSOLE_BINDING
+
+#Enable DRM Panic
+./scripts/config -e CONFIG_DRM_PANIC
+./scripts/config --set-val CONFIG_DRM_PANIC_BACKGROUND_COLOR 0x808080
+./scripts/config --set-val CONFIG_DRM_PANIC_FOREGROUND_COLOR 0x000000
 
 make olddefconfig
 }
