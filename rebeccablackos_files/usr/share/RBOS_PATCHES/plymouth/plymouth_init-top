@@ -19,7 +19,7 @@ SPLASH="true"
 for ARGUMENT in $(cat /proc/cmdline)
 do
 	case "${ARGUMENT}" in
-		splash*)
+		splash*|plymouth.graphical)
 			SPLASH="true"
 			;;
 
