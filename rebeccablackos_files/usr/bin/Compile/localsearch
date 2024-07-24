@@ -20,10 +20,10 @@
 . /usr/bin/build_core
 
 #The name of the source code folder that gets created
-SOURCENAME=tracker
+SOURCENAME=localsearch
 
 #The URL of the Source code repo
-SOURCEURL=https://gitlab.gnome.org/GNOME/tracker.git
+SOURCEURL=https://gitlab.gnome.org/GNOME/localsearch.git
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
@@ -57,7 +57,7 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dbash_completion_dir=$INSTALLDIR/share/bash-completion/completions/ -Doverride_sqlite_version_check=true -Ddocs=false build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
