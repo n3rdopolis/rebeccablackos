@@ -372,22 +372,8 @@ function DeviceSelection
   done
 
   echo "$DeviceSelectionString" | $ZENITYCMD --height 580 --width 800 --list --hide-column 1 --print-column 1 --column=selectionnumber --column="Type" --column="Name" --column="Connection Path" --column="Current Physical/Logical Seats" --column="New Physical/Logical Seats" --column="Connected Order" --title="Multipointer and Seat Configuration" --text="The changes made here will impact all users, as well as the login greeters. 
-Multipointer is not supported by all Wayland desktops like it is on Weston.
-
-This assist in associating devices with physical seats and logical seats.
-   -  Physical 'Seats' are a grouping containing at least of graphics device 'card', and input devices.
-      Having multiple physical seats allows one computer to act as multiple workstations.
-
-   -  Logical 'Seats' are what belong to a separate mouse cursor and keyboard focus.
-      The more logical seats with devices associated with them, the more pointers there will be.
 
 Devices are associated with the physical seat first, then the logical seat. There can be multiple physical seats with multiple logical seats each.
-
-This utility stores the device seat association with these following attributes:
-   1. The device's internal name, usually containing the make and model.
-   2. The port they are plugged into. Devices will only associate with the proper seats if plugged in the same way.
-
-The default seat for physical seats is 'seat0', and the default seat for logical seats is 'default',
 
 Please note that some devices have multiple internal components, and sometimes appear as 'different' devices
 
@@ -574,6 +560,8 @@ where all seats are really being run on one.
 A USB graphics card is usually suitable for the multiple
 graphics card requirement, as long as the driver is supported.
 
+The default physical seat is 'seat0'
+
 What is a Logical Seat?
 -----------------------
 A logical seat is a group of hardware within a physical seat 
@@ -585,7 +573,12 @@ with two users sharing a session. It is also possible to
 have physical seats, with multiple logical seats, to where each
 independent session also has multiple pointers.
 
-A special graphics configuration for logical seats/pointers is not needed.
+For multiple logical seats (assuming one physical seat) there is
+no need for multiple graphics devices.
+
+Weston supports multiple logical seats the best.
+
+The default logical seat is 'default'
 
 ABOUT THIS UTILITY
 ==================
@@ -625,6 +618,10 @@ Leaving a field blank leaves the device assigned to the current seat info.
 For example, if a device is on seat0/default and the logical seat is set to seat1
 the device's physical seat will remain on seat0 as the logical seat is set to seat1.
 
+This utility stores the device seat association with these following attributes:
+   1. The device's internal name, usually containing the make and model.
+   2. The port they are plugged into. Devices will only associate with the proper
+      seats if plugged in the same way.
 "|$ZENITYCMD --title="Multipointer and Seat Configuration"  --text-info --font=mono --width=700 --height=600 2>/dev/null
 }
 
