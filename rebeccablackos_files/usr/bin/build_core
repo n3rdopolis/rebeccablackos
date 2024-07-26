@@ -266,14 +266,8 @@ function RunDownloadAndOrBuild
     echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     exit
   fi
-  
-  TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep '/*\.toml$')
-  if [[ ! -z $TOMLFILES ]]
-  then
-    export TOMLFilesExist=1
-  else
-    export TOMLFilesExist=0
-  fi
+
+  export TOMLFilesExist=-1
 
   #Download source, unless the argument passed to the build script is 'build-only'
   if [[ "$ACTION" != build-only && "$ACTION" != env-only ]]
@@ -771,6 +765,14 @@ function DownloadSource()
     ENDTIME=$(date +%s)
     echo "Download$REPOSITORYTYPE finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
 
+    TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep '/*\.toml$')
+    if [[ ! -z $TOMLFILES ]]
+    then
+      export TOMLFilesExist=1
+    else
+      export TOMLFilesExist=0
+    fi
+
     if [[ $TOMLFilesExist == 1 ]]
     then
       mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust
@@ -942,6 +944,18 @@ function SetBuildVariables()
   #Create build variables
   . /usr/bin/build_vars
   DEBIAN_ARCH=$(dpkg --print-architecture)
+
+  if [[ $TOMLFilesExist == -1 ]]
+  then
+    TOMLFILES=$(find "/$SOURCEDIR/$SOURCENAME" | grep '/*\.toml$')
+    if [[ ! -z $TOMLFILES ]]
+    then
+      export TOMLFilesExist=1
+    else
+      export TOMLFilesExist=0
+    fi
+  fi
+
   if [[ $TOMLFilesExist == 1 ]]
   then
     DEBIAN_ARCH=$(dpkg --print-architecture)
