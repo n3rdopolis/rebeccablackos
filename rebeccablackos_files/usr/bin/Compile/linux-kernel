@@ -163,6 +163,8 @@ make olddefconfig
 ./scripts/config -d CONFIG_SYSTEM_REVOCATION_KEYS
 ./scripts/config -d CONFIG_SYSTEM_TRUSTED_KEYS
 
+#enable the NULL TTY Driver
+./scripts/config -e CONFIG_NULL_TTY
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
 ./scripts/config -e CONFIG_DRM
