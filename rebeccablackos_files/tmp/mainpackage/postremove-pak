@@ -46,7 +46,5 @@ fi
 UndivertDpkgFile /usr/bin/X
 UndivertDpkgFile /usr/bin/plymouth
 UndivertDpkgFile /usr/bin/chvt
-#remove when /dev/console workaround not needed
-UndivertDpkgFile /sbin/init
 #remove when systemd v257
 UndivertDpkgFile /usr/lib/systemd/systemd-logind
