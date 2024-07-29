@@ -64,9 +64,6 @@ fi
 #Don't run ssh by default 
 systemctl disable ssh.service
 
-#Enable the serial getty (mostly for VMs)
-systemctl enable serial-getty@ttyS0.service
-
 #Configure a locale so that the initramfs doesn't have to
 update-locale LANG=C.UTF-8
 #End pre-config
