@@ -1,3 +1,3 @@
-DEVPATH=="/devices/virtual/tty/ttynull", TAG+="master-of-seat"
-DEVPATH=="/devices/virtual/tty/ttynull", TAG+="seat"
-DEVPATH=="/devices/virtual/tty/ttynull", ENV{ID_SEAT}="seat-vtty"
+DEVPATH=="/devices/virtual/tty/tty", TAG+="master-of-seat"
+DEVPATH=="/devices/virtual/tty/tty", TAG+="seat"
+DEVPATH=="/devices/virtual/tty/tty", ENV{ID_SEAT}="seat-vtty"
