@@ -407,7 +407,6 @@ function DownloadGIT()
       REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rev-parse --abbrev-ref origin/HEAD)
       MODULEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
     fi
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME checkout -f $MODULEREVISION 
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME reset --hard
     
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rebase
@@ -419,6 +418,7 @@ function DownloadGIT()
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule init
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule update --recursive --force
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME pull -f
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME checkout -f $MODULEREVISION
   done
   return $UpdateCommandResult
 }
