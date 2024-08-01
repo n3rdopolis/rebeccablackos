@@ -960,7 +960,7 @@ cp "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/tmp/POSTREMOVES.txt "$BU
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/cache/apt/*.bin "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/cache/apt
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE1_PATHNAME/var/lib/apt/lists "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/var/lib/apt
 
-#If a sources.list was created for Debian Snapshots, import it in
+#Copy the APTFETCHDATE file, it is for snapshots, and it is also generated on the fly for determining the date version stamp on generated .deb files
 cp "$BUILDLOCATION"/build/"$BUILDARCH"/"$PHASE1_PATHNAME"/tmp/APTFETCHDATE "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME/tmp/APTFETCHDATE
 
 #Remove Phase 1 if it's a snapshot
