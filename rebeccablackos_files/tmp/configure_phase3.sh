@@ -35,6 +35,18 @@ mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3
 #Create a log folder for non-buildcore built packages
 mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages
 
+
+#Copy some files from /etc that should not be included as part of a package
+mkdir -p /etc/apt/
+cp /tmp/import/etc/apt/sources.list /etc/apt/sources.list
+
+mkdir -p /etc/X11
+cp /tmp/import/etc/X11/default-display-manager /etc/X11/default-display-manager
+
+mkdir -p /etc/default
+cp /tmp/import/etc/default/grub /etc/default/grub
+
+
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
   TargetFile=$1
