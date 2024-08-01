@@ -93,8 +93,8 @@ mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/remastersys "$BUILDLOCATION"/b
 mount --bind  "$BUILDLOCATION"/build/"$BUILDARCH"/vartmp "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/tmp
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 
-#copy the files to where they belong
-rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/
+#copy the temporary files needed for building the first packages
+rsync -CKr -- "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/* "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp
 
 #Handle /tmp/import for the creation of the deb file that contains this systems files
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp/import

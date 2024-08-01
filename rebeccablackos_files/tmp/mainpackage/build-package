@@ -29,8 +29,20 @@ shopt -s dotglob
 
 export DEBIAN_DISTRO=$(awk '{print $1}' /etc/issue)
 
-#Copy select files into place, that are suitable for distribution.
-rsync --exclude=etc/apt/sources.list --exclude=etc/default/grub --exclude=etc/X11/default-display-manager -a /tmp/import /
+#Build the exclusion list
+IFS=$'\n'
+ExcludedFiles=($(cat /tmp/mainpackage/EXCLUDEFILES.txt))
+unset IFS
+
+RSyncExcludeArgs=()
+for ExcludedFile in "${ExcludedFiles[@]}"
+do
+  ExcludePath=$(realpath --relative-to=/ "$ExcludedFile")\
+  RSyncExcludeArgs+=(--exclude="$ExcludePath")
+done
+
+#Copy select files into place
+rsync ${RSyncExcludeArgs[@]} -Ia /tmp/import/ /
 
 mkdir -p /etc/skel/.config
 mkdir -p /etc/skel/Desktop

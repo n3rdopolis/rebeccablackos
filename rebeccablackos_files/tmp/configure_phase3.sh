@@ -36,16 +36,17 @@ mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3
 mkdir "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages
 
 
-#Copy some files from /etc that should not be included as part of a package
-mkdir -p /etc/apt/
-cp /tmp/import/etc/apt/sources.list /etc/apt/sources.list
+#Copy the main package excluded files outside of the checkinstalled script so they are not part of the package
+IFS=$'\n'
+ExcludedFiles=($(cat /tmp/mainpackage/EXCLUDEFILES.txt))
+unset IFS
 
-mkdir -p /etc/X11
-cp /tmp/import/etc/X11/default-display-manager /etc/X11/default-display-manager
-
-mkdir -p /etc/default
-cp /tmp/import/etc/default/grub /etc/default/grub
-
+for ExcludedFile in "${ExcludedFiles[@]}"
+do
+  ExcludedFileDirectory=$(dirname "$ExcludedFile")
+  mkdir -p "$ExcludedFileDirectory"
+  cp /tmp/import/"$ExcludedFile" "$ExcludedFile"
+done
 
 #function to handle moving back dpkg redirect files for chroot
 function RevertFile {
@@ -89,7 +90,7 @@ if [[ $(compgen -G "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGES
 then
   rm "/var/cache/srcbuild/buildoutput/"${PACKAGESUFFIX}-${PACKAGESUFFIX}_*.deb
 fi
-env -C /tmp/mainpackage/ -- /usr/libexec/build_core/checkinstall -y -D --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/tmp,/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
+env -C /tmp/mainpackage/ -- /tmp/import/usr/libexec/build_core/checkinstall -y -D --nodoc --dpkgflags="--force-overwrite --force-confmiss --force-confnew" --install=yes --backup=no --pkgname=${PACKAGESUFFIX}-${PACKAGESUFFIX} --pkgversion=1 --pkgrelease=$PACKAGEDATE  --maintainer=${PACKAGESUFFIX}@${PACKAGESUFFIX} --pkgsource=${PACKAGESUFFIX} --pkggroup=${PACKAGESUFFIX} --requires="" --exclude=/tmp,/var/cache/srcbuild,/home/remastersys,/var/tmp,/var/log/buildlogs /tmp/mainpackage/build-package |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/build_packages/${PACKAGESUFFIX}-${PACKAGESUFFIX}.log
 cp /tmp/mainpackage/${PACKAGESUFFIX}-${PACKAGESUFFIX}*.deb "/var/cache/srcbuild/buildoutput/"
 
 #Create a virtual configuration package for the waylandloginmanager
