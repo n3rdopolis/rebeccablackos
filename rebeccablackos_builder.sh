@@ -858,12 +858,24 @@ fi
 #If using a revisions file, force downloading a snapshot from the time specified
 if [[ $APTFETCHDATESECONDS == [0-9]* ]]
 then
-  APTFETCHDATE=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ 2>/dev/null)
-  APTFETCHDATERESULT=$?
-  if [[ $APTFETCHDATERESULT == 0 ]]
+  APTFetchDate=$(date -d @$APTFETCHDATESECONDS -u +%Y%m%dT%H%M%SZ 2>/dev/null)
+  APTFetchDateResult=$?
+  if [[ $APTFetchDateResult == 0 ]]
   then
-    DEBIANREPO="https://snapshot.debian.org/archive/debian/$APTFETCHDATE/"
-    sed "s|https://httpredir.debian.org/debian|$DEBIANREPO|g" "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list > "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
+    cat "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list | grep ^deb | while read -r APTSourceLine
+    do
+      APTSourceElements=($APTSourceLine)
+      APTURL=${APTSourceElements[1]}
+      IFS="/"
+      APTURLElements=($APTURL)
+      unset IFS
+      APTURLElementsCount=${#APTURLElements[@]}
+      APTURLElements[2]="snapshot.debian.org/archive"
+      APTURLElements[$APTURLElementsCount]=$APTFetchDate
+      NewURL=$(IFS="/" ; echo "${APTURLElements[*]}")
+      APTSourceElements[1]=$NewURL
+      echo "${APTSourceElements[@]}"
+    done >> "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list
   else
     echolog "Invalid APTFETCHDATESECONDS set. Falling back"
   fi
