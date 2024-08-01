@@ -68,16 +68,14 @@ done
 #ibus workaround
 ln -sf /usr/share/unicode/ /usr/share/unicode/ucd
 
-ln -sf /usr/lib/os-release.rbos /etc/os-release
-
 #configure /etc/issue
 echo -e "RebeccaBlackOS \\\n \\\l \n" > /etc/issue
 setterm -cursor on >> /etc/issue
 echo -e "RebeccaBlackOS \n" > /etc/issue.net
 
 #Add libraries under /opt to the ldconfig cache, for setcap'ed binaries
-echo /opt/lib >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
-echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_rbos_opt_libs.conf
+echo /opt/lib >> /etc/ld.so.conf.d/aa_${PACKAGESUFFIX}_opt_libs.conf
+echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_${PACKAGESUFFIX}_opt_libs.conf
 
 #save the build date of the CD.
 date -u +"%A, %Y-%m-%d %H:%M:%S %Z" > /etc/builddate
