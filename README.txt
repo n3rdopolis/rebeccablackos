@@ -34,7 +34,7 @@ How to use the ISO:
     * Burn the ISO, (or set it to be "in" the CD ROM device in your favorite VM software), reboot, set the BIOS to boot from the DVD if it does not already,
     boot from the DVD. Once it boots you can use the live system.
 
-    * The ISOs are also hybrid ISOs, meaning they can also be written directly to a flash drive, to be bootable without using slower optical media.
+    * The ISOs are also hybrid ISOs, meaning they can also be written directly to a flash drive.
 
     * The live user "rebestie" has no password.
 
