@@ -77,6 +77,12 @@ else
   echo "chroot execution failed. Please ensure your processor can handle the "$BUILDARCH" architecture, or that the target system isn't corrupt."
 fi
 
+#Copy the original /etc/sources.list if build with a temporary one specifying Debian snapshots
+if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/etc_apt_sources.list ]]
+then
+  cp "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/etc/apt/sources.list "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/etc/apt/sources.list
+fi
+
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
