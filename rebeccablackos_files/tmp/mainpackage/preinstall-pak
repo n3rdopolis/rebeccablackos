@@ -31,7 +31,6 @@ function DivertDpkgFile
   fi
 }
 
-DivertDpkgFile /etc/default/grub           /var/lib/divert-distrib/etc_default_grub
 DivertDpkgFile /etc/skel/.bashrc           /var/lib/divert-distrib/etc_skel_.bashrc
 DivertDpkgFile /etc/issue                  /var/lib/divert-distrib/etc_issue
 DivertDpkgFile /etc/issue.net              /var/lib/divert-distrib/etc_issue.net
