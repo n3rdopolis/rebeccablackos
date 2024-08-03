@@ -50,12 +50,12 @@ else
 fi
 
 #Determine what dialog program to use
-if [[ $HASZENITY == 1 ]]
-then
-  UIDIALOGTYPE=zenity
-elif [[ $HASKDIALOG == 1 ]]
+if [[ $HASKDIALOG == 1 ]]
 then
   UIDIALOGTYPE=kdialog
+elif [[ $HASZENITY == 1 ]]
+then
+  UIDIALOGTYPE=zenity
 elif [[ $HASDIALOG == 1 ]]
 then
   UIDIALOGTYPE=dialog
