@@ -504,6 +504,8 @@ FOO
 
     # make a new initial ramdisk including the casper scripts
     log_msg "Creating a new initial ramdisk for the live system"
+    #Casper makes the initramfs default to casper when export CASPER_GENERATE_UUID=1 is set
+    export CASPER_GENERATE_UUID=1
     mkinitramfs -o /boot/initrd.img-$KERNELVERSION $KERNELVERSION
     mkdir /var/lib/initramfs-tools/
     sha1sum /boot/initrd.img-$KERNELVERSION > /var/lib/initramfs-tools/$KERNELVERSION
@@ -520,6 +522,16 @@ FOO
         log_msg "Missing valid initial ramdisk. Exiting"
         exit 1
     fi
+
+    #Get the casper UUID out of the initrd (if any)
+    mkdir -p $WORKDIR/INITRDDIR
+    mkdir -p $WORKDIR/ISOTMP/.disk
+    unmkinitramfs $WORKDIR/ISOTMP/casper/initrd.gz $WORKDIR/INITRDDIR
+    find $WORKDIR/INITRDDIR | grep /conf/uuid.conf$ | while read -r UUIDFILE
+    do
+      cp "$UUIDFILE" $WORKDIR/ISOTMP/.disk/casper-uuid-generic
+    done
+    rm -r $WORKDIR/INITRDDIR
 
     # Step 6 - Make filesystem.squashfs
 
