@@ -61,9 +61,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' themes/spinner/spinner.plymouth.in
-sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' themes/spinner/spinner.plymouth.in
-
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dgtk=enabled -Ddrm=true -Dpango=enabled -Dsystemd-integration=true -Dlogo=$INSTALLDIR/share/plymouth/boot_logo.png -Drunstatedir=/run/plymouth build
 }
 
@@ -80,8 +77,11 @@ mkdir -p $INSTALLDIR/share/plymouth/
 #cp /usr/share/RBOS_PATCHES/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
 touch $INSTALLDIR/share/plymouth/boot_logo.png
 ninja -C build install
-cp /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /opt/share/plymouth/themes/spinner/background.png
-sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' /opt/share/plymouth/themes/spinner/spinner.plymouth
+cp /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png $INSTALLDIR/share/plymouth/themes/spinner/background.png
+sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
