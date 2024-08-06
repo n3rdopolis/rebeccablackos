@@ -16,6 +16,12 @@ esac
 
 SPLASH="true"
 
+TERMTYPE=$(head /proc/consoles | awk '{print $1}' | tr -d 0-9)
+if [ "${TERMTYPE}" = "ttynull" ]
+then
+	SPLASH="true"
+fi
+
 for ARGUMENT in $(cat /proc/cmdline)
 do
 	case "${ARGUMENT}" in
