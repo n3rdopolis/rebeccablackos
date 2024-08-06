@@ -30,7 +30,7 @@ menu color title 1;37;44 #c0ffffff #00000000 std
 label live
   menu label Startup Normally
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull --
 TEXT HELP
 Start with default graphics driver
 
@@ -42,7 +42,7 @@ MENU SEPARATOR
 label liveforcesw
   menu label Startup and use Software Rendering
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman --
 TEXT HELP
 Start with default graphics driver, but force software rendering.
 
@@ -53,7 +53,7 @@ ENDTEXT
 label livesddefault
   menu label Startup with Fallback Graphics Driver (auto size)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset --
 TEXT HELP
 Start with the fallback graphics driver. Use the default resolution.
 
@@ -63,7 +63,7 @@ ENDTEXT
 label livesd342
   menu label Startup with Fallback Graphics Driver 640x480(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x342 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x342 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -74,7 +74,7 @@ ENDTEXT
 label livesd343
   menu label Startup with Fallback Graphics Driver 800x600(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x343 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x343 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -85,7 +85,7 @@ ENDTEXT
 label livesd344
   menu label Startup with Fallback Graphics Driver 1024x768(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x344 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x344 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -97,7 +97,7 @@ ENDTEXT
 label livesd345
   menu label Startup with Fallback Graphics Driver 1280x1024(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x345 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x345 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -108,7 +108,7 @@ ENDTEXT
 label livesd37A
   menu label Startup with Fallback Graphics Driver 1280x800(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x37A --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x37A --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -119,7 +119,7 @@ ENDTEXT
 label livesd380
   menu label Startup with Fallback Graphics Driver 1400x900(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x380 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x380 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -130,7 +130,7 @@ ENDTEXT
 label livesd347
   menu label Startup with Fallback Graphics Driver 1600x1200(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x347 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x347 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -141,7 +141,7 @@ ENDTEXT
 label livesd392
   menu label Startup with Fallback Graphics Driver 1920x1080(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x392 --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x392 --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
@@ -152,7 +152,7 @@ ENDTEXT
 label livesd38C
   menu label Startup with Fallback Graphics Driver 2560x1600(x32)
   kernel /casper/vmlinuz
-  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz plymouth.graphical console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x38C --
+  append  file=/cdrom/preseed/custom.seed boot=casper initrd=/casper/initrd.gz console=ttynull wlmforceswrender wlmforcepixman nomodeset vga=0x38C --
 TEXT HELP
 Start with the fallback graphics driver.
 Attempt to use the specified resolution. Specified resolution may fail
