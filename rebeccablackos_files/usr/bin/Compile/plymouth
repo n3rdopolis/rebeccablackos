@@ -79,6 +79,8 @@ touch $INSTALLDIR/share/plymouth/boot_logo.png
 ninja -C build install
 cp /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png $INSTALLDIR/share/plymouth/themes/spinner/background.png
 sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+#Red (0xrrggbb, 0xrrggbbaa) needs to be greater than zero to set alpha, as Plymouth shifts it, treating it like 0xrrggbb
+sed -i 's/\[two-step\]/[two-step]\nConsoleLogBackgroundColor=0x0100007f/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 
