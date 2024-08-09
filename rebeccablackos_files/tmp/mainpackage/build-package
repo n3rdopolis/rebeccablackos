@@ -55,16 +55,6 @@ do
 echo "/opt/lib/$PYTHON3DIR/site-packages" >> "/usr/lib/python3/dist-packages/optpkgs.pth"
 done
 
-#workaround for Debian not including legacy systemd files
-export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-echo -e "daemon\nid128\njournal\nlogin" | while read -r LIBRARY
-do
-  if [[ ! -e /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc ]]
-  then
-    ln -sf /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd.pc /usr/lib/$DEB_HOST_MULTIARCH/pkgconfig/libsystemd-$LIBRARY.pc
-  fi
-done
-
 #ibus workaround
 ln -sf /usr/share/unicode/ /usr/share/unicode/ucd
 
