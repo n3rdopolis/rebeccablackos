@@ -25,6 +25,9 @@ fi
 
 export PACKAGESUFFIX="rbos"
 
+#Configure dpkg
+export DPKG_FORCE=security-mac,downgrade,overwrite,unsafe-io,confnew,confold,confdef,confmiss
+
 shopt -s dotglob
 
 export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
@@ -138,11 +141,6 @@ RedirectFile /usr/sbin/grub-probe
 RedirectFile /sbin/initctl
 RedirectFile /usr/sbin/invoke-rc.d
 
-#Configure dpkg
-echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
-echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
-echo "force-confdef"   > /etc/dpkg/dpkg.cfg.d/force-confdef
-
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v dpkg-dev)
 
@@ -190,11 +188,6 @@ compile_all installsmallpackage
 RevertFile /usr/sbin/grub-probe
 RevertFile /sbin/initctl
 RevertFile /usr/sbin/invoke-rc.d
-
-#set dpkg to defaults
-rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
-rm /etc/dpkg/dpkg.cfg.d/force-confold
-rm /etc/dpkg/dpkg.cfg.d/force-confdef
 
 #Force the post install package to re-run certian actions
 dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/postbuildcore-${PACKAGESUFFIX}*.deb
