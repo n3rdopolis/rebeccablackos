@@ -39,5 +39,6 @@ DivertDpkgFile /etc/lsb-release            /var/lib/divert-distrib/etc_lsb-relea
 DivertDpkgFile /usr/bin/X                  /var/lib/divert-distrib/usr_bin_X
 DivertDpkgFile /usr/bin/plymouth           /var/lib/divert-distrib/usr_bin_plymouth
 DivertDpkgFile /usr/bin/chvt               /var/lib/divert-distrib/usr_bin_chvt
+DivertDpkgFile /usr/lib/os-release         /var/lib/divert-distrib/usr_lib_os-release
 #remove when systemd v257
 DivertDpkgFile /lib/systemd/systemd-logind /var/lib/divert-distrib/lib_systemd_systemd-logind
