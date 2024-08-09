@@ -27,7 +27,7 @@ function UndivertDpkgFile
   SourceFile="$1"
 
   DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
-  if [[ "$DivertPackage" == "$DivertName"-"$DivertName" ]]
+  if [[ "$DivertPackage" == "$DPKG_MAINTSCRIPT_PACKAGE" ]]
   then
     dpkg-divert --remove --rename "$SourceFile"
   fi

@@ -25,9 +25,9 @@ function DivertDpkgFile
   DivertDestination="$2"
 
   DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
-  if [[ "$DivertPackage" != "$DivertName"-"$DivertName" ]]
+  if [[ "$DivertPackage" != "$DPKG_MAINTSCRIPT_PACKAGE" ]]
   then
-    dpkg-divert --package "$DivertName"-"$DivertName" --add --rename --divert "$DivertDestination" "$SourceFile"
+    dpkg-divert --package "$DPKG_MAINTSCRIPT_PACKAGE" --add --rename --divert "$DivertDestination" "$SourceFile"
   fi
 }
 
