@@ -1,3 +1,18 @@
+diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
+index 05c5aa951da7..e506dcdf44a2 100644
+--- a/arch/x86/kernel/setup.c
++++ b/arch/x86/kernel/setup.c
+@@ -1159,6 +1159,10 @@ void __init setup_arch(char **cmdline_p)
+ 
+ 	e820__setup_pci_gap();
+ 
++#ifdef CONFIG_NULL_TTY_CONSOLE
++	add_preferred_console("ttynull", 0, NULL);
++#endif
++
+ #ifdef CONFIG_VT
+ #if defined(CONFIG_VGA_CONSOLE)
+ 	if (!efi_enabled(EFI_BOOT) || (efi_mem_type(0xa0000) != EFI_CONVENTIONAL_MEMORY))
 diff --git a/drivers/tty/Kconfig b/drivers/tty/Kconfig
 index a45d423ad10f..a8080732589a 100644
 --- a/drivers/tty/Kconfig
@@ -20,18 +35,3 @@ index a45d423ad10f..a8080732589a 100644
  config VCC
  	tristate "Sun Virtual Console Concentrator"
  	depends on SUN_LDOMS
-diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
-index dddb15f48d59..e7e25e3feaac 100644
---- a/kernel/printk/printk.c
-+++ b/kernel/printk/printk.c
-@@ -3728,6 +3728,10 @@ void __init console_init(void)
- 		trace_initcall_finish(call, ret);
- 		ce++;
- 	}
-+#ifdef CONFIG_NULL_TTY_CONSOLE
-+	if (preferred_console < 0)
-+		__add_preferred_console("ttynull", 0, NULL, NULL, false);
-+#endif
- }
- 
- /*
