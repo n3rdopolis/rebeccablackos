@@ -21,7 +21,7 @@ index a45d423ad10f..a8080732589a 100644
  	tristate "Sun Virtual Console Concentrator"
  	depends on SUN_LDOMS
 diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
-index dddb15f48d59..6950118c6fb3 100644
+index dddb15f48d59..e7e25e3feaac 100644
 --- a/kernel/printk/printk.c
 +++ b/kernel/printk/printk.c
 @@ -3728,6 +3728,10 @@ void __init console_init(void)
@@ -30,7 +30,7 @@ index dddb15f48d59..6950118c6fb3 100644
  	}
 +#ifdef CONFIG_NULL_TTY_CONSOLE
 +	if (preferred_console < 0)
-+		add_preferred_console("ttynull", 0, NULL);
++		__add_preferred_console("ttynull", 0, NULL, NULL, false);
 +#endif
  }
  
