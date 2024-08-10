@@ -23,7 +23,6 @@ fi
 #1 argument: The first argument is the file to stop diverting
 function UndivertDpkgFile
 {
-  DivertName=rbos
   SourceFile="$1"
 
   DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
@@ -46,5 +45,3 @@ UndivertDpkgFile /usr/bin/X
 UndivertDpkgFile /usr/bin/plymouth
 UndivertDpkgFile /usr/bin/chvt
 UndivertDpkgFile /usr/lib/os-release
-#remove when systemd v257
-UndivertDpkgFile /usr/lib/systemd/systemd-logind

@@ -57,6 +57,42 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+echo '#! /bin/bash
+mkdir -p /var/lib/divert-distrib
+
+#2 arguments: The first argument is the file to redirect, the second argument is where to redirect the file to
+function DivertDpkgFile
+{
+  SourceFile="$1"
+  DivertDestination="$2"
+
+  DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
+  if [[ "$DivertPackage" != "$DPKG_MAINTSCRIPT_PACKAGE" ]]
+  then
+    dpkg-divert --package "$DPKG_MAINTSCRIPT_PACKAGE" --add --rename --divert "$DivertDestination" "$SourceFile"
+  fi
+}
+DivertDpkgFile /lib/systemd/systemd-logind /var/lib/divert-distrib/lib_systemd_systemd-logind ' > preinstall-pak
+
+echo '#! /bin/bash
+if [[ $1 == upgrade ]]
+then
+  exit
+fi
+
+#1 argument: The first argument is the file to stop diverting
+function UndivertDpkgFile
+{
+  SourceFile="$1"
+
+  DivertPackage=$(dpkg-divert --listpackage "$SourceFile")
+  if [[ "$DivertPackage" == "$DPKG_MAINTSCRIPT_PACKAGE" ]]
+  then
+    dpkg-divert --remove --rename "$SourceFile"
+  fi
+}
+UndivertDpkgFile /usr/lib/systemd/systemd-logind' > postremove-pak
+
 patch -f -p1 < /usr/share/RBOS_PATCHES/systemd.diff
 meson setup -Ddebug=false -Doptimization=s --prefix=/usr --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build \
 -Dsysvinit-path=/etc/init.d -Dsysvrcnd-path=/etc -Ddbuspolicydir=/usr/share/dbus-1/system.d/ -Dpamlibdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
@@ -78,7 +114,7 @@ cp build/src/core/libsystemd-core-*.so $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/syste
 mkdir -p $INSTALLDIR/lib/systemd/
 cp build/systemd-logind $INSTALLDIR/lib/systemd/
 chrpath $INSTALLDIR/lib/systemd/systemd-logind -r $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/systemd/
-ln -s $INSTALLDIR/lib/systemd/systemd-logind /usr/lib/systemd/systemd-logind
+ln -sf $INSTALLDIR/lib/systemd/systemd-logind /usr/lib/systemd/systemd-logind
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
