@@ -1,13 +1,14 @@
 diff --git a/arch/x86/kernel/setup.c b/arch/x86/kernel/setup.c
-index 05c5aa951da7..e506dcdf44a2 100644
+index 05c5aa951da7..be68dd3f49eb 100644
 --- a/arch/x86/kernel/setup.c
 +++ b/arch/x86/kernel/setup.c
-@@ -1159,6 +1159,10 @@ void __init setup_arch(char **cmdline_p)
+@@ -1159,6 +1159,11 @@ void __init setup_arch(char **cmdline_p)
  
  	e820__setup_pci_gap();
  
 +#ifdef CONFIG_NULL_TTY_CONSOLE
-+	add_preferred_console("ttynull", 0, NULL);
++	if (!strstr(boot_command_line, "console="))
++		add_preferred_console("ttynull", 0, NULL);
 +#endif
 +
  #ifdef CONFIG_VT
