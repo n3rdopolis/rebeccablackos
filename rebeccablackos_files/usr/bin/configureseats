@@ -499,13 +499,17 @@ function CommitConfigFile
 #Function that sends the signal to udev and to the waylandloginmanagers to now detect the config changes that have been made
 function SignalCompletion
 {
-
-  $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
+  if [[ -e /run/waylandloginmanager ]]
+  then
+    $ZENITYCMD --info --text "Seat Configuration for all devices is now complete.
 
 Press OK to apply all the changes. This will switch user to the loginmanager display.
 This is to signal the display server to detect the new changes, and the waylandloginmanager to detect new seats.
 
 Your sessions will NOT be terminated, but they will need to be switched back into with Switch User" --no-wrap --title="Multipointer and Seat Configuration" 2>/dev/null
+  else
+    $ZENITYCMD --info --text "Seat Configuration for all devices is now complete. You may need to restart for the changes to take effect" 2>/dev/null
+  fi
 
   #Reload the new configuration into udev
   udevadm control --reload-rules
@@ -520,6 +524,11 @@ Your sessions will NOT be terminated, but they will need to be switched back int
     udevadm trigger --subsystem-match=sound
     sleep 1
   done
+
+  if [[ ! -e /run/waylandloginmanager ]]
+  then
+    return
+  fi
 
   #Force the server to pickup the changes
   waylandloginmanager --sendcommand DetectSeats
