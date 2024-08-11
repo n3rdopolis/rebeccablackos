@@ -1,25 +1,32 @@
 diff --git a/drivers/tty/Kconfig b/drivers/tty/Kconfig
-index a45d423ad10f..a8080732589a 100644
+index a45d423ad10f..98ac8a394c88 100644
 --- a/drivers/tty/Kconfig
 +++ b/drivers/tty/Kconfig
-@@ -387,6 +387,17 @@ config NULL_TTY
+@@ -383,7 +383,23 @@ config NULL_TTY
+ 	  available or desired.
  
- 	  If unsure, say N.
- 
+ 	  In order to use this driver, you should redirect the console to this
+-	  TTY, or boot the kernel with console=ttynull.
++	  TTY, boot the kernel with console=ttynull, or enable
++	  CONFIG_NULL_TTY_CONSOLE.
++
++	  If unsure, say N.
++
 +config NULL_TTY_CONSOLE
 +        bool "Supports /dev/ttynull as a console automatically"
 +        depends on NULL_TTY && !VT_CONSOLE
 +	help
-+	  Say Y here if you want a NULL TTY to be /dev/console automatically.
++	  Say Y here if you want the NULL TTY to be used as a /dev/console
++	  device.
 +
-+	  This is useful for replacing where VT_CONSOLE was previously enabled.
-+	  /dev/ttynull backs /dev/console if no console= options are specified
-+
-+	  If unsure, say N.
-+
- config VCC
- 	tristate "Sun Virtual Console Concentrator"
- 	depends on SUN_LDOMS
++	  This is useful for userspace applications that expect a working
++	  console device, without changing the kernel boot options, such as a
++	  distribuition or environment that historically had CONFIG_VT_CONSOLE
++	  enabled, and have now disabled it, but still need /dev/console to be
++	  working for userspace applications.
+ 
+ 	  If unsure, say N.
+ 
 diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
 index dddb15f48d59..c1554a789de8 100644
 --- a/kernel/printk/printk.c
