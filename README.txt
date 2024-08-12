@@ -100,7 +100,8 @@ BOOT OPTIONS:
 
       * This option is handled early in initramfs:
           **  norecinit=1                 This forces the initramfs recovery prompt to fall back to the system console, and not use the user mode terminal.
-                                          This is not recommended for most users, as the system console is the first serial device
+                                          This is not recommended for most users, as it also must be used with console=ttyS0 for debugging through a serial
+                                          console.
 
 
       * These utilities assit with changing boot options on installed systems:
