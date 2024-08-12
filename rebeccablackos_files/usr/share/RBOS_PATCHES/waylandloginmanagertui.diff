@@ -285,7 +285,7 @@
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
    fi
-@@ -2802,7 +2767,12 @@
+@@ -2780,7 +2745,12 @@
    ACTIONSTRING=($ACTIONSTRING)
    unset IFS
  
@@ -299,7 +299,7 @@
  
    CancelOrOK=$?
    #Abort if the user selected cancel on the dialog
-@@ -2824,7 +2794,12 @@
+@@ -2846,7 +2816,12 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -313,7 +313,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2870,7 +2845,12 @@
+@@ -2892,7 +2867,12 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -327,7 +327,7 @@
    fi
  }
  
-@@ -3061,7 +3041,7 @@
+@@ -3083,7 +3063,7 @@
          OutputArgs=""
        fi
        SetFallbackEnvironmentVariables $CurrentSeat
@@ -336,7 +336,7 @@
        if [[ ! -z $LIBGL_ALWAYS_SOFTWARE ]]
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=LIBGL_ALWAYS_SOFTWARE=$LIBGL_ALWAYS_SOFTWARE "
-@@ -3086,7 +3066,8 @@
+@@ -3108,7 +3088,8 @@
         --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" \
         --setenv=XDG_SEAT=$CurrentSeat \
         --setenv=HOME="$HOME" \
@@ -346,7 +346,7 @@
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -3226,7 +3207,7 @@
+@@ -3248,7 +3229,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -355,7 +355,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -3251,7 +3232,7 @@
+@@ -3273,7 +3254,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -364,7 +364,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3295,7 +3276,7 @@
+@@ -3317,7 +3298,7 @@
    ActionMenu=($ActionMenu)
    unset IFS
  
@@ -373,7 +373,7 @@
    DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
-@@ -3705,9 +3686,9 @@
+@@ -3727,9 +3708,9 @@
        fi
      done
  
@@ -385,7 +385,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3942,7 +3923,7 @@
+@@ -3964,7 +3945,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -394,7 +394,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -3988,7 +3969,7 @@
+@@ -4010,7 +3991,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -403,7 +403,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4017,7 +3998,7 @@
+@@ -4039,7 +4020,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -412,7 +412,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4063,7 +4044,7 @@
+@@ -4085,7 +4066,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -421,7 +421,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4135,6 +4116,7 @@
+@@ -4157,6 +4138,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      StartSocketFilter &

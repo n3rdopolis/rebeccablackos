@@ -313,7 +313,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2713,7 +2703,7 @@
+@@ -2713,13 +2703,13 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -322,16 +322,14 @@
      SessionPromptThreshold=2
  
      ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
-@@ -2741,7 +2731,7 @@
-   unset RunningSessions
-   unset RunningSessionTypes
+   fi
  
 -  #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.
 +  #The first line is sent to the zenity dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the Zenity dialog for the user.
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2797,15 +2787,9 @@
+@@ -2775,15 +2765,9 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -349,7 +347,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2824,7 +2808,7 @@
+@@ -2846,7 +2830,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -358,7 +356,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2870,7 +2854,7 @@
+@@ -2892,7 +2876,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -367,7 +365,7 @@
    fi
  }
  
-@@ -3213,7 +3197,7 @@
+@@ -3235,7 +3219,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -376,7 +374,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -3251,7 +3235,7 @@
+@@ -3273,7 +3257,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -385,7 +383,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3287,16 +3271,12 @@
+@@ -3309,16 +3293,12 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -407,7 +405,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -3304,12 +3284,12 @@
+@@ -3326,12 +3306,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -423,7 +421,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3705,9 +3685,9 @@
+@@ -3727,9 +3707,9 @@
        fi
      done
  

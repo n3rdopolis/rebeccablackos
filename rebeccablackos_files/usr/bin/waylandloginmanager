@@ -2719,28 +2719,6 @@ function LeavePrompt
     ACTIONSTRING="Switch User"$'\n'"Switch User"$'\n'"Logoff"$'\n'"Logoff Session"
   fi
 
-  #Get the number of running sessions
-  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
-  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
-  RunningSessionItr=0
-  RunningSessionCount=0
-  for RunningSession in "${RunningSessions[@]}"
-  do
-    Include=1
-    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
-    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
-    then
-      Include=0
-    fi
-    if [[ $Include == 1 ]]
-    then
-      ((RunningSessionCount++))
-    fi
-    ((RunningSessionItr++))
-  done
-  unset RunningSessions
-  unset RunningSessionTypes
-
   #The first line is sent to the dialog is the actual command it sets the ACTION variable to be. the second line is what it appears as in the dialog for the user.
   CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
   if [[ $CanPowerOff =~ " \"yes\"" ]]
@@ -2815,6 +2793,50 @@ function LeavePrompt
   then
     return
   fi
+
+  #Get the number of running sessions
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
+  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
+  RunningSessionItr=0
+  RunningSessionCount=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    Include=1
+    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
+    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
+    then
+      Include=0
+    fi
+    if [[ $Include == 1 ]]
+    then
+      ((RunningSessionCount++))
+    fi
+    ((RunningSessionItr++))
+  done
+  unset RunningSessions
+  unset RunningSessionTypes
+
+  #Get the number of running sessions
+  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
+  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
+  RunningSessionItr=0
+  RunningSessionCount=0
+  for RunningSession in "${RunningSessions[@]}"
+  do
+    Include=1
+    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
+    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
+    then
+      Include=0
+    fi
+    if [[ $Include == 1 ]]
+    then
+      ((RunningSessionCount++))
+    fi
+    ((RunningSessionItr++))
+  done
+  unset RunningSessions
+  unset RunningSessionTypes
 
   if [[ $ACTION != "Logoff" && $ACTION != "Switch User" && $RunningSessionCount -ge $SessionPromptThreshold ]]
   then
