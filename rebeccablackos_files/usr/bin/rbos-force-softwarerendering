@@ -30,14 +30,16 @@ fi
 
 
 #See if wlmforceswrender is configured to be on or off to tell the user
-CURRENTOPTION=$(/usr/bin/waylandloginmanager --getconfigkey wlmforceswrender "" 0 0)
+CurrentSWOption=$(/usr/bin/waylandloginmanager --getconfigkey wlmforceswrender "" 0 0)
+CurrentPixmanOption=$(/usr/bin/waylandloginmanager --getconfigkey wlmforcepixman "" 0 0)
 
 #Tell the user what the script does
-runuser -u $DIALOGUSER -- dialog  --msgbox "This will assist you in configuring your system, to force software rendering. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it." 10 60
+runuser -u $DIALOGUSER -- dialog  --msgbox "This will assist you in configuring your system, to force software rendering, and pixman for Weston. This updates /etc/waylandloginmanager.conf . Keep in mind If you specified an option on the kernel command line, that option will override it." 10 60
 
 #Ask the user what to do
-FORCESW=$(runuser -u $DIALOGUSER -- dialog --radiolist "Would you like to force/unforce software rendering?
-Current Option: $CURRENTOPTION" 20 60 20 1 "Force Software Rendering" off 0 "Unforce Software Rendering" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
+FORCESW=$(runuser -u $DIALOGUSER -- dialog --radiolist "Would you like to force/unforce software rendering & Pixman?
+Current Software Option: $CurrentSWOption
+Current Pixman Option: $CurrentPixmanOption" 20 60 20 1 "Force Software Rendering & Pixman" off 0 "Unforce Software Rendering & Pixman" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 
 #If the user hit OK, and didn't select "leave unchanged"
@@ -47,10 +49,12 @@ then
   if [[ $FORCESW == 1 ]]
   then
     /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 1
+    /usr/bin/waylandloginmanager --setconfigkey wlmforcepixman 1
   #if the user selected to not force software rendering, then set the wlmforceswrender argument to 0 in the config file.
   elif [[ $FORCESW == 0 ]]
   then
     /usr/bin/waylandloginmanager --setconfigkey wlmforceswrender 0
+    /usr/bin/waylandloginmanager --setconfigkey wlmforcepixman 0
   fi
   runuser -u $DIALOGUSER -- dialog  --msgbox "The software rendering setting has been changed. This will take effect for new sessions. To take effect on the loginmanagerdisplay itself, the waylandloginmanager service and then the loginmanagerdisplay will need to be restarted in the given order." 9 60
 fi
