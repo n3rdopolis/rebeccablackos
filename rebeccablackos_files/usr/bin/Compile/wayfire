@@ -84,7 +84,7 @@ sed -i 's/\[autostart\]/[autostart]\ndbus = dbus-update-activation-environment -
 sed -i 's/autostart_wf_shell = true/autostart_wf_shell = false/g' /etc/skel/.config/wayfire.ini
 sed -i 's/alacritty/konsole/g' /etc/skel/.config/wayfire.ini
 sed -i 's/dmenu_run/waylandapp/g' /etc/skel/.config/wayfire.ini
-sed -i '|wf-background|d' /etc/skel/.config/wayfire.ini
+sed -i '/wf-background/d' /etc/skel/.config/wayfire.ini
 sed -i 's|wf-panel|mate-panel|g' /etc/skel/.config/wayfire.ini
 sed -i 's|^# background|background|g' /etc/skel/.config/wayfire.ini
 sed -i 's|^# panel|panel|g' /etc/skel/.config/wayfire.ini
