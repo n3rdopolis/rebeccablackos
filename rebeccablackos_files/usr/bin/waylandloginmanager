@@ -237,6 +237,11 @@ function UserSessionWorker
     WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
     install -dDTm700 $WLM_XDG_RUNTIME_DIR
     systemd-run --user -u "$WlmSDUserUnit" -E XDG_RUNTIME_DIR="$WLM_XDG_RUNTIME_DIR" -E DBUS_SESSION_BUS_ADDRESS="$WLM_DBUS_SESSION_BUS_ADDRESS" /usr/lib/systemd/systemd --user
+    if ! systemctl is-active --user "$WlmSDUserUnit"
+    then
+      echo "Failed to start child systemd user session $WlmSDUserUnit" &>> $WLM_SESSION_LOG
+      exit 1
+    fi
     export DBUS_SESSION_BUS_ADDRESS=$WLM_DBUS_SESSION_BUS_ADDRESS
     export XDG_RUNTIME_DIR=$WLM_XDG_RUNTIME_DIR
     #Wait for the socket to be active
