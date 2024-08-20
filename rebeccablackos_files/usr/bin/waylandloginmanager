@@ -236,7 +236,7 @@ function UserSessionWorker
     WLM_XDG_RUNTIME_DIR=/run/user/$(id -u)/wlm-rd-"$WAYLAND_GUEST"
     WLM_DBUS_SESSION_BUS_ADDRESS="unix:path=$WLM_XDG_RUNTIME_DIR/bus"
     install -dDTm700 $WLM_XDG_RUNTIME_DIR
-    systemd-run --user -u "$WlmSDUserUnit" -E XDG_RUNTIME_DIR="$WLM_XDG_RUNTIME_DIR" -E DBUS_SESSION_BUS_ADDRESS="$WLM_DBUS_SESSION_BUS_ADDRESS" systemd --user
+    systemd-run --user -u "$WlmSDUserUnit" -E XDG_RUNTIME_DIR="$WLM_XDG_RUNTIME_DIR" -E DBUS_SESSION_BUS_ADDRESS="$WLM_DBUS_SESSION_BUS_ADDRESS" /usr/lib/systemd/systemd --user
     export DBUS_SESSION_BUS_ADDRESS=$WLM_DBUS_SESSION_BUS_ADDRESS
     export XDG_RUNTIME_DIR=$WLM_XDG_RUNTIME_DIR
     #Wait for the socket to be active
