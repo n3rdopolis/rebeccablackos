@@ -1344,6 +1344,10 @@ function ReadRegister
           fi
           FailedSessionSeat+=("$SessionSeatID")
         fi
+
+        #If the user hits the SecureAttentionKey, tries to start a second session, and hits it again under a minute, ensure that the secondary fallback action (start a terminal) isn't used
+        GetStartedSeatIndex $SessionSeatID
+        SeatRescueTimestamps[$ReturnSeatIndex]=-1
       elif [[ $RegisterType == SETCONFIGKEY ]]
       then
         SetValueName=${ArraySessionData[1]}
