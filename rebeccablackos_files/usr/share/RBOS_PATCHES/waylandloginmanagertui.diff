@@ -385,7 +385,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3973,7 +3954,7 @@
+@@ -3975,7 +3956,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -394,7 +394,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4019,7 +4000,7 @@
+@@ -4021,7 +4002,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -403,7 +403,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4048,7 +4029,7 @@
+@@ -4050,7 +4031,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -412,7 +412,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4094,7 +4075,7 @@
+@@ -4096,7 +4077,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -421,7 +421,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4166,6 +4147,7 @@
+@@ -4168,6 +4149,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      StartSocketFilter &
