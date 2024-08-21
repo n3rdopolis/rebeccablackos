@@ -261,6 +261,8 @@ function UserSessionWorker
     . ~/.local/wlprofile &> /dev/null
   fi
 
+  dbus-update-activation-environment --systemd --all
+
   #XDG_SEAT and XDG_SESSION_ID variables tend to get cousumed by some desktops
   export WLM_XDG_SEAT=$XDG_SEAT
   export WLM_XDG_SESSION_ID=$XDG_SESSION_ID
@@ -378,6 +380,14 @@ function UserSessionWorker
   $SLEEPCMD 1
   TerminateJobPID $JournalctlPID 15 0
   exit
+}
+
+#Function that is run to set the environment and start the loginmanagerdisplay (when started with the --loginmanagerdisplay argument)
+function LoginManagerDisplayWorker
+{
+  . /usr/bin/wlruntime_vars &> /dev/null
+  dbus-update-activation-environment --systemd --all
+  exec "$@"
 }
 
 #Function that UserSession calls to attempt to guess and notify the user systemd of the WAYLAND_DISPLAY
@@ -3117,7 +3127,7 @@ function StartLoginManagerDisplay
        --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" \
        --setenv=XDG_SEAT=$CurrentSeat \
        --setenv=HOME="$HOME" \
-       $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
+       $0 --loginmanagerdisplay $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
@@ -4178,6 +4188,10 @@ function WaylandLoginManagerExecute
   then
     shift
     UserSessionWorker "$@" &> /dev/null
+  elif [[ $1 == "--loginmanagerdisplay" ]]
+  then
+    shift
+    LoginManagerDisplayWorker "$@" &> /dev/null
   elif [[ $1 == "--sendcommand" ]]
   then
     if [[ -z $3 ]]
