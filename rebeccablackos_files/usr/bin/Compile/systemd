@@ -23,13 +23,13 @@
 SOURCENAME=systemd
 
 #The URL of the Source code repo
-SOURCEURL=https://salsa.debian.org/systemd-team/systemd.git/
+SOURCEURL=https://github.com/systemd/systemd
 
 #The Type of repository the source code is on. Either 'GIT', 'SVN', 'BZR', or 'HG'.
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=upstream/252.x
+SOURCEREVISION=v256-stable
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -72,7 +72,7 @@ function DivertDpkgFile
     dpkg-divert --package "$DPKG_MAINTSCRIPT_PACKAGE" --add --rename --divert "$DivertDestination" "$SourceFile"
   fi
 }
-DivertDpkgFile /lib/systemd/systemd-logind /var/lib/divert-distrib/lib_systemd_systemd-logind ' > preinstall-pak
+DivertDpkgFile /usr/lib/systemd/systemd-logind /var/lib/divert-distrib/usr_lib_systemd_systemd-logind ' > preinstall-pak
 
 echo '#! /bin/bash
 if [[ $1 == upgrade ]]
