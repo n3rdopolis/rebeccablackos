@@ -19,7 +19,7 @@ echo "PHASE 0"
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-DEBIANRELEASE=bookworm
+DEBIANRELEASE=trixie
 
 unset HOME
 
