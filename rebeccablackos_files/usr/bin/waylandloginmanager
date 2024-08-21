@@ -382,14 +382,6 @@ function UserSessionWorker
   exit
 }
 
-#Function that is run to set the environment and start the loginmanagerdisplay (when started with the --loginmanagerdisplay argument)
-function LoginManagerDisplayWorker
-{
-  . /usr/bin/wlruntime_vars &> /dev/null
-  dbus-update-activation-environment --systemd --all
-  exec "$@"
-}
-
 #Function that UserSession calls to attempt to guess and notify the user systemd of the WAYLAND_DISPLAY
 #Only Weston supports the waylandloginmanager's ability to set an explict WAYLAND_DISPLAY, so a hueristic has to be used
 #If it fails, because the session uses systemd to start itself (and it's not in the tree, then that is OK)
@@ -969,6 +961,8 @@ function PrepareLoginManager
   export QT_QPA_PLATFORM=wayland
   export QT_QPA_PLATFORMTHEME=qt6ct
   export QT_FORCE_STDERR_LOGGING=1
+  export QT_NO_XDG_DESKTOP_PORTAL=1
+  export CANBERRA_DRIVER=null
   #Set the default path for weston
   export DEFAULTWAYLANDSERVER=$(which weston 2>/dev/null)
   #Specify where wsession files are found
@@ -2446,7 +2440,7 @@ function StartUserSession
    --setenv=XDG_SEAT="$USERSEAT" \
    --setenv=WLM_SEAT=$SeatFileName \
    --setenv=WAYLAND_HOST="$WAYLAND_HOST" \
-   $0 --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
+   "$0" --usersession $CompositorExec $BackendArguments  $SessionArgument $CompositorSeatArgument $AdditionalArguments $CompositorDisplayArgument &>/dev/null
 
   #Get the PID that was called, by seing which process is the 'leader pid' of the $USERSESSIONTTY tty that the server was started. This is needed to know what TTY to switch to.
   TRYCOUNT=0
@@ -3127,7 +3121,7 @@ function StartLoginManagerDisplay
        --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" \
        --setenv=XDG_SEAT=$CurrentSeat \
        --setenv=HOME="$HOME" \
-       $0 --loginmanagerdisplay $DEFAULTWAYLANDSERVER --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
+       "$DEFAULTWAYLANDSERVER" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0
@@ -3406,7 +3400,7 @@ function StartDbusHandler {
   {
     my $SecureAttentionKeySeat=shift;
 
-    system("$ARGV[0] --sendregisterdata RESCUESEAT $SecureAttentionKeySeat");
+    system("\"$ARGV[0]\" --sendregisterdata RESCUESEAT $SecureAttentionKeySeat");
 
     return;
   }
@@ -4188,10 +4182,6 @@ function WaylandLoginManagerExecute
   then
     shift
     UserSessionWorker "$@" &> /dev/null
-  elif [[ $1 == "--loginmanagerdisplay" ]]
-  then
-    shift
-    LoginManagerDisplayWorker "$@" &> /dev/null
   elif [[ $1 == "--sendcommand" ]]
   then
     if [[ -z $3 ]]
