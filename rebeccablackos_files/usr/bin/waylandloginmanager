@@ -249,6 +249,10 @@ function UserSessionWorker
     do
       $SLEEPCMD .1
     done
+
+    dbus-update-activation-environment --systemd --all
+  else
+    dbus-update-activation-environment --all
   fi
 
   #instead of .xprofile handle ~/.local/wlprofile files
@@ -260,8 +264,6 @@ function UserSessionWorker
   then
     . ~/.local/wlprofile &> /dev/null
   fi
-
-  dbus-update-activation-environment --systemd --all
 
   #XDG_SEAT and XDG_SESSION_ID variables tend to get cousumed by some desktops
   export WLM_XDG_SEAT=$XDG_SEAT
