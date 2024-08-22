@@ -40,7 +40,7 @@
 #Weston 10.0 or greater is required for support for launcher names in the tooltips for the loginmanagerdisplay. Weston 9.0 or greater is needed for the Kiosk Shell support, which permits some fallback. Otherwise for the multiseat functionality to work, Weston 5.0 or greater is an absolute must.
 
 #as well as:
-#At least systemd v235 as it has all the ability to launch Wayland sessions with systemd-run, and needs support for BindPaths (bugfix)
+#At least systemd v236 for the file logging in StandardOutput and StandardError
 #At least systemd v257 is required SecureAttentionKey handling, but this is a soft requirement
 
 #/etc/waylandloginmanager.conf
@@ -3112,6 +3112,8 @@ function StartLoginManagerDisplay
        --unit=wlm-loginmanagerdisplay_$SeatFileName \
        -p CollectMode=inactive-or-failed \
        -p PrivateTmp=yes \
+       -p StandardOutput=file:$LoginManagerDisplayLogPath \
+       -p StandardError=file:$LoginManagerDisplayLogPath \
        -p BindPaths="/tmp/.X11-unix/ /tmp/.ICE-unix/ /tmp/.XIM-unix/ /tmp/.font-unix/" \
        -p PAMName=waylandloginmanager-loginmanagerdisplay \
        -p User="$LOGINMANAGERDISPLAYUSER" \
@@ -3123,7 +3125,7 @@ function StartLoginManagerDisplay
        --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" \
        --setenv=XDG_SEAT=$CurrentSeat \
        --setenv=HOME="$HOME" \
-       "$DEFAULTWAYLANDSERVER" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
+       "$DEFAULTWAYLANDSERVER" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 
       LOGINMANAGERDISPLAYREADY=1
       TRYCOUNT=0

@@ -339,17 +339,17 @@
        if [[ ! -z $LIBGL_ALWAYS_SOFTWARE ]]
        then
          LOGINMANAGERDISPLAYENVSTRING+=" --setenv=LIBGL_ALWAYS_SOFTWARE=$LIBGL_ALWAYS_SOFTWARE "
-@@ -3123,7 +3101,8 @@
+@@ -3125,7 +3103,8 @@
         --setenv=XDG_CONFIG_HOME="$XDG_CONFIG_HOME" \
         --setenv=XDG_SEAT=$CurrentSeat \
         --setenv=HOME="$HOME" \
--       "$DEFAULTWAYLANDSERVER" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --log=$LoginManagerDisplayLogPath --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
+-       "$DEFAULTWAYLANDSERVER" --backend=$WESTONBACKENDSTRING $PIXMANARGS --socket=loginmanagerdisplay_$SeatFileName --config="$XDG_CONFIG_HOME/loginmanagerdisplay.ini" &>/dev/null
 +       --setenv=SeatFileName=$SeatFileName \
 +       "$DEFAULTWAYLANDSERVER" -m last -d -s -- foot --config=/etc/footkiosk.conf -- bash -c "trap '' 2; rm /run/waylandloginmanager/ptys/\$SeatFileName &>/dev/null; ln -s \$(tty) /run/waylandloginmanager/ptys/\$SeatFileName; sleep inf" &>/dev/null
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -3263,7 +3242,7 @@
+@@ -3265,7 +3244,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -358,7 +358,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -3288,7 +3267,7 @@
+@@ -3290,7 +3269,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -367,7 +367,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3332,7 +3311,7 @@
+@@ -3334,7 +3313,7 @@
    ActionMenu=($ActionMenu)
    unset IFS
  
@@ -376,7 +376,7 @@
    DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
-@@ -3742,9 +3721,9 @@
+@@ -3744,9 +3723,9 @@
        fi
      done
  
@@ -388,7 +388,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3981,7 +3960,7 @@
+@@ -3983,7 +3962,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -397,7 +397,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4027,7 +4006,7 @@
+@@ -4029,7 +4008,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -406,7 +406,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4056,7 +4035,7 @@
+@@ -4058,7 +4037,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -415,7 +415,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4102,7 +4081,7 @@
+@@ -4104,7 +4083,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -424,7 +424,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4174,6 +4153,7 @@
+@@ -4176,6 +4155,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      StartSocketFilter &
