@@ -1389,6 +1389,9 @@ function ReadRegister
           SeatRescueTimestamps[$ReturnSeatIndex]=-1
         elif [[ $SeatRescueTimeDelay -le 1 ]]
         then
+          #Force sw render/pixman on the loginmanagerdisplay only
+          LoginManagerDisplayIsFailsafes[$ReturnSeatIndex]=1
+
           UserActionAttemptCounts[$ReturnSeatIndex]=$MAX_UI_ATTEMPTS
           LoginManagerDisplayAttemptCounts[$ReturnSeatIndex]=$MAX_UI_ATTEMPTS
           systemctl stop wlm-loginmanagerdisplay_$RescueSeatFileName &> /dev/null
@@ -3067,7 +3070,7 @@ function StartLoginManagerDisplay
   fi
   if [[ $LOGINMANAGERDISPLAYSTATUS == 0 && $SeatStartCount -ge 0 && $DoStartLoginManagerDisplay == 1 ]]
   then
-    if [[ $SeatUsePixman == 1 ]]
+    if [[ $SeatUsePixman == 1 || ${LoginManagerDisplayIsFailsafes[$SeatIndexID]} == 1 ]]
     then
       PIXMANARGS="--use-pixman"
     else
@@ -3231,7 +3234,7 @@ function SetFallbackEnvironmentVariables
   GetStartedSeatIndex $1
   SeatIndexIDFallback=$ReturnSeatIndex
   SetFallbackSoftware=${SeatForceSWRenderFlags[$SeatIndexIDFallback]}
-  if [[ $SetFallbackSoftware == 1 ]]
+  if [[ $SetFallbackSoftware == 1 || ${LoginManagerDisplayIsFailsafes[$ReturnSeatIndex]} == 1 ]]
   then
     export LIBGL_ALWAYS_SOFTWARE=1
     export GBM_ALWAYS_SOFTWARE=1
@@ -3454,6 +3457,7 @@ function WaylandLoginManagerMain
   LoginManagerDisplayAttemptCounts=()
   LoginManagerDisplayBackends=()
   LoginManagerDisplayPixmanFlags=()
+  LoginManagerDisplayIsFailsafes=()
   SeatForceSWRenderFlags=()
   SeatFileNames=()
   SeatRescueTimestamps=()
@@ -3581,6 +3585,7 @@ function WaylandLoginManagerMain
           SeatForceSWRenderFlags[$StartIndex]=${SeatCapabilityArr[2]}
           LoginManagerDisplayAttemptCounts[$StartIndex]=$MAX_UI_ATTEMPTS
           SeatRescueTimestamps[$StartIndex]=0
+          LoginManagerDisplayIsFailsafes[$StartIndex]=0
           if [[ -f /run/waylandloginmanager/autologinran ]]
           then
             read -r -d $'\r' AUTOLOGINFILE 2>/dev/null </run/waylandloginmanager/autologinran
