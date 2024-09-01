@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2024-08-31 09:39:56.214563530 -0400
-+++ usr/bin/waylandloginmanagerzenity	2024-08-31 09:50:57.813616426 -0400
+--- usr/bin/waylandloginmanager	2024-08-31 23:16:48.804233623 -0400
++++ usr/bin/waylandloginmanagerzenity	2024-08-31 23:30:08.361050010 -0400
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports multiseat, and session failure detection
@@ -12,7 +12,7 @@
  
  #User sessions can have /etc/wlprofile or ~/.local/wlprofile (similar to xprofile only for Wayland)
  
-@@ -824,7 +824,7 @@
+@@ -829,7 +829,7 @@
    export MAX_UI_ATTEMPTS=5
    ######################################################
  
@@ -21,7 +21,7 @@
    export LOGINMANAGERDISPLAYUSER=waylandloginmanager
    #User that reads from the loginmanager_control socket, and filters the command sent to it to loginmanager_listener FIFO
    export FIFOREADERUSER=waylandloginmanager
-@@ -955,16 +955,14 @@
+@@ -960,16 +960,14 @@
    #Enable job control in this script
    set -m
  
@@ -41,7 +41,7 @@
    #Set the default path for weston
    export DEFAULTWAYLANDSERVER=$(which weston 2>/dev/null)
    #Specify where wsession files are found
-@@ -1024,7 +1022,7 @@
+@@ -1029,7 +1027,7 @@
    #Determine if this is running on a live instance, if booted with casper
    GetConfigKey wlmlivemode "" 0 0 LiveCDMode
  
@@ -50,7 +50,7 @@
    WAYLANDINFOCMD="runuser -u $LOGINMANAGERDISPLAYUSER -m -- wayland-info"
    if [[ $seat0HasTTYs == 1 ]]
    then
-@@ -1035,8 +1033,8 @@
+@@ -1040,8 +1038,8 @@
      TTYWIZARDCMD=true
    fi
  
@@ -61,7 +61,7 @@
  
    #Detect hardware abilities, first try to see if the system has kernel mode setting, then try framebuffer. if both aren't supported, bring up a text mode dialog
    GetConfigKey wlmforcefbdev "" 0 1 wlmforcefbdev
-@@ -1410,17 +1408,23 @@
+@@ -1415,17 +1413,23 @@
    done
  }
  
@@ -90,7 +90,7 @@
  }
  
  #This function takes 1 argument, the seat that the loginmanagerdisplay belongs to, and waits for the loginmanagerdisplay to startup
-@@ -2135,7 +2139,7 @@
+@@ -2140,7 +2144,7 @@
        done
        if [[ $WSESSIONNUMBER == -1 ]]
        then
@@ -99,7 +99,7 @@
          WriteToLog "$DEFAULTWSESSION set as default session for $SessionUser, but was not found in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
          return 1
        fi
-@@ -2146,33 +2150,17 @@
+@@ -2151,33 +2155,17 @@
        WSESSIONPICKLIST=""
        for (( element=0; element<$WSESSIONCOUNT; element++ ))
        do
@@ -137,7 +137,7 @@
        CancelOrOK=$?
        if [[ $CancelOrOK != 0 ]]
        then
-@@ -2188,7 +2176,7 @@
+@@ -2193,7 +2181,7 @@
    else
      unset WSESSIONDATA
      unset WSESSIONNUMBER
@@ -146,7 +146,7 @@
      WriteToLog "No sessions are installed in $WSESSIONSPATHS, configured correctly, or supported by the hardware in this seat, $CurrentHandleSeat ."
      return 1
    fi
-@@ -2224,7 +2212,7 @@
+@@ -2229,7 +2217,7 @@
  
  This is the optimal way to run Weston or other Wayland servers."
    fi
@@ -155,7 +155,7 @@
  
  $BACKENDSTRING
  
-@@ -2252,17 +2240,15 @@
+@@ -2257,17 +2245,15 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -179,7 +179,7 @@
      #determine if the current session is alive, before adding it to the list
      SessionisRunning=0
      for RunningSeatSession in "${RunningSeatSessions[@]}"
-@@ -2282,7 +2268,11 @@
+@@ -2287,7 +2273,11 @@
          then
            SessionList+=$'\n'
          fi
@@ -192,7 +192,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -2293,17 +2283,19 @@
+@@ -2298,17 +2288,19 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -218,7 +218,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2332,7 +2324,7 @@
+@@ -2337,7 +2329,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -227,7 +227,7 @@
        fi
      fi
    fi
-@@ -2606,30 +2598,26 @@
+@@ -2611,30 +2603,26 @@
      then
        UserDisplayName=$UserName
      fi
@@ -266,7 +266,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2637,9 +2625,9 @@
+@@ -2642,9 +2630,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -278,7 +278,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2670,9 +2658,9 @@
+@@ -2675,9 +2663,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -290,7 +290,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2686,7 +2674,7 @@
+@@ -2691,7 +2679,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -299,7 +299,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2710,13 +2698,13 @@
+@@ -2715,13 +2703,13 @@
        StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
      fi
    else
@@ -315,7 +315,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2731,13 +2719,13 @@
+@@ -2736,13 +2724,13 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -331,7 +331,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2793,15 +2781,9 @@
+@@ -2798,15 +2786,9 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -349,7 +349,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2864,7 +2846,7 @@
+@@ -2869,7 +2851,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -358,7 +358,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2910,7 +2892,7 @@
+@@ -2915,7 +2897,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -367,7 +367,7 @@
    fi
  }
  
-@@ -3255,7 +3237,7 @@
+@@ -3260,7 +3242,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -376,7 +376,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -3293,7 +3275,7 @@
+@@ -3298,7 +3280,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -385,7 +385,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3329,16 +3311,12 @@
+@@ -3334,16 +3316,12 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -407,7 +407,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -3346,12 +3324,12 @@
+@@ -3351,12 +3329,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -423,7 +423,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3749,9 +3727,9 @@
+@@ -3754,9 +3732,9 @@
        fi
      done
  

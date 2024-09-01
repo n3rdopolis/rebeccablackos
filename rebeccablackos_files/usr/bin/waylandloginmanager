@@ -121,7 +121,7 @@
 #Log Files:
   #/var/log/waylandloginmanager/waylandloginmanager.log : this is the main log for the waylandloginmanager
   #/var/log/waylandloginmanager/loginmanagerdisplays/loginmanagerdisplay_{SEAT}.log : This is the log file for the Weston server that is the loginmanagerdisplay
-  #~/.cache/wlsessionlogs/waylandsession_($SEAT)_($DATESTAMP).log : This is where all wayland servers get logged as the run as the user.
+  #~/.cache/wlsessionlogs/waylandsession_($SEAT)_($NewLogFileNumber).log : This is where all wayland servers get logged as the run as the user.
   #~/.cache/wlsessionlogs/waylandhost_($SEAT).log : This log is for the host Wayland server that gets started for Wayland sessions that run on other Wayland servers
 
 #Runtime Files:
@@ -187,14 +187,20 @@ function UserSessionWorker
 
   #Cleanup old log files
   LOGFILECOUNT=0
-  ls -t ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_* 2>/dev/null | while read -r LOGFILE
+  NewLogFileNumber=0
+  while read -r LOGFILE
   do
+    if [[ $NewLogFileNumber == 0 ]]
+    then
+      NewLogFileNumber=$(basename "$LOGFILE" | sed -e "s/waylandsession_${WLM_SEAT}_//g" -e "s/.log//g")
+    fi
     ((LOGFILECOUNT++))
     if [[ $LOGFILECOUNT -gt 4 ]]
     then
       rm "$LOGFILE" &> /dev/null
     fi
-  done
+  done < <(ls ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_*.log 2>/dev/null | sort -r)
+  ((NewLogFileNumber++))
 
   #Create a folder for the logs
   if [[ ! -e ~/.cache/wlsessionlogs ]]
@@ -204,8 +210,7 @@ function UserSessionWorker
 
   #set all arguments into an array
   ArgumentString=$(echo -en "$@")
-  DATESTAMP=$(date +%Y-%m-%d__%H-%M-%S)
-  export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${DATESTAMP}.log
+  export WLM_SESSION_LOG="$HOME"/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_${NewLogFileNumber}.log
   echo "Started with the arguments: $ArgumentString" >> $WLM_SESSION_LOG
   eval set -- $ArgumentString >> $WLM_SESSION_LOG
   ArgArray=($ArgumentString)
