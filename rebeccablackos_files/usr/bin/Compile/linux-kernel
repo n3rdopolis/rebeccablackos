@@ -177,6 +177,9 @@ make olddefconfig
 ./scripts/config -e CONFIG_DRM_SIMPLEDRM
 ./scripts/config -m CONFIG_DRM_GUD
 
+#Enbable vkms
+./scripts/config -m CONFIG_DRM_VKMS
+
 #DMA buf options
 ./scripts/config -e CONFIG_SYNC_FILE
 ./scripts/config -e CONFIG_SW_SYNC
