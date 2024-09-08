@@ -18,24 +18,24 @@
 SCRIPTFILEPATH=$(readlink -f "$0")
 SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-jp2a --colors --color-depth=24 $SCRIPTFOLDERPATH/rbos_logo_source.png             > $SCRIPTFOLDERPATH/asciilogos/logo_24_default.txt 
-jp2a --colors --color-depth=24 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=32 > $SCRIPTFOLDERPATH/asciilogos/logo_24_32.txt
-jp2a --colors --color-depth=24 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=16 > $SCRIPTFOLDERPATH/asciilogos/logo_24_16.txt
-jp2a --colors --color-depth=24 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=8  > $SCRIPTFOLDERPATH/asciilogos/logo_24_8.txt
+jp2a --colors --color-depth=24 "$SCRIPTFOLDERPATH"/rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_default.txt
+jp2a --colors --color-depth=24 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_32.txt
+jp2a --colors --color-depth=24 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_16.txt
+jp2a --colors --color-depth=24 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_8.txt
 
-jp2a --colors --color-depth=8 $SCRIPTFOLDERPATH/rbos_logo_source.png             > $SCRIPTFOLDERPATH/asciilogos/logo_8_default.txt 
-jp2a --colors --color-depth=8 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=32 > $SCRIPTFOLDERPATH/asciilogos/logo_8_32.txt
-jp2a --colors --color-depth=8 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=16 > $SCRIPTFOLDERPATH/asciilogos/logo_8_16.txt
-jp2a --colors --color-depth=8 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=8  > $SCRIPTFOLDERPATH/asciilogos/logo_8_8.txt
+jp2a --colors --color-depth=8 "$SCRIPTFOLDERPATH"/rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_default.txt
+jp2a --colors --color-depth=8 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_32.txt
+jp2a --colors --color-depth=8 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_16.txt
+jp2a --colors --color-depth=8 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_8.txt
 
 
-jp2a --colors --color-depth=4 $SCRIPTFOLDERPATH/rbos_logo_source.png             > $SCRIPTFOLDERPATH/asciilogos/logo_4_default.txt 
-jp2a --colors --color-depth=4 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=32 > $SCRIPTFOLDERPATH/asciilogos/logo_4_32.txt
-jp2a --colors --color-depth=4 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=16 > $SCRIPTFOLDERPATH/asciilogos/logo_4_16.txt
-jp2a --colors --color-depth=4 $SCRIPTFOLDERPATH/rbos_logo_source.png --height=8  > $SCRIPTFOLDERPATH/asciilogos/logo_4_8.txt
+jp2a --colors --color-depth=4 "$SCRIPTFOLDERPATH"/rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_default.txt
+jp2a --colors --color-depth=4 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_32.txt
+jp2a --colors --color-depth=4 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_16.txt
+jp2a --colors --color-depth=4 "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_8.txt
 
-jp2a $SCRIPTFOLDERPATH/rbos_logo_source.png             > $SCRIPTFOLDERPATH/asciilogos/logo_0_default.txt 
-jp2a $SCRIPTFOLDERPATH/rbos_logo_source.png --height=32 > $SCRIPTFOLDERPATH/asciilogos/logo_0_32.txt
-jp2a $SCRIPTFOLDERPATH/rbos_logo_source.png --height=16 > $SCRIPTFOLDERPATH/asciilogos/logo_0_16.txt
-jp2a $SCRIPTFOLDERPATH/rbos_logo_source.png --height=8  > $SCRIPTFOLDERPATH/asciilogos/logo_0_8.txt
+jp2a "$SCRIPTFOLDERPATH"/rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_default.txt
+jp2a "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_32.txt
+jp2a "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_16.txt
+jp2a "$SCRIPTFOLDERPATH"/rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_8.txt
 
