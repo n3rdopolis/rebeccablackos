@@ -1355,20 +1355,14 @@ fi
 #Detect if overlayfs can be used
 if [[ $OVERLAYFSTRANS == 1 && $UID == 0 ]]
 then
-  HASOVERLAYFS=$(grep -c overlay$ /proc/filesystems)
-  if [[ $HASOVERLAYFS == 0 ]]
-  then
-    HASOVERLAYFSMODULE=$(modprobe -n overlay; echo $?)
-    if [[ $HASOVERLAYFSMODULE == 0 ]]
-    then
-      HASOVERLAYFS=1
-    fi
-  fi
+  #When the filesystem type does not exist, the error quotes the non-existant file system type
+  #This is ths best way to probe if the kernel supports a file system without /proc/filesystems
+  OVERLAYFSMISSING=$(mount -t overlay none /tmp 2>&1 | grep -c "'overlay'")
 
   #Get a mapping of the filesystem, if it reports an unfavorable condition, then fall back
   FILESYSTEMMAP=$(getmountmap)
   GETMAPRESULT=$?
-  if [[ $HASOVERLAYFS == 1 && $GETMAPRESULT == 0 ]]
+  if [[ $OVERLAYFSMISSING == 0 && $GETMAPRESULT == 0 ]]
   then
     echog "Using overlayfs translation"
     USEOVERLAYFS=1
