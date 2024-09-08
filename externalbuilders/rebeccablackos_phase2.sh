@@ -40,7 +40,7 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/$PHASE2_PATHNAME "$BUILDLOCATIO
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-mount -t proc proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+mount -o subset=pid -t proc proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
@@ -49,9 +49,6 @@ mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
-
-#Hide /proc/modules as some debian packages call lsmod during install, which could lead to different results
-mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 
 #Bring in needed files.
 cp -a "$BUILDLOCATION"/build/"$BUILDARCH"/importdata/tmp/*     "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/tmp
@@ -84,7 +81,6 @@ then
 fi
 
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives

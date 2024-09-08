@@ -85,7 +85,7 @@ fi
 
 #mounting critical fses on chrooted fs with bind 
 mount --rbind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/ "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-mount -t proc proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
+mount -o subset=pid -t proc proc "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/minidev/shm "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 
@@ -97,9 +97,6 @@ mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild "$BUILDLOCATION"/build
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/archives "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/apt/archives
 mount --bind "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/log/buildlogs
-
-#Hide /proc/modules as some debian packages call lsmod during install, which could lead to different results
-mount --bind /dev/null "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 
 #Clear list of failed downloads
 if [[ -e "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/build_core/faileddownloads ]]
@@ -124,7 +121,6 @@ else
 fi
 
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/dev
-umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc/modules
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/proc
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/run/shm
 umount -lf "$BUILDLOCATION"/build/"$BUILDARCH"/workdir/var/cache/srcbuild/buildoutput
