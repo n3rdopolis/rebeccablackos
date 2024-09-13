@@ -244,6 +244,9 @@ make olddefconfig
 ./scripts/config -d CONFIG_FB_MB862XX_I2C
 ./scripts/config -d CONFIG_FB_HYPERV
 
+#Set default log level
+./scripts/config --set-val CONFIG_CONSOLE_LOGLEVEL_DEFAULT 6
+
 #Disable debug option
 ./scripts/config -d CONFIG_DEBUG_INFO_DWARF5
 ./scripts/config -d CONFIG_DEBUG_INFO_BTF
