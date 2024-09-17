@@ -62,7 +62,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #Workaround for co-installablilty of multiple wlroots versions
-sed -i "s/wlroots        = dependency('wlroots',/wlroots        = dependency('wlroots-0.17-tiny',/g" meson.build
+sed -i "s/wlroots        = dependency('wlroots-0.18',/wlroots        = dependency('wlroots-cage',/g" meson.build
 meson setup -Dbuildtype=plain -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwerror=false build
 }
 
