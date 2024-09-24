@@ -2291,7 +2291,7 @@ function SwitchUserDialog
 
   unset ChangeSession
   #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
+  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to switch to." --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
   CancelOrOK=$?
   #Abort if the user selected cancel on the dialog
   if [[ $CancelOrOK != 0 ]]
@@ -2616,7 +2616,7 @@ function GetUserCredentials
   unset IFS
 
   #present the list of the users to the system
-  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log into." -- "${USERLISTSTRING[@]}" 2>/dev/null )
+  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log as." -- "${USERLISTSTRING[@]}" 2>/dev/null )
   CancelOrOK=$?
   export LOGINUSER
   #Abort if the user selected cancel on the dialog
@@ -2788,7 +2788,7 @@ function LeavePrompt
   ACTIONSTRING=($ACTIONSTRING)
   unset IFS
 
-  ACTION=$($KDIALOGCMD --title="Leave..." --menu "What do you want to do?" -- "${ACTIONSTRING[@]}" 2>/dev/null )
+  ACTION=$($KDIALOGCMD --title="Leave..." --menu "Select an action." -- "${ACTIONSTRING[@]}" 2>/dev/null )
 
   CancelOrOK=$?
   #Abort if the user selected cancel on the dialog

@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2024-09-23 23:37:12.603424692 -0400
-+++ usr/bin/waylandloginmanagertui	2024-09-23 23:38:15.590823506 -0400
+--- usr/bin/waylandloginmanager
++++ usr/bin/waylandloginmanagertui
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports multiseat, and session failure detection
@@ -198,8 +198,8 @@
  
    unset ChangeSession
    #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
--  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
-+  ChangeSession=$($UIDIALOGCMD --title "Switch User" --menu "Select a running session to change into" 50 80 0 -- "${SessionList[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
+-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to switch to." --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
++  ChangeSession=$($UIDIALOGCMD --title "Switch User" --menu "Select a running session to switch to." 50 80 0 -- "${SessionList[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
    CancelOrOK=$?
    #Abort if the user selected cancel on the dialog
    if [[ $CancelOrOK != 0 ]]
@@ -225,8 +225,8 @@
    unset IFS
  
    #present the list of the users to the system
--  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log into." -- "${USERLISTSTRING[@]}" 2>/dev/null )
-+  LOGINUSER=$($UIDIALOGCMD --title "Username" --menu "Select a user from the list to log into." 30 70 0 -- "${USERLISTSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
+-  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log as." -- "${USERLISTSTRING[@]}" 2>/dev/null )
++  LOGINUSER=$($UIDIALOGCMD --title "Username" --menu "Select a user from the list to log as." 30 70 0 -- "${USERLISTSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
    CancelOrOK=$?
    export LOGINUSER
    #Abort if the user selected cancel on the dialog
@@ -290,12 +290,12 @@
    ACTIONSTRING=($ACTIONSTRING)
    unset IFS
  
--  ACTION=$($KDIALOGCMD --title="Leave..." --menu "What do you want to do?" -- "${ACTIONSTRING[@]}" 2>/dev/null )
+-  ACTION=$($KDIALOGCMD --title="Leave..." --menu "Select an action." -- "${ACTIONSTRING[@]}" 2>/dev/null )
 +  if [[ $PromptAsUser == 0 ]]
 +  then
-+    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "What do you want to do?" 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
++    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "Select an action." 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1 > /run/waylandloginmanager/ptys/$SeatFileName < /run/waylandloginmanager/ptys/$SeatFileName )
 +  else
-+    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "What do you want to do?" 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1)
++    ACTION=$($UIDIALOGCMD --title "Leave..." --menu "Select an action." 30 60 0 -- "${ACTIONSTRING[@]}" 2>&1)
 +  fi
  
    CancelOrOK=$?

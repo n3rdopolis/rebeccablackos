@@ -1,5 +1,5 @@
---- usr/bin/waylandloginmanager	2024-09-23 23:37:12.603424692 -0400
-+++ usr/bin/waylandloginmanagerzenity	2024-09-23 23:37:59.288238301 -0400
+--- usr/bin/waylandloginmanager
++++ usr/bin/waylandloginmanagerzenity
 @@ -18,9 +18,9 @@
  
  #This script is the WaylandLoginManager it handles a graphical login for the user, and allows the user to start multiple types of Wayland sessions, specified in wsession files, and it supports autologin, and user switching. It supports multiseat, and session failure detection
@@ -210,8 +210,8 @@
  
    unset ChangeSession
    #prompt for the list of running sessions, and return the session ID. (which is used in all of the arrays for Session PID, user name, etc)
--  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to change into" --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
-+  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --width=500 --list --text "Select a running session to change into" --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=1,3,5 --separator="\n" 2>/dev/null )
+-  ChangeSession=$($KDIALOGCMD --title="Switch User" --menu "Select a running session to switch to." --geometry=500x300+0+0 -- "${SessionList[@]}" 2>/dev/null )
++  ChangeSession=$(echo "$SessionList"  | sed '$d'| $ZENITYCMD --title="Switch User" --height=450 --width=500 --list --text "Select a running session to switch to." --hide-header --column sessionid --column tty --column pid --column username --column ID --print-column=1 --hide-column=1,3,5 --separator="\n" 2>/dev/null )
    CancelOrOK=$?
 -  #Abort if the user selected cancel on the dialog
 +  #Abort if the user selected cancel on the zenity dialog
@@ -257,8 +257,8 @@
 -  unset IFS
  
    #present the list of the users to the system
--  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log into." -- "${USERLISTSTRING[@]}" 2>/dev/null )
-+  LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log into."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
+-  LOGINUSER=$($KDIALOGCMD --title="Username" --menu "Select a user from the list to log as." -- "${USERLISTSTRING[@]}" 2>/dev/null )
++  LOGINUSER=$(echo "$USERLISTSTRING" | $ZENITYCMD --title="Username" --height=450 --list --text "Select a user from the list to log as."  --column users --column usernames --hide-column 2 --print-column 2 --hide-header --separator="\n" 2>/dev/null )
    CancelOrOK=$?
    export LOGINUSER
 -  #Abort if the user selected cancel on the dialog
@@ -340,9 +340,9 @@
 -  ACTIONSTRING=($ACTIONSTRING)
 -  unset IFS
 -
--  ACTION=$($KDIALOGCMD --title="Leave..." --menu "What do you want to do?" -- "${ACTIONSTRING[@]}" 2>/dev/null )
+-  ACTION=$($KDIALOGCMD --title="Leave..." --menu "Select an action." -- "${ACTIONSTRING[@]}" 2>/dev/null )
 -
-+  ACTION=$(echo "$ACTIONSTRING" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="What do you want to do?" --separator="\n" --column 'action' --column 'useraction' --hide-column 1 --print-column=1  2>/dev/null )
++  ACTION=$(echo "$ACTIONSTRING" | $ZENITYCMD --title="Leave..." --height=450 --list  --hide-header --text="Select an action." --separator="\n" --column 'action' --column 'useraction' --hide-column 1 --print-column=1  2>/dev/null )
    CancelOrOK=$?
 -  #Abort if the user selected cancel on the dialog
 +  #Abort if the user selected cancel on the zenity dialog
