@@ -2216,22 +2216,7 @@ function ShowInfo
     SEATSTRING="This Login Manager Display is for seat $CurrentSeat"
   fi
   SeatDefaultBackendType=${LoginManagerDisplayBackends[$SeatIndexID]}
-  #If the backend type is FB, then add a string to tell the user that in the help dialog
-  if [[ $SeatDefaultBackendType == "FB" ]]
-  then
-    BACKENDSTRING="The framebuffer backend is being used for this seat.
-
-This probably means the current video card drivers do not 
-support the native kernel mode setting that is optimal for Weston or other Wayland servers.
-or the system was started with the wlmforcefbdev argument."
-  else
-    BACKENDSTRING="Kernel mode setting is being used for this seat.
-
-This is the optimal way to run Weston or other Wayland servers."
-  fi
   $KDIALOGCMD --title="System Information" --msgbox "This is a third party fan made distribution!
-
-$BACKENDSTRING
 
 $SEATSTRING
 
