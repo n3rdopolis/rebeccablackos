@@ -1656,7 +1656,7 @@ function ParseWSessionFiles
       #If the line is for a backend, determine what element to set on the backend array
       #Each backend has a number elements each, and are always in order KMS, WKS, WL, FB
       #The number of elements are fixed place for if it's supports the backend, arguments for the backend, if the backend supports seats, ect.
-      if [[ $KeyName =~ [a-Z]*KMS[a-Z]* || $KeyName =~ [a-Z]*WKS[a-Z]* || $KeyName =~ [a-Z]*WL[a-Z]* || $KeyName =~ [a-Z]*FB[a-Z]* ]]
+      if [[ $KeyName =~ [a-zA-Z]*KMS[a-zA-Z]* || $KeyName =~ [a-zA-Z]*WKS[a-zA-Z]* || $KeyName =~ [a-zA-Z]*WL[a-zA-Z]* || $KeyName =~ [a-zA-Z]*FB[a-zA-Z]* ]]
       then
         for BACKEND in KMS WKS WL FB
         do
