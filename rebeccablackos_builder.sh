@@ -266,7 +266,7 @@ function run_buildprocess {
     echolog "Select architecture:"
     echolog "  Enter 0 or press Enter to build an ISO matching the current architecture ($DEFAULT_ARCH)"
     echolog "  Enter 1 for amd64"
-    echolog "  Enter 2 for i386"
+    echolog "  Enter 2 for i386 (Unsupported)"
     echolog "  Enter 3 for arm64 (Unsupported)"
     echolog "  Enter 4 for armhf (Unsupported)"
     echolog "  Enter 5 for a prompt for a custom architecture (Unsupported)"
