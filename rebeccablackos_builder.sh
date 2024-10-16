@@ -1123,7 +1123,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   echolog -n "Export time: $((EXPORT_ENDTIME-EXPORT_STARTTIME)) seconds, " 
   echolog    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
 
-  LIST=$(find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/ -mindepth 1 -maxdepth 1 -type f -printf "%f\n" | sort | tr '\n' '|' | sed 's/|/. /g')
+  LIST=$(find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/ -mindepth 1 -maxdepth 1 -type f -printf "%f\n" | sort | tr '\n' ' ')
   if [[ ! -z $LIST ]]
   then
     echolog -e "\nExtra packages found under "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ that were not used"
@@ -1135,7 +1135,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   if [[ -e "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_1/failedpackages.log ]]
   then
     echolog -e "\nPackages and operations that failed to download in phase 1:"
-    LIST=$(cat "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_1/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+    LIST=$(cat "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_1/failedpackages.log | tr '\n' ' ')
     echolog "$LIST"
     echolog " "
   fi
@@ -1143,7 +1143,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   if [[ -e "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_2/failedpackages.log ]]
   then
     echolog -e "\nPackages and operations that failed to install in phase 2:"
-    LIST=$(cat "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_2/failedpackages.log | tr '\n' '|' | sed 's/|/. /g')
+    LIST=$(cat "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_2/failedpackages.log | tr '\n' ' ')
     echolog "$LIST"
     echolog " "
   fi
