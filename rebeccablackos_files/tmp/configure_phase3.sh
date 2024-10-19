@@ -51,24 +51,6 @@ do
   cp /tmp/import/"$ExcludedFile" "$ExcludedFile"
 done
 
-#function to handle moving back dpkg redirect files for chroot
-function RevertFile {
-  TargetFile=$1
-  SourceFile=$(dpkg-divert --truename "$1")
-  if [[ "$TargetFile" != "$SourceFile" ]]
-  then
-    rm "$1"
-    dpkg-divert --local --rename --remove "$1"
-  fi
-}
-
-#function to handle temporarily moving files with dpkg that attempt to cause issues with chroot
-function RedirectFile {
-  RevertFile "$1"
-  dpkg-divert --local --rename --add "$1" 
-  ln -s /bin/true "$1"
-}
-
 if [[ -f /tmp/APTFETCHDATE ]]
 then
   PACKAGEDATE=$(cat "/tmp/APTFETCHDATE" | grep -v ^$| awk -F = '{print $2}')
@@ -135,12 +117,6 @@ remastersys dist
 mv /home/remastersys/remastersys/custom.iso /home/remastersys/custom-full.iso
 rm -rf /home/remastersys/remastersys/*
 
-
-#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-RedirectFile /usr/sbin/grub-probe
-RedirectFile /sbin/initctl
-RedirectFile /usr/sbin/invoke-rc.d
-
 #This will remove abilities to build packages from the reduced ISO, but should make it a bit smaller
 REMOVEDEVPGKS=$(dpkg --get-selections | awk '{print $1}' | grep "\-dev$"  | grep -v dpkg-dev)
 
@@ -183,11 +159,6 @@ apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3
 
 #Install the reduced packages
 compile_all installsmallpackage 
-
-#Reset the utilites back to the way they are supposed to be.
-RevertFile /usr/sbin/grub-probe
-RevertFile /sbin/initctl
-RevertFile /usr/sbin/invoke-rc.d
 
 #Force the post install package to re-run certian actions
 dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/postbuildcore-${PACKAGESUFFIX}*.deb

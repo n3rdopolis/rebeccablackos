@@ -25,29 +25,6 @@ fi
 
 export PACKAGEOPERATIONLOGDIR=/var/log/buildlogs/package_operations
 
-#function to handle moving back dpkg redirect files for chroot
-function RevertFile {
-  TargetFile=$1
-  SourceFile=$(dpkg-divert --truename "$1")
-  if [[ "$TargetFile" != "$SourceFile" ]]
-  then
-    rm "$1"
-    dpkg-divert --local --rename --remove "$1"
-  fi
-}
-
-#function to handle temporarily moving files with dpkg that attempt to cause issues with chroot
-function RedirectFile {
-  RevertFile "$1"
-  dpkg-divert --local --rename --add "$1" 
-  ln -s /bin/true "$1"
-}
-
-#Redirect these utilitues to /bin/true during the live CD Build process. They aren't needed and cause package installs to complain
-RedirectFile /usr/sbin/grub-probe
-RedirectFile /sbin/initctl
-RedirectFile /usr/sbin/invoke-rc.d
-
 #Configure dpkg
 echo "force-unsafe-io" > /etc/dpkg/dpkg.cfg.d/force-unsafe-io
 echo "force-confold"   > /etc/dpkg/dpkg.cfg.d/force-confold
@@ -236,10 +213,6 @@ then
 else
   echo        "Not purging older packages, because apt-get update failed" 2>&1 |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_2/5_purge_obsolete.log
 fi
-#Reset the utilites back to the way they are supposed to be.
-RevertFile /usr/sbin/grub-probe
-RevertFile /sbin/initctl
-RevertFile /usr/sbin/invoke-rc.d
 
 #set dpkg to defaults
 rm /etc/dpkg/dpkg.cfg.d/force-unsafe-io
