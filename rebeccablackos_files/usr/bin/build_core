@@ -1105,7 +1105,10 @@ function MakeAndInstall()
   mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
 
   mkdir -p "$INSTALLDIR/bin"
-  ln -s "$INSTALLDIR/bin" "$INSTALLDIR/sbin"
+  if [[ -e "$INSTALLDIR/sbin" ]]
+  then
+    ln -s "$INSTALLDIR/bin" "$INSTALLDIR/sbin"
+  fi
   mkdir -p "$INSTALLDIR/share/aclocal"
   mkdir -p "$INSTALLDIR/lib/$DEB_HOST_MULTIARCH"
   mkdir -p "$INSTALLDIR/libexec"
