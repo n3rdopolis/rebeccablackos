@@ -291,6 +291,18 @@ function InstallDebFile()
   return $?
 }
 
+#Function to probe if git is installed
+function GetInstalledGIT()
+{
+  command -v git > /dev/null
+  ReturnStatus=$?
+  if [[ $ReturnStatus != 0 ]]
+  then
+    echo "Unable to download as git is not installed" | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+  fi
+  return $ReturnStatus
+}
+
 #function to get the revison of GIT repos
 function GetVersionGIT()
 {
@@ -423,6 +435,18 @@ function DownloadGIT()
   return $UpdateCommandResult
 }
 
+#Function to probe if svn is installed
+function GetInstalledSVN()
+{
+  command -v svn > /dev/null
+  ReturnStatus=$?
+  if [[ $ReturnStatus != 0 ]]
+  then
+    echo "Unable to download as svn is not installed" | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+  fi
+  return $ReturnStatus
+}
+
 #function to get the revison of SVN repos
 function GetVersionSVN()
 {
@@ -474,6 +498,17 @@ function DownloadSVN()
   return $UpdateCommandResult
 }
 
+#Function to probe if bzr is installed
+function GetInstalledBZR()
+{
+  command -v bzr > /dev/null
+  ReturnStatus=$?
+  if [[ $ReturnStatus != 0 ]]
+  then
+    echo "Unable to download as bzr is not installed" | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+  fi
+  return $ReturnStatus
+}
 
 #function to get the version of BZR repos
 function GetVersionBZR()
@@ -529,6 +564,18 @@ function DownloadBZR()
   return $UpdateCommandResult
 }
 
+#Function to probe if hg is installed
+function GetInstalledHG()
+{
+  command -v hg > /dev/null
+  ReturnStatus=$?
+  if [[ $ReturnStatus != 0 ]]
+  then
+    echo "Unable to download as hg is not installed" | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+  fi
+  return $ReturnStatus
+}
+
 #function to get the version of hg repos
 function GetVersionHG()
 {
@@ -582,6 +629,17 @@ function DownloadHG()
   fi
 }
 
+#Function to probe if wget is installed
+function GetInstalledARCHIVE()
+{
+  command -v wget > /dev/null
+  ReturnStatus=$?
+  if [[ $ReturnStatus != 0 ]]
+  then
+    echo "Unable to download as wget is not installed" | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+  fi
+  return $ReturnStatus
+}
 
 #function to get the version of Archives
 function GetVersionARCHIVE()
@@ -715,10 +773,16 @@ function DownloadSource()
     $NONROOTCOMMAND nslookup root-servers.org &> /dev/null
     NetworkStatus=$?
 
+    GetInstalled$REPOSITORYTYPE
+    SourceHandlerInstalledStatus=$?
+
     #If no network, skip downloading.
-    if [[ $NetworkStatus != 0 ]]
+    if [[ $NetworkStatus != 0 || $SourceHandlerInstalledStatus != 0 ]]
     then
-      echo "Skipping download, no network availible." | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+      if [[ $NetworkStatus != 0 ]]
+      then
+        echo "Skipping download, no network availible." | tee "$BUILDLOGDIR/$SOURCENAME/Download$REPOSITORYTYPE"
+      fi
       DownloadRepoResult=1
     else
       for (( DownloadAttempt=1 ; DownloadAttempt <= $DownloadAttempts ; DownloadAttempt++ ))
