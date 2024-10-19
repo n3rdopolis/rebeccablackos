@@ -1104,10 +1104,11 @@ function MakeAndInstall()
 {
   mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
 
+  mkdir -p "$INSTALLDIR/bin"
+  ln -s "$INSTALLDIR/bin" "$INSTALLDIR/sbin"
   mkdir -p "$INSTALLDIR/share/aclocal"
   mkdir -p "$INSTALLDIR/lib/$DEB_HOST_MULTIARCH"
   mkdir -p "$INSTALLDIR/libexec"
-  mkdir -p "$INSTALLDIR/doc"
   mkdir -p "$INSTALLDIR/include"
 
   #Get all Source 
