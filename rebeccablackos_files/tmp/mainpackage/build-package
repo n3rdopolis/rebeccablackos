@@ -103,3 +103,19 @@ touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
 
 #Set the bootsplash for remastersys
 ln -sf /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png
+
+#Create sbin symlinks
+if [[ ! -e /usr/sbin/auto_simpledrm_fallback ]]
+then
+  ln -s /usr/bin/auto_simpledrm_fallback /usr/sbin/auto_simpledrm_fallback
+fi
+
+if [[ ! -e /usr/sbin/recinit ]]
+then
+  ln -s /usr/bin/recinit /usr/sbin/recinit
+fi
+
+if [[ ! -e /usr/sbin/list_build_core_usr_clashes ]]
+then
+  ln -s /usr/bin/list_build_core_usr_clashes /usr/sbin/list_build_core_usr_clashes
+fi
