@@ -425,7 +425,8 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     TARNAME=$(ar t "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb |grep 'data\.tar\.')
     ar p "$BUILDLOCATION"/debootstrap/debian-archive-keyring.deb $TARNAME > "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar
 
-    tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap ./usr/sbin/debootstrap
+    DEBOOTSTRIPBINPATH=$(tar -atf "$BUILDLOCATION"/debootstrap/debootstrap.tar | grep bin/debootstrap$)
+    tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap "$DEBOOTSTRIPBINPATH"
     tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/scripts
     tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/functions
     tar -axf "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap/keyrings ./usr/share/keyrings/debian-archive-keyring.gpg
