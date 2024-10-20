@@ -147,13 +147,19 @@ fi
 
 # copy binaries and base plugins
 copy_exec /opt/bin/plymouth
-copy_exec /opt/sbin/plymouthd
+cp /opt/sbin/plymouthd ${DESTDIR}/opt/bin/plymouthd
 copy_exec /opt/libexec/plymouth/plymouthd-fd-escrow
 
 ln -sf /opt/bin/plymouth ${DESTDIR}/bin/plymouth
 ln -sf /opt/bin/plymouth ${DESTDIR}/usr/bin/plymouth
-ln -sf /opt/sbin/plymouthd ${DESTDIR}/sbin/plymouthd
-ln -sf /opt/sbin/plymouthd /usr/sbin/plymouthd
+if [ ! -e ${DESTDIR}/sbin/plymouthd ]
+then
+        ln -sf /opt/sbin/plymouthd ${DESTDIR}/sbin/plymouthd
+fi
+if [ ! -e ${DESTDIR}/usr/sbin/plymouthd ]
+then
+        ln -sf /opt/sbin/plymouthd ${DESTDIR}/usr/sbin/plymouthd
+fi
 
 for PLUGIN in ${PLUGINS}
 do
