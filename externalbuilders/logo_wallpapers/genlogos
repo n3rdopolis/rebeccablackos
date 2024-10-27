@@ -1,0 +1,69 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2024 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+SCRIPTFILEPATH=$(readlink -f "$0")
+SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
+
+if [[ -z $BLENDERPATH ]]
+then
+  echo "The variable \"\$BLENDERPATH\" must be manually set and exported to a path to a blender binary that supports denoise-ing with OpenImageDenoise."
+  exit 1
+fi
+
+#Render the logos
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S _Scene_Main -o //####_rbos_logo_source -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Boot_Logo -o //####_rbos_logo_boot -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Calamares_Logo -o //####_rbos_logo_calamares -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Icon -o //####_rbos_logo_icon -f 0
+
+#Place the new logos in the correct places
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/RBOS_PATCHES/plymouth/boot_logo.png
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_calamares.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/RBOS_PATCHES/calamares/src/branding/default/LogoRBOS.png
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_icon.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/icons/RBOS_icon.png
+
+#Update the Wallpapers
+#https://stackoverflow.com/questions/10918907/how-to-add-transparent-watermark-in-center-of-a-video-with-ffmpeg
+#https://stackoverflow.com/questions/71910384/ffmpeg-removing-black-outline-on-overlay-after-alphamerge
+ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_login.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png
+
+ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_desktop.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png
+
+ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_boot.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Bootsplash/contents/images/1920x1200.png
+
+
+#Generate the ASCII art
+jp2a --background=light --colors --color-depth=24 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_default.txt
+jp2a --background=light --colors --color-depth=24 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_32.txt
+jp2a --background=light --colors --color-depth=24 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_16.txt
+jp2a --background=light --colors --color-depth=24 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_24_8.txt
+
+jp2a --background=light --colors --color-depth=8 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_default.txt
+jp2a --background=light --colors --color-depth=8 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_32.txt
+jp2a --background=light --colors --color-depth=8 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_16.txt
+jp2a --background=light --colors --color-depth=8 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_8_8.txt
+
+
+jp2a --background=light --colors --color-depth=4 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_default.txt
+jp2a --background=light --colors --color-depth=4 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_32.txt
+jp2a --background=light --colors --color-depth=4 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_16.txt
+jp2a --background=light --colors --color-depth=4 "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_4_8.txt
+
+jp2a --background=light "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png             > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_default.txt
+jp2a --background=light "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=32 > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_32.txt
+jp2a --background=light "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=16 > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_16.txt
+jp2a --background=light "$SCRIPTFOLDERPATH"/0000_rbos_logo_source.png --height=8  > "$SCRIPTFOLDERPATH"/asciilogos/logo_0_8.txt
+
