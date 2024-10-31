@@ -33,11 +33,22 @@ fi
 mkdir -p "${DESTDIR}/lib/udev/rules.d"
 cp /lib/udev/rules.d/60-input-id.rules "${DESTDIR}/lib/udev/rules.d"
 
-if [ -e /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf ]
+MonospaceFontPath=$(fc-match -f %{file} monospace)
+if [ -n $MonospaceFontPath ]
 then
-  mkdir -p "${DESTDIR}/usr/share/fonts/truetype/dejavu"
-  cp -aZ /usr/share/fonts/truetype/dejavu/DejaVuSansMono.ttf "${DESTDIR}/usr/share/fonts/truetype/dejavu"
+  MonospaceFontFolder=$(dirname "$MonospaceFontPath")
+  mkdir -p "${DESTDIR}/$MonospaceFontFolder"
+  cp -aZ "$MonospaceFontPath" "${DESTDIR}/$MonospaceFontFolder"
 fi
+
+BoldMonospaceFontPath=$(fc-match -f %{file} monospace:weight=bold)
+if [ -n $BoldMonospaceFont ]
+then
+  BoldMonospaceFontFolder=$(dirname "$BoldMonospaceFontPath")
+  mkdir -p "${DESTDIR}/$BoldMonospaceFontFolder"
+  cp -aZ "$BoldMonospaceFontPath" "${DESTDIR}/$BoldMonospaceFontFolder"
+fi
+
 
 if [ -e /usr/lib/locale/[cC].[uU][tT][fF]*8/ ]
 then
