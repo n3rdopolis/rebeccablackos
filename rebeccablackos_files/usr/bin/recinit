@@ -21,8 +21,8 @@
 
 #If this is pid1 it starts /sbin/init upon exit, or the overrideinit= option if it is passed to the kernel
 
-UID=$(id -u)
-if [ $UID -ne 0 ]
+USER_UID=$(id -u)
+if [ $USER_UID -ne 0 ]
 then
   echo "Must be run as root"
   exit 1
