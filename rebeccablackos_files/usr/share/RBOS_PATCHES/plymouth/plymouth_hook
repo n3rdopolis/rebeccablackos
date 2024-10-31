@@ -110,6 +110,11 @@ then
                 if [ ! -z "$PLYMOUTH_MONOSPACE_FONT_PATH" ]; then
                         copy_exec "$PLYMOUTH_MONOSPACE_FONT_PATH"
                 fi
+                PLYMOUTH_BOLD_MONOSPACE_FONT_PATH=$(fc-match -f %{file} "$PLYMOUTH_MONOSPACE_FONT":weight=bold)
+                if [ ! -z "$PLYMOUTH_BOLD_MONOSPACE_FONT_PATH" ]; then
+                        copy_exec "$PLYMOUTH_BOLD_MONOSPACE_FONT_PATH"
+                fi
+
         fi
 else
         exit 0
