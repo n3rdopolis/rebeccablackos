@@ -54,7 +54,7 @@ chmod 700 /run/user/0
 export XDG_RUNTIME_DIR=/run/user/0
 export XDG_SEAT=seat0
 export WLR_RENDERER_ALLOW_SOFTWARE=1
-export LIBSEAT_BACKEND=builtin
+export LIBSEAT_BACKEND=noop
 export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
 export WLR_NO_HARDWARE_CURSORS=1
