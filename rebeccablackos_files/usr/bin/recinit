@@ -21,6 +21,8 @@
 
 #If this is pid1 it starts /sbin/init upon exit, or the overrideinit= option if it is passed to the kernel
 
+#If the first argument is "--", then further arguments are handled as a command to execute (as in "recinit -- command --argument1 --argument2")
+
 USER_UID=$(id -u)
 if [ $USER_UID -ne 0 ]
 then
@@ -75,6 +77,7 @@ then
 fi
 
 #Supress warning when started from initramfs
+LC_ALL_REAL=$LC_ALL
 export LC_ALL=C.UTF-8
 
 #Load simpledrm if there is no /dev/dri/card0 device
@@ -115,12 +118,19 @@ then
   plymouth hide-splash
 fi
 
-#Prefer bash (if started as init). In initramfs, only sh tends to be usable, use sh as a fallback
-if command -v bash > /dev/null 2>/dev/null
+#If the first argument is --, the rest of the arguments are a command that will run within the terminal emulator
+if [ $# -gt 0 ] && [ $1 = "--" ]
 then
-  RUNCOMMAND="bash -l"
+  shift
+  RUNCOMMAND="$@"
 else
-  RUNCOMMAND="sh -l"
+  #Prefer bash, use sh as a fallback
+  if command -v bash > /dev/null 2>/dev/null
+  then
+    RUNCOMMAND="bash -l"
+  else
+    RUNCOMMAND="sh -l"
+  fi
 fi
 
 if [ "$RECINIT_SYSTEMD" = "1" ]
@@ -136,7 +146,7 @@ fi
 
 cage -d -s -m last -- \
 foot --config=/etc/footkiosk.conf --override=scrollback.lines=10000  -- \
-sh -c "$RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
+sh -c "LC_ALL=$LC_ALL_REAL $RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
 if [ $udev_result -ne 0 ]
 then
