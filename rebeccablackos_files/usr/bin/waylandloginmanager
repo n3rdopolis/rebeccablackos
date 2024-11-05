@@ -199,7 +199,7 @@ function UserSessionWorker
     then
       rm "$LOGFILE" &> /dev/null
     fi
-  done < <(ls ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_*.log 2>/dev/null | sort -r)
+  done < <(ls ~/.cache/wlsessionlogs/waylandsession_${WLM_SEAT}_*.log 2>/dev/null | sort -rV)
   ((NewLogFileNumber++))
 
   #Create a folder for the logs
