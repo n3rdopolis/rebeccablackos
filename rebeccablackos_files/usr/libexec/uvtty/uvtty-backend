@@ -76,7 +76,7 @@ function UvTTYBackendMain
     SHELLCMD="$SHELL"
   fi
 
-  socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700,fork &
+  socat exec:"/usr/libexec/uvtty/uvtty-be-run $UvTTYName $SHELLCMD",pty,stderr,setsid,sigint,sane unix-listen:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy",mode=0700 &
   SOCATPID=$!
   $SLEEPCMD .1
 
