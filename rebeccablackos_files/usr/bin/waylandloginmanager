@@ -2811,29 +2811,7 @@ function LeavePrompt
   do
     Include=1
     RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
-    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
-    then
-      Include=0
-    fi
-    if [[ $Include == 1 ]]
-    then
-      ((RunningSessionCount++))
-    fi
-    ((RunningSessionItr++))
-  done
-  unset RunningSessions
-  unset RunningSessionTypes
-
-  #Get the number of running sessions
-  RunningSessions=($(loginctl list-sessions --no-legend 2>/dev/null| awk '{print $1}'))
-  RunningSessionTypes=($(loginctl show-session -p Class ${RunningSessions[@]} --value 2>/dev/null))
-  RunningSessionItr=0
-  RunningSessionCount=0
-  for RunningSession in "${RunningSessions[@]}"
-  do
-    Include=1
-    RunningSessionType=${RunningSessionTypes[$RunningSessionItr]}
-    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" ]]
+    if [[ $RunningSessionType == "greeter"  || $RunningSessionType == "lock-screen" || $RunningSessionType == "manager" || $RunningSessionType == "manager-early" ]]
     then
       Include=0
     fi
