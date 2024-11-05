@@ -74,6 +74,7 @@ patch -f --no-backup-if-mismatch -p1 < /usr/share/RBOS_PATCHES/casper.diff
 rm scripts/casper-bottom/22sslcert #WORKAROUND
 rm scripts/casper-bottom/41apt_cdrom
 sed -i "s|/root$INSTALLDIR/share/autostart/trackerd.desktop|$INSTALLDIR/etc/xdg/autostart/tracker-store.desktop|g" scripts/casper-bottom/36disable_trackerd
+sed -i '/db_set passwd\/username "$USERNAME"/a db_set passwd/user-default-groups string adm cdrom dip lpadmin plugdev sambashare debian-tor libvirtd sudo users' scripts/casper-bottom/25adduser
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
