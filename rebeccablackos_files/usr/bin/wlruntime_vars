@@ -27,7 +27,7 @@ fi
 unset HOME
 export HOME=$(echo ~)
 export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-export XDG_DATA_DIRS=/opt/share:/usr/share
+export XDG_DATA_DIRS=$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/opt/share:/usr/local/share:/usr/share
 export GI_TYPELIB_PATH=/opt/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
 export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS:/etc/xdg
 export PATH=/opt/sbin:/opt/bin:/opt/games:/usr/games:$PATH
