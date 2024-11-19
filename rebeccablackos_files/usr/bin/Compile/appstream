@@ -57,6 +57,14 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+cat <<EOF > postinstall-pak
+#!/bin/sh
+. /usr/bin/wlruntime_vars
+$INSTALLDIR/bin/appstreamcli refresh-cache --source=os || true
+$INSTALLDIR/bin/appstreamcli refresh-cache --force || true
+exit 0
+EOF
+
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dqt=true -Dapt-support=true build -Dapidocs=false
 }
 
@@ -77,7 +85,9 @@ ninja -C build install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-:
+cp $INSTALLDIR/etc/apt/apt.conf.d/50appstream /etc/apt/apt.conf.d/50appstreamconf
+sed -i "s|/usr/bin/appstreamcli|$INSTALLDIR/bin/appstreamcli|g" /etc/apt/apt.conf.d/50appstreamconf
+sed -i "s| appstreamcli| $INSTALLDIR/bin/appstreamcli|g" /etc/apt/apt.conf.d/50appstreamconf
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
