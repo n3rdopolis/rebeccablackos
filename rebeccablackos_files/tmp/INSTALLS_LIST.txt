@@ -24,6 +24,7 @@
 #If "BUILDONLY" is specified, the package will be uninstalled after they are used to build the packages, in order to build a smaller ISO
 #######
 aptitude::PART
+flatpak::PART
 dselect::PART
 apt-rdepends::PART
 ragel::PART::::BUILDONLY
