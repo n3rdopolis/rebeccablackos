@@ -144,6 +144,7 @@ fi
 function PackagePrepareBuild()
 {
 patch -f -p1 < /usr/share/RBOS_PATCHES/linux-kernel.diff
+sed -i 's/CONSOLE_LOGLEVEL_DEFAULT/CONSOLE_LOGLEVEL_QUIET/g' drivers/firmware/efi/libstub/printk.c
 
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
 then
@@ -243,9 +244,6 @@ make olddefconfig
 ./scripts/config -d CONFIG_FB_MB862XX_PCI_GDC
 ./scripts/config -d CONFIG_FB_MB862XX_I2C
 ./scripts/config -d CONFIG_FB_HYPERV
-
-#Set default log level
-./scripts/config --set-val CONFIG_CONSOLE_LOGLEVEL_DEFAULT 6
 
 #Disable debug option
 ./scripts/config -d CONFIG_DEBUG_INFO_DWARF5
