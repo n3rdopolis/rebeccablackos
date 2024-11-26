@@ -27,19 +27,60 @@ index a45d423ad10f..98ac8a394c88 100644
  
  	  If unsure, say N.
  
-diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
-index dddb15f48d59..c1554a789de8 100644
---- a/kernel/printk/printk.c
-+++ b/kernel/printk/printk.c
-@@ -3712,6 +3712,11 @@ void __init console_init(void)
- 	initcall_t call;
- 	initcall_entry_t *ce;
+diff --git a/drivers/tty/Makefile b/drivers/tty/Makefile
+index 07aca5184a55..106e0552cd36 100644
+--- a/drivers/tty/Makefile
++++ b/drivers/tty/Makefile
+@@ -11,6 +11,7 @@ obj-$(CONFIG_N_HDLC)		+= n_hdlc.o
+ obj-$(CONFIG_N_GSM)		+= n_gsm.o
+ 
+ obj-y				+= vt/
++obj-$(CONFIG_NULL_TTY)		+= ttynull.o
+ obj-$(CONFIG_HVC_DRIVER)	+= hvc/
+ obj-y				+= serial/
+ obj-$(CONFIG_SERIAL_DEV_BUS)	+= serdev/
+@@ -20,7 +21,6 @@ obj-$(CONFIG_AMIGA_BUILTIN_SERIAL) += amiserial.o
+ obj-$(CONFIG_MOXA_INTELLIO)	+= moxa.o
+ obj-$(CONFIG_MOXA_SMARTIO)	+= mxser.o
+ obj-$(CONFIG_NOZOMI)		+= nozomi.o
+-obj-$(CONFIG_NULL_TTY)	        += ttynull.o
+ obj-$(CONFIG_SYNCLINK_GT)	+= synclink_gt.o
+ obj-$(CONFIG_PPC_EPAPR_HV_BYTECHAN) += ehv_bytechan.o
+ obj-$(CONFIG_GOLDFISH_TTY)	+= goldfish.o
+diff --git a/drivers/tty/ttynull.c b/drivers/tty/ttynull.c
+index e4c4273993bc..ef66a80600a4 100644
+--- a/drivers/tty/ttynull.c
++++ b/drivers/tty/ttynull.c
+@@ -57,6 +57,10 @@ static struct tty_driver *ttynull_device(struct console *c, int *index)
+ static struct console ttynull_console = {
+ 	.name = "ttynull",
+ 	.device = ttynull_device,
++#ifdef CONFIG_NULL_TTY_CONSOLE
++	.index = -1,
++	.flags = CON_PRINTBUFFER,
++#endif
+ };
+ 
+ static int __init ttynull_init(void)
+@@ -90,10 +94,20 @@ static int __init ttynull_init(void)
+ 	}
+ 
+ 	ttynull_driver = driver;
+-	register_console(&ttynull_console);
++	if (!console_is_registered(&ttynull_console))
++		register_console(&ttynull_console);
++
++	return 0;
++}
  
 +#ifdef CONFIG_NULL_TTY_CONSOLE
-+       if (!strstr(boot_command_line, "console="))
-+               add_preferred_console("ttynull", 0, NULL);
++static int __init ttynull_register(void)
++{
++	register_console(&ttynull_console);
+ 	return 0;
+ }
++console_initcall(ttynull_register);
 +#endif
-+
- 	/* Setup the default TTY line discipline. */
- 	n_tty_init();
  
+ static void __exit ttynull_exit(void)
+ {
