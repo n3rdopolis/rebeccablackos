@@ -14,7 +14,7 @@ index a45d423ad10f..98ac8a394c88 100644
 +
 +config NULL_TTY_CONSOLE
 +        bool "Supports /dev/ttynull as a console automatically"
-+        depends on NULL_TTY && !VT_CONSOLE
++        depends on NULL_TTY=y && !VT_CONSOLE
 +	help
 +	  Say Y here if you want the NULL TTY to be used as a /dev/console
 +	  device.
