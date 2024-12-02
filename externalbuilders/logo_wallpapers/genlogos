@@ -28,12 +28,16 @@ fi
 "$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S _Scene_Main -o //####_rbos_logo_source -f 0
 "$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Boot_Logo -o //####_rbos_logo_boot -f 0
 "$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Calamares_Logo -o //####_rbos_logo_calamares -f 0
-"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Icon -o //####_rbos_logo_icon -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Icon_016 -o //####_rbos_logo_icon_016 -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Icon_032 -o //####_rbos_logo_icon_032 -f 0
+"$BLENDERPATH" -b "$SCRIPTFOLDERPATH"/rbos_logo_new_source.blend -S Scene_Icon_256 -o //####_rbos_logo_icon_256 -f 0
 
 #Place the new logos in the correct places
 cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/RBOS_PATCHES/plymouth/boot_logo.png
 cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_calamares.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/RBOS_PATCHES/calamares/src/branding/default/LogoRBOS.png
-cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_icon.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/icons/RBOS_icon.png
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_icon_016.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/icons/hicolor/16x16/apps/rbos.png
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_icon_032.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/icons/hicolor/32x32/apps/rbos.png
+cp "$SCRIPTFOLDERPATH"/0000_rbos_logo_icon_256.png "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/icons/hicolor/256x256/apps/rbos.png
 
 #Update the Wallpapers
 #https://stackoverflow.com/questions/10918907/how-to-add-transparent-watermark-in-center-of-a-video-with-ffmpeg
