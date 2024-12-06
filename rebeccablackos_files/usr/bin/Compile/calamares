@@ -66,7 +66,7 @@ sed -i 's/NOT WITH_QT6/WITH_QT6/g' CMakeModules/KPMcoreHelper.cmake
 
 cp -a /usr/share/RBOS_PATCHES/calamares/* .
 sed -i "s|^Exec=*|Exec=bash -c -- \"xhost +SI:localuser:root; systemd-inhibit --who=\'System Installer\' --why=\'Installing System\' --mode=block -- wlsudo calamares -style oxygen\"\n|g" calamares.desktop
-sed -i '/Icon=/cIcon=drive-harddisk' calamares.desktop
+sed -i '/Icon=/cIcon=rbos' calamares.desktop
 sed -i 's/Name=Calamares/Name=Install RebeccaBlackOS/g' calamares.desktop
 sed -i '/pkexec/d' calamares.desktop
 
