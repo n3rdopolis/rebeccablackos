@@ -56,6 +56,8 @@ meson subprojects purge display-info --confirm
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+#Revert commmit that draws blank screen
+git revert -n 0ff5ac0f7b07d719d0e034f30900612be4f7499c
 patch -f -p1 < /usr/share/RBOS_PATCHES/weston.diff
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dxwayland-path=$INSTALLDIR/bin/Xwayland -Dtools=calibrator,debug,terminal,touch-calibrator -Ddemo-clients=true -Dsimple-clients=all -Dpipewire=true build
 }
