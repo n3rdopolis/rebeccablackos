@@ -1357,7 +1357,7 @@ if [[ $OVERLAYFSTRANS == 1 && $UID == 0 ]]
 then
   #When the filesystem type does not exist, the error quotes the non-existant file system type
   #This is ths best way to probe if the kernel supports a file system without /proc/filesystems
-  OVERLAYFSMISSING=$(sudo unshare -m -- mount -t overlay none -o lowerdir=/tmp:/mnt /tmp)
+  OVERLAYFSMISSING=$(unshare -m -- mount -t overlay none -o lowerdir=/tmp:/mnt /tmp)
 
   #Get a mapping of the filesystem, if it reports an unfavorable condition, then fall back
   FILESYSTEMMAP=$(getmountmap)
