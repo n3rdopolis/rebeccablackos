@@ -161,6 +161,7 @@ fi
 
 #build these packages in this order.
 
+CompilePackage rust-bindgen
 CompilePackage linux-kernel
 CompilePackage cmake
 CompilePackage meson
@@ -200,7 +201,6 @@ CompilePackage libglvnd
 CompilePackage glslang
 CompilePackage spirv-tools
 CompilePackage cbindgen
-CompilePackage rust-bindgen
 CompilePackage mesa
 CompilePackage glu
 CompilePackage libepoxy
