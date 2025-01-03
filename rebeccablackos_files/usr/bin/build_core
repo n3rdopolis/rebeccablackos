@@ -891,7 +891,7 @@ function DownloadSource()
 
       RUSTPACKAGENAME=rust-${RUSTVERSION}-${RUST_PACKAGE_ARCH}
 
-      if [[ ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc" || ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo" ]]
+      if [[ ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc" || ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo" || ! -e "/$SOURCEDIR/buildhome/buildcore_rust/rustrun/lib/rustlib/src/rust/library/core/src/lib.rs" ]]
       then
         mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/download
         mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
@@ -903,6 +903,12 @@ function DownloadSource()
 
         chown -R $NONROOTUSER:$NONROOTGROUP /"$SOURCEDIR"/buildhome/cargocache
         setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
+
+        curl -L "https://static.rust-lang.org/dist/rust-src-$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2).tar.gz" |
+                tar -xzf - -C "$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --print sysroot)/lib" \
+                "rust-src-$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2)/rust-src/lib/" \
+                --strip-components=3
+
       fi
 
       rm "/$SOURCEDIR/buildhome/buildcore_rust/lockfile"
