@@ -155,7 +155,10 @@ fi
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
 export LOCALVERSION=""
 
-make olddefconfig
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
+
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 
 ./scripts/kconfig/merge_config.sh -m .config ./mainconfig.config
 ./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
@@ -252,6 +255,10 @@ make olddefconfig
 ./scripts/config -d CONFIG_DEBUG_KERNEL
 ./scripts/config -e CONFIG_DEBUG_INFO_NONE
 
+#Enable Rust
+./scripts/config -d CONFIG_MODVERSIONS
+./scripts/config -e CONFIG_RUST
+
 #Disable VTs
 ./scripts/config -d CONFIG_VT
 ./scripts/config -d CONFIG_CONSOLE_TRANSLATIONS
@@ -262,20 +269,24 @@ make olddefconfig
 
 #Enable DRM Panic
 ./scripts/config -e CONFIG_DRM_PANIC
+./scripts/config -e CONFIG_DRM_PANIC_SCREEN_QR_CODE
 ./scripts/config --set-val CONFIG_DRM_PANIC_BACKGROUND_COLOR 0x808080
 ./scripts/config --set-val CONFIG_DRM_PANIC_FOREGROUND_COLOR 0x000000
-./scripts/config --set-val CONFIG_DRM_PANIC_SCREEN kmsg
+./scripts/config --set-str CONFIG_DRM_PANIC_SCREEN qr_code
 
-make olddefconfig
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
+
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
 export LOCALVERSION=""
 
-make -j$BUILD_CPU_COUNT
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" -j$BUILD_CPU_COUNT
 
 KernelVersion=$(make kernelrelease)
 echo "#! /bin/bash"$'\n'"update-grub; update-initramfs -k all -c; linux-update-symlinks install $KernelVersion /boot/vmlinuz-$KernelVersion" > postinstall-pak
@@ -284,12 +295,15 @@ echo "#! /bin/bash"$'\n'"update-grub; update-initramfs -k all -c; linux-update-s
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
+
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
 export LOCALVERSION=""
 
 KernelVersion=$(make kernelrelease)
-make install
-make modules_install
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" install
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" modules_install
 rm /boot/initrd*${KernelVersion}*
 }
 
