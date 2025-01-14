@@ -46,6 +46,8 @@ ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_login.png -i "$SCRIPTFOLDERPATH"/0000_rb
 
 ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_desktop.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Desktop/contents/images/1920x1200.png
 
+ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_desktop_dark.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Desktop_Dark/contents/images/1920x1200.png
+
 ffmpeg -i "$SCRIPTFOLDERPATH"/wallpaper_boot.png -i "$SCRIPTFOLDERPATH"/0000_rbos_logo_boot.png -filter_complex "[1] unpremultiply=inplace=1 [front]; [0] [front] overlay=(main_w-overlay_w)/2:(main_h-overlay_h)/2:format=rgb" -map 0:a?  -y "$SCRIPTFOLDERPATH"/../../rebeccablackos_files/usr/share/wallpapers/RBOS_Bootsplash/contents/images/1920x1200.png
 
 
