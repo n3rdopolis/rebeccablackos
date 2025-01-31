@@ -23,6 +23,13 @@
 export WLSUDO=1
 export SUDO_ASKPASS="$0"
 
+wayland-info &> /dev/null
+WaylandPingResult=$?
+if [[ $WaylandPingResult != 0 ]]
+then
+  echo "wlsudo: Could not make a connection to a Wayland display"
+  exit 1
+fi
 
 if [[ -z $WLSUDO_CMD ]]
 then
