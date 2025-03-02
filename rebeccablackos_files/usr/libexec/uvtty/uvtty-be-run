@@ -43,7 +43,7 @@ function UvTTYBeRunMain
   fi
   ln -s $PTYPath "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink"
 
-  "$@"
+  env -u SOCAT_PPID -u SOCAT_PID -u SOCAT_VERSION "$@"
 
   rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" &>/dev/null
   kill $SOCAT_PID
