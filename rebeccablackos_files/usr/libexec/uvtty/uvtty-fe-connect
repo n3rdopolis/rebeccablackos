@@ -60,13 +60,16 @@ function UvTTYFeConnectMain
     SLEEPCMD="/bin/sleep"
   fi
 
-  if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
+  if [[ ! -z $WAYLAND_DISPLAY ]]
   then
-    WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
-  else
-    WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+    if [[ ${WAYLAND_DISPLAY:0:1} == "/" ]]
+    then
+      WAYLANDDISPLAYPATH=$WAYLAND_DISPLAY
+    else
+      WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
+    fi
+    rm $WAYLANDDISPLAYPATH
   fi
-  rm $WAYLANDDISPLAYPATH
 
   #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
   trap PtyResizeEvent WINCH
@@ -81,7 +84,6 @@ function UvTTYFeConnectMain
   fi
 
   socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
-  set -m
   SOCATPID=$!
 
   trap 'if [[ ! -e /proc/$SOCATPID ]]; then exit; fi' SIGCHLD
