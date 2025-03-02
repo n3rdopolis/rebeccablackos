@@ -46,7 +46,7 @@ function UvTTYBeRunMain
   "$@"
 
   rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptylink" &>/dev/null
-  pkill $SOCAT_PID
+  kill $SOCAT_PID
   exit $?
 }
 
