@@ -1,86 +1,61 @@
+diff --git a/Documentation/admin-guide/serial-console.rst b/Documentation/admin-guide/serial-console.rst
+index a3dfc2c66e01..1609e7479249 100644
+--- a/Documentation/admin-guide/serial-console.rst
++++ b/Documentation/admin-guide/serial-console.rst
+@@ -78,7 +78,9 @@ If no console device is specified, the first device found capable of
+ acting as a system console will be used. At this time, the system
+ first looks for a VGA card and then for a serial port. So if you don't
+ have a VGA card in your system the first serial port will automatically
+-become the console.
++become the console, unless the kernel is configured with the
++CONFIG_NULL_TTY_DEFAULT_CONSOLE option, then it will default to using the
++ttynull device.
+ 
+ You will need to create a new device to use ``/dev/console``. The official
+ ``/dev/console`` is now character device 5,1.
 diff --git a/drivers/tty/Kconfig b/drivers/tty/Kconfig
-index a45d423ad10f..98ac8a394c88 100644
+index 63a494d36a1f..7fb81bbaee60 100644
 --- a/drivers/tty/Kconfig
 +++ b/drivers/tty/Kconfig
-@@ -383,7 +383,23 @@ config NULL_TTY
+@@ -383,7 +383,24 @@ config NULL_TTY
  	  available or desired.
  
  	  In order to use this driver, you should redirect the console to this
 -	  TTY, or boot the kernel with console=ttynull.
 +	  TTY, boot the kernel with console=ttynull, or enable
-+	  CONFIG_NULL_TTY_CONSOLE.
++	  NULL_TTY_DEFAULT_CONSOLE.
 +
 +	  If unsure, say N.
 +
-+config NULL_TTY_CONSOLE
-+        bool "Supports /dev/ttynull as a console automatically"
-+        depends on NULL_TTY=y && !VT_CONSOLE
++config NULL_TTY_DEFAULT_CONSOLE
++	bool "Support for console on ttynull"
++	depends on NULL_TTY=y && !VT_CONSOLE
 +	help
 +	  Say Y here if you want the NULL TTY to be used as a /dev/console
-+	  device.
++	  device by default.
 +
-+	  This is useful for userspace applications that expect a working
-+	  console device, without changing the kernel boot options, such as a
-+	  distribuition or environment that historically had CONFIG_VT_CONSOLE
-+	  enabled, and have now disabled it, but still need /dev/console to be
-+	  working for userspace applications.
++	  For example, it might be useful to prevent a VT-less kernel from
++	  writing the system log to a random device connected to the serial
++	  port.
++
++	  Another console driver still might get preferred via the command
++	  line, SPCR, or the device tree.
  
  	  If unsure, say N.
  
-diff --git a/drivers/tty/Makefile b/drivers/tty/Makefile
-index 07aca5184a55..106e0552cd36 100644
---- a/drivers/tty/Makefile
-+++ b/drivers/tty/Makefile
-@@ -11,6 +11,7 @@ obj-$(CONFIG_N_HDLC)		+= n_hdlc.o
- obj-$(CONFIG_N_GSM)		+= n_gsm.o
+diff --git a/kernel/printk/printk.c b/kernel/printk/printk.c
+index 07668433644b..2590498d8353 100644
+--- a/kernel/printk/printk.c
++++ b/kernel/printk/printk.c
+@@ -4277,6 +4277,11 @@ void __init console_init(void)
+ 	initcall_t call;
+ 	initcall_entry_t *ce;
  
- obj-y				+= vt/
-+obj-$(CONFIG_NULL_TTY)		+= ttynull.o
- obj-$(CONFIG_HVC_DRIVER)	+= hvc/
- obj-y				+= serial/
- obj-$(CONFIG_SERIAL_DEV_BUS)	+= serdev/
-@@ -20,7 +21,6 @@ obj-$(CONFIG_AMIGA_BUILTIN_SERIAL) += amiserial.o
- obj-$(CONFIG_MOXA_INTELLIO)	+= moxa.o
- obj-$(CONFIG_MOXA_SMARTIO)	+= mxser.o
- obj-$(CONFIG_NOZOMI)		+= nozomi.o
--obj-$(CONFIG_NULL_TTY)	        += ttynull.o
- obj-$(CONFIG_SYNCLINK_GT)	+= synclink_gt.o
- obj-$(CONFIG_PPC_EPAPR_HV_BYTECHAN) += ehv_bytechan.o
- obj-$(CONFIG_GOLDFISH_TTY)	+= goldfish.o
-diff --git a/drivers/tty/ttynull.c b/drivers/tty/ttynull.c
-index e4c4273993bc..ef66a80600a4 100644
---- a/drivers/tty/ttynull.c
-+++ b/drivers/tty/ttynull.c
-@@ -57,6 +57,10 @@ static struct tty_driver *ttynull_device(struct console *c, int *index)
- static struct console ttynull_console = {
- 	.name = "ttynull",
- 	.device = ttynull_device,
-+#ifdef CONFIG_NULL_TTY_CONSOLE
-+	.index = -1,
-+	.flags = CON_PRINTBUFFER,
++#ifdef CONFIG_NULL_TTY_DEFAULT_CONSOLE
++	if (!console_set_on_cmdline)
++		add_preferred_console("ttynull", 0, NULL);
 +#endif
- };
- 
- static int __init ttynull_init(void)
-@@ -90,10 +94,20 @@ static int __init ttynull_init(void)
- 	}
- 
- 	ttynull_driver = driver;
--	register_console(&ttynull_console);
-+	if (!console_is_registered(&ttynull_console))
-+		register_console(&ttynull_console);
 +
-+	return 0;
-+}
+ 	/* Setup the default TTY line discipline. */
+ 	n_tty_init();
  
-+#ifdef CONFIG_NULL_TTY_CONSOLE
-+static int __init ttynull_register(void)
-+{
-+	register_console(&ttynull_console);
- 	return 0;
- }
-+console_initcall(ttynull_register);
-+#endif
- 
- static void __exit ttynull_exit(void)
- {

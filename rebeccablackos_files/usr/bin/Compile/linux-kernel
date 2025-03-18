@@ -171,7 +171,7 @@ make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 
 #enable the NULL TTY Driver
 ./scripts/config -e CONFIG_NULL_TTY
-./scripts/config -e CONFIG_NULL_TTY_CONSOLE
+./scripts/config -e CONFIG_NULL_TTY_DEFAULT_CONSOLE
 
 #Enable SimpleDRM, SimpleDRM dependancies, and other useful drivers
 ./scripts/config -e CONFIG_DRM
