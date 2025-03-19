@@ -67,6 +67,12 @@ echo -e "\nAPTFETCHDATESECONDS=$APTFETCHDATESECONDS" > /tmp/APTFETCHDATE
 #install basic applications that the system needs to get repositories and packages
 INSTALLS=($(cat /tmp/BASE_INSTALLS.txt))
 apt-get install ${INSTALLS[@]} -y
+Result=$?
+if [[ $Result != 0 ]]
+then
+ echo "Base Installs failed" |tee -a "$PACKAGEOPERATIONLOGDIR"/phase_1/failedpackages.log
+fi
+
 apt-get dist-upgrade -y --no-install-recommends
 
 #perl outputs complaints if a locale isn't generated
