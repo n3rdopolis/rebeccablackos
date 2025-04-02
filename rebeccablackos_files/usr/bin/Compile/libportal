@@ -57,7 +57,6 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-sed -i 's/#if QT_VERSION >= QT_VERSION_CHECK(6, 5, 0)/#if 0 > 1/g' libportal/portal-qt6.cpp
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Ddocs=false -Dbackend-gtk3=enabled -Dbackend-gtk4=enabled -Dbackend-qt5=disabled build
 }
 
