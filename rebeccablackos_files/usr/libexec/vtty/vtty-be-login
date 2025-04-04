@@ -21,14 +21,14 @@
 function DoLoginPrompt
 {
   export TERM=xterm-256color
-  tput reset
-  tput clear
+  tput reset > /dev/pts/$PTYNumber
+  tput clear > /dev/pts/$PTYNumber
 
   unset NOTIFY_SOCKET
   unset INVOCATION_ID
   unset JOURNAL_STREAM
   export VTTY=$EmulatedTTY
-  echo "v${VTTY} backed by $PTYPath"
+  echo "v${VTTY} backed by $PTYPath" > /dev/pts/$PTYNumber
 
   #Clear the clipboard and the primary selection
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
