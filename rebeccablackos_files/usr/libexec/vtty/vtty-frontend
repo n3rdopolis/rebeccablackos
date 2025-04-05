@@ -116,6 +116,17 @@ function vTTYFrontendMain
 
   ResetTTYMode $EmulatedTTY
 
+  #Get the keyboard layout from /etc/vconsole.conf
+  if [[ -e /etc/vconsole.conf ]]
+  then
+    source /etc/vconsole.conf
+    if [[ $(echo $KEYMAP | awk -F'-' '{print NF}') -gt 0 ]]
+    then
+      export XKB_DEFAULT_LAYOUT=$(echo $KEYMAP | cut -d "-" -f1)
+      export XKB_DEFAULT_VARIANT=$(echo $KEYMAP | cut -d "-" -f2-)
+    fi
+  fi
+
   export WLR_RENDERER=pixman
   export WLR_RENDERER_ALLOW_SOFTWARE=1
   export WLR_NO_HARDWARE_CURSORS=1
