@@ -61,6 +61,18 @@ export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
 export WLR_NO_HARDWARE_CURSORS=1
 export WLR_RENDERER=pixman
+
+#Get the keyboard layout from /etc/vconsole.conf
+if [ -e /etc/vconsole.conf ]
+then
+  . /etc/vconsole.conf
+  if [ $(echo $KEYMAP | awk -F'-' '{print NF}') -gt 0 ]
+  then
+    export XKB_DEFAULT_LAYOUT=$(echo $KEYMAP | cut -d "-" -f1)
+    export XKB_DEFAULT_VARIANT=$(echo $KEYMAP | cut -d "-" -f2-)
+  fi
+fi
+
 if [ ! -e /dev/tty0 ]
 then
   export SEATD_VTBOUND=0
