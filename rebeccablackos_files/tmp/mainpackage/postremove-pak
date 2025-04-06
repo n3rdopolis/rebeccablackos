@@ -39,6 +39,10 @@ then
   UndivertDpkgFile /etc/issue.net
   UndivertDpkgFile /etc/os-release
   UndivertDpkgFile /etc/lsb-release
+  if [[ -e /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults ]]
+  then
+    rm /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
+  fi
 fi
 
 UndivertDpkgFile /usr/bin/X

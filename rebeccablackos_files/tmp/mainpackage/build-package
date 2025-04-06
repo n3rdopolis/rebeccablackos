@@ -77,12 +77,6 @@ fi
 echo "blacklist udlfb" > /etc/modprobe.d/udlkmsonly.conf
 echo "blacklist evbug" > /etc/modprobe.d/evbug.conf
 
-#Create a default /etc/vconsole.conf for plymouth
-echo "XKBLAYOUT=\"us\"" >> /etc/vconsole.conf
-echo "XKBMODEL=\"pc105\"" >> /etc/vconsole.conf
-echo "XKBVARIANT=\"\"" >> /etc/vconsole.conf
-echo "XKBOPTIONS=\"\"" >> /etc/vconsole.conf
-
 #Create a python path
 mkdir -p /opt/lib/$(readlink /usr/bin/python3)/site-packages/
 
@@ -97,9 +91,6 @@ ln -sf /opt/bin/plymouth /usr/bin/plymouth
 
 #Replace chvt with the seat aware wrapper
 ln -sf /usr/bin/chvt-logind /usr/bin/chvt
-
-#include /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults as part of the package, the contents get generated later when dconf is actually built
-touch /etc/loginmanagerdisplay/dconf/waylandloginmanager-dconf-defaults
 
 #Set the bootsplash for remastersys
 ln -sf /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png /etc/remastersys/isolinux/splash.png
