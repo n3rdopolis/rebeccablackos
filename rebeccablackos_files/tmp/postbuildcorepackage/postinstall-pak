@@ -37,9 +37,6 @@ echo "Action: fc-cache"
 #The second argument is NULL the first time the package is installed or configured
 if [[ -z $2 ]]
 then
-  #Force CRYPTSETUP to be enabled, so that needed files are already copied
-  echo "export CRYPTSETUP=y" >> /etc/cryptsetup-initramfs/conf-hook
-
   #Set the cursor theme
   update-alternatives --set x-cursor-theme /etc/X11/cursors/oxy-white.theme
 
