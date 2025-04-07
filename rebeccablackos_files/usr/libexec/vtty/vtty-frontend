@@ -120,7 +120,7 @@ function vTTYFrontendMain
   if [[ -e /etc/vconsole.conf ]]
   then
     source /etc/vconsole.conf
-    if [[ $(echo $KEYMAP | awk -F'-' '{print NF}') -gt 0 ]]
+    if [[ $(echo $KEYMAP | awk -F'-' '{print NF}') -gt 1 ]]
     then
       export XKB_DEFAULT_LAYOUT=$(echo $KEYMAP | cut -d "-" -f1)
       export XKB_DEFAULT_VARIANT=$(echo $KEYMAP | cut -d "-" -f2-)
