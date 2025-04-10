@@ -347,7 +347,7 @@
  
        LOGINMANAGERDISPLAYREADY=1
        TRYCOUNT=0
-@@ -3236,7 +3215,7 @@
+@@ -3244,7 +3223,7 @@
     else
      export AutoSessionTTY=0
    fi
@@ -356,7 +356,7 @@
    #if there is a tty for the autologin session, the autologin is configured, start the autologin session
    if [[ $AutoSessionTTY -ne -1 ]]
    then
-@@ -3261,7 +3240,7 @@
+@@ -3269,7 +3248,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -365,7 +365,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3305,7 +3284,7 @@
+@@ -3313,7 +3292,7 @@
    ActionMenu=($ActionMenu)
    unset IFS
  
@@ -374,7 +374,7 @@
    DIALOGSTATUS=$?
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
-@@ -3717,9 +3696,9 @@
+@@ -3725,9 +3704,9 @@
        fi
      done
  
@@ -386,7 +386,7 @@
        UIPromptAttemptsMaxedOut=1
      fi
  
-@@ -3956,7 +3935,7 @@
+@@ -3964,7 +3943,7 @@
          loginctl lock-session $(loginctl show-seat "$SEATARG" -p ActiveSession --value 2>/dev/null) &>/dev/null
          loginctl activate $LOGINMANAGERDISPLAYSESSION &>/dev/null
        fi
@@ -395,7 +395,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4002,7 +3981,7 @@
+@@ -4010,7 +3989,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -404,7 +404,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4031,7 +4010,7 @@
+@@ -4039,7 +4018,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -413,7 +413,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4077,7 +4056,7 @@
+@@ -4085,7 +4064,7 @@
        else
          WriteToLog "received command $COMMAND for seat $SEATARG"
        fi
@@ -422,7 +422,7 @@
        then
          if [[ ! -z ${LastUserActionPIDs[$SeatIndexID]} ]]
          then
-@@ -4149,6 +4128,7 @@
+@@ -4157,6 +4136,7 @@
  
      #Start the filter that will only send valid data to the main command FIFO
      StartSocketFilter &

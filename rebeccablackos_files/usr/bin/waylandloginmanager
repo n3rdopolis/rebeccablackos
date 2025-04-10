@@ -3127,12 +3127,20 @@ function StartLoginManagerDisplay
         then
           ReadyNotifySent=1
           TRYCOUNT=0
-          while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && $TRYCOUNT -le 5 ]]
+          while [[ ! -e /run/user/$LOGINMANAGERDISPLAYUID/loginmanagerdisplay_$SeatFileName && $TRYCOUNT -le 10 ]]
           do
             $SLEEPCMD 1
             ((TRYCOUNT++))
           done
           systemd-notify --ready &> /dev/null
+
+          #If the wayland socket for the loginmanager was not created after the wait, assume the display server is failing to start.
+          #Stop Plymouth so that logind can listen for the RESCUESEAT key sequence
+          if [[ $TRYCOUNT -ge 15 ]]
+          then
+            plymouth quit &> /dev/null
+            PlymouthQuitRequestSent=1
+          fi
         fi
       else
         #If the first loginmanagerdisplay fails to start on the first attempt
