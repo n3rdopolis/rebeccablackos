@@ -50,9 +50,7 @@ REBUILDNEWREVISION=1
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-git show caec57a12038d4110e1a3dc8dbef56acbeb55261 | patch -f -p1
-git show 084a6fe0281ac83d4497782a18a5ef2691d7fae9 | patch -f -p1
-git show 33f8ca5b76302745a40803d9c23ff36280f2e791 | patch -f -p1
+:
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
