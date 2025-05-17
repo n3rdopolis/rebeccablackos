@@ -19,9 +19,4 @@
 #This script is for calling kdeplasma nested under a Wayland session.
 . /usr/bin/wlruntime_vars
 
-
-export XDG_CURRENT_DESKTOP=KDE
-export $(dbus-launch)
-#unset DISPLAY
-#unset WAYLAND_DISPLAY
-kwin_wayland --xwayland plasmashell
+dbus-run-session startplasma-wayland
