@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.14.y
+SOURCEREVISION=linux-6.15.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -54,7 +54,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-DebianConfigCommit=debian/6.14.6-1_exp1
+DebianConfigCommit=49a0baa6bfc39e836b12a442587e297e351648db
 DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/$DebianConfigCommit/debian/config
 DebianArch=$(dpkg --print-architecture)
 
@@ -143,7 +143,6 @@ fi
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-patch -f -p1 < /usr/share/RBOS_PATCHES/linux-kernel.diff
 sed -i 's/CONSOLE_LOGLEVEL_DEFAULT/CONSOLE_LOGLEVEL_QUIET/g' drivers/firmware/efi/libstub/printk.c
 
 if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
