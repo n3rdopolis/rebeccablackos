@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/libsdl-org/SDL.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=SDL2
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -57,19 +57,23 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-./autogen.sh 
-./configure --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)
+mkdir build
+cd build
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=/ -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=RELEASE -DCMAKE_INSTALL_INCLUDEDIR=$INSTALLDIR/include/ -DCMAKE_INSTALL_DATAROOTDIR=$INSTALLDIR/share -DSDL_TESTS=ON -DSDL_INSTALL_TESTS=ON -DCMAKE_INSTALL_LIBEXECDIR=$INSTALLDIR/libexec
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
+cd build
 make 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
+unset DESTDIR
+cd build
 make install
 }
 
@@ -77,17 +81,7 @@ make install
 function PackagePostInstall()
 {
 mkdir -p $INSTALLDIR/share/icons/
-cp Xcode-iOS/Demos/Icon.png $INSTALLDIR/share/icons/sdl.png
-
-cd test
-./configure
-make -i
-#Install more includes
-cp /"$SOURCEDIR"/"$SOURCENAME"/include/* $INSTALLDIR/include/SDL2
-#install sdl tests
-cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgl2 $INSTALLDIR/bin
-cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgles $INSTALLDIR/bin
-cp /"$SOURCEDIR"/"$SOURCENAME"/test/testgles2 $INSTALLDIR/bin
+cp ./VisualC-GDK/logos/Logo44x44.png $INSTALLDIR/share/icons/sdl.png
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
