@@ -154,7 +154,7 @@ fi
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
 export LOCALVERSION=""
 
-export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
 export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
 
 make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
@@ -279,7 +279,7 @@ make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
 export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
 
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
@@ -294,7 +294,7 @@ echo "#! /bin/bash"$'\n'"update-grub; update-initramfs -k all -c; linux-update-s
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
 function PackageInstallSource()
 {
-export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]][[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
+export LLVM_VERSION=$(find /usr/bin/ -maxdepth 1  -regextype posix-basic -regex '.*/clang-[[:digit:]]' -execdir basename '{}' ';' | sort | tail -n 1 | awk -F "-" '{print $2}')
 export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
 
 #Ensure the kernel scripts don't append unexpected suffixes in the build name
