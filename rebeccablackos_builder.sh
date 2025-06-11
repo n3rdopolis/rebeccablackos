@@ -215,31 +215,6 @@ function run_buildprocess {
   SCRIPTFILEPATH=$(readlink -f "$0")
   SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
-  #Begin config options
-  BUILDROOT=/var/cache
-  BUILDFOLDERNAME=RBOS_Build_Files
-  export BUILDUNIXNAME=rebeccablackos
-  export BUILDFRIENDLYNAME=RebeccaBlackOS
-
-  #Values for determining how much free disk/ramdisk space is needed
-  GIGABYTE=1048576
-  STORAGESIZE_TOTALSIZE=0
-  STORAGESIZE_PADDING=$((2 * $GIGABYTE ))
-
-  STORAGESIZE_TMPBASEBUILD=$((1 * $GIGABYTE ))
-  STORAGESIZE_TMPSRCBUILDOVERLAY=$((2 * $GIGABYTE ))
-  STORAGESIZE_TMPPHASE3=$((2 * $GIGABYTE ))
-  STORAGESIZE_TMPREMASTERSYS=$((7 * $GIGABYTE ))
-
-
-  STORAGESIZE_ISOOUT=$((4 * $GIGABYTE ))
-  STORAGESIZE_BUILDOUTPUT=$((2 * $GIGABYTE ))
-  STORAGESIZE_PHASE1=$((2 * $GIGABYTE ))
-  STORAGESIZE_PHASE2=$((5 * $GIGABYTE ))
-  STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
-  STORAGESIZE_SRCBUILD=$((38 * $GIGABYTE ))
-  #End config options
-
   #Move to /var/cache if an existing build folder exists. With systemd-homed and the problems caused by UIDs moved in a migrated home directory, it's best to store in /var/cache
   if [[ -d "$OLDBUILDROOT"/$BUILDFOLDERNAME && ! -d "$BUILDROOT"/$BUILDFOLDERNAME ]]
   then
@@ -1184,12 +1159,38 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
 function elevate_buildprocess
 {
   export BUILDER_IS_UNSHARED=1
-  sudo -E -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages and building Live CD" --what=sleep:shutdown -- unshare --mount "$0" "$@"
+  sudo -E -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages for, and building the $BUILDFRIENDLYNAME ISOs" --what=sleep:shutdown -- unshare --mount "$0" "$@"
   exit $?
 }
 
 function execute_buildprocess
 {
+
+  #Begin config options
+  BUILDROOT=/var/cache
+  BUILDFOLDERNAME=RBOS_Build_Files
+  export BUILDUNIXNAME=rebeccablackos
+  export BUILDFRIENDLYNAME=RebeccaBlackOS
+
+  #Values for determining how much free disk/ramdisk space is needed
+  GIGABYTE=1048576
+  STORAGESIZE_TOTALSIZE=0
+  STORAGESIZE_PADDING=$((2 * $GIGABYTE ))
+
+  STORAGESIZE_TMPBASEBUILD=$((1 * $GIGABYTE ))
+  STORAGESIZE_TMPSRCBUILDOVERLAY=$((2 * $GIGABYTE ))
+  STORAGESIZE_TMPPHASE3=$((2 * $GIGABYTE ))
+  STORAGESIZE_TMPREMASTERSYS=$((7 * $GIGABYTE ))
+
+
+  STORAGESIZE_ISOOUT=$((4 * $GIGABYTE ))
+  STORAGESIZE_BUILDOUTPUT=$((2 * $GIGABYTE ))
+  STORAGESIZE_PHASE1=$((2 * $GIGABYTE ))
+  STORAGESIZE_PHASE2=$((5 * $GIGABYTE ))
+  STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
+  STORAGESIZE_SRCBUILD=$((38 * $GIGABYTE ))
+  #End config options
+
   #Start the build process
   if [[ $BUILDER_IS_UNSHARED != 1 ]]
   then
