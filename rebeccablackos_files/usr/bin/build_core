@@ -172,9 +172,10 @@ function RunDownloadAndOrBuild
     function PackageCompileSource { :; }
   fi
 
+  #If a build script doesn't define a PackageInstallSource, handle that as a failure
   if ! declare -F PackageInstallSource &> /dev/null
   then
-    function PackageInstallSource { :; }
+    function PackageInstallSource { exit 1; }
   fi
 
   if ! declare -F PackagePostInstall &> /dev/null
