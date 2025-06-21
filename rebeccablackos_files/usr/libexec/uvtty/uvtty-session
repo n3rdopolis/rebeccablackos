@@ -16,11 +16,39 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+function GetFirstSeatCard
+{
+  MatchSeat=$XDG_SEAT
+  if [[ -z $XDG_SEAT ]]
+  then
+    MatchSeat=seat0
+  fi
+
+  SelectCard=""
+  while read -r ReadCard
+  do
+    ReadCardSeat=$(udevadm info --query=property  --property ID_SEAT --value --name=$ReadCard)
+    CardIsVGABoot=$(udevadm info --name=$ReadCard -a | grep -c "{boot_vga}")
+    if [[ -z $ReadCardSeat ]]
+    then
+      ReadCardSeat=seat0
+    fi
+
+    if [[ $CardIsVGABoot -gt 0 ]]
+    then
+      SelectCard=$ReadCard
+      break
+    fi
+  done < <(ls -r /dev/dri/card*)
+  echo $SelectCard
+}
+
 function UvTTYSessionMain
 {
   export XDG_CURRENT_DESKTOP=UvTTY
   export WLR_BACKENDS=libinput,drm
   export WLR_RENDERER_ALLOW_SOFTWARE=1
+  export WLR_DRM_DEVICES=$(GetFirstSeatCard)
   export WLR_RENDERER=pixman
   export WLR_NO_HARDWARE_CURSORS=1
   export WLR_LIBINPUT_NO_DEVICES=1
