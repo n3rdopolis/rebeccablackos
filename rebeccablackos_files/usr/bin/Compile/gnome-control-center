@@ -61,7 +61,7 @@ sed -i 's/0.114/0.103/g' meson.build
 sed -i "s/'online-accounts',//g" panels/meson.build
 sed -i '/goa_dep/d' meson.build
 sed -i '/cc_online_accounts_panel_get_type/d' shell/cc-panel-loader.c
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dwayland=true -Dprivileged_group=sudo -Dtests=false build
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dprivileged_group=sudo -Dtests=false build
 sed -i '/BUILD_THUNDERBOLT/d' build/config.h
 }
 
