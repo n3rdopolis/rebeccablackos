@@ -1,0 +1,36 @@
+diff --git a/glycin/src/sandbox.rs b/glycin/src/sandbox.rs
+index 0e7e590..10dab83 100644
+--- a/glycin/src/sandbox.rs
++++ b/glycin/src/sandbox.rs
+@@ -235,13 +235,13 @@ impl Sandbox {
+         command.args(args);
+ 
+         // Clear ENV
+-        if matches!(self.sandbox_mechanism, SandboxMechanism::FlatpakSpawn) {
+-            // Do not clear environment before `flatpak-spawn` is called. Otherwise,
+-            // `flatpak-spawn` will fail to find the D-Bus connection to call the portal.
+-            command.arg("--clear-env");
+-        } else {
+-            command.env_clear();
+-        }
++        //if matches!(self.sandbox_mechanism, SandboxMechanism::FlatpakSpawn) {
++        //    // Do not clear environment before `flatpak-spawn` is called. Otherwise,
++        //    // `flatpak-spawn` will fail to find the D-Bus connection to call the portal.
++        //    command.arg("--clear-env");
++        //} else {
++        //    command.env_clear();
++        //}
+ 
+         // Inherit some environment variables
+         for env_key in ["RUST_BACKTRACE", "RUST_LOG"] {
+@@ -299,6 +299,10 @@ impl Sandbox {
+                 "--ro-bind",
+                 "/usr",
+                 "/usr",
++                // Make /opt available as read only
++                "--ro-bind",
++                "/opt",
++                "/opt",
+                 // Make tmpfs dev available
+                 "--dev",
+                 "/dev",
