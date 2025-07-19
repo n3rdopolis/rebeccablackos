@@ -112,3 +112,6 @@ then
 fi
 
 ln -s ./bin /opt/sbin
+
+#KDE's systemsettings defaults to /usr/share/sounds when sounds are installed under /opt. Add a hint link
+ln -s /opt/share/sounds /usr/share/sounds/optsounds
