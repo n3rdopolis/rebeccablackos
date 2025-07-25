@@ -221,7 +221,7 @@ function UserSessionWorker
   GetConfigKey wlmforcepixman "$XDG_SEAT" 0 1 wlmforcepixman
   if [[ $DefaultBackendType == KMS && $wlmforcepixman != 0  ]]
   then
-    export PIXMANARGS="--use-pixman"
+    export PIXMANARGS="--renderer=pixman"
   else
     export PIXMANARGS=""
   fi
@@ -3040,7 +3040,7 @@ function StartLoginManagerDisplay
   then
     if [[ $SeatUsePixman == 1 || ${LoginManagerDisplayIsFailsafes[$SeatIndexID]} == 1 ]]
     then
-      PIXMANARGS="--use-pixman"
+      PIXMANARGS="--renderer=pixman"
     else
       unset PIXMANARGS
     fi
