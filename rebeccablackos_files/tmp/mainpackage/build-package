@@ -111,6 +111,7 @@ then
   ln -s /usr/bin/list_build_core_usr_clashes /usr/sbin/list_build_core_usr_clashes
 fi
 
+#Link /opt/sbin to /opt/bin, systemd recommends merged /sbin and /bin now. 
 ln -s ./bin /opt/sbin
 
 #KDE's systemsettings defaults to /usr/share/sounds when sounds are installed under /opt. Add a hint link
