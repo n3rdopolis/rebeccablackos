@@ -15,7 +15,7 @@ CompositorKMSSeatArgument=--seat=
 CompositorFBSeatAware=1
 CompositorFBSeatArgument=--seat=
 SessionArgument=
-AdditionalArguments=--xwayland --use-pixman
+AdditionalArguments=--xwayland --renderer=pixman
 IsFallbackSession=1
 NeedsFile=/opt/bin/weston
 [EnvironmentFile]
