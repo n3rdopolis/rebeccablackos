@@ -84,7 +84,12 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-cp examples/* $INSTALLDIR/bin
+cd build
+Cfind examples/ -maxdepth 1 -type f -executable | while read -r EXAMPLE
+do
+  EXAMPLENAME=$(basename $EXAMPLE)
+  cp "$EXAMPLE" $INSTALLDIR/bin/glfw-"$EXAMPLENAME"
+done
 }
 
 #Run the Build and or Download, based on the argument this script was called by. This is decided within /usr/bin/build_core
