@@ -26,37 +26,33 @@ fi
 
 unset HOME
 export HOME=$(echo ~)
-export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-export XDG_DATA_DIRS=$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/opt/share:/usr/local/share:/usr/share
-export GI_TYPELIB_PATH=/opt/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
-export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS:/etc/xdg
-export PATH=/opt/bin:/opt/sbin:/opt/games:/usr/games:$PATH
-export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
-export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
-export GDK_BACKEND=wayland
+
+export _JAVA_AWT_WM_NONREPARENTING=1export WESTON_PLUGIN_PATH=/opt/lib/$DEB_HOST_MULTIARCH/weston
 export CLUTTER_BACKEND=wayland
-export COGL_RENDERER=egl_wayland 
-export QTDIR=/opt
-export PKG_CONFIG_PATH=/opt/lib/pkgconfig/:$PKG_CONFIG_PATH
-export QT_QPA_PLATFORM=wayland
-export ELM_DISPLAY=wl
-export ELM_ACCEL=gl
-export IRR_DEVICE_TYPE=wayland
+export COGL_RENDERER=egl_wayland
+export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
 export ECORE_EVAS_ENGINE=wayland_egl
-export SDL_VIDEODRIVER=wayland
+export ELM_ACCEL=gl
+export ELM_DISPLAY=wl
+export GDK_BACKEND=wayland
+export GI_TYPELIB_PATH=/opt/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
+export GS_LIB="$HOME/.fonts"
 export GST_GL_WINDOW=wayland
-export QT_QUICK_CONTROLS_STYLE=org.kde.desktop
-export QT_QUICK_CONTROLS_1_STYLE=Plasma
-#export QT_WAYLAND_RESIZE_AFTER_SWAP=1
-#export QT_WAYLAND_USE_XDG_SHELL=1
-#export EFL_WAYLAND_DONT_USE_XDG_SHELL=1
-#export KDE_DEBUG=1
+export IRR_DEVICE_TYPE=wayland
+export LD_LIBRARY_PATH=/opt/lib/$DEB_HOST_MULTIARCH:/opt/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
 #export KSCREEN_BACKEND=QScreen
 #export KSCREEN_BACKEND=KWayland
-export QT_QPA_PLATFORMTHEME=qt6ct
-export GS_LIB="$HOME/.fonts"
-export XCURSOR_PATH="/opt/share/icons:$HOME/.icons:/usr/share/icons:/usr/share/piximaps:/usr/X11R6/lib/X11/icons"
-export QT_WAYLAND_DECORATION=bradient
-export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/:/opt/lib/python3/dist-packages/
-export _JAVA_AWT_WM_NONREPARENTING=1
 export MOZ_ENABLE_WAYLAND=1
+export PATH=/opt/bin:/opt/sbin:/opt/games:/usr/games:$PATH
+export PKG_CONFIG_PATH=/opt/lib/pkgconfig/:$PKG_CONFIG_PATH
+export QT_QUICK_CONTROLS_STYLE=org.kde.desktop
+export QT_QUICK_CONTROLS_1_STYLE=Plasma
+export QT_QPA_PLATFORM=wayland
+export QT_QPA_PLATFORMTHEME=qt6ct
+export QT_WAYLAND_DECORATION=bradient
+export QTDIR=/opt
+export SDL_VIDEODRIVER=wayland
+export XCURSOR_PATH="/opt/share/icons:$HOME/.icons:/usr/share/icons:/usr/share/piximaps:/usr/X11R6/lib/X11/icons"export PYTHONPATH=/opt/lib/$(readlink /usr/bin/python3)/site-packages/:/opt/lib/python3/dist-packages/
+export XDG_CONFIG_DIRS=/opt/etc/xdg:$XDG_CONFIG_DIRS:/etc/xdg
+export XDG_DATA_DIRS=$HOME/.local/share/flatpak/exports/share:/var/lib/flatpak/exports/share:/opt/share:/usr/local/share:/usr/share
+
