@@ -153,9 +153,9 @@
 -  $KDIALOGCMD --title="System Information" --msgbox "This is a third party fan made distribution!
 +  $ZENITYCMD --title="Information" --no-wrap --info --text="This is a third party fan made distribution!
  
- $SEATSTRING
+ $SEATSTRING" &> /dev/null
  
-@@ -2242,17 +2230,15 @@
+@@ -2237,17 +2225,15 @@
    ((NumberOfSessions--))
  
    #go thorugh each session, reading the arrays containing information about the sessions. to build the SessionList variable
@@ -179,7 +179,7 @@
      #determine if the current session is alive, before adding it to the list
      SessionisRunning=0
      for RunningSeatSession in "${RunningSeatSessions[@]}"
-@@ -2272,7 +2258,11 @@
+@@ -2267,7 +2253,11 @@
          then
            SessionList+=$'\n'
          fi
@@ -192,7 +192,7 @@
        fi
      fi
      ((NumberOfSessions--))
-@@ -2283,17 +2273,19 @@
+@@ -2278,17 +2268,19 @@
      SessionList+=$'\n'
    fi
    SessionList+="-1"$'\n'
@@ -218,7 +218,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2322,7 +2314,7 @@
+@@ -2317,7 +2309,7 @@
          #hand over the logind session ID to allow desktop permissions to work.
          loginctl activate $ChangeSessionID &>/dev/null
        else
@@ -227,7 +227,7 @@
        fi
      fi
    fi
-@@ -2596,30 +2588,26 @@
+@@ -2591,30 +2583,26 @@
      then
        UserDisplayName=$UserName
      fi
@@ -266,7 +266,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2627,9 +2615,9 @@
+@@ -2622,9 +2610,9 @@
    #if there is no user selected or if the LOGINUSER is -1, as in the user opted to enter a username manually prompt for the username with a text dialog
    if [[ -z $LOGINUSER || $LOGINUSER == -1 ]]
    then
@@ -278,7 +278,7 @@
      if [[ $CancelOrOK != 0 ]]
      then
        exit 0
-@@ -2660,9 +2648,9 @@
+@@ -2655,9 +2643,9 @@
        passwordresult=0
      else
        #Prompt for the users password
@@ -290,7 +290,7 @@
        if [[ $CancelOrOK != 0 ]]
        then
          exit 0
-@@ -2676,7 +2664,7 @@
+@@ -2671,7 +2659,7 @@
      fi
      if [[ $passwordresult != 0 ]]
      then
@@ -299,7 +299,7 @@
        WriteToLog "Invalid password for $LOGINUSER, or username invalid"
      else
        export USERHOME=$(eval echo ~$LOGINUSER)
-@@ -2700,13 +2688,13 @@
+@@ -2695,13 +2683,13 @@
        StartUserSession "$SessionTTY" "$CurrentSeat" "$LOGINUSER" $DoSessionLock "$WSESSIONDATA" &
      fi
    else
@@ -315,7 +315,7 @@
  #It takes 1 optional argument, the seat to display the dialogs on
  function LeavePrompt
  {
-@@ -2721,13 +2709,13 @@
+@@ -2716,13 +2704,13 @@
      SessionPromptThreshold=1
    else
      SetCommonConfig
@@ -331,7 +331,7 @@
    CanPowerOff=$(dbus-send --print-reply --system --dest=org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager.CanPowerOff)
    if [[ $CanPowerOff =~ " \"yes\"" ]]
    then
-@@ -2783,15 +2771,9 @@
+@@ -2778,15 +2766,9 @@
      ACTIONSTRING+=$'\n'
      ACTIONSTRING+="Hibernate Computer"
    fi
@@ -349,7 +349,7 @@
    if [[ $CancelOrOK != 0 ]]
    then
      exit 0
-@@ -2832,7 +2814,7 @@
+@@ -2827,7 +2809,7 @@
    fi
  
    #Prompt the user if they are sure they want to execute the selected action
@@ -358,7 +358,7 @@
    CONFIRM=$?
    if [[ $CONFIRM != 0 ]]
    then
-@@ -2878,7 +2860,7 @@
+@@ -2873,7 +2855,7 @@
    #if the selected action failed, tell the user
    if [[ $RESULT != 0 ]]
    then
@@ -367,7 +367,7 @@
    fi
  }
  
-@@ -3231,7 +3213,7 @@
+@@ -3226,7 +3208,7 @@
    DisplayServerWait "$CurrentSeat"
    AUTOLOGINUSERHOME=$(eval echo ~$AUTOLOGINUSER)
    ChooseSessionType "$CurrentSeat" "$AUTOLOGINUSER" "$AUTOLOGINUSERHOME" 1
@@ -376,7 +376,7 @@
    CancelOrOK=$?
    if [[ $CancelOrOK != 0 ]]
    then
-@@ -3269,7 +3251,7 @@
+@@ -3264,7 +3246,7 @@
  
      StartUserSession "$AutoSessionTTY" "$CurrentSeat" "$AUTOLOGINUSER" $DoSessionLock "$WSESSIONDATA" &
    else
@@ -385,7 +385,7 @@
      WriteToLog "Not Enough TTYs for autologin!"
    fi
  }
-@@ -3305,16 +3287,12 @@
+@@ -3300,16 +3282,12 @@
    SetFallbackEnvironmentVariables $CurrentSeat
    #wait for the loginmanagerdisplay
    DisplayServerWait "$CurrentSeat"
@@ -407,7 +407,7 @@
    #If the useraction exists (the user did not click cancel), then send the command to the loginmanager_control
    if [[ ! -z $USERACTION ]]
    then
-@@ -3322,12 +3300,12 @@
+@@ -3317,12 +3295,12 @@
    else
      $SLEEPCMD .1
    fi
@@ -423,7 +423,7 @@
  }
  
  #Function to get the index number of the specified seat of the array "StartedSeats" for the specified seat. It takes 1 argument, the seat
-@@ -3725,9 +3703,9 @@
+@@ -3720,9 +3698,9 @@
        fi
      done
  

@@ -2218,12 +2218,7 @@ function ShowInfo
   SeatDefaultBackendType=${LoginManagerDisplayBackends[$SeatIndexID]}
   $KDIALOGCMD --title="System Information" --msgbox "This is a third party fan made distribution!
 
-$SEATSTRING
-
-The key icon brings up a login prompt
-The arrow icon brings up a prompt to switch between running sessions
-The red X icon brings up a shutdown prompt
-The i icon shows this help prompt" &> /dev/null
+$SEATSTRING" &> /dev/null
 
 }
 
