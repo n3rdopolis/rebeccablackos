@@ -85,7 +85,7 @@ make install
 function PackagePostInstall()
 {
 cd build
-Cfind examples/ -maxdepth 1 -type f -executable | while read -r EXAMPLE
+find examples/ -maxdepth 1 -type f -executable | while read -r EXAMPLE
 do
   EXAMPLENAME=$(basename $EXAMPLE)
   cp "$EXAMPLE" $INSTALLDIR/bin/glfw-"$EXAMPLENAME"
