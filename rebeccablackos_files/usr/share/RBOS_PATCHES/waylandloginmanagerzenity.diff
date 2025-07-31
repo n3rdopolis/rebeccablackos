@@ -129,7 +129,7 @@
 -      unset IFS
        #select the session. Each line is handled as a column. currently there are 9 collumns. So line 1 is is column 1, line 2 is in collumn 2, and line 10 is in collumn 1 again
 -      #The dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
--      WSESSIONNUMBER=$($KDIALOGCMD --geometry=750x300+0+0 --title="$SessionSelectionTitleHint" --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
+-      WSESSIONNUMBER=$($KDIALOGCMD --geometry=850x300+0+0 --title="$SessionSelectionTitleHint" --menu "Select a Wayland Desktop Environment to use" -- "${WSESSIONPICKLIST[@]}" 2>/dev/null )
 -      #Abort if the user selected cancel on the dialog
 +      #The zenity dialog then outputs the selected session's lines into the WSESSIONDATA variable. each collumn is a different aspect of the wsessions
 +      WSESSIONNUMBER=$(echo "$WSESSIONPICKLIST" | $ZENITYCMD --title="$SessionSelectionTitleHint" --height=450 --width=630 --list --text "Select a Wayland Desktop Environment to use" --column sessionnumber --column Name --column Comment --hide-column=1 --print-column=1 2>/dev/null )
