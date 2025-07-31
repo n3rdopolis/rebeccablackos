@@ -39,8 +39,8 @@ How to use the ISO:
     * The live user "rebestie" has no password.
 
     * The ISO is built with Remastersys, and has Casper, which makes it compatible with the USB Startup creator, despite being based off of Debian. Unetbootin
-    will also work. Note that Unetbootin is not recommened if your target computer needs fallback drivers, as it uses syslinux instead of Grub which does not
-    properly allow the fallback drivers to work correctly. (See "CHANGING THE RESOLUTION ON SIMPLE HARDWARE" section for more details)
+    will also work. Note that Unetbootin is not recommened if your target computer needs SimpleDRM, as it uses syslinux instead of Grub which does not properly
+    allow SimpleDRM to work correctly. (See "CHANGING THE RESOLUTION ON SIMPLE HARDWARE" section for more details)
 
     * You could also use the test_RBOS_ISO.sh to try software on the ISO without a reboot or a VM. This is more recommended for advanced users, as it is not
     *fully* isolated. To use, Download the ISO, and download and make the test_RBOS_ISO.sh script executable, and run the script. It can be run from a
@@ -94,9 +94,8 @@ BOOT OPTIONS:
            ** init=/bin/recinit :       Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.
 
            ** nomodeset :               This option is handled by the kernel. It may be slightly misleading in name, but it prevents other drivers from
-                                        taking over vesadrm or efidrm, leaving (vesa/efi)drm as the current graphics driver. Use this if the graphics driver
-                                        misbehaves, and fails to create any graphical devices. The efidrm or vesadrm drivers are automatically selected based
-                                        on boot firmware type. (vesadrm for BIOS, efidrm for EFI)
+                                        taking over SimpleDRM, leaving SimpleDRM as the current graphics driver. Use this if the graphics driver misbehaves,
+                                        and fails to create any graphical devices.
 
 
       * This option is handled early in initramfs:
@@ -107,10 +106,10 @@ BOOT OPTIONS:
 
       * These utilities assit with changing boot options on installed systems:
            ** rbos-force-simplegraphics:     Wizard for configuring the bootloader to add or remove `nomodeset to the kernel command line to force or unforce
-                                             using the fallback efidrm or vesadrm driver.
+                                             using the fallback (SimpleDRM) driver.
 
-           ** rbos-configure-simplegraphics: Wizard for configuring the bootloader frambuffer size for hardware that requires a fallback driver (see CHANGING
-                                             THE RESOLUTION ON SIMPLE HARDWARE)
+           ** rbos-configure-simplegraphics: Wizard for configuring the bootloader frambuffer size for hardware that requires SimpleDRM (see CHANGING THE
+                                             RESOLUTION ON SIMPLE HARDWARE)
 
            ** rbos-force-softwarerendering:  Wizard for configuring the WaylandLoginManager to force software rendering, and Pixman where possible
 
@@ -118,12 +117,12 @@ BOOT OPTIONS:
 CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
 -------------------------------------------
       * Not every video card has its own driver that supports Kernel Mode Setting. VirtualBox did not (until recently), and the emulated 'vmware' device in
-      QEMU VMs does not work quite right with the vmwgfx driver. Before the kernel added fallback driver support, hardware without proper modesetting support
-      required framebuffer support. While possible, there was the problem that Wayland based display servers that have framebuffer backends are rare.
+      QEMU VMs does not work quite right with the vmwgfx driver. Before simpledrm, hardware without proper modesetting support required framebuffer support.
+      While possible, there was the problem that Wayland based display servers that have framebuffer backends are rare.
 
-      * The *bootloader* is where the video memory for these drivers are prepared, before the kernel starts. Grub tries its best to detect your resolution,
-      with one that is supported by both your BIOS and your monitor. However, the resolution can be customized, especially on VMs which may tend to default
-      to a smaller screen size.
+      * The *bootloader* is where the video memory for this driver is prepared, before the kernel starts. Grub tries its best to detect your resolution, with
+      one that is supported by both your BIOS and your monitor. However, the resolution can be customized, especially on VMs which may tend to default to a
+      smaller screen size.
 
       * For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
       resolution, and hit "CTRL+X"
