@@ -339,6 +339,7 @@ function CleanupGIT()
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" gc --auto
   fi
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" clean -xffd
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" gc --auto
 }
 
 #Function to download git repos
