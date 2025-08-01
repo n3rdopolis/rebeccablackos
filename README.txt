@@ -132,11 +132,13 @@ CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
 
 BUILDING:
 ---------
-     * Building your own ISO is simple. Simply download the SVN by ensuring subversion is installed, and running the command:
+     * Building your own ISOs is simple. Simply download the SVN after ensuring subversion is installed, by running the command:
           svn checkout svn://svn.code.sf.net/p/rebeccablackos/code/
      run the rebeccablackos_builder.sh, and then select the build architecture to run. The build process only works on Linux computers, but should work on
      most distros. A full build from scratch may take several hours to about a day depending on your hardware, and may take several GB. If nothing is selected
      to be rebuilt on the second build attempt, it may take less than an hour depending on your hardware.
+
+     * The resulting ISOs are placed under the ~/RebeccaBlackOS directory. (Under your home directory)
 
      * It requires the 'ar' utility from the 'binutils' package for the extraction of debootstrap to work
 
