@@ -382,7 +382,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   PREPARE_STARTTIME=$(date +%s)
 
   #prepare debootstrap
-  if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
+  if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.pgp || ! -e "$BUILDLOCATION"/DontDownloadDebootstrapScript ]]
   then
     type ar &> /dev/null
     if [[ $? != 0 ]]
@@ -412,9 +412,9 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=3 -C "$BUILDLOCATION"/debootstrap "$DEBOOTSTRIPBINPATH"
     tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/scripts
     tar -axf "$BUILDLOCATION"/debootstrap/debootstrap.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap ./usr/share/debootstrap/functions
-    tar -axf "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap/keyrings ./usr/share/keyrings/debian-archive-keyring.gpg
+    tar -axf "$BUILDLOCATION"/debootstrap/debian-archive-keyring.tar --strip-components=4 -C "$BUILDLOCATION"/debootstrap/keyrings ./usr/share/keyrings/debian-archive-keyring.pgp
 
-    if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/scripts || ! -e "$BUILDLOCATION"/debootstrap/functions || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.gpg ]]
+    if [[ ! -e "$BUILDLOCATION"/debootstrap/debootstrap || ! -e "$BUILDLOCATION"/debootstrap/scripts || ! -e "$BUILDLOCATION"/debootstrap/functions || ! -e "$BUILDLOCATION"/debootstrap/keyrings/debian-archive-keyring.pgp ]]
     then
       faillog "failed to bootstrap debootstrap"
     fi
@@ -504,11 +504,26 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
       rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/*
       rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_1/*
       rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
-      rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
-      rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
-      rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
-      rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
-      rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
+      if [[ -e "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH" ]]
+      then
+        rm "$BUILDLOCATION"/DontRestartPhase1"$BUILDARCH"
+      fi
+      if [[ -e "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH" ]]
+      then
+        rm "$BUILDLOCATION"/DontRestartPhase2"$BUILDARCH"
+      fi
+      if [[ -e "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
+      then
+        rm "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
+      fi
+      if [[ -e "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH" ]]
+      then
+        rm "$BUILDLOCATION"/DontRestartArchives"$BUILDARCH"
+      fi
+      if [[ -e "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH" ]]
+      then
+        rm "$BUILDLOCATION"/DontRestartSourceDownload"$BUILDARCH"
+      fi
       touch "$BUILDLOCATION"/DontStartFromScratch"$BUILDARCH"
       touch "$BUILDLOCATION"/DontForceSnapshotBuild"$BUILDARCH"
       mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/phase_2/tmp
@@ -540,6 +555,8 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   if [[ ! -f "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH" ]]
   then
     echolog "Control file for buildoutput removed, or non existing. Deleting compiled .deb files for $BUILDARCH"
+    rm -rf "$BUILDLOCATION"/logs/*"$BUILDARCH"
+    rm -rf "$BUILDLOCATION"/logs/failedlogs/*"$BUILDARCH".log
     rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput/*
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildoutput
     touch "$BUILDLOCATION"/DontRestartBuildoutput"$BUILDARCH"
