@@ -1205,7 +1205,7 @@ function define_config
   STORAGESIZE_PHASE1=$((2 * $GIGABYTE ))
   STORAGESIZE_PHASE2=$((5 * $GIGABYTE ))
   STORAGESIZE_ARCHIVES=$((1 * $GIGABYTE ))
-  STORAGESIZE_SRCBUILD=$((38 * $GIGABYTE ))
+  STORAGESIZE_SRCBUILD=$((80 * $GIGABYTE ))
 }
 
 function elevate_buildprocess
