@@ -1474,6 +1474,8 @@ function MakeAndInstall()
       else
         PACKAGEDATE=$(date +%s)
       fi
+      PACKAGEVERSION=1
+      PACKAGEARCH=$(dpkg --print-architecture)
       env -C /"$SOURCEDIR"/$SOURCENAME/ -- $CHECKINSTALLCMD \
                                             -y \
                                             -D \
@@ -1486,7 +1488,7 @@ function MakeAndInstall()
                                             --install=no \
                                             --backup=no \
                                             --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" \
-                                            --pkgversion=1 \
+                                            --pkgversion=$PACKAGEVERSION \
                                             --pkgrelease=$PACKAGEDATE \
                                             --pkglicense="OSI_COMPLIANT" \
                                             --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" \
@@ -1499,12 +1501,17 @@ function MakeAndInstall()
       echo "Checkinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/Checkinstall"
 
       #move the resulting deb file into the buildoutput tree.
-      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/"
+      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_"$PACKAGEVERSION"-"$PACKAGEDATE"_"$PACKAGEARCH".deb "/$SOURCEDIR/buildoutput/"
 
       #Install the newly created deb file
       STARTTIME=$(date +%s)
-      InstallDebFile "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
-      InstallResult=$?
+      if [[ -e "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_"$PACKAGEVERSION"-"$PACKAGEDATE"_"$PACKAGEARCH".deb ]]
+      then
+        InstallDebFile "/$SOURCEDIR/buildoutput/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_"$PACKAGEVERSION"-"$PACKAGEDATE"_"$PACKAGEARCH".deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
+        InstallResult=$?
+      else
+        InstallResult=1
+      fi
       ENDTIME=$(date +%s)
       echo "BuiltDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/BuiltDebInstall"
 
@@ -1521,7 +1528,7 @@ function MakeAndInstall()
                                             --dpkgflags=--force-overwrite \
                                             --backup=no \
                                             --pkgname="$PACKAGESOURCENAME"-"$PACKAGESUFFIX" \
-                                            --pkgversion=1 \
+                                            --pkgversion=$PACKAGEVERSION \
                                             --pkgrelease=$PACKAGEDATE \
                                             --pkglicense="OSI_COMPLIANT" \
                                             --maintainer="$PACKAGESUFFIX"@"$PACKAGESUFFIX" \
@@ -1534,7 +1541,7 @@ function MakeAndInstall()
       echo "SmallCheckinstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallCheckinstall"
       
       #move the resulting deb file into the buildoutput tree.
-      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb "/$SOURCEDIR/buildoutput/smallpackages"
+      mv /"$SOURCEDIR"/$SOURCENAME/"$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_"$PACKAGEVERSION"-"$PACKAGEDATE"_"$PACKAGEARCH".deb "/$SOURCEDIR/buildoutput/smallpackages"
 
       #If dpkg aborts for some reason, such as being unable to overwrite a file, log it, and force the package to rebuild
       if [[ $InstallResult != 0 ]]
