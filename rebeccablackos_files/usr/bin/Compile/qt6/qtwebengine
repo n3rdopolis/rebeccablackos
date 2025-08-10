@@ -59,6 +59,9 @@ function PackagePrepareBuild()
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/build/config/compiler/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/perfetto/gn/standalone/BUILD.gn
 sed -i 's/-Wl,--fatal-warnings//g' src/3rdparty/chromium/third_party/openscreen/src/build/config/BUILD.gn
+#sed -i 's/this.maxInstances = options.maxWorkers || cpus().length;/this.maxInstances = options.maxWorkers || cpus().length || 1;/g' src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/@rollup/plugin-terser/src/worker-pool.ts
+#sed -i 's/this.maxInstances = options.maxWorkers || cpus().length;/this.maxInstances = options.maxWorkers || cpus().length || 1;/g' src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/@rollup/plugin-terser/dist/es/index.js
+#sed -i 's/this.maxInstances = options.maxWorkers || os.cpus().length;/this.maxInstances = options.maxWorkers || os.cpus().length || 1;/g'  src/3rdparty/chromium/third_party/devtools-frontend/src/node_modules/@rollup/plugin-terser/dist/cjs/index.js
 
 cmake -B build -G Ninja -DQT_NO_STRIP_WRAPPER=TRUE -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DQT_FEATURE_webengine_system_ffmpeg=ON -DQT_FEATURE_webengine_system_icu=ON -DQT_FEATURE_webengine_system_libevent=ON -DQT_FEATURE_webengine_system_libxslt=ON -DQT_FEATURE_webengine_proprietary_codecs=ON -DQT_FEATURE_webengine_kerberos=ON -DQT_FEATURE_webengine_full_debug_info=OFF -DQT_FEATURE_webengine_webrtc_pipewire=ON
 }
