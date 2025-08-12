@@ -627,22 +627,6 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     RAMDISKTESTSIZE=$RAMDISKSIZE
   fi
 
-  #Determine if enough free RAM for srcbuild_overlay in ramdisk
-  ((TOTAL_TEMP_FOLDERS++))
-  RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPSRCBUILDOVERLAY))
-  OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMPSRCBUILDOVERLAY))
-  if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
-  then
-    echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for srcbuild overlay"
-    ((RAMDISKED_TEMP_FOLDERS++))
-    RAMDISK_FOR_SRCBUILD=1
-    RAMDISKSIZE=$RAMDISKTESTSIZE
-  else
-    echolog "Not enough free RAM to use a ramdisk for srcbuild overlay."
-    RAMDISKTESTSIZE=$RAMDISKSIZE
-    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
-  fi
-
   #Determine if enough free RAM for phase3 in ramdisk
   ((TOTAL_TEMP_FOLDERS++))
   RAMDISKTESTSIZE=$((RAMDISKTESTSIZE+STORAGESIZE_TMPPHASE3))
@@ -695,21 +679,50 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
 
   fi
 
+  #remastersys and the srcbuild overlay both can use the RAM disk, and have different space requirements
+  #but because the overlay gets cleared after each package, only the largest one gets added to the ram disk size
+  #as they are not run at the same time
+  RAMDISKTESTSIZE_PREPAD=$RAMDISKSIZE
+  STORAGESIZE_TMP_PADSIZE=0
+
+  #Determine if enough free RAM for srcbuild_overlay in ramdisk
+  ((TOTAL_TEMP_FOLDERS++))
+  RAMDISKTESTSIZE=$((RAMDISKTESTSIZE_PREPAD+STORAGESIZE_TMPSRCBUILDOVERLAY))
+  if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
+  then
+    echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for srcbuild overlay"
+    ((RAMDISKED_TEMP_FOLDERS++))
+    RAMDISK_FOR_SRCBUILD=1
+    if [[ $STORAGESIZE_TMPSRCBUILDOVERLAY -gt $STORAGESIZE_TMPREMASTERSYS ]]
+    then
+      STORAGESIZE_TMP_PADSIZE=$STORAGESIZE_TMPSRCBUILDOVERLAY
+    fi
+  else
+    echolog "Not enough free RAM to use a ramdisk for srcbuild overlay."
+    RAMDISKTESTSIZE=$RAMDISKSIZE
+    ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPSRCBUILDOVERLAY))
+  fi
+
   #Determine if enough free RAM for Remastersys in ramdisk
   ((TOTAL_TEMP_FOLDERS++))
-  RAMDISKTESTSIZE=$((RAMDISKSIZE+STORAGESIZE_TMPREMASTERSYS))
-  OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMPREMASTERSYS))
+  RAMDISKTESTSIZE=$((RAMDISKTESTSIZE_PREPAD+STORAGESIZE_TMPREMASTERSYS))
   if [[ $FREERAM -gt $RAMDISKTESTSIZE ]]
   then
     echolog "More than $(( ((RAMDISKTESTSIZE+1023) /1024 + 1023) /1024 ))GB of RAM Free. Using a ramdisk for remastersys"
     ((RAMDISKED_TEMP_FOLDERS++))
     RAMDISK_FOR_REMASTERSYS=1
-    RAMDISKSIZE=$RAMDISKTESTSIZE
+    if [[ $STORAGESIZE_TMPREMASTERSYS -gt $STORAGESIZE_TMPSRCBUILDOVERLAY ]]
+    then
+      STORAGESIZE_TMP_PADSIZE=$STORAGESIZE_TMPREMASTERSYS
+    fi
   else
     echolog "Not enough free RAM to use a ramdisk for remastersys."
     RAMDISKTESTSIZE=$RAMDISKSIZE
     ((STORAGESIZE_TOTALSIZE+=STORAGESIZE_TMPREMASTERSYS))
   fi
+
+  RAMDISKSIZE=$(($RAMDISKSIZE+STORAGESIZE_TMP_PADSIZE))
+  OPTIMAL_FREE_RAM=$((OPTIMAL_FREE_RAM+STORAGESIZE_TMP_PADSIZE))
 
   #get the size of the output location
   FREEDISKSPACE_OUTPUT=$(df --output=avail $HOMELOCATION | tail -1)
@@ -735,9 +748,6 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     echolog -e "Current free RAM: $(( ((FREERAM+1023) /1024 + 1023) /1024 ))GB; RAM disk maximum size: $(( ((RAMDISKSIZE+1023) /1024 + 1023) /1024 ))GB, Free disk space needed for build: $(( ((STORAGESIZE_TOTALSIZE+1023) /1024 + 1023) /1024 ))GB, Current free disk space for build: $(( ((FREEDISKSPACE_BUILDSPACE+1023) /1024 + 1023) /1024 ))GB"
     echolog -e "Temporary folders in ramdisk: $RAMDISKED_TEMP_FOLDERS / Total temporary folders: $TOTAL_TEMP_FOLDERS . For all temporary folders to be in RAM, $(( ((OPTIMAL_FREE_RAM+1023) /1024 + 1023) /1024 ))GB is needed to be free.\n"
   fi
-
-
-
 
 
   #Mount the ramdisk
@@ -1195,8 +1205,8 @@ function define_config
   STORAGESIZE_PADDING=$((2 * $GIGABYTE ))
 
   STORAGESIZE_TMPBASEBUILD=$((1 * $GIGABYTE ))
-  STORAGESIZE_TMPSRCBUILDOVERLAY=$((2 * $GIGABYTE ))
   STORAGESIZE_TMPPHASE3=$((2 * $GIGABYTE ))
+  STORAGESIZE_TMPSRCBUILDOVERLAY=$((6 * $GIGABYTE ))
   STORAGESIZE_TMPREMASTERSYS=$((7 * $GIGABYTE ))
 
 
