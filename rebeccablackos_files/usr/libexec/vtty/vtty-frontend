@@ -113,7 +113,7 @@ function vTTYFrontendMain
   fi
 
   echo $XDG_SESSION_ID > /run/vtty/sessions/$XDG_SEAT
-  chmod 744 /run/vtty/sessions/$XDG_SEAT
+  chmod 644 /run/vtty/sessions/$XDG_SEAT
 
   #Only handle special vTTY inhibit cases if there are traditional TTYs on the seat
   SeatCanTTY=$(loginctl show-seat $XDG_SEAT -p CanTTY --value)
