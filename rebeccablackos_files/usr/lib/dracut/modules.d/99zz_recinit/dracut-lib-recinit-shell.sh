@@ -49,9 +49,9 @@ _emergency_shell() {
         HAS_MODESETTING_DEVICE=0
     fi
 
-    if [ -z $norecinit ] && [ $HAS_MODESETTING_DEVICE ] ; then
+    if [ -z $norecinit ] && [ $HAS_MODESETTING_DEVICE ] && [ ! -e /dev/tty0 ]; then
         if command -v recinit >/dev/null 2>&1; then
-            echo "No TTYs detected. Starting user mode recovery console. pass norecinit=1 to disable"
+            echo "Starting user mode recovery console. pass norecinit=1 to disable"
             recinit -- recinit-dracut-emergency
         else
             _emergency_shell_dracut
