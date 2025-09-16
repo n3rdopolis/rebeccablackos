@@ -59,7 +59,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=MinSizeRel  -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR  
+cmake -Wno-dev .. -DBUILD_PYTHON_BINDINGS=OFF -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR  -DCMAKE_BUILD_TYPE=MinSizeRel  -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR  
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
