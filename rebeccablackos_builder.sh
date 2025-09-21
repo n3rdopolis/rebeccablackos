@@ -1221,7 +1221,7 @@ function define_config
 function elevate_buildprocess
 {
   export BUILDER_IS_UNSHARED=1
-  sudo -E -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages for, and building the $BUILDFRIENDLYNAME ISOs" --what=sleep:shutdown -- unshare --mount "$0" "$@"
+  sudo --preserve-env=HOME,BUILDER_IS_UNSHARED -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages for, and building the $BUILDFRIENDLYNAME ISOs" --what=sleep:shutdown -- unshare --mount "$0" "$@"
   exit $?
 }
 
