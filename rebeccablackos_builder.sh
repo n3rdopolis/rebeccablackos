@@ -1106,7 +1106,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
   fi
 
-  rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
+  rm -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
 
   POSTCLEANUP_ENDTIME=$(date +%s)
   #If the live cd did  build then tell user   
