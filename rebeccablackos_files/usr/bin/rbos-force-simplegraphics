@@ -37,10 +37,10 @@ then
 fi
 
 #Tell the user what the script does
-sudo -E -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force or unforce using the fallback SimpleDRM graphics driver." 7 60
+sudo -u $DIALOGUSER dialog  --msgbox "This will assist you in configuring your system, to force or unforce using the fallback SimpleDRM graphics driver." 7 60
 
 #Ask the user what to do
-ForceFallback=$(sudo -E -u $DIALOGUSER dialog --radiolist "Would you like to force using the fallback graphics driver?
+ForceFallback=$(sudo -u $DIALOGUSER dialog --radiolist "Would you like to force using the fallback graphics driver?
 Current Option: $CURRENTOPTION" 20 60 20 1 "Force Fallback Driver" off 0 "Unforce Fallback Driver" off 2 "Leave Unchanged" on --stdout 2>/dev/tty)
 OKSelected=$?
 
@@ -60,7 +60,7 @@ then
 
   #update the grub configs, and ask the user to restart now or later
   update-grub
-  sudo -E -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
+  sudo -u $DIALOGUSER dialog  --yesno "You will need to restart in order for the changes to apply
 
 Restart now?" 7 60
   OKSelected=$?
