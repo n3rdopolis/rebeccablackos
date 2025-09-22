@@ -4,13 +4,13 @@
 #As not all login managers have an always-running greeter like waylandloginmanager
 Description=Graphical terminal for vTTY %i
 
-After=vtty-backend-novt@.service
+After=vtty-backend-seat@.service
 After=systemd-user-sessions.service display-manager.service
 
 StartLimitIntervalSec=30
 StartLimitBurst=3
 
-BindsTo=vtty-backend-novt@.service
+BindsTo=vtty-backend-seat@.service
 
 #Same as default getty service
 IgnoreOnIsolate=true
@@ -42,4 +42,3 @@ RestrictSUIDSGID=true
 
 [Install]
 WantedBy=multi-user.target
-DefaultInstance=seat0
