@@ -213,6 +213,7 @@ function run_buildprocess {
   BUILD_RUNNING=0
 
   SCRIPTFILEPATH=$(readlink -f "$0")
+  SCRIPTFILENAME=$(basename "$SCRIPTFILEPATH")
   SCRIPTFOLDERPATH=$(dirname "$SCRIPTFILEPATH")
 
   define_config
@@ -299,17 +300,23 @@ function run_buildprocess {
     fi
   fi
 
-  #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/cmdline, and making sure the second line of /proc/pid/cmdline matches (as it's the path to the script).
-  ls "$(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile)" &> /dev/null
+  #Detect another instance, by creating a testing a lockfile, which is a symlink to /proc/pid/fd/255, and making sure the basename of the linked fd is the name of the script
+  #Bash opens scripts with the 255 FD. This should limit the chances of the script failing to run due to pid reuse
+  LockFilePidPath=$(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null)
+  ls "$LockFilePidPath" &> /dev/null
   result=$?
-  if [[ $result != 0 || ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile  ]]
+  if [[ $result == 0 ]]
+  then
+    LockFileScriptName=$(basename "$LockFilePidPath")
+  fi
+  if [[ $result != 0 || ! -e "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile || "$SCRIPTFILENAME" != "$LockFileScriptName" ]]
   then
     mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile &> /dev/null
+    rm -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile &> /dev/null
     "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile 2>/dev/null
-    ln -s /proc/"$$"/cmdline "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
+    ln -s /proc/"$$"/fd/255 "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile
   else
-    LockPID=$(readlink -f "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile | awk -F "/" '{print $3}')
+    LockPID=$(readlink "$BUILDLOCATION"/build/"$BUILDARCH"/lockfile | awk -F "/" '{print $3}')
     faillog "Error: Another instance is already running for $BUILDARCH (pid $LockPID)"
   fi
 
