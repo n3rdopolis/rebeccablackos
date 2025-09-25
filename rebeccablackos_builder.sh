@@ -218,6 +218,12 @@ function run_buildprocess {
 
   define_config
 
+  #Don't allow the script to run if the name is incorrect, as users could rename the script to allow multiple instances to run, as the lock file uses the script name
+  if [[ $SCRIPTFILENAME != "$BUILDUNIXNAME"_builder.sh ]]
+  then
+    faillog "Error, could not run. Please rename the script to ${BUILDUNIXNAME}_builder.sh" 
+  fi
+
   #Move to /var/cache if an existing build folder exists. With systemd-homed and the problems caused by UIDs moved in a migrated home directory, it's best to store in /var/cache
   if [[ -d "$OLDBUILDROOT"/$BUILDFOLDERNAME && ! -d "$BUILDROOT"/$BUILDFOLDERNAME ]]
   then
