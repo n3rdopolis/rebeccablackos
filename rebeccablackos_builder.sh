@@ -218,10 +218,18 @@ function run_buildprocess {
 
   define_config
 
+  export BUILDLOCATION="$BUILDROOT"/$BUILDFOLDERNAME
+
+  #make a folder containing the live cd tools in the users local folder
+  mkdir -p "$BUILDLOCATION"
+
+  #Create the logs folder for any logs the script may need to write if it aborts early
+  mkdir -p "$BUILDLOCATION"/logs/failedlogs
+
   #Don't allow the script to run if the name is incorrect, as users could rename the script to allow multiple instances to run, as the lock file uses the script name
   if [[ $SCRIPTFILENAME != "$BUILDUNIXNAME"_builder.sh ]]
   then
-    faillog "Error, could not run. Please rename the script to ${BUILDUNIXNAME}_builder.sh" 
+    faillog "Error: The script has been detected to have been renamed. The script must be named ${BUILDUNIXNAME}_builder.sh"
   fi
 
   #Move to /var/cache if an existing build folder exists. With systemd-homed and the problems caused by UIDs moved in a migrated home directory, it's best to store in /var/cache
@@ -230,14 +238,6 @@ function run_buildprocess {
     echolog "Moving $OLDBUILDROOT/$BUILDFOLDERNAME to $BUILDROOT/$BUILDFOLDERNAME"
     mv "$OLDBUILDROOT"/$BUILDFOLDERNAME "$BUILDROOT"/$BUILDFOLDERNAME
   fi
-
-  export BUILDLOCATION="$BUILDROOT"/$BUILDFOLDERNAME
-
-  #make a folder containing the live cd tools in the users local folder
-  mkdir -p "$BUILDLOCATION"
-
-  #Create the logs folder for any logs the script may need to write if it aborts early
-  mkdir -p "$BUILDLOCATION"/logs/failedlogs
 
   #Create the output directory
   mkdir -p "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/
