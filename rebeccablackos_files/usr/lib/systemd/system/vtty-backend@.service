@@ -14,7 +14,7 @@ Type=notify
 
 IgnoreSIGPIPE=false
 SendSIGHUP=true
-KillMode=process
+KillMode=control-group
 
 [Install]
 WantedBy=getty.target
