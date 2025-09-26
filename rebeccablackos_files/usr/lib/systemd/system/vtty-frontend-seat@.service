@@ -2,7 +2,7 @@
 #Single user vtty for non-vt text mode processes that configure the system, such as console-conf or recovery
 #Perhaps in the future kwin could offer to start it if the screen unlocker fails, and needs the user to run the unlock command
 #As not all login managers have an always-running greeter like waylandloginmanager
-Description=Graphical terminal for vTTY %i
+Description=Graphical terminal for vTTY on seat %i
 
 After=vtty-backend-seat@.service
 After=systemd-user-sessions.service display-manager.service
