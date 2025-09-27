@@ -75,6 +75,12 @@ function vTTYBackendMain
     rm /run/vtty/"$EmulatedTTY"/socatproxy
   fi
   socat exec:"/usr/libexec/vtty/vtty-be-login $EmulatedTTY",pty,stderr,setsid,sigint,sane unix-listen:/run/vtty/"$EmulatedTTY"/socatproxy,reuseaddr,fork,su=$VTTYUSER,user=$VTTYUSER,group=$VTTYUSER,mode=0700 &
+  #Exit if socat crashes
+  SOCATPID=$!
+  trap 'if [[ $(kill -0 $SOCATPID &>/dev/null; echo $?) != 0 ]]
+        then
+          exit 1
+        fi' CHLD
 
   $SLEEPCMD .1
 
