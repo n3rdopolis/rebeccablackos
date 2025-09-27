@@ -24,6 +24,7 @@ function GetFirstSeatCard
     MatchSeat=seat0
   fi
 
+  SeatCardFound=0
   SelectCard=""
   while read -r ReadCard
   do
@@ -34,13 +35,20 @@ function GetFirstSeatCard
       ReadCardSeat=seat0
     fi
 
-    if [[ $CardIsVGABoot -gt 0 ]]
+    if [[ $ReadCardSeat == $MatchSeat ]]
     then
+      SeatCardFound=1
       SelectCard=$ReadCard
-      break
+      if [[ $CardIsVGABoot -gt 0 ]]
+      then
+        break
+      fi
     fi
   done < <(ls -r /dev/dri/card*)
-  echo $SelectCard
+  if [[ $SeatCardFound != 0 ]]
+  then
+    echo $SelectCard
+  fi
 }
 
 function UvTTYSessionMain
