@@ -164,7 +164,7 @@ function vTTYFrontendMain
 
   #Cage gets run in a different cgroup because of PAMName, which causes service stop events to not work
   #Stop the cage process when the script is exiting
-  trap 'kill -9 $CAGEPAD' EXIT TERM
+  trap 'kill -9 $CAGEPID' TERM
 
   export WLR_RENDERER=pixman
   export WLR_RENDERER_ALLOW_SOFTWARE=1
