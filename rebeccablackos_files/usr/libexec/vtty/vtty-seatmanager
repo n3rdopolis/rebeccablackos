@@ -1,0 +1,128 @@
+#! /usr/bin/perl
+#    Copyright (c) 2012 - 2025 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
+#busctl call org.freedesktop.systemd1 /org/freedesktop/systemd1/unit/vtty_2dfrontend_2dseat_40seat0_2eservice org.freedesktop.DBus.Properties Get "ss" org.freedesktop.systemd1.Service MainPID
+#busctl call org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Id
+#busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/seat0 org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY
+
+use strict;
+use warnings;
+use Env;
+use Net::DBus;
+use Net::DBus::Reactor;
+
+my $SystemBus=Net::DBus->system();
+
+my $Login1Service=$SystemBus->get_service("org.freedesktop.login1");
+my $Login1ManagerObject=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.login1.Manager");
+
+my $Systemd1Service=$SystemBus->get_service("org.freedesktop.systemd1");
+my $Systemd1ManagerObject=$Systemd1Service->get_object("/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager");
+
+sub HandleSecureAttentionKey
+{
+  my $SecureAttentionKeySeat=shift;
+
+  my $Unit=eval {$Systemd1ManagerObject->GetUnit("vtty-frontend-seat\@seat1.service")};
+  if ($@)
+  {
+    print("Dead Service vtty\n");
+  }
+
+  my $LDUnit=eval {$Systemd1ManagerObject->GetUnit("systemd-logind.service")};
+  my $LDUnitObject->get_object($LDUnit, "org.freedesktop.DBus.Properties");
+  my $MainPID=$LDUnitObject->Get("org.freedesktop.systemd1.Service", "MainPID");
+  print("MainPID $MainPID");
+  
+
+  print("\n");
+  my $Seats=$Login1ManagerObject->ListSeats();
+  foreach my $Seat ( @{$Seats} ) {
+    my @SeatParams=@{$Seat};
+    print "Seat Name: $SeatParams[0]\n";
+    print "Seat Path: $SeatParams[1]\n";
+  }
+
+  # TODO switch to, or activate vtty-frontend-seat\@${SecureAttentionKeySeat}.service
+  print("HandleSecureAttentionKey $SecureAttentionKeySeat\n");
+
+  return;
+}
+
+sub HandleSessionRemoved
+{
+  my $SessionRemovedSession=shift;
+
+  # TODO go through all seats, see what one has no active sessions, and start or switch to vtty-frontend-seat\@${SessionRemovedSession}.service
+  # The seat of a removed session is not queriable
+  print("HandleSessionRemoved $SessionRemovedSession\n");
+
+  return;
+}
+
+sub HandleSeatNew
+{
+  my $SeatNewSeat=shift;
+
+  #Start the vtty-frontend-seat@.service for the new seat
+  $Systemd1ManagerObject->StartUnit("vtty-frontend-seat\@${SeatNewSeat}.service", "replace");
+
+  return;
+}
+
+sub HandleSeatRemoved
+{
+  my $SeatRemovedSeat=shift;
+
+  #Only stop the vtty-frontend-seat@.service when a seat is removed. Do not stop the backend
+  #The seat removal could be accidental, or caused by a loose USB GPU, and stopping the backend
+  #could cause a user running process to be killed.
+  $Systemd1ManagerObject->StopUnit("vtty-frontend-seat\@${SeatRemovedSeat}.service", "replace");
+
+  return;
+}
+
+sub main
+{
+  #This script must be run as root.
+  if ($> != 0)
+  {
+    print("Must be run as root\n");
+    exit 1
+  }
+
+  #Start vtty-frontend-seat@.service on all running seats.
+  my $Seats=$Login1ManagerObject->ListSeats();
+  foreach my $Seat ( @{$Seats} ) {
+    my @SeatParams=@{$Seat};
+    my $SeatName=$SeatParams[0];
+    $Systemd1ManagerObject->StartUnit("vtty-frontend-seat\@${SeatName}.service", "replace");
+  }
+
+  $Login1ManagerObject->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
+  $Login1ManagerObject->connect_to_signal("SessionRemoved", \&HandleSessionRemoved);
+  $Login1ManagerObject->connect_to_signal("SeatNew", \&HandleSeatNew);
+  $Login1ManagerObject->connect_to_signal("SeatRemoved", \&HandleSeatRemoved);
+
+  my $DbusReactor=Net::DBus::Reactor->main();
+  $DbusReactor->run();
+  exit 0;
+}
+
+main();
