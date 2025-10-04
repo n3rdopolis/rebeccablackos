@@ -6,9 +6,8 @@ After=systemd-user-sessions.service
 ConditionPathExists=!/dev/tty0
 
 [Service]
-Type=notify
+Type=simple
 ExecStart=/usr/libexec/vtty/vtty-seatmanager
-IgnoreSIGPIPE=no
 
 [Install]
 Alias=display-manager.service
