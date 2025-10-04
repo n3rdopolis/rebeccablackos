@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#This handles the login prompt and handling of /etc/issue
+#This handles the login prompt.
 
 function DoLoginPrompt
 {
@@ -28,7 +28,6 @@ function DoLoginPrompt
   unset INVOCATION_ID
   unset JOURNAL_STREAM
   export VTTY=$EmulatedTTY
-  echo "v${VTTY} backed by $PTYPath" > /dev/pts/$PTYNumber
 
   #Clear the clipboard and the primary selection
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
