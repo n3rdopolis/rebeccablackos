@@ -16,11 +16,6 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
-#busctl call org.freedesktop.systemd1 /org/freedesktop/systemd1/unit/vtty_2dfrontend_2dseat_40seat0_2eservice org.freedesktop.DBus.Properties Get "ss" org.freedesktop.systemd1.Service MainPID
-#busctl call org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Id
-#busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/seat0 org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY
-
 use strict;
 use warnings;
 use Env;
