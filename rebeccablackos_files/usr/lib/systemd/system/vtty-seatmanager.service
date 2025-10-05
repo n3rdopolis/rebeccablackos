@@ -1,8 +1,5 @@
 [Unit]
 Description=Starts the vTTY login console on seats.
-Conflicts=plymouth-quit.service plymouth-quit-wait.service
-Before=plymouth-quit-wait.service plymouth-quit.service
-After=systemd-user-sessions.service
 ConditionPathExists=!/dev/tty0
 
 [Service]
