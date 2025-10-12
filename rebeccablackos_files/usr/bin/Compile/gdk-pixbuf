@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 sed -i "s/subdir('tests')//g" meson.build
-echo -e "#! /bin/bash\n. /usr/bin/wlruntime_vars\ngdk-pixbuf-query-loaders > $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache" > "postinstall-pak"
+echo -e "#! /bin/bash\nmkdir -p $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/\n. /usr/bin/wlruntime_vars\ngdk-pixbuf-query-loaders > $INSTALLDIR/lib/$DEB_HOST_MULTIARCH/gdk-pixbuf-2.0/2.10.0/loaders.cache" > "postinstall-pak"
 meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) build -Dgtk_doc=false
 }
 
