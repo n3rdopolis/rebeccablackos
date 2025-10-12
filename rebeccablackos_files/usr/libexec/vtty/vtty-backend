@@ -24,6 +24,8 @@ function vTTYBackendMain
 
   VTTYUSER=vtty
 
+  export PATH=/opt/bin:$PATH
+
   #Use bash builtin sleep if availible
   if [[ -f /usr/lib/bash/sleep ]]
   then
