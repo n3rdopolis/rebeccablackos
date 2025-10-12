@@ -28,7 +28,7 @@ function DoLoginPrompt
   unset INVOCATION_ID
   unset JOURNAL_STREAM
   export VTTY=$EmulatedTTY
-  echo "${VTTY}" > /dev/pts/$PTYNumber
+  echo -n "[${VTTY}] " > /dev/pts/$PTYNumber
 
   #Clear the clipboard and the primary selection
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
