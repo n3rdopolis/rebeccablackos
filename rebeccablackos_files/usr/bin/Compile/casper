@@ -61,6 +61,9 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+#Casper's scripts overrides the PATH set in the initramfs /init script, add the $INSTALLDIR/bin and $INSTALLDIR/sbin back
+sed -i "s|export PATH=|export PATH=$INSTALLDIR/bin:$INSTALLDIR/sbin:|" scripts/casper
+
 echo "#! /bin/bash"$'\n'"if [[ (\$1 == purge) && (-e /etc/casper.conf) ]]"$'\n'"then"$'\n'"rm /etc/casper.conf"$'\n'"fi"  > postremove-pak
 
 sed -i "s|/usr/share/kubuntu-default-settings/kf5-settings/|/etc/skel/.config/|g" scripts/casper-bottom/34disable_kde_services
