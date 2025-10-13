@@ -74,8 +74,6 @@ function vTTYFrontendMain
     exit 1
   fi
 
-  export PATH=/opt/bin:$PATH
-
   EmulatedTTY=$1
 
   which socat &> /dev/null
