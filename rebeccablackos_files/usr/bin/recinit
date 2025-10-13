@@ -88,7 +88,6 @@ else
   removedevshm=0
 fi
 
-OLD_PATH=$PATH
 mkdir /run/recinit/
 mkdir -p /run/user/0
 chmod 700 /run/user/0
@@ -96,7 +95,6 @@ export XDG_RUNTIME_DIR=/run/user/0
 export XDG_SEAT=seat0
 export WLR_RENDERER_ALLOW_SOFTWARE=1
 export LIBSEAT_BACKEND=noop
-export PATH=/opt/bin:$PATH
 export WLR_LIBINPUT_NO_DEVICES=1
 export WLR_NO_HARDWARE_CURSORS=1
 export WLR_RENDERER=pixman
@@ -229,7 +227,6 @@ fi
 #If this is pid 1 start init upon exit
 if [ $$ -eq 1 ]
 then
-  export PATH=$OLD_PATH
   unset LC_ALL
   unset XDG_RUNTIME_DIR
   unset XDG_SEAT
