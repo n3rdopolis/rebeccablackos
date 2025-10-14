@@ -125,10 +125,11 @@ CHANGING THE RESOLUTION ON SIMPLE HARDWARE:
       with one that is supported by both your BIOS and your monitor. However, the resolution can be customized, especially on VMs which may tend to default
       to a smaller screen size.
 
-      * For Live CD mode, in the boot menu, hit the 'e' key. and set SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired
-      resolution, and hit "CTRL+X"
+      * The LiveCD boot menu gives the option to hit the 'e' key to edit the boot script.
+      It can be tweaked to force the boot framebuffer size. SetCustomResolution to 1 (from 0) and then change the set gfxmode= line to your desired resolution,
+      and hit "CTRL+X"
 
-      * For installed, a utility, rbos-configure-simplegraphics is provided.
+      * For installed systems, a utility, rbos-configure-simplegraphics is provided, that configures the bootloader framebuffer size.
 
 BUILDING:
 ---------
