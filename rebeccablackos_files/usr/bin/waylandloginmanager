@@ -414,6 +414,9 @@ function UserSessionGuessWAYLAND_DISPLAY
           then
             WAYLAND_DISPLAY=$(basename $UserSessionWaylandSocket) dbus-update-activation-environment --systemd WAYLAND_DISPLAY
             UserSessionWAYLAND_DISPLAYFound=1
+
+            #Start the user graphical-session target
+            systemctl --user start waylandloginmanager.target
           fi
         done
 
