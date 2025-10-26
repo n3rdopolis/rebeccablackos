@@ -79,7 +79,7 @@ make install
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
 function PackagePostInstall()
 {
-echo "#! /bin/bash"$'\n'"systemctl --user start plasma-polkit-agent.service" > $INSTALLDIR/libexec/start-kde-polkit-agent
+echo "#! /bin/bash"$'\n'"sleep 5"$'\n'"systemctl --user start plasma-polkit-agent.service" > $INSTALLDIR/libexec/start-kde-polkit-agent
 chmod +x $INSTALLDIR/libexec/start-kde-polkit-agent
 }
 
