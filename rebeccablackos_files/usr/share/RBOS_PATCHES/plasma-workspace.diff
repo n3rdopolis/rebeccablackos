@@ -28,17 +28,14 @@ index 54de2fa83c..1f5cf13a93 100644
      Qt::Xml
      Qt::Gui
 diff --git a/kcms/kfontinst/lib/Fc.h b/kcms/kfontinst/lib/Fc.h
-index 4dd854d4db..88e7fedeef 100644
+index 4dd854d4db..0899e6bfec 100644
 --- a/kcms/kfontinst/lib/Fc.h
 +++ b/kcms/kfontinst/lib/Fc.h
-@@ -8,8 +8,10 @@
- #include "Misc.h"
+@@ -9,6 +9,7 @@
  #include "kfontinst_export.h"
  #include <QUrl>
-+#include <fontconfig/fcfreetype.h>
  #include <fontconfig/fontconfig.h>
++#include <fontconfig/fcfreetype.h>
  
-+
  #include "kfontinst_export.h"
  
- #if (FC_VERSION < 20200)
