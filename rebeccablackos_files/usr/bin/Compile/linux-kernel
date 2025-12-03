@@ -248,12 +248,8 @@ make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 ./scripts/config -d CONFIG_FB_MB862XX_I2C
 ./scripts/config -d CONFIG_FB_HYPERV
 
-#Disable debug option
-./scripts/config -d CONFIG_DEBUG_INFO_DWARF5
-./scripts/config -d CONFIG_DEBUG_INFO_BTF
-./scripts/config -d CONFIG_DEBUG_INFO_DWARF_TOOLCHAIN_DEFAULT
-./scripts/config -d CONFIG_DEBUG_KERNEL
-./scripts/config -e CONFIG_DEBUG_INFO_NONE
+#Enable btf
+./scripts/config -e CONFIG_DEBUG_INFO_BTF
 
 #Enable Rust
 ./scripts/config -d CONFIG_MODVERSIONS
@@ -303,7 +299,7 @@ export LOCALVERSION=""
 
 KernelVersion=$(make kernelrelease)
 make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" install
-make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" modules_install
+make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" INSTALL_MOD_STRIP=1 modules_install
 rm /boot/initrd*${KernelVersion}*
 }
 

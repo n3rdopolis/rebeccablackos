@@ -124,7 +124,8 @@ function setup_buildprocess
         fi' SIGINT
 
   #Handle when the script is resumed
-  trap 'if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]];
+  trap 'echo "Resuming..."
+        if [[ -e /proc/"$SUBSHELLPID" && $SUBSHELLPID != "" ]];
           then kill -CONT $SUBSHELLPID;
         fi;
 
@@ -1219,7 +1220,7 @@ function define_config
 
   STORAGESIZE_TMPBASEBUILD=$((1 * $GIGABYTE ))
   STORAGESIZE_TMPPHASE3=$((4 * $GIGABYTE ))
-  STORAGESIZE_TMPSRCBUILDOVERLAY=$((10 * $GIGABYTE ))
+  STORAGESIZE_TMPSRCBUILDOVERLAY=$((15 * $GIGABYTE ))
   STORAGESIZE_TMPREMASTERSYS=$((7 * $GIGABYTE ))
 
 
