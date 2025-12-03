@@ -29,7 +29,7 @@ SOURCEURL=https://gitlab.com/linux-kernel/stable.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=linux-6.17.y
+SOURCEREVISION=linux-6.18.y
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -298,9 +298,9 @@ export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
 export LOCALVERSION=""
 
 KernelVersion=$(make kernelrelease)
+export INITRD=No
 make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" install
 make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" INSTALL_MOD_STRIP=1 modules_install
-rm /boot/initrd*${KernelVersion}*
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
