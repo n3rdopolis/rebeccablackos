@@ -1235,7 +1235,16 @@ function define_config
 function elevate_buildprocess
 {
   export BUILDER_IS_UNSHARED=1
-  sudo --preserve-env=HOME,BUILDER_IS_UNSHARED -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages for, and building the $BUILDFRIENDLYNAME ISOs" --what=sleep:shutdown -- unshare --mount "$0" "$@"
+
+  #sudo-rs seems have some issues when handling Ctrl+Z, use the traditional sudo if availible.
+  if command -v sudo.ws &>/dev/null;
+  then
+    SUDOCOMMAND=sudo.ws
+  else
+    SUDOCOMMAND=sudo
+  fi
+
+  $SUDOCOMMAND --preserve-env=HOME,BUILDER_IS_UNSHARED -- systemd-inhibit --who="Live CD Builder (PID $$)" --why="Compiling packages for, and building the $BUILDFRIENDLYNAME ISOs" --what=sleep:shutdown -- unshare --mount "$0" "$@"
   exit $?
 }
 
