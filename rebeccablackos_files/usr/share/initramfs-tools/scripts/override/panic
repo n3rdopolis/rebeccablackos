@@ -54,15 +54,13 @@ panic()
 	  HAS_MODESETTING_DEVICE=0
 	fi
 
-	if [ -z $norecinit ] && [ $HAS_MODESETTING_DEVICE ] && [ ! -e /dev/tty0 ]; then
-		if command -v recinit >/dev/null 2>&1; then
-			echo "Starting user mode recovery console. pass norecinit=1 to disable"
-			export REASON="$*"
-			echo "echo \"$REASON\"" > /etc/profile
-			export PS1='(initramfs) '
-			recinit
-			DO_RETURN=1
-		fi
+	if [ -z $norecinit ] && [ $HAS_MODESETTING_DEVICE ] && [ ! -e /dev/tty0 ] && command -v recinit >/dev/null 2>&1; then
+		echo "Starting user mode recovery console. pass norecinit=1 to disable"
+		export REASON="$*"
+		echo "echo \"$REASON\"" > /etc/profile
+		export PS1='(initramfs) '
+		recinit
+		DO_RETURN=1
 	fi
 
 	#Unload simpledrm if it was loaded manually, so udev can load it in the right order later
