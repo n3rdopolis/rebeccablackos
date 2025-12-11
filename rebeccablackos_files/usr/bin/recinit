@@ -68,9 +68,18 @@ then
   exit 1
 fi
 
+#Ensure that /dev/pts is mounted
+if ! mountpoint /dev/pts > /dev/null 2>&1
+then
+  unmountdevptsfs=1
+  mkdir /dev/pts
+  mount -t devpts -o noexec,nosuid,gid=5,mode=600 /dev/pts
+else
+  unmountdevptsfs=0
+fi
+
 #Ensure /run is writable
-touch /run/.rotest > /dev/null 2>&1
-if [ $? -ne 0 ]
+if ! touch /run/.rotest > /dev/null 2>&1
 then
   unmountrunfs=1
   mount -t tmpfs none /run
@@ -148,8 +157,13 @@ udevadm control --ping -t 1 > /dev/null 2>&1
 udev_result=$?
 
 #Get Plymouth status
-plymouth --ping
-plymouth_result=$?
+if command plymouth > /dev/null 2>&1
+then
+  plymouth --ping
+  plymouth_result=$?
+else
+  plymouth_result=-1
+fi
 
 if [ $udev_result -ne 0 ]
 then
@@ -211,6 +225,11 @@ fi
 if [ $unmountrunfs -eq 1 ]
 then
   umount -lf /run
+fi
+
+if [ $unmountdevptsfs -eq 1 ]
+then
+  umount /dev/pts
 fi
 
 if [ $removedevshm -eq 1 ]
