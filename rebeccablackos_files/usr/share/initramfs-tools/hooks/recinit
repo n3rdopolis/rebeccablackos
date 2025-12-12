@@ -25,9 +25,9 @@ then
   copy_exec /opt/bin/foot /opt/bin/
 fi
 
-if [ -e /usr/sbin/recinit ]
+if [ -e /usr/bin/recinit ]
 then
-  copy_file script /usr/sbin/recinit
+  copy_file script /usr/bin/recinit
 fi
 
 mkdir -p "${DESTDIR}/lib/udev/rules.d"
