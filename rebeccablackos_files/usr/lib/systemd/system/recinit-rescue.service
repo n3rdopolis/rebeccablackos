@@ -3,6 +3,8 @@ Description=Recinit backed Rescue Shell
 Conflicts=shutdown.target
 After=sysinit.target plymouth-start.service
 Before=shutdown.target
+DefaultDependencies=no
+ConditionPathExists=!/dev/tty0
 
 [Service]
 Environment=RECINIT_SYSTEMD=1
