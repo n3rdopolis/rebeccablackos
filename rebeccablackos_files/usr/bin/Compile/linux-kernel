@@ -54,7 +54,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-DebianConfigCommit=debian/6.17.5-1_exp1
+DebianConfigCommit=debian/6.18.1-1_exp1
 DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/$DebianConfigCommit/debian/config
 DebianArch=$(dpkg --print-architecture)
 
