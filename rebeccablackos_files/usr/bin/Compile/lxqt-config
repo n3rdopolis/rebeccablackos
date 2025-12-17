@@ -57,6 +57,8 @@ function PackageDownloadSource
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
+sed -i 's/output->isPrimary()/output->priority(), 1/g' lxqt-config-monitor/monitorwidget.cpp
+sed -i 's/output->isPrimary()/output->priority(), 1/g' lxqt-config-monitor/monitorsettingsdialog.cpp
 mkdir build
 cd build
 cmake -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR ..
