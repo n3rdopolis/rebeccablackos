@@ -50,7 +50,7 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-/usr/bin/python3 $INTERNALBUILDHOME/util/meson_aux/libstdcxx-tag.py wget $INTERNALBUILDHOME/doctags libstdc++.tag
+/usr/bin/python3 $INTERNALBUILDHOME/util/meson_aux/libstdcxx-tag.py true wget $INTERNALBUILDHOME/doctags libstdc++.tag
 }
 
 
