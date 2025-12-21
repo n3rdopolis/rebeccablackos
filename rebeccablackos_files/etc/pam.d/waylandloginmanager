@@ -1,11 +1,18 @@
 #%PAM-1.0
-auth            required        pam_nologin.so
-auth            required        pam_unix.so     try_first_pass nullok
-
-account         required        pam_nologin.so
-account         required        pam_unix.so
-
-session         required        pam_env.so
-session         required        pam_unix.so
--session        optional        pam_systemd.so type=wayland class=user
--session        optional        pam_loginuid.so
+auth    requisite       pam_nologin.so
+auth    sufficient      pam_succeed_if.so user ingroup nopasswdlogin
+@include common-auth
+-auth    optional        pam_gnome_keyring.so
+-auth    optional        pam_kwallet.so
+-auth    optional        pam_kwallet5.so
+@include common-account
+session [success=ok ignore=ignore module_unknown=ignore default=bad] pam_selinux.so close
+#session required        pam_loginuid.so
+session required        pam_limits.so
+-session optional      pam_systemd.so type=wayland class=user
+@include common-session
+session [success=ok ignore=ignore module_unknown=ignore default=bad] pam_selinux.so open
+-session optional        pam_gnome_keyring.so auto_start
+-session optional        pam_kwallet.so auto_start
+-session optional        pam_kwallet5.so auto_start
+session required        pam_env.so readenv=1
