@@ -171,8 +171,9 @@ function vTTYFrontendMain
   export WLR_LIBINPUT_NO_DEVICES=1
   export LIBGL_ALWAYS_SOFTWARE=1
   export DBUS_SESSION_BUS_ADDRESS=/dev/null
+  export XDG_CONFIG_HOME=/etc/vtty
   cage -m last -d -s -- \
-  foot --config=/etc/footkiosk.conf -- \
+  foot --config=$XDG_CONFIG_HOME/footkiosk.conf -- \
   /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log &
   CAGEPID=$!
   wait $CAGEPID

@@ -119,10 +119,10 @@ then
   fi
 fi
 
-if [ -e /etc/footkiosk.conf ]
+if [ -e "/etc/vtty" ]
 then
-  mkdir -p "${DESTDIR}/etc"
-  cp -Z /etc/footkiosk.conf "${DESTDIR}/etc"
+  mkdir -p "${DESTDIR}/etc/vtty"
+  cp -a "/etc/vtty"/* "${DESTDIR}/etc/vtty"
 fi
 
 echo ". /scripts/override/panic" >> "${DESTDIR}/scripts/functions"

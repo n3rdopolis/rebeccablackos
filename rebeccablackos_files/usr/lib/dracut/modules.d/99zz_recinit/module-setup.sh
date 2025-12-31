@@ -101,9 +101,10 @@ install() {
         fi
     fi
 
-    if [ -e /etc/footkiosk.conf ]
+    if [ -e "/etc/vtty" ]
     then
-        inst_simple /etc/footkiosk.conf
+        mkdir -p "$initdir/etc/vtty"
+        cp -a "/etc/vtty/"* "$initdir/etc/vtty"
     fi
 
     inst_simple /usr/lib/systemd/system/recinit-emergency.service
