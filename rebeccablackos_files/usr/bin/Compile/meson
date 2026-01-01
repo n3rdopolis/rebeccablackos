@@ -1,5 +1,5 @@
 #! /bin/bash
-#    Copyright (c) 2012 - 2025 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#    Copyright (c) 2012 - 2026 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
 #
 #    This file is part of RebeccaBlackOS.
 #
