@@ -20,6 +20,12 @@
 
 function PtyResizeEvent
 {
+  #Ensure all the outputs are in clone mode
+  wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
+  do
+    wlr-randr --output $OUTPUT --pos 0,0 2>/dev/null
+  done
+
   if [[ ! -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
   then
     Retries=0
@@ -37,6 +43,7 @@ function PtyResizeEvent
   #Wait for the terminal client to act when SIG_WINCH is sent before getting the size
   $SLEEPCMD .3
   ClientPTYSize=($(stty size))
+
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
 }
 

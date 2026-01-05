@@ -20,6 +20,12 @@
 
 function PtyResizeEvent
 {
+  #Ensure all the outputs are in clone mode
+  WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
+  do
+    WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver wlr-randr --output $OUTPUT --pos 0,0 2>/dev/null
+  done
+
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
   then
     Retries=0
@@ -37,6 +43,7 @@ function PtyResizeEvent
   #Wait for the terminal client to act when SIG_WINCH is sent before getting the size
   $SLEEPCMD .3
   ClientPTYSize=($(stty size))
+
   echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy"
 }
 
@@ -68,7 +75,7 @@ function UvTTYFeConnectMain
     else
       WAYLANDDISPLAYPATH=$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY
     fi
-    rm $WAYLANDDISPLAYPATH
+    mv $WAYLANDDISPLAYPATH $XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver
   fi
 
   #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped

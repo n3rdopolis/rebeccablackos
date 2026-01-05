@@ -85,7 +85,7 @@ function UvTTYFrontendMain
 
     export WLR_DRM_DEVICES=$(GetFirstSeatCard)
 
-    cage -m last -d -s -- \
+    cage -d -s -- \
     foot --font DejaVuSansMono:size=9 -- \
     /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
     CAGEPID=$!
