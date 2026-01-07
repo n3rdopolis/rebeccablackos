@@ -175,7 +175,7 @@ function vTTYFrontendMain
   export XDG_CONFIG_HOME=/etc/vtty
   cage -d -s -- \
   foot --config=$XDG_CONFIG_HOME/footkiosk.conf -- \
-  /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /var/log/vtty/host_${EmulatedTTY}.log &
+  /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &> /run/vtty/$EmulatedTTY/host.log &
   CAGEPID=$!
   wait $CAGEPID
 

@@ -55,11 +55,6 @@ function vTTYBackendMain
   chown $VTTYUSER:$VTTYUSER /run/vtty/sessions
   chmod 755 /run/vtty/sessions
 
-  #Make the logging folder
-  mkdir -p /var/log/vtty
-  chown $VTTYUSER:$VTTYUSER /var/log/vtty
-  chmod 755 /var/log/vtty
-
   #Create the FIFO to where resize commands will be sent
   if [[ -e /run/vtty/"$EmulatedTTY"/ptycommandproxy ]]
   then
