@@ -118,9 +118,6 @@ function vTTYFrontendMain
     SLEEPCMD="/bin/sleep"
   fi
 
-  echo $XDG_SESSION_ID > /run/vtty/sessions/$XDG_SEAT
-  chmod 644 /run/vtty/sessions/$XDG_SEAT
-
   #Only handle special vTTY inhibit cases if there are traditional TTYs on the seat
   SeatCanTTY=$(loginctl show-seat $XDG_SEAT -p CanTTY --value)
   if [[ $SeatCanTTY == yes ]]
@@ -186,11 +183,6 @@ function vTTYFrontendMain
   if [[ $ReturnCode != 0 && $ReturnCode != 129 ]]
   then
     systemd-notify ERRNO=1
-  fi
-
-  if [[ -e /run/vtty/sessions/$XDG_SEAT ]]
-  then
-    rm /run/vtty/sessions/$XDG_SEAT
   fi
 
   exit $ReturnCode
