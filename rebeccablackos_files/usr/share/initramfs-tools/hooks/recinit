@@ -12,108 +12,118 @@ case "$1" in
 esac
 
 . /usr/share/initramfs-tools/hook-functions
-. /usr/bin/wlruntime_vars
+
 manual_add_modules evdev
 
-if [ -e /opt/bin/cage ]
+if [ -z "$LOCALE_LIB_DIR" ]
 then
-  copy_exec /opt/bin/cage /opt/bin/
+  LOCALE_LIB_DIR=/usr/lib/locale
 fi
 
-if [ -e /opt/bin/foot ]
+if [ -z "$LIBINPUT_SHARE_DIR" ]
 then
-  copy_exec /opt/bin/foot /opt/bin/
+  LIBINPUT_SHARE_DIR=/usr/share/libinput
 fi
 
-if [ -e /usr/bin/recinit ]
+if [ -z "$LIBX11_SHARE_DIR" ]
 then
-  copy_file script /usr/bin/recinit
+  LIBX11_SHARE_DIR=/usr/share/X11
+fi
+
+copy_exec "$(which cage)" /usr/bin/
+copy_exec "$(which foot)" /usr/bin/
+copy_exec "$(which id)" /usr/bin/
+copy_exec "$(which wlr-randr)" /usr/bin/
+copy_exec "$(which tput)" /usr/bin/
+
+if [ -e "/usr/bin/recinit" ]
+then
+  copy_file script "/usr/bin/recinit"
 fi
 
 mkdir -p "${DESTDIR}/lib/udev/rules.d"
 cp /lib/udev/rules.d/60-input-id.rules "${DESTDIR}/lib/udev/rules.d"
 
 MonospaceFontPath=$(fc-match -f %{file} monospace)
-if [ -n $MonospaceFontPath ]
+if [ -n "$MonospaceFontPath" ]
 then
   MonospaceFontFolder=$(dirname "$MonospaceFontPath")
   mkdir -p "${DESTDIR}/$MonospaceFontFolder"
-  cp -aZ "$MonospaceFontPath" "${DESTDIR}/$MonospaceFontFolder"
+  cp -a "$MonospaceFontPath" "${DESTDIR}/$MonospaceFontFolder"
 fi
 
 BoldMonospaceFontPath=$(fc-match -f %{file} monospace:weight=bold)
-if [ -n $BoldMonospaceFont ]
+if [ -n "$BoldMonospaceFontPath" ]
 then
   BoldMonospaceFontFolder=$(dirname "$BoldMonospaceFontPath")
   mkdir -p "${DESTDIR}/$BoldMonospaceFontFolder"
-  cp -aZ "$BoldMonospaceFontPath" "${DESTDIR}/$BoldMonospaceFontFolder"
+  cp -a "$BoldMonospaceFontPath" "${DESTDIR}/$BoldMonospaceFontFolder"
 fi
 
-
-if [ -e /usr/lib/locale/[cC].[uU][tT][fF]*8/ ]
+if [ -e "$LOCALE_LIB_DIR"/[cC].[uU][tT][fF]*8/ ]
 then
-  CUTF8DIR=$(basename $(ls -d /usr/lib/locale/[cC].[uU][tT][fF]*8))
-  mkdir -p "${DESTDIR}/usr/lib/locale/$CUTF8DIR/"
-  cp -aZ "/usr/lib/locale/$CUTF8DIR/"* "${DESTDIR}/usr/lib/locale/$CUTF8DIR/"
+  CUTF8DIR=$(basename $(ls -d "$LOCALE_LIB_DIR"/[cC].[uU][tT][fF]*8))
+  mkdir -p "${DESTDIR}/$LOCALE_LIB_DIR/$CUTF8DIR/"
+  cp -a "$LOCALE_LIB_DIR/$CUTF8DIR/"* "${DESTDIR}/$LOCALE_LIB_DIR/$CUTF8DIR/"
 fi
 
-if [ -e /opt/share/libinput ]
+if [ -e "$LIBINPUT_SHARE_DIR" ]
 then
-  mkdir -p "${DESTDIR}/opt/share/libinput/"
-  cp -aZ /opt/share/libinput/* "${DESTDIR}/opt/share/libinput/"
+  mkdir -p "${DESTDIR}/$LIBINPUT_SHARE_DIR/"
+  cp -a "$LIBINPUT_SHARE_DIR"/* "${DESTDIR}/$LIBINPUT_SHARE_DIR/"
 fi
 
-if [ -e /opt/share/X11/xkb ]
+if [ -e "$LIBX11_SHARE_DIR/xkb" ]
 then
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/"
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/compat/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
 
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/keycodes/"
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/rules/"
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/symbols/"
-  mkdir -p "${DESTDIR}/opt/share/X11/xkb/types/"
-  cp -Z /opt/share/X11/xkb/compat/accessx ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/basic ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/caps ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/complete ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/iso9995 ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/ledcaps ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/lednum ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/ledscroll ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/level5 ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/misc ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/mousekeys ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/compat/xfree86 ${DESTDIR}/opt/share/X11/xkb/compat/
-  cp -Z /opt/share/X11/xkb/keycodes/aliases ${DESTDIR}/opt/share/X11/xkb/keycodes/
-  cp -Z /opt/share/X11/xkb/keycodes/evdev ${DESTDIR}/opt/share/X11/xkb/keycodes/
-  cp -Z /opt/share/X11/xkb/rules/evdev ${DESTDIR}/opt/share/X11/xkb/rules/
-  find /opt/share/X11/xkb/symbols -maxdepth 1 ! -type d | while read -r file
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/keycodes/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/rules/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/symbols/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/accessx" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/basic" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/caps" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/complete" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/iso9995" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/ledcaps" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/lednum" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/ledscroll" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/level5" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/misc" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/mousekeys" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/compat/xfree86" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/compat/"
+  cp "$LIBX11_SHARE_DIR/xkb/keycodes/aliases" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/keycodes/"
+  cp "$LIBX11_SHARE_DIR/xkb/keycodes/evdev" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/keycodes/"
+  cp "$LIBX11_SHARE_DIR/xkb/rules/evdev" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/rules/"
+  find "$LIBX11_SHARE_DIR/xkb/symbols" -maxdepth 1 ! -type d | while read -r file
   do
-    cp -Z $file ${DESTDIR}/opt/share/X11/xkb/symbols/
+    cp "$file" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/symbols/"
   done
-  cp -Z /opt/share/X11/xkb/types/basic ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/complete ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/extra ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/iso9995 ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/level5 ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/mousekeys ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/numpad ${DESTDIR}/opt/share/X11/xkb/types/
-  cp -Z /opt/share/X11/xkb/types/pc ${DESTDIR}/opt/share/X11/xkb/types/
+  cp "$LIBX11_SHARE_DIR/xkb/types/basic" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/complete" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/extra" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/iso9995" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/level5" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/mousekeys" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/numpad" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
+  cp "$LIBX11_SHARE_DIR/xkb/types/pc" "${DESTDIR}/$LIBX11_SHARE_DIR/xkb/types/"
 fi
 
-if [ -e /usr/share/X11/locale ]
+if [ -e "$LIBX11_SHARE_DIR/locale" ]
 then
-  mkdir -p "${DESTDIR}/usr/share/X11/locale/"
+  mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/locale/"
   # In the off chance the user uses their compose key in initrd
-  if [ -f "/usr/share/X11/locale/compose.dir" ]
+  if [ -f "$LIBX11_SHARE_DIR/locale/compose.dir" ]
   then
-    cp -Z /usr/share/X11/locale/compose.dir ${DESTDIR}/usr/share/X11/locale/
-    grep UTF-8/Compose: /usr/share/X11/locale/compose.dir | awk -F: '{ print $1 }' | sort -u | xargs dirname | while read -r DIR
+    cp "$LIBX11_SHARE_DIR/locale/compose.dir" "${DESTDIR}/$LIBX11_SHARE_DIR/locale/"
+    grep UTF-8/Compose: "$LIBX11_SHARE_DIR/locale/compose.dir" | awk -F: '{ print $1 }' | sort -u | xargs dirname | while read -r DIR
     do
-      mkdir -p ${DESTDIR}/usr/share/X11/locale/$DIR
-      find /usr/share/X11/locale/$DIR -maxdepth 1 ! -type d | while read -r file
+      mkdir -p "${DESTDIR}/$LIBX11_SHARE_DIR/locale/$DIR"
+      find "$LIBX11_SHARE_DIR/locale/$DIR" -maxdepth 1 ! -type d | while read -r file
       do
-        cp -Z $file ${DESTDIR}/usr/share/X11/locale/$DIR
+        cp "$file" "${DESTDIR}/$LIBX11_SHARE_DIR/locale/$DIR"
       done
     done
   fi
