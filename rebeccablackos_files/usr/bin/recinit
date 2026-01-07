@@ -118,7 +118,7 @@ RecinitMain()
 
   if [ $1 = "--HandleResize" ]
   then
-    RecinitHandleResize
+    RecinitHandleResize > /dev/null 2>&1
     exit
   fi
 
