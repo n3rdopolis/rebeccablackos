@@ -164,6 +164,7 @@ function vTTYFrontendMain
   #Stop the cage process when the script is exiting
   trap 'kill -9 $CAGEPID' TERM
 
+  export WLR_BACKENDS=libinput,drm
   export WLR_RENDERER=pixman
   export WLR_RENDERER_ALLOW_SOFTWARE=1
   export WLR_DRM_DEVICES=$(GetFirstSeatCard)
