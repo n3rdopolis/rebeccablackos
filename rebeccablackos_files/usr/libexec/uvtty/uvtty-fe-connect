@@ -20,6 +20,8 @@
 
 function PtyResizeEvent
 {
+  $SLEEPCMD .5
+
   #Ensure all the outputs are in clone mode
   WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
   do
