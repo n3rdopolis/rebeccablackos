@@ -161,10 +161,12 @@ function vTTYFrontendMain
   #Stop the cage process when the script is exiting
   trap 'kill -9 $CAGEPID' TERM
 
+  #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040
+  export WLR_DRM_DEVICES=$(GetFirstSeatCard)
+
   export WLR_BACKENDS=libinput,drm
   export WLR_RENDERER=pixman
   export WLR_RENDERER_ALLOW_SOFTWARE=1
-  export WLR_DRM_DEVICES=$(GetFirstSeatCard)
   export WLR_NO_HARDWARE_CURSORS=1
   export WLR_LIBINPUT_NO_DEVICES=1
   export LIBGL_ALWAYS_SOFTWARE=1

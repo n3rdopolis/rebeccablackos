@@ -83,6 +83,7 @@ function UvTTYFrontendMain
       tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
     fi
 
+    #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040
     export WLR_DRM_DEVICES=$(GetFirstSeatCard)
 
     cage -d -s -- \

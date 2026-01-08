@@ -249,7 +249,9 @@ RecinitMain()
     fi
   fi
 
+  #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040
   export WLR_DRM_DEVICES=$(GetFirstSeatCard)
+
   cage -d -s -- \
   foot --config="$XDG_CONFIG_HOME"/footkiosk.conf --override=scrollback.lines=10000  -- \
   sh -c "$0 --HandleResize & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
