@@ -142,9 +142,9 @@ function vTTYFrontendMain
         $SLEEPCMD 1
       done
     fi
-  fi
 
-  ResetTTYMode $EmulatedTTY
+    ResetTTYMode $EmulatedTTY
+  fi
 
   #Get the keyboard layout from /etc/vconsole.conf
   if [[ -e /etc/vconsole.conf ]]
