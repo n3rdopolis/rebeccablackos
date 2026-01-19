@@ -18,7 +18,7 @@ Conflicts=rescue.service
 Before=rescue.service
 
 [Service]
-Environment=XDG_SEAT=%i
+EnvironmentFile=/run/vtty/%i/environment
 PAMName=vtty
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %i
