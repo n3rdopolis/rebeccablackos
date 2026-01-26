@@ -20,14 +20,6 @@
 
 function PtyResizeEvent
 {
-  $SLEEPCMD .5
-
-  #Ensure all the outputs are in clone mode
-  WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
-  do
-    WAYLAND_DISPLAY=$XDG_RUNTIME_DIR/uvtty/$UvTTYName/waylandserver wlr-randr --output $OUTPUT --pos 0,0 2>/dev/null
-  done
-
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/ptycommandproxy" ]]
   then
     Retries=0
@@ -91,6 +83,8 @@ function UvTTYFeConnectMain
       $SLEEPCMD 1
     done
   fi
+
+  XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR/uvtty/$UvTTYName WAYLAND_DISPLAY=waylandserver kanshi -c /etc/vtty/kanshiconfig.conf &>/dev/null &
 
   socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
   SOCATPID=$!

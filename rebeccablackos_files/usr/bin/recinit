@@ -61,39 +61,6 @@ GetFirstSeatCard()
   fi
 }
 
-RecinitHandleResize()
-{
-  PtyResizeEvent
-
-  LinesCount=$(tput lines)
-  LastLinesCount=$LinesCount
-  ColsCount=$(tput cols)
-  LastColsCount=$ColsCount
-
-  while :
-  do
-    LinesCount=$(tput lines)
-    ColsCount=$(tput cols)
-
-    if [ $LinesCount != $LastLinesCount ] || [ $ColsCount != $LastColsCount ]
-    then
-      PtyResizeEvent
-      LastLinesCount=$LinesCount
-      LastColsCount=$ColsCount
-    fi
-    sleep 3
-  done
-}
-
-PtyResizeEvent()
-{
-  #Ensure all the outputs are in clone mode
-  wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
-  do
-    wlr-randr --output $OUTPUT --pos 0,0 2>/dev/null
-  done
-}
-
 RecinitMain()
 {
   USER_UID=$(id -u)
@@ -115,12 +82,6 @@ RecinitMain()
   export WLR_NO_HARDWARE_CURSORS=1
   export WLR_RENDERER=pixman
   export XDG_CONFIG_HOME=/etc/vtty
-
-  if [ $1 = "--HandleResize" ]
-  then
-    RecinitHandleResize > /dev/null 2>&1
-    exit
-  fi
 
   #Ensure that /dev/pts is mounted
   if ! mountpoint /dev/pts > /dev/null 2>&1
@@ -254,7 +215,7 @@ RecinitMain()
 
   cage -d -s -- \
   foot --config="$XDG_CONFIG_HOME"/footkiosk.conf --override=scrollback.lines=10000  -- \
-  sh -c "$0 --HandleResize & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
+  sh -c "kanshi -c \"$XDG_CONFIG_HOME\"/kanshiconfig.conf >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
 
   if [ $udev_result -ne 0 ]
   then

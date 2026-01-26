@@ -20,14 +20,6 @@
 
 function PtyResizeEvent
 {
-  $SLEEPCMD .5
-
-  #Ensure all the outputs are in clone mode
-  wlr-randr 2>/dev/null | grep -v "^ " | awk '{print $1}' | while read -r OUTPUT
-  do
-    wlr-randr --output $OUTPUT --pos 0,0 2>/dev/null
-  done
-
   if [[ ! -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
   then
     Retries=0
@@ -68,6 +60,8 @@ function vTTYFeConnectMain
     rm /run/vtty/$EmulatedTTY/waylandserver
   fi
   ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
+
+  kanshi -c "$XDG_CONFIG_HOME"/kanshiconfig.conf &>/dev/null &
 
   socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
 
