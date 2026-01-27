@@ -148,6 +148,7 @@ rustc::PART
 cargo::PART
 cpp::PART::::BUILDONLY
 gcc::PART::::BUILDONLY
+gcc-bpf::PART::::BUILDONLY
 g++::PART::::BUILDONLY
 llvm-18::PART::::BUILDONLY
 llvm-18-dev::PART
@@ -714,3 +715,5 @@ libheif1::PART
 libheif-dev::PART
 libjxl0.11::PART
 libjxl-dev::PART
+libbpf1::PART
+libbpf-dev::PART
