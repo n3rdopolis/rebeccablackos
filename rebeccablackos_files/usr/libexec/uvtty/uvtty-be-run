@@ -27,6 +27,9 @@ function UvTTYBeRunMain
     exit 1
   fi
 
+  #Do not pass the ptycommandproxy fd to the session
+  exec 1000>&-
+
   shift
   export TERM=xterm-256color
 

@@ -60,6 +60,9 @@ function vTTYBeLoginMain
     SLEEPCMD="/bin/sleep"
   fi
 
+  #Do not pass the ptycommandproxy fd to the subprocess
+  exec 1000>&-
+
   #Create a static name for the PTY that this is running as
   PTYPath=$(tty)
   IFS="/"
