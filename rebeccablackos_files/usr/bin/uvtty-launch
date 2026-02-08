@@ -162,7 +162,7 @@ function SessionCheck
 
 function HelpText
 {
-  echo "No arguments passed. Usage is $0 [-i / --inhibit-after-quit] -- programname [--args]"
+  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
   echo ""
   echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
   echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
@@ -216,7 +216,7 @@ function UvTTYLaunchMain
 
   if ! command -v $1 &> /dev/null
   then
-    echo "$0: Command '$1' not found"
+    echo "uvtty-launch: Command '$1' not found"
     exit 1
   fi
 
