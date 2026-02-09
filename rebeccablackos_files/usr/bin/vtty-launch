@@ -1,0 +1,407 @@
+#! /bin/bash
+#    Copyright (c) 2012 - 2026 nerdopolis (or n3rdopolis) <bluescreen_avenger@verzion.net>
+#
+#    This file is part of RebeccaBlackOS.
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 2 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+#Suspend cage in the FullscreenShell session, to launch another program
+
+#Populates the first argument with a true or false value if the script is running nested
+function GetIfScriptCalledBySelf
+{
+  CurrentProcData=($(cat /proc/$$/stat))
+  CurrentProcCallerPID=${CurrentProcData[3]}
+
+  readarray -d $'\0' CurrentProcCallerCmdline < /proc/$CurrentProcCallerPID/cmdline
+  CurrentProcCallerProgram=${CurrentProcCallerCmdline[1]}
+  if [[ "$0" == "$CurrentProcCallerProgram" ]]
+  then
+    ReturnValue=1
+  else
+    ReturnValue=0
+  fi
+  printf -v "$1" '%s' $ReturnValue
+}
+
+function GetIfScriptCalledByPid1
+{
+  CurrentProcData=($(cat /proc/$$/stat))
+  CurrentProcCallerPID=${CurrentProcData[3]}
+
+  if [[ $CurrentProcCallerPID == 1 ]]
+  then
+    ReturnValue=1
+  else
+    ReturnValue=0
+  fi
+  printf -v "$1" '%s' $ReturnValue
+}
+
+#Populates the first argument with the value of the vTTY Instance (if any). Or quits
+function GetvTTYInstance
+{
+  SessionLeaderPIDString=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/session/self org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Leader))
+  SessionLeaderPID=${SessionLeaderPIDString[2]}
+
+  SessionLeaderProcData=($(cat /proc/$SessionLeaderPID/stat))
+  SessionCallerPID=${SessionLeaderProcData[3]}
+
+  readarray -d $'\0' SessionCallerProcCmdline < /proc/$SessionCallerPID/cmdline
+  SessionCallerProgram=${SessionCallerProcCmdline[1]}
+  vTTYInstance=${SessionCallerProcCmdline[2]}
+
+  SessionCallerProcUID=$(stat /proc/$SessionCallerPID -c %u)
+
+  if [[ ("$SessionCallerProgram" != "/usr/libexec/vtty/vtty-be-login") || ($SessionCallerProcUID != 0) ]]
+  then
+    echo "vtty-launch: Not running under a vTTY session"
+    exit 1
+  fi
+
+  if [[ ! -z "$vTTYInstance" ]]
+  then
+    ReturnValue="$vTTYInstance"
+  else
+    echo "vtty-launch: Cannot determine the vTTY instance"
+    exit 1
+  fi
+
+  printf -v "$1" '%s' "$ReturnValue"
+}
+
+#Given the first argument of the vTTY instance, populate the second argument with the seat of the vTTY frontend (if any)
+function GetvTTYFrontendSeat
+{
+  vTTYInstance="$1"
+  if [[ -e /run/vtty/"$vTTYInstance"/waylandseat ]]
+  then
+    read -n 255 -r vTTYFrontendSeat < /run/vtty/"$vTTYInstance"/waylandseat
+  else
+    echo "vtty-launch: Cannot get the vTTY instance's seat frontend"
+    exit 1
+  fi
+
+  if [[ -z "$vTTYFrontendSeat" ]]
+  then
+    echo "vtty-launch: Error determining the vTTY seat frontend"
+    exit 1
+  fi
+
+  printf -v "$2" '%s' "$vTTYFrontendSeat"
+}
+
+#Command to enumerate device files
+function EnumerateDeviceFiles
+{
+  find /sys/class/drm/card[0-9]* ! -path "*-*"
+}
+
+#Get all gpus on the seat
+function CollectDeviceInfo
+{
+  SeatCards=()
+  CurrentSeat=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
+  #Get all input devices from udev, and store attributes into an array
+  while read -r Device
+  do
+    #get properties of the device
+    DeviceProperties=$(udevadm info --query=property  --path=$Device)
+    IFS=$'\n'
+    DeviceProperties=($DeviceProperties)
+    unset IFS
+
+    unset DEV_ID_SEAT DEV_DEVNAME
+    for DeviceProperty in "${DeviceProperties[@]}"
+    do
+      IFS="="
+      DeviceProperty=($DeviceProperty)
+      unset IFS
+      case ${DeviceProperty[0]} in
+        ID_SEAT)
+          DEV_ID_SEAT=${DeviceProperty[1]}
+          ;;
+        DEVNAME)
+          DEV_DEVNAME=${DeviceProperty[1]}
+          ;;
+      esac
+    done
+
+    DevicePhysicalSeatID=$DEV_ID_SEAT
+    #if the device has no configured ID_SEAT value, then udev sees it as it being under the seat0 seat
+    if [[ -z $DevicePhysicalSeatID ]]
+    then
+      DevicePhysicalSeatID="seat0"
+    fi
+
+    DeviceName=$DEV_DEVNAME
+    if [[ $DevicePhysicalSeatID == "$CurrentSeat" ]]
+    then
+      SeatCards+=("$DeviceName")
+    fi
+
+    done < <(EnumerateDeviceFiles)
+}
+
+#attempt to test if the card is in use
+#It returns 0 when not in use, 1 when in use, and 2 when the device path is invalid
+function GetDriCardIsUnused
+{
+  python -c "import sys
+from fcntl import ioctl;
+#Variables from drm.h and https://raw.githubusercontent.com/tomba/pykms/master/kms/uapi/kms.py
+DRM_IOCTL_BASE = 'd';
+_IOC_NONE = 0;
+_IOC_NRBITS = 8;
+_IOC_TYPEBITS = 8;
+_IOC_SIZEBITS = 14;
+_IOC_NRSHIFT = 0;
+_IOC_TYPESHIFT = (_IOC_NRSHIFT + _IOC_NRBITS);
+_IOC_SIZESHIFT = (_IOC_TYPESHIFT + _IOC_TYPEBITS);
+_IOC_DIRSHIFT = (_IOC_SIZESHIFT + _IOC_SIZEBITS);
+def _IOC(dir, type, nr, size):
+    return ((((dir << _IOC_DIRSHIFT) | (ord(type) << _IOC_TYPESHIFT)) | (nr << _IOC_NRSHIFT)) | (size << _IOC_SIZESHIFT));
+def _IO(type, nr):
+    return (_IOC (_IOC_NONE, type, nr, 0));
+def DRM_IO(nr):
+    return (_IO (DRM_IOCTL_BASE, nr));
+DRM_IOCTL_SET_MASTER = (DRM_IO (0x1e));
+DRM_IOCTL_DROP_MASTER = (DRM_IO (0x1f));
+
+return_var = 0;
+try:
+    fd = open('$1', 'wb');
+except:
+    sys.exit(2);
+
+try:
+    ioctl(fd, DRM_IOCTL_SET_MASTER, 0);
+except:
+    return_var = 1;
+else:
+    ioctl(fd, DRM_IOCTL_DROP_MASTER, 0);
+fd.close();
+sys.exit(return_var);"
+  return $?
+}
+
+#Probe all the GPUs on the seat if they are in use, if they are, return 1
+function ProbeSeatCardsInUse
+{
+  CollectDeviceInfo
+
+  #If there are no cards on the seat, assume that perhaps the device is being used as a pass-through GPU, and continue to inhibit
+  if [[ "${#SeatCards[@]}" == 0 ]]
+  then
+    return 1
+  fi
+
+  CardsInUse=0
+  for SeatCard in "${SeatCards[@]}"
+  do
+    GetDriCardIsUnused $SeatCard
+    if [[ $? != 0 ]]
+    then
+      ((CardsInUse++))
+      break
+    fi
+  done
+  return $CardsInUse
+}
+
+#Detect if a display server is running. If there is not one (nothing controling the logind session), remove the inhibit file to allow cage/foot to start again.
+function SessionCheck
+{
+  while [ 1 ]
+  do
+    $SLEEPCMD 5
+    ProbeSeatCardsInUse
+    CardsInUse=$?
+
+    #Exit if the child process already quit, and the inhibit file was already removed
+    if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+    then
+      return
+    fi
+
+    #If the command succeeds, there is nothing holding control of the logind session
+    if [[ $CardsInUse == 0 ]]
+    then
+      echo "uvtty-launch: There are no processes or no longer any processes that have any display devices open. It is likely that a display server was not run, or the display server quit. Will now uninhibit cage."
+      rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+    fi
+  done
+}
+
+function HelpText
+{
+  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
+  echo ""
+  echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
+  echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
+}
+
+function vTTYLaunchMain
+{
+  SeatCanTTYString=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
+  SeatCanTTY=${SeatCanTTYString[2]}
+
+  if [[ "$SeatCanTTY" == "true" ]]
+  then
+    echo "vtty-launch: Cannot run on seats that support TTYs"
+    exit 1
+  fi
+
+  #Enable job control
+  set -m
+
+  GetIfScriptCalledBySelf ScriptCalledBySelf
+  GetIfScriptCalledByPid1 ScriptCalledByPid1
+  if [[ $ScriptCalledBySelf == 0 && $ScriptCalledByPid1 != 1 ]]
+  then
+    export VTTY_LAUNCH_UMASK=$(umask)
+    printenv -0 | pkexec "$0" "$@"
+    exit
+  elif [[ $ScriptCalledByPid1 == 1 ]]
+  then
+    readarray -d $'\0' EnvironmentBlock
+    export "${EnvironmentBlock[@]}"
+
+    export XDG_SEAT="$VTTY_LAUNCH_SEAT"
+    umask "$VTTY_LAUNCH_UMASK"
+
+    env
+    echo $UID
+    echo "$@"
+    groups
+    umask
+
+    exit
+  else
+    GetvTTYInstance vTTYInstance
+    GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
+
+    cat /dev/stdin | systemd-run --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" --uid=$PKEXEC_UID -p PAMName=login -P "$0" "$@"
+    exit
+  fi
+
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD="sleep"
+  else
+    SLEEPCMD="/bin/sleep"
+  fi
+
+  if [[ -z $1 ]]
+  then
+   HelpText
+   exit 1
+  fi
+
+  InhibitAfterQuit=0
+  for ARG in "$@"
+  do
+    if [[ $ARG =~ ^"-" ]]
+    then
+      shift
+    else
+      break
+    fi
+
+    if [[ $ARG == "--inhibit-after-quit" || $ARG == "-i" ]]
+    then
+      InhibitAfterQuit=1
+    elif [[ $ARG == "--help" ]]
+    then
+      HelpText
+      exit 1
+    elif [[ $ARG == "--" ]]
+    then
+      break
+    else
+      HelpText
+      exit 1
+    fi
+  done
+
+  if ! command -v $1 &> /dev/null
+  then
+    echo "vtty-launch: Command '$1' not found"
+    exit 1
+  fi
+
+  vTTYName=$(GetvTTYSeat)
+  if [[ -z $UvTTYName ]]
+  then
+    echo "UvTTYName variable not set. Not running under a UvTTY?"
+    exit 1
+  fi
+
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    echo "$UvTTYName does not appear to be running"
+    exit 1
+  fi
+
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
+  then
+    echo "Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
+    exit 1
+  fi
+
+  CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
+
+  if [[ ! -e /proc/$CAGEPID ]]
+  then
+    echo "cage is not running."
+    exit
+  fi
+
+  touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  SessionCheck &
+
+  #Wait before ending cage, so key press of "enter" isn't held down when the command is run
+  $SLEEPCMD .3
+
+  kill -9 $CAGEPID
+
+  #Wait for the cage process to end
+  if [[ -e /proc/$CAGEPID ]]
+  then
+    while [[ -e /proc/$CAGEPID ]]
+    do
+      $SLEEPCMD 1
+    done
+  fi
+
+  #launch the program
+  "$@"
+  CommandResult=$?
+
+  if [[ $InhibitAfterQuit == 1 ]]
+  then
+    fg 1 &> /dev/null
+  fi
+
+  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+  then
+    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  fi
+
+  exit $CommandResult
+}
+
+vTTYLaunchMain "$@"

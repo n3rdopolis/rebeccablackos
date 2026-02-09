@@ -1,0 +1,7 @@
+polkit.addRule(function(action, subject) {
+    if (action.id == "org.freedesktop.policykit.exec" &&
+        action.lookup("program") == "/usr/bin/vtty-launch" &&
+        subject.seat == "seat-vtty") {
+        return polkit.Result.YES;
+    }
+});
