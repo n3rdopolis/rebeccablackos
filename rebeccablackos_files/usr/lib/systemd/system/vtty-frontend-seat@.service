@@ -19,7 +19,7 @@ Before=rescue.service
 
 [Service]
 EnvironmentFile=/run/vtty/%i/environment
-PAMName=vtty
+PAMName=vtty-frontend
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %i
 
