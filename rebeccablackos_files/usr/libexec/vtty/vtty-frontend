@@ -137,15 +137,6 @@ function vTTYFrontendMain
       done
     fi
 
-    #handle vtty inhibit
-    if [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-    then
-      while [[ -e /run/vtty/$EmulatedTTY/vttyinhibit ]]
-      do
-        $SLEEPCMD 1
-      done
-    fi
-
     ResetTTYMode $EmulatedTTY
   fi
 
