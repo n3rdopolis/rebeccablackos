@@ -60,7 +60,6 @@ function vTTYFeConnectMain
     rm /run/vtty/$EmulatedTTY/waylandserver
   fi
   ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
-  echo $XDG_SEAT > /run/vtty/$EmulatedTTY/waylandseat
 
   kanshi -c "$XDG_CONFIG_HOME"/kanshiconfig.conf &>/dev/null &
 

@@ -86,9 +86,9 @@ function GetvTTYInstance
 function GetvTTYFrontendSeat
 {
   vTTYInstance="$1"
-  if [[ -e /run/vtty/"$vTTYInstance"/waylandseat ]]
+  if [[ -e /run/vtty/"$vTTYInstance"/frontend_seat ]]
   then
-    read -n 255 -r vTTYFrontendSeat < /run/vtty/"$vTTYInstance"/waylandseat
+    read -n 255 -r vTTYFrontendSeat < /run/vtty/"$vTTYInstance"/frontend_seat
   else
     echo "vtty-launch: Cannot get the vTTY instance's seat frontend"
     exit 1

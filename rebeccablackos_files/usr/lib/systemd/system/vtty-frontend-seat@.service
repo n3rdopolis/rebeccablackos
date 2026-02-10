@@ -18,7 +18,7 @@ Conflicts=rescue.service
 Before=rescue.service
 
 [Service]
-EnvironmentFile=/run/vtty/%i/environment
+EnvironmentFile=/run/vtty/%i/frontend_env
 PAMName=vtty-frontend
 
 ExecStart=/usr/libexec/vtty/vtty-frontend %i

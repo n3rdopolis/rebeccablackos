@@ -84,7 +84,12 @@ function vTTYBackendMain
     done
   fi
 
-  echo "XDG_SEAT=$EmulatedTTYSeat" > /run/vtty/"$EmulatedTTY"/environment
+  #Create the environment file that is used by the frontend service to correctly configure the PAM environment early enough
+  echo "XDG_SEAT=$EmulatedTTYSeat" > /run/vtty/"$EmulatedTTY"/frontend_env
+
+  #Create the file for vtty-launch to be able to read the seat the frontend is running on.
+  #While it could read frontend_env, it's less parsing
+  echo "$EmulatedTTYSeat" > /run/vtty/$EmulatedTTY/frontend_seat
 
   PlymouthQuitRequested=0
   systemd-notify --ready &> /dev/null
