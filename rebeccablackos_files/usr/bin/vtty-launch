@@ -16,7 +16,7 @@
 #    You should have received a copy of the GNU General Public License
 #    along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-#Suspend cage in the FullscreenShell session, to launch another program
+#Starts a display server from a vTTY
 
 #Populates the first argument with a true or false value if the script is running nested
 function GetIfScriptCalledBySelf
@@ -24,7 +24,7 @@ function GetIfScriptCalledBySelf
   CurrentProcData=($(cat /proc/$$/stat))
   CurrentProcCallerPID=${CurrentProcData[3]}
 
-  readarray -d $'\0' CurrentProcCallerCmdline < /proc/$CurrentProcCallerPID/cmdline
+  readarray -d $'\0' CurrentProcCallerCmdline < /proc/"$CurrentProcCallerPID"/cmdline
   CurrentProcCallerProgram=${CurrentProcCallerCmdline[1]}
   if [[ "$0" == "$CurrentProcCallerProgram" ]]
   then
@@ -35,9 +35,10 @@ function GetIfScriptCalledBySelf
   printf -v "$1" '%s' $ReturnValue
 }
 
+#Populates the first argument with a true or false value if called by pid 1
 function GetIfScriptCalledByPid1
 {
-  CurrentProcData=($(cat /proc/$$/stat))
+  CurrentProcData=($(cat /proc/"$$"/stat))
   CurrentProcCallerPID=${CurrentProcData[3]}
 
   if [[ $CurrentProcCallerPID == 1 ]]
@@ -100,6 +101,14 @@ function GetvTTYFrontendSeat
   fi
 
   printf -v "$2" '%s' "$vTTYFrontendSeat"
+}
+
+function HelpText
+{
+  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
+  echo ""
+  echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
+  echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
 }
 
 #Command to enumerate device files
@@ -244,16 +253,23 @@ function SessionCheck
   done
 }
 
-function HelpText
+#This part is run by the user invoking the script.
+#It determines if it can be run, or informs the user how to use it, sets some variables, exports the environment
+#then elevates itself with pkexec
+function vttyLaunchPrepareAsUser
 {
-  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
-  echo ""
-  echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
-  echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
-}
+  if [[ $UID == 0 ]]
+  then
+    echo "vtty-launch: Cannot be run by users as root"
+    exit 1
+  fi
 
-function vTTYLaunchMain
-{
+  if [[ -z $1 ]]
+  then
+   HelpText
+   exit 1
+  fi
+
   SeatCanTTYString=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
   SeatCanTTY=${SeatCanTTYString[2]}
 
@@ -261,54 +277,6 @@ function vTTYLaunchMain
   then
     echo "vtty-launch: Cannot run on seats that support TTYs"
     exit 1
-  fi
-
-  #Enable job control
-  set -m
-
-  GetIfScriptCalledBySelf ScriptCalledBySelf
-  GetIfScriptCalledByPid1 ScriptCalledByPid1
-  if [[ $ScriptCalledBySelf == 0 && $ScriptCalledByPid1 != 1 ]]
-  then
-    export VTTY_LAUNCH_UMASK=$(umask)
-    printenv -0 | pkexec "$0" "$@"
-    exit
-  elif [[ $ScriptCalledByPid1 == 1 ]]
-  then
-    readarray -d $'\0' EnvironmentBlock
-    export "${EnvironmentBlock[@]}"
-
-    export XDG_SEAT="$VTTY_LAUNCH_SEAT"
-    umask "$VTTY_LAUNCH_UMASK"
-
-    env
-    echo $UID
-    echo "$@"
-    groups
-    umask
-
-    exit
-  else
-    GetvTTYInstance vTTYInstance
-    GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
-
-    cat /dev/stdin | systemd-run --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" --uid=$PKEXEC_UID -p PAMName=login -P "$0" "$@"
-    exit
-  fi
-
-  #Use bash builtin sleep if availible
-  if [[ -f /usr/lib/bash/sleep ]]
-  then
-    enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD="sleep"
-  else
-    SLEEPCMD="/bin/sleep"
-  fi
-
-  if [[ -z $1 ]]
-  then
-   HelpText
-   exit 1
   fi
 
   InhibitAfterQuit=0
@@ -343,12 +311,94 @@ function vTTYLaunchMain
     exit 1
   fi
 
-  vTTYName=$(GetvTTYSeat)
-  if [[ -z $UvTTYName ]]
+  export VTTY_PWD=$(pwd)
+  export VTTY_LAUNCH_UMASK=$(umask)
+  printenv -0 | pkexec "$0" "$@"
+  exit
+}
+
+#This runs as the user again, when called by systemd-run
+#It reads the environment, exports it, and then starts the command as the user
+function vTTYLaunchStartAsUser
+{
+  #The script is called by systemd-run. Import the environment, run the command
+  if [[ $UID == 0 ]]
   then
-    echo "UvTTYName variable not set. Not running under a UvTTY?"
+    echo "vtty-launch: Cannot be called by systemd as root"
     exit 1
   fi
+
+  VTTY_LAUNCH_SESSION_ID=$XDG_SESSION_ID
+
+  readarray -d $'\0' EnvironmentBlock
+  export "${EnvironmentBlock[@]}"
+
+  export XDG_SEAT="$VTTY_LAUNCH_SEAT"
+  export XDG_SESSION_ID=$VTTY_LAUNCH_SESSION_ID
+
+  umask "$VTTY_LAUNCH_UMASK"
+  cd "$VTTY_PWD"
+
+  #Execute the command
+  "$@"
+
+  exit
+}
+
+#This part is run as root by pkexec.
+#It finds the seat of the vTTY frontend, and then starts itself with systemd-run as the user, on the seat
+function vttyLaunchPrepareAsRoot
+{
+  #The script is called by itself through pkexec, get the seat, start through systemd-run
+  if [[ $UID != 0 ]]
+  then
+    echo "vtty-launch: This helper must be started by vtty-launch as root"
+    exit 1
+  fi
+
+  GetvTTYInstance vTTYInstance
+  GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
+
+  systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
+  cat /dev/stdin | systemd-run --unit=vtty-launch_"${vTTYInstance}" \
+                               --setenv=XDG_SEAT="$vTTYSeat" \
+                               --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
+                               --uid=$PKEXEC_UID \
+                               -p PAMName=waylandloginmanager \ # TODO make vtty-launch PAM file
+                               --quiet \
+                               --collect \
+                               --pipe \
+                               "$0" "$@"
+  systemctl start vtty-frontend-seat@"${vTTYInstance}".service
+  exit
+}
+
+function vTTYLaunchMain
+{
+  GetIfScriptCalledBySelf ScriptCalledBySelf
+  GetIfScriptCalledByPid1 ScriptCalledByPid1
+
+  if [[ $ScriptCalledBySelf == 0 && $ScriptCalledByPid1 != 1 ]]
+  then
+    vttyLaunchPrepareAsUser "$@"
+  elif [[ $ScriptCalledByPid1 == 1 ]]
+  then
+    vTTYLaunchStartAsUser "$@"
+  else
+    vttyLaunchPrepareAsRoot "$@"
+  fi
+
+
+
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD="sleep"
+  else
+    SLEEPCMD="/bin/sleep"
+  fi
+
 
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
   then
