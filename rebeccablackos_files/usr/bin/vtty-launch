@@ -364,7 +364,7 @@ function vttyLaunchPrepareAsRoot
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
                                --uid=$PKEXEC_UID \
-                               -p PAMName=waylandloginmanager \ # TODO make vtty-launch PAM file
+                               -p PAMName=vtty-frontend \
                                --quiet \
                                --collect \
                                --pipe \
