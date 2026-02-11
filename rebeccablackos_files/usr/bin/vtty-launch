@@ -18,6 +18,16 @@
 
 #Starts a display server from a vTTY
 
+function HelpText
+{
+  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
+  echo ""
+  echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
+  echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
+}
+
+
+
 #Populates the first argument with a true or false value if the script is running nested
 function GetIfScriptCalledBySelf
 {
@@ -49,6 +59,8 @@ function GetIfScriptCalledByPid1
   fi
   printf -v "$1" '%s' $ReturnValue
 }
+
+
 
 #Populates the first argument with the value of the vTTY Instance (if any). Or quits
 function GetvTTYInstance
@@ -103,13 +115,7 @@ function GetvTTYFrontendSeat
   printf -v "$2" '%s' "$vTTYFrontendSeat"
 }
 
-function HelpText
-{
-  echo "No arguments passed. Usage is ${0##*/} [-i / --inhibit-after-quit] -- programname [--args]"
-  echo ""
-  echo "-i --inhibit-after-quit: Instead of letting cage run when the process quits, don't uninhibit until the seat's display devices are free"
-  echo "     A use case of this is if plymouthd is running, running 'plymouth show-splash'"
-}
+
 
 #Command to enumerate device files
 function EnumerateDeviceFiles
@@ -232,6 +238,15 @@ function ProbeSeatCardsInUse
 #Detect if a display server is running. If there is not one (nothing controling the logind session), remove the inhibit file to allow cage/foot to start again.
 function SessionCheck
 {
+  #Use bash builtin sleep if availible
+  if [[ -f /usr/lib/bash/sleep ]]
+  then
+    enable -f /usr/lib/bash/sleep sleep
+    SLEEPCMD="sleep"
+  else
+    SLEEPCMD="/bin/sleep"
+  fi
+
   while [ 1 ]
   do
     $SLEEPCMD 5
@@ -252,6 +267,8 @@ function SessionCheck
     fi
   done
 }
+
+
 
 #This part is run by the user invoking the script.
 #It determines if it can be run, or informs the user how to use it, sets some variables, exports the environment
@@ -313,8 +330,11 @@ function vttyLaunchPrepareAsUser
 
   export VTTY_PWD=$(pwd)
   export VTTY_LAUNCH_UMASK=$(umask)
+
   printenv -0 | pkexec "$0" "$@"
-  exit
+  CommandResult=${PIPESTATUS[1]}
+
+  exit $CommandResult
 }
 
 #This runs as the user again, when called by systemd-run
@@ -341,8 +361,9 @@ function vTTYLaunchStartAsUser
 
   #Execute the command
   "$@"
+  CommandResult=$?
 
-  exit
+  exit $CommandResult
 }
 
 #This part is run as root by pkexec.
@@ -359,6 +380,9 @@ function vttyLaunchPrepareAsRoot
   GetvTTYInstance vTTYInstance
   GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
 
+  #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
+  sleep .3
+
   systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
   cat /dev/stdin | systemd-run --unit=vtty-launch_"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
@@ -369,9 +393,13 @@ function vttyLaunchPrepareAsRoot
                                --collect \
                                --pipe \
                                "$0" "$@"
+  CommandResult=${PIPESTATUS[1]}
   systemctl start vtty-frontend-seat@"${vTTYInstance}".service
-  exit
+
+  exit $CommandResult
 }
+
+
 
 function vTTYLaunchMain
 {
@@ -390,68 +418,14 @@ function vTTYLaunchMain
 
 
 
-  #Use bash builtin sleep if availible
-  if [[ -f /usr/lib/bash/sleep ]]
-  then
-    enable -f /usr/lib/bash/sleep sleep
-    SLEEPCMD="sleep"
-  else
-    SLEEPCMD="/bin/sleep"
-  fi
-
-
-  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-  then
-    echo "$UvTTYName does not appear to be running"
-    exit 1
-  fi
-
-  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
-  then
-    echo "Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
-    exit 1
-  fi
-
-  CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
-
-  if [[ ! -e /proc/$CAGEPID ]]
-  then
-    echo "cage is not running."
-    exit
-  fi
-
-  touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
   SessionCheck &
-
-  #Wait before ending cage, so key press of "enter" isn't held down when the command is run
-  $SLEEPCMD .3
-
-  kill -9 $CAGEPID
-
-  #Wait for the cage process to end
-  if [[ -e /proc/$CAGEPID ]]
-  then
-    while [[ -e /proc/$CAGEPID ]]
-    do
-      $SLEEPCMD 1
-    done
-  fi
-
-  #launch the program
-  "$@"
-  CommandResult=$?
 
   if [[ $InhibitAfterQuit == 1 ]]
   then
     fg 1 &> /dev/null
   fi
 
-  if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
-  then
-    rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
-  fi
-
-  exit $CommandResult
+  exit
 }
 
 vTTYLaunchMain "$@"
