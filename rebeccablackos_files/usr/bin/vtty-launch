@@ -53,8 +53,8 @@ function GetIfScriptCalledByPid1
 #Populates the first argument with the value of the vTTY Instance (if any). Or quits
 function GetvTTYInstance
 {
-  SessionLeaderPIDString=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/session/self org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Leader))
-  SessionLeaderPID=${SessionLeaderPIDString[2]}
+  SessionLeaderPIDData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/session/self org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Leader))
+  SessionLeaderPID=${SessionLeaderPIDData[2]}
 
   SessionLeaderProcData=($(cat /proc/$SessionLeaderPID/stat))
   SessionCallerPID=${SessionLeaderProcData[3]}
@@ -270,8 +270,8 @@ function vttyLaunchPrepareAsUser
    exit 1
   fi
 
-  SeatCanTTYString=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
-  SeatCanTTY=${SeatCanTTYString[2]}
+  SeatCanTTYData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
+  SeatCanTTY=${SeatCanTTYData[2]}
 
   if [[ "$SeatCanTTY" == "true" ]]
   then
