@@ -37,7 +37,7 @@ function DoLoginPrompt
     WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -pc & /dev/null
   fi
 
-  #/usr/bin/vtty-login-program could be a symlink provided by another package, such as console-conf
+  #vtty-login-program could be a symlink provided by another package, such as console-conf
   VTTY_LOGIN_PROGRAM=$(command -v vtty-login-program)
   if [[ ! -z $VTTY_LOGIN_PROGRAM ]]
   then
