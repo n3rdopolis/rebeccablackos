@@ -126,8 +126,9 @@ function EnumerateDeviceFiles
 #Get all gpus on the seat
 function CollectDeviceInfo
 {
+  vTTYSeat="$1"
+
   SeatCards=()
-  CurrentSeat=$(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Seat | awk -F \" '{print $2}')
   #Get all input devices from udev, and store attributes into an array
   while read -r Device
   do
@@ -161,7 +162,7 @@ function CollectDeviceInfo
     fi
 
     DeviceName=$DEV_DEVNAME
-    if [[ $DevicePhysicalSeatID == "$CurrentSeat" ]]
+    if [[ $DevicePhysicalSeatID == "$vTTYSeat" ]]
     then
       SeatCards+=("$DeviceName")
     fi
@@ -214,7 +215,9 @@ sys.exit(return_var);"
 #Probe all the GPUs on the seat if they are in use, if they are, return 1
 function ProbeSeatCardsInUse
 {
-  CollectDeviceInfo
+  vTTYSeat="$1"
+
+  CollectDeviceInfo "$vTTYSeat"
 
   #If there are no cards on the seat, assume that perhaps the device is being used as a pass-through GPU, and continue to inhibit
   if [[ "${#SeatCards[@]}" == 0 ]]
@@ -238,6 +241,9 @@ function ProbeSeatCardsInUse
 #Detect if a display server is running. If there is not one (nothing controling the logind session), remove the inhibit file to allow cage/foot to start again.
 function SessionCheck
 {
+  vTTYInstance="$1"
+  vTTYSeat="$2"
+
   #Use bash builtin sleep if availible
   if [[ -f /usr/lib/bash/sleep ]]
   then
@@ -250,11 +256,11 @@ function SessionCheck
   while [ 1 ]
   do
     $SLEEPCMD 5
-    ProbeSeatCardsInUse
+    ProbeSeatCardsInUse "$vTTYSeat"
     CardsInUse=$?
 
-    #Exit if the child process already quit, and the inhibit file was already removed
-    if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
+    #Exit if the child process already quit, and the vtty-frontend was already started
+    if systemctl is-active vtty-frontend-seat@"${vTTYInstance}".service &>/dev/null
     then
       return
     fi
@@ -262,8 +268,8 @@ function SessionCheck
     #If the command succeeds, there is nothing holding control of the logind session
     if [[ $CardsInUse == 0 ]]
     then
-      echo "uvtty-launch: There are no processes or no longer any processes that have any display devices open. It is likely that a display server was not run, or the display server quit. Will now uninhibit cage."
-      rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+      echo "vtty-launch: There are no processes or no longer any processes that have any display devices open. It is likely that a display server was not run, or the display server quit. Will now start the vtty-frontend."
+      systemctl start vtty-frontend-seat@"${vTTYInstance}".service
     fi
   done
 }
@@ -384,6 +390,8 @@ function vttyLaunchPrepareAsRoot
   sleep .3
 
   systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
+  SessionCheck "$vTTYInstance" "$vTTYSeat" &
+
   cat /dev/stdin | systemd-run --unit=vtty-launch_"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
@@ -394,6 +402,7 @@ function vttyLaunchPrepareAsRoot
                                --pipe \
                                "$0" "$@"
   CommandResult=${PIPESTATUS[1]}
+
   systemctl start vtty-frontend-seat@"${vTTYInstance}".service
 
   exit $CommandResult
@@ -415,10 +424,6 @@ function vTTYLaunchMain
   else
     vttyLaunchPrepareAsRoot "$@"
   fi
-
-
-
-  SessionCheck &
 
   if [[ $InhibitAfterQuit == 1 ]]
   then
