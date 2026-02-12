@@ -392,7 +392,7 @@ function vttyLaunchPrepareAsRoot
   systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
   SessionCheck "$vTTYInstance" "$vTTYSeat" &
 
-  cat /dev/stdin | systemd-run --unit=vtty-launch_"${vTTYInstance}" \
+  cat /dev/stdin | systemd-run --unit=vtty-launch@"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
                                --uid=$PKEXEC_UID \
