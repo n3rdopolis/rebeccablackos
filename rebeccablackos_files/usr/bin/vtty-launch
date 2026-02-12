@@ -312,6 +312,7 @@ function vttyLaunchPrepareAsUser
       break
     fi
 
+    InhibitAfterQuit=0
     if [[ $ARG == "--inhibit-after-quit" || $ARG == "-i" ]]
     then
       InhibitAfterQuit=1
@@ -337,8 +338,55 @@ function vttyLaunchPrepareAsUser
   export VTTY_PWD=$(pwd)
   export VTTY_LAUNCH_UMASK=$(umask)
 
-  printenv -0 | pkexec "$0" "$@"
+  printenv -0 | pkexec "$0" "$InhibitAfterQuit" "$@"
   CommandResult=${PIPESTATUS[1]}
+
+  exit $CommandResult
+}
+
+#This part is run as root by pkexec.
+#It finds the seat of the vTTY frontend, and then starts itself with systemd-run as the user, on the seat
+function vttyLaunchPrepareAsRoot
+{
+  #The script is called by itself through pkexec, get the seat, start through systemd-run
+  if [[ $UID != 0 ]]
+  then
+    echo "vtty-launch: This helper must be started by vtty-launch as root"
+    exit 1
+  fi
+
+  #Enable job control
+  set -m
+
+  InhibitAfterQuit="$1"
+  shift
+
+  GetvTTYInstance vTTYInstance
+  GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
+
+  #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
+  sleep .3
+
+  systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
+  SessionCheck "$vTTYInstance" "$vTTYSeat" &
+
+  cat /dev/stdin | systemd-run --unit=vtty-launch@"${vTTYInstance}" \
+                               --setenv=XDG_SEAT="$vTTYSeat" \
+                               --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
+                               --uid=$PKEXEC_UID \
+                               -p PAMName=vtty-frontend \
+                               --quiet \
+                               --collect \
+                               --pipe \
+                               "$0" "$@"
+  CommandResult=${PIPESTATUS[1]}
+
+  if [[ $InhibitAfterQuit == 1 ]]
+  then
+    fg 1 &> /dev/null
+  fi
+
+  systemctl start vtty-frontend-seat@"${vTTYInstance}".service
 
   exit $CommandResult
 }
@@ -372,42 +420,6 @@ function vTTYLaunchStartAsUser
   exit $CommandResult
 }
 
-#This part is run as root by pkexec.
-#It finds the seat of the vTTY frontend, and then starts itself with systemd-run as the user, on the seat
-function vttyLaunchPrepareAsRoot
-{
-  #The script is called by itself through pkexec, get the seat, start through systemd-run
-  if [[ $UID != 0 ]]
-  then
-    echo "vtty-launch: This helper must be started by vtty-launch as root"
-    exit 1
-  fi
-
-  GetvTTYInstance vTTYInstance
-  GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
-
-  #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
-  sleep .3
-
-  systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
-  SessionCheck "$vTTYInstance" "$vTTYSeat" &
-
-  cat /dev/stdin | systemd-run --unit=vtty-launch@"${vTTYInstance}" \
-                               --setenv=XDG_SEAT="$vTTYSeat" \
-                               --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
-                               --uid=$PKEXEC_UID \
-                               -p PAMName=vtty-frontend \
-                               --quiet \
-                               --collect \
-                               --pipe \
-                               "$0" "$@"
-  CommandResult=${PIPESTATUS[1]}
-
-  systemctl start vtty-frontend-seat@"${vTTYInstance}".service
-
-  exit $CommandResult
-}
-
 
 
 function vTTYLaunchMain
@@ -423,11 +435,6 @@ function vTTYLaunchMain
     vTTYLaunchStartAsUser "$@"
   else
     vttyLaunchPrepareAsRoot "$@"
-  fi
-
-  if [[ $InhibitAfterQuit == 1 ]]
-  then
-    fg 1 &> /dev/null
   fi
 
   exit
