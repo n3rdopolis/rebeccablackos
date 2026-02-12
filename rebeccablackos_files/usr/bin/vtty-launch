@@ -386,6 +386,7 @@ function vttyLaunchPrepareAsRoot
     fg 1 &> /dev/null
   fi
 
+  systemctl reset-failed vtty-frontend-seat@"${vTTYInstance}".service
   systemctl start vtty-frontend-seat@"${vTTYInstance}".service
 
   exit $CommandResult
