@@ -23,6 +23,11 @@
 export WLSUDO=1
 export SUDO_ASKPASS="$0"
 
+if [[ $WLRUNTIME_VARS_EXPORTED != 1 ]]
+then
+  echo "wlsudo: warning: Some environment variables missing. Please run '. /usr/bin/wlruntime_vars' first"
+fi
+
 wayland-info &> /dev/null
 WaylandPingResult=$?
 if [[ $WaylandPingResult != 0 ]]
