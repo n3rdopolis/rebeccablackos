@@ -389,6 +389,8 @@ function vttyLaunchPrepareAsRoot
   systemd-run --unit=vtty-launch@"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
+                               --setenv=XDG_SESSION_CLASS=user \
+                               --setenv=XDG_SESSION_TYPE=wayland \
                                --uid=$PKEXEC_UID \
                                -p PAMName=vtty-frontend \
                                --quiet \
@@ -422,12 +424,16 @@ function vTTYLaunchStartAsUser
   fi
 
   VTTY_LAUNCH_SESSION_ID=$XDG_SESSION_ID
+  VTTY_LAUNCH_CLASS=$XDG_SESSION_CLASS
+  VTTY_LAUNCH_TYPE=$XDG_SESSION_TYPE
 
   readarray -d $'\0' EnvironmentBlock
   export "${EnvironmentBlock[@]}"
 
   export XDG_SEAT="$VTTY_LAUNCH_SEAT"
   export XDG_SESSION_ID=$VTTY_LAUNCH_SESSION_ID
+  export XDG_SESSION_CLASS=$VTTY_LAUNCH_CLASS
+  export XDG_SESSION_TYPE=$VTTY_LAUNCH_TYPE
 
   umask "$VTTY_LAUNCH_UMASK"
   cd "$VTTY_PWD"
