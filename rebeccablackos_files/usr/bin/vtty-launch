@@ -287,19 +287,20 @@ function vttyLaunchPrepareAsUser
     exit 1
   fi
 
+  SeatIdData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat Id 2>/dev/null))
+  SeatId=${SeatIdData[2]}
+  SeatId=${SeatId//\"/}
+
+  if [[ "$SeatId" != "seat-vtty" ]]
+  then
+    echo "vtty-launch: Must be started from a session on the seat-vtty seat"
+    exit 1
+  fi
+
   if [[ -z $1 ]]
   then
    HelpText
    exit 1
-  fi
-
-  SeatCanTTYData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
-  SeatCanTTY=${SeatCanTTYData[2]}
-
-  if [[ "$SeatCanTTY" == "true" ]]
-  then
-    echo "vtty-launch: Cannot run on seats that support TTYs"
-    exit 1
   fi
 
   InhibitAfterQuit=0
@@ -363,6 +364,18 @@ function vttyLaunchPrepareAsRoot
 
   GetvTTYInstance vTTYInstance
   GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
+
+  SeatPathData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager GetSeat "s" $vTTYSeat))
+  SeatPath=${SeatPathData[1]}
+  SeatPath=${SeatPath//\"/}
+  SeatCanTTYData=($(busctl call org.freedesktop.login1 $SeatPath org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat CanTTY 2>/dev/null))
+  SeatCanTTY=${SeatCanTTYData[2]}
+
+  if [[ "$SeatCanTTY" == "true" ]]
+  then
+    echo "vtty-launch: Cannot run on seats that support TTYs"
+    exit 1
+  fi
 
   #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
   sleep .3
