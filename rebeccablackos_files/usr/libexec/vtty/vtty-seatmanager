@@ -246,6 +246,12 @@ sub HandleSessionRemoved
       next;
     }
 
+    #Skip switching back if vtty-launch is inhibiting the seat
+    if (-e "/run/vtty/${SeatName}.vttylaunchinhibit")
+    {
+      next;
+    }
+
     if ($SeatActiveSessionName eq "")
     {
       StartOrSwitchToVttyFrontend($SeatName, $SeatPath);
