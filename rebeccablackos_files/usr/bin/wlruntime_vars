@@ -18,6 +18,8 @@
 
 #This script sets variables for running programs as Wayland programs
 
+export WLRUNTIME_VARS_EXPORTED=1
+
 #Set XDG_RUNTIME_DIR if it doesn't exist
 if [ -z $XDG_RUNTIME_DIR ]
 then
