@@ -364,13 +364,16 @@ function vttyLaunchPrepareAsRoot
   GetvTTYInstance vTTYInstance
   GetvTTYFrontendSeat "$vTTYInstance" vTTYSeat
 
+  trap 'systemctl stop vtty-launch@"${vTTYInstance}".service' INT
+
   #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
   sleep .3
 
+  touch /run/vtty/"$vTTYInstance"/vttyinhibit
   systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
   SessionCheck "$vTTYInstance" "$vTTYSeat" &
 
-  cat /dev/stdin | systemd-run --unit=vtty-launch@"${vTTYInstance}" \
+  systemd-run --unit=vtty-launch@"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
                                --uid=$PKEXEC_UID \
@@ -378,14 +381,16 @@ function vttyLaunchPrepareAsRoot
                                --quiet \
                                --collect \
                                --pipe \
-                               "$0" "$@"
-  CommandResult=${PIPESTATUS[1]}
+                               "$0" "$@" < /dev/stdin
+  wait $!
+  CommandResult=$?
 
   if [[ $InhibitAfterQuit == 1 ]]
   then
     fg 1 &> /dev/null
   fi
 
+  rm /run/vtty/"$vTTYInstance"/vttyinhibit
   systemctl reset-failed vtty-frontend-seat@"${vTTYInstance}".service
   systemctl start vtty-frontend-seat@"${vTTYInstance}".service
 
