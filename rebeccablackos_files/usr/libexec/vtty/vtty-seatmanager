@@ -140,6 +140,44 @@ sub GetSeatFreeVttyInstance
   return $SelectedSession;
 }
 
+#When NAutoVTs is used up, don't start any more sessions, instead, switch through all sessions on the seat
+sub SwitchToNextSession
+{
+  my $SeatName=shift;
+
+  my $LogindSeatPath=$Login1ManagerObject->GetSeat($SeatName);
+  my $LogindSeatObjectCall=$Login1Service->get_object("$LogindSeatPath", "org.freedesktop.login1.Seat");
+  my $LogindSeatObjectProperties=$Login1Service->get_object("$LogindSeatPath", "org.freedesktop.DBus.Properties");
+
+  my $LogindSeatActiveSession=$LogindSeatObjectProperties->Get("org.freedesktop.login1.Seat", "ActiveSession");
+  my $LogindSeatActiveSessionName=$LogindSeatActiveSession->[0];
+  my $LogindSeatActiveSessionPath=$LogindSeatActiveSession->[1];
+
+  my $LogindSeatSessions=$LogindSeatObjectProperties->Get("org.freedesktop.login1.Seat", "Sessions");
+  my $LogindSeatSessionsCount=@{$LogindSeatSessions};
+
+  my $NextSessionIndex;
+
+  #Sessions is an array, that is backwards, the last element is session 1 for the SwitchTo method
+  for (my $SessionIterator=0; $SessionIterator < $LogindSeatSessionsCount; $SessionIterator++)
+  {
+    my $SessionData=$LogindSeatSessions->[$SessionIterator];
+    my $SessionName=$SessionData->[0];
+    my $SessionPath=$SessionData->[1];
+
+    if ($SessionName eq $LogindSeatActiveSessionName)
+    {
+      $NextSessionIndex=($LogindSeatSessionsCount-$SessionIterator)+1;
+      if ($NextSessionIndex > $LogindSeatSessionsCount)
+      {
+        $NextSessionIndex=1;
+      }
+      last;
+    }
+  }
+  $LogindSeatObjectCall->SwitchTo($NextSessionIndex);
+}
+
 #Get the MainPID attribute of a unit
 #Takes a "something.service" as an argument, returns 0 if it is not running
 sub GetUnitMainPID
@@ -169,9 +207,10 @@ sub StartOrSwitchToVttyFrontend
   my $SeatName=shift;
   my $SeatPath=shift;
 
-  my $FreeVttyInstance=GetSeatFreeVttyInstance ${SeatName};
+  my $FreeVttyInstance=GetSeatFreeVttyInstance($SeatName);
   if ($FreeVttyInstance == -1)
   {
+    SwitchToNextSession($SeatName);
     return;
   }
 
