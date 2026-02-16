@@ -22,17 +22,8 @@ use Env;
 use Net::DBus;
 use Net::DBus::Reactor;
 
-my $SystemBus=Net::DBus->system();
-
-my $Login1Service=$SystemBus->get_service("org.freedesktop.login1");
-my $Login1ManagerObject=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.login1.Manager");
-my $Login1ManagerPropertiesObject=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.DBus.Properties");
-
-my $Systemd1Service=$SystemBus->get_service("org.freedesktop.systemd1");
-my $Systemd1ManagerObject=$Systemd1Service->get_object("/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager");
-
-#Get the number of sessions that logind is configured for
-my $MaxSessionCount=$Login1ManagerPropertiesObject->Get("org.freedesktop.login1.Manager", "NAutoVTs");
+#Global vars
+my %SeatManager;
 
 #Sessions logged in on PTYs use logind's TTY attribute
 #Takes no arguments, returns an array of paths
@@ -40,18 +31,18 @@ sub GetSessionTTYs
 {
   my @SessionTTYs=();
 
-  my $Sessions=$Login1ManagerObject->ListSessions();
-  foreach my $Session ( @{$Sessions} )
+  #Enumerate through all logind sessions, collect all the TTY/PTYs that contain a running session
+  my @Sessions=@{$SeatManager{Login1ManagerCallObject}->ListSessions()};
+  foreach my $Session ( @Sessions )
   {
-    my @SessionParams=@{$Session};
-    my $SessionName=$SessionParams[0];
-    my $SessionUID=$SessionParams[1];
-    my $SessionUsername=$SessionParams[2];
-    my $SessionSeat=$SessionParams[3];
-    my $SessionPath=$SessionParams[4];
+    my $SessionName=$Session->[0];
+    my $SessionUID=$Session->[1];
+    my $SessionUsername=$Session->[2];
+    my $SessionSeat=$Session->[3];
+    my $SessionPath=$Session->[4];
 
-    my $SessionObject=$Login1Service->get_object($SessionPath, "org.freedesktop.DBus.Properties");
-    my $SessionTTY=$SessionObject->Get("org.freedesktop.login1.Session", "TTY");
+    my $SessionPropertiesObject=$SeatManager{Login1Service}->get_object($SessionPath, "org.freedesktop.DBus.Properties");
+    my $SessionTTY=$SessionPropertiesObject->Get("org.freedesktop.login1.Session", "TTY");
     if ($SessionTTY ne "")
     {
       push(@SessionTTYs, $SessionTTY);
@@ -65,26 +56,27 @@ sub GetSessionTTYs
 #Takes the seat as the argument, returns an array, they should be numbers
 sub GetSeatVttyBackends
 {
-  my $SeatName=shift;
+  my $SeatName=$_[0];
+
   my @VttyBackends=();
 
-  my $Units=$Systemd1ManagerObject->ListUnits();
-  foreach my $Unit ( @{$Units} )
+  my @Units=@{$SeatManager{Systemd1ManagerCallObject}->ListUnits()};
+  foreach my $Unit ( @Units )
   {
-    my @UnitParams=@{$Unit};
-    my $UnitName=$UnitParams[0];
-    my $UnitDescription=$UnitParams[1];
-    my $UnitLoadState=$UnitParams[2];
-    my $UnitState=$UnitParams[3];
-    my $UnitSubState=$UnitParams[4];
-    my $UnitFollowedState=$UnitParams[5];
-    my $UnitObjectPath=$UnitParams[6];
-    my $UnitIsJobQueued=$UnitParams[7];
-    my $UnitJobType=$UnitParams[8];
-    my $UnitJobPath=$UnitParams[9];
+    my $UnitName=$Unit->[0];
+    my $UnitDescription=$Unit->[1];
+    my $UnitLoadState=$Unit->[2];
+    my $UnitState=$Unit->[3];
+    my $UnitSubState=$Unit->[4];
+    my $UnitFollowedState=$Unit->[5];
+    my $UnitObjectPath=$Unit->[6];
+    my $UnitIsJobQueued=$Unit->[7];
+    my $UnitJobType=$Unit->[8];
+    my $UnitJobPath=$Unit->[9];
+
     if ($UnitName =~ /^vtty-frontend-seat\@${SeatName}\@vtty/ && $UnitName =~ /\.service$/)
     {
-      #There seems to be no dbus attribute in systemd to query to get a parameterized unit's parameter
+      #Remove the vtty-frontend-seat@vtty@   and the .service   leaving just the number
       $UnitName = $UnitName =~ s/^vtty-frontend-seat\@${SeatName}\@vtty//r;
       $UnitName = $UnitName =~ s/\.service$//r;
 
@@ -95,16 +87,17 @@ sub GetSeatVttyBackends
   return @VttyBackends;
 }
 
-#Get from 1 - NAutoVTs of the vtty instances for the seat, the first one to have no logged in session on the seat
+#Check from 1 - NAutoVTs for PTYs with no sessions in logind, return the first one to have no logged in session on the seat
 sub GetSeatFreeVttyInstance
 {
-  my $SeatName=shift;
+  my $SeatName=$_[0];
+
   my $SelectedSession=-1;
 
   my @SessionTTYs=GetSessionTTYs();
   my @VttyBackends=GetSeatVttyBackends($SeatName);
 
-  for (my $SessionIterator = 1; $SessionIterator <= $MaxSessionCount; $SessionIterator++)
+  for (my $SessionIterator = 1; $SessionIterator <= $SeatManager{MaxSessionCount}; $SessionIterator++)
   {
     my $VttyInstanceName="${SeatName}\@vtty${SessionIterator}";
     my $VttyBackendUsed=0;
@@ -141,58 +134,61 @@ sub GetSeatFreeVttyInstance
 }
 
 #When NAutoVTs is used up, don't start any more sessions, instead, switch through all sessions on the seat
+#logind populates the seat's Sessions array in reverse order
 sub SwitchToNextSession
 {
-  my $SeatName=shift;
+  my $SeatName=$_[0];
 
-  my $LogindSeatPath=$Login1ManagerObject->GetSeat($SeatName);
-  my $LogindSeatObjectCall=$Login1Service->get_object("$LogindSeatPath", "org.freedesktop.login1.Seat");
-  my $LogindSeatObjectProperties=$Login1Service->get_object("$LogindSeatPath", "org.freedesktop.DBus.Properties");
+  my $LogindSeatPath=$SeatManager{Login1ManagerCallObject}->GetSeat($SeatName);
+  my $LogindSeatCallObject=$SeatManager{Login1Service}->get_object($LogindSeatPath, "org.freedesktop.login1.Seat");
+  my $LogindSeatPropertiesObject=$SeatManager{Login1Service}->get_object($LogindSeatPath, "org.freedesktop.DBus.Properties");
 
-  my $LogindSeatActiveSession=$LogindSeatObjectProperties->Get("org.freedesktop.login1.Seat", "ActiveSession");
+  #Get the active session
+  my $LogindSeatActiveSession=$LogindSeatPropertiesObject->Get("org.freedesktop.login1.Seat", "ActiveSession");
   my $LogindSeatActiveSessionName=$LogindSeatActiveSession->[0];
   my $LogindSeatActiveSessionPath=$LogindSeatActiveSession->[1];
 
-  my $LogindSeatSessions=$LogindSeatObjectProperties->Get("org.freedesktop.login1.Seat", "Sessions");
-  my $LogindSeatSessionsCount=@{$LogindSeatSessions};
+  #Get all sessions
+  my @LogindSeatSessions=@{$LogindSeatPropertiesObject->Get("org.freedesktop.login1.Seat", "Sessions")};
+  my $LogindSeatSessionsCount=scalar @LogindSeatSessions;
 
   my $NextSessionIndex;
 
-  #Sessions is an array, that is backwards, the last element is session 1 for the SwitchTo method
-  for (my $SessionIterator=0; $SessionIterator < $LogindSeatSessionsCount; $SessionIterator++)
+  for (my $SessionIterator=$LogindSeatSessionsCount - 1; $SessionIterator >= 0; $SessionIterator--)
   {
-    my $SessionData=$LogindSeatSessions->[$SessionIterator];
+    my $SessionData=$LogindSeatSessions[$SessionIterator];
     my $SessionName=$SessionData->[0];
     my $SessionPath=$SessionData->[1];
 
     if ($SessionName eq $LogindSeatActiveSessionName)
     {
-      $NextSessionIndex=($LogindSeatSessionsCount-$SessionIterator)+1;
-      if ($NextSessionIndex > $LogindSeatSessionsCount)
+      $NextSessionIndex=$SessionIterator - 1;
+      if ($NextSessionIndex < 0)
       {
-        $NextSessionIndex=1;
+        $NextSessionIndex=0;
       }
       last;
     }
   }
-  $LogindSeatObjectCall->SwitchTo($NextSessionIndex);
+
+  eval{$LogindSeatCallObject->ActivateSession($LogindSeatSessions[$NextSessionIndex]->[0])};
 }
 
 #Get the MainPID attribute of a unit
 #Takes a "something.service" as an argument, returns 0 if it is not running
 sub GetUnitMainPID
 {
-  my $Unit=shift;
+  my $UnitName=$_[0];
 
-  my $UnitPath=eval {$Systemd1ManagerObject->GetUnit($Unit)};
-  if ($@)
+  #If the unit doesn't resolve, it's not running
+  if (! eval{$SeatManager{Systemd1ManagerCallObject}->GetUnit($UnitName)})
   {
     return 0;
   }
 
   #Get the MainPID of the seat's vtty frontend service.
-  my $UnitObject=$Systemd1Service->get_object($UnitPath, "org.freedesktop.DBus.Properties");
-  my $UnitMainPID=$UnitObject->Get("org.freedesktop.systemd1.Service", "MainPID");
+  my $UnitPropertiesObject=$SeatManager{Systemd1Service}->get_object($UnitPath, "org.freedesktop.DBus.Properties");
+  my $UnitMainPID=$UnitPropertiesObject->Get("org.freedesktop.systemd1.Service", "MainPID");
   if ($UnitMainPID == 0)
   {
     return 0;
@@ -203,9 +199,8 @@ sub GetUnitMainPID
 
 sub StartOrSwitchToVttyFrontend
 {
-  my $VttyFrontendRunning=1;
-  my $SeatName=shift;
-  my $SeatPath=shift;
+  my $SeatName=$_[0];
+  my $SeatPath=$_[1];
 
   my $FreeVttyInstance=GetSeatFreeVttyInstance($SeatName);
   if ($FreeVttyInstance == -1)
@@ -218,27 +213,26 @@ sub StartOrSwitchToVttyFrontend
 
   if ($VttyUnitMainPID == 0)
   {
-    $Systemd1ManagerObject->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty${FreeVttyInstance}.service", "replace");
+    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty${FreeVttyInstance}.service", "replace")};
     return;
   }
 
   #Look for the logind session with the Leader that matches the MainPID of the service.
-  my $Sessions=$Login1ManagerObject->ListSessions();
-  foreach my $Session ( @{$Sessions} )
+  my @Sessions=@{$SeatManager{Login1ManagerCallObject}->ListSessions()};
+  foreach my $Session ( @Sessions )
   {
-    my @SessionParams=@{$Session};
-    my $SessionName=$SessionParams[0];
-    my $SessionUID=$SessionParams[1];
-    my $SessionUsername=$SessionParams[2];
-    my $SessionSeat=$SessionParams[3];
-    my $SessionPath=$SessionParams[4];
+    my $SessionName=$Session->[0];
+    my $SessionUID=$Session->[1];
+    my $SessionUsername=$Session->[2];
+    my $SessionSeat=$Session->[3];
+    my $SessionPath=$Session->[4];
 
-    my $SessionObject=$Login1Service->get_object($SessionPath, "org.freedesktop.DBus.Properties");
-    my $SessionLeaderPID=$SessionObject->Get("org.freedesktop.login1.Session", "Leader");
+    my $SessionPropertiesObject=$SeatManager{Login1Service}->get_object($SessionPath, "org.freedesktop.DBus.Properties");
+    my $SessionLeaderPID=$SessionPropertiesObject->Get("org.freedesktop.login1.Session", "Leader");
 
     if ($SessionLeaderPID == $VttyUnitMainPID)
     {
-      $Login1ManagerObject->ActivateSession($SessionName);
+      eval{$SeatManager{Login1ManagerCallObject}->ActivateSession($SessionName)};
       return;
     }
   }
@@ -246,10 +240,13 @@ sub StartOrSwitchToVttyFrontend
 
 sub HandleSecureAttentionKey
 {
-  my $SecureAttentionKeySeatName=shift;
-  my $SecureAttentionKeySeatPath=shift;
+  my $SecureAttentionKeySeatName=$_[0];
+  my $SecureAttentionKeySeatPath=$_[1];
 
-  if ($SecureAttentionKeySeatName eq "seat-vtty")
+  my $SecureAttentionKeySeatPropertiesObject=$SeatManager{Login1Service}->get_object($SecureAttentionKeySeatPath, "org.freedesktop.DBus.Properties");
+  my $SecureAttentionKeySeatCanGraphical=$SecureAttentionKeySeatPropertiesObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
+
+  if ($SecureAttentionKeySeatName eq "seat-vtty" || ($SecureAttentionKeySeatCanGraphical == 0))
   {
     return;
   }
@@ -261,23 +258,23 @@ sub HandleSecureAttentionKey
 
 sub HandleSessionRemoved
 {
-  my $SessionRemovedSessionName=shift;
-  my $SessionRemovedSessionPath=shift;
+  my $SessionRemovedSessionName=$_[0];
+  my $SessionRemovedSessionPath=$_[1];
 
   #When a session is removed, the impacted seat is not emitted in dbus
   #Enumerate through all seats to find one with no active sessions
-  my $Seats=$Login1ManagerObject->ListSeats();
-  foreach my $Seat ( @{$Seats} )
+  my @Seats=@{$SeatManager{Login1ManagerCallObject}->ListSeats()};
+  foreach my $Seat ( @Seats )
   {
-    my @SeatParams=@{$Seat};
-    my $SeatName=$SeatParams[0];
-    my $SeatPath=$SeatParams[1];
+    my $SeatName=$Seat->[0];
+    my $SeatPath=$Seat->[1];
 
-    my $SeatObject=$Login1Service->get_object($SeatPath, "org.freedesktop.DBus.Properties");
-    my $SeatCanGraphical=$SeatObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
-    my $SeatActiveSession=$SeatObject->Get("org.freedesktop.login1.Seat", "ActiveSession");
-    my $SeatActiveSessionName=@{$SeatActiveSession}[0];
-    my $SeatActiveSessionPath=@{$SeatActiveSession}[1];
+    my $SeatPropertiesObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.DBus.Properties");
+    my $SeatCanGraphical=$SeatPropertiesObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
+    my $SeatActiveSession=$SeatPropertiesObject->Get("org.freedesktop.login1.Seat", "ActiveSession");
+
+    my $SeatActiveSessionName=$SeatActiveSession->[0];
+    my $SeatActiveSessionPath=$SeatActiveSession->[1];
 
     #Don't start a vtty-frontend on the virtual seat-vtty seat, or on seats that don't have GPUs
     if (($SeatName eq "seat-vtty") || ($SeatCanGraphical == 0))
@@ -302,36 +299,41 @@ sub HandleSessionRemoved
 
 sub HandleSeatNew
 {
-  my $SeatNewSeatName=shift;
-  my $SeatNewSeatPath=shift;
+  my $SeatNewSeatName=$_[0];
+  my $SeatNewSeatPath=$_[1];
 
-  if ($SeatNewSeatName eq "seat-vtty")
+  my $SeatNewPropertiesObject=$SeatManager{Login1Service}->get_object($SeatNewSeatPath, "org.freedesktop.DBus.Properties");
+  my $SeatNewCanGraphical=$SeatNewPropertiesObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
+
+  if ($SeatNewSeatName eq "seat-vtty" || ($SeatNewCanGraphical == 0))
   {
     return;
   }
 
   #Start the first vtty frontend for the new seat
-  $Systemd1ManagerObject->StartUnit("vtty-frontend-seat\@${SeatNewSeatName}\@vtty1.service", "replace");
+  eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatNewSeatName}\@vtty1.service", "replace")};
 
   return;
 }
 
 sub HandleSeatRemoved
 {
-  my $SeatRemovedSeatName=shift;
-  my $SeatRemovedSeatPath=shift;
+  my $SeatRemovedSeatName=$_[0];
+  my $SeatRemovedSeatPath=$_[1];
 
+  #Only ignore on seat-vtty, can't query the CanGraphical property on a seat that no longer exists
   if ($SeatRemovedSeatName eq "seat-vtty")
   {
     return;
   }
 
-  #Only stop the frontend, and not the backend when a seat is removed. Do not stop the backend
-  #The seat removal could be accidental, or caused by a loose USB GPU, and stopping the backend
-  #could cause a user running process to be killed.
-  for (my $Iterator=1; $Iterator <= $MaxSessionCount; $Iterator++)
+  #Only stop the frontend, and NOT the backend when a seat is removed.
+  #
+  #The seat removal could be accidental, or caused by a loose USB GPU, stopping the backend
+  #would result in terminated sessions otherwise
+  for (my $InstanceIterator=1; $InstanceIterator <= $SeatManager{MaxSessionCount}; $InstanceIterator++)
   {
-    $Systemd1ManagerObject->StopUnit("vtty-frontend-seat\@${SeatRemovedSeatName}\@vtty${Iterator}.service", "replace");
+    eval{$SeatManager{Systemd1ManagerCallObject}->StopUnit("vtty-frontend-seat\@${SeatRemovedSeatName}\@vtty${InstanceIterator}.service", "replace")};
   }
 
   return;
@@ -346,15 +348,37 @@ sub main
     exit 1
   }
 
-  #Start vtty-frontend-seat@.service on all running seats.
-  my $Seats=$Login1ManagerObject->ListSeats();
-  foreach my $Seat ( @{$Seats} )
-  {
-    my @SeatParams=@{$Seat};
-    my $SeatName=$SeatParams[0];
-    my $SeatPath=$SeatParams[1];
+  my $SystemBus=Net::DBus->system();
 
-    my $SeatObject=$Login1Service->get_object($SeatPath, "org.freedesktop.DBus.Properties");
+  my $Login1Service=$SystemBus->get_service("org.freedesktop.login1");
+  my $Login1ManagerCallObject=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.login1.Manager");
+  my $Login1ManagerPropertiesObject=$Login1Service->get_object("/org/freedesktop/login1", "org.freedesktop.DBus.Properties");
+
+  my $Systemd1Service=$SystemBus->get_service("org.freedesktop.systemd1");
+  my $Systemd1ManagerCallObject=$Systemd1Service->get_object("/org/freedesktop/systemd1", "org.freedesktop.systemd1.Manager");
+
+  #Get the number of sessions that logind is configured for
+  my $MaxSessionCount=$Login1ManagerPropertiesObject->Get("org.freedesktop.login1.Manager", "NAutoVTs");
+
+  %SeatManager = (
+                    Login1Service => $Login1Service,
+                    Login1ManagerCallObject => $Login1ManagerCallObject,
+                    Login1ManagerPropertiesObject => $Login1ManagerPropertiesObject,
+
+                    Systemd1Service => $Systemd1Service,
+                    Systemd1ManagerCallObject => $Systemd1ManagerCallObject,
+
+                    MaxSessionCount => $MaxSessionCount,
+                 );
+
+  #Start vtty-frontend-seat@.service on all running seats.
+  my @Seats=@{$SeatManager{Login1ManagerCallObject}->ListSeats()};
+  foreach my $Seat ( @Seats )
+  {
+    my $SeatName=$Seat->[0];
+    my $SeatPath=$Seat->[1];
+
+    my $SeatObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.DBus.Properties");
     my $SeatCanGraphical=$SeatObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
 
     #Don't start a vtty-frontend on the virtual seat-vtty seat, or on seats that don't have GPUs, or has VTs
@@ -363,13 +387,13 @@ sub main
       next;
     }
 
-    $Systemd1ManagerObject->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty1.service", "replace");
+    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty1.service", "replace")};
   }
 
-  $Login1ManagerObject->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
-  $Login1ManagerObject->connect_to_signal("SessionRemoved", \&HandleSessionRemoved);
-  $Login1ManagerObject->connect_to_signal("SeatNew", \&HandleSeatNew);
-  $Login1ManagerObject->connect_to_signal("SeatRemoved", \&HandleSeatRemoved);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SessionRemoved", \&HandleSessionRemoved);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatNew", \&HandleSeatNew);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatRemoved", \&HandleSeatRemoved);
 
   my $DbusReactor=Net::DBus::Reactor->main();
   $DbusReactor->run();
