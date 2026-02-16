@@ -34,7 +34,7 @@ function DoLoginPrompt
   if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
   then
     WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -c &> /dev/null
-    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -pc & /dev/null
+    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -pc &> /dev/null
   fi
 
   #vtty-login-program could be a symlink provided by another package, such as console-conf
