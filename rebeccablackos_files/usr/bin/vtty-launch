@@ -380,8 +380,8 @@ function vttyLaunchPrepareAsRoot
   #Wait before ending the frontend, so key press of "enter" isn't held down when the command is run
   sleep .3
 
-  touch /run/vtty/${vTTYSeat}.vttylaunchinhibit
-  trap 'rm /run/vtty/${vTTYSeat}.vttylaunchinhibit; systemctl stop vtty-launch@"${vTTYInstance}".service' INT
+  touch /run/vtty/${vTTYInstance}/vttylaunchinhibit
+  trap 'rm /run/vtty/${vTTYInstance}/vttylaunchinhibit; systemctl stop vtty-launch@"${vTTYInstance}".service' INT
 
   systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
   SessionCheck "$vTTYInstance" "$vTTYSeat" &
@@ -407,7 +407,7 @@ function vttyLaunchPrepareAsRoot
 
   systemctl reset-failed vtty-frontend-seat@"${vTTYInstance}".service
   systemctl start vtty-frontend-seat@"${vTTYInstance}".service
-  rm /run/vtty/${vTTYSeat}.vttylaunchinhibit
+  rm /run/vtty/${vTTYInstance}/vttylaunchinhibit
 
   exit $CommandResult
 }
