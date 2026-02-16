@@ -165,7 +165,7 @@ sub SwitchToNextSession
       $NextSessionIndex=$SessionIterator - 1;
       if ($NextSessionIndex < 0)
       {
-        $NextSessionIndex=0;
+        $NextSessionIndex=$SessionIterator - 1;
       }
       last;
     }
@@ -181,7 +181,8 @@ sub GetUnitMainPID
   my $UnitName=$_[0];
 
   #If the unit doesn't resolve, it's not running
-  if (! eval{$SeatManager{Systemd1ManagerCallObject}->GetUnit($UnitName)})
+  my $UnitPath;
+  if (! eval{$UnitPath=$SeatManager{Systemd1ManagerCallObject}->GetUnit($UnitName)})
   {
     return 0;
   }
@@ -339,6 +340,30 @@ sub HandleSeatRemoved
   return;
 }
 
+
+#These prevent a failed dbus call (like a seat going away mid call) from stopping the entire script
+sub HandleSecureAttentionKeySafe
+{
+  eval{HandleSecureAttentionKey($_[0], $_[1])};
+}
+
+sub HandleSessionRemovedSafe
+{
+  eval{HandleSessionRemovedSafe($_[0], $_[1])};
+}
+
+sub HandleSeatNewSafe
+{
+  eval{HandleSeatNewSafe($_[0], $_[1])};
+}
+
+sub HandleSeatRemovedSafe
+{
+  eval{HandleSeatRemovedSafe($_[0], $_[1])};
+}
+
+
+
 sub main
 {
   #This script must be run as root.
@@ -390,10 +415,10 @@ sub main
     eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty1.service", "replace")};
   }
 
-  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKey);
-  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SessionRemoved", \&HandleSessionRemoved);
-  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatNew", \&HandleSeatNew);
-  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatRemoved", \&HandleSeatRemoved);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKeySafe);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SessionRemoved", \&HandleSessionRemovedSafe);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatNew", \&HandleSeatNewSafe);
+  $SeatManager{Login1ManagerCallObject}->connect_to_signal("SeatRemoved", \&HandleSeatRemovedSafe);
 
   my $DbusReactor=Net::DBus::Reactor->main();
   $DbusReactor->run();
