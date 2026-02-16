@@ -88,10 +88,12 @@ sub GetSeatVttyBackends
 }
 
 #Check from 1 - NAutoVTs for PTYs with no sessions in logind, return the first one to have no logged in session on the seat
+#Unless it finds vtty backends running with a missing frontend
 sub GetSeatFreeVttyInstance
 {
   my $SeatName=$_[0];
 
+  my $SkipSelectedSession=0;
   my $SelectedSession=-1;
 
   my @SessionTTYs=GetSessionTTYs();
@@ -104,7 +106,22 @@ sub GetSeatFreeVttyInstance
 
     if (GetUnitMainPID("vtty-backend-seat\@${VttyInstanceName}.service") > 0)
     {
+      #If the backend is running, but the frontend is not
+      if (GetUnitMainPID("vtty-frontend-seat\@${VttyInstanceName}.service") == 0)
+      {
+        eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${VttyInstanceName}.service", "replace")};
+        #If 2+ frontends are down, starting too many at a time gets tricky for logind.
+        sleep(3);
+        $SkipSelectedSession=1;
+      }
 
+      #A session was already found. Skip finding free sessions, but still loop to start any failed frontends
+      if ($SelectedSession != -1)
+      {
+        next;
+      }
+
+      #For the vtty instance, find any logind sessions matching the PTY
       foreach (@SessionTTYs)
       {
         my $SessionTTY=$_;
@@ -123,14 +140,21 @@ sub GetSeatFreeVttyInstance
       }
     }
 
-    if ($VttyBackendUsed != 1)
+    #If this instance is not used, select it, if one hasn't alrady been selected
+    if ($VttyBackendUsed == 0 && $SelectedSession == -1)
     {
       $SelectedSession=$SessionIterator;
-      last;
     }
   }
 
-  return $SelectedSession;
+  #Return 0 if a running backend with a missing frontend was found and started
+  #This skips starting a new backend/frontend
+  if ($SkipSelectedSession == 0)
+  {
+    return $SelectedSession;
+  } else {
+    return 0;
+  }
 }
 
 #When NAutoVTs is used up, don't start any more sessions, instead, switch through all sessions on the seat
@@ -204,9 +228,15 @@ sub StartOrSwitchToVttyFrontend
   my $SeatPath=$_[1];
 
   my $FreeVttyInstance=GetSeatFreeVttyInstance($SeatName);
+
+  #If GetSeatFreeVttyInstance returns -1, it is out of instances.
+  #If GetSeatFreeVttyInstance returns 0, skip as it started a frontend for a running backend, and logind activated it
   if ($FreeVttyInstance == -1)
   {
     SwitchToNextSession($SeatName);
+    return;
+  } elsif ($FreeVttyInstance == 0)
+  {
     return;
   }
 
