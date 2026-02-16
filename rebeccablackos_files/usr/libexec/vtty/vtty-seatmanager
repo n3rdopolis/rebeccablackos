@@ -349,17 +349,17 @@ sub HandleSecureAttentionKeySafe
 
 sub HandleSessionRemovedSafe
 {
-  eval{HandleSessionRemovedSafe($_[0], $_[1])};
+  eval{HandleSessionRemoved($_[0], $_[1])};
 }
 
 sub HandleSeatNewSafe
 {
-  eval{HandleSeatNewSafe($_[0], $_[1])};
+  eval{HandleSeatNew($_[0], $_[1])};
 }
 
 sub HandleSeatRemovedSafe
 {
-  eval{HandleSeatRemovedSafe($_[0], $_[1])};
+  eval{HandleSeatRemoved($_[0], $_[1])};
 }
 
 
