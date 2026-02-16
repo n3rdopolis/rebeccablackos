@@ -109,6 +109,12 @@ sub GetSeatFreeVttyInstance
       #If the backend is running, but the frontend is not
       if (GetUnitMainPID("vtty-frontend-seat\@${VttyInstanceName}.service") == 0)
       {
+        #Skip starting the frontend if vtty-launch is inhibiting it
+        if (-e "/run/vtty/${VttyInstanceName}/vttylaunchinhibit")
+        {
+          next;
+        }
+
         eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${VttyInstanceName}.service", "replace")};
         #If 2+ frontends are down, starting too many at a time gets tricky for logind.
         sleep(3);
@@ -178,6 +184,7 @@ sub SwitchToNextSession
 
   my $NextSessionIndex;
 
+  #Get the next session in the $LogindSeatSessions array, backwards (as the first session is the last one)
   for (my $SessionIterator=$LogindSeatSessionsCount - 1; $SessionIterator >= 0; $SessionIterator--)
   {
     my $SessionData=$LogindSeatSessions[$SessionIterator];
@@ -292,7 +299,7 @@ sub HandleSessionRemoved
   my $SessionRemovedSessionName=$_[0];
   my $SessionRemovedSessionPath=$_[1];
 
-  #When a session is removed, the impacted seat is not emitted in dbus
+  #When a session is removed, the impacted seat is not emitted in dbus, only the session, which is no longer queryable once gone
   #Enumerate through all seats to find one with no active sessions
   my @Seats=@{$SeatManager{Login1ManagerCallObject}->ListSeats()};
   foreach my $Seat ( @Seats )
@@ -307,14 +314,25 @@ sub HandleSessionRemoved
     my $SeatActiveSessionName=$SeatActiveSession->[0];
     my $SeatActiveSessionPath=$SeatActiveSession->[1];
 
+    my $SeatHasInhibitedSession=0;
+
     #Don't start a vtty-frontend on the virtual seat-vtty seat, or on seats that don't have GPUs
     if (($SeatName eq "seat-vtty") || ($SeatCanGraphical == 0))
     {
       next;
     }
 
-    #Skip switching back if vtty-launch is inhibiting the seat
-    if (-e "/run/vtty/${SeatName}.vttylaunchinhibit")
+    for (my $InstanceIterator=1; $InstanceIterator <= $SeatManager{MaxSessionCount}; $InstanceIterator++)
+    {
+      if (-e "/run/vtty/${$SeatName}\@vtty${InstanceIterator}/vttylaunchinhibit")
+      {
+        $SeatHasInhibitedSession=1;
+        last;
+      }
+    }
+
+    #Skip switching back if vtty-launch is inhibiting a session on the seat
+    if ($SeatHasInhibitedSession == 1)
     {
       next;
     }
