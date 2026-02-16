@@ -739,11 +739,15 @@ function MainConfig
 
 function MainDialog
 {
-SelectedOption=$(echo "1
+  SelectedOption=$(echo "1
 Configure Devices
 2
-Show Detailed Help
+Create Custom Physical Seat List
 3
+Create Custom Logical Seat List
+4
+Show Detailed Help
+5
 Quit"| $ZENITYCMD --height 380 --list --hide-column 1 --print-column 1 --column=selectionnumber --column=option --hide-header --title="Multipointer and Seat Configuration" --text "Select device configuration mode.
 
 'Configure All Devices' lists all devices currently attached to be configured.
@@ -752,18 +756,50 @@ Quit"| $ZENITYCMD --height 380 --list --hide-column 1 --print-column 1 --column=
 
 'Quit' Exits this wizard
 ")
-Return=$?
-if [[ $Return != 0 ]]
-then
-  exit
-fi
+  Return=$?
+  if [[ $Return != 0 ]]
+  then
+    exit
+  fi
+}
+
+function PhysicalSeatListDialog
+{
+  NewSeatList=""
+  FirstSeat=1
+  while read -r Seat
+  do
+    if [[ $FirstSeat != 1 ]]
+    then
+      NewSeatList+="|"
+    fi
+    NewSeatList+=$(echo "$Seat" | cut -c -255 |sed 's|[^a-zA-Z0-9_-]|_|g')
+    FirstSeat=0
+  done < <(echo "$PhysicalSeatList" | sed "s/|/\n/g" | $ZENITYCMD --text-info --editable --title="Edit Physical Seat List" | grep .)
+  echo "$NewSeatList"
+}
+
+function LogicalSeatListDialog
+{
+  NewSeatList=""
+  FirstSeat=1
+  while read -r Seat
+  do
+    if [[ $FirstSeat != 1 ]]
+    then
+      NewSeatList+="|"
+    fi
+    NewSeatList+=$(echo "$Seat" | cut -c -255 |sed 's|[^a-zA-Z0-9_-]|_|g')
+    FirstSeat=0
+  done < <(echo "$LogicalSeatList" | sed "s/|/\n/g" | $ZENITYCMD --text-info --editable --title="Edit Logical Seat List" | grep .)
+  echo "$NewSeatList"
 }
 
 
-PrepareSeatList
-
 function ConfigureSeatsMain
 {
+  PrepareSeatList
+
   #Main wizard dialog
   while [ 1 ]
   do
@@ -781,8 +817,14 @@ function ConfigureSeatsMain
       fi
     elif [[ $SelectedOption == 2 ]]
     then
-      HelpDialog
+      PhysicalSeatList=$(PhysicalSeatListDialog)
     elif [[ $SelectedOption == 3 ]]
+    then
+      LogicalSeatList=$(LogicalSeatListDialog)
+    elif [[ $SelectedOption == 4 ]]
+    then
+      HelpDialog
+    elif [[ $SelectedOption == 5 ]]
     then
       exit
     fi
