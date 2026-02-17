@@ -58,70 +58,8 @@ DebianConfigCommit=debian/6.19-1_exp1
 DebianConfigRootURL=https://salsa.debian.org/kernel-team/linux/-/raw/$DebianConfigCommit/debian/config
 DebianArch=$(dpkg --print-architecture)
 
-#Download the Debian defines
-wget ${DebianConfigRootURL}/defines.toml -O - 2>/dev/null > ./defines.toml
-if [[ $? != 0 ]]
-then
-  echo "Failed to download Debian config defines: ${DebianConfigRootURL}/defines.toml"
-  exit 1
-fi
-
-#Parse the Debian defines to get the kernelarch of the debian arch (eg amd64 = x86)
-KernelArchGroup=0
-KernelArchGroupName=""
-while IFS= read -r TOMLLINE
-do
-  if [[ "$TOMLLINE" == "[[kernelarch]]" ]]
-  then
-    KernelArchGroup=1
-    KernelArchGroupName=""
-    continue
-  fi
-  if [[ $KernelArchGroup == 1 && $TOMLLINE == "" ]]
-  then
-    KernelArchGroup=0
-    continue
-  fi
-  if [[ $KernelArchGroup == 1 && $KernelArchGroupName == "" && $TOMLLINE =~ ^"name = " ]]
-  then
-    IFS=\'
-    TOMLLINE=($TOMLLINE)
-    unset IFS
-    KernelArchGroupName=${TOMLLINE[1]}
-    continue
-  fi
-  if [[ $KernelArchGroup == 1 && $KernelArchGroupName != ""&& $TOMLLINE =~ ^" "*"name = " ]]
-  then
-    IFS=\'
-    TOMLLINE=($TOMLLINE)
-    unset IFS
-    DebianArchGroupName=${TOMLLINE[1]}
-    if [[ $DebianArchGroupName == $DebianArch ]]
-    then
-      KernelArch=$KernelArchGroupName
-      break
-    fi
-    continue
-  fi
-done < <(cat ./defines.toml)
-
-echo > ./kernelarch.config
-wget ${DebianConfigRootURL}/kernelarch-${KernelArch}/config -O - > ./kernelarch.config
-if [[ $? != 0 ]]
-then
-  echo "Failed to download Debian kernel arch config ${DebianConfigRootURL}/kernelarch-${KernelArch}/config"
-  rm ./kernelarch.config
-  exit 1
-fi
-
-ConfigFileName="config"
-if [[ $DEB_HOST_MULTIARCH == i386-linux-gnu ]]
-then
-  ConfigFileName="config.686-pae"
-fi
-
 echo > ./arch.config
-wget ${DebianConfigRootURL}/${DebianArch}/${ConfigFileName} -O - > ./arch.config
+wget ${DebianConfigRootURL}/${DebianArch}/config -O - > ./arch.config
 if [[ $? != 0 ]]
 then
   echo "Failed to download Debian arch config ${DebianConfigRootURL}/${DebianArch}/${ConfigFileName}"
@@ -143,7 +81,7 @@ fi
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
 function PackagePrepareBuild()
 {
-if [[ ! -e ./kernelarch.config || ! -e ./arch.config || ! -e ./mainconfig.config ]]
+if [[ ! -e ./arch.config || ! -e ./mainconfig.config ]]
 then
   echo "Downloaded Debian configs not found, check the download logs from PackageDownloadSource"
   exit 1
@@ -158,7 +96,6 @@ export LIBCLANG_PATH=/usr/lib/llvm-${LLVM_VERSION}/lib
 make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 
 ./scripts/kconfig/merge_config.sh -m .config ./mainconfig.config
-./scripts/kconfig/merge_config.sh -m .config ./kernelarch.config
 ./scripts/kconfig/merge_config.sh -m .config ./arch.config
 
 #Disable signing
