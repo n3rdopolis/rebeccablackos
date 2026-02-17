@@ -70,6 +70,8 @@ RecinitMain()
     exit 1
   fi
 
+  export RECINITPID=$$
+
   mkdir -p /run/recinit/
   mkdir -p /run/user/0
   chmod 700 /run/user/0
@@ -84,11 +86,11 @@ RecinitMain()
   export XDG_CONFIG_HOME=/etc/vtty
 
   #Ensure that /dev/pts is mounted
-  if ! mountpoint /dev/pts > /dev/null 2>&1
+  if [ ! -e /dev/pts/ptmx ]
   then
     unmountdevptsfs=1
     mkdir /dev/pts
-    mount -t devpts -o noexec,nosuid,gid=5,mode=600 /dev/pts
+    mount -t devpts -o noexec,nosuid,gid=5,mode=600 tmpfs /dev/pts
   else
     unmountdevptsfs=0
   fi
@@ -131,7 +133,7 @@ RecinitMain()
   #Make init command in /run/recinit/init file, 
   #/run/recinit/init will get executed when recinit ends
   #Users can replace it if they want recinit to start a different init command after working in recinit
-  if [ $$ -eq 1 ]
+  if [ $RECINITPID -eq 1 ]
   then
     echo "exec /sbin/init" > /run/recinit/init
     chmod +x /run/recinit/init
@@ -215,7 +217,7 @@ RecinitMain()
 
   cage -d -s -- \
   foot --config="$XDG_CONFIG_HOME"/footkiosk.conf --override=scrollback.lines=10000  -- \
-  sh -c "kanshi -c \"$XDG_CONFIG_HOME\"/kanshiconfig.conf >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; kill -9 \$(pidof cage)" > /dev/null 2>&1
+  sh -c "kanshi -c \"$XDG_CONFIG_HOME\"/kanshiconfig.conf >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" > /dev/null 2>&1
 
   if [ $udev_result -ne 0 ]
   then
@@ -250,7 +252,7 @@ RecinitMain()
   fi
 
   #If this is pid 1 start init upon exit
-  if [ $$ -eq 1 ]
+  if [ $RECINITPID -eq 1 ]
   then
     unset LC_ALL
     unset XDG_RUNTIME_DIR

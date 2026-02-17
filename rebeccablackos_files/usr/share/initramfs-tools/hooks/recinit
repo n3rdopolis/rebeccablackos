@@ -35,6 +35,7 @@ copy_exec "$(which foot)" /usr/bin/
 copy_exec "$(which id)" /usr/bin/
 copy_exec "$(which kanshi)" /usr/bin/
 copy_exec "$(which tput)" /usr/bin/
+copy_exec "$(which pkill)" /usr/bin/
 
 if [ -e "/usr/bin/recinit" ]
 then
