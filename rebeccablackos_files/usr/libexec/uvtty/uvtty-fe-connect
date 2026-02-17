@@ -84,7 +84,15 @@ function UvTTYFeConnectMain
     done
   fi
 
-  XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR/uvtty/$UvTTYName WAYLAND_DISPLAY=waylandserver kanshi -c /etc/vtty/kanshiconfig.conf &>/dev/null &
+  #Prefer the user's .config/vtty/kanshiconfig.conf if it exists
+  if [[ -e "$HOME/.config/vtty/kanshiconfig.conf" ]]
+  then
+    KANSHI_CONFIG_FILE="$HOME/.config/vtty/kanshiconfig.conf"
+  else
+    KANSHI_CONFIG_FILE="/etc/vtty/kanshiconfig.conf"
+  fi
+
+  XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR/uvtty/$UvTTYName WAYLAND_DISPLAY=waylandserver kanshi -c "$KANSHI_CONFIG_FILE" &>/dev/null &
 
   socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
   SOCATPID=$!
