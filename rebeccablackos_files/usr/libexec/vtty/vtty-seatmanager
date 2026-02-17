@@ -116,8 +116,6 @@ sub GetSeatFreeVttyInstance
         }
 
         eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${VttyInstanceName}.service", "replace")};
-        #If 2+ frontends are down, starting too many at a time gets tricky for logind.
-        sleep(3);
         $SkipSelectedSession=1;
       }
 
