@@ -89,7 +89,7 @@ function UvTTYFeConnectMain
   then
     KANSHI_CONFIG_FILE="$HOME/.config/uvtty/kanshiconfig.conf"
   else
-    KANSHI_CONFIG_FILE="/etc/uvtty/kanshiconfig.conf"
+    KANSHI_CONFIG_FILE="/etc/vtty/kanshiconfig.conf"
   fi
 
   XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR/uvtty/$UvTTYName WAYLAND_DISPLAY=waylandserver kanshi -c "$KANSHI_CONFIG_FILE" &> ~/KanshiLog$RANDOM &
