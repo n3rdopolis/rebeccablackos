@@ -30,6 +30,9 @@ then
   LIBX11_SHARE_DIR=/usr/share/X11
 fi
 
+mkdir -p "${DESTDIR}/etc"
+cp -a /etc/vconsole.conf "${DESTDIR}/etc"
+
 copy_exec "$(which cage)" /usr/bin/
 copy_exec "$(which foot)" /usr/bin/
 copy_exec "$(which id)" /usr/bin/
