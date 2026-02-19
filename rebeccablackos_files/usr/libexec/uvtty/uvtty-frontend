@@ -84,11 +84,11 @@ function UvTTYFrontendMain
     fi
 
     #Prefer the user's .config/vtty/footkiosk.conf if it exists
-    if [[ -e "$HOME/.config/vtty/footkiosk.conf" ]]
+    if [[ -e "$HOME/.config/uvtty/footkiosk.conf" ]]
     then
-      FOOT_CONFIG_FILE="$HOME/.config/vtty/footkiosk.conf"
+      FOOT_CONFIG_FILE="$HOME/.config/uvtty/footkiosk.conf"
     else
-      FOOT_CONFIG_FILE="/etc/vtty/footkiosk.conf"
+      FOOT_CONFIG_FILE="/etc/uvtty/footkiosk.conf"
     fi
 
     #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040

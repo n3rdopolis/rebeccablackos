@@ -85,11 +85,11 @@ function UvTTYFeConnectMain
   fi
 
   #Prefer the user's .config/vtty/kanshiconfig.conf if it exists
-  if [[ -e "$HOME/.config/vtty/kanshiconfig.conf" ]]
+  if [[ -e "$HOME/.config/uvtty/kanshiconfig.conf" ]]
   then
-    KANSHI_CONFIG_FILE="$HOME/.config/vtty/kanshiconfig.conf"
+    KANSHI_CONFIG_FILE="$HOME/.config/uvtty/kanshiconfig.conf"
   else
-    KANSHI_CONFIG_FILE="/etc/vtty/kanshiconfig.conf"
+    KANSHI_CONFIG_FILE="/etc/uvtty/kanshiconfig.conf"
   fi
 
   XDG_RUNTIME_DIR=$XDG_RUNTIME_DIR/uvtty/$UvTTYName WAYLAND_DISPLAY=waylandserver kanshi -c "$KANSHI_CONFIG_FILE" &> ~/KanshiLog$RANDOM &
