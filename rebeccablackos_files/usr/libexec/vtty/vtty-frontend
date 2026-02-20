@@ -207,7 +207,6 @@ function vTTYFrontendMain
   export WLR_NO_HARDWARE_CURSORS=1
   export WLR_LIBINPUT_NO_DEVICES=1
   export LIBGL_ALWAYS_SOFTWARE=1
-  export DBUS_SESSION_BUS_ADDRESS=/dev/null
   export XDG_CONFIG_HOME=/etc/vtty
 
   while ! IsSessionActive
