@@ -427,6 +427,7 @@ function vTTYLaunchStartAsUser
   VTTY_LAUNCH_CLASS=$XDG_SESSION_CLASS
   VTTY_LAUNCH_TYPE=$XDG_SESSION_TYPE
 
+  #reads stdin
   readarray -d $'\0' EnvironmentBlock
   export "${EnvironmentBlock[@]}"
 
