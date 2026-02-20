@@ -152,15 +152,47 @@ function vTTYFrontendMain
   fi
 
   #Get the keyboard layout from /etc/vconsole.conf
-  if [[ -e /etc/vconsole.conf ]]
-  then
-    source /etc/vconsole.conf
-    if [[ $(echo $KEYMAP | awk -F'-' '{print NF}') -gt 1 ]]
+  #Existing keymaps, options, variants, and models only have numbers, letters, hyphens, underscores and colons.
+  XKBLAYOUT=""
+  XKBMODEL=""
+  XKBVARIANT=""
+  XKBOPTIONS=""
+
+  while read -r LINE
+  do
+    Name=$(echo "$LINE" | awk -F '=' '{print $1}')
+    Value=$(echo "$LINE" | awk -F '=' '{print $2}')
+
+    export "$Name"="$Value"
+  done < <(cat /etc/vconsole.conf | sed 's/[^#=:a-zA-Z0-9_-]//g'| grep -vE '^$|#')
+
+  #Allow kernel command line options vconsole.xkblayout=, vconsole.xkbmodel=, vconsole.xkbvariant=, and vconsole.xkboptions= to take precidence
+  readarray -d " " KernelCommandLineOptions < /proc/cmdline
+  for KernelCommandLineOption in "${KernelCommandLineOptions[@]}"
+  do
+    if [[ $KernelCommandLineOption == vconsole.xkblayout=* ]]
     then
-      export XKB_DEFAULT_LAYOUT=$(echo $KEYMAP | cut -d "-" -f1)
-      export XKB_DEFAULT_VARIANT=$(echo $KEYMAP | cut -d "-" -f2-)
+      XKBLAYOUT=${KernelCommandLineOption/vconsole.xkblayout=/}
+
+    elif [[ $KernelCommandLineOption == vconsole.xkbmodel=* ]]
+    then
+      XKBMODEL=${KernelCommandLineOption/vconsole.xkbmodel=/}
+
+    elif [[ $KernelCommandLineOption == vconsole.xkbvariant=* ]]
+    then
+      XKBVARIANT=${KernelCommandLineOption/vconsole.xkbvariant=/}
+
+    elif [[ $KernelCommandLineOption == vconsole.xkboptions=* ]]
+    then
+      XKBOPTIONS=${KernelCommandLineOption/vconsole.xkboptions=/}
+
     fi
-  fi
+  done
+
+  export XKB_DEFAULT_LAYOUT=$XKBLAYOUT
+  export XKB_DEFAULT_MODEL=$XKBMODEL
+  export XKB_DEFAULT_VARIANT=$XKBVARIANT
+  export XKB_DEFAULT_OPTIONS=$XKBOPTIONS
 
   #Cage gets run in a different cgroup because of PAMName, which causes service stop events to not work
   #Stop the cage process when the script is exiting
