@@ -57,8 +57,8 @@ then
   systemctl enable upower.service
 
   #enable the virtual tty services.
-  systemctl enable vtty-frontend@.service
-  ln -s /usr/lib/systemd/system/vtty-frontend@.service /etc/systemd/system/autovt@.service
+  systemctl enable vtty-frontend-vt@.service
+  ln -s /usr/lib/systemd/system/vtty-frontend-vt@.service /etc/systemd/system/autovt@.service
 
   #Enable the auto simpledrm fallback detector
   systemctl enable auto_simpledrm_fallback.service

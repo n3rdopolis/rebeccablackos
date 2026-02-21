@@ -260,7 +260,7 @@ function SessionCheck
     CardsInUse=$?
 
     #Exit if the child process already quit, and the vtty-frontend was already started
-    if systemctl is-active vtty-frontend-seat@"${vTTYInstance}".service &>/dev/null
+    if systemctl is-active vtty-frontend@"${vTTYInstance}".service &>/dev/null
     then
       return
     fi
@@ -269,7 +269,7 @@ function SessionCheck
     if [[ $CardsInUse == 0 ]]
     then
       echo "vtty-launch: There are no processes or no longer any processes that have any display devices open. It is likely that a display server was not run, or the display server quit. Will now start the vtty-frontend."
-      systemctl start vtty-frontend-seat@"${vTTYInstance}".service
+      systemctl start vtty-frontend@"${vTTYInstance}".service
     fi
   done
 }
@@ -383,7 +383,7 @@ function vttyLaunchPrepareAsRoot
   touch /run/vtty/${vTTYInstance}/vttylaunchinhibit
   trap 'rm /run/vtty/${vTTYInstance}/vttylaunchinhibit; systemctl stop vtty-launch@"${vTTYInstance}".service' INT
 
-  systemctl stop vtty-frontend-seat@"${vTTYInstance}".service
+  systemctl stop vtty-frontend@"${vTTYInstance}".service
   SessionCheck "$vTTYInstance" "$vTTYSeat" &
 
   systemd-run --unit=vtty-launch@"${vTTYInstance}" \
@@ -405,8 +405,8 @@ function vttyLaunchPrepareAsRoot
     fg 1 &> /dev/null
   fi
 
-  systemctl reset-failed vtty-frontend-seat@"${vTTYInstance}".service
-  systemctl start vtty-frontend-seat@"${vTTYInstance}".service
+  systemctl reset-failed vtty-frontend@"${vTTYInstance}".service
+  systemctl start vtty-frontend@"${vTTYInstance}".service
   rm /run/vtty/${vTTYInstance}/vttylaunchinhibit
 
   exit $CommandResult

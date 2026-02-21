@@ -1,0 +1,21 @@
+[Unit]
+Description=Session proxy runner for vTTY %i
+Before=vtty-frontend-vt@.service
+
+ConditionPathExists=/dev/tty0
+ConditionPathExists=/dev/%i
+
+[Service]
+Restart=on-failure
+RestartSec=0
+
+ExecStart=/usr/libexec/vtty/vtty-backend %i
+Type=notify
+
+IgnoreSIGPIPE=false
+SendSIGHUP=true
+KillMode=control-group
+
+[Install]
+WantedBy=getty.target
+DefaultInstance=tty1

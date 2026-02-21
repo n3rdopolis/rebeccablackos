@@ -52,7 +52,7 @@ sub GetSessionTTYs
   return @SessionTTYs;
 }
 
-#Get the list of vtty-frontend-seat@{THE_SEAT}@vtty*.service
+#Get the list of vtty-frontend@{THE_SEAT}@vtty*.service
 #Takes the seat as the argument, returns an array, they should be numbers
 sub GetSeatVttyBackends
 {
@@ -74,10 +74,10 @@ sub GetSeatVttyBackends
     my $UnitJobType=$Unit->[8];
     my $UnitJobPath=$Unit->[9];
 
-    if ($UnitName =~ /^vtty-frontend-seat\@${SeatName}\@vtty/ && $UnitName =~ /\.service$/)
+    if ($UnitName =~ /^vtty-frontend\@${SeatName}\@vtty/ && $UnitName =~ /\.service$/)
     {
-      #Remove the vtty-frontend-seat@vtty@   and the .service   leaving just the number
-      $UnitName = $UnitName =~ s/^vtty-frontend-seat\@${SeatName}\@vtty//r;
+      #Remove the vtty-frontend@vtty@   and the .service   leaving just the number
+      $UnitName = $UnitName =~ s/^vtty-frontend\@${SeatName}\@vtty//r;
       $UnitName = $UnitName =~ s/\.service$//r;
 
       push(@VttyBackends, $UnitName);
@@ -104,10 +104,10 @@ sub GetSeatFreeVttyInstance
     my $VttyInstanceName="${SeatName}\@vtty${SessionIterator}";
     my $VttyBackendUsed=0;
 
-    if (GetUnitMainPID("vtty-backend-seat\@${VttyInstanceName}.service") > 0)
+    if (GetUnitMainPID("vtty-backend\@${VttyInstanceName}.service") > 0)
     {
       #If the backend is running, but the frontend is not
-      if (GetUnitMainPID("vtty-frontend-seat\@${VttyInstanceName}.service") == 0)
+      if (GetUnitMainPID("vtty-frontend\@${VttyInstanceName}.service") == 0)
       {
         #Skip starting the frontend if vtty-launch is inhibiting it
         if (-e "/run/vtty/${VttyInstanceName}/vttylaunchinhibit")
@@ -115,7 +115,7 @@ sub GetSeatFreeVttyInstance
           next;
         }
 
-        eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${VttyInstanceName}.service", "replace")};
+        eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend\@${VttyInstanceName}.service", "replace")};
         $SkipSelectedSession=1;
       }
 
@@ -245,11 +245,11 @@ sub StartOrSwitchToVttyFrontend
     return;
   }
 
-  my $VttyUnitMainPID=GetUnitMainPID("vtty-frontend-seat\@${SeatName}\@vtty${FreeVttyInstance}.service");
+  my $VttyUnitMainPID=GetUnitMainPID("vtty-frontend\@${SeatName}\@vtty${FreeVttyInstance}.service");
 
   if ($VttyUnitMainPID == 0)
   {
-    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty${FreeVttyInstance}.service", "replace")};
+    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend\@${SeatName}\@vtty${FreeVttyInstance}.service", "replace")};
     return;
   }
 
@@ -358,7 +358,7 @@ sub HandleSeatNew
   }
 
   #Start the first vtty frontend for the new seat
-  eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatNewSeatName}\@vtty1.service", "replace")};
+  eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend\@${SeatNewSeatName}\@vtty1.service", "replace")};
 
   return;
 }
@@ -380,7 +380,7 @@ sub HandleSeatRemoved
   #would result in terminated sessions otherwise
   for (my $InstanceIterator=1; $InstanceIterator <= $SeatManager{MaxSessionCount}; $InstanceIterator++)
   {
-    eval{$SeatManager{Systemd1ManagerCallObject}->StopUnit("vtty-frontend-seat\@${SeatRemovedSeatName}\@vtty${InstanceIterator}.service", "replace")};
+    eval{$SeatManager{Systemd1ManagerCallObject}->StopUnit("vtty-frontend\@${SeatRemovedSeatName}\@vtty${InstanceIterator}.service", "replace")};
   }
 
   return;
@@ -442,7 +442,7 @@ sub main
                     MaxSessionCount => $MaxSessionCount,
                  );
 
-  #Start vtty-frontend-seat@.service on all running seats.
+  #Start vtty-frontend@.service on all running seats.
   my @Seats=@{$SeatManager{Login1ManagerCallObject}->ListSeats()};
   foreach my $Seat ( @Seats )
   {
@@ -458,7 +458,7 @@ sub main
       next;
     }
 
-    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend-seat\@${SeatName}\@vtty1.service", "replace")};
+    eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend\@${SeatName}\@vtty1.service", "replace")};
   }
 
   $SeatManager{Login1ManagerCallObject}->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKeySafe);

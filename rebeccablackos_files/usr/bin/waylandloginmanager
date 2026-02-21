@@ -1392,8 +1392,8 @@ function ReadRegister
         #If RESCUESEAT gets sent once, or twice within a timeframe after 10 seconds, switch back to the loginmanagerdisplay
         if [[ $SeatRescueTimeDelay -le 10 && $SeatRescueTimeDelay -gt 1 && ($SeatRescueTerminalValid == 1) ]]
         then
-          WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend-seat@${RescueSeat}.service service"
-          systemctl restart vtty-frontend-seat@${RescueSeat}.service &> /dev/null
+          WriteToLog "Sequence pressed twice. Restarting the vTTY vtty-frontend@${RescueSeat}.service service"
+          systemctl restart vtty-frontend@${RescueSeat}.service &> /dev/null
           SeatRescueTimestamps[$ReturnSeatIndex]=-1
         elif [[ $SeatRescueTimeDelay -le 1 ]]
         then
