@@ -58,7 +58,7 @@ function PackageDownloadSource
 function PackagePrepareBuild()
 {
 #Set the default panel
-sed -i 's/gridUnit \* 2.5/gridUnit \* 1.75/' layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
+sed -i 's/gridUnit \* 2.5/gridUnit \* 2.0/' layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
 echo "panel.floating = false" >> layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
 echo "panel.floatingApplets = false" >> layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
 sed -i 's/org.kde.plasma.icontasks/org.kde.plasma.taskmanager/g' layout-templates/org.kde.plasma.desktop.defaultPanel/contents/layout.js
