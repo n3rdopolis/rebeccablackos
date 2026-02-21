@@ -108,11 +108,15 @@ function UvTTYFrontendMain
 
     while read -r LINE
     do
+      LINE=$(echo $LINE | sed 's/[^,#=:a-zA-Z0-9_-]//g' | awk -F '#' '{print $1}')
       Name=$(echo "$LINE" | awk -F '=' '{print $1}')
       Value=$(echo "$LINE" | awk -F '=' '{print $2}')
 
-      export "$Name"="$Value"
-    done < <(cat "$VCONSOLE_CONFIG_FILE" | sed 's/[^#=:a-zA-Z0-9_-]//g'| grep -vE '^$|#')
+      if [[ ! -z $Value ]]
+      then
+        export "$Name"="$Value"
+      fi
+    done < "$VCONSOLE_CONFIG_FILE"
 
     #Allow kernel command line options vconsole.xkblayout=, vconsole.xkbmodel=, vconsole.xkbvariant=, and vconsole.xkboptions= to take precidence
     readarray -d " " KernelCommandLineOptions < /proc/cmdline
