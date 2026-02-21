@@ -85,6 +85,55 @@ RecinitMain()
   export WLR_RENDERER=pixman
   export XDG_CONFIG_HOME=/etc/vtty
 
+  #Get the keyboard layout from /etc/vconsole.conf
+  #Existing keymaps, options, variants, and models only have numbers, letters, hyphens, underscores and colons.
+  XKBLAYOUT=""
+  XKBMODEL=""
+  XKBVARIANT=""
+  XKBOPTIONS=""
+
+  while read -r LINE
+  do
+    LINE=$(echo $LINE | sed 's/[^,#=:a-zA-Z0-9_-]//g' | awk -F '#' '{print $1}')
+    Name=$(echo "$LINE" | awk -F '=' '{print $1}')
+    Value=$(echo "$LINE" | awk -F '=' '{print $2}')
+
+    if [ ! -z $Value ]
+    then
+      export "$Name"="$Value"
+    fi
+  done < /etc/vconsole.conf
+
+  #Allow kernel command line options vconsole.xkblayout=, vconsole.xkbmodel=, vconsole.xkbvariant=, and vconsole.xkboptions= to take precidence
+  BOOT_XKBLAYOUT=$(grep -o 'vconsole.xkblayout=[a-zA-Z0-9,:_]*' /proc/cmdline | sed 's/vconsole.xkblayout=//g')
+  if [ ! -z $BOOT_XKBLAYOUT ]
+  then
+    XKBLAYOUT=$BOOT_XKBLAYOUT
+  fi
+
+  BOOT_XKBMODEL=$(grep -o 'vconsole.xkbmodel=[a-zA-Z0-9,:_]*' /proc/cmdline | sed 's/vconsole.xkbmodel=//g')
+  if [ ! -z $BOOT_XKBMODEL ]
+  then
+    XKBMODEL=$BOOT_XKBMODEL
+  fi
+
+  BOOT_XKBVARIANT=$(grep -o 'vconsole.xkbvariant=[a-zA-Z0-9,:_]*' /proc/cmdline | sed 's/vconsole.xkbvariant=//g')
+  if [ ! -z $BOOT_XKBVARIANT ]
+  then
+    XKBVARIANT=$BOOT_XKBVARIANT
+  fi
+
+  BOOT_XKBOPTIONS=$(grep -o 'vconsole.xkboptions=[a-zA-Z0-9,:_]*' /proc/cmdline | sed 's/vconsole.xkboptions=//g')
+  if [ ! -z $BOOT_XKBOPTIONS ]
+  then
+    XKBOPTIONS=$BOOT_XKBOPTIONS
+  fi
+
+  export XKB_DEFAULT_LAYOUT=$XKBLAYOUT
+  export XKB_DEFAULT_MODEL=$XKBMODEL
+  export XKB_DEFAULT_VARIANT=$XKBVARIANT
+  export XKB_DEFAULT_OPTIONS=$XKBOPTIONS
+
   #Ensure that /dev/pts is mounted
   if [ ! -e /dev/pts/ptmx ]
   then
