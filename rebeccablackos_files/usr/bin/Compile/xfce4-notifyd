@@ -67,7 +67,7 @@ meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTAL
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-ninja -v -C build
+ninja -v -j 8 -C build
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
