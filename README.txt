@@ -70,6 +70,8 @@ How to use Wayland:
 
 BOOT OPTIONS:
 -------------
+
+
       * The WaylandLoginManager responds when particular strings are passed to the kernel command line. These options are made available by the live CD boot
       menu, or on an installed system by running the command rbos-failedboot as root.
 
@@ -89,6 +91,12 @@ BOOT OPTIONS:
            ** wlmdebug :                Forces sessions marked as debug-only to be selectable as runnable sessions, and WaylandLoginManager to log to /dev/kmsg.
 
 
+      * vTTY's, UvTTYs, and recinit read these kernel command line paramters:
+
+           ** vconsole.xkblayout : Sets the global keymap
+           ** vconsole.xkbmodel : Sets the global keyboard model
+           ** vconsole.xkbvariant : Sets the global keyboard variant
+           ** vconsole.xkboptions : Sets any global keyboard options
 
        * These relevant options are also handled, (but not by the WaylandLoginManager itself)
            ** init=/bin/recinit :       Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.
