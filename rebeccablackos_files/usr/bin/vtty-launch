@@ -279,7 +279,7 @@ function SessionCheck
 #This part is run by the user invoking the script.
 #It determines if it can be run, or informs the user how to use it, sets some variables, exports the environment
 #then elevates itself with pkexec
-function vttyLaunchPrepareAsUser
+function vTTYLaunchPrepareAsUser
 {
   if [[ $UID == 0 ]]
   then
@@ -347,7 +347,7 @@ function vttyLaunchPrepareAsUser
 
 #This part is run as root by pkexec.
 #It finds the seat of the vTTY frontend, and then starts itself with systemd-run as the user, on the seat
-function vttyLaunchPrepareAsRoot
+function vTTYLaunchPrepareAsRoot
 {
   #The script is called by itself through pkexec, get the seat, start through systemd-run
   if [[ $UID != 0 ]]
@@ -455,12 +455,12 @@ function vTTYLaunchMain
 
   if [[ $ScriptCalledBySelf == 0 && $ScriptCalledByPid1 != 1 ]]
   then
-    vttyLaunchPrepareAsUser "$@"
+    vTTYLaunchPrepareAsUser "$@"
   elif [[ $ScriptCalledByPid1 == 1 ]]
   then
     vTTYLaunchStartAsUser "$@"
   else
-    vttyLaunchPrepareAsRoot "$@"
+    vTTYLaunchPrepareAsRoot "$@"
   fi
 
   exit
