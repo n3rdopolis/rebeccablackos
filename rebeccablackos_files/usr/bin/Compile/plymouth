@@ -67,7 +67,7 @@ meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTAL
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-ninja -v -C build 
+meson compile -C build 
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. This is the routine to install the source. The PWD does not get inherited from PackageCompileSource, so if needed, the PWD needs to be changed here too.
@@ -76,7 +76,7 @@ function PackageInstallSource()
 mkdir -p $INSTALLDIR/share/plymouth/
 #cp /usr/share/RBOS_PATCHES/plymouth/boot_logo.png $INSTALLDIR/share/plymouth/boot_logo.png
 touch $INSTALLDIR/share/plymouth/boot_logo.png
-ninja -C build install
+meson install -C build
 cp /usr/share/wallpapers/RBOS_Login/contents/images/1920x1200.png $INSTALLDIR/share/plymouth/themes/spinner/background.png
 sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 #Red (0xrrggbb, 0xrrggbbaa) needs to be greater than zero to set alpha, as Plymouth shifts it, treating it like 0xrrggbb
