@@ -45,33 +45,31 @@ export BUILD_QT_MAJOR_VERSION=6
 #export BUILD_CORE_FORCE_GCC_VERSION=7
 export DESTDIR=/
 export BUILD_CPU_COUNT=$(nproc)
-export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
-export CFLAGS="-Os -Wno-error" 
-export CXXFLAGS="-Os -Wno-error"
-export TARGETBITSIZE=$(getconf LONG_BIT)
-export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
-export MAKEFLAGS="-j $(( $BUILD_CPU_COUNT ))"
-export LD_LIBRARY_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH:$INSTALLDIR/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
-export PATH="$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
-export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/:$(pkg-config --variable pc_path pkg-config 2>/dev/null)
-export CPATH=$INSTALLDIR/include
-export LIBRARY_PATH=$INSTALLDIR/lib
-export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
-export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
-export ACLOCAL_PATH=$INSTALLDIR/share/aclocal:/usr/share/aclocal
-export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
-export LIRI_LIBRARY_PREFIX=$INSTALLDIR
-export LIRI_INCLUDE_PREFIX=$INSTALLDIR
-export PYTHONPATH=$INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/:$INSTALLDIR/lib/python3/dist-packages/
-export GI_SCANNER_DISABLE_CACHE=1
-export GI_TYPELIB_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
-export CARGO_INSTALL_ROOT=$INSTALLDIR
 
-export CARGO_PROFILE_RELEASE_DEBUG=false
+export ACLOCAL_FLAGS="-I /usr/share/aclocal -I $INSTALLDIR/share/aclocal"
+export ACLOCAL_PATH=$INSTALLDIR/share/aclocal:/usr/share/aclocal
+export CARGO_INSTALL_ROOT=$INSTALLDIR
 export CARGO_PROFILE_RELEASE_CODEGEN_UNITS=1
+export CARGO_PROFILE_RELEASE_DEBUG=false
 export CARGO_PROFILE_RELEASE_INCREMENTAL=false
 export CARGO_PROFILE_RELEASE_LTO=true
 export CARGO_PROFILE_RELEASE_OPT_LEVEL=z
+export CFLAGS="-Os -Wno-error" 
+export CMAKE_PREFIX_PATH=$INSTALLDIR:$CMAKE_PREFIX_PATH
+export CPATH=$INSTALLDIR/include
+export CXXFLAGS="-Os -Wno-error"
+export DEB_HOST_MULTIARCH=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+export GI_SCANNER_DISABLE_CACHE=1
+export GI_TYPELIB_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/$DEB_HOST_MULTIARCH/girepository-1.0/:/usr/lib/girepository-1.0/
+export LD_LIBRARY_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH:$INSTALLDIR/lib:/usr/local/lib/$DEB_HOST_MULTIARCH:/usr/lib/$DEB_HOST_MULTIARCH:/usr/local/lib:/usr/lib
+export LIBRARY_PATH=$INSTALLDIR/lib
+export MAKEFLAGS="-j $(( $BUILD_CPU_COUNT ))"
+export PATH="$INSTALLDIR/sbin:$INSTALLDIR/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/sbin:/bin:/usr/games"
+export PKG_CONFIG_PATH=$INSTALLDIR/lib/$DEB_HOST_MULTIARCH/pkgconfig:$INSTALLDIR/lib/pkgconfig/:$INSTALLDIR/share/pkgconfig/:$(pkg-config --variable pc_path pkg-config 2>/dev/null)
+export PYTHONPATH=$INSTALLDIR/lib/$(readlink /usr/bin/python3)/site-packages/:$INSTALLDIR/lib/python3/dist-packages/
+export RUSTFLAGS="-Ccodegen-units=$(( BUILD_CPU_COUNT ))"
+export TARGETBITSIZE=$(getconf LONG_BIT)
+export XDG_DATA_DIRS=$INSTALLDIR/share:/usr/share
 
 #Array format, pkgconfig_file.pc=variablename=newvalue
 BUILD_CORE_PKGCONIFG_OVERRIDE_VARS=(
