@@ -1,5 +1,4 @@
 [Unit]
-#Single user vtty for non-vt text mode processes that configure the system, such as console-conf
 Description=Session proxy runner for vTTY for instance %i
 Before=vtty-frontend@.service
 
