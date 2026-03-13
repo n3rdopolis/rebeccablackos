@@ -83,7 +83,7 @@ RecinitMain()
   export WLR_LIBINPUT_NO_DEVICES=1
   export WLR_NO_HARDWARE_CURSORS=1
   export WLR_RENDERER=pixman
-  export XDG_CONFIG_HOME=/etc/vtty
+  export XDG_CONFIG_HOME="/etc/vtty"
 
   #Get the keyboard layout from /etc/vconsole.conf
   #Existing keymaps, options, variants, and models only have numbers, letters, hyphens, underscores and colons.
@@ -265,8 +265,8 @@ RecinitMain()
   export WLR_DRM_DEVICES=$(GetFirstSeatCard)
 
   cage -d -s -- \
-  foot --config="$XDG_CONFIG_HOME"/footkiosk.conf --override=scrollback.lines=10000  -- \
-  sh -c "kanshi -c \"$XDG_CONFIG_HOME\"/kanshiconfig.conf >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" > /dev/null 2>&1
+  foot --config="$XDG_CONFIG_HOME/footkiosk.conf" --override=scrollback.lines=10000  -- \
+  sh -c "kanshi -c \"$XDG_CONFIG_HOME/kanshiconfig.conf\" >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" > /dev/null 2>&1
 
   if [ $udev_result -ne 0 ]
   then
