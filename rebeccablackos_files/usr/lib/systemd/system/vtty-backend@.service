@@ -6,7 +6,7 @@ Before=vtty-frontend@.service
 Restart=on-failure
 RestartSec=0
 
-ExecStart=/usr/libexec/vtty/vtty-backend %i
+ExecStart="/usr/libexec/vtty/vtty-backend" "%i"
 Type=notify
 
 IgnoreSIGPIPE=false

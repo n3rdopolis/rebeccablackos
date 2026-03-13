@@ -12,7 +12,7 @@ Environment=RECINIT_SYSTEMD_TYPE=emergency
 Environment=HOME=/root
 WorkingDirectory=-/root
 ExecStartPre=-/bin/plymouth --wait quit
-ExecStart=/usr/bin/recinit
+ExecStart="/usr/bin/recinit"
 Type=idle
 KillMode=process
 IgnoreSIGPIPE=no

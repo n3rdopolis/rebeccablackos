@@ -4,7 +4,7 @@ ConditionPathExists=!/dev/tty0
 
 [Service]
 Type=simple
-ExecStart=/usr/libexec/vtty/vtty-seatmanager
+ExecStart="/usr/libexec/vtty/vtty-seatmanager"
 
 [Install]
 Alias=display-manager.service
