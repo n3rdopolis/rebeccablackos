@@ -57,7 +57,7 @@ function UvTTYFrontendMain
 {
   set -m
 
-  UvTTYName=$1
+  export UvTTYName="$1"
   if [[ -z $UvTTYName ]]
   then
     echo "Incorrect arguments passed"
@@ -151,7 +151,7 @@ function UvTTYFrontendMain
 
     cage -d -s -- \
     foot --config="$FOOT_CONFIG_FILE" -- \
-    /usr/libexec/uvtty/uvtty-fe-connect $UvTTYName &
+    "/usr/libexec/uvtty/uvtty-fe-connect" &
     CAGEPID=$!
 
     mkdir -p "$XDG_RUNTIME_DIR/uvtty/$UvTTYName"
