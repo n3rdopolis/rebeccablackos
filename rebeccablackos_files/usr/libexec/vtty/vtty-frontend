@@ -85,7 +85,7 @@ function vTTYFrontendMain
     exit 1
   fi
 
-  EmulatedTTY=$1
+  export vTTYName="$1"
 
   which socat &> /dev/null
   if [[ $? != 0 ]]
@@ -116,7 +116,7 @@ function vTTYFrontendMain
   if [[ -e /dev/tty0 ]]
   then
     read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
-    if [[ $EmulatedTTY =~ tty* && $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
+    if [[ $vTTYName =~ tty* && $KernelCommandLine =~ ([[:space:]]|^)"vttydisable"([[:space:]]|$) ]]
     then
       echo "vttydisable specified on the command line. Falling back to default getty"
       exit 1
@@ -139,16 +139,16 @@ function vTTYFrontendMain
     #The autovt for tty1 starts automatically, and tty1 doesn't work with autovt
     #Only start once the actual TTY is active, as otherwise it can conflict with a display server
     read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
-    if [[ $ActiveTTY != "$EmulatedTTY" ]]
+    if [[ $ActiveTTY != "$vTTYName" ]]
     then
-      while [[ $ActiveTTY != "$EmulatedTTY" ]]
+      while [[ $ActiveTTY != "$vTTYName" ]]
       do
         read -r -t 4 -n5 ActiveTTY < /sys/class/tty/tty0/active
         $SLEEPCMD 1
       done
     fi
 
-    ResetTTYMode $EmulatedTTY
+    ResetTTYMode "$vTTYName"
   fi
 
   #Get the keyboard layout from /etc/vconsole.conf
@@ -220,7 +220,7 @@ function vTTYFrontendMain
 
   cage -d -s -- \
   foot --config=$XDG_CONFIG_HOME/footkiosk.conf -- \
-  /usr/libexec/vtty/vtty-fe-connect $EmulatedTTY &
+  "/usr/libexec/vtty/vtty-fe-connect" &
   CAGEPID=$!
   wait $CAGEPID
 

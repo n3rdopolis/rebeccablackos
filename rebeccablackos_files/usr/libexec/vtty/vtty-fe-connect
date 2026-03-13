@@ -20,10 +20,10 @@
 
 function PtyResizeEvent
 {
-  if [[ ! -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
+  if [[ ! -e "/run/vtty/$vTTYName/ptycommandproxy" ]]
   then
     Retries=0
-    while [[ ! -e /run/vtty/$EmulatedTTY/ptycommandproxy ]]
+    while [[ ! -e "/run/vtty/$vTTYName/ptycommandproxy" ]]
     do
       $SLEEPCMD 1
       ((Retries++))
@@ -38,12 +38,17 @@ function PtyResizeEvent
   $SLEEPCMD .3
   ClientPTYSize=($(stty size))
 
-  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > /run/vtty/$EmulatedTTY/ptycommandproxy
+  echo "s ${ClientPTYSize[0]} ${ClientPTYSize[1]}" > "/run/vtty/$vTTYName/ptycommandproxy"
 }
 
 function vTTYFeConnectMain
 {
-  EmulatedTTY=$1
+  if [[ -z $vTTYName ]]
+  then
+    echo "vTTYName variable not set."
+    exit 1
+  fi
+
   PTYPath=$(tty)
 
   #Use bash builtin sleep if availible
@@ -55,15 +60,15 @@ function vTTYFeConnectMain
     SLEEPCMD="/bin/sleep"
   fi
 
-  if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
+  if [[ -e "/run/vtty/$vTTYName/waylandserver" ]]
   then
-    rm /run/vtty/$EmulatedTTY/waylandserver
+    rm "/run/vtty/$vTTYName/waylandserver"
   fi
-  ln -s $XDG_RUNTIME_DIR/$WAYLAND_DISPLAY /run/vtty/$EmulatedTTY/waylandserver
+  ln -s "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "/run/vtty/$vTTYName/waylandserver"
 
-  kanshi -c "$XDG_CONFIG_HOME"/kanshiconfig.conf &>/dev/null &
+  kanshi -c "$XDG_CONFIG_HOME/kanshiconfig.conf" &>/dev/null &
 
-  socat file:$PTYPath,raw,echo=0 unix-connect:/run/vtty/$EmulatedTTY/socatproxy &
+  socat file:"$PTYPath",raw,echo=0 unix-connect:"/run/vtty/$vTTYName/socatproxy" &
 
   #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
   trap PtyResizeEvent WINCH

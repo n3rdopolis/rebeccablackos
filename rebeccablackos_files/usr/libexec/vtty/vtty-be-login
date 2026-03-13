@@ -21,20 +21,20 @@
 function DoLoginPrompt
 {
   export TERM=xterm-256color
-  tput reset > /dev/pts/$PTYNumber
-  tput clear > /dev/pts/$PTYNumber
+  tput reset > "/dev/pts/$PTYNumber"
+  tput clear > "/dev/pts/$PTYNumber"
 
   unset NOTIFY_SOCKET
   unset INVOCATION_ID
   unset JOURNAL_STREAM
-  export VTTY=$EmulatedTTY
-  echo -n "[${VTTY}] " > /dev/pts/$PTYNumber
+  export VTTY=$vTTYName
+  echo -n "[${VTTY}] " > "/dev/pts/$PTYNumber"
 
   #Clear the clipboard and the primary selection
-  if [[ -e /run/vtty/$EmulatedTTY/waylandserver ]]
+  if [[ -e "/run/vtty/$vTTYName/waylandserver" ]]
   then
-    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -c &> /dev/null
-    WAYLAND_DISPLAY=/run/vtty/$EmulatedTTY/waylandserver wl-copy -pc &> /dev/null
+    WAYLAND_DISPLAY="/run/vtty/$vTTYName/waylandserver" wl-copy -c &> /dev/null
+    WAYLAND_DISPLAY="/run/vtty/$vTTYName/waylandserver" wl-copy -pc &> /dev/null
   fi
 
   #vtty-login-program could be a symlink provided by another package, such as console-conf
@@ -49,7 +49,11 @@ function DoLoginPrompt
 
 function vTTYBeLoginMain
 {
-  EmulatedTTY=$1
+  if [[ -z $vTTYName ]]
+  then
+    echo "vTTYName variable not set."
+    exit 1
+  fi
 
   #Use bash builtin sleep if availible
   if [[ -f /usr/lib/bash/sleep ]]
@@ -70,18 +74,18 @@ function vTTYBeLoginMain
   unset IFS
   PTYNumber=${PTYPathArray[-1]}
 
-  if [[ -e /run/vtty/$EmulatedTTY/loginpty ]]
+  if [[ -e "/run/vtty/$vTTYName/loginpty" ]]
   then
-    rm /run/vtty/$EmulatedTTY/loginpty
+    rm "/run/vtty/$vTTYName/loginpty"
   fi
-  ln -s $PTYPath /run/vtty/$EmulatedTTY/loginpty
+  ln -s "$PTYPath" "/run/vtty/$vTTYName/loginpty"
 
   trap 'DoLoginPrompt' 2
 
   while [ 1 ]
   do
     DoLoginPrompt
-    if [[ ! -e $PTYPath ]]
+    if [[ ! -e "$PTYPath" ]]
     then
       exit 1
     fi
