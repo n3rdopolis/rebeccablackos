@@ -86,7 +86,7 @@ sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscree
 sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/dynamicKeyboardLayoutMenu.py
 sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/inputManager.py
 sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/settingsManager.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' lsrc/fenrirscreenreader/utils/fenrir-config.py
+sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/utils/fenrir-config.py
 
 
 python3 ./setup.py build
