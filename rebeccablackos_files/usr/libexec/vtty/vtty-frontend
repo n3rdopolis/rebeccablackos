@@ -218,10 +218,30 @@ function vTTYFrontendMain
     $SLEEPCMD 3
   done
 
-  cage -d -s -- \
-  foot --config=$XDG_CONFIG_HOME/footkiosk.conf -- \
-  "/usr/libexec/vtty/vtty-fe-connect" &
+  vTTYAccessibleMode=0
+  if [[ -e "/etc/vtty/accessiblemode" ]]
+  then
+    vTTYAccessibleMode=1
+  fi
+  read -r -n 16385 -d $'\r' KernelCommandLine </proc/cmdline
+  if [[ $KernelCommandLine =~ ([[:space:]]|^)"vttyaccessible"([[:space:]]|$) ]]
+  then
+    vTTYAccessibleMode=1
+  fi
+
+
+  if [[ $vTTYAccessibleMode == 1 ]]
+  then
+    cage -d -s -- \
+    foot --config="$XDG_CONFIG_HOME/footkiosk.conf" -- \
+    fenrir -e -o general#shell="/usr/libexec/vtty/vtty-fe-connect" &
+  else
+    cage -d -s -- \
+    foot --config="$XDG_CONFIG_HOME/footkiosk.conf" -- \
+    "/usr/libexec/vtty/vtty-fe-connect" &
+  fi
   CAGEPID=$!
+
   wait $CAGEPID
 
   ReturnCode=$?
