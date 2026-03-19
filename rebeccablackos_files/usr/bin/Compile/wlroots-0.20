@@ -29,13 +29,13 @@ SOURCEURL=https://gitlab.freedesktop.org/wlroots/wlroots.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes. ARCHIVE doesn't have revisions
-SOURCEREVISION=git:defaultbranch
+SOURCEREVISION=0.20
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
 
 #This variable is not manditory, /usr/bin/build_core sets it by default as 0, so that when it's set to create deb files, it only needs to build them once. 
-REBUILDNEWREVISION=1
+REBUILDNEWREVISION=0
 
 #Specify any custom revisions for git submodules in the format shown below
 # SUBMODULEREVISIONS=(examplesubmodule master 
