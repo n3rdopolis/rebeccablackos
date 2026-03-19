@@ -698,21 +698,20 @@ function DownloadARCHIVE()
 #This is exported, and run in the non-root generated packagedownloadscript script
 function DownloadTOMLData()
 {
+  mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
 
   #Handle Cargo files for any potential rust programs
-  TOMLFilesHandled=0
   while read -r CARGOFILE
   do
-    TOMLFilesHandled=1
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
     /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
+
+    #Handle vendoring
+    CARGOFILEDIR=$(dirname "$CARGOFILE")
+    mkdir -p "$CARGOFILEDIR/.cargo"
+    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --manifest-path "$CARGOFILE" /"$SOURCEDIR"/buildhome/cargocache/vendor >> "$CARGOFILEDIR/.cargo/config.toml"
   done < <(find | grep /Cargo.toml$)
-  if [[ $TOMLFilesHandled == 1 ]]
-  then
-    mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
-    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
-  fi
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
