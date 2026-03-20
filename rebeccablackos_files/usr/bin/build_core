@@ -332,13 +332,13 @@ function CleanupGIT()
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git reset --hard
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git gc --auto
   fi
-  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git clean -xffd
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" submodule foreach --recursive git clean -xffde /subprojects
   if [[ $1 != 1 ]]
   then
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" reset --hard
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" gc --auto
   fi
-  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" clean -xffd
+  $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" clean -xffde /subprojects
   $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME" gc --auto
 }
 
@@ -698,20 +698,31 @@ function DownloadARCHIVE()
 #This is exported, and run in the non-root generated packagedownloadscript script
 function DownloadTOMLData()
 {
-  mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
+  LASTCARGOFILEDIR=""
+  TOMLFilesHandled=0
 
   #Handle Cargo files for any potential rust programs
   while read -r CARGOFILE
   do
+    TOMLFilesHandled=1
+    CARGOFILEDIR=$(dirname "$CARGOFILE")
+    if [[ "$CARGOFILEDIR" =~ "$LASTCARGOFILEDIR" && $LASTCARGOFILEDIR != "" ]]
+    then
+      continue
+    fi
+
+    LASTCARGOFILEDIR=$CARGOFILEDIR
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
     /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
-
-    #Handle vendoring
-    CARGOFILEDIR=$(dirname "$CARGOFILE")
-    mkdir -p "$CARGOFILEDIR/.cargo"
-    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --manifest-path "$CARGOFILE" /"$SOURCEDIR"/buildhome/cargocache/vendor >> "$CARGOFILEDIR/.cargo/config.toml"
   done < <(find | grep /Cargo.toml$)
+
+  if [[ $TOMLFilesHandled == 1 ]]
+  then
+    #Handle vendoring
+    mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
+    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor /"$SOURCEDIR"/buildhome/cargocache/vendor >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+  fi
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
@@ -927,6 +938,8 @@ function DownloadSource()
     if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
     then
       meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
+      meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git clean -xffd
+      meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME"
     fi
 
     DownloadTOMLData
