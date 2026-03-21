@@ -698,30 +698,34 @@ function DownloadARCHIVE()
 #This is exported, and run in the non-root generated packagedownloadscript script
 function DownloadTOMLData()
 {
-  LASTCARGOFILEDIR=""
   TOMLFilesHandled=0
+  TOMLFiles=$(find "/$SOURCEDIR/$SOURCENAME/" | grep /Cargo.toml$)
+
+  if [[ -z $TOMLFiles ]]
+  then
+    return
+  fi
 
   #Handle Cargo files for any potential rust programs
   while read -r CARGOFILE
   do
     TOMLFilesHandled=1
     CARGOFILEDIR=$(dirname "$CARGOFILE")
-    if [[ "$CARGOFILEDIR" =~ "$LASTCARGOFILEDIR" && $LASTCARGOFILEDIR != "" ]]
-    then
-      continue
-    fi
 
-    LASTCARGOFILEDIR=$CARGOFILEDIR
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
-  done < <(find | grep /Cargo.toml$)
+    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
+    ln -s "$SOURCEDIR"/buildhome/cargocache/registry "$CARGOFILEDIR/registry"
+  done < <(echo "$TOMLFiles")
 
+  echo "Vendoring sources..."
   if [[ $TOMLFilesHandled == 1 ]]
   then
+    TOMLDir=$(dirname $(echo "$TOMLFiles" | head -n 1))
     #Handle vendoring
-    mkdir -p "/$SOURCEDIR/$SOURCENAME/.cargo"
-    /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor /"$SOURCEDIR"/buildhome/cargocache/vendor >> "/$SOURCEDIR/$SOURCENAME/.cargo/config.toml"
+    mkdir -p "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo
+    rm "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/*
+    env -C "$TOMLDir" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
   fi
 }
 
@@ -891,7 +895,7 @@ function DownloadSource()
       LASTRUSTVERSION=$(cat /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion | head -1)
 
       #Detect if the rust version changed
-      if [[ "$RUSTVERSION" != "$LASTRUSTVERSION" ]]
+      if [[ "$RUSTVERSION" != "$LASTRUSTVERSION" && $RUSTVERSION != "" ]]
       then
         echo "$RUSTVERSION"
         echo MISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCH
@@ -938,6 +942,7 @@ function DownloadSource()
     if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
     then
       meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
+      meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git reset --hard
       meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git clean -xffd
       meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME"
     fi
@@ -1181,6 +1186,11 @@ function PrepareBuild()
   PackagePrepareBuild 2>&1 | tee "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
   ENDTIME=$(date +%s)
   echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
+
+  #Variables for cargo
+  mkdir -p /"$SOURCEDIR"/"$SOURCENAME/.cargobuild"
+  export CARGO_TARGET_DIR=/"$SOURCEDIR"/"$SOURCENAME/.cargobuild"
+  export CARGO_NET_OFFLINE=true
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
