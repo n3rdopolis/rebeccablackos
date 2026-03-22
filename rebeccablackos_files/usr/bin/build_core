@@ -726,6 +726,7 @@ function DownloadTOMLData()
     mkdir -p "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo
     rm "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/*
     env -C "$TOMLDir" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
+    ln -s "$SOURCEDIR"/buildhome/cargocache/vendor "$CARGOFILEDIR/vendor"
   fi
 }
 
@@ -1189,7 +1190,6 @@ function PrepareBuild()
 
   #Variables for cargo
   mkdir -p /"$SOURCEDIR"/"$SOURCENAME/.cargobuild"
-  export CARGO_TARGET_DIR=/"$SOURCEDIR"/"$SOURCENAME/.cargobuild"
   export CARGO_NET_OFFLINE=true
 }
 
