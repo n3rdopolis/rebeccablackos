@@ -50,7 +50,9 @@ REBUILDNEWREVISION=0
 #This gets called by DownloadSource in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to download source.
 function PackageDownloadSource
 {
-:
+#the corrosion cmake module tries to build an exact version of cxxbridge-cmd with exact dependancies which build_core can't really detect
+#There is no cargo command to only download a package and its dependancies without installing it, and otherwise it tries to go online, which phase3 does NOT have network access
+env -C ./rust -- cargo generate-lockfile
 }
 
 #This is called by PrepareBuild in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These functions are custom commands that need to be done to prepare the system to build the source
