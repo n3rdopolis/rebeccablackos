@@ -712,22 +712,30 @@ function DownloadTOMLData()
     TOMLFilesHandled=1
     CARGOFILEDIR=$(dirname "$CARGOFILE")
 
-    echo "Downloading dependancies defined by $CARGOFILE"
+    echo "Downloading dependencies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
     env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --locked --manifest-path "$CARGOFILE"
     ln -sf "$SOURCEDIR"/buildhome/cargocache/registry "$CARGOFILEDIR/registry"
   done < <(echo "$TOMLFiles")
 
-  echo "Vendoring sources..."
-  if [[ $TOMLFilesHandled == 1 ]]
-  then
-    TOMLDir=$(dirname $(echo "$TOMLFiles" | head -n 1))
+  LASTCARGOFILEDIR=""
+  while read -r CARGOFILE
+  do
+    CARGOFILEDIR=$(dirname $CARGOFILE)
+    if [[ "$CARGOFILEDIR" =~ "$LASTCARGOFILEDIR" && $LASTCARGOFILEDIR != "" ]]
+    then
+      continue
+    fi
+
     #Handle vendoring
+    echo "Vendoring sources defined by $CARGOFILE"
     mkdir -p "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo
     rm "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/*
-    env -C "$TOMLDir" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
+    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
     ln -sf "$SOURCEDIR"/buildhome/cargocache/vendor "$CARGOFILEDIR/vendor"
-  fi
+
+    LASTCARGOFILEDIR=$CARGOFILEDIR
+  done < <(echo "$TOMLFiles")
 }
 
 #Function that calls download functions for GIT repos based on the repository type set by the main script
