@@ -943,9 +943,7 @@ function DownloadSource()
     if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
     then
       meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
-      GIT_CEILING_DIRECTORIES=/"$SOURCEDIR/$SOURCENAME" meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git reset --hard
-      GIT_CEILING_DIRECTORIES=/"$SOURCEDIR/$SOURCENAME" meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git clean -xffd
-      meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME"
+      meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME" --reset
     fi
 
     DownloadTOMLData
