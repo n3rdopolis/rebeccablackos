@@ -714,8 +714,8 @@ function DownloadTOMLData()
 
     echo "Downloading dependancies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --manifest-path "$CARGOFILE"
-    ln -s "$SOURCEDIR"/buildhome/cargocache/registry "$CARGOFILEDIR/registry"
+    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --locked --manifest-path "$CARGOFILE"
+    ln -sf "$SOURCEDIR"/buildhome/cargocache/registry "$CARGOFILEDIR/registry"
   done < <(echo "$TOMLFiles")
 
   echo "Vendoring sources..."
@@ -726,7 +726,7 @@ function DownloadTOMLData()
     mkdir -p "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo
     rm "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/*
     env -C "$TOMLDir" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
-    ln -s "$SOURCEDIR"/buildhome/cargocache/vendor "$CARGOFILEDIR/vendor"
+    ln -sf "$SOURCEDIR"/buildhome/cargocache/vendor "$CARGOFILEDIR/vendor"
   fi
 }
 
@@ -943,8 +943,8 @@ function DownloadSource()
     if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
     then
       meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
-      meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git reset --hard
-      meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git clean -xffd
+      GIT_CEILING_DIRECTORIES=/"$SOURCEDIR/$SOURCENAME" meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git reset --hard
+      GIT_CEILING_DIRECTORIES=/"$SOURCEDIR/$SOURCENAME" meson subprojects foreach --sourcedir=/"$SOURCEDIR/$SOURCENAME" git clean -xffd
       meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME"
     fi
 
