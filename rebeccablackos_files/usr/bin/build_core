@@ -699,7 +699,7 @@ function DownloadARCHIVE()
 function DownloadTOMLData()
 {
   TOMLFilesHandled=0
-  TOMLFiles=$(find "/$SOURCEDIR/$SOURCENAME/" | grep /Cargo.toml$)
+  TOMLFiles=$(find "/$SOURCEDIR/$SOURCENAME/" | grep /Cargo.toml$ | sort)
 
   if [[ -z $TOMLFiles ]]
   then
