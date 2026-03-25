@@ -1037,6 +1037,8 @@ function RedirectPkgconfigFileVars()
 
 function SetBuildVariables()
 {
+  export CARGO_NET_OFFLINE=true
+
   #Create build variables
   . /usr/bin/build_vars
   DEBIAN_ARCH=$(dpkg --print-architecture)
@@ -1193,10 +1195,6 @@ function PrepareBuild()
   PackagePrepareBuild 2>&1 | tee "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
   ENDTIME=$(date +%s)
   echo "PackagePrepareBuild finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "/$SOURCEDIR/$SOURCENAME/Logs/PackagePrepareBuild"
-
-  #Variables for cargo
-  mkdir -p /"$SOURCEDIR"/"$SOURCENAME/.cargobuild"
-  export CARGO_NET_OFFLINE=true
 }
 
 #Function that handles the build of the source, creation of the deb file, or installation of the source
