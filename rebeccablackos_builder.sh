@@ -1117,6 +1117,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   rm -rf "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild_overlay/*
   if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 ]]
   then
+    #If Phase 1 is a snapshot, it is already cleared earlier, after phase 1 is complete
     rm -rf  "$BUILDLOCATION"/build/"$BUILDARCH"/snapshot_phase_2/*
   fi
 
