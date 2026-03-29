@@ -98,8 +98,11 @@ BOOT OPTIONS:
            ** vconsole.xkbvariant : Sets the global keyboard variant
            ** vconsole.xkboptions : Sets any global keyboard options
 
-           ** vttyaccessible : makes the vTTYs use the fenrir screen reader
-           ** uvttyaccessible : makes the UvTTYs use the fenrir screen reader
+           ** vttyaccessible : Makes the vTTYs use the fenrir screen reader
+           ** novttyaccessible : Disables the ferir screen reader in vTTYs
+ 
+           ** uvttyaccessible : Makes the UvTTYs use the fenrir screen reader
+           ** nouvttyaccessible: Disables the fenrir screen reader in UvTTYs
 
        * These relevant options are also handled, (but not by the WaylandLoginManager itself)
            ** init=/bin/recinit :       Instead of using init=/bin/bash as an emergency recovery console, this starts a prompt under a user mode terminal.

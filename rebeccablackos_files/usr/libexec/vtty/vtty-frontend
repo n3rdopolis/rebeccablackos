@@ -229,6 +229,13 @@ function vTTYFrontendMain
     vTTYAccessibleMode=1
   fi
 
+  #boot option to disable accessible mode, in case if speech-dispatcher or fenrir fail to work.
+  if [[ $KernelCommandLine =~ ([[:space:]]|^)"novttyaccessible"([[:space:]]|$) ]]
+  then
+    vTTYAccessibleMode=0
+  fi
+
+
 
   if [[ $vTTYAccessibleMode == 1 ]]
   then

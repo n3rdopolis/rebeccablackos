@@ -164,6 +164,12 @@ function UvTTYFrontendMain
       UvTTYAccessibleMode=1
     fi
 
+    #boot option to disable accessible mode, in case if speech-dispatcher or fenrir fail to work.
+    if [[ $KernelCommandLine =~ ([[:space:]]|^)"nouvttyaccessible"([[:space:]]|$) ]]
+    then
+      UvTTYAccessibleMode=0
+    fi
+
 
     if [[ $UvTTYAccessibleMode == 1 ]]
     then
