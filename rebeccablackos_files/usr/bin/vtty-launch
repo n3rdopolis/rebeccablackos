@@ -65,19 +65,30 @@ function GetIfScriptCalledByPid1
 #Populates the first argument with the value of the vTTY Instance (if any). Or quits
 function GetvTTYInstance
 {
+  #Get the leading PID of the session
   SessionLeaderPIDData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/session/self org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Leader))
   SessionLeaderPID=${SessionLeaderPIDData[2]}
 
+  #Get the PID that started the session
   SessionLeaderProcData=($(cat /proc/$SessionLeaderPID/stat))
   SessionCallerPID=${SessionLeaderProcData[3]}
 
-  readarray -d $'\0' SessionCallerProcCmdline < /proc/$SessionCallerPID/cmdline
-  SessionCallerProgram=${SessionCallerProcCmdline[1]}
-  vTTYInstance=${SessionCallerProcCmdline[2]}
+  #Get the service that the calling PID is in
+  SessionServicePathData=($(busctl call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager GetUnitByPID "u" $SessionCallerPID))
+  SessionServicePath=${SessionServicePathData[1]}
+  SessionServicePath=${SessionServicePath//\"/}
 
-  SessionCallerProcUID=$(stat /proc/$SessionCallerPID -c %u)
+  #Get the leading PID of the service
+  SessionServiceMainPIDData=($(busctl call org.freedesktop.systemd1 $SessionServicePath org.freedesktop.DBus.Properties Get "ss" org.freedesktop.systemd1.Service MainPID))
+  SessionServiceMainPID=${SessionServiceMainPIDData[2]}
 
-  if [[ ("$SessionCallerProgram" != "/usr/libexec/vtty/vtty-be-login") || ($SessionCallerProcUID != 0) ]]
+  #Get the path of the program that is the leading PID, the first argument (Should be the vTTY instance), and the user it is running as
+  readarray -d $'\0' SessionServiceMainPIDProcCmdline < /proc/$SessionServiceMainPID/cmdline
+  SessionServiceMainPIDProgram=${SessionServiceMainPIDProcCmdline[1]}
+  vTTYInstance=${SessionServiceMainPIDProcCmdline[2]}
+  SessionServiceMainPIDUID=$(stat /proc/$SessionServiceMainPID -c %u)
+
+  if [[ ("$SessionServiceMainPIDProgram" != "/usr/libexec/vtty/vtty-backend") || ($SessionServiceMainPIDUID != 0) ]]
   then
     echo "vtty-launch: Not running under a vTTY session"
     exit 1
