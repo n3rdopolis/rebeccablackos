@@ -98,8 +98,8 @@ BOOT OPTIONS:
            ** vconsole.xkbvariant : Sets the global keyboard variant
            ** vconsole.xkboptions : Sets any global keyboard options
 
-           ** vttyaccessible : Makes the vTTYs use the fenrir screen reader
-           ** novttyaccessible : Disables the ferir screen reader in vTTYs
+           ** vttyaccessible : Makes the vTTYs and recinit use the fenrir screen reader
+           ** novttyaccessible : Disables the ferir screen reader in vTTYs and recinit
  
            ** uvttyaccessible : Makes the UvTTYs use the fenrir screen reader
            ** nouvttyaccessible: Disables the fenrir screen reader in UvTTYs

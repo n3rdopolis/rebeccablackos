@@ -31,7 +31,7 @@ GetFirstSeatCard()
     MatchSeat=seat0
   fi
 
-  ls -r /dev/dri/card* > /run/recinit/devices
+  ls -r /dev/dri/card* > "/run/recinit/$RECINITPID/devices"
 
   SeatCardFound=0
   SelectCard=""
@@ -53,8 +53,8 @@ GetFirstSeatCard()
         break
       fi
     fi
-  done < /run/recinit/devices
-  rm /run/recinit/devices
+  done < "/run/recinit/$RECINITPID/devices"
+  rm "/run/recinit/$RECINITPID/devices"
   if [ $SeatCardFound -ne 0 ]
   then
     echo $SelectCard
@@ -70,9 +70,14 @@ RecinitMain()
     exit 1
   fi
 
-  export RECINITPID=$$
+  export RECINITPID="$$"
 
-  mkdir -p /run/recinit/
+  #/run is mounted with noexec, but recinit temporary scripts need to be executable
+  mkdir -p "/run/recinit/"
+  mount -o size=4M -t tmpfs none /run/recinit
+  chmod 700 /run/recinit
+
+  mkdir -p "/run/recinit/$RECINITPID"
   mkdir -p /run/user/0
   chmod 700 /run/user/0
   export XDG_RUNTIME_DIR=/run/user/0
@@ -179,13 +184,13 @@ RecinitMain()
     export SEATD_VTBOUND=0
   fi
 
-  #Make init command in /run/recinit/init file, 
+  #Make init command in /run/recinit/$RECINITPID/init file,
   #/run/recinit/init will get executed when recinit ends
   #Users can replace it if they want recinit to start a different init command after working in recinit
-  if [ $RECINITPID -eq 1 ]
+  if [ "$RECINITPID" -eq 1 ]
   then
-    echo "exec /sbin/init" > /run/recinit/init
-    chmod +x /run/recinit/init
+    echo "exec /sbin/init" > "/run/recinit/$RECINITPID/init"
+    chmod +x "/run/recinit/$RECINITPID/init"
   fi
 
   #Supress warning when started from initramfs
@@ -212,7 +217,7 @@ RecinitMain()
   udev_result=$?
 
   #Get Plymouth status
-  if command plymouth > /dev/null 2>&1
+  if command -v plymouth > /dev/null 2>&1
   then
     plymouth --ping
     plymouth_result=$?
@@ -264,9 +269,56 @@ RecinitMain()
   #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040
   export WLR_DRM_DEVICES=$(GetFirstSeatCard)
 
-  cage -d -s -- \
-  foot --config="$XDG_CONFIG_HOME/footkiosk.conf" --override=scrollback.lines=10000  -- \
-  sh -c "kanshi -c \"$XDG_CONFIG_HOME/kanshiconfig.conf\" >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" > /dev/null 2>&1
+
+  #Fenrir can only run a custom executable, and does not allow arguments. Generate a script that runs under the terminal emulator, or fenrir
+  echo "#! /bin/sh" > "/run/recinit/$RECINITPID/script"
+  echo "kanshi -c \"$XDG_CONFIG_HOME/kanshiconfig.conf\" >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" >> "/run/recinit/$RECINITPID/script"
+  chmod +x "/run/recinit/$RECINITPID/script"
+
+
+  RecinitAccessibleMode=0
+  if [ -e "$XDG_CONFIG_HOME/accessiblemode" ]
+  then
+    RecinitAccessibleMode=1
+  fi
+  #Use the same option for system-wide vttyaccessible, instead of making users use recinitaccesible
+  if grep -E '\bvttyaccessible\b' /proc/cmdline > /dev/null 2>&1
+  then
+    RecinitAccessibleMode=1
+  fi
+
+  #boot option to disable accessible mode, in case if speech-dispatcher or fenrir fail to work.
+  if grep -E '\bnovttyaccessible\b' /proc/cmdline > /dev/null 2>&1
+  then
+    RecinitAccessibleMode=0
+  fi
+  #Fenrir and speech-dispatcher might not be in the initrd. Some distributions might want these to be an optional dependency too
+  if ! command -v speech-dispatcher > /dev/null 2>&1 || ! command -v fenrir > /dev/null 2>&1
+  then
+    RecinitAccessibleMode=0
+  fi
+
+  if [ $RecinitAccessibleMode -eq 1 ]
+  then
+    export SPEECHD_ADDRESS="unix_socket:/run/recinit/$RECINITPID/speechd.sock"
+    speech-dispatcher -c unix_socket -S "/run/recinit/$RECINITPID/speechd.sock" -C "$XDG_CONFIG_HOME"/speech-dispatcher/
+
+    #Unmute all sound devices
+    ls -d /sys/class/sound/card* | while read -r CARD
+    do
+      CARDID=$(basename "$CARD" | sed 's/card//g')
+      alsactl init "$CARDID" > /dev/null 2>&1
+    done
+
+
+    cage -d -s -- \
+    foot --config="$XDG_CONFIG_HOME/footkiosk.conf" --override=scrollback.lines=10000  -- \
+    fenrir -e -o general#shell="/run/recinit/$RECINITPID/script" > /dev/null 2>&1
+  else
+    cage -d -s -- \
+    foot --config="$XDG_CONFIG_HOME/footkiosk.conf" --override=scrollback.lines=10000  -- \
+    "/run/recinit/$RECINITPID/script" > /dev/null 2>&1
+  fi
 
   if [ $udev_result -ne 0 ]
   then
@@ -301,7 +353,7 @@ RecinitMain()
   fi
 
   #If this is pid 1 start init upon exit
-  if [ $RECINITPID -eq 1 ]
+  if [ "$RECINITPID" -eq 1 ]
   then
     unset LC_ALL
     unset XDG_RUNTIME_DIR
@@ -316,7 +368,7 @@ RecinitMain()
     then
       exec $overrideinit
     else
-      . /run/recinit/init
+      . "/run/recinit/$RECINITPID/init"
     fi
   fi
 
