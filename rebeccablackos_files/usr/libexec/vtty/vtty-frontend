@@ -219,7 +219,7 @@ function vTTYFrontendMain
   done
 
   vTTYAccessibleMode=0
-  if [[ -e "/etc/vtty/accessiblemode" ]]
+  if [[ -e "$XDG_CONFIG_HOME/accessiblemode" ]]
   then
     vTTYAccessibleMode=1
   fi
@@ -234,7 +234,11 @@ function vTTYFrontendMain
   then
     vTTYAccessibleMode=0
   fi
-
+  #Some distributions might want these to be an optional dependency
+  if ! command -v speech-dispatcher > /dev/null 2>&1 || ! command -v fenrir > /dev/null 2>&1
+  then
+    vTTYAccessibleMode=0
+  fi
 
 
   if [[ $vTTYAccessibleMode == 1 ]]

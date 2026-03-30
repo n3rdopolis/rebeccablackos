@@ -169,6 +169,11 @@ function UvTTYFrontendMain
     then
       UvTTYAccessibleMode=0
     fi
+    #Some distributions might want these to be an optional dependency
+    if ! command -v speech-dispatcher > /dev/null 2>&1 || ! command -v fenrir > /dev/null 2>&1
+    then
+      UvTTYAccessibleMode=0
+    fi
 
 
     if [[ $UvTTYAccessibleMode == 1 ]]
