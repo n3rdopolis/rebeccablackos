@@ -42,7 +42,7 @@ copy_exec "$(which pkill)" /usr/bin/
 
 if [ -e "/usr/bin/recinit" ]
 then
-  copy_file script "/usr/bin/recinit"
+  copy_file script "/usr/bin/recinit" /usr/bin/recinit
 fi
 
 mkdir -p "${DESTDIR}/lib/udev/rules.d"
