@@ -76,7 +76,7 @@ sub GetSeatVttyBackends
 
     if ($UnitName =~ /^vtty-frontend\@${SeatName}\@vtty/ && $UnitName =~ /\.service$/)
     {
-      #Remove the vtty-frontend@vtty@   and the .service   leaving just the number
+      #Parse the instance number
       $UnitName = $UnitName =~ s/^vtty-frontend\@${SeatName}\@vtty//r;
       $UnitName = $UnitName =~ s/\.service$//r;
 
