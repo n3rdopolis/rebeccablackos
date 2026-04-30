@@ -1,3 +1,20 @@
+INTRO:
+------
+    * I got the idea to name a Linux distribution after my favorite celebrity after I saw some earlier Linux distributions named after celebrities, and also this KDE blog post. http://ivan.fomentgroup.org/blog/2011/05/02/splash-screens-and-qml/
+    * And then I thought, she deserves the free promo too.
+
+    * This is amongst the first live distributions to provide a Wayland server. VTs are disabled in the kernel.
+
+    * While 32 bit and 64 bit x86 ISOs used to be provided in each build, the latest builds are 64 bit only due to QtWebEngine refusing to build in 32 bit chroots.
+
+    * (It does NOT have her copyrighted music, or photos on the ISO. You have to buy her music legally on iTunes (or Amazon, etc)))
+
+    * The build scripts in the SVN is available for you to modify and build your own version of this project.
+
+    * This distribution is 3RD PARTY fan made. Yes. I am a fan of Rebecca Black.
+
+    * The latest ISO now has a login manager for Wayland, and now it has removed X from the startup path of the system. 
+
 LICENSE:
 --------
     * The build script are all under GPL v2+, except for were stated, namely in patches under rebeccablackos_files/usr/share/RBOS_PATCHES or imported and
