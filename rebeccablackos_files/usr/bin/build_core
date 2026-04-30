@@ -864,7 +864,7 @@ function DownloadSource()
 
     if [[ $TOMLFilesExist == 1 ]]
     then
-      mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust
+      $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/buildhome/buildcore_rust
 
       #Ensure only one instace of the rust/cargo downloader runs, sleep a variable amount of time, less than a second, to try to give a clear "winner" when two start nearly the same time
       SLEEPTIME=$(( (RANDOM%10)+1 ))
