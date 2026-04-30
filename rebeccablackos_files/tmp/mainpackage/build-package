@@ -68,6 +68,7 @@ echo /opt/lib >> /etc/ld.so.conf.d/aa_${PACKAGESUFFIX}_opt_libs.conf
 echo /opt/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null) >> /etc/ld.so.conf.d/aa_${PACKAGESUFFIX}_opt_libs.conf
 
 #Add /opt/bin to the system PATH
+mkdir -p /usr/lib/systemd/system-environment-generators/
 echo -e "#!/bin/bash\necho PATH=\"/opt/bin:/opt/sbin:\$PATH\"" >> /usr/lib/systemd/system-environment-generators/optbin
 chmod +x /usr/lib/systemd/system-environment-generators/optbin
 echo -e "#!/bin/bash\necho PATH=\"/opt/bin:/opt/sbin:\$PATH\"" >> /usr/lib/systemd/user-environment-generators/optbin
