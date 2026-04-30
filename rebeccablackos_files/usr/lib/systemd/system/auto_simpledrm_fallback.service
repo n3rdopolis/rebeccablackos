@@ -3,7 +3,7 @@ Description=Automatically detect the need to force fallback graphics drivers
 
 [Service]
 Type=oneshot
-ExecStart=/usr/sbin/auto_simpledrm_fallback
+ExecStart=/usr/bin/auto_simpledrm_fallback
 RemainAfterExit=yes
 
 [Install]
