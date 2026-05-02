@@ -158,16 +158,6 @@ function StartRemoteCommand()
     PreviousSessions=()
   fi
 
-  ReconnectCommands=""
-  ReconnectArguments=""
-  for PreviousSession in "${PreviousSessions[@]}"
-  do
-    ReconnectCommands+="ln -s "/tmp/waypipeserver-$PreviousSession-$SessionID" "\$XDG_RUNTIME_DIR/waypipe/servers/$HOSTNAME/$LOGNAME/waypipeserver-$PreviousSession-$SessionID""$'\n'
-    ReconnectCommands+="waypipe recon \$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/waypipecontrol-$PreviousSession /tmp/waypipeserver-$PreviousSession-$SessionID"$'\n'
-    ReconnectArguments+="-R /tmp/waypipeserver-$PreviousSession-$SessionID:$XDG_RUNTIME_DIR/waypipe/clients/$RemoteHost/$RemoteUser/waypipeclient-$PreviousSession "
-  done
-  printf -v ReconnectCommandsEscaped "%q" "$ReconnectCommands"
-
   if [[ ($ManualCommandEntered == 1 && $ManualCommand == "") || "${#SelectedCommandNumbers[@]}" == 0 ]]
   then
     if [[ ${#PreviousSessions[@]} == 0 ]]
@@ -190,7 +180,6 @@ function StartRemoteCommand()
     echo $SessionID >> "\$XDG_RUNTIME_DIR/waypipe/control/$HOSTNAME/$LOGNAME/Sessions"
 
     eval \"echo $RemoteCommandsEscaped\" >  "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
-    eval \"echo $ReconnectCommandsEscaped\" >> "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
     echo "sleep inf" >> "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
 
     chmod +x "\$XDG_RUNTIME_DIR/waypipe/scripts/$HOSTNAME/$LOGNAME/script_$SessionID"
