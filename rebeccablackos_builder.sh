@@ -1193,7 +1193,7 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   echolog "ISO sizes:"
   if [[ $(compgen -G "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso &> /dev/null; echo $?) == 0 ]]
   then
-    echolog "$(ls -lh "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso)"
+    echolog "$(ls -lh "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"_DevDbg_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"_"$BUILDARCH".iso)"
   fi
 
   #Write specially logged messages to the mainlog
