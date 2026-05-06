@@ -205,9 +205,9 @@ function RunDownloadAndOrBuild
 
   mkdir -p "/$SOURCEDIR"
 
-  if [[ -e "$SOURCEDIR"/buildhome/inactive_packages/"$SOURCENAME" ]]
+  if [[ -e "$BUILDLOGDIR"/../inactive_packages/"$SOURCENAME" ]]
   then
-    rm "$SOURCEDIR"/buildhome/inactive_packages/"$SOURCENAME"
+    rm "$BUILDLOGDIR"/../inactive_packages/"$SOURCENAME"
   fi
 
   #Set ACL permissions to allow a non root user account manage the source repos
@@ -766,7 +766,7 @@ function DownloadSource()
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
   fi
-  mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
+  $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
 
   REPOSITORYTYPE=$(echo $REPOSITORYTYPE |tr [:lower:] [:upper:])
 

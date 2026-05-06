@@ -790,14 +790,14 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   fi
 
   #Make a list of all current items under srcbuild
-  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages
-  if [[ $(ls -A "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/) ]]
+  mkdir -p "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages
+  if [[ $(ls -A "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages/) ]]
   then
-    rm "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/*
+    rm "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages/*
   fi
   find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ -mindepth 1 -maxdepth 1 -type d -printf "%f\n" | grep -v ^buildoutput$ | grep -v ^buildhome$ | while read -r PACKAGE
   do
-    touch "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/"$PACKAGE"
+    touch "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages/"$PACKAGE"
   done
 
   if [[ $BUILD_SNAPSHOT_SYSTEMS == 1 && $RAMDISK_FOR_PHASE1 == 1 && $RAMDISK_STATUS == 0 ]]
@@ -1042,6 +1042,15 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   #Create a date string for unique log folder names
   ENDDATE=$(date +"%Y-%m-%d_%H-%M-%S")
 
+  LIST=$(find "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages/ -mindepth 1 -maxdepth 1 -type f -printf "%f\n" | sort | tr '\n' ' ')
+  if [[ ! -z $LIST ]]
+  then
+    echolog -e "\nExtra packages found under "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ that were not used"
+    echolog "$LIST"
+    echolog " "
+  fi
+  rm -r "$BUILDLOCATION"/build/"$BUILDARCH"/buildlogs/inactive_packages
+
   #Create a folder contain the revisions files
   mkdir -p "$BUILDLOCATION"/revisions_history
 
@@ -1063,7 +1072,6 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
     chmod 644 "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"*_"$BUILDARCH".iso "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".txt "$HOMELOCATION"/"$BUILDFRIENDLYNAME"/"$BUILDFRIENDLYNAME"_*_"$BUILDARCH".tar.gz
   fi
   EXPORT_ENDTIME=$(date +%s)
-
 
   echolog "Cleaning up non reusable build data..."
   POSTCLEANUP_STARTTIME=$(date +%s)
@@ -1148,14 +1156,6 @@ Ensure the file(s) are copied, and not moved, as they are treated as a one time 
   echolog -n "Phase 3 build time: $((PHASE3_ENDTIME-PHASE3_STARTTIME)) seconds, "
   echolog -n "Export time: $((EXPORT_ENDTIME-EXPORT_STARTTIME)) seconds, " 
   echolog    "Cleanup time: $((POSTCLEANUP_ENDTIME-POSTCLEANUP_STARTTIME)) seconds" 
-
-  LIST=$(find "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/buildhome/inactive_packages/ -mindepth 1 -maxdepth 1 -type f -printf "%f\n" | sort | tr '\n' ' ')
-  if [[ ! -z $LIST ]]
-  then
-    echolog -e "\nExtra packages found under "$BUILDLOCATION"/build/"$BUILDARCH"/srcbuild/ that were not used"
-    echolog "$LIST"
-    echolog " "
-  fi
 
 
   if [[ -e "$BUILDLOCATION"/logs/latest-"$BUILDARCH"/package_operations/phase_1/failedpackages.log ]]
