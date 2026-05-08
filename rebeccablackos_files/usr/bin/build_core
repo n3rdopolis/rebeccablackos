@@ -262,7 +262,7 @@ function RunDownloadAndOrBuild
   if [[ "$ACTION" == installsmallpackage ]]
   then
     STARTTIME=$(date +%s)
-    InstallDebFile "/$SOURCEDIR/buildoutput/smallpackages/""$PACKAGESOURCENAME"-"$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall" | sed -e "s|^|  Small Install $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
+    InstallDebFile "/$SOURCEDIR/buildoutput/smallpackages/$PACKAGESOURCENAME-$PACKAGESUFFIX"_*.deb 2>&1 | tee "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall" | sed -e "s|^|  Small Install $SOURCENAME ($CurrentPackageNumber of $TotalPackageNumber): |"
     ENDTIME=$(date +%s)
     echo "SmallDebInstall finished in $((ENDTIME-STARTTIME)) seconds" 2>&1 | tee -a "$BUILDLOGDIR/$SOURCENAME/SmallDebInstall"
     exit
@@ -411,28 +411,28 @@ function DownloadGIT()
     MODULENAME=${SUBMODULEREVISIONS[$SUBMODULEREVISION]}
     MODULEREVISION=${SUBMODULEREVISIONS[$SUBMODULEREVISION+1]}
 
-    $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME
+    $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME"
 
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote update origin --prune
     if [[ -z $MODULEREVISION ]]
     then
-      $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote set-head origin --auto
-      ORIGINNAME=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME remote)
-      REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rev-parse --abbrev-ref origin/HEAD)
+      $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" remote set-head origin --auto
+      ORIGINNAME=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" remote)
+      REMOTEBRANCH=$($NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" rev-parse --abbrev-ref origin/HEAD)
       MODULEREVISION=$(echo $REMOTEBRANCH | sed "s|$ORIGINNAME/||g")
     fi
     $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME reset --hard
     
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rebase
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME pull -f
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME rebase -s ours
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME fetch --prune
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule sync --recursive
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule init
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME submodule update --recursive --force
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME pull -f
-    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/$MODULENAME checkout -f $MODULEREVISION
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" rebase
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" pull -f
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" rebase -s ours
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" fetch --prune
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" config user.email "$PACKAGESUFFIX"@$"$PACKAGESUFFIX"
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" submodule sync --recursive
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" submodule init
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" submodule update --recursive --force
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" pull -f
+    $NONROOTCOMMAND git -C /"$SOURCEDIR"/"$SOURCENAME"/"$MODULENAME" checkout -f "$MODULEREVISION"
   done
   return $UpdateCommandResult
 }
@@ -619,9 +619,9 @@ function DownloadHG()
   SourceURLActive=$?
   $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg clone "$SOURCEURL" "$SOURCENAME"
   $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
-  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME"hg --config trusted.users=$NONROOTUSER,root pull
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg --config trusted.users=$NONROOTUSER,root pull
   HgPullResult=$?
-  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME"hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
+  $NONROOTCOMMAND env -C /"$SOURCEDIR"/"$SOURCENAME" -- hg --config trusted.users=$NONROOTUSER,root update -C -r $SOURCEREVISION
   return $UpdateCommandResult
   if [[ ($SourceURLActive == 0) && ($HgPullResult == 0) ]]
   then
@@ -658,7 +658,7 @@ function CleanupARCHIVE()
   $NONROOTCOMMAND mkdir -p /"$SOURCEDIR"/"$SOURCENAME"
   find /"$SOURCEDIR"/"$SOURCENAME" | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILE$ | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEFILESLIST$ | grep -v /"$SOURCEDIR"/"$SOURCENAME"/SOURCEURL$ | sort -r | while read -r FILE
   do
-    rm -rf $FILE
+    rm -rf "$FILE"
   done
 }
 #Function to download archives
@@ -714,7 +714,7 @@ function DownloadTOMLData()
 
     echo "Downloading dependencies defined by $CARGOFILE"
     #"$CARGO_HOME"/cargo update --aggressive --manifest-path "$CARGOFILE"
-    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo fetch --locked --manifest-path "$CARGOFILE"
+    env -C "$CARGOFILEDIR" -- /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun/bin/cargo fetch --locked --manifest-path "$CARGOFILE"
     ln -sf "$SOURCEDIR"/buildhome/cargocache/registry "$CARGOFILEDIR/registry"
   done < <(echo "$TOMLFiles")
 
@@ -731,7 +731,7 @@ function DownloadTOMLData()
     echo "Vendoring sources defined by $CARGOFILE"
     mkdir -p "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo
     rm "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/*
-    env -C "$CARGOFILEDIR" -- /$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
+    env -C "$CARGOFILEDIR" -- /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun/bin/cargo vendor --versioned-dirs --no-delete --respect-source-config "$SOURCEDIR"/buildhome/cargocache/vendor > "$SOURCEDIR"/buildhome/cargocache/"$SOURCENAME"/.cargo/config.toml
     ln -sf "$SOURCEDIR"/buildhome/cargocache/vendor "$CARGOFILEDIR/vendor"
 
     LASTCARGOFILEDIR=$CARGOFILEDIR
@@ -909,8 +909,8 @@ function DownloadSource()
         echo "$RUSTVERSION"
         echo MISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCH
         echo "$LASTRUSTVERSION"
-        rm -rf /$SOURCEDIR/buildhome/buildcore_rust/download
-        rm -rf /$SOURCEDIR/buildhome/buildcore_rust/rustrun
+        rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/download
+        rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
         echo -n "$RUSTVERSION" > /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion
       fi
 
@@ -929,9 +929,9 @@ function DownloadSource()
         chown -R $NONROOTUSER:$NONROOTGROUP /"$SOURCEDIR"/buildhome/cargocache
         setfacl -Rm $NONROOTUSER:rwx -Rm mask::rwx -dRm $NONROOTUSER:rwx -dRm mask::rwx /"$SOURCEDIR"/buildhome/cargocache
 
-        curl -L "https://static.rust-lang.org/dist/rust-src-$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2).tar.gz" |
-                tar -xzf - -C "$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --print sysroot)/lib" \
-                "rust-src-$(/$SOURCEDIR/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2)/rust-src/lib/" \
+        curl -L "https://static.rust-lang.org/dist/rust-src-$(/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2).tar.gz" |
+                tar -xzf - -C "$(/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun/bin/rustc --print sysroot)/lib" \
+                "rust-src-$(/"$SOURCEDIR"/buildhome/buildcore_rust/rustrun/bin/rustc --version | cut -d' ' -f2)/rust-src/lib/" \
                 --strip-components=3
 
       fi
@@ -943,15 +943,15 @@ function DownloadSource()
     echo "#! /bin/bash
     $(declare -f PackageDownloadSource)
     $(declare -f DownloadTOMLData)
-    export SOURCEDIR=$SOURCEDIR
+    export SOURCEDIR=\"$SOURCEDIR\"
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    cd "$SOURCEDIR/$SOURCENAME"
-    if [[ -d /"$SOURCEDIR/$SOURCENAME"/subprojects/ ]]
+    cd \"$SOURCEDIR/$SOURCENAME\"
+    if [[ -d /\"$SOURCEDIR/$SOURCENAME\"/subprojects/ ]]
     then
-      meson subprojects download --sourcedir=/"$SOURCEDIR/$SOURCENAME"
-      meson subprojects update --sourcedir=/"$SOURCEDIR/$SOURCENAME" --reset
+      meson subprojects download --sourcedir=/\"$SOURCEDIR/$SOURCENAME\"
+      meson subprojects update --sourcedir=/\"$SOURCEDIR/$SOURCENAME\" --reset
     fi
 
     DownloadTOMLData
@@ -1107,32 +1107,32 @@ function SymlinkDirToDir()
   SingleSlash="/"
 
   DirsCreated=0
-  #Add an extra / to the end so that if the SourceDir is /path/to/dir/ that it doesn't include /path/to/directory/
-  SourceDir="$1/"
+  #Add an extra / to the end so that if the FileSourceDir is /path/to/dir/ that it doesn't include /path/to/directory/
+  FileSourceDir="$1/"
   DestinationDir="$2"
   FileSuffix="$3"
 
-  #Eliminate doube slashes in case the SourceDir already had a / at the end
-  SourceDir="${SourceDir//$DoubleSlash/$SingleSlash}"
+  #Eliminate doube slashes in case the FileSourceDir already had a / at the end
+  FileSourceDir="${FileSourceDir//$DoubleSlash/$SingleSlash}"
 
   cat "$EXTERNALBUILDHOME/checkinstall_files" | sort | while read -r Item
   do
-    if [[ ! $Item =~ ^"$SourceDir" ]]
+    if [[ ! $Item =~ ^"$FileSourceDir" ]]
     then
       continue
     fi
 
-    Item="${Item/$SourceDir/}"
+    Item="${Item/$FileSourceDir/}"
     Item="${Item//$DoubleSlash/$SingleSlash}"
 
-    if [[ $DirsCreated == 0 && -e "$SourceDir/$Item" ]]
+    if [[ $DirsCreated == 0 && -e "$FileSourceDir/$Item" ]]
     then
-      mkdir -p "$SourceDir"
+      mkdir -p "$FileSourceDir"
       mkdir -p "$DestinationDir"
       DirsCreated=1
     fi
 
-    if [[ -d "$SourceDir/$Item" ]]
+    if [[ -d "$FileSourceDir/$Item" ]]
     then
       if [[ ! -e "$DestinationDir/$Item" ]]
       then
@@ -1143,7 +1143,7 @@ function SymlinkDirToDir()
       then
         if [[ -z $FileSuffix ]]
         then
-          ln -s "$SourceDir/$Item" "$DestinationDir/$Item"
+          ln -s "$FileSourceDir/$Item" "$DestinationDir/$Item"
         else
           FolderLeaf=$(dirname "$Item")
           FileName=${Item##*/}
@@ -1160,7 +1160,7 @@ function SymlinkDirToDir()
           FileName=$(echo "${FileName[*]}")
           unset IFS
           mkdir -p "$DestinationDir/$FolderLeaf"
-          ln -s "$SourceDir/$Item" "$DestinationDir/$FolderLeaf/$FileName"
+          ln -s "$FileSourceDir/$Item" "$DestinationDir/$FolderLeaf/$FileName"
         fi
       fi
     fi
@@ -1265,11 +1265,11 @@ function MakeAndInstall()
     $(declare -f PrepareBuild)
     $(declare -f PackagePrepareBuild)
     $(declare -f PackageCompileSource)
-    export SOURCEDIR=$SOURCEDIR
+    export SOURCEDIR=\"$SOURCEDIR\"
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
-    cd "$SOURCEDIR/$SOURCENAME"
+    cd \"$SOURCEDIR/$SOURCENAME\"
     #Call PrepareBuild functions
     PrepareBuild
 
@@ -1282,7 +1282,7 @@ function MakeAndInstall()
     then
       exit 1
     fi
-    echo "PackageCompileSource finished in '$((ENDTIME-STARTTIME))' seconds" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
+    echo \"PackageCompileSource finished in '$((ENDTIME-STARTTIME))' seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
 " > "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
 
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
@@ -1301,7 +1301,7 @@ function MakeAndInstall()
     $(declare -f PackagePostInstall)
     $(declare -f GenerateChangedFilesList)
     $(declare -f SymlinkDirToDir)
-    export SOURCEDIR=$SOURCEDIR
+    export SOURCEDIR=\"$SOURCEDIR\"
     export SOURCENAME=$SOURCENAME
     export INSTALLDIR=$INSTALLDIR
 
@@ -1309,7 +1309,7 @@ function MakeAndInstall()
     cp \"$BUILDLOGDIR/$SOURCENAME/GetSourceVersion\" \"/usr/share/buildcore_revisions/$SOURCENAME\"
 
     SetBuildVariables
-    cd "$SOURCEDIR/$SOURCENAME"
+    cd \"$SOURCEDIR/$SOURCENAME\"
 
     STARTTIME=\$(date +%s)
     PackageInstallSource 2>&1 | tee \"/$SOURCEDIR/$SOURCENAME/Logs/PackageInstallSource\"
