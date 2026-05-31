@@ -321,8 +321,8 @@ do
 done
 
 # copy renderers
-copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/frame-buffer.so
-copy_exec /opt/lib/$DEB_HOST_MULTIARCH/plymouth/renderers/drm.so
+copy_exec $PLUGIN_PATH/renderers/frame-buffer.so
+copy_exec $PLUGIN_PATH/renderers/drm.so
 
 # handle keymap config
 #default value
