@@ -761,7 +761,7 @@ function DownloadSource()
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/*
     cp /tmp/buildcore_revisions.txt /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
     chmod 755 /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/buildcore_revisions.txt
-    PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $RUNUSEREXE -u "$NONROOTUSER" -m -- $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION 2>&-; \declare -p SUBMODULEREVISIONS 2>&-" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
+    PATH=/tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME} $RUNUSEREXE -u "$NONROOTUSER" -m -- $BASHEXE -r -c ". buildcore_revisions.txt 2>&- 1>&-; OverrideRevisions_$SAFESOURCENAME 2>&- 1>&-; POSIXLY_CORRECT=1; unset declare; \declare -p SOURCEREVISION 2>&-; \declare -p SUBMODULEREVISIONS 2>&-; declare -p RUSTPACKAGEURLLEAF 2>&-" > /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     chmod +x /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     . /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}/revisiondata
     rm -rf /tmp/buildcore_secure_${FOLDERDATE}_${SOURCENAME}
@@ -896,9 +896,24 @@ function DownloadSource()
         fi
       fi
 
-      RUSTPACKAGEURL=$($NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/channel-rust-stable.toml 2>/dev/null  | sed -n "/\[pkg.cargo.target.${RUST_PACKAGE_ARCH}\]/,/^$/p" | grep "^url = " | awk -F '"' '{print $2}')
-      RUSTVERSION=$(echo $RUSTPACKAGEURL | sed "s|.*cargo-||g" | awk -F - '{print $1}')
-      RUSTPACKAGEURL=$(echo $RUSTPACKAGEURL | sed 's|/cargo-|/rust-|g')
+      #If the revisions file specifies a RUSTPACKAGEURLLEAF
+      #like yyyy-mm-dd/rust-x.yy.z-ARCH-unknown-linux-gnu.tar.gz
+      #Download that version, instead of the latest stable one. This is so the same version of Rust can be used that was used in the revisions file.
+      if [[ -z $RUSTPACKAGEURLLEAF ]]
+      then
+        RUSTPACKAGEURL=$($NONROOTCOMMAND wget -O - https://static.rust-lang.org/dist/channel-rust-stable.toml 2>/dev/null  | sed -n "/\[pkg.cargo.target.${RUST_PACKAGE_ARCH}\]/,/^$/p" | grep "^url = " | awk -F '"' '{print $2}')
+
+        RUSTPACKAGEURL=$(echo $RUSTPACKAGEURL | sed 's|/cargo-|/rust-|g')
+
+        #This is to prevent a bad revisions file from pointing to https://www.TotesLegit.exe/ThisIsTheRealRustPackageAndNotMalwareBelieveMeFolks.tar.gz, or something of the like
+        #Instead of the whole URL, only store the leaf of the file from Rust's site so that it can't just point to any file.
+        RUSTPACKAGEURLLEAF=$(echo "$RUSTPACKAGEURL" | sed 's|https://static.rust-lang.org/dist/||g')
+        echo -n "RUSTPACKAGEURLLEAF=$RUSTPACKAGEURLLEAF" > /"$SOURCEDIR"/buildhome/buildcore_rust/rusturlleaf
+      else
+        rm /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion
+        RUSTPACKAGEURL="https://static.rust-lang.org/dist/$RUSTPACKAGEURLLEAF"
+      fi
+      RUSTVERSION=$(echo $RUSTPACKAGEURL | sed "s|.*rust-||g" | awk -F - '{print $1}')
 
       #Use the SHA sum of the rust package to determine if there is a new one server side
       LASTRUSTVERSION=$(cat /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion | head -1)
@@ -906,9 +921,7 @@ function DownloadSource()
       #Detect if the rust version changed
       if [[ "$RUSTVERSION" != "$LASTRUSTVERSION" && $RUSTVERSION != "" ]]
       then
-        echo "$RUSTVERSION"
-        echo MISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCHMISMATCH
-        echo "$LASTRUSTVERSION"
+        echo "Updating Rust from [ $LASTRUSTVERSION ] to [ $RUSTVERSION ]"
         rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/download
         rm -rf /"$SOURCEDIR"/buildhome/buildcore_rust/rustrun
         echo -n "$RUSTVERSION" > /"$SOURCEDIR"/buildhome/buildcore_rust/rustversion

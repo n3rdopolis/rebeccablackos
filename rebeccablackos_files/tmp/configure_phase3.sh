@@ -98,6 +98,9 @@ rm /etc/apt/sources.list.bak
 #run the script that calls all compile scripts in a specified order, in build only mode
 compile_all build-only
 
+#Apend the Rust URL to the end of the revisions file
+cat /var/cache/srcbuild/buildhome/buildcore_rust/rusturlleaf >> /usr/share/buildcore_revisions.txt
+
 #Append the snapshot date to the end of the revisions file
 cat /tmp/APTFETCHDATE >> /usr/share/buildcore_revisions.txt
 
