@@ -93,7 +93,7 @@ function UndivertDpkgFile
 }
 UndivertDpkgFile /usr/lib/systemd/systemd-logind' > postremove-pak
 
-#patch -f -p1 < /usr/share/RBOS_PATCHES/systemd.diff
+patch -f -p1 < /usr/share/RBOS_PATCHES/systemd.diff
 meson setup -Ddebug=false -Doptimization=s --prefix=/usr --libdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dtests=false build \
 -Dsysvinit-path=/etc/init.d -Dsysvrcnd-path=/etc -Ddbuspolicydir=/usr/share/dbus-1/system.d/ -Dpamlibdir=/usr/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH)/security
 }
