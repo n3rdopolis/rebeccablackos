@@ -167,29 +167,29 @@ sub SwitchToNextSession
 {
   my $SeatName=$_[0];
 
-  my $LogindSeatPath=$SeatManager{Login1ManagerCallObject}->GetSeat($SeatName);
-  my $LogindSeatCallObject=$SeatManager{Login1Service}->get_object($LogindSeatPath, "org.freedesktop.login1.Seat");
-  my $LogindSeatPropertiesObject=$SeatManager{Login1Service}->get_object($LogindSeatPath, "org.freedesktop.DBus.Properties");
+  my $SeatPath=$SeatManager{Login1ManagerCallObject}->GetSeat($SeatName);
+  my $SeatCallObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.login1.Seat");
+  my $SeatPropertiesObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.DBus.Properties");
 
   #Get the active session
-  my $LogindSeatActiveSession=$LogindSeatPropertiesObject->Get("org.freedesktop.login1.Seat", "ActiveSession");
-  my $LogindSeatActiveSessionName=$LogindSeatActiveSession->[0];
-  my $LogindSeatActiveSessionPath=$LogindSeatActiveSession->[1];
+  my $SeatActiveSession=$SeatPropertiesObject->Get("org.freedesktop.login1.Seat", "ActiveSession");
+  my $SeatActiveSessionName=$SeatActiveSession->[0];
+  my $SeatActiveSessionPath=$SeatActiveSession->[1];
 
   #Get all sessions
-  my @LogindSeatSessions=@{$LogindSeatPropertiesObject->Get("org.freedesktop.login1.Seat", "Sessions")};
-  my $LogindSeatSessionsCount=scalar @LogindSeatSessions;
+  my @SeatSessions=@{$SeatPropertiesObject->Get("org.freedesktop.login1.Seat", "Sessions")};
+  my $SeatSessionsCount=scalar @SeatSessions;
 
   my $NextSessionIndex;
 
-  #Get the next session in the $LogindSeatSessions array, backwards (as the first session is the last one)
-  for (my $SessionIterator=$LogindSeatSessionsCount - 1; $SessionIterator >= 0; $SessionIterator--)
+  #Get the next session in the $SeatSessions array, backwards (as the first session is the last one)
+  for (my $SessionIterator=$SeatSessionsCount - 1; $SessionIterator >= 0; $SessionIterator--)
   {
-    my $SessionData=$LogindSeatSessions[$SessionIterator];
+    my $SessionData=$SeatSessions[$SessionIterator];
     my $SessionName=$SessionData->[0];
     my $SessionPath=$SessionData->[1];
 
-    if ($SessionName eq $LogindSeatActiveSessionName)
+    if ($SessionName eq $SeatActiveSessionName)
     {
       $NextSessionIndex=$SessionIterator - 1;
       if ($NextSessionIndex < 0)
@@ -200,7 +200,7 @@ sub SwitchToNextSession
     }
   }
 
-  eval{$LogindSeatCallObject->ActivateSession($LogindSeatSessions[$NextSessionIndex]->[0])};
+  eval{$SeatCallObject->ActivateSession($SeatSessions[$NextSessionIndex]->[0])};
 }
 
 #Get the MainPID attribute of a unit
@@ -290,6 +290,20 @@ sub HandleSecureAttentionKey
   StartOrSwitchToVttyFrontend($SecureAttentionKeySeatName, $SecureAttentionKeySeatPath);
 
   return;
+}
+
+sub HandleSessionNew
+{
+  my $SessionNewSessionName=$_[0];
+  my $SessionNewSessionPath=$_[1];
+
+  my $SessionNewPropertiesObject=$SeatManager{Login1Service}->get_object($SessionNewSessionPath, "org.freedesktop.DBus.Properties");
+  my $SessionNewName=$SessionNewPropertiesObject->Get("org.freedesktop.login1.Session", "Name");
+
+  if ($SessionNewName eq "vtty")
+  {
+    eval{$SeatManager{Login1ManagerCallObject}->ActivateSession($SessionNewSessionName)};
+  }
 }
 
 sub HandleSessionRemoved
@@ -393,6 +407,11 @@ sub HandleSecureAttentionKeySafe
   eval{HandleSecureAttentionKey($_[0], $_[1])};
 }
 
+sub HandleSessionNewSafe
+{
+  eval{HandleSessionNew($_[0], $_[1])};
+}
+
 sub HandleSessionRemovedSafe
 {
   eval{HandleSessionRemoved($_[0], $_[1])};
@@ -449,8 +468,9 @@ sub main
     my $SeatName=$Seat->[0];
     my $SeatPath=$Seat->[1];
 
-    my $SeatObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.DBus.Properties");
-    my $SeatCanGraphical=$SeatObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
+    my $SeatPropertiesObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.DBus.Properties");
+    my $SeatCallObject=$SeatManager{Login1Service}->get_object($SeatPath, "org.freedesktop.login1.Seat");
+    my $SeatCanGraphical=$SeatPropertiesObject->Get("org.freedesktop.login1.Seat", "CanGraphical");
 
     #Don't start a vtty-frontend on the virtual seat-vtty seat, or on seats that don't have GPUs, or has VTs
     if (($SeatName eq "seat-vtty") || ($SeatCanGraphical == 0))
@@ -460,6 +480,10 @@ sub main
 
     eval{$SeatManager{Systemd1ManagerCallObject}->StartUnit("vtty-frontend\@${SeatName}\@vtty1.service", "replace")};
   }
+
+  #If logind offers the ability to not automatically activate new sessions on vt-less seats, https://github.com/systemd/systemd/issues/42247
+  #But for now, this is unnneeded.
+  #$SeatManager{Login1ManagerCallObject}->connect_to_signal("SessionNew", \&HandleSessionNewSafe);
 
   $SeatManager{Login1ManagerCallObject}->connect_to_signal("SecureAttentionKey", \&HandleSecureAttentionKeySafe);
   $SeatManager{Login1ManagerCallObject}->connect_to_signal("SessionRemoved", \&HandleSessionRemovedSafe);
