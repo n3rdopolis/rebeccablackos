@@ -442,6 +442,10 @@ function vTTYLaunchStartAsUser
   readarray -d $'\0' EnvironmentBlock
   export "${EnvironmentBlock[@]}"
 
+  #If logind offers the ability to not automatically activate new sessions on vt-less seats, https://github.com/systemd/systemd/issues/42247
+  #But for now, this is unnneeded.
+  #busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.login1.Seat ActivateSession "s" $XDG_SESSION_ID
+
   export XDG_SEAT="$VTTY_LAUNCH_SEAT"
   export XDG_SESSION_ID=$VTTY_LAUNCH_SESSION_ID
   export XDG_SESSION_CLASS=$VTTY_LAUNCH_CLASS
