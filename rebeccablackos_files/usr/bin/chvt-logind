@@ -18,6 +18,33 @@
 
 #This utility works the same as chvt, only it uses logind's seat aware SwitchTo dbus method
 
+function GetvTTYSeat
+{
+  #Get the leading PID of the session
+  SessionLeaderPIDData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/session/self org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Session Leader))
+  SessionLeaderPID=${SessionLeaderPIDData[2]}
+
+  #Get the PID that started the session
+  SessionLeaderProcData=($(cat /proc/$SessionLeaderPID/stat))
+  SessionCallerPID=${SessionLeaderProcData[3]}
+
+  #Get the service that the calling PID is in
+  SessionServicePathData=($(busctl call org.freedesktop.systemd1 /org/freedesktop/systemd1 org.freedesktop.systemd1.Manager GetUnitByPID "u" $SessionCallerPID))
+  SessionServicePath=${SessionServicePathData[1]}
+  SessionServicePath=${SessionServicePath//\"/}
+
+  #Get the leading PID of the service
+  SessionServiceMainPIDData=($(busctl call org.freedesktop.systemd1 $SessionServicePath org.freedesktop.DBus.Properties Get "ss" org.freedesktop.systemd1.Service MainPID))
+  SessionServiceMainPID=${SessionServiceMainPIDData[2]}
+
+  #Get the path of the program that is the leading PID, the first argument (Should be the vTTY instance), and the user it is running as
+  readarray -d $'\0' SessionServiceMainPIDProcCmdline < /proc/$SessionServiceMainPID/cmdline
+  SessionServiceMainPIDProgram=${SessionServiceMainPIDProcCmdline[1]}
+  vTTYInstance=${SessionServiceMainPIDProcCmdline[2]}
+  vTTYSeat=$(echo $vTTYInstance | awk -F '@' '{print $1}')
+  echo $vTTYSeat
+}
+
 if [[ -z $1 ]]
 then
   ExecutableName=$(basename $0)
@@ -34,12 +61,22 @@ fi
 
 if [[ -z $2 ]]
 then
-  busctl introspect org.freedesktop.login1 /org/freedesktop/login1/seat/self org.freedesktop.login1.Seat &>/dev/null
+  vTTYSeat=$(GetvTTYSeat)
+
+  if [[ -z $vTTYSeat ]]
+  then
+    SeatPath=/org/freedesktop/login1/seat/self
+  else
+    SeatPath=/org/freedesktop/login1/seat/$vTTYSeat
+  fi
+
+  busctl introspect org.freedesktop.login1 $SeatPath org.freedesktop.login1.Seat &>/dev/null
   Result=$?
 
+  #If the seat cannot be determined, assume seat0
   if [[ $Result == 0 ]]
   then
-    busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/self org.freedesktop.login1.Seat SwitchTo u $1
+    busctl call org.freedesktop.login1 $SeatPath org.freedesktop.login1.Seat SwitchTo u $1
   else
     busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/seat0 org.freedesktop.login1.Seat SwitchTo u $1
   fi
