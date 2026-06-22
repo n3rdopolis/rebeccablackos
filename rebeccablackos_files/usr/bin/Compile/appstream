@@ -65,7 +65,7 @@ $INSTALLDIR/bin/appstreamcli refresh-cache --force || true
 exit 0
 EOF
 
-meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dqt=true -Dapt-support=true build -Dapidocs=false
+meson setup -Ddebug=false -Doptimization=s --prefix=$INSTALLDIR --libdir=$INSTALLDIR/lib/$(dpkg-architecture -qDEB_HOST_MULTIARCH) -Dqt=true -Dapt-support=true build -Dapidocs=false -Dman=false -Dinstall-docs=false
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
