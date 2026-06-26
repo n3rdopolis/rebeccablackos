@@ -246,7 +246,7 @@ function UvTTYLaunchMain
     exit
   fi
 
-  touch "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  echo > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
   SessionCheck &
 
   #Wait before ending cage, so key press of "enter" isn't held down when the command is run
@@ -264,7 +264,9 @@ function UvTTYLaunchMain
   fi
 
   #launch the program
-  "$@"
+  "$@" &
+  echo -n $! > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
+  fg 2
   CommandResult=$?
 
   if [[ $InhibitAfterQuit == 1 ]]

@@ -18,6 +18,17 @@
 
 #This runs a graphical terminal full screen to connect to the socat socket
 
+function IsSessionActive
+{
+  SessionActiveData=($(busctl get-property org.freedesktop.login1 /org/freedesktop/login1/session/auto org.freedesktop.login1.Session Active))
+  if [[ ${SessionActiveData[1]} == true ]]
+  then
+    return 0
+  else
+    return 1
+  fi
+}
+
 function GetFirstSeatCard
 {
   MatchSeat=$XDG_SEAT
@@ -77,10 +88,11 @@ function UvTTYFrontendMain
   AttemptItr=0
   while ((AttemptItr < 5))
   do
+    read WAITPID < "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
     if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
     then
       AttemptItr=0
-      tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
+      tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" --pid $WAITPID &> /dev/null
     fi
 
     #Prefer the user's .config/uvtty/footkiosk.conf if it exists
@@ -175,6 +187,10 @@ function UvTTYFrontendMain
       UvTTYAccessibleMode=0
     fi
 
+    while ! IsSessionActive
+    do
+      $SLEEPCMD 3
+    done
 
     if [[ $UvTTYAccessibleMode == 1 ]]
     then
