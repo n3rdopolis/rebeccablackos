@@ -222,19 +222,19 @@ function UvTTYLaunchMain
 
   if [[ -z $UvTTYName ]]
   then
-    echo "UvTTYName variable not set. Not running under a UvTTY?"
+    echo "uvtty-launch: UvTTYName variable not set. Not running under a UvTTY?"
     exit 1
   fi
 
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
   then
-    echo "$UvTTYName does not appear to be running"
+    echo "uvtty-launch: $UvTTYName does not appear to be running"
     exit 1
   fi
 
   if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
   then
-    echo "Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
+    echo "uvtty-launch: Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
     exit 1
   fi
 
@@ -242,7 +242,7 @@ function UvTTYLaunchMain
 
   if [[ ! -e /proc/$CAGEPID ]]
   then
-    echo "cage is not running."
+    echo "uvtty-launch: cage is not running."
     exit
   fi
 
