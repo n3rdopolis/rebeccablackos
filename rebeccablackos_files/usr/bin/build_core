@@ -1299,7 +1299,7 @@ function MakeAndInstall()
     then
       exit 1
     fi
-    echo \"PackageCompileSource finished in '$((ENDTIME-STARTTIME))' seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
+    echo \"PackageCompileSource finished in '\$((ENDTIME-STARTTIME))' seconds\" 2>&1 | tee -a \"/$SOURCEDIR/$SOURCENAME/Logs/PackageCompileSource\"
 " > "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
 
     chmod +x "/$SOURCEDIR/$SOURCENAME/packagecompilescript"
