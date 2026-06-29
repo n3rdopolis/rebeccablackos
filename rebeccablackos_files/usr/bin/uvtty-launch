@@ -173,6 +173,10 @@ function UvTTYLaunchMain
   #Enable job control
   set -m
 
+  SeatIdData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1/seat/auto org.freedesktop.DBus.Properties Get "ss" org.freedesktop.login1.Seat Id 2>/dev/null))
+  SeatId=${SeatIdData[2]}
+  SeatId=${SeatId//\"/}
+
   #Use bash builtin sleep if availible
   if [[ -f /usr/lib/bash/sleep ]]
   then
@@ -180,6 +184,36 @@ function UvTTYLaunchMain
     SLEEPCMD="sleep"
   else
     SLEEPCMD="/bin/sleep"
+  fi
+
+  if [[ -z $UvTTYName ]]
+  then
+    echo "uvtty-launch: UvTTYName variable not set. Not running under a UvTTY?"
+    exit 1
+  fi
+
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
+  then
+    echo "uvtty-launch: $UvTTYName does not appear to be running."
+    exit 1
+  fi
+
+  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
+  then
+    echo "uvtty-launch: Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
+    exit 1
+  fi
+
+  CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
+
+  if [[ ! -e /proc/$CAGEPID ]]
+  then
+    echo "uvtty-launch: cage is not running."
+    if [[ "$SeatId" != "seat-vtty" ]]
+    then
+      echo "  This is running under seat-vtty, this could be a vtty. Try vtty-launch."
+    fi
+    exit
   fi
 
   if [[ -z $1 ]]
@@ -216,34 +250,8 @@ function UvTTYLaunchMain
 
   if ! command -v $1 &> /dev/null
   then
-    echo "uvtty-launch: Command '$1' not found"
+    echo "uvtty-launch: Command '$1' not found."
     exit 1
-  fi
-
-  if [[ -z $UvTTYName ]]
-  then
-    echo "uvtty-launch: UvTTYName variable not set. Not running under a UvTTY?"
-    exit 1
-  fi
-
-  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" ]]
-  then
-    echo "uvtty-launch: $UvTTYName does not appear to be running"
-    exit 1
-  fi
-
-  if [[ ! -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid" ]]
-  then
-    echo "uvtty-launch: Cage does not appear to be running for $UvTTYName , perhaps cage is already suspended?"
-    exit 1
-  fi
-
-  CAGEPID=$(cat "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/cagepid")
-
-  if [[ ! -e /proc/$CAGEPID ]]
-  then
-    echo "uvtty-launch: cage is not running."
-    exit
   fi
 
   echo > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
