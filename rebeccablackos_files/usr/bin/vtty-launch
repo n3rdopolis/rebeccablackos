@@ -90,7 +90,7 @@ function GetvTTYInstance
 
   if [[ ("$SessionServiceMainPIDProgram" != "/usr/libexec/vtty/vtty-backend") || ($SessionServiceMainPIDUID != 0) ]]
   then
-    echo "vtty-launch: Not running under a vTTY session"
+    echo "vtty-launch: Not running under a vTTY session."
     exit 1
   fi
 
@@ -98,7 +98,7 @@ function GetvTTYInstance
   then
     ReturnValue="$vTTYInstance"
   else
-    echo "vtty-launch: Cannot determine the vTTY instance"
+    echo "vtty-launch: Cannot determine the vTTY instance."
     exit 1
   fi
 
@@ -113,13 +113,13 @@ function GetvTTYFrontendSeat
   then
     read -n 255 -r vTTYFrontendSeat < /run/vtty/"$vTTYInstance"/frontend_seat
   else
-    echo "vtty-launch: Cannot get the vTTY instance's seat frontend"
+    echo "vtty-launch: Cannot get the vTTY instance's seat frontend."
     exit 1
   fi
 
   if [[ -z "$vTTYFrontendSeat" ]]
   then
-    echo "vtty-launch: Error determining the vTTY seat frontend"
+    echo "vtty-launch: Error determining the vTTY seat frontend."
     exit 1
   fi
 
@@ -294,7 +294,7 @@ function vTTYLaunchPrepareAsUser
 {
   if [[ $UID == 0 ]]
   then
-    echo "vtty-launch: Cannot be run by users as root"
+    echo "vtty-launch: Cannot be run by users as root."
     exit 1
   fi
 
@@ -304,7 +304,11 @@ function vTTYLaunchPrepareAsUser
 
   if [[ "$SeatId" != "seat-vtty" ]]
   then
-    echo "vtty-launch: Must be started from a session on the seat-vtty seat"
+    echo "vtty-launch: Must be started from a session on the seat-vtty seat."
+    if [[ ! -z $UvTTYName ]]
+    then
+      echo "  UvTTYName is variable set. This could be a UvTTY. Try uvtty-launch."
+    fi
     exit 1
   fi
 
@@ -343,7 +347,7 @@ function vTTYLaunchPrepareAsUser
 
   if ! command -v $1 &> /dev/null
   then
-    echo "vtty-launch: Command '$1' not found"
+    echo "vtty-launch: Command '$1' not found."
     exit 1
   fi
 
@@ -363,7 +367,7 @@ function vTTYLaunchPrepareAsRoot
   #The script is called by itself through pkexec, get the seat, start through systemd-run
   if [[ $UID != 0 ]]
   then
-    echo "vtty-launch: This helper must be started by vtty-launch as root"
+    echo "vtty-launch: This helper must be started by vtty-launch as root."
     exit 1
   fi
 
@@ -384,7 +388,7 @@ function vTTYLaunchPrepareAsRoot
 
   if [[ "$SeatCanTTY" == "true" ]]
   then
-    echo "vtty-launch: Cannot run on seats that support TTYs"
+    echo "vtty-launch: Cannot run on seats that support TTYs."
     exit 1
   fi
 
@@ -430,7 +434,7 @@ function vTTYLaunchStartAsUser
   #The script is called by systemd-run. Import the environment, run the command
   if [[ $UID == 0 ]]
   then
-    echo "vtty-launch: Cannot be called by systemd as root"
+    echo "vtty-launch: Cannot be called by systemd as root."
     exit 1
   fi
 
