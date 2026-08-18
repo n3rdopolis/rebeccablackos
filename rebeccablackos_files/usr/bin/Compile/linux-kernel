@@ -112,7 +112,6 @@ make LLVM=1 LLVM_SUFFIX="-${LLVM_VERSION}" olddefconfig
 ./scripts/config -e CONFIG_SYSFB
 #./scripts/config -e CONFIG_SYSFB_SIMPLEFB
 #./scripts/config -e CONFIG_X86_SYSFB
-./scripts/config -e CONFIG_DRM_SIMPLEDRM
 ./scripts/config -e CONFIG_DRM_EFIDRM
 ./scripts/config -e CONFIG_DRM_VESADRM
 ./scripts/config -m CONFIG_DRM_GUD
