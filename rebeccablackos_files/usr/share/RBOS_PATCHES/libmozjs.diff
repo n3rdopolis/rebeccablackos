@@ -1,0 +1,15 @@
+--- a/build/moz.configure/rust.configure
++++ b/build/moz.configure/rust.configure
+@@ -415,6 +415,12 @@
+         if len(narrowed) == 1:
+             return narrowed[0].rust_target
+
++        # The autoconf "pc" vendor corresponds to Rust's "unknown" vendor.
++        if host_or_target.vendor == "pc":
++            narrowed = [c for c in candidates if c.target.vendor == "unknown"]
++            if len(narrowed) == 1:
++                return narrowed[0].rust_target
++
+         return None
+
+     rustc_target = find_candidate(candidates)
