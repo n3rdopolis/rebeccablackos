@@ -83,7 +83,9 @@ sed -i 's/\[two-step\]/[two-step]\nScaleBackgroundImage=true/' $INSTALLDIR/share
 sed -i 's/\[two-step\]/[two-step]\nConsoleLogBackgroundColor=0x0100007f/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 sed -i 's/^.*BackgroundStartColor.*$/BackgroundStartColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 sed -i 's/^.*BackgroundEndColor.*$/BackgroundEndColor=000000/' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
-
+sed -i '/\[boot-up\]/a UseProgressBar=true' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+sed -i '/\[shutdown\]/a UseProgressBar=true' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
+sed -i '/\[reboot\]/a UseProgressBar=true' $INSTALLDIR/share/plymouth/themes/spinner/spinner.plymouth
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core. If there are no other commands here, the colon (:) is MANDITORY as a NULL command, otherwise Bash complains of an empty function. These commands are custom install commands that are needed for this package that are not performed by the source install operation. 
