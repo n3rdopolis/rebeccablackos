@@ -13,3 +13,17 @@
          return None
 
      rustc_target = find_candidate(candidates)
+
+diff --git a/js/src/js-config.h.in b/js/src/js-config.h.in
+index 8372623..498ea96 100644
+--- a/js/src/js-config.h.in
++++ b/js/src/js-config.h.in
+@@ -68,4 +68,8 @@
+ #undef MOZJS_MAJOR_VERSION
+ #undef MOZJS_MINOR_VERSION
+ 
++/* Controls API in UniquePtrExtensions.h. */
++#undef XP_UNIX
++#undef XP_WIN
++
+ #endif /* js_config_h */
