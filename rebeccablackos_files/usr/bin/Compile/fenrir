@@ -62,31 +62,31 @@ function PackagePrepareBuild()
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
 function PackageCompileSource()
 {
-sed -i 's|config/fenrirscreenreader/settings/settings.conf|config/settings/settings.conf|g' setup.py
+sed -i "s|config/fenrirscreenreader/settings/settings.conf|config/settings/settings.conf|g" setup.py
 
-sed -i 's|/usr/share/sounds|/opt/share/sounds|g' config/settings/settings.conf
-sed -i 's|/usr/share/sounds|/opt/share/sounds|g' src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/sound/select_theme.py
-sed -i 's|/usr/share/sounds|/opt/share/sounds|g' src/fenrirscreenreader/core/settingsManager.py
-sed -i 's|/usr/share/sounds|/opt/share/sounds|g' setup.py
+sed -i "s|/usr/share/sounds|$INSTALLDIR/share/sounds|g" config/settings/settings.conf
+sed -i "s|/usr/share/sounds|$INSTALLDIR/share/sounds|g" src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/sound/select_theme.py
+sed -i "s|/usr/share/sounds|$INSTALLDIR/share/sounds|g" src/fenrirscreenreader/core/settingsManager.py
+sed -i "s|/usr/share/sounds|$INSTALLDIR/share/sounds|g" setup.py
 
-sed -i 's|/usr/share/man/man1|/opt/share/man/man1|g' setup.py
+sed -i "s|/usr/share/man/man1|$INSTALLDIR/share/man/man1|g" setup.py
 
-sed -i 's|/usr/share/fenrirscreenreader|/opt/share/fenrirscreenreader|g' src/fenrirscreenreader/core/settingsData.py
-sed -i 's|/usr/share/fenrirscreenreader|/opt/share/fenrirscreenreader|g' src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/sound/select_theme.py
-sed -i 's|/usr/share/fenrirscreenreader|/opt/share/fenrirscreenreader|g' src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/management/reset_defaults.py
-sed -i 's|/usr/share/fenrirscreenreader|/opt/share/fenrirscreenreader|g' setup.py
+sed -i "s|/usr/share/fenrirscreenreader|$INSTALLDIR/share/fenrirscreenreader|g" src/fenrirscreenreader/core/settingsData.py
+sed -i "s|/usr/share/fenrirscreenreader|$INSTALLDIR/share/fenrirscreenreader|g" src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/sound/select_theme.py
+sed -i "s|/usr/share/fenrirscreenreader|$INSTALLDIR/share/fenrirscreenreader|g" src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/management/reset_defaults.py
+sed -i "s|/usr/share/fenrirscreenreader|$INSTALLDIR/share/fenrirscreenreader|g" setup.py
 
-sed -i 's|/usr/share/locale|/opt/share/locale|g' setup.py
+sed -i "s|/usr/share/locale|$INSTALLDIR/share/locale|g" setup.py
 
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' setup.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrir
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/commands/commands/cycle_keyboard_layout.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/config_base.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/management/reset_defaults.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/dynamicKeyboardLayoutMenu.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/inputManager.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/core/settingsManager.py
-sed -i 's|/etc/fenrirscreenreader|/opt/etc/fenrirscreenreader|g' src/fenrirscreenreader/utils/fenrir-config.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" setup.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrir
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/commands/commands/cycle_keyboard_layout.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/config_base.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/commands/vmenu-profiles/KEY/fenrir/management/reset_defaults.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/core/dynamicKeyboardLayoutMenu.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/core/inputManager.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/core/settingsManager.py
+sed -i "s|/etc/fenrirscreenreader|$INSTALLDIR/etc/fenrirscreenreader|g" src/fenrirscreenreader/utils/fenrir-config.py
 
 
 python3 ./setup.py build
