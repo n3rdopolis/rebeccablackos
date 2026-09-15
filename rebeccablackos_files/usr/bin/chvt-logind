@@ -61,7 +61,10 @@ fi
 
 if [[ -z $2 ]]
 then
-  vTTYSeat=$(GetvTTYSeat)
+  if [[ -z $XDG_SEAT ]]
+  then
+    vTTYSeat=$(GetvTTYSeat)
+  fi
 
   if [[ -z $vTTYSeat ]]
   then
