@@ -69,14 +69,12 @@ function ChvtLogindMain
     #If no seat was specified as the second argument
     SeatPath=""
 
-    busctl introspect org.freedesktop.login1 $SeatPath org.freedesktop.login1.Seat &>/dev/null
-    Result=$?
-
-    if [[ $Result == 0 ]]
+    if [[ ! -z $XDG_SEAT && $XDG_SEAT != seat-vtty ]]
     then
-      SeatPath=/org/freedesktop/login1/seat/self
+      SeatData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager GetSeat "s" $XDG_SEAT))
+      SeatPath=${SeatData[1]//\"/}
     else
-      vTTYSeat=$(GetvTTYSeatPath)
+      vTTYSeat=$(GetvTTYSeat)
       SeatData=($(busctl call org.freedesktop.login1 /org/freedesktop/login1 org.freedesktop.login1.Manager GetSeat "s" $vTTYSeat))
       SeatPath=${SeatData[1]//\"/}
     fi
