@@ -29,7 +29,7 @@ SOURCEURL=https://github.com/libical/libical.git
 REPOSITORYTYPE=GIT
 
 #The revision of the source repo to use. To get the lastest revision for GIT it's 'git:defaultbranch', for SVN it's 'HEAD', for BZR, it's 'last:1', and for HG it's 'default', without the quotes
-SOURCEREVISION=v3.0.14
+SOURCEREVISION=git:defaultbranch
 
 #The prefix to compile and install the source code to
 INSTALLDIR=/opt
@@ -58,7 +58,7 @@ function PackagePrepareBuild()
 {
 mkdir build
 cd build
-cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR 
+cmake -Wno-dev .. -DCMAKE_INSTALL_PREFIX=$INSTALLDIR -DCMAKE_PREFIX_PATH=$INSTALLDIR -DCMAKE_BUILD_TYPE=MinSizeRel -DINSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DCMAKE_INSTALL_LIBDIR=$INSTALLDIR_LIBDIR -DLIBICAL_JAVA_BINDINGS=False -DLIBICAL_GLIB_BUILD_DOCS=False
 }
 
 #This is called by MakeAndInstall in /usr/bin/build_core, when the PWD is in the source tree. The commands should build the source 
