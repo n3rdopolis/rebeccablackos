@@ -161,10 +161,11 @@ apt-get autoremove -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/5_autoremoves.
 
 #remove the built packages so that the smaller ones can be installed cleanly
 REMOVEDBGBUILTPKGS=$(dpkg --get-selections | awk '{print $1}' | grep -- "-${PACKAGESUFFIX}$"| grep -v ${PACKAGESUFFIX}-${PACKAGESUFFIX} | grep -v postbuildcore-${PACKAGESUFFIX})
-apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_devbuiltpackages.log
+apt-get purge $REMOVEDBGBUILTPKGS -y |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/6_builtpackages.log
 
 #Install the reduced packages
-compile_all installsmallpackage 
+compile_all installsmallpackage
+apt-get purge cmake-${PACKAGESUFFIX} json-c-${PACKAGESUFFIX} |& tee -a "$PACKAGEOPERATIONLOGDIR"/phase_3/7_devonlybuiltpackages.log
 
 #Force the post install package to re-run certian actions
 dpkg --force-overwrite --force-confmiss --force-confnew -i /var/cache/srcbuild/buildoutput/postbuildcore-${PACKAGESUFFIX}*.deb
