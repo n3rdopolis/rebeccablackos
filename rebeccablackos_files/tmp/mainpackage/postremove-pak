@@ -35,6 +35,7 @@ function UndivertDpkgFile
 
 if [[ $1 == purge ]]
 then
+  UndivertDpkgFile /etc/pam/kde
   UndivertDpkgFile /etc/skel/.bashrc
   UndivertDpkgFile /etc/issue
   UndivertDpkgFile /etc/issue.net
