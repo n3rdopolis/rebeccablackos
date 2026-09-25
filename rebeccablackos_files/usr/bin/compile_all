@@ -63,7 +63,7 @@ function CompilePackageInList
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" download-only 2>&1 &
     else
       mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecDownloadBuilder
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/ or is not executable" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecDownloadBuilder
       echo "$BUILDNAME" >> /var/log/buildlogs/build_core/faileddownloads
       return
     fi
@@ -80,7 +80,7 @@ function CompilePackageInList
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" build-only 2>&1
     else
       mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/ or is not executable" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCompileBuilder
       echo "$BUILDNAME" >> /var/log/buildlogs/build_core/failedcompiles
       return
     fi
@@ -95,7 +95,7 @@ function CompilePackageInList
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" installsmallpackage 2>&1
     else
       mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecSmallInstallBuilder
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/ or is not executable" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecSmallInstallBuilder
       return
     fi
   fi
