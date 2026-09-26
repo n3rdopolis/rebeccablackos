@@ -119,7 +119,7 @@ function CompilePackageInList
       build_core buildspec "/usr/bin/Compile/$BUILDNAME" clean 2>&1 &
     else
       mkdir -p /var/log/buildlogs/build_core/$BUILDNAME
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/ or is not executable" | tee /var/log/buildlogs/build_core/$BUILDNAME/ExecCleanBuilder
       return
     fi
     MULTIJOBSTATUS="~"
@@ -132,7 +132,7 @@ function CompilePackageInList
     then
       build_core buildspec "/usr/bin/Compile/$BUILDNAME"
     else
-      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/"
+      echo "Builder for $BUILDNAME does not exist in /usr/bin/Compile/ or is not executable"
       return
     fi
   fi
