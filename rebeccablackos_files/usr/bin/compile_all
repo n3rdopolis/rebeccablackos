@@ -159,6 +159,8 @@ then
   rm /var/cache/srcbuild/buildhome/buildcore_rust/lockfile
 fi
 
+trap 'CompilePackageList' EXIT
+
 #build these packages in this order.
 
 CompilePackage rust-bindgen
@@ -693,5 +695,3 @@ CompilePackage xdg-desktop-portal-wlr
 CompilePackage fenrir
 CompilePackage calamares
 CompilePackage casper
-
-CompilePackageList
