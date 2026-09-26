@@ -14,10 +14,9 @@ CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 NeedsFile=/opt/bin/labwc
-SessionArgument=
+SessionArgument=-s lxqt-session
 AdditionalArguments=
 [EnvironmentFile]
-set=LABWC_AUTOLAUNCH=LXQt
 set=XDG_CURRENT_DESKTOP=LXQt
 set=WLR_BACKENDS=wayland@WKS
 set=WLR_RENDERER=pixman@SOFTWARE
