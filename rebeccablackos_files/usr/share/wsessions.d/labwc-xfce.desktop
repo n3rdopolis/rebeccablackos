@@ -14,10 +14,9 @@ CompositorKMSArguments=
 CompositorFBArguments=
 CompositorDisplayArgument=
 NeedsFile=/opt/bin/labwc
-SessionArgument=
+SessionArgument=-s xfce4-session
 AdditionalArguments=
 [EnvironmentFile]
-set=LABWC_AUTOLAUNCH=XFCE
 set=XDG_CURRENT_DESKTOP=XFCE
 set=WLR_BACKENDS=wayland@WKS
 set=WLR_RENDERER=pixman@SOFTWARE
