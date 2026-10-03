@@ -60,6 +60,8 @@ function PackagePrepareBuild()
 sed -i '/plasma-setup-xwayland/d' src/xwayland/xwayland.cpp
 
 sed -i 's/ || m_renderer.contains("llvmpipe")//g' src/opengl/eglcontext.cpp
+sed -i 's/EGL_MESA_device_software/zzz_EGL_MESA_device_software/g' src/opengl/egldisplay.cpp
+
 echo "setcap cap_sys_nice=eip $INSTALLDIR/bin/kwin_wayland" > "postinstall-pak"
 mkdir build
 cd build
