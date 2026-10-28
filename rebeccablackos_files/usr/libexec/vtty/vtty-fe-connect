@@ -67,8 +67,12 @@ function vTTYFeConnectMain
   ln -s "$XDG_RUNTIME_DIR/$WAYLAND_DISPLAY" "/run/vtty/$vTTYName/waylandserver"
 
   kanshi -c "$XDG_CONFIG_HOME/kanshiconfig.conf" &>/dev/null &
+  KANSHIPID=$!
 
   socat file:"$PTYPath",raw,echo=0 unix-connect:"/run/vtty/$vTTYName/socatproxy" &
+  SOCATPID=$!
+
+  trap 'if [[ ! -e /proc/$SOCATPID ]]; then kill -9 $KANSHIPID; exit; fi' SIGHUP SIGCHLD
 
   #Resize events will be rare (it's fullscreen), but probably possible if a screen is swapped
   trap PtyResizeEvent WINCH
@@ -76,7 +80,7 @@ function vTTYFeConnectMain
 
   while [ 1 ]
   do
-    wait $!
+    wait $SOCATPID
     $SLEEPCMD .1
   done
 

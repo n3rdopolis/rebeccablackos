@@ -97,7 +97,7 @@ function UvTTYFeConnectMain
   socat file:$PTYPath,raw,echo=0 unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
   SOCATPID=$!
 
-  trap 'if [[ ! -e /proc/$SOCATPID ]]; then kill -9 $KANSHIPID; exit; fi' SIGCHLD
+  trap 'if [[ ! -e /proc/$SOCATPID ]]; then kill -9 $KANSHIPID; exit; fi' SIGHUP SIGCHLD
   PtyResizeEvent
 
   while [ 1 ]
