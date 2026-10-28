@@ -23,44 +23,6 @@
 
 #If the first argument is "--", then further arguments are handled as a command to execute (as in "recinit -- command --argument1 --argument2")
 
-GetFirstSeatCard()
-{
-  MatchSeat=$XDG_SEAT
-  if [ -z $XDG_SEAT ]
-  then
-    MatchSeat=seat0
-  fi
-
-  ls -r /dev/dri/card* > "/run/recinit/$RECINITPID/devices"
-
-  SeatCardFound=0
-  SelectCard=""
-  while read -r ReadCard
-  do
-    ReadCardSeat=$(udevadm info --query=property  --property ID_SEAT --value --name=$ReadCard)
-    CardIsVGABoot=$(udevadm info --name=$ReadCard -a | grep -c "{boot_vga}")
-    if [ -z $ReadCardSeat ]
-    then
-      ReadCardSeat=seat0
-    fi
-
-    if [ $ReadCardSeat = $MatchSeat ]
-    then
-      SeatCardFound=1
-      SelectCard=$ReadCard
-      if [ $CardIsVGABoot -gt 0 ]
-      then
-        break
-      fi
-    fi
-  done < "/run/recinit/$RECINITPID/devices"
-  rm "/run/recinit/$RECINITPID/devices"
-  if [ $SeatCardFound -ne 0 ]
-  then
-    echo $SelectCard
-  fi
-}
-
 RecinitMain()
 {
   USER_UID=$(id -u)
@@ -265,10 +227,6 @@ RecinitMain()
       RUNCOMMAND="/usr/lib/systemd/systemd-sulogin-shell emergency"
     fi
   fi
-
-  #Workaround for https://gitlab.freedesktop.org/wlroots/wlroots/-/issues/4040
-  export WLR_DRM_DEVICES=$(GetFirstSeatCard)
-
 
   #Fenrir can only run a custom executable, and does not allow arguments. Generate a script that runs under the terminal emulator, or fenrir
   echo "#! /bin/sh" > "/run/recinit/$RECINITPID/script"
