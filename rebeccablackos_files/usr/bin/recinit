@@ -272,7 +272,11 @@ RecinitMain()
 
   #Fenrir can only run a custom executable, and does not allow arguments. Generate a script that runs under the terminal emulator, or fenrir
   echo "#! /bin/sh" > "/run/recinit/$RECINITPID/script"
-  echo "kanshi -c \"$XDG_CONFIG_HOME/kanshiconfig.conf\" >/dev/null 2>/dev/null & LC_ALL=$LC_ALL_REAL $RUNCOMMAND; pkill -9 -P $RECINITPID cage" >> "/run/recinit/$RECINITPID/script"
+  echo "kanshi -c \"$XDG_CONFIG_HOME/kanshiconfig.conf\" >/dev/null 2>/dev/null &" >> "/run/recinit/$RECINITPID/script"
+  echo "KANSHIPID=\$!" >> "/run/recinit/$RECINITPID/script"
+  echo "trap 'kill -9 \$KANSHIPID' SIGHUP" >> "/run/recinit/$RECINITPID/script"
+  echo "LC_ALL=$LC_ALL_REAL $RUNCOMMAND" >> "/run/recinit/$RECINITPID/script"
+  echo "pkill -9 -P $RECINITPID cage" >> "/run/recinit/$RECINITPID/script"
   chmod +x "/run/recinit/$RECINITPID/script"
 
 
