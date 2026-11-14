@@ -189,6 +189,10 @@ function UvTTYLaunchMain
   if [[ -z $UvTTYName ]]
   then
     echo "uvtty-launch: UvTTYName variable not set. Not running under a UvTTY?"
+    if [[ "$SeatId" == "seat-vtty" ]]
+    then
+      echo "  This is running under seat-vtty, this could be a vtty. Try vtty-launch."
+    fi
     exit 1
   fi
 
@@ -209,10 +213,6 @@ function UvTTYLaunchMain
   if [[ ! -e /proc/$CAGEPID ]]
   then
     echo "uvtty-launch: cage is not running."
-    if [[ "$SeatId" != "seat-vtty" ]]
-    then
-      echo "  This is running under seat-vtty, this could be a vtty. Try vtty-launch."
-    fi
     exit
   fi
 
