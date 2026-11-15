@@ -57,8 +57,11 @@ function UvTTYFrontendMain
     if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
     then
       AttemptItr=0
+      socat -U file:/dev/null unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
+      SOCATPID=$!
       tail --follow=name "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" --pid $WAITPID &> /dev/null
       rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" &> /dev/null
+      kill -9 $SOCATPID
     fi
 
     #Prefer the user's .config/uvtty/footkiosk.conf if it exists

@@ -401,6 +401,9 @@ function vTTYLaunchPrepareAsRoot
   systemctl stop vtty-frontend@"${vTTYInstance}".service
   SessionCheck "$vTTYInstance" "$vTTYSeat" &
 
+  socat -U file:/dev/null unix-connect:/run/vtty/"${vTTYInstance}"/socatproxy &
+  SOCATPID=$!
+
   systemd-run --unit=vtty-launch@"${vTTYInstance}" \
                                --setenv=XDG_SEAT="$vTTYSeat" \
                                --setenv=VTTY_LAUNCH_SEAT="$vTTYSeat" \
@@ -424,6 +427,7 @@ function vTTYLaunchPrepareAsRoot
   then
     rm /run/vtty/"${vTTYInstance}"/vttylaunchinhibit
   fi
+  kill -9 $SOCATPID
   systemctl reset-failed vtty-frontend@"${vTTYInstance}".service
   systemctl start vtty-frontend@"${vTTYInstance}".service
 
