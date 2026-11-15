@@ -9,6 +9,8 @@ StartLimitBurst=3
 
 BindsTo=vtty-backend@.service
 
+ConditionPathExists=!/run/vtty/%i/vttylaunchinhibit
+
 #Same as default getty service
 IgnoreOnIsolate=true
 Conflicts=rescue.service
