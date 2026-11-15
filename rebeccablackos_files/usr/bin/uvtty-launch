@@ -271,17 +271,21 @@ function UvTTYLaunchMain
     done
   fi
 
+  socat -U file:/dev/null unix-connect:"$XDG_RUNTIME_DIR/uvtty/$UvTTYName/socatproxy" &
+  SOCATPID=$!
+
   #launch the program
   "$@" &
   echo -n $! > "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
-  fg 2
+  fg 3
   CommandResult=$?
 
   if [[ $InhibitAfterQuit == 1 ]]
   then
-    fg 1 &> /dev/null
+    fg 2 &> /dev/null
   fi
 
+  kill -9 $SOCATPID
   if [[ -e "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend" ]]
   then
     rm "$XDG_RUNTIME_DIR/uvtty/$UvTTYName/uvttysuspend"
